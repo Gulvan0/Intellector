@@ -868,7 +868,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "32";
+	app.meta.h["build"] = "1";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -4092,6 +4092,21 @@ EReg.prototype = {
 	}
 	,__class__: EReg
 };
+var Direction = $hxEnums["Direction"] = { __ename__ : "Direction", __constructs__ : ["U","UL","UR","D","DL","DR","A_UL","A_UR","A_R","A_DR","A_DL","A_L"]
+	,U: {_hx_index:0,__enum__:"Direction",toString:$estr}
+	,UL: {_hx_index:1,__enum__:"Direction",toString:$estr}
+	,UR: {_hx_index:2,__enum__:"Direction",toString:$estr}
+	,D: {_hx_index:3,__enum__:"Direction",toString:$estr}
+	,DL: {_hx_index:4,__enum__:"Direction",toString:$estr}
+	,DR: {_hx_index:5,__enum__:"Direction",toString:$estr}
+	,A_UL: {_hx_index:6,__enum__:"Direction",toString:$estr}
+	,A_UR: {_hx_index:7,__enum__:"Direction",toString:$estr}
+	,A_R: {_hx_index:8,__enum__:"Direction",toString:$estr}
+	,A_DR: {_hx_index:9,__enum__:"Direction",toString:$estr}
+	,A_DL: {_hx_index:10,__enum__:"Direction",toString:$estr}
+	,A_L: {_hx_index:11,__enum__:"Direction",toString:$estr}
+};
+Direction.__empty_constructs__ = [Direction.U,Direction.UL,Direction.UR,Direction.D,Direction.DL,Direction.DR,Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
 var Field = function() {
 	openfl_display_Sprite.call(this);
 	this.hexes = [];
@@ -4102,7 +4117,7 @@ var Field = function() {
 		var _g1 = 0;
 		while(_g1 < 9) {
 			var i = _g1++;
-			if(j == 6 && i % 2 == 1) {
+			if(!this.hexExists(i,j)) {
 				row.push(null);
 			} else {
 				var hex = new Hexagon(Field.a,this.isDark(i,j));
@@ -4223,27 +4238,54 @@ var Field = function() {
 	this.figures[5][6] = new Figure(FigureType.Progressor,FigureColor.White);
 	this.figures[5][8] = new Figure(FigureType.Progressor,FigureColor.White);
 	this.placeFigures();
-	this.addEventListener("mouseDown",$bind(this,this.onPress));
+	this.addEventListener("addedToStage",$bind(this,this.init));
 };
 $hxClasses["Field"] = Field;
 Field.__name__ = "Field";
 Field.__super__ = openfl_display_Sprite;
 Field.prototype = $extend(openfl_display_Sprite.prototype,{
-	onPress: function(e) {
+	init: function(e) {
+		this.removeEventListener("addedToStage",$bind(this,this.init));
+		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
+	}
+	,onPress: function(e) {
 		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
 		if(indexes == null) {
+			if(this.selected != null) {
+				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+				this.hexes[this.selected.j][this.selected.i].deselect();
+				this.selected = null;
+			}
 			return;
 		}
 		if(this.selected != null) {
-			if(this.ableToMove()) {
+			var movingFig = this.getFigure(this.selected);
+			var moveOntoFig = this.getFigure(indexes);
+			var _g = 0;
+			var _g1 = this.possibleFields(movingFig,this.selected.i,this.selected.j);
+			while(_g < _g1.length) {
+				var dest = _g1[_g];
+				++_g;
+				this.hexes[dest.j][dest.i].removeDot();
+			}
+			if(moveOntoFig != null && moveOntoFig.color == this.getFigure(this.selected).color && !this.isCastle(this.selected,indexes,movingFig,moveOntoFig)) {
+				this.hexes[this.selected.j][this.selected.i].deselect();
+				this.selected = indexes;
+				this.hexes[this.selected.j][this.selected.i].select();
+				var _g = 0;
+				var _g1 = this.possibleFields(moveOntoFig,indexes.i,indexes.j);
+				while(_g < _g1.length) {
+					var dest = _g1[_g];
+					++_g;
+					this.hexes[dest.j][dest.i].addDot();
+				}
+				return;
+			}
+			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+			if(this.ableToMove(this.selected,indexes)) {
 				this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
 			}
-			this.hexes[this.selected.j][this.selected.i].deselect();
-			if(this.selectedDest != null) {
-				this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
-			}
-			this.selected = null;
-			this.selectedDest = null;
+			this.selectionBackToNormal();
 		} else {
 			var figure = this.figures[indexes.j][indexes.i];
 			if(figure != null) {
@@ -4252,54 +4294,412 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 				this.removeChild(figure);
 				this.addChild(figure);
 				figure.startDrag(true);
+				var _g = 0;
+				var _g1 = this.possibleFields(figure,indexes.i,indexes.j);
+				while(_g < _g1.length) {
+					var dest = _g1[_g];
+					++_g;
+					this.hexes[dest.j][dest.i].addDot();
+				}
+				this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
+				this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
+				this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
 			}
-			this.removeEventListener("mouseDown",$bind(this,this.onPress));
-			this.addEventListener("mouseMove",$bind(this,this.onMove));
-			this.addEventListener("mouseUp",$bind(this,this.onRelease));
 		}
 	}
 	,onMove: function(e) {
 		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		if(indexes == null && this.selectedDest != null) {
-			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
-			this.selectedDest = null;
-		}
-		if(indexes != null && !indexes.equals(this.selected) && !indexes.equals(this.selectedDest)) {
-			if(this.selectedDest != null) {
+		if(this.selectedDest != null) {
+			if(this.selectedDest.equals(indexes)) {
+				return;
+			} else {
 				this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+				this.selectedDest = null;
 			}
+		}
+		if(indexes != null && this.ableToMove(this.selected,indexes)) {
 			this.selectedDest = indexes;
-			if(this.selectedDest != null) {
-				this.hexes[this.selectedDest.j][this.selectedDest.i].select();
-			}
+			this.hexes[this.selectedDest.j][this.selectedDest.i].select();
 		}
 	}
 	,onRelease: function(e) {
-		this.removeEventListener("mouseMove",$bind(this,this.onMove));
-		this.removeEventListener("mouseUp",$bind(this,this.onRelease));
+		this.stage.removeEventListener("mouseUp",$bind(this,this.onRelease));
 		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
 		this.figures[this.selected.j][this.selected.i].stopDrag();
-		if(indexes != null && this.ableToMove() && !indexes.equals(this.selected)) {
-			this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
-			this.hexes[this.selected.j][this.selected.i].deselect();
-			if(this.selectedDest != null) {
-				this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+		if(indexes != null && this.ableToMove(this.selected,indexes) && !indexes.equals(this.selected)) {
+			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+			var _g = 0;
+			var _g1 = this.possibleFields(this.figures[this.selected.j][this.selected.i],this.selected.i,this.selected.j);
+			while(_g < _g1.length) {
+				var dest = _g1[_g];
+				++_g;
+				this.hexes[dest.j][dest.i].removeDot();
 			}
-			this.selected = null;
-			this.selectedDest = null;
+			this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
+			this.selectionBackToNormal();
 		} else {
 			this.disposeFigure(this.figures[this.selected.j][this.selected.i],this.selected.i,this.selected.j);
 		}
-		this.addEventListener("mouseDown",$bind(this,this.onPress));
+		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
-	,ableToMove: function() {
-		return true;
+	,selectionBackToNormal: function() {
+		this.hexes[this.selected.j][this.selected.i].deselect();
+		if(this.selectedDest != null) {
+			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+		}
+		this.selected = null;
+		this.selectedDest = null;
+	}
+	,ableToMove: function(from,to) {
+		var _g = 0;
+		var _g1 = this.possibleFields(this.getFigure(from),from.i,from.j);
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			if(to.equals(dest)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	,isCastle: function(pos1,pos2,fig1,fig2) {
+		if(fig1 == null || fig2 == null || fig1.color != fig2.color) {
+			return false;
+		}
+		if(!(fig1.type == FigureType.Intellector && fig2.type == FigureType.Defensor || fig1.type == FigureType.Defensor && fig2.type == FigureType.Intellector)) {
+			return false;
+		}
+		var dir = Direction.UL;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.UR;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.D;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.DR;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.DL;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.U;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		return false;
+	}
+	,possibleFields: function(figure,fromI,fromJ) {
+		var fields = [];
+		switch(figure.type._hx_index) {
+		case 0:
+			var dir = Direction.U;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			break;
+		case 1:
+			var _g = 0;
+			var _g1 = [Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
+			while(_g < _g1.length) {
+				var dir = _g1[_g];
+				++_g;
+				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+				while(destination != null) {
+					var occupier = this.getFigure(destination);
+					if(occupier != null) {
+						if(occupier.color != figure.color) {
+							fields.push(destination);
+						}
+						break;
+					} else {
+						fields.push(destination);
+						destination = this.getCoordsInRelDirection(destination.i,destination.j,dir,figure.color);
+					}
+				}
+			}
+			break;
+		case 2:
+			var _g = 0;
+			var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
+			while(_g < _g1.length) {
+				var dir = _g1[_g];
+				++_g;
+				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+				while(destination != null) {
+					var occupier = this.getFigure(destination);
+					if(occupier != null) {
+						if(occupier.color != figure.color) {
+							fields.push(destination);
+						}
+						break;
+					} else {
+						fields.push(destination);
+						destination = this.getCoordsInRelDirection(destination.i,destination.j,dir,figure.color);
+					}
+				}
+			}
+			break;
+		case 3:
+			var dir = Direction.UL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.D;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.U;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			break;
+		case 4:
+			var dir = Direction.UL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.D;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.U;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			break;
+		case 5:
+			var dir = Direction.UL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.D;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.U;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			break;
+		}
+		return fields;
+	}
+	,getFigure: function(coords) {
+		if(coords == null || !this.hexExists(coords.i,coords.j) || this.figures[coords.j] == null) {
+			return null;
+		} else {
+			return this.figures[coords.j][coords.i];
+		}
+	}
+	,getCoordsInRelDirection: function(fromI,fromJ,dir,col,steps) {
+		if(steps == null) {
+			steps = 1;
+		}
+		var trueDirection = col == FigureColor.White ? dir : this.oppositeDir(dir);
+		var nextCoords = this.getCoordsInAbsDirection(fromI,fromJ,trueDirection);
+		--steps;
+		while(steps > 0 && nextCoords != null) {
+			nextCoords = this.getCoordsInAbsDirection(nextCoords.i,nextCoords.j,trueDirection);
+			--steps;
+		}
+		return nextCoords;
+	}
+	,oppositeDir: function(dir) {
+		switch(dir._hx_index) {
+		case 0:
+			return Direction.D;
+		case 1:
+			return Direction.DR;
+		case 2:
+			return Direction.DL;
+		case 3:
+			return Direction.U;
+		case 4:
+			return Direction.UR;
+		case 5:
+			return Direction.UL;
+		case 6:
+			return Direction.A_DR;
+		case 7:
+			return Direction.A_DL;
+		case 8:
+			return Direction.A_L;
+		case 9:
+			return Direction.A_UL;
+		case 10:
+			return Direction.A_UR;
+		case 11:
+			return Direction.A_R;
+		}
+	}
+	,getCoordsInAbsDirection: function(fromI,fromJ,dir) {
+		var coords;
+		switch(dir._hx_index) {
+		case 0:
+			coords = new IntPoint(fromI,fromJ - 1);
+			break;
+		case 1:
+			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
+			break;
+		case 2:
+			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
+			break;
+		case 3:
+			coords = new IntPoint(fromI,fromJ + 1);
+			break;
+		case 4:
+			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
+			break;
+		case 5:
+			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
+			break;
+		case 6:
+			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
+			break;
+		case 7:
+			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
+			break;
+		case 8:
+			coords = new IntPoint(fromI + 2,fromJ);
+			break;
+		case 9:
+			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
+			break;
+		case 10:
+			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
+			break;
+		case 11:
+			coords = new IntPoint(fromI - 2,fromJ);
+			break;
+		}
+		if(this.hexExists(coords.i,coords.j)) {
+			return coords;
+		} else {
+			return null;
+		}
+	}
+	,hexExists: function(i,j) {
+		if(i >= 0 && i < 9 && j >= 0 && j < 9) {
+			if(j == 6) {
+				return i % 2 == 0;
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
 	}
 	,move: function(fromI,fromJ,toI,toJ) {
 		var figure = this.figures[fromJ][fromI];
+		var figMoveOnto = this.getFigure(new IntPoint(toI,toJ));
 		this.disposeFigure(figure,toI,toJ);
 		this.figures[toJ][toI] = figure;
 		this.figures[fromJ][fromI] = null;
+		if(figMoveOnto != null) {
+			if(figMoveOnto.color == figure.color) {
+				if(this.isCastle(new IntPoint(fromI,fromJ),new IntPoint(toI,toJ),figure,figMoveOnto)) {
+					this.disposeFigure(figMoveOnto,fromI,fromJ);
+					this.figures[fromJ][fromI] = figMoveOnto;
+				} else {
+					throw haxe_Exception.thrown("Trying to eat own figure");
+				}
+			} else {
+				this.removeChild(figMoveOnto);
+			}
+		}
 	}
 	,posToIndexes: function(x,y) {
 		var closest = null;
@@ -4310,7 +4710,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 			var _g1 = 0;
 			while(_g1 < 9) {
 				var i = _g1++;
-				if(j == 6 && i % 2 == 1) {
+				if(!this.hexExists(i,j)) {
 					continue;
 				}
 				var coords = this.hexCoords(i,j);
@@ -4426,21 +4826,33 @@ var Hexagon = function(a,dark) {
 	openfl_display_Sprite.call(this);
 	this.unselectedHex = this.drawHex(a,dark ? Colors.darkHex : Colors.lightHex);
 	this.selectedHex = this.drawHex(a,dark ? Colors.selectedDark : Colors.selectedLight);
+	this.dot = new openfl_display_Sprite();
+	this.dot.get_graphics().beginFill(3355443);
+	this.dot.get_graphics().drawCircle(0,0,8);
+	this.dot.get_graphics().endFill();
 	this.selectedHex.set_visible(false);
+	this.dot.set_visible(false);
 	this.addChild(this.unselectedHex);
 	this.addChild(this.selectedHex);
+	this.addChild(this.dot);
 };
 $hxClasses["Hexagon"] = Hexagon;
 Hexagon.__name__ = "Hexagon";
 Hexagon.__super__ = openfl_display_Sprite;
 Hexagon.prototype = $extend(openfl_display_Sprite.prototype,{
-	select: function(e) {
+	select: function() {
 		this.selectedHex.set_visible(true);
 		this.unselectedHex.set_visible(false);
 	}
-	,deselect: function(e) {
+	,deselect: function() {
 		this.unselectedHex.set_visible(true);
 		this.selectedHex.set_visible(false);
+	}
+	,addDot: function() {
+		this.dot.set_visible(true);
+	}
+	,removeDot: function() {
+		this.dot.set_visible(false);
 	}
 	,drawHex: function(a,color) {
 		var sprite = new openfl_display_Sprite();
@@ -23144,7 +23556,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 652673;
+	this.version = 717560;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";

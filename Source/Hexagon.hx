@@ -6,27 +6,44 @@ class Hexagon extends Sprite
 {
         private var unselectedHex:Sprite;
         private var selectedHex:Sprite;
+        private var dot:Sprite;
 
         public function new(a:Float, dark:Bool)
         {
                 super();
                 unselectedHex = drawHex(a, dark? Colors.darkHex : Colors.lightHex);
                 selectedHex = drawHex(a, dark? Colors.selectedDark : Colors.selectedLight);
+                dot = new Sprite();
+                dot.graphics.beginFill(0x333333);
+                dot.graphics.drawCircle(0, 0, 8);
+                dot.graphics.endFill();
                 selectedHex.visible = false;
+                dot.visible = false;
                 addChild(unselectedHex);
                 addChild(selectedHex);
+                addChild(dot);
         }
 
-        public function select(?e)
+        public function select()
         {
                 selectedHex.visible = true;
                 unselectedHex.visible = false;
         }
 
-        public function deselect(?e)
+        public function deselect()
         {
                 unselectedHex.visible = true;
                 selectedHex.visible = false;
+        }
+
+        public function addDot()
+        {
+                dot.visible = true;
+        }
+        
+        public function removeDot()
+        {
+                dot.visible = false;
         }
 
         private function drawHex(a:Float, color:Int):Sprite
