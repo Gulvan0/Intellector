@@ -113,7 +113,7 @@ class Field extends Sprite
             var moveOntoFig = getFigure(indexes);
 
             for (dest in possibleFields(movingFig, selected.i, selected.j))
-                hexes[dest.j][dest.i].removeDot();
+                hexes[dest.j][dest.i].removeMarkers();
 
             if (moveOntoFig != null && moveOntoFig.color == getFigure(selected).color && !isCastle(selected, indexes, movingFig, moveOntoFig))
             {
@@ -121,7 +121,10 @@ class Field extends Sprite
                 selected = indexes;
                 hexes[selected.j][selected.i].select();
                 for (dest in possibleFields(moveOntoFig, indexes.i, indexes.j))
-                    hexes[dest.j][dest.i].addDot();
+                    if (getFigure(dest) != null)
+                        hexes[dest.j][dest.i].addRound();
+                    else
+                        hexes[dest.j][dest.i].addDot();
                 return;
             }
 
@@ -142,7 +145,10 @@ class Field extends Sprite
                 figure.startDrag(true);
 
                 for (dest in possibleFields(figure, indexes.i, indexes.j))
-                    hexes[dest.j][dest.i].addDot();
+                    if (getFigure(dest) != null)
+                        hexes[dest.j][dest.i].addRound();
+                    else
+                        hexes[dest.j][dest.i].addDot();
 
                 stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress);
                 stage.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
@@ -181,7 +187,7 @@ class Field extends Sprite
         {
             stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
             for (dest in possibleFields(figures[selected.j][selected.i], selected.i, selected.j))
-                hexes[dest.j][dest.i].removeDot();
+                hexes[dest.j][dest.i].removeMarkers();
             move(selected.i, selected.j, indexes.i, indexes.j);
             selectionBackToNormal();
         }
@@ -363,7 +369,7 @@ class Field extends Sprite
 
     private function hexExists(i:Int, j:Int):Bool
     {
-        return i >= 0 && i < 9 && j >= 0 && j < 9 && (j != 6 || i % 2 == 0);
+        return i >= 0 && i < 9 && j >= 0 && j < 7 && (j != 6 || i % 2 == 0);
     }
 
     private function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int) 

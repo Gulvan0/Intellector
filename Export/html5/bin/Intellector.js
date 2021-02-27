@@ -868,7 +868,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "1";
+	app.meta.h["build"] = "2";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -4266,7 +4266,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 			while(_g < _g1.length) {
 				var dest = _g1[_g];
 				++_g;
-				this.hexes[dest.j][dest.i].removeDot();
+				this.hexes[dest.j][dest.i].removeMarkers();
 			}
 			if(moveOntoFig != null && moveOntoFig.color == this.getFigure(this.selected).color && !this.isCastle(this.selected,indexes,movingFig,moveOntoFig)) {
 				this.hexes[this.selected.j][this.selected.i].deselect();
@@ -4277,7 +4277,11 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 				while(_g < _g1.length) {
 					var dest = _g1[_g];
 					++_g;
-					this.hexes[dest.j][dest.i].addDot();
+					if(this.getFigure(dest) != null) {
+						this.hexes[dest.j][dest.i].addRound();
+					} else {
+						this.hexes[dest.j][dest.i].addDot();
+					}
 				}
 				return;
 			}
@@ -4299,7 +4303,11 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 				while(_g < _g1.length) {
 					var dest = _g1[_g];
 					++_g;
-					this.hexes[dest.j][dest.i].addDot();
+					if(this.getFigure(dest) != null) {
+						this.hexes[dest.j][dest.i].addRound();
+					} else {
+						this.hexes[dest.j][dest.i].addDot();
+					}
 				}
 				this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
 				this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
@@ -4333,7 +4341,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 			while(_g < _g1.length) {
 				var dest = _g1[_g];
 				++_g;
-				this.hexes[dest.j][dest.i].removeDot();
+				this.hexes[dest.j][dest.i].removeMarkers();
 			}
 			this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
 			this.selectionBackToNormal();
@@ -4672,7 +4680,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 	}
 	,hexExists: function(i,j) {
-		if(i >= 0 && i < 9 && j >= 0 && j < 9) {
+		if(i >= 0 && i < 9 && j >= 0 && j < 7) {
 			if(j == 6) {
 				return i % 2 == 0;
 			} else {
@@ -4831,10 +4839,15 @@ var Hexagon = function(a,dark) {
 	this.dot.get_graphics().drawCircle(0,0,8);
 	this.dot.get_graphics().endFill();
 	this.selectedHex.set_visible(false);
+	this.round = new openfl_display_Sprite();
+	this.round.get_graphics().lineStyle(4,3355443);
+	this.round.get_graphics().drawCircle(0,0,0.78 * a);
+	this.round.set_visible(false);
 	this.dot.set_visible(false);
 	this.addChild(this.unselectedHex);
 	this.addChild(this.selectedHex);
 	this.addChild(this.dot);
+	this.addChild(this.round);
 };
 $hxClasses["Hexagon"] = Hexagon;
 Hexagon.__name__ = "Hexagon";
@@ -4849,10 +4862,16 @@ Hexagon.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.selectedHex.set_visible(false);
 	}
 	,addDot: function() {
+		this.round.set_visible(false);
 		this.dot.set_visible(true);
 	}
-	,removeDot: function() {
+	,addRound: function() {
 		this.dot.set_visible(false);
+		this.round.set_visible(true);
+	}
+	,removeMarkers: function() {
+		this.dot.set_visible(false);
+		this.round.set_visible(false);
 	}
 	,drawHex: function(a,color) {
 		var sprite = new openfl_display_Sprite();
@@ -23556,7 +23575,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 717560;
+	this.version = 365072;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";

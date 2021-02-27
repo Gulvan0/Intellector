@@ -7,6 +7,7 @@ class Hexagon extends Sprite
         private var unselectedHex:Sprite;
         private var selectedHex:Sprite;
         private var dot:Sprite;
+        private var round:Sprite;
 
         public function new(a:Float, dark:Bool)
         {
@@ -18,10 +19,15 @@ class Hexagon extends Sprite
                 dot.graphics.drawCircle(0, 0, 8);
                 dot.graphics.endFill();
                 selectedHex.visible = false;
+                round = new Sprite();
+                round.graphics.lineStyle(4, 0x333333);
+                round.graphics.drawCircle(0, 0, 0.8 * a);
+                round.visible = false;
                 dot.visible = false;
                 addChild(unselectedHex);
                 addChild(selectedHex);
                 addChild(dot);
+                addChild(round);
         }
 
         public function select()
@@ -38,12 +44,20 @@ class Hexagon extends Sprite
 
         public function addDot()
         {
+                round.visible = false;  
                 dot.visible = true;
         }
         
-        public function removeDot()
+        public function addRound()
         {
                 dot.visible = false;
+                round.visible = true;  
+        }
+
+        public function removeMarkers() 
+        {
+                dot.visible = false;
+                round.visible = false;        
         }
 
         private function drawHex(a:Float, color:Int):Sprite
