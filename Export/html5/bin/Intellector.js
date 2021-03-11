@@ -892,7 +892,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "3";
+	app.meta.h["build"] = "4";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -4183,39 +4183,85 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	,gameboard: null
 	,errorLabel: null
 	,fadeTimer: null
-	,onLoginResults: function(result) {
+	,onSignResults: function(signin,result) {
 		if(result == "success") {
 			this.removeChild(this.signinMenu);
-			haxe_Log.trace("Hooray",{ fileName : "Source/Main.hx", lineNumber : 37, className : "Main", methodName : "onLoginResults"});
+			Networker.registerChallengeReceiver($bind(this,this.drawGame));
 			this.drawMainMenu();
 		} else {
+			this.errorLabel.set_text(signin ? "Invalid login/password" : "An user with this login already exists");
 			this.displayLoginError();
 		}
 	}
 	,drawSigninMenu: function() {
 		var _gthis = this;
 		this.signinMenu = new haxe_ui_containers_VBox();
+		this.signinMenu.set_width(200);
 		var loginField = new haxe_ui_components_TextField();
 		loginField.set_placeholder("Login");
+		loginField.set_width(200);
+		loginField.set_restrictChars("A-Za-z0-9");
 		this.signinMenu.addComponent(loginField);
 		var passField = new haxe_ui_components_TextField();
 		passField.set_placeholder("Password");
+		passField.set_width(loginField.get_width());
+		passField.set_restrictChars("A-Za-z0-9");
+		passField.set_password(true);
 		this.signinMenu.addComponent(passField);
+		var btns = new haxe_ui_containers_HBox();
+		btns.set_horizontalAlign("center");
 		var signinbtn = new haxe_ui_components_Button();
 		signinbtn.set_text("Sign In");
-		this.signinMenu.addComponent(signinbtn);
+		signinbtn.set_width(loginField.get_width() / 2 - 5);
+		btns.addComponent(signinbtn);
 		signinbtn.set_onClick(function(e) {
-			Networker.signin(loginField.get_text(),passField.get_text(),$bind(_gthis,_gthis.onLoginResults));
+			var tmp = loginField.get_text();
+			var tmp1 = passField.get_text();
+			var _g = $bind(_gthis,_gthis.onSignResults);
+			var signin = true;
+			Networker.signin(tmp,tmp1,function(result) {
+				_g(signin,result);
+			});
 		});
+		var regbtn = new haxe_ui_components_Button();
+		regbtn.set_text("Register");
+		regbtn.set_width(loginField.get_width() / 2 - 5);
+		btns.addComponent(regbtn);
+		regbtn.set_onClick(function(e) {
+			var tmp = loginField.get_text();
+			var tmp1 = passField.get_text();
+			var _g = $bind(_gthis,_gthis.onSignResults);
+			var signin = false;
+			Networker.register(tmp,tmp1,function(result) {
+				_g(signin,result);
+			});
+		});
+		this.signinMenu.addComponent(btns);
 		this.errorLabel = new haxe_ui_components_Label();
 		this.errorLabel.set_text("Invalid login/password");
 		this.errorLabel.set_alpha(0);
 		this.signinMenu.addComponent(this.errorLabel);
-		this.signinMenu.set_x(100);
+		this.signinMenu.set_x((window.innerWidth - this.signinMenu.get_width()) / 2);
 		this.signinMenu.set_y(100);
 		this.addChild(this.signinMenu);
 	}
 	,drawMainMenu: function() {
+		var _gthis = this;
+		this.mainMenu = new haxe_ui_containers_VBox();
+		this.mainMenu.set_width(200);
+		var calloutBtn = new haxe_ui_components_Button();
+		calloutBtn.set_width(200);
+		calloutBtn.set_text("Send challenge");
+		this.mainMenu.addComponent(calloutBtn);
+		calloutBtn.set_onClick(function(e) {
+			var response = window.prompt("Enter the callee's username");
+			if(response != null) {
+				Networker.sendChallenge(response,$bind(_gthis,_gthis.drawGame));
+			}
+		});
+		this.mainMenu.set_x((window.innerWidth - this.mainMenu.get_width()) / 2);
+		this.mainMenu.set_y(100);
+		this.addChild(this.mainMenu);
 	}
 	,displayLoginError: function() {
 		var _gthis = this;
@@ -4226,18 +4272,46 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.fadeTimer = new haxe_Timer(10);
 		this.fadeTimer.run = function() {
 			var _g = _gthis.errorLabel;
-			_g.set_alpha(_g.get_alpha() - 1);
+			_g.set_alpha(_g.get_alpha() - 0.01);
 			if(_gthis.errorLabel.get_alpha() == 0) {
 				_gthis.fadeTimer.stop();
 				_gthis.fadeTimer = null;
 			}
 		};
 	}
-	,drawGame: function() {
-		this.gameboard = new Field();
+	,drawGame: function(data) {
+		Networker.registerGameEvents($bind(this,this.onMove),$bind(this,this.onEnded));
+		this.removeChild(this.mainMenu);
+		this.gameboard = new Field(data.colour);
 		this.gameboard.set_x(200);
 		this.gameboard.set_y(100);
 		this.addChild(this.gameboard);
+		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
+	}
+	,onMove: function(data) {
+		this.gameboard.move(data.fromI,data.fromJ,data.toI,data.toJ);
+	}
+	,onEnded: function(data) {
+		Networker.unregisterGameEvents($bind(this,this.drawGame));
+		var resultMessage;
+		if(data.winner_color == "") {
+			resultMessage = "½ - ½.";
+		} else {
+			var e = this.gameboard.playerColor;
+			if(data.winner_color == $hxEnums[e.__enum__].__constructs__[e._hx_index].toLowerCase()) {
+				if(data.reason == "mate") {
+					resultMessage = "You won.";
+				} else {
+					resultMessage = "Opponent disconnected. You won.";
+				}
+			} else {
+				resultMessage = "You lost.";
+			}
+		}
+		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
+		window.alert(Std.string("Game over. " + resultMessage));
+		this.removeChild(this.gameboard);
+		this.addChild(this.mainMenu);
 	}
 	,__class__: Main
 });
@@ -4350,6 +4424,22 @@ DateTools.__format = function(d,f) {
 DateTools.format = function(d,f) {
 	return DateTools.__format(d,f);
 };
+var Dialogs = function() { };
+$hxClasses["Dialogs"] = Dialogs;
+Dialogs.__name__ = "Dialogs";
+Dialogs.confirm = function(message,title,onConfirmed,onDeclined) {
+	haxe_ui_core_Screen.get_instance().messageBox(message,title,"haxeui-core/styles/default/dialogs/question.png",true,function(btn) {
+		var larr = haxe_ui_containers_dialogs_DialogButton.toString(btn).split("|");
+		if(larr.indexOf(haxe_ui_containers_dialogs_DialogButton.toString("Yes")) != -1) {
+			onConfirmed();
+		} else {
+			onDeclined();
+		}
+	});
+};
+Dialogs.alert = function(message,title) {
+	haxe_ui_core_Screen.get_instance().messageBox(message,title,"haxeui-core/styles/default/dialogs/exclamation.png",true);
+};
 var EReg = function(r,opt) {
 	this.r = new RegExp(r,opt.split("u").join(""));
 };
@@ -4455,7 +4545,7 @@ var Direction = $hxEnums["Direction"] = { __ename__ : "Direction", __constructs_
 	,A_L: {_hx_index:11,__enum__:"Direction",toString:$estr}
 };
 Direction.__empty_constructs__ = [Direction.U,Direction.UL,Direction.UR,Direction.D,Direction.DL,Direction.DR,Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
-var Field = function() {
+var Field = function(playerColourName) {
 	openfl_display_Sprite.call(this);
 	this.hexes = [];
 	var _g = 0;
@@ -4478,6 +4568,9 @@ var Field = function() {
 		}
 		this.hexes.push(row);
 	}
+	this.playerColor = playerColourName == "white" ? FigureColor.White : FigureColor.Black;
+	var enemyColour = playerColourName == "white" ? FigureColor.Black : FigureColor.White;
+	this.playersTurn = playerColourName == "white";
 	var _g = [];
 	var _g1 = [];
 	_g1.push(null);
@@ -4557,34 +4650,34 @@ var Field = function() {
 	_g1.push(null);
 	_g.push(_g1);
 	this.figures = _g;
-	this.figures[0][0] = new Figure(FigureType.Dominator,FigureColor.Black);
-	this.figures[0][1] = new Figure(FigureType.Liberator,FigureColor.Black);
-	this.figures[0][2] = new Figure(FigureType.Aggressor,FigureColor.Black);
-	this.figures[0][3] = new Figure(FigureType.Defensor,FigureColor.Black);
-	this.figures[0][4] = new Figure(FigureType.Intellector,FigureColor.Black);
-	this.figures[0][5] = new Figure(FigureType.Defensor,FigureColor.Black);
-	this.figures[0][6] = new Figure(FigureType.Aggressor,FigureColor.Black);
-	this.figures[0][7] = new Figure(FigureType.Liberator,FigureColor.Black);
-	this.figures[0][8] = new Figure(FigureType.Dominator,FigureColor.Black);
-	this.figures[1][0] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[1][2] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[1][4] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[1][6] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[1][8] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[6][0] = new Figure(FigureType.Dominator,FigureColor.White);
-	this.figures[5][1] = new Figure(FigureType.Liberator,FigureColor.White);
-	this.figures[6][2] = new Figure(FigureType.Aggressor,FigureColor.White);
-	this.figures[5][3] = new Figure(FigureType.Defensor,FigureColor.White);
-	this.figures[6][4] = new Figure(FigureType.Intellector,FigureColor.White);
-	this.figures[5][5] = new Figure(FigureType.Defensor,FigureColor.White);
-	this.figures[6][6] = new Figure(FigureType.Aggressor,FigureColor.White);
-	this.figures[5][7] = new Figure(FigureType.Liberator,FigureColor.White);
-	this.figures[6][8] = new Figure(FigureType.Dominator,FigureColor.White);
-	this.figures[5][0] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.figures[5][2] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.figures[5][4] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.figures[5][6] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.figures[5][8] = new Figure(FigureType.Progressor,FigureColor.White);
+	this.figures[0][0] = new Figure(FigureType.Dominator,enemyColour);
+	this.figures[0][1] = new Figure(FigureType.Liberator,enemyColour);
+	this.figures[0][2] = new Figure(FigureType.Aggressor,enemyColour);
+	this.figures[0][3] = new Figure(FigureType.Defensor,enemyColour);
+	this.figures[0][4] = new Figure(FigureType.Intellector,enemyColour);
+	this.figures[0][5] = new Figure(FigureType.Defensor,enemyColour);
+	this.figures[0][6] = new Figure(FigureType.Aggressor,enemyColour);
+	this.figures[0][7] = new Figure(FigureType.Liberator,enemyColour);
+	this.figures[0][8] = new Figure(FigureType.Dominator,enemyColour);
+	this.figures[1][0] = new Figure(FigureType.Progressor,enemyColour);
+	this.figures[1][2] = new Figure(FigureType.Progressor,enemyColour);
+	this.figures[1][4] = new Figure(FigureType.Progressor,enemyColour);
+	this.figures[1][6] = new Figure(FigureType.Progressor,enemyColour);
+	this.figures[1][8] = new Figure(FigureType.Progressor,enemyColour);
+	this.figures[6][0] = new Figure(FigureType.Dominator,this.playerColor);
+	this.figures[5][1] = new Figure(FigureType.Liberator,this.playerColor);
+	this.figures[6][2] = new Figure(FigureType.Aggressor,this.playerColor);
+	this.figures[5][3] = new Figure(FigureType.Defensor,this.playerColor);
+	this.figures[6][4] = new Figure(FigureType.Intellector,this.playerColor);
+	this.figures[5][5] = new Figure(FigureType.Defensor,this.playerColor);
+	this.figures[6][6] = new Figure(FigureType.Aggressor,this.playerColor);
+	this.figures[5][7] = new Figure(FigureType.Liberator,this.playerColor);
+	this.figures[6][8] = new Figure(FigureType.Dominator,this.playerColor);
+	this.figures[5][0] = new Figure(FigureType.Progressor,this.playerColor);
+	this.figures[5][2] = new Figure(FigureType.Progressor,this.playerColor);
+	this.figures[5][4] = new Figure(FigureType.Progressor,this.playerColor);
+	this.figures[5][6] = new Figure(FigureType.Progressor,this.playerColor);
+	this.figures[5][8] = new Figure(FigureType.Progressor,this.playerColor);
 	this.placeFigures();
 	this.addEventListener("addedToStage",$bind(this,this.init));
 };
@@ -4594,6 +4687,8 @@ Field.__super__ = openfl_display_Sprite;
 Field.prototype = $extend(openfl_display_Sprite.prototype,{
 	hexes: null
 	,figures: null
+	,playersTurn: null
+	,playerColor: null
 	,selected: null
 	,selectedDest: null
 	,init: function(e) {
@@ -4601,6 +4696,9 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
 	,onPress: function(e) {
+		if(!this.playersTurn) {
+			return;
+		}
 		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
 		if(indexes == null) {
 			if(this.selected != null) {
@@ -4639,12 +4737,16 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 			}
 			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
 			if(this.ableToMove(this.selected,indexes)) {
+				Networker.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
 				this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
 			}
 			this.selectionBackToNormal();
 		} else {
 			var figure = this.figures[indexes.j][indexes.i];
 			if(figure != null) {
+				if(figure.color != this.playerColor) {
+					return;
+				}
 				this.selected = indexes;
 				this.hexes[indexes.j][indexes.i].select();
 				this.removeChild(figure);
@@ -4668,6 +4770,9 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 	}
 	,onMove: function(e) {
+		if(!this.playersTurn) {
+			return;
+		}
 		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
 		if(this.selectedDest != null) {
 			if(this.selectedDest.equals(indexes)) {
@@ -4683,6 +4788,9 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 	}
 	,onRelease: function(e) {
+		if(!this.playersTurn) {
+			return;
+		}
 		this.stage.removeEventListener("mouseUp",$bind(this,this.onRelease));
 		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
 		this.figures[this.selected.j][this.selected.i].stopDrag();
@@ -4711,6 +4819,13 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.selectedDest = null;
 	}
 	,ableToMove: function(from,to) {
+		if(!this.playersTurn) {
+			return false;
+		}
+		var movingFigure = this.getFigure(from);
+		if(movingFigure == null || movingFigure.color != this.playerColor) {
+			return false;
+		}
 		var _g = 0;
 		var _g1 = this.possibleFields(this.getFigure(from),from.i,from.j);
 		while(_g < _g1.length) {
@@ -4821,41 +4936,21 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 			}
 			break;
 		case 3:
-			var dir = Direction.UL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.D;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.U;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
+			var _g = 0;
+			var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
+			while(_g < _g1.length) {
+				var dir = _g1[_g];
+				++_g;
+				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,1);
+				var occupier = this.getFigure(destination);
+				if(destination != null && occupier == null) {
+					fields.push(destination);
+				}
+				destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+				occupier = this.getFigure(destination);
+				if(destination != null && (occupier == null || occupier.color != figure.color)) {
+					fields.push(destination);
+				}
 			}
 			break;
 		case 4:
@@ -4948,7 +5043,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		if(steps == null) {
 			steps = 1;
 		}
-		var trueDirection = col == FigureColor.White ? dir : this.oppositeDir(dir);
+		var trueDirection = col == this.playerColor ? dir : this.oppositeDir(dir);
 		var nextCoords = this.getCoordsInAbsDirection(fromI,fromJ,trueDirection);
 		--steps;
 		while(steps > 0 && nextCoords != null) {
@@ -5049,17 +5144,18 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.figures[toJ][toI] = figure;
 		this.figures[fromJ][fromI] = null;
 		if(figMoveOnto != null) {
-			if(figMoveOnto.color == figure.color) {
-				if(this.isCastle(new IntPoint(fromI,fromJ),new IntPoint(toI,toJ),figure,figMoveOnto)) {
-					this.disposeFigure(figMoveOnto,fromI,fromJ);
-					this.figures[fromJ][fromI] = figMoveOnto;
-				} else {
-					throw haxe_Exception.thrown("Trying to eat own figure");
-				}
+			if(this.isCastle(new IntPoint(fromI,fromJ),new IntPoint(toI,toJ),figure,figMoveOnto)) {
+				this.disposeFigure(figMoveOnto,fromI,fromJ);
+				this.figures[fromJ][fromI] = figMoveOnto;
+				openfl_utils_Assets.getSound("sounds/move.mp3").play();
 			} else {
 				this.removeChild(figMoveOnto);
+				openfl_utils_Assets.getSound("sounds/capture.mp3").play();
 			}
+		} else {
+			openfl_utils_Assets.getSound("sounds/move.mp3").play();
 		}
+		this.playersTurn = !this.playersTurn;
 	}
 	,posToIndexes: function(x,y) {
 		var closest = null;
@@ -5378,7 +5474,7 @@ ManifestResources.init = function(config) {
 	openfl_text_Font.registerFont(_$_$ASSET_$_$OPENFL_$_$fonts_$roboto_$medium_$ttf);
 	openfl_text_Font.registerFont(_$_$ASSET_$_$OPENFL_$_$fonts_$roboto_$regular_$ttf);
 	var bundle;
-	var data = "{\"name\":null,\"assets\":\"aoy4:pathy27:styles%2Fdefault%2Fmain.cssy4:sizei1135y4:typey4:TEXTy2:idR1y7:preloadtgoR0y17:styles%2Fmain.cssR2i148R3R4R5R7R6tgoR2i171320R3y4:FONTy9:classNamey32:__ASSET__fonts_roboto_medium_ttfR5y25:fonts%2FRoboto-Medium.ttfR6tgoR0y26:fonts%2FRoboto-Regular.eotR2i163058R3y6:BINARYR5R12R6tgoR0y26:fonts%2FRoboto-Regular.svgR2i240120R3R4R5R14R6tgoR2i162876R3R8R9y33:__ASSET__fonts_roboto_regular_ttfR5y26:fonts%2FRoboto-Regular.ttfR6tgoR0y27:fonts%2FRoboto-Regular.woffR2i86488R3R13R5R17R6tgoR0y28:fonts%2FRoboto-Regular.woff2R2i19960R3R13R5R18R6tgoR0y38:assets%2Ffigures%2FAggressor_black.pngR2i11433R3y5:IMAGER5R19R6tgoR0y38:assets%2Ffigures%2FAggressor_white.pngR2i11685R3R20R5R21R6tgoR0y37:assets%2Ffigures%2FDefensor_black.pngR2i13534R3R20R5R22R6tgoR0y37:assets%2Ffigures%2FDefensor_white.pngR2i13132R3R20R5R23R6tgoR0y38:assets%2Ffigures%2FDominator_black.pngR2i14027R3R20R5R24R6tgoR0y38:assets%2Ffigures%2FDominator_white.pngR2i14289R3R20R5R25R6tgoR0y40:assets%2Ffigures%2FIntellector_black.pngR2i13664R3R20R5R26R6tgoR0y40:assets%2Ffigures%2FIntellector_white.pngR2i13928R3R20R5R27R6tgoR0y38:assets%2Ffigures%2FLiberator_black.pngR2i11674R3R20R5R28R6tgoR0y38:assets%2Ffigures%2FLiberator_white.pngR2i11443R3R20R5R29R6tgoR0y39:assets%2Ffigures%2FProgressor_black.pngR2i9640R3R20R5R30R6tgoR0y39:assets%2Ffigures%2FProgressor_white.pngR2i9684R3R20R5R31R6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
+	var data = "{\"name\":null,\"assets\":\"aoy4:pathy27:styles%2Fdefault%2Fmain.cssy4:sizei1135y4:typey4:TEXTy2:idR1y7:preloadtgoR0y17:styles%2Fmain.cssR2i148R3R4R5R7R6tgoR2i171320R3y4:FONTy9:classNamey32:__ASSET__fonts_roboto_medium_ttfR5y25:fonts%2FRoboto-Medium.ttfR6tgoR0y26:fonts%2FRoboto-Regular.eotR2i163058R3y6:BINARYR5R12R6tgoR0y26:fonts%2FRoboto-Regular.svgR2i240120R3R4R5R14R6tgoR2i162876R3R8R9y33:__ASSET__fonts_roboto_regular_ttfR5y26:fonts%2FRoboto-Regular.ttfR6tgoR0y27:fonts%2FRoboto-Regular.woffR2i86488R3R13R5R17R6tgoR0y28:fonts%2FRoboto-Regular.woff2R2i19960R3R13R5R18R6tgoR2i5987R3y5:MUSICR5y20:sounds%2Fcapture.mp3y9:pathGroupaR20hR6tgoR2i4285R3R19R5y17:sounds%2Fmove.mp3R21aR22hR6tgoR2i8011R3R19R5y19:sounds%2Fnotify.mp3R21aR23hR6tgoR0y38:assets%2Ffigures%2FAggressor_black.pngR2i11433R3y5:IMAGER5R24R6tgoR0y38:assets%2Ffigures%2FAggressor_white.pngR2i11685R3R25R5R26R6tgoR0y37:assets%2Ffigures%2FDefensor_black.pngR2i13534R3R25R5R27R6tgoR0y37:assets%2Ffigures%2FDefensor_white.pngR2i13132R3R25R5R28R6tgoR0y38:assets%2Ffigures%2FDominator_black.pngR2i14027R3R25R5R29R6tgoR0y38:assets%2Ffigures%2FDominator_white.pngR2i14289R3R25R5R30R6tgoR0y40:assets%2Ffigures%2FIntellector_black.pngR2i13664R3R25R5R31R6tgoR0y40:assets%2Ffigures%2FIntellector_white.pngR2i13928R3R25R5R32R6tgoR0y38:assets%2Ffigures%2FLiberator_black.pngR2i11674R3R25R5R33R6tgoR0y38:assets%2Ffigures%2FLiberator_white.pngR2i11443R3R25R5R34R6tgoR0y39:assets%2Ffigures%2FProgressor_black.pngR2i9640R3R25R5R35R6tgoR0y39:assets%2Ffigures%2FProgressor_white.pngR2i9684R3R25R5R36R6tgoR2i5987R3R19R5y29:assets%2Fsounds%2Fcapture.mp3R21aR37hR6tgoR2i4285R3R19R5y26:assets%2Fsounds%2Fmove.mp3R21aR38hR6tgoR2i8011R3R19R5y28:assets%2Fsounds%2Fnotify.mp3R21aR39hR6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
 	var manifest = lime_utils_AssetManifest.parse(data,ManifestResources.rootPath);
 	var library = lime_utils_AssetLibrary.fromManifest(manifest);
 	lime_utils_Assets.registerLibrary("default",library);
@@ -5724,27 +5820,86 @@ Networker.__name__ = "Networker";
 Networker.connect = function() {
 	Networker._ws = new hx_ws_WebSocket("ws://localhost:5000");
 	Networker._ws.set_onopen(function() {
-		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 24, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 46, className : "Networker", methodName : "connect"});
 	});
 	Networker._ws.set_onmessage(function(msg) {
-		var callback = Networker.eventMap.h[msg.name];
+		var str = msg.toString();
+		var event = JSON.parse(str.substring(11,str.length - 1));
+		var callback = Networker.eventMap.h[event.name];
 		if(callback != null) {
-			callback(msg.data);
+			callback(event.data);
 		} else {
-			haxe_Log.trace("Uncaught event: " + msg.name,{ fileName : "Source/Networker.hx", lineNumber : 31, className : "Networker", methodName : "connect"});
+			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 55, className : "Networker", methodName : "connect"});
 		}
 	});
 	Networker._ws.set_onclose(function() {
 		Networker._ws = null;
 	});
 	Networker._ws.set_onerror(function(err) {
-		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 37, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 61, className : "Networker", methodName : "connect"});
 	});
 };
 Networker.signin = function(login,password,onAnswer) {
 	Networker.login = login;
 	Networker.once("login_result",onAnswer);
 	Networker.emit("login",{ login : login, password : password});
+};
+Networker.register = function(login,password,onAnswer) {
+	Networker.login = login;
+	Networker.once("register_result",onAnswer);
+	Networker.emit("register",{ login : login, password : password});
+};
+Networker.registerChallengeReceiver = function(onStarted) {
+	var onStarted1 = onStarted;
+	Networker.on("incoming_challenge",function(data) {
+		Networker.challengeReceiver(onStarted1,data);
+	});
+};
+Networker.challengeReceiver = function(onStarted,data) {
+	var onConfirmed = function() {
+		Networker.emit("accept_challenge",{ caller_login : data.caller, callee_login : Networker.login});
+		Networker.once("game_started",onStarted);
+	};
+	Dialogs.confirm("" + data.caller + " wants to play with you. Accept the challenge?","Incoming challenge",onConfirmed,function() {
+	});
+};
+Networker.sendChallenge = function(callee,onStarted) {
+	var onRepeated = function(d) {
+		window.alert("You have already sent a challenge to this player");
+	};
+	var onOffline = function(d) {
+		window.alert("Callee is offline");
+	};
+	var onIngame = function(d) {
+		window.alert("Callee is currently playing");
+	};
+	if(Object.prototype.hasOwnProperty.call(Networker.eventMap.h,"game_started")) {
+		var _g = new haxe_ds_StringMap();
+		_g.h["repeated_callout"] = onRepeated;
+		_g.h["callee_unavailable"] = onOffline;
+		_g.h["callee_ingame"] = onIngame;
+		Networker.onceOneOf(_g);
+	} else {
+		var _g = new haxe_ds_StringMap();
+		_g.h["game_started"] = onStarted;
+		_g.h["repeated_callout"] = onRepeated;
+		_g.h["callee_unavailable"] = onOffline;
+		_g.h["callee_ingame"] = onIngame;
+		Networker.onceOneOf(_g);
+	}
+	Networker.emit("callout",{ caller_login : Networker.login, callee_login : callee});
+};
+Networker.move = function(fromI,fromJ,toI,toJ) {
+	Networker.emit("move",{ issuer_login : Networker.login, fromI : fromI, fromJ : fromJ, toI : toI, toJ : toJ});
+};
+Networker.registerGameEvents = function(onMove,onOver) {
+	Networker.off("incoming_challenge");
+	Networker.on("move",onMove);
+	Networker.once("game_ended",onOver);
+};
+Networker.unregisterGameEvents = function(onGameStarted) {
+	Networker.off("move");
+	Networker.registerChallengeReceiver(onGameStarted);
 };
 Networker.on = function(eventName,callback) {
 	Networker.eventMap.h[eventName] = callback;
@@ -5757,6 +5912,22 @@ Networker.once = function(eventName,callback) {
 	},callback);
 	this1.h[eventName] = v;
 };
+Networker.onceOneOf = function(callbacks) {
+	var disableAll = function() {
+		var eventName = haxe_ds_StringMap.keysIterator(callbacks.h);
+		while(eventName.hasNext()) {
+			var eventName1 = eventName.next();
+			Networker.off(eventName1);
+		}
+	};
+	var _g = haxe_ds_StringMap.kvIterator(callbacks.h);
+	while(_g.hasNext()) {
+		var _g1 = _g.next();
+		var eventName = _g1.key;
+		var callback = _g1.value;
+		Networker.on(eventName,Networker.combineSecond(disableAll,callback));
+	}
+};
 Networker.off = function(eventName) {
 	var _this = Networker.eventMap;
 	if(Object.prototype.hasOwnProperty.call(_this.h,eventName)) {
@@ -5765,7 +5936,7 @@ Networker.off = function(eventName) {
 };
 Networker.emit = function(eventName,data) {
 	var event = { name : eventName, data : data};
-	haxe_Log.trace(JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 66, className : "Networker", methodName : "emit"});
+	haxe_Log.trace(JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 155, className : "Networker", methodName : "emit"});
 	Networker._ws.send(JSON.stringify(event));
 };
 Networker.combineVoid = function(f1,f2) {
@@ -8339,6 +8510,18 @@ haxe_ds_StringMap.valueIterator = function(h) {
 	}, next : function() {
 		idx += 1;
 		return h[keys[idx - 1]];
+	}};
+};
+haxe_ds_StringMap.kvIterator = function(h) {
+	var keys = Object.keys(h);
+	var len = keys.length;
+	var idx = 0;
+	return { hasNext : function() {
+		return idx < len;
+	}, next : function() {
+		idx += 1;
+		var k = keys[idx - 1];
+		return { key : k, value : h[k]};
 	}};
 };
 haxe_ds_StringMap.prototype = {
@@ -56496,7 +56679,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 308707;
+	this.version = 741842;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";

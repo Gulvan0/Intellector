@@ -1,5 +1,6 @@
 package;
 
+import openfl.Assets;
 import openfl.events.Event;
 import Figure.FigureColor;
 import openfl.events.MouseEvent;
@@ -28,10 +29,13 @@ class Field extends Sprite
     public var hexes:Array<Array<Hexagon>>;
     public var figures:Array<Array<Null<Figure>>>;
 
+    public var playersTurn:Bool;
+    public var playerColor:FigureColor;
+
     private var selected:Null<IntPoint>;
     private var selectedDest:Null<IntPoint>;
 
-    public function new() 
+    public function new(playerColourName:String) 
     {
         super();
         hexes = [];
@@ -52,36 +56,41 @@ class Field extends Sprite
                 }
             hexes.push(row);
         }
-        figures = [for (j in 0...7) [for (i in 0...9) null]];
-        figures[0][0] = new Figure(Dominator, Black);
-        figures[0][1] = new Figure(Liberator, Black);
-        figures[0][2] = new Figure(Aggressor, Black);
-        figures[0][3] = new Figure(Defensor, Black);
-        figures[0][4] = new Figure(Intellector, Black);
-        figures[0][5] = new Figure(Defensor, Black);
-        figures[0][6] = new Figure(Aggressor, Black);
-        figures[0][7] = new Figure(Liberator, Black);
-        figures[0][8] = new Figure(Dominator, Black);
-        figures[1][0] = new Figure(Progressor, Black);
-        figures[1][2] = new Figure(Progressor, Black);
-        figures[1][4] = new Figure(Progressor, Black);
-        figures[1][6] = new Figure(Progressor, Black);
-        figures[1][8] = new Figure(Progressor, Black);
 
-        figures[6][0] = new Figure(Dominator, White);
-        figures[5][1] = new Figure(Liberator, White);
-        figures[6][2] = new Figure(Aggressor, White);
-        figures[5][3] = new Figure(Defensor, White);
-        figures[6][4] = new Figure(Intellector, White);
-        figures[5][5] = new Figure(Defensor, White);
-        figures[6][6] = new Figure(Aggressor, White);
-        figures[5][7] = new Figure(Liberator, White);
-        figures[6][8] = new Figure(Dominator, White);
-        figures[5][0] = new Figure(Progressor, White);
-        figures[5][2] = new Figure(Progressor, White);
-        figures[5][4] = new Figure(Progressor, White);
-        figures[5][6] = new Figure(Progressor, White);
-        figures[5][8] = new Figure(Progressor, White);
+        playerColor = playerColourName == 'white'? White : Black;
+        var enemyColour:FigureColor = playerColourName == 'white'? Black : White;
+        playersTurn = playerColourName == 'white';
+
+        figures = [for (j in 0...7) [for (i in 0...9) null]];
+        figures[0][0] = new Figure(Dominator, enemyColour);
+        figures[0][1] = new Figure(Liberator, enemyColour);
+        figures[0][2] = new Figure(Aggressor, enemyColour);
+        figures[0][3] = new Figure(Defensor, enemyColour);
+        figures[0][4] = new Figure(Intellector, enemyColour);
+        figures[0][5] = new Figure(Defensor, enemyColour);
+        figures[0][6] = new Figure(Aggressor, enemyColour);
+        figures[0][7] = new Figure(Liberator, enemyColour);
+        figures[0][8] = new Figure(Dominator, enemyColour);
+        figures[1][0] = new Figure(Progressor, enemyColour);
+        figures[1][2] = new Figure(Progressor, enemyColour);
+        figures[1][4] = new Figure(Progressor, enemyColour);
+        figures[1][6] = new Figure(Progressor, enemyColour);
+        figures[1][8] = new Figure(Progressor, enemyColour);
+
+        figures[6][0] = new Figure(Dominator, playerColor);
+        figures[5][1] = new Figure(Liberator, playerColor);
+        figures[6][2] = new Figure(Aggressor, playerColor);
+        figures[5][3] = new Figure(Defensor, playerColor);
+        figures[6][4] = new Figure(Intellector, playerColor);
+        figures[5][5] = new Figure(Defensor, playerColor);
+        figures[6][6] = new Figure(Aggressor, playerColor);
+        figures[5][7] = new Figure(Liberator, playerColor);
+        figures[6][8] = new Figure(Dominator, playerColor);
+        figures[5][0] = new Figure(Progressor, playerColor);
+        figures[5][2] = new Figure(Progressor, playerColor);
+        figures[5][4] = new Figure(Progressor, playerColor);
+        figures[5][6] = new Figure(Progressor, playerColor);
+        figures[5][8] = new Figure(Progressor, playerColor);
 
         placeFigures();
         addEventListener(Event.ADDED_TO_STAGE, init);
@@ -95,6 +104,9 @@ class Field extends Sprite
 
     private function onPress(e:MouseEvent) 
     {
+        if (!playersTurn)
+            return;
+
         var indexes = posToIndexes(e.stageX - this.x, e.stageY - this.y);
         if (indexes == null)
         {
@@ -130,7 +142,10 @@ class Field extends Sprite
 
             stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
             if (ableToMove(selected, indexes))
+            {
+                Networker.move(selected.i, selected.j, indexes.i, indexes.j);
                 move(selected.i, selected.j, indexes.i, indexes.j);
+            }
             selectionBackToNormal();
         }
         else
@@ -138,6 +153,9 @@ class Field extends Sprite
             var figure = figures[indexes.j][indexes.i];
             if (figure != null)
             {
+                if (figure.color != playerColor)
+                    return;
+
                 selected = indexes;
                 hexes[indexes.j][indexes.i].select();
                 removeChild(figure);
@@ -159,6 +177,9 @@ class Field extends Sprite
 
     private function onMove(e:MouseEvent) 
     {
+        if (!playersTurn)
+            return;
+        
         var indexes = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
         if (selectedDest != null)
@@ -179,6 +200,9 @@ class Field extends Sprite
 
     private function onRelease(e:MouseEvent) 
     {
+        if (!playersTurn)
+            return;
+        
         stage.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
 
         var indexes = posToIndexes(e.stageX - this.x, e.stageY - this.y);
@@ -208,6 +232,13 @@ class Field extends Sprite
 
     private function ableToMove(from:IntPoint, to:IntPoint) 
     {
+        if (!playersTurn)
+            return false;
+
+        var movingFigure = getFigure(from);
+        if (movingFigure == null || movingFigure.color != playerColor)
+            return false;
+
         for (dest in possibleFields(getFigure(from), from.i, from.j))
             if (to.equals(dest))
                 return true;
@@ -285,8 +316,13 @@ class Field extends Sprite
             case Liberator:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color, 2);
+                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color, 1);
                     var occupier = getFigure(destination);
+                    if (destination != null && occupier == null)
+                        fields.push(destination);
+
+                    destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color, 2);
+                    occupier = getFigure(destination);
                     if (destination != null && (occupier == null || occupier.color != figure.color))
                         fields.push(destination);
                 }
@@ -317,7 +353,7 @@ class Field extends Sprite
 
     private function getCoordsInRelDirection(fromI:Int, fromJ:Int, dir:Direction, col:FigureColor, ?steps:Int = 1):Null<IntPoint>
     {
-        var trueDirection = col == White? dir : oppositeDir(dir);
+        var trueDirection = col == playerColor? dir : oppositeDir(dir);
         var nextCoords = getCoordsInAbsDirection(fromI, fromJ, trueDirection);
         steps--;
         while (steps > 0 && nextCoords != null)
@@ -372,7 +408,7 @@ class Field extends Sprite
         return i >= 0 && i < 9 && j >= 0 && j < 7 && (j != 6 || i % 2 == 0);
     }
 
-    private function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int) 
+    public function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int) 
     {
         var figure = figures[fromJ][fromI];
         var figMoveOnto = getFigure(new IntPoint(toI, toJ));
@@ -382,16 +418,21 @@ class Field extends Sprite
         figures[fromJ][fromI] = null;
 
         if (figMoveOnto != null)
-            if (figMoveOnto.color == figure.color)
-                if (isCastle(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), figure, figMoveOnto))
-                {
-                    disposeFigure(figMoveOnto, fromI, fromJ);
-                    figures[fromJ][fromI] = figMoveOnto;
-                }
-                else 
-                    throw "Trying to eat own figure";
+            if (isCastle(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), figure, figMoveOnto))
+            {
+                disposeFigure(figMoveOnto, fromI, fromJ);
+                figures[fromJ][fromI] = figMoveOnto;
+                Assets.getSound("sounds/move.mp3").play();
+            }
             else 
+            {
                 removeChild(figMoveOnto);
+                Assets.getSound("sounds/capture.mp3").play();
+            }
+        else 
+            Assets.getSound("sounds/move.mp3").play();
+
+        playersTurn = !playersTurn;
     }
 
     private function posToIndexes(x:Float, y:Float):Null<IntPoint>

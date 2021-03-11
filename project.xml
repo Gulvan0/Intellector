@@ -11,6 +11,7 @@
 	<haxelib name="haxeui-core" />
 	<haxelib name="haxeui-openfl" />
 	
+	<assets path="Assets/sounds" rename="sounds" />
 	<assets path="Assets" rename="assets" />
 	
 </project>
