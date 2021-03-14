@@ -45,10 +45,16 @@ class Figure extends Sprite
         {
             bitmaps[fig] = new Map<FigureColor, BitmapData>();
             for (col in FigureColor.createAll())
-            {
-                var filename:String = fig.getName() + "_" + col.getName().toLowerCase();
-                bitmaps[fig][col] = Assets.getBitmapData('assets/figures/$filename.png');
-            }
+                bitmaps[fig][col] = Assets.getBitmapData(pathToImage(fig, col));
         }
+    }
+
+    public static inline function pathToImage(type:FigureType, color:FigureColor, ?icon:Bool = false):String
+    {
+        var filename:String = type.getName() + "_" + color.getName().toLowerCase();
+        if (icon)
+            return 'assets/figicons/$filename.png';
+        else
+            return 'assets/figures/$filename.png';
     }
 }

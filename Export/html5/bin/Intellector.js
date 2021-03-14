@@ -892,7 +892,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "4";
+	app.meta.h["build"] = "5";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -4168,11 +4168,21 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 	,__properties__: $extend(openfl_display_DisplayObjectContainer.prototype.__properties__,{get_graphics:"get_graphics",set_buttonMode:"set_buttonMode",get_buttonMode:"get_buttonMode"})
 });
 var Main = function() {
+	var _gthis = this;
 	openfl_display_Sprite.call(this);
 	haxe_ui_Toolkit.init();
 	Figure.initFigures();
-	Networker.connect();
-	this.drawSigninMenu();
+	Networker.connect($bind(this,this.drawGame));
+	var searcher = new URLSearchParams($global.location.search);
+	if(js_Cookie.exists("saved_login") && js_Cookie.exists("saved_password")) {
+		Networker.signin(js_Cookie.get("saved_login"),js_Cookie.get("saved_password"),$bind(this,this.onAutologinResults));
+	} else if(searcher.has("id")) {
+		Networker.getGame(Std.parseInt(searcher.get("id")),$bind(this,this.drawJoinGame),function(s) {
+			_gthis.drawSigninMenu();
+		},$bind(this,this.drawMainMenu));
+	} else {
+		this.drawSigninMenu();
+	}
 };
 $hxClasses["Main"] = Main;
 Main.__name__ = "Main";
@@ -4180,16 +4190,39 @@ Main.__super__ = openfl_display_Sprite;
 Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	signinMenu: null
 	,mainMenu: null
+	,joinMenu: null
 	,gameboard: null
 	,errorLabel: null
 	,fadeTimer: null
+	,onAutologinResults: function(result) {
+		var _gthis = this;
+		if(result == "success") {
+			var searcher = new URLSearchParams($global.location.search);
+			if(searcher.has("id")) {
+				Networker.getGame(Std.parseInt(searcher.get("id")),$bind(this,this.drawJoinGame),function(s) {
+					_gthis.drawMainMenu();
+				},$bind(this,this.drawMainMenu));
+			} else {
+				this.drawMainMenu();
+			}
+		} else {
+			js_Cookie.remove("saved_login");
+			js_Cookie.remove("saved_password");
+			this.drawSigninMenu();
+		}
+	}
 	,onSignResults: function(signin,result) {
 		if(result == "success") {
 			this.removeChild(this.signinMenu);
-			Networker.registerChallengeReceiver($bind(this,this.drawGame));
 			this.drawMainMenu();
 		} else {
-			this.errorLabel.set_text(signin ? "Invalid login/password" : "An user with this login already exists");
+			if(!signin) {
+				this.errorLabel.set_text("An user with this login already exists");
+			} else if(result == "online") {
+				this.errorLabel.set_text("An user with this login is already online");
+			} else {
+				this.errorLabel.set_text("Invalid login/password");
+			}
 			this.displayLoginError();
 		}
 	}
@@ -4246,7 +4279,8 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.addChild(this.signinMenu);
 	}
 	,drawMainMenu: function() {
-		var _gthis = this;
+		window.history.pushState({ },"Intellector","");
+		Networker.registerMainMenuEvents();
 		this.mainMenu = new haxe_ui_containers_VBox();
 		this.mainMenu.set_width(200);
 		var calloutBtn = new haxe_ui_components_Button();
@@ -4256,12 +4290,35 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		calloutBtn.set_onClick(function(e) {
 			var response = window.prompt("Enter the callee's username");
 			if(response != null) {
-				Networker.sendChallenge(response,$bind(_gthis,_gthis.drawGame));
+				Networker.sendChallenge(response);
 			}
 		});
 		this.mainMenu.set_x((window.innerWidth - this.mainMenu.get_width()) / 2);
 		this.mainMenu.set_y(100);
 		this.addChild(this.mainMenu);
+	}
+	,drawJoinGame: function(enemy) {
+		this.joinMenu = new haxe_ui_containers_VBox();
+		this.joinMenu.set_width(400);
+		var label = new haxe_ui_components_Label();
+		label.set_width(400);
+		if(Networker.login == null) {
+			label.set_text("" + enemy + " is hosting a challenge. First one to accept it will become an opponent\nYou will be playing as guest");
+		} else {
+			label.set_text("" + enemy + " is hosting a challenge. First one to accept it will become an opponent\nYou are joining the game as " + Networker.login);
+		}
+		this.mainMenu.addComponent(label);
+		var joinButton = new haxe_ui_components_Button();
+		joinButton.set_width(200);
+		joinButton.set_x(100);
+		joinButton.set_text("Accept challenge");
+		this.mainMenu.addComponent(joinButton);
+		joinButton.set_onClick(function(e) {
+			Networker.acceptOpen(enemy);
+		});
+		this.joinMenu.set_x((window.innerWidth - this.joinMenu.get_width()) / 2);
+		this.joinMenu.set_y(100);
+		this.addChild(this.joinMenu);
 	}
 	,displayLoginError: function() {
 		var _gthis = this;
@@ -4280,19 +4337,39 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		};
 	}
 	,drawGame: function(data) {
-		Networker.registerGameEvents($bind(this,this.onMove),$bind(this,this.onEnded));
+		Networker.registerGameEvents($bind(this,this.onMove),$bind(this,this.onTimeCorrection),$bind(this,this.onEnded));
 		this.removeChild(this.mainMenu);
 		this.gameboard = new Field(data.colour);
-		this.gameboard.set_x(200);
+		this.gameboard.set_x((window.innerWidth - this.gameboard.get_width()) / 2);
 		this.gameboard.set_y(100);
+		Main.sidebox = new Sidebox(data.startSecs,data.bonusSecs,Networker.login,data.enemy,data.colour == "white");
+		Main.sidebox.set_x(this.gameboard.get_x() + this.gameboard.get_width() + 10);
+		Main.sidebox.set_y(this.gameboard.get_y() + (this.gameboard.get_height() - 380 - Math.sqrt(3) * Field.a) / 2);
+		window.history.pushState({ },"Intellector","?id=" + data.match_id);
 		this.addChild(this.gameboard);
+		this.addChild(Main.sidebox);
 		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
 	}
+	,onTimeCorrection: function(data) {
+		Main.sidebox.correctTime(data.whiteSeconds,data.blackSeconds);
+	}
 	,onMove: function(data) {
-		this.gameboard.move(data.fromI,data.fromJ,data.toI,data.toJ);
+		var from = new IntPoint(data.fromI,data.fromJ);
+		var to = new IntPoint(data.toI,data.toJ);
+		var movingFigure = this.gameboard.getFigure(from);
+		var ontoFigure = this.gameboard.getFigure(to);
+		var opponentColor = this.gameboard.playerColor == FigureColor.White ? FigureColor.Black : FigureColor.White;
+		var morphedInto = data.morphInto == null ? null : Type.createEnum(FigureType,data.morphInto,null);
+		var capture = ontoFigure != null && ontoFigure.color == this.gameboard.playerColor;
+		var mate = capture && ontoFigure.type == FigureType.Intellector;
+		Main.sidebox.makeMove(opponentColor,movingFigure.type,to,capture,mate);
+		this.gameboard.move(from,to,morphedInto);
 	}
 	,onEnded: function(data) {
-		Networker.unregisterGameEvents($bind(this,this.drawGame));
+		Networker.registerMainMenuEvents();
+		if(data.reason != "mate") {
+			Main.sidebox.onNonMateEnded();
+		}
 		var resultMessage;
 		if(data.winner_color == "") {
 			resultMessage = "½ - ½.";
@@ -4301,16 +4378,22 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			if(data.winner_color == $hxEnums[e.__enum__].__constructs__[e._hx_index].toLowerCase()) {
 				if(data.reason == "mate") {
 					resultMessage = "You won.";
+				} else if(data.reason == "timeout") {
+					resultMessage = "You won by timeout.";
 				} else {
 					resultMessage = "Opponent disconnected. You won.";
 				}
+			} else if(data.reason == "timeout") {
+				resultMessage = "You lost by timeout.";
 			} else {
 				resultMessage = "You lost.";
 			}
 		}
 		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
-		window.alert(Std.string("Game over. " + resultMessage));
+		Dialogs.info("Game over. " + resultMessage,"Game ended");
+		this.removeChild(Main.sidebox);
 		this.removeChild(this.gameboard);
+		window.history.pushState({ },"Intellector","");
 		this.addChild(this.mainMenu);
 	}
 	,__class__: Main
@@ -4439,6 +4522,86 @@ Dialogs.confirm = function(message,title,onConfirmed,onDeclined) {
 };
 Dialogs.alert = function(message,title) {
 	haxe_ui_core_Screen.get_instance().messageBox(message,title,"haxeui-core/styles/default/dialogs/exclamation.png",true);
+};
+Dialogs.info = function(message,title) {
+	haxe_ui_core_Screen.get_instance().messageBox(message,title,"haxeui-core/styles/default/dialogs/information.png",true);
+};
+Dialogs.promotionSelect = function(color,callback,onCancel) {
+	var cb = function(dialog,type) {
+		dialog.hideDialog("OK");
+		callback(type);
+	};
+	var dialog = new haxe_ui_containers_dialogs_Dialog();
+	dialog.set_width(430);
+	var body = new haxe_ui_containers_VBox();
+	var question = new haxe_ui_components_Label();
+	question.set_text("Select a piece to which you want to promote");
+	question.set_width(430);
+	question.set_textAlign("center");
+	body.addComponent(question);
+	var btns = new haxe_ui_containers_HBox();
+	var type = FigureType.Aggressor;
+	var dialog1 = dialog;
+	var type1 = type;
+	btns.addComponent(Dialogs.figureBtn(type,color,function() {
+		cb(dialog1,type1);
+	}));
+	var type = FigureType.Liberator;
+	var dialog2 = dialog;
+	var type2 = type;
+	btns.addComponent(Dialogs.figureBtn(type,color,function() {
+		cb(dialog2,type2);
+	}));
+	var type = FigureType.Defensor;
+	var dialog3 = dialog;
+	var type3 = type;
+	btns.addComponent(Dialogs.figureBtn(type,color,function() {
+		cb(dialog3,type3);
+	}));
+	var type = FigureType.Dominator;
+	var dialog4 = dialog;
+	var type4 = type;
+	btns.addComponent(Dialogs.figureBtn(type,color,function() {
+		cb(dialog4,type4);
+	}));
+	body.addComponent(btns);
+	dialog.addComponent(body);
+	dialog.set_title("Promotion selection");
+	dialog.buttons = "Cancel";
+	dialog.set_onDialogClosed(function(e) {
+		onCancel();
+	});
+	dialog.showDialog(true);
+};
+Dialogs.chameleonConfirm = function(onConfirmed,onDeclined,onCancelled) {
+	haxe_ui_core_Screen.get_instance().messageBox("Morph into an eaten figure?","Chameleon confirmation","haxeui-core/styles/default/dialogs/question.png",true,function(btn) {
+		var larr = haxe_ui_containers_dialogs_DialogButton.toString(btn).split("|");
+		if(larr.indexOf(haxe_ui_containers_dialogs_DialogButton.toString("Yes")) != -1) {
+			onConfirmed();
+		} else {
+			var larr = haxe_ui_containers_dialogs_DialogButton.toString(btn).split("|");
+			if(larr.indexOf(haxe_ui_containers_dialogs_DialogButton.toString("No")) != -1) {
+				onDeclined();
+			} else {
+				onCancelled();
+			}
+		}
+	});
+};
+Dialogs.figureBtn = function(type,color,callback) {
+	var btn = new haxe_ui_components_Button();
+	var icon = true;
+	if(icon == null) {
+		icon = false;
+	}
+	var filename = $hxEnums[type.__enum__].__constructs__[type._hx_index] + "_" + $hxEnums[color.__enum__].__constructs__[color._hx_index].toLowerCase();
+	btn.set_icon(icon ? "assets/figicons/" + filename + ".png" : "assets/figures/" + filename + ".png");
+	btn.set_width(100);
+	btn.set_height(100);
+	btn.set_onClick(function(e) {
+		callback();
+	});
+	return btn;
 };
 var EReg = function(r,opt) {
 	this.r = new RegExp(r,opt.split("u").join(""));
@@ -4695,128 +4858,152 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.removeEventListener("addedToStage",$bind(this,this.init));
 		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
+	,departurePress: function(pressLocation) {
+		var figure = this.getFigure(pressLocation);
+		if(figure == null || figure.color != this.playerColor) {
+			return;
+		}
+		this.selectDeparture(pressLocation,figure);
+		this.drag(figure);
+		this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
+		this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
+	}
+	,destinationPress: function(pressLocation) {
+		var from = new IntPoint(this.selected.i,this.selected.j);
+		var movingFig = this.getFigure(from);
+		var moveOntoFig = this.getFigure(pressLocation);
+		this.selectionBackToNormal();
+		if(pressLocation == null) {
+			return;
+		}
+		var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !this.isCastle(from,pressLocation,movingFig,moveOntoFig);
+		if(otherOwnClicked) {
+			this.selectDeparture(pressLocation,moveOntoFig);
+		} else {
+			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+			this.attemptMove(from,pressLocation);
+		}
+	}
 	,onPress: function(e) {
 		if(!this.playersTurn) {
 			return;
 		}
-		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		if(indexes == null) {
-			if(this.selected != null) {
-				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-				this.hexes[this.selected.j][this.selected.i].deselect();
-				this.selected = null;
-			}
-			return;
-		}
+		var pressLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
 		if(this.selected != null) {
-			var movingFig = this.getFigure(this.selected);
-			var moveOntoFig = this.getFigure(indexes);
-			var _g = 0;
-			var _g1 = this.possibleFields(movingFig,this.selected.i,this.selected.j);
-			while(_g < _g1.length) {
-				var dest = _g1[_g];
-				++_g;
-				this.hexes[dest.j][dest.i].removeMarkers();
-			}
-			if(moveOntoFig != null && moveOntoFig.color == this.getFigure(this.selected).color && !this.isCastle(this.selected,indexes,movingFig,moveOntoFig)) {
-				this.hexes[this.selected.j][this.selected.i].deselect();
-				this.selected = indexes;
-				this.hexes[this.selected.j][this.selected.i].select();
-				var _g = 0;
-				var _g1 = this.possibleFields(moveOntoFig,indexes.i,indexes.j);
-				while(_g < _g1.length) {
-					var dest = _g1[_g];
-					++_g;
-					if(this.getFigure(dest) != null) {
-						this.hexes[dest.j][dest.i].addRound();
-					} else {
-						this.hexes[dest.j][dest.i].addDot();
-					}
-				}
-				return;
-			}
-			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-			if(this.ableToMove(this.selected,indexes)) {
-				Networker.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
-				this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
-			}
-			this.selectionBackToNormal();
+			this.destinationPress(pressLocation);
 		} else {
-			var figure = this.figures[indexes.j][indexes.i];
-			if(figure != null) {
-				if(figure.color != this.playerColor) {
-					return;
-				}
-				this.selected = indexes;
-				this.hexes[indexes.j][indexes.i].select();
-				this.removeChild(figure);
-				this.addChild(figure);
-				figure.startDrag(true);
-				var _g = 0;
-				var _g1 = this.possibleFields(figure,indexes.i,indexes.j);
-				while(_g < _g1.length) {
-					var dest = _g1[_g];
-					++_g;
-					if(this.getFigure(dest) != null) {
-						this.hexes[dest.j][dest.i].addRound();
-					} else {
-						this.hexes[dest.j][dest.i].addDot();
-					}
-				}
-				this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
-				this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
-				this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
-			}
+			this.departurePress(pressLocation);
 		}
 	}
 	,onMove: function(e) {
 		if(!this.playersTurn) {
 			return;
 		}
-		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		if(this.selectedDest != null) {
-			if(this.selectedDest.equals(indexes)) {
-				return;
-			} else {
-				this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
-				this.selectedDest = null;
-			}
+		var shadowLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		if(shadowLocation != null && this.ableToMove(this.selected,shadowLocation)) {
+			this.hexes[shadowLocation.j][shadowLocation.i].select();
 		}
-		if(indexes != null && this.ableToMove(this.selected,indexes)) {
-			this.selectedDest = indexes;
-			this.hexes[this.selectedDest.j][this.selectedDest.i].select();
+		if(this.selectedDest != null && !this.selectedDest.equals(shadowLocation)) {
+			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
 		}
+		this.selectedDest = shadowLocation;
 	}
 	,onRelease: function(e) {
 		if(!this.playersTurn) {
 			return;
 		}
 		this.stage.removeEventListener("mouseUp",$bind(this,this.onRelease));
-		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		this.figures[this.selected.j][this.selected.i].stopDrag();
-		if(indexes != null && this.ableToMove(this.selected,indexes) && !indexes.equals(this.selected)) {
+		var pressedAt = new IntPoint(this.selected.i,this.selected.j);
+		var releasedAt = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		this.figures[pressedAt.j][pressedAt.i].stopDrag();
+		if(releasedAt != null && this.ableToMove(pressedAt,releasedAt) && !releasedAt.equals(pressedAt)) {
 			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-			var _g = 0;
-			var _g1 = this.possibleFields(this.figures[this.selected.j][this.selected.i],this.selected.i,this.selected.j);
-			while(_g < _g1.length) {
-				var dest = _g1[_g];
-				++_g;
-				this.hexes[dest.j][dest.i].removeMarkers();
-			}
-			this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
 			this.selectionBackToNormal();
+			this.attemptMove(pressedAt,releasedAt);
 		} else {
-			this.disposeFigure(this.figures[this.selected.j][this.selected.i],this.selected.i,this.selected.j);
+			this.disposeFigure(this.figures[pressedAt.j][pressedAt.i],pressedAt);
 		}
-		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
-	,selectionBackToNormal: function() {
-		this.hexes[this.selected.j][this.selected.i].deselect();
-		if(this.selectedDest != null) {
-			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+	,attemptMove: function(from,to) {
+		if(!this.ableToMove(from,to)) {
+			return;
 		}
-		this.selected = null;
-		this.selectedDest = null;
+		var figure = this.getFigure(from);
+		var moveOntoFigure = this.getFigure(to);
+		var nearIntellector = false;
+		var _g = 0;
+		var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
+		while(_g < _g1.length) {
+			var dir = _g1[_g];
+			++_g;
+			var neighbour = this.getFigure(this.getCoordsInRelDirection(from.i,from.j,dir,figure.color));
+			if(neighbour != null && neighbour.color == figure.color && neighbour.type == FigureType.Intellector) {
+				nearIntellector = true;
+				break;
+			}
+		}
+		if(nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type) {
+			var _g = $bind(this,this.makeMove);
+			var from1 = from;
+			var to1 = to;
+			var morphInto = moveOntoFigure.type;
+			var _g1 = $bind(this,this.makeMove);
+			var from2 = from;
+			var to2 = to;
+			Dialogs.chameleonConfirm(function() {
+				_g(from1,to1,morphInto);
+			},function() {
+				_g1(from2,to2);
+			},function() {
+			});
+		} else if(this.isFinalForPlayer(to) && figure.type == FigureType.Progressor) {
+			var _g2 = $bind(this,this.makeMove);
+			var from3 = from;
+			var to3 = to;
+			var tmp = function(morphInto) {
+				_g2(from3,to3,morphInto);
+			};
+			Dialogs.promotionSelect(this.playerColor,tmp,function() {
+			});
+		} else {
+			this.makeMove(from,to);
+		}
+	}
+	,makeMove: function(from,to,morphInto) {
+		var movingFigure = this.getFigure(from);
+		var figMoveOnto = this.getFigure(to);
+		var capture = figMoveOnto != null && figMoveOnto.color != this.playerColor;
+		var mate = capture && figMoveOnto.type == FigureType.Intellector;
+		Networker.move(from.i,from.j,to.i,to.j,morphInto);
+		Main.sidebox.makeMove(this.playerColor,movingFigure.type,to,capture,mate);
+		this.move(from,to,morphInto);
+	}
+	,move: function(from,to,morphInto) {
+		var figure = this.getFigure(from);
+		var figMoveOnto = this.getFigure(to);
+		if(morphInto != null) {
+			var color = figure.color;
+			this.removeChild(figure);
+			figure = new Figure(morphInto,color);
+			this.scaleFigure(figure);
+			this.addChild(figure);
+		}
+		this.disposeFigure(figure,to);
+		this.figures[to.j][to.i] = figure;
+		this.figures[from.j][from.i] = null;
+		if(figMoveOnto != null) {
+			if(this.isCastle(from,to,figure,figMoveOnto)) {
+				this.disposeFigure(figMoveOnto,from);
+				this.figures[from.j][from.i] = figMoveOnto;
+				openfl_utils_Assets.getSound("sounds/move.mp3").play();
+			} else {
+				this.removeChild(figMoveOnto);
+				openfl_utils_Assets.getSound("sounds/capture.mp3").play();
+			}
+		} else {
+			openfl_utils_Assets.getSound("sounds/move.mp3").play();
+		}
+		this.playersTurn = !this.playersTurn;
 	}
 	,ableToMove: function(from,to) {
 		if(!this.playersTurn) {
@@ -5032,13 +5219,6 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 		return fields;
 	}
-	,getFigure: function(coords) {
-		if(coords == null || !this.hexExists(coords.i,coords.j) || this.figures[coords.j] == null) {
-			return null;
-		} else {
-			return this.figures[coords.j][coords.i];
-		}
-	}
 	,getCoordsInRelDirection: function(fromI,fromJ,dir,col,steps) {
 		if(steps == null) {
 			steps = 1;
@@ -5126,37 +5306,6 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 			return null;
 		}
 	}
-	,hexExists: function(i,j) {
-		if(i >= 0 && i < 9 && j >= 0 && j < 7) {
-			if(j == 6) {
-				return i % 2 == 0;
-			} else {
-				return true;
-			}
-		} else {
-			return false;
-		}
-	}
-	,move: function(fromI,fromJ,toI,toJ) {
-		var figure = this.figures[fromJ][fromI];
-		var figMoveOnto = this.getFigure(new IntPoint(toI,toJ));
-		this.disposeFigure(figure,toI,toJ);
-		this.figures[toJ][toI] = figure;
-		this.figures[fromJ][fromI] = null;
-		if(figMoveOnto != null) {
-			if(this.isCastle(new IntPoint(fromI,fromJ),new IntPoint(toI,toJ),figure,figMoveOnto)) {
-				this.disposeFigure(figMoveOnto,fromI,fromJ);
-				this.figures[fromJ][fromI] = figMoveOnto;
-				openfl_utils_Assets.getSound("sounds/move.mp3").play();
-			} else {
-				this.removeChild(figMoveOnto);
-				openfl_utils_Assets.getSound("sounds/capture.mp3").play();
-			}
-		} else {
-			openfl_utils_Assets.getSound("sounds/move.mp3").play();
-		}
-		this.playersTurn = !this.playersTurn;
-	}
 	,posToIndexes: function(x,y) {
 		var closest = null;
 		var distanceSqr = Field.a * Field.a;
@@ -5179,6 +5328,13 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 		return closest;
 	}
+	,getFigure: function(coords) {
+		if(coords == null || !this.hexExists(coords.i,coords.j)) {
+			return null;
+		} else {
+			return this.figures[coords.j][coords.i];
+		}
+	}
 	,hexCoords: function(i,j) {
 		var p = new openfl_geom_Point(0,0);
 		p.x = 3 * Field.a * i / 2;
@@ -5188,31 +5344,416 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 		return p;
 	}
-	,placeFigures: function() {
-		var _g = 0;
-		while(_g < 7) {
-			var j = _g++;
-			var _g1 = 0;
-			while(_g1 < 9) {
-				var i = _g1++;
-				var figure = this.figures[j][i];
-				if(figure != null) {
-					var scale = Math.sqrt(3) * Field.a * 0.85 / figure.get_height();
-					if(figure.type == FigureType.Progressor) {
-						scale *= 0.7;
-					} else if(figure.type == FigureType.Liberator || figure.type == FigureType.Defensor) {
-						scale *= 0.9;
-					}
-					figure.set_scaleX(scale);
-					figure.set_scaleY(scale);
-					this.disposeFigure(figure,i,j);
-					this.addChild(figure);
-				}
-			}
+	,isFinalForPlayer: function(p) {
+		if(p.j == 0) {
+			return p.i % 2 == 0;
+		} else {
+			return false;
 		}
 	}
-	,disposeFigure: function(figure,i,j) {
-		var coords = this.hexCoords(i,j);
+	,hexExists: function(i,j) {
+		if(i >= 0 && i < 9 && j >= 0 && j < 7) {
+			if(j == 6) {
+				return i % 2 == 0;
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
+	}
+	,placeFigures: function() {
+		var figure = this.figures[0][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,6));
+			this.addChild(figure);
+		}
+	}
+	,scaleFigure: function(figure) {
+		var scale = Math.sqrt(3) * Field.a * 0.85 / figure.get_height();
+		if(figure.type == FigureType.Progressor) {
+			scale *= 0.7;
+		} else if(figure.type == FigureType.Liberator || figure.type == FigureType.Defensor) {
+			scale *= 0.9;
+		}
+		figure.set_scaleX(scale);
+		figure.set_scaleY(scale);
+	}
+	,disposeFigure: function(figure,loc) {
+		var coords = this.hexCoords(loc.i,loc.j);
 		figure.set_x(coords.x);
 		figure.set_y(coords.y);
 	}
@@ -5224,6 +5765,47 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		} else {
 			return i % 2 == 1;
 		}
+	}
+	,drag: function(figure) {
+		this.removeChild(figure);
+		this.addChild(figure);
+		figure.startDrag(true);
+	}
+	,addMarkers: function(from,figure) {
+		var _g = 0;
+		var _g1 = this.possibleFields(figure,from.i,from.j);
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			if(this.getFigure(dest) != null) {
+				this.hexes[dest.j][dest.i].addRound();
+			} else {
+				this.hexes[dest.j][dest.i].addDot();
+			}
+		}
+	}
+	,removeMarkers: function(from,figure) {
+		var _g = 0;
+		var _g1 = this.possibleFields(figure,from.i,from.j);
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			this.hexes[dest.j][dest.i].removeMarkers();
+		}
+	}
+	,selectDeparture: function(dep,depFigure) {
+		this.selected = dep;
+		this.hexes[dep.j][dep.i].select();
+		this.addMarkers(dep,depFigure);
+	}
+	,selectionBackToNormal: function() {
+		this.removeMarkers(this.selected,this.getFigure(this.selected));
+		this.hexes[this.selected.j][this.selected.i].deselect();
+		if(this.selectedDest != null) {
+			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+		}
+		this.selected = null;
+		this.selectedDest = null;
 	}
 	,__class__: Field
 });
@@ -5267,11 +5849,22 @@ Figure.initFigures = function() {
 		while(_g2 < _g3.length) {
 			var col = _g3[_g2];
 			++_g2;
-			var filename = $hxEnums[fig.__enum__].__constructs__[fig._hx_index] + "_" + $hxEnums[col.__enum__].__constructs__[col._hx_index].toLowerCase();
 			var this2 = Figure.bitmaps.get(fig);
+			var filename = $hxEnums[fig.__enum__].__constructs__[fig._hx_index] + "_" + $hxEnums[col.__enum__].__constructs__[col._hx_index].toLowerCase();
 			var v1 = openfl_utils_Assets.getBitmapData("assets/figures/" + filename + ".png");
 			this2.set(col,v1);
 		}
+	}
+};
+Figure.pathToImage = function(type,color,icon) {
+	if(icon == null) {
+		icon = false;
+	}
+	var filename = $hxEnums[type.__enum__].__constructs__[type._hx_index] + "_" + $hxEnums[color.__enum__].__constructs__[color._hx_index].toLowerCase();
+	if(icon) {
+		return "assets/figicons/" + filename + ".png";
+	} else {
+		return "assets/figures/" + filename + ".png";
 	}
 };
 Figure.__super__ = openfl_display_Sprite;
@@ -5474,7 +6067,7 @@ ManifestResources.init = function(config) {
 	openfl_text_Font.registerFont(_$_$ASSET_$_$OPENFL_$_$fonts_$roboto_$medium_$ttf);
 	openfl_text_Font.registerFont(_$_$ASSET_$_$OPENFL_$_$fonts_$roboto_$regular_$ttf);
 	var bundle;
-	var data = "{\"name\":null,\"assets\":\"aoy4:pathy27:styles%2Fdefault%2Fmain.cssy4:sizei1135y4:typey4:TEXTy2:idR1y7:preloadtgoR0y17:styles%2Fmain.cssR2i148R3R4R5R7R6tgoR2i171320R3y4:FONTy9:classNamey32:__ASSET__fonts_roboto_medium_ttfR5y25:fonts%2FRoboto-Medium.ttfR6tgoR0y26:fonts%2FRoboto-Regular.eotR2i163058R3y6:BINARYR5R12R6tgoR0y26:fonts%2FRoboto-Regular.svgR2i240120R3R4R5R14R6tgoR2i162876R3R8R9y33:__ASSET__fonts_roboto_regular_ttfR5y26:fonts%2FRoboto-Regular.ttfR6tgoR0y27:fonts%2FRoboto-Regular.woffR2i86488R3R13R5R17R6tgoR0y28:fonts%2FRoboto-Regular.woff2R2i19960R3R13R5R18R6tgoR2i5987R3y5:MUSICR5y20:sounds%2Fcapture.mp3y9:pathGroupaR20hR6tgoR2i4285R3R19R5y17:sounds%2Fmove.mp3R21aR22hR6tgoR2i8011R3R19R5y19:sounds%2Fnotify.mp3R21aR23hR6tgoR0y38:assets%2Ffigures%2FAggressor_black.pngR2i11433R3y5:IMAGER5R24R6tgoR0y38:assets%2Ffigures%2FAggressor_white.pngR2i11685R3R25R5R26R6tgoR0y37:assets%2Ffigures%2FDefensor_black.pngR2i13534R3R25R5R27R6tgoR0y37:assets%2Ffigures%2FDefensor_white.pngR2i13132R3R25R5R28R6tgoR0y38:assets%2Ffigures%2FDominator_black.pngR2i14027R3R25R5R29R6tgoR0y38:assets%2Ffigures%2FDominator_white.pngR2i14289R3R25R5R30R6tgoR0y40:assets%2Ffigures%2FIntellector_black.pngR2i13664R3R25R5R31R6tgoR0y40:assets%2Ffigures%2FIntellector_white.pngR2i13928R3R25R5R32R6tgoR0y38:assets%2Ffigures%2FLiberator_black.pngR2i11674R3R25R5R33R6tgoR0y38:assets%2Ffigures%2FLiberator_white.pngR2i11443R3R25R5R34R6tgoR0y39:assets%2Ffigures%2FProgressor_black.pngR2i9640R3R25R5R35R6tgoR0y39:assets%2Ffigures%2FProgressor_white.pngR2i9684R3R25R5R36R6tgoR2i5987R3R19R5y29:assets%2Fsounds%2Fcapture.mp3R21aR37hR6tgoR2i4285R3R19R5y26:assets%2Fsounds%2Fmove.mp3R21aR38hR6tgoR2i8011R3R19R5y28:assets%2Fsounds%2Fnotify.mp3R21aR39hR6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
+	var data = "{\"name\":null,\"assets\":\"aoy4:pathy27:styles%2Fdefault%2Fmain.cssy4:sizei1135y4:typey4:TEXTy2:idR1y7:preloadtgoR0y17:styles%2Fmain.cssR2i148R3R4R5R7R6tgoR2i171320R3y4:FONTy9:classNamey32:__ASSET__fonts_roboto_medium_ttfR5y25:fonts%2FRoboto-Medium.ttfR6tgoR0y26:fonts%2FRoboto-Regular.eotR2i163058R3y6:BINARYR5R12R6tgoR0y26:fonts%2FRoboto-Regular.svgR2i240120R3R4R5R14R6tgoR2i162876R3R8R9y33:__ASSET__fonts_roboto_regular_ttfR5y26:fonts%2FRoboto-Regular.ttfR6tgoR0y27:fonts%2FRoboto-Regular.woffR2i86488R3R13R5R17R6tgoR0y28:fonts%2FRoboto-Regular.woff2R2i19960R3R13R5R18R6tgoR2i5987R3y5:MUSICR5y20:sounds%2Fcapture.mp3y9:pathGroupaR20hR6tgoR2i10448R3R19R5y27:sounds%2Fchallenge_sent.mp3R21aR22hR6tgoR2i4285R3R19R5y17:sounds%2Fmove.mp3R21aR23hR6tgoR2i8011R3R19R5y19:sounds%2Fnotify.mp3R21aR24hR6tgoR2i62644R3R19R5y19:sounds%2Fsocial.mp3R21aR25hR6tgoR0y39:assets%2Ffigicons%2FAggressor_black.pngR2i12342R3y5:IMAGER5R26R6tgoR0y39:assets%2Ffigicons%2FAggressor_white.pngR2i12566R3R27R5R28R6tgoR0y38:assets%2Ffigicons%2FDefensor_black.pngR2i14981R3R27R5R29R6tgoR0y38:assets%2Ffigicons%2FDefensor_white.pngR2i15362R3R27R5R30R6tgoR0y39:assets%2Ffigicons%2FDominator_black.pngR2i14756R3R27R5R31R6tgoR0y39:assets%2Ffigicons%2FDominator_white.pngR2i15008R3R27R5R32R6tgoR0y39:assets%2Ffigicons%2FLiberator_black.pngR2i12576R3R27R5R33R6tgoR0y39:assets%2Ffigicons%2FLiberator_white.pngR2i12354R3R27R5R34R6tgoR0y38:assets%2Ffigures%2FAggressor_black.pngR2i11433R3R27R5R35R6tgoR0y38:assets%2Ffigures%2FAggressor_white.pngR2i11685R3R27R5R36R6tgoR0y37:assets%2Ffigures%2FDefensor_black.pngR2i13534R3R27R5R37R6tgoR0y37:assets%2Ffigures%2FDefensor_white.pngR2i13132R3R27R5R38R6tgoR0y38:assets%2Ffigures%2FDominator_black.pngR2i14027R3R27R5R39R6tgoR0y38:assets%2Ffigures%2FDominator_white.pngR2i14289R3R27R5R40R6tgoR0y40:assets%2Ffigures%2FIntellector_black.pngR2i13664R3R27R5R41R6tgoR0y40:assets%2Ffigures%2FIntellector_white.pngR2i13928R3R27R5R42R6tgoR0y38:assets%2Ffigures%2FLiberator_black.pngR2i11674R3R27R5R43R6tgoR0y38:assets%2Ffigures%2FLiberator_white.pngR2i11443R3R27R5R44R6tgoR0y39:assets%2Ffigures%2FProgressor_black.pngR2i9640R3R27R5R45R6tgoR0y39:assets%2Ffigures%2FProgressor_white.pngR2i9684R3R27R5R46R6tgoR0y32:assets%2Flayouts%2Fmovetable.xmlR2i288R3R4R5R47R6tgoR2i5987R3R19R5y29:assets%2Fsounds%2Fcapture.mp3R21aR48hR6tgoR2i10448R3R19R5y36:assets%2Fsounds%2Fchallenge_sent.mp3R21aR49hR6tgoR2i4285R3R19R5y26:assets%2Fsounds%2Fmove.mp3R21aR50hR6tgoR2i8011R3R19R5y28:assets%2Fsounds%2Fnotify.mp3R21aR51hR6tgoR2i62644R3R19R5y28:assets%2Fsounds%2Fsocial.mp3R21aR52hR6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
 	var manifest = lime_utils_AssetManifest.parse(data,ManifestResources.rootPath);
 	var library = lime_utils_AssetLibrary.fromManifest(manifest);
 	lime_utils_Assets.registerLibrary("default",library);
@@ -5817,10 +6410,12 @@ Math.__name__ = "Math";
 var Networker = function() { };
 $hxClasses["Networker"] = Networker;
 Networker.__name__ = "Networker";
-Networker.connect = function() {
-	Networker._ws = new hx_ws_WebSocket("ws://localhost:5000");
+Networker.connect = function(onGameStated) {
+	Networker._ws = new hx_ws_WebSocket("ws://ec2-13-48-10-164.eu-north-1.compute.amazonaws.com:5000");
 	Networker._ws.set_onopen(function() {
-		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 46, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 59, className : "Networker", methodName : "connect"});
+		Networker.gameStartHandler = onGameStated;
+		Networker.once("game_started",Networker.gameStartHandler);
 	});
 	Networker._ws.set_onmessage(function(msg) {
 		var str = msg.toString();
@@ -5829,14 +6424,14 @@ Networker.connect = function() {
 		if(callback != null) {
 			callback(event.data);
 		} else {
-			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 55, className : "Networker", methodName : "connect"});
+			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 70, className : "Networker", methodName : "connect"});
 		}
 	});
 	Networker._ws.set_onclose(function() {
 		Networker._ws = null;
 	});
 	Networker._ws.set_onerror(function(err) {
-		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 61, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 76, className : "Networker", methodName : "connect"});
 	});
 };
 Networker.signin = function(login,password,onAnswer) {
@@ -5849,57 +6444,78 @@ Networker.register = function(login,password,onAnswer) {
 	Networker.once("register_result",onAnswer);
 	Networker.emit("register",{ login : login, password : password});
 };
-Networker.registerChallengeReceiver = function(onStarted) {
-	var onStarted1 = onStarted;
-	Networker.on("incoming_challenge",function(data) {
-		Networker.challengeReceiver(onStarted1,data);
+Networker.getGame = function(id,onOpen,onFinished,on404) {
+	Networker.once("game_response",function(data) {
+		if(data.type == "open") {
+			onOpen(data.host);
+		} else if(data.type == "finished") {
+			onFinished(data.log);
+		} else {
+			on404();
+		}
 	});
+	Networker.emit("get_game",{ id : id});
 };
-Networker.challengeReceiver = function(onStarted,data) {
+Networker.challengeReceiver = function(data) {
 	var onConfirmed = function() {
 		Networker.emit("accept_challenge",{ caller_login : data.caller, callee_login : Networker.login});
-		Networker.once("game_started",onStarted);
 	};
-	Dialogs.confirm("" + data.caller + " wants to play with you. Accept the challenge?","Incoming challenge",onConfirmed,function() {
-	});
+	var onDeclined = function() {
+		Networker.emit("decline_challenge",{ caller_login : data.caller, callee_login : Networker.login});
+	};
+	openfl_utils_Assets.getSound("sounds/social.mp3").play();
+	Dialogs.confirm("" + data.caller + " wants to play with you. Accept the challenge?","Incoming challenge",onConfirmed,onDeclined);
 };
-Networker.sendChallenge = function(callee,onStarted) {
+Networker.acceptOpen = function(caller) {
+	Networker.emit("accept_open_challenge",{ caller_login : caller, callee_login : Networker.login});
+};
+Networker.sendChallenge = function(callee) {
+	var onSuccess = function(d) {
+		openfl_utils_Assets.getSound("sounds/challenge_sent.mp3").play();
+		Dialogs.info("Challenge sent to " + d.callee + "!","Success");
+	};
+	var onDeclined = function(d) {
+		Dialogs.info("" + d.callee + " has declined your challenge","Challenge declined");
+	};
+	var onSame = function(d) {
+		Dialogs.alert("You can't challenge yourself","Challenge error");
+	};
 	var onRepeated = function(d) {
-		window.alert("You have already sent a challenge to this player");
+		Dialogs.alert("You have already sent a challenge to this player","Challenge error");
 	};
 	var onOffline = function(d) {
-		window.alert("Callee is offline");
+		Dialogs.alert("Callee is offline","Challenge error");
 	};
 	var onIngame = function(d) {
-		window.alert("Callee is currently playing");
+		Dialogs.alert("Callee is currently playing","Challenge error");
 	};
-	if(Object.prototype.hasOwnProperty.call(Networker.eventMap.h,"game_started")) {
-		var _g = new haxe_ds_StringMap();
-		_g.h["repeated_callout"] = onRepeated;
-		_g.h["callee_unavailable"] = onOffline;
-		_g.h["callee_ingame"] = onIngame;
-		Networker.onceOneOf(_g);
-	} else {
-		var _g = new haxe_ds_StringMap();
-		_g.h["game_started"] = onStarted;
-		_g.h["repeated_callout"] = onRepeated;
-		_g.h["callee_unavailable"] = onOffline;
-		_g.h["callee_ingame"] = onIngame;
-		Networker.onceOneOf(_g);
-	}
-	Networker.emit("callout",{ caller_login : Networker.login, callee_login : callee});
+	Networker.once("challenge_declined",onDeclined);
+	var _g = new haxe_ds_StringMap();
+	_g.h["callee_same"] = onSame;
+	_g.h["callout_success"] = onSuccess;
+	_g.h["repeated_callout"] = onRepeated;
+	_g.h["callee_unavailable"] = onOffline;
+	_g.h["callee_ingame"] = onIngame;
+	Networker.onceOneOf(_g);
+	Networker.emit("callout",{ caller_login : Networker.login, callee_login : callee, secsStart : 600, secsBonus : 5});
 };
-Networker.move = function(fromI,fromJ,toI,toJ) {
-	Networker.emit("move",{ issuer_login : Networker.login, fromI : fromI, fromJ : fromJ, toI : toI, toJ : toJ});
+Networker.reqTimeoutCheck = function() {
+	Networker.emit("request_timeout_check",{ issuer_login : Networker.login});
 };
-Networker.registerGameEvents = function(onMove,onOver) {
+Networker.move = function(fromI,fromJ,toI,toJ,morphInto) {
+	Networker.emit("move",{ issuer_login : Networker.login, fromI : fromI, fromJ : fromJ, toI : toI, toJ : toJ, morphInto : morphInto == null ? null : $hxEnums[morphInto.__enum__].__constructs__[morphInto._hx_index]});
+};
+Networker.registerGameEvents = function(onMove,onTimeCorrection,onOver) {
 	Networker.off("incoming_challenge");
 	Networker.on("move",onMove);
+	Networker.on("time_correction",onTimeCorrection);
 	Networker.once("game_ended",onOver);
 };
-Networker.unregisterGameEvents = function(onGameStarted) {
+Networker.registerMainMenuEvents = function() {
 	Networker.off("move");
-	Networker.registerChallengeReceiver(onGameStarted);
+	Networker.off("time_correction");
+	Networker.on("incoming_challenge",Networker.challengeReceiver);
+	Networker.once("game_started",Networker.gameStartHandler);
 };
 Networker.on = function(eventName,callback) {
 	Networker.eventMap.h[eventName] = callback;
@@ -5936,7 +6552,7 @@ Networker.off = function(eventName) {
 };
 Networker.emit = function(eventName,data) {
 	var event = { name : eventName, data : data};
-	haxe_Log.trace(JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 155, className : "Networker", methodName : "emit"});
+	haxe_Log.trace("Emitted: " + JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 193, className : "Networker", methodName : "emit"});
 	Networker._ws.send(JSON.stringify(event));
 };
 Networker.combineVoid = function(f1,f2) {
@@ -6080,6 +6696,208 @@ Reflect.makeVarArgs = function(f) {
 		return f(a2);
 	};
 };
+var Sidebox = function(startSecs,secsPerTurn,playerLogin,opponentLogin,playerIsWhite) {
+	openfl_display_Sprite.call(this);
+	this.move = 1;
+	this.secsPerTurn = secsPerTurn;
+	this.playerColor = playerIsWhite ? FigureColor.White : FigureColor.Black;
+	this.playerTurn = playerIsWhite;
+	var strStart = this.secsToString(startSecs);
+	var timeStyle = new haxe_ui_styles_Style();
+	timeStyle.fontSize = 40;
+	var loginStyle = new haxe_ui_styles_Style();
+	loginStyle.fontSize = 24;
+	var box = new haxe_ui_containers_VBox();
+	this.upperTime = new haxe_ui_components_Label();
+	this.upperTime.set_text(strStart);
+	this.upperTime.customStyle = timeStyle;
+	box.addComponent(this.upperTime);
+	this.upperLogin = new haxe_ui_components_Label();
+	this.upperLogin.set_text(opponentLogin);
+	this.upperLogin.customStyle = loginStyle;
+	box.addComponent(this.upperLogin);
+	var c0 = new haxe_ui_containers_TableView();
+	c0.set_id("movetable");
+	c0.set_width(250.);
+	c0.set_height(200.);
+	c0.set_percentContentWidth(100.);
+	var c1 = new haxe_ui_containers_Header();
+	c1.set_percentWidth(100.);
+	var c2 = new haxe_ui_components_Column();
+	c2.set_id("num");
+	c2.set_percentWidth(16.);
+	c2.set_text("");
+	c1.addComponent(c2);
+	var c3 = new haxe_ui_components_Column();
+	c3.set_id("white_move");
+	c3.set_percentWidth(42.);
+	c3.set_text("");
+	c1.addComponent(c3);
+	var c4 = new haxe_ui_components_Column();
+	c4.set_id("black_move");
+	c4.set_percentWidth(42.);
+	c4.set_text("");
+	c1.addComponent(c4);
+	c0.addComponent(c1);
+	c0.bindingRoot = true;
+	this.movetable = c0;
+	box.addComponent(this.movetable);
+	this.bottomLogin = new haxe_ui_components_Label();
+	this.bottomLogin.set_text(playerLogin);
+	this.bottomLogin.customStyle = loginStyle;
+	box.addComponent(this.bottomLogin);
+	this.bottomTime = new haxe_ui_components_Label();
+	this.bottomTime.set_text(strStart);
+	this.bottomTime.customStyle = timeStyle;
+	box.addComponent(this.bottomTime);
+	this.addChild(box);
+};
+$hxClasses["Sidebox"] = Sidebox;
+Sidebox.__name__ = "Sidebox";
+Sidebox.__super__ = openfl_display_Sprite;
+Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
+	bottomTime: null
+	,upperTime: null
+	,bottomLogin: null
+	,upperLogin: null
+	,movetable: null
+	,timer: null
+	,secsPerTurn: null
+	,move: null
+	,playerColor: null
+	,playerTurn: null
+	,lastMove: null
+	,numRep: function(v) {
+		if(v < 10) {
+			return "0" + v;
+		} else {
+			return "" + v;
+		}
+	}
+	,secsToString: function(secs) {
+		var secsLeft = secs % 60;
+		var minsLeft = (secs - secsLeft) / 60;
+		var minRepresentation = minsLeft < 10 ? "0" + minsLeft : "" + minsLeft;
+		var secRepresentation = secsLeft < 10 ? "0" + secsLeft : "" + secsLeft;
+		return "" + minRepresentation + ":" + secRepresentation;
+	}
+	,figureAbbreviation: function(figure) {
+		switch(figure._hx_index) {
+		case 0:
+			return "P";
+		case 1:
+			return "Ag";
+		case 2:
+			return "Dm";
+		case 3:
+			return "Lb";
+		case 4:
+			return "Df";
+		case 5:
+			return "In";
+		}
+	}
+	,timerRun: function() {
+		var timeLabel = this.playerTurn ? this.bottomTime : this.upperTime;
+		var timeNumbers = timeLabel.get_text().split(":");
+		if(timeNumbers[1] == "00") {
+			if(timeNumbers[0] == "00") {
+				this.onNonMateEnded();
+				Networker.reqTimeoutCheck();
+				return;
+			}
+			var v = Std.parseInt(timeNumbers[0]) - 1;
+			timeLabel.set_text("" + (v < 10 ? "0" + v : "" + v) + ":59");
+		} else {
+			var v = Std.parseInt(timeNumbers[1]) - 1;
+			timeLabel.set_text("" + timeNumbers[0] + ":" + (v < 10 ? "0" + v : "" + v));
+		}
+	}
+	,addBonus: function(text) {
+		var _this = text.split(":");
+		var f = Std.parseInt;
+		var result = new Array(_this.length);
+		var _g = 0;
+		var _g1 = _this.length;
+		while(_g < _g1) {
+			var i = _g++;
+			result[i] = f(_this[i]);
+		}
+		var timeNumbers = result;
+		timeNumbers[0] += Math.floor((timeNumbers[1] + this.secsPerTurn) / 60);
+		timeNumbers[1] = (timeNumbers[1] + this.secsPerTurn) % 60;
+		var v = timeNumbers[0];
+		var v1 = timeNumbers[1];
+		return "" + (v < 10 ? "0" + v : "" + v) + ":" + (v1 < 10 ? "0" + v1 : "" + v1);
+	}
+	,locToStr: function(loc) {
+		if(this.playerColor == FigureColor.White) {
+			var code = 97 + loc.i;
+			return String.fromCodePoint(code) + (7 - loc.j - loc.i % 2);
+		} else {
+			var code = 97 + loc.i;
+			return String.fromCodePoint(code) + (1 + loc.j);
+		}
+	}
+	,correctTime: function(correctedSecsWhite,correctedSecsBlack) {
+		if(this.playerColor == FigureColor.White) {
+			this.bottomTime.set_text(this.secsToString(correctedSecsWhite));
+			this.upperTime.set_text(this.secsToString(correctedSecsBlack));
+		} else {
+			this.upperTime.set_text(this.secsToString(correctedSecsWhite));
+			this.bottomTime.set_text(this.secsToString(correctedSecsBlack));
+		}
+	}
+	,makeMove: function(color,figure,to,capture,mate) {
+		if(this.timer != null) {
+			this.timer.stop();
+		}
+		var moveStr;
+		switch(figure._hx_index) {
+		case 0:
+			moveStr = "P";
+			break;
+		case 1:
+			moveStr = "Ag";
+			break;
+		case 2:
+			moveStr = "Dm";
+			break;
+		case 3:
+			moveStr = "Lb";
+			break;
+		case 4:
+			moveStr = "Df";
+			break;
+		case 5:
+			moveStr = "In";
+			break;
+		}
+		var moveStr1 = moveStr + (capture ? "x" : "") + this.locToStr(to) + (mate ? "#" : "");
+		if(color == FigureColor.Black) {
+			this.lastMove.black_move = moveStr1;
+			this.movetable.get_dataSource().update(this.movetable.get_dataSource().get_size() - 1,this.lastMove);
+		} else {
+			this.lastMove = { "num" : "" + this.move, "white_move" : moveStr1, "black_move" : ""};
+			this.movetable.get_dataSource().add(this.lastMove);
+		}
+		if(this.playerTurn) {
+			this.bottomTime.set_text(this.addBonus(this.bottomTime.get_text()));
+		}
+		this.move++;
+		this.playerTurn = color != this.playerColor;
+		if(!mate && this.move > 2) {
+			this.timer = new haxe_Timer(1000);
+			this.timer.run = $bind(this,this.timerRun);
+		}
+	}
+	,onNonMateEnded: function() {
+		if(this.timer != null) {
+			this.timer.stop();
+		}
+	}
+	,__class__: Sidebox
+});
 var Std = function() { };
 $hxClasses["Std"] = Std;
 Std.__name__ = "Std";
@@ -30473,6 +31291,9 @@ haxe_ui_layouts_VerticalLayout.prototype = $extend(haxe_ui_layouts_DefaultLayout
 var haxe_ui_macros_BackendMacros = function() { };
 $hxClasses["haxe.ui.macros.BackendMacros"] = haxe_ui_macros_BackendMacros;
 haxe_ui_macros_BackendMacros.__name__ = "haxe.ui.macros.BackendMacros";
+var haxe_ui_macros_ComponentMacros = function() { };
+$hxClasses["haxe.ui.macros.ComponentMacros"] = haxe_ui_macros_ComponentMacros;
+haxe_ui_macros_ComponentMacros.__name__ = "haxe.ui.macros.ComponentMacros";
 var haxe_ui_macros_ModuleMacros = function() { };
 $hxClasses["haxe.ui.macros.ModuleMacros"] = haxe_ui_macros_ModuleMacros;
 haxe_ui_macros_ModuleMacros.__name__ = "haxe.ui.macros.ModuleMacros";
@@ -30957,6 +31778,24 @@ haxe_ui_parsers_ui_resolvers_AssetResourceResolver.prototype = $extend(haxe_ui_p
 		return haxe_ui_ToolkitAssets.get_instance().getText(f);
 	}
 	,__class__: haxe_ui_parsers_ui_resolvers_AssetResourceResolver
+});
+var haxe_ui_parsers_ui_resolvers_FileResourceResolver = function(rootFile,params) {
+	haxe_ui_parsers_ui_resolvers_ResourceResolver.call(this,params);
+	this._rootFile = rootFile;
+	var arr = this._rootFile.split("/");
+	arr.pop();
+	this._rootDir = arr.join("/");
+	if(arr.length > 1) {
+		this._rootDir += "/";
+	}
+};
+$hxClasses["haxe.ui.parsers.ui.resolvers.FileResourceResolver"] = haxe_ui_parsers_ui_resolvers_FileResourceResolver;
+haxe_ui_parsers_ui_resolvers_FileResourceResolver.__name__ = "haxe.ui.parsers.ui.resolvers.FileResourceResolver";
+haxe_ui_parsers_ui_resolvers_FileResourceResolver.__super__ = haxe_ui_parsers_ui_resolvers_ResourceResolver;
+haxe_ui_parsers_ui_resolvers_FileResourceResolver.prototype = $extend(haxe_ui_parsers_ui_resolvers_ResourceResolver.prototype,{
+	_rootFile: null
+	,_rootDir: null
+	,__class__: haxe_ui_parsers_ui_resolvers_FileResourceResolver
 });
 var haxe_ui_scripting_ConditionEvaluator = function() {
 };
@@ -40557,6 +41396,50 @@ js_Boot.__isNativeObj = function(o) {
 };
 js_Boot.__resolveNativeClass = function(name) {
 	return $global[name];
+};
+var js_Cookie = function() { };
+$hxClasses["js.Cookie"] = js_Cookie;
+js_Cookie.__name__ = "js.Cookie";
+js_Cookie.set = function(name,value,expireDelay,path,domain) {
+	var s = name + "=" + encodeURIComponent(value);
+	if(expireDelay != null) {
+		var d = new Date(new Date().getTime() + expireDelay * 1000);
+		s += ";expires=" + d.toGMTString();
+	}
+	if(path != null) {
+		s += ";path=" + path;
+	}
+	if(domain != null) {
+		s += ";domain=" + domain;
+	}
+	window.document.cookie = s;
+};
+js_Cookie.all = function() {
+	var h = new haxe_ds_StringMap();
+	var a = window.document.cookie.split(";");
+	var _g = 0;
+	while(_g < a.length) {
+		var e = a[_g];
+		++_g;
+		e = StringTools.ltrim(e);
+		var t = e.split("=");
+		if(t.length < 2) {
+			continue;
+		}
+		var value = decodeURIComponent(t[1].split("+").join(" "));
+		h.h[t[0]] = value;
+	}
+	return h;
+};
+js_Cookie.get = function(name) {
+	return js_Cookie.all().h[name];
+};
+js_Cookie.exists = function(name) {
+	var _this = js_Cookie.all();
+	return Object.prototype.hasOwnProperty.call(_this.h,name);
+};
+js_Cookie.remove = function(name,path,domain) {
+	js_Cookie.set(name,"",-10,path,domain);
 };
 var js_html__$CanvasElement_CanvasUtil = function() { };
 $hxClasses["js.html._CanvasElement.CanvasUtil"] = js_html__$CanvasElement_CanvasUtil;
@@ -56679,7 +57562,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 741842;
+	this.version = 803586;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";

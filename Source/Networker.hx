@@ -1,5 +1,7 @@
 package;
 
+import Figure.FigureType;
+import openfl.utils.Assets;
 import js.Browser;
 import haxe.Json;
 import hx.ws.WebSocket;
@@ -12,8 +14,11 @@ typedef Event =
 
 typedef BattleData =
 {
+    var match_id:Int;
     var enemy:String;
     var colour:String;
+    var startSecs:Int;
+    var bonusSecs:Int;
 }
 
 typedef MoveData =
@@ -23,6 +28,7 @@ typedef MoveData =
     var toI:Int;
     var fromJ:Int;
     var toJ:Int;
+    var morphInto:Null<String>;
 }
 
 typedef GameOverData =
@@ -31,19 +37,28 @@ typedef GameOverData =
     var reason:String;
 }
 
+typedef TimeData =
+{
+    var whiteSeconds:Int;
+    var blackSeconds:Int;
+}
+
 class Networker
 {
 
     private static var _ws:WebSocket;
-    private static var login:String;
+    public static var login:String;
 
+    private static var gameStartHandler:BattleData->Void;
     private static var eventMap:Map<String, Dynamic->Void> = [];
 
-    public static function connect() 
+    public static function connect(onGameStated:BattleData->Void) 
     {
-        _ws = new WebSocket("ws://localhost:5000");
+        _ws = new WebSocket("ws://ec2-13-48-10-164.eu-north-1.compute.amazonaws.com:5000");
         _ws.onopen = function() {
             trace("open");
+            gameStartHandler = onGameStated;
+            once('game_started', gameStartHandler);
         };
         _ws.onmessage = function(msg) {
             var str:String = msg.toString();
@@ -76,51 +91,74 @@ class Networker
         emit('register', {login: login, password: password});
     }
 
-    public static function registerChallengeReceiver(onStarted:BattleData->Void) 
+    public static function getGame(id:Int, onOpen:(hostLogin:String)->Void, onFinished:(log:String)->Void, on404:Void->Void) 
     {
-        on('incoming_challenge', challengeReceiver.bind(onStarted));
+        once('game_response', (data)->{
+            if (data.type == 'open')
+                onOpen(data.host);
+            else if (data.type == 'finished')
+                onFinished(data.log);
+            else 
+                on404();
+        });
+        emit('get_game', {id: id});
     }
 
-    private static function challengeReceiver(onStarted:BattleData->Void, data) 
+    private static function challengeReceiver(data) 
     {
-        function onConfirmed() 
-        {
-            emit('accept_challenge', {caller_login: data.caller, callee_login: Networker.login});
-            once('game_started', onStarted);
-        }
+        var onConfirmed = () -> {emit('accept_challenge', {caller_login: data.caller, callee_login: Networker.login});};
+        var onDeclined = () -> {emit('decline_challenge', {caller_login: data.caller, callee_login: Networker.login});};
 
-        Dialogs.confirm('${data.caller} wants to play with you. Accept the challenge?', "Incoming challenge", onConfirmed, ()->{});
+        Assets.getSound("sounds/social.mp3").play();
+        Dialogs.confirm('${data.caller} wants to play with you. Accept the challenge?', "Incoming challenge", onConfirmed, onDeclined);
     }
 
-    public static function sendChallenge(callee:String, onStarted:BattleData->Void) 
+    public static function acceptOpen(caller:String) 
     {
-        var onRepeated = (d) -> {Browser.alert("You have already sent a challenge to this player");};
-        var onOffline = (d) -> {Browser.alert("Callee is offline");};
-        var onIngame = (d) -> {Browser.alert("Callee is currently playing");};
-
-        if (eventMap.exists('game_started'))
-            onceOneOf(['repeated_callout' => onRepeated, 'callee_unavailable' => onOffline, 'callee_ingame' => onIngame]);
-        else
-            onceOneOf(['game_started' => onStarted, 'repeated_callout' => onRepeated, 'callee_unavailable' => onOffline, 'callee_ingame' => onIngame]);
-        emit('callout', {caller_login: Networker.login, callee_login: callee});
+        emit('accept_open_challenge', {caller_login: caller, callee_login: Networker.login});
     }
 
-    public static function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int) 
+    public static function sendChallenge(callee:String) 
     {
-        emit('move', {issuer_login: Networker.login, fromI: fromI, fromJ: fromJ, toI: toI, toJ: toJ});
+        var onSuccess = (d) -> {
+            Assets.getSound("sounds/challenge_sent.mp3").play();
+            Dialogs.info('Challenge sent to ${d.callee}!', "Success");
+        };
+        var onDeclined = (d) -> {Dialogs.info('${d.callee} has declined your challenge', "Challenge declined");};
+        var onSame = (d) -> {Dialogs.alert("You can't challenge yourself", "Challenge error");};
+        var onRepeated = (d) -> {Dialogs.alert("You have already sent a challenge to this player", "Challenge error");};
+        var onOffline = (d) -> {Dialogs.alert("Callee is offline", "Challenge error");};
+        var onIngame = (d) -> {Dialogs.alert("Callee is currently playing", "Challenge error");};
+
+        once('challenge_declined', onDeclined);
+        onceOneOf(['callee_same' => onSame, 'callout_success' => onSuccess, 'repeated_callout' => onRepeated, 'callee_unavailable' => onOffline, 'callee_ingame' => onIngame]);
+        emit('callout', {caller_login: Networker.login, callee_login: callee, secsStart: 600, secsBonus: 5});
     }
 
-    public static function registerGameEvents(onMove:MoveData->Void, onOver:GameOverData->Void) 
+    public static function reqTimeoutCheck() 
+    {
+        emit('request_timeout_check', {issuer_login: Networker.login});
+    }
+
+    public static function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:FigureType) 
+    {
+        emit('move', {issuer_login: Networker.login, fromI: fromI, fromJ: fromJ, toI: toI, toJ: toJ, morphInto: morphInto == null? null : morphInto.getName()});
+    }
+
+    public static function registerGameEvents(onMove:MoveData->Void, onTimeCorrection:TimeData->Void, onOver:GameOverData->Void) 
     {
         off('incoming_challenge');
         on('move', onMove);
+        on('time_correction', onTimeCorrection);
         once('game_ended', onOver);
     }
 
-    public static function unregisterGameEvents(onGameStarted:BattleData->Void)
+    public static function registerMainMenuEvents()
     {
         off('move');
-        registerChallengeReceiver(onGameStarted);
+        off('time_correction');
+        on('incoming_challenge', challengeReceiver);
+        once('game_started', gameStartHandler);
     }
 
     private static function on(eventName:String, callback:Dynamic->Void) 
@@ -152,7 +190,7 @@ class Networker
     private static function emit(eventName:String, data:Dynamic) 
     {
         var event:Event = {name: eventName, data: data};
-        trace(Json.stringify(event));
+        trace("Emitted: " + Json.stringify(event));
         _ws.send(Json.stringify(event));
     }
 
