@@ -1,0 +1,7 @@
+<tableview id="movetable" width="250" height="200" contentWidth="100%">
+    <header width="100%">
+        <column width="16%" text="" id="num" />
+        <column width="42%" text="" id="white_move" />
+        <column width="42%" text="" id="black_move" />
+    </header>
+</tableview>
