@@ -60,12 +60,12 @@ class Dialogs
         dialog.title = "Promotion selection";
         dialog.buttons = DialogButton.CANCEL;
         dialog.onDialogClosed = (e) -> {onCancel();};
-        dialog.showDialog(true);
+        dialog.showDialog(false);
     }
 
     public static function chameleonConfirm(onConfirmed:Void->Void, onDeclined:Void->Void, onCancelled:Void->Void)
     {
-        Screen.instance.messageBox("Morph into an eaten figure?", "Chameleon confirmation", MessageBoxType.TYPE_QUESTION, true, (btn:DialogButton) -> {
+        Screen.instance.messageBox("Morph into an eaten figure?", "Chameleon confirmation", MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
             if (btn == DialogButton.YES)
                 onConfirmed();
             else if (btn == DialogButton.NO)

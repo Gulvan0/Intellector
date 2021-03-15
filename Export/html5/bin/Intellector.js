@@ -892,7 +892,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "5";
+	app.meta.h["build"] = "7";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -4211,19 +4211,18 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			this.drawSigninMenu();
 		}
 	}
-	,onSignResults: function(signin,result) {
+	,onSignResults: function(type,result) {
 		if(result == "success") {
 			this.removeChild(this.signinMenu);
 			this.drawMainMenu();
-		} else {
-			if(!signin) {
-				this.errorLabel.set_text("An user with this login already exists");
-			} else if(result == "online") {
-				this.errorLabel.set_text("An user with this login is already online");
+		} else if(type == SignType.SignIn) {
+			if(result == "online") {
+				this.displayLoginError("An user with this login is already online");
 			} else {
-				this.errorLabel.set_text("Invalid login/password");
+				this.displayLoginError("Invalid login/password");
 			}
-			this.displayLoginError();
+		} else {
+			this.displayLoginError("An user with this login already exists");
 		}
 	}
 	,drawSigninMenu: function() {
@@ -4248,38 +4247,48 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		signinbtn.set_width(loginField.get_width() / 2 - 5);
 		btns.addComponent(signinbtn);
 		signinbtn.set_onClick(function(e) {
-			var tmp = loginField.get_text();
-			var tmp1 = passField.get_text();
-			var _g = $bind(_gthis,_gthis.onSignResults);
-			var signin = true;
-			Networker.signin(tmp,tmp1,function(result) {
-				_g(signin,result);
-			});
+			if(loginField.get_text() == "" || passField.get_text() == "" || loginField.get_text() == null || passField.get_text() == null) {
+				_gthis.displayLoginError("You need to specify both the login and the password");
+			} else {
+				var tmp = loginField.get_text();
+				var tmp1 = passField.get_text();
+				var _g = $bind(_gthis,_gthis.onSignResults);
+				var type = SignType.SignIn;
+				Networker.signin(tmp,tmp1,function(result) {
+					_g(type,result);
+				});
+			}
 		});
 		var regbtn = new haxe_ui_components_Button();
 		regbtn.set_text("Register");
 		regbtn.set_width(loginField.get_width() / 2 - 5);
 		btns.addComponent(regbtn);
 		regbtn.set_onClick(function(e) {
-			var tmp = loginField.get_text();
-			var tmp1 = passField.get_text();
-			var _g = $bind(_gthis,_gthis.onSignResults);
-			var signin = false;
-			Networker.register(tmp,tmp1,function(result) {
-				_g(signin,result);
-			});
+			if(loginField.get_text() == "" || passField.get_text() == "" || loginField.get_text() == null || passField.get_text() == null) {
+				_gthis.displayLoginError("You need to specify both the login and the password");
+			} else {
+				var tmp = loginField.get_text();
+				var tmp1 = passField.get_text();
+				var _g = $bind(_gthis,_gthis.onSignResults);
+				var type = SignType.SignUp;
+				Networker.register(tmp,tmp1,function(result) {
+					_g(type,result);
+				});
+			}
 		});
 		this.signinMenu.addComponent(btns);
 		this.errorLabel = new haxe_ui_components_Label();
 		this.errorLabel.set_text("Invalid login/password");
 		this.errorLabel.set_alpha(0);
+		this.errorLabel.set_width(loginField.get_width());
+		this.errorLabel.set_textAlign("center");
 		this.signinMenu.addComponent(this.errorLabel);
 		this.signinMenu.set_x((window.innerWidth - this.signinMenu.get_width()) / 2);
 		this.signinMenu.set_y(100);
 		this.addChild(this.signinMenu);
 	}
 	,drawMainMenu: function() {
-		window.history.pushState({ },"Intellector","");
+		window.history.pushState({ },"Intellector","/");
 		Networker.registerMainMenuEvents();
 		this.mainMenu = new haxe_ui_containers_VBox();
 		this.mainMenu.set_width(200);
@@ -4320,13 +4329,16 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.joinMenu.set_y(100);
 		this.addChild(this.joinMenu);
 	}
-	,displayLoginError: function() {
+	,displayLoginError: function(text) {
 		var _gthis = this;
 		if(this.fadeTimer != null) {
 			this.fadeTimer.stop();
 		}
+		if(text != null) {
+			this.errorLabel.set_text(text);
+		}
 		this.errorLabel.set_alpha(1);
-		this.fadeTimer = new haxe_Timer(10);
+		this.fadeTimer = new haxe_Timer(20);
 		this.fadeTimer.run = function() {
 			var _g = _gthis.errorLabel;
 			_g.set_alpha(_g.get_alpha() - 0.01);
@@ -4393,7 +4405,7 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		Dialogs.info("Game over. " + resultMessage,"Game ended");
 		this.removeChild(Main.sidebox);
 		this.removeChild(this.gameboard);
-		window.history.pushState({ },"Intellector","");
+		window.history.pushState({ },"Intellector","/");
 		this.addChild(this.mainMenu);
 	}
 	,__class__: Main
@@ -4571,10 +4583,10 @@ Dialogs.promotionSelect = function(color,callback,onCancel) {
 	dialog.set_onDialogClosed(function(e) {
 		onCancel();
 	});
-	dialog.showDialog(true);
+	dialog.showDialog(false);
 };
 Dialogs.chameleonConfirm = function(onConfirmed,onDeclined,onCancelled) {
-	haxe_ui_core_Screen.get_instance().messageBox("Morph into an eaten figure?","Chameleon confirmation","haxeui-core/styles/default/dialogs/question.png",true,function(btn) {
+	haxe_ui_core_Screen.get_instance().messageBox("Morph into an eaten figure?","Chameleon confirmation","haxeui-core/styles/default/dialogs/question.png",false,function(btn) {
 		var larr = haxe_ui_containers_dialogs_DialogButton.toString(btn).split("|");
 		if(larr.indexOf(haxe_ui_containers_dialogs_DialogButton.toString("Yes")) != -1) {
 			onConfirmed();
@@ -4870,18 +4882,17 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,destinationPress: function(pressLocation) {
 		var from = new IntPoint(this.selected.i,this.selected.j);
-		var movingFig = this.getFigure(from);
+		var movingFig = this.getFigure(this.selected);
 		var moveOntoFig = this.getFigure(pressLocation);
 		this.selectionBackToNormal();
-		if(pressLocation == null) {
-			return;
-		}
-		var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !this.isCastle(from,pressLocation,movingFig,moveOntoFig);
-		if(otherOwnClicked) {
-			this.selectDeparture(pressLocation,moveOntoFig);
-		} else {
-			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-			this.attemptMove(from,pressLocation);
+		if(pressLocation != null) {
+			var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !this.isCastle(from,pressLocation,movingFig,moveOntoFig);
+			if(otherOwnClicked) {
+				this.selectDeparture(pressLocation,moveOntoFig);
+			} else {
+				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+				this.attemptMove(from,pressLocation);
+			}
 		}
 	}
 	,onPress: function(e) {
@@ -4942,6 +4953,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 				break;
 			}
 		}
+		this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
 		if(nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type) {
 			var _g = $bind(this,this.makeMove);
 			var from1 = from;
@@ -4977,6 +4989,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		Networker.move(from.i,from.j,to.i,to.j,morphInto);
 		Main.sidebox.makeMove(this.playerColor,movingFigure.type,to,capture,mate);
 		this.move(from,to,morphInto);
+		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
 	,move: function(from,to,morphInto) {
 		var figure = this.getFigure(from);
@@ -6051,6 +6064,11 @@ Lambda.array = function(it) {
 	}
 	return a;
 };
+var SignType = $hxEnums["SignType"] = { __ename__ : "SignType", __constructs__ : ["SignIn","SignUp"]
+	,SignIn: {_hx_index:0,__enum__:"SignType",toString:$estr}
+	,SignUp: {_hx_index:1,__enum__:"SignType",toString:$estr}
+};
+SignType.__empty_constructs__ = [SignType.SignIn,SignType.SignUp];
 var ManifestResources = function() { };
 $hxClasses["ManifestResources"] = ManifestResources;
 ManifestResources.__name__ = "ManifestResources";
@@ -6067,7 +6085,7 @@ ManifestResources.init = function(config) {
 	openfl_text_Font.registerFont(_$_$ASSET_$_$OPENFL_$_$fonts_$roboto_$medium_$ttf);
 	openfl_text_Font.registerFont(_$_$ASSET_$_$OPENFL_$_$fonts_$roboto_$regular_$ttf);
 	var bundle;
-	var data = "{\"name\":null,\"assets\":\"aoy4:pathy27:styles%2Fdefault%2Fmain.cssy4:sizei1135y4:typey4:TEXTy2:idR1y7:preloadtgoR0y17:styles%2Fmain.cssR2i148R3R4R5R7R6tgoR2i171320R3y4:FONTy9:classNamey32:__ASSET__fonts_roboto_medium_ttfR5y25:fonts%2FRoboto-Medium.ttfR6tgoR0y26:fonts%2FRoboto-Regular.eotR2i163058R3y6:BINARYR5R12R6tgoR0y26:fonts%2FRoboto-Regular.svgR2i240120R3R4R5R14R6tgoR2i162876R3R8R9y33:__ASSET__fonts_roboto_regular_ttfR5y26:fonts%2FRoboto-Regular.ttfR6tgoR0y27:fonts%2FRoboto-Regular.woffR2i86488R3R13R5R17R6tgoR0y28:fonts%2FRoboto-Regular.woff2R2i19960R3R13R5R18R6tgoR2i5987R3y5:MUSICR5y20:sounds%2Fcapture.mp3y9:pathGroupaR20hR6tgoR2i10448R3R19R5y27:sounds%2Fchallenge_sent.mp3R21aR22hR6tgoR2i4285R3R19R5y17:sounds%2Fmove.mp3R21aR23hR6tgoR2i8011R3R19R5y19:sounds%2Fnotify.mp3R21aR24hR6tgoR2i62644R3R19R5y19:sounds%2Fsocial.mp3R21aR25hR6tgoR0y39:assets%2Ffigicons%2FAggressor_black.pngR2i12342R3y5:IMAGER5R26R6tgoR0y39:assets%2Ffigicons%2FAggressor_white.pngR2i12566R3R27R5R28R6tgoR0y38:assets%2Ffigicons%2FDefensor_black.pngR2i14981R3R27R5R29R6tgoR0y38:assets%2Ffigicons%2FDefensor_white.pngR2i15362R3R27R5R30R6tgoR0y39:assets%2Ffigicons%2FDominator_black.pngR2i14756R3R27R5R31R6tgoR0y39:assets%2Ffigicons%2FDominator_white.pngR2i15008R3R27R5R32R6tgoR0y39:assets%2Ffigicons%2FLiberator_black.pngR2i12576R3R27R5R33R6tgoR0y39:assets%2Ffigicons%2FLiberator_white.pngR2i12354R3R27R5R34R6tgoR0y38:assets%2Ffigures%2FAggressor_black.pngR2i11433R3R27R5R35R6tgoR0y38:assets%2Ffigures%2FAggressor_white.pngR2i11685R3R27R5R36R6tgoR0y37:assets%2Ffigures%2FDefensor_black.pngR2i13534R3R27R5R37R6tgoR0y37:assets%2Ffigures%2FDefensor_white.pngR2i13132R3R27R5R38R6tgoR0y38:assets%2Ffigures%2FDominator_black.pngR2i14027R3R27R5R39R6tgoR0y38:assets%2Ffigures%2FDominator_white.pngR2i14289R3R27R5R40R6tgoR0y40:assets%2Ffigures%2FIntellector_black.pngR2i13664R3R27R5R41R6tgoR0y40:assets%2Ffigures%2FIntellector_white.pngR2i13928R3R27R5R42R6tgoR0y38:assets%2Ffigures%2FLiberator_black.pngR2i11674R3R27R5R43R6tgoR0y38:assets%2Ffigures%2FLiberator_white.pngR2i11443R3R27R5R44R6tgoR0y39:assets%2Ffigures%2FProgressor_black.pngR2i9640R3R27R5R45R6tgoR0y39:assets%2Ffigures%2FProgressor_white.pngR2i9684R3R27R5R46R6tgoR0y32:assets%2Flayouts%2Fmovetable.xmlR2i288R3R4R5R47R6tgoR2i5987R3R19R5y29:assets%2Fsounds%2Fcapture.mp3R21aR48hR6tgoR2i10448R3R19R5y36:assets%2Fsounds%2Fchallenge_sent.mp3R21aR49hR6tgoR2i4285R3R19R5y26:assets%2Fsounds%2Fmove.mp3R21aR50hR6tgoR2i8011R3R19R5y28:assets%2Fsounds%2Fnotify.mp3R21aR51hR6tgoR2i62644R3R19R5y28:assets%2Fsounds%2Fsocial.mp3R21aR52hR6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
+	var data = "{\"name\":null,\"assets\":\"aoy4:pathy27:styles%2Fdefault%2Fmain.cssy4:sizei1135y4:typey4:TEXTy2:idR1y7:preloadtgoR0y17:styles%2Fmain.cssR2i148R3R4R5R7R6tgoR2i171320R3y4:FONTy9:classNamey32:__ASSET__fonts_roboto_medium_ttfR5y25:fonts%2FRoboto-Medium.ttfR6tgoR0y26:fonts%2FRoboto-Regular.eotR2i163058R3y6:BINARYR5R12R6tgoR0y26:fonts%2FRoboto-Regular.svgR2i240120R3R4R5R14R6tgoR2i162876R3R8R9y33:__ASSET__fonts_roboto_regular_ttfR5y26:fonts%2FRoboto-Regular.ttfR6tgoR0y27:fonts%2FRoboto-Regular.woffR2i86488R3R13R5R17R6tgoR0y28:fonts%2FRoboto-Regular.woff2R2i19960R3R13R5R18R6tgoR2i5987R3y5:MUSICR5y20:sounds%2Fcapture.mp3y9:pathGroupaR20hR6tgoR2i10448R3R19R5y27:sounds%2Fchallenge_sent.mp3R21aR22hR6tgoR2i4285R3R19R5y17:sounds%2Fmove.mp3R21aR23hR6tgoR2i8011R3R19R5y19:sounds%2Fnotify.mp3R21aR24hR6tgoR2i62644R3R19R5y19:sounds%2Fsocial.mp3R21aR25hR6tgoR0y20:assets%2Ffavicon.pngR2i17461R3y5:IMAGER5R26R6tgoR0y39:assets%2Ffigicons%2FAggressor_black.pngR2i12342R3R27R5R28R6tgoR0y39:assets%2Ffigicons%2FAggressor_white.pngR2i12566R3R27R5R29R6tgoR0y38:assets%2Ffigicons%2FDefensor_black.pngR2i14981R3R27R5R30R6tgoR0y38:assets%2Ffigicons%2FDefensor_white.pngR2i15362R3R27R5R31R6tgoR0y39:assets%2Ffigicons%2FDominator_black.pngR2i14756R3R27R5R32R6tgoR0y39:assets%2Ffigicons%2FDominator_white.pngR2i15008R3R27R5R33R6tgoR0y39:assets%2Ffigicons%2FLiberator_black.pngR2i12576R3R27R5R34R6tgoR0y39:assets%2Ffigicons%2FLiberator_white.pngR2i12354R3R27R5R35R6tgoR0y38:assets%2Ffigures%2FAggressor_black.pngR2i11433R3R27R5R36R6tgoR0y38:assets%2Ffigures%2FAggressor_white.pngR2i11685R3R27R5R37R6tgoR0y37:assets%2Ffigures%2FDefensor_black.pngR2i13534R3R27R5R38R6tgoR0y37:assets%2Ffigures%2FDefensor_white.pngR2i13132R3R27R5R39R6tgoR0y38:assets%2Ffigures%2FDominator_black.pngR2i14027R3R27R5R40R6tgoR0y38:assets%2Ffigures%2FDominator_white.pngR2i14289R3R27R5R41R6tgoR0y40:assets%2Ffigures%2FIntellector_black.pngR2i13664R3R27R5R42R6tgoR0y40:assets%2Ffigures%2FIntellector_white.pngR2i13928R3R27R5R43R6tgoR0y38:assets%2Ffigures%2FLiberator_black.pngR2i11674R3R27R5R44R6tgoR0y38:assets%2Ffigures%2FLiberator_white.pngR2i11443R3R27R5R45R6tgoR0y39:assets%2Ffigures%2FProgressor_black.pngR2i9640R3R27R5R46R6tgoR0y39:assets%2Ffigures%2FProgressor_white.pngR2i9684R3R27R5R47R6tgoR0y32:assets%2Flayouts%2Fmovetable.xmlR2i288R3R4R5R48R6tgoR2i5987R3R19R5y29:assets%2Fsounds%2Fcapture.mp3R21aR49hR6tgoR2i10448R3R19R5y36:assets%2Fsounds%2Fchallenge_sent.mp3R21aR50hR6tgoR2i4285R3R19R5y26:assets%2Fsounds%2Fmove.mp3R21aR51hR6tgoR2i8011R3R19R5y28:assets%2Fsounds%2Fnotify.mp3R21aR52hR6tgoR2i62644R3R19R5y28:assets%2Fsounds%2Fsocial.mp3R21aR53hR6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
 	var manifest = lime_utils_AssetManifest.parse(data,ManifestResources.rootPath);
 	var library = lime_utils_AssetLibrary.fromManifest(manifest);
 	lime_utils_Assets.registerLibrary("default",library);
@@ -6411,9 +6429,9 @@ var Networker = function() { };
 $hxClasses["Networker"] = Networker;
 Networker.__name__ = "Networker";
 Networker.connect = function(onGameStated) {
-	Networker._ws = new hx_ws_WebSocket("ws://ec2-13-48-10-164.eu-north-1.compute.amazonaws.com:5000");
+	Networker._ws = new hx_ws_WebSocket("ws://13.48.10.164:5000");
 	Networker._ws.set_onopen(function() {
-		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 59, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 63, className : "Networker", methodName : "connect"});
 		Networker.gameStartHandler = onGameStated;
 		Networker.once("game_started",Networker.gameStartHandler);
 	});
@@ -6424,14 +6442,14 @@ Networker.connect = function(onGameStated) {
 		if(callback != null) {
 			callback(event.data);
 		} else {
-			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 70, className : "Networker", methodName : "connect"});
+			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 74, className : "Networker", methodName : "connect"});
 		}
 	});
 	Networker._ws.set_onclose(function() {
 		Networker._ws = null;
 	});
 	Networker._ws.set_onerror(function(err) {
-		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 76, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 80, className : "Networker", methodName : "connect"});
 	});
 };
 Networker.signin = function(login,password,onAnswer) {
@@ -6552,7 +6570,7 @@ Networker.off = function(eventName) {
 };
 Networker.emit = function(eventName,data) {
 	var event = { name : eventName, data : data};
-	haxe_Log.trace("Emitted: " + JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 193, className : "Networker", methodName : "emit"});
+	haxe_Log.trace("Emitted: " + JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 197, className : "Networker", methodName : "emit"});
 	Networker._ws.send(JSON.stringify(event));
 };
 Networker.combineVoid = function(f1,f2) {
@@ -57562,7 +57580,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 803586;
+	this.version = 138616;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";

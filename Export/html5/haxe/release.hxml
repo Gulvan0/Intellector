@@ -56,6 +56,7 @@
 -cp C:/HaxeToolkit/haxe/lib/openfl/9,0,2/packages/video/src
 -D tools=7.8.0
 -D lime-canvas
+-D prod
 -D howlerjs
 -D no-compilation
 -D openfl-html5

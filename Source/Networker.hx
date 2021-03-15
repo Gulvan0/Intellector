@@ -54,7 +54,11 @@ class Networker
 
     public static function connect(onGameStated:BattleData->Void) 
     {
-        _ws = new WebSocket("ws://ec2-13-48-10-164.eu-north-1.compute.amazonaws.com:5000");
+        #if prod
+        _ws = new WebSocket("ws://13.48.10.164:5000");
+        #else
+        _ws = new WebSocket("ws://localhost:5000");
+        #end
         _ws.onopen = function() {
             trace("open");
             gameStartHandler = onGameStated;

@@ -124,21 +124,21 @@ class Field extends Sprite
     private function destinationPress(pressLocation:IntPoint) 
     {
         var from = new IntPoint(selected.i, selected.j);
-        var movingFig = getFigure(from);
+        var movingFig = getFigure(selected);
         var moveOntoFig = getFigure(pressLocation);
 
         selectionBackToNormal();
 
-        if (pressLocation == null)
-            return;
-
-        var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !isCastle(from, pressLocation, movingFig, moveOntoFig);
-        if (otherOwnClicked)
-            selectDeparture(pressLocation, moveOntoFig);
-        else
+        if (pressLocation != null)
         {
-            stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
-            attemptMove(from, pressLocation);
+            var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !isCastle(from, pressLocation, movingFig, moveOntoFig);
+            if (otherOwnClicked)
+                selectDeparture(pressLocation, moveOntoFig);
+            else
+            {
+                stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
+                attemptMove(from, pressLocation);
+            }
         }
     }
 
@@ -211,6 +211,8 @@ class Field extends Sprite
             }
         }
         
+        stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress); //To ignore clicking on dialogs
+
         if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type)
             Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), ()->{});
         else if (isFinalForPlayer(to) && figure.type == Progressor)
@@ -230,6 +232,7 @@ class Field extends Sprite
         Networker.move(from.i, from.j, to.i, to.j, morphInto);
         Main.sidebox.makeMove(playerColor, movingFigure.type, to, capture, mate);
         move(from, to, morphInto);
+        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
 
     public function move(from:IntPoint, to:IntPoint, ?morphInto:FigureType) 

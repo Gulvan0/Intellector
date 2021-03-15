@@ -19,6 +19,12 @@ import openfl.display.SimpleButton;
 import js.Browser;
 import openfl.display.Sprite;
 
+enum SignType
+{
+	SignIn;
+	SignUp;
+}
+
 class Main extends Sprite
 {
 
@@ -64,7 +70,7 @@ class Main extends Sprite
 		}
 	}
 
-	private function onSignResults(signin:Bool, result:String)
+	private function onSignResults(type:SignType, result:String)
 	{
 		if (result == 'success')
 		{
@@ -73,13 +79,13 @@ class Main extends Sprite
 		}
 		else
 		{
-			if (!signin)
-				errorLabel.text = "An user with this login already exists";
-			else if (result == 'online')
-				errorLabel.text = "An user with this login is already online";
+			if (type == SignIn)
+				if (result == 'online')
+					displayLoginError("An user with this login is already online");
+				else
+					displayLoginError("Invalid login/password");
 			else
-				errorLabel.text = "Invalid login/password";
-			displayLoginError();
+				displayLoginError("An user with this login already exists");
 		}
 	}
 
@@ -110,7 +116,10 @@ class Main extends Sprite
 		btns.addComponent(signinbtn);
 
 		signinbtn.onClick = (e) -> {
-			Networker.signin(loginField.text, passField.text, onSignResults.bind(true));
+			if (loginField.text == "" || passField.text == "" || loginField.text == null || passField.text == null)
+				displayLoginError("You need to specify both the login and the password");
+			else
+				Networker.signin(loginField.text, passField.text, onSignResults.bind(SignIn));
 		}
 
 		var regbtn = new haxe.ui.components.Button();
@@ -119,7 +128,10 @@ class Main extends Sprite
 		btns.addComponent(regbtn);
 
 		regbtn.onClick = (e) -> {
-			Networker.register(loginField.text, passField.text, onSignResults.bind(false));
+			if (loginField.text == "" || passField.text == "" || loginField.text == null || passField.text == null)
+				displayLoginError("You need to specify both the login and the password");
+			else
+				Networker.register(loginField.text, passField.text, onSignResults.bind(SignUp));
 		}
 		
 		signinMenu.addComponent(btns);
@@ -127,6 +139,8 @@ class Main extends Sprite
 		errorLabel = new haxe.ui.components.Label();
 		errorLabel.text = "Invalid login/password";
 		errorLabel.alpha = 0;
+		errorLabel.width = loginField.width;
+		errorLabel.textAlign = "center";
 		signinMenu.addComponent(errorLabel);
 
 		signinMenu.x = (Browser.window.innerWidth - signinMenu.width) / 2;
@@ -136,7 +150,7 @@ class Main extends Sprite
 
 	private function drawMainMenu() 
 	{
-		Browser.window.history.pushState({}, "Intellector", "");
+		Browser.window.history.pushState({}, "Intellector", "/");
 		Networker.registerMainMenuEvents();
 
 		mainMenu = new VBox();
@@ -187,14 +201,16 @@ class Main extends Sprite
 		addChild(joinMenu);
 	}
 
-	private function displayLoginError()
+	private function displayLoginError(?text:String)
 	{
 		if (fadeTimer != null)
 			fadeTimer.stop();
 
+		if (text != null)
+			errorLabel.text = text;
 		errorLabel.alpha = 1;
 
-		fadeTimer = new Timer(10);
+		fadeTimer = new Timer(20);
 		fadeTimer.run = () -> {
 			errorLabel.alpha -= 0.01;
 			if (errorLabel.alpha == 0)
@@ -272,7 +288,7 @@ class Main extends Sprite
 		removeChild(sidebox);
 		removeChild(gameboard);
 
-		Browser.window.history.pushState({}, "Intellector", "");
+		Browser.window.history.pushState({}, "Intellector", "/");
 		addChild(mainMenu);
 	}
 }
