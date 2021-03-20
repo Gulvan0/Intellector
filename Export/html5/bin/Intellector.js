@@ -892,7 +892,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "7";
+	app.meta.h["build"] = "12";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -4168,39 +4168,63 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 	,__properties__: $extend(openfl_display_DisplayObjectContainer.prototype.__properties__,{get_graphics:"get_graphics",set_buttonMode:"set_buttonMode",get_buttonMode:"get_buttonMode"})
 });
 var Main = function() {
-	var _gthis = this;
 	openfl_display_Sprite.call(this);
 	haxe_ui_Toolkit.init();
+	OpeningTree.init();
 	Figure.initFigures();
-	Networker.connect($bind(this,this.drawGame));
-	var searcher = new URLSearchParams($global.location.search);
-	if(js_Cookie.exists("saved_login") && js_Cookie.exists("saved_password")) {
-		Networker.signin(js_Cookie.get("saved_login"),js_Cookie.get("saved_password"),$bind(this,this.onAutologinResults));
-	} else if(searcher.has("id")) {
-		Networker.getGame(Std.parseInt(searcher.get("id")),$bind(this,this.drawJoinGame),function(s) {
-			_gthis.drawSigninMenu();
-		},$bind(this,this.drawMainMenu));
-	} else {
-		this.drawSigninMenu();
-	}
+	Networker.connect($bind(this,this.drawGame),$bind(this,this.onConnected));
 };
 $hxClasses["Main"] = Main;
 Main.__name__ = "Main";
 Main.__super__ = openfl_display_Sprite;
 Main.prototype = $extend(openfl_display_Sprite.prototype,{
-	signinMenu: null
+	changes: null
+	,signinMenu: null
 	,mainMenu: null
+	,hostingMenu: null
 	,joinMenu: null
 	,gameboard: null
 	,errorLabel: null
 	,fadeTimer: null
+	,onConnected: function() {
+		var _gthis = this;
+		this.changes = new haxe_ui_components_Label();
+		this.changes.set_htmlText(Changes.getFormatted());
+		this.changes.set_width(300);
+		this.changes.set_x(15);
+		this.changes.set_y(10);
+		this.changes.set_visible(false);
+		this.addChild(this.changes);
+		var searcher = new URLSearchParams($global.location.search);
+		if(js_Cookie.exists("saved_login") && js_Cookie.exists("saved_password")) {
+			Networker.signin(js_Cookie.get("saved_login"),js_Cookie.get("saved_password"),$bind(this,this.onAutologinResults));
+		} else if(searcher.has("id")) {
+			Networker.getGame(Std.parseInt(searcher.get("id")),function(s) {
+				_gthis.drawSigninMenu();
+			},function(s) {
+				_gthis.drawSigninMenu();
+			},$bind(this,this.drawSigninMenu));
+		} else if(searcher.has("ch")) {
+			Networker.getOpenChallenge(searcher.get("ch"),function(data) {
+				_gthis.drawJoinGame(data);
+			},$bind(this,this.drawSigninMenu));
+		} else {
+			this.drawSigninMenu();
+		}
+	}
 	,onAutologinResults: function(result) {
 		var _gthis = this;
 		if(result == "success") {
 			var searcher = new URLSearchParams($global.location.search);
 			if(searcher.has("id")) {
-				Networker.getGame(Std.parseInt(searcher.get("id")),$bind(this,this.drawJoinGame),function(s) {
+				Networker.getGame(Std.parseInt(searcher.get("id")),function(s) {
 					_gthis.drawMainMenu();
+				},function(s) {
+					_gthis.drawMainMenu();
+				},$bind(this,this.drawMainMenu));
+			} else if(searcher.has("ch") && searcher.get("ch") != Networker.login) {
+				Networker.getOpenChallenge(searcher.get("ch"),function(data) {
+					_gthis.drawJoinGame(data);
 				},$bind(this,this.drawMainMenu));
 			} else {
 				this.drawMainMenu();
@@ -4227,6 +4251,7 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,drawSigninMenu: function() {
 		var _gthis = this;
+		this.changes.set_visible(true);
 		this.signinMenu = new haxe_ui_containers_VBox();
 		this.signinMenu.set_width(200);
 		var loginField = new haxe_ui_components_TextField();
@@ -4288,6 +4313,8 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.addChild(this.signinMenu);
 	}
 	,drawMainMenu: function() {
+		var _gthis = this;
+		this.changes.set_visible(true);
 		window.history.pushState({ },"Intellector","/");
 		Networker.registerMainMenuEvents();
 		this.mainMenu = new haxe_ui_containers_VBox();
@@ -4298,32 +4325,76 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.mainMenu.addComponent(calloutBtn);
 		calloutBtn.set_onClick(function(e) {
 			var response = window.prompt("Enter the callee's username");
-			if(response != null) {
-				Networker.sendChallenge(response);
+			if(response == null) {
+				return;
 			}
+			var callee = response;
+			Dialogs.specifyChallengeParams(function(secsStart,secsBonus) {
+				Networker.sendChallenge(callee,secsStart,secsBonus);
+			},function() {
+			});
+		});
+		var openCalloutBtn = new haxe_ui_components_Button();
+		openCalloutBtn.set_width(200);
+		openCalloutBtn.set_text("Host open challenge");
+		this.mainMenu.addComponent(openCalloutBtn);
+		openCalloutBtn.set_onClick(function(e) {
+			Dialogs.specifyChallengeParams($bind(_gthis,_gthis.drawOpenChallengeHosting),function() {
+			});
 		});
 		this.mainMenu.set_x((window.innerWidth - this.mainMenu.get_width()) / 2);
 		this.mainMenu.set_y(100);
 		this.addChild(this.mainMenu);
 	}
-	,drawJoinGame: function(enemy) {
+	,drawOpenChallengeHosting: function(startSecs,bonusSecs) {
+		Networker.sendOpenChallenge(startSecs,bonusSecs);
+		this.removeChild(this.mainMenu);
+		this.removeChild(this.changes);
+		this.hostingMenu = new haxe_ui_containers_VBox();
+		this.hostingMenu.set_width(800);
+		var firstLabel = new haxe_ui_components_Label();
+		firstLabel.set_htmlText("<font size=\"16\">Challenge by " + Networker.login + "<br>" + startSecs / 60 + "+" + bonusSecs + "<br>Share the link to invite your opponent:</font>");
+		firstLabel.set_textAlign("center");
+		firstLabel.set_width(800);
+		this.hostingMenu.addComponent(firstLabel);
+		var linkText = new haxe_ui_components_TextField();
+		linkText.set_text("intellector.surge.sh/?ch=" + Networker.login);
+		linkText.set_width(800);
+		this.hostingMenu.addComponent(linkText);
+		var secondLabel = new haxe_ui_components_Label();
+		secondLabel.set_htmlText("<font size=\"16\">First one to follow the link will join the game</font>");
+		secondLabel.set_textAlign("center");
+		secondLabel.set_width(800);
+		this.hostingMenu.addComponent(secondLabel);
+		this.hostingMenu.set_x((window.innerWidth - this.hostingMenu.get_width()) / 2);
+		this.hostingMenu.set_y(100);
+		this.addChild(this.hostingMenu);
+	}
+	,drawJoinGame: function(data) {
+		this.changes.set_visible(false);
 		this.joinMenu = new haxe_ui_containers_VBox();
-		this.joinMenu.set_width(400);
+		this.joinMenu.set_width(800);
 		var label = new haxe_ui_components_Label();
-		label.set_width(400);
+		label.set_width(800);
+		label.set_htmlText("<font size=\"16\">" + data.challenger + " is hosting a challenge (" + data.startSecs / 60 + "+" + data.bonusSecs + "). First one to accept it will become an opponent\n");
 		if(Networker.login == null) {
-			label.set_text("" + enemy + " is hosting a challenge. First one to accept it will become an opponent\nYou will be playing as guest");
+			var _g = label;
+			_g.set_htmlText(_g.get_htmlText() + "You will be playing as guest");
 		} else {
-			label.set_text("" + enemy + " is hosting a challenge. First one to accept it will become an opponent\nYou are joining the game as " + Networker.login);
+			var _g = label;
+			_g.set_htmlText(_g.get_htmlText() + ("You are joining the game as " + Networker.login));
 		}
-		this.mainMenu.addComponent(label);
+		var _g = label;
+		_g.set_htmlText(_g.get_htmlText() + "</font>");
+		label.set_textAlign("center");
+		this.joinMenu.addComponent(label);
 		var joinButton = new haxe_ui_components_Button();
 		joinButton.set_width(200);
-		joinButton.set_x(100);
+		joinButton.set_horizontalAlign("center");
 		joinButton.set_text("Accept challenge");
-		this.mainMenu.addComponent(joinButton);
+		this.joinMenu.addComponent(joinButton);
 		joinButton.set_onClick(function(e) {
-			Networker.acceptOpen(enemy);
+			Networker.acceptOpen(data.challenger);
 		});
 		this.joinMenu.set_x((window.innerWidth - this.joinMenu.get_width()) / 2);
 		this.joinMenu.set_y(100);
@@ -4349,14 +4420,27 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		};
 	}
 	,drawGame: function(data) {
-		Networker.registerGameEvents($bind(this,this.onMove),$bind(this,this.onTimeCorrection),$bind(this,this.onEnded));
+		this.changes.set_visible(false);
+		Networker.registerGameEvents($bind(this,this.onMove),$bind(this,this.onMessage),$bind(this,this.onTimeCorrection),$bind(this,this.onEnded));
 		this.removeChild(this.mainMenu);
+		this.removeChild(this.joinMenu);
+		this.removeChild(this.hostingMenu);
 		this.gameboard = new Field(data.colour);
 		this.gameboard.set_x((window.innerWidth - this.gameboard.get_width()) / 2);
 		this.gameboard.set_y(100);
 		Main.sidebox = new Sidebox(data.startSecs,data.bonusSecs,Networker.login,data.enemy,data.colour == "white");
 		Main.sidebox.set_x(this.gameboard.get_x() + this.gameboard.get_width() + 10);
 		Main.sidebox.set_y(this.gameboard.get_y() + (this.gameboard.get_height() - 380 - Math.sqrt(3) * Field.a) / 2);
+		Main.chatbox = new Chatbox(this.gameboard.get_height() * 0.75);
+		Main.chatbox.set_x(this.gameboard.get_x() - Chatbox.WIDTH - Field.a - 30);
+		Main.chatbox.set_y(this.gameboard.get_y() + this.gameboard.get_height() * 0.25 - Field.a * Math.sqrt(3) / 2);
+		this.addChild(Main.chatbox);
+		var whiteLogin = data.colour == "white" ? Networker.login : data.enemy;
+		var blackLogin = data.colour == "black" ? Networker.login : data.enemy;
+		Main.infobox = new GameInfoBox(Chatbox.WIDTH,this.gameboard.get_height() * 0.23,data.startSecs,data.bonusSecs,whiteLogin,blackLogin,data.colour == "white");
+		Main.infobox.set_x(this.gameboard.get_x() - Chatbox.WIDTH - Field.a - 30);
+		Main.infobox.set_y(this.gameboard.get_y() - Field.a * Math.sqrt(3) / 2);
+		this.addChild(Main.infobox);
 		window.history.pushState({ },"Intellector","?id=" + data.match_id);
 		this.addChild(this.gameboard);
 		this.addChild(Main.sidebox);
@@ -4364,6 +4448,9 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,onTimeCorrection: function(data) {
 		Main.sidebox.correctTime(data.whiteSeconds,data.blackSeconds);
+	}
+	,onMessage: function(data) {
+		Main.chatbox.appendMessage(data.issuer_login,data.message);
 	}
 	,onMove: function(data) {
 		var from = new IntPoint(data.fromI,data.fromJ);
@@ -4374,7 +4461,9 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		var morphedInto = data.morphInto == null ? null : Type.createEnum(FigureType,data.morphInto,null);
 		var capture = ontoFigure != null && ontoFigure.color == this.gameboard.playerColor;
 		var mate = capture && ontoFigure.type == FigureType.Intellector;
-		Main.sidebox.makeMove(opponentColor,movingFigure.type,to,capture,mate);
+		var castle = ontoFigure != null && ontoFigure.color == opponentColor && (ontoFigure.type == FigureType.Intellector && movingFigure.type == FigureType.Defensor || ontoFigure.type == FigureType.Defensor && movingFigure.type == FigureType.Intellector);
+		Main.sidebox.makeMove(opponentColor,movingFigure.type,to,capture,mate,castle,morphedInto);
+		Main.infobox.makeMove(data.fromI,data.fromJ,data.toI,data.toJ,morphedInto);
 		this.gameboard.move(from,to,morphedInto);
 	}
 	,onEnded: function(data) {
@@ -4404,9 +4493,15 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
 		Dialogs.info("Game over. " + resultMessage,"Game ended");
 		this.removeChild(Main.sidebox);
+		this.removeChild(Main.chatbox);
+		this.removeChild(Main.infobox);
 		this.removeChild(this.gameboard);
 		window.history.pushState({ },"Intellector","/");
-		this.addChild(this.mainMenu);
+		if(StringTools.startsWith(Networker.login,"guest_")) {
+			Networker.dropConnection();
+		} else {
+			this.addChild(this.mainMenu);
+		}
 	}
 	,__class__: Main
 });
@@ -4420,6 +4515,74 @@ DocumentClass.__name__ = "DocumentClass";
 DocumentClass.__super__ = Main;
 DocumentClass.prototype = $extend(Main.prototype,{
 	__class__: DocumentClass
+});
+var Changes = function() { };
+$hxClasses["Changes"] = Changes;
+Changes.__name__ = "Changes";
+Changes.getFormatted = function() {
+	var result = "<font size=\"16\">";
+	var _g = 0;
+	var _g1 = Changes.changelog;
+	while(_g < _g1.length) {
+		var entry = _g1[_g];
+		++_g;
+		result += "<b>" + entry.date + ".</b> " + entry.text + "\n";
+	}
+	result += "</font>";
+	return result;
+};
+var Chatbox = function(totalHeight) {
+	openfl_display_Sprite.call(this);
+	this.history = new haxe_ui_containers_ScrollView();
+	this.history.set_width(Chatbox.WIDTH);
+	this.history.set_height(totalHeight - 5 - 25);
+	this.historyText = new haxe_ui_components_Label();
+	this.historyText.set_htmlText("");
+	this.historyText.set_width(Chatbox.WIDTH - 20);
+	this.history.addComponent(this.historyText);
+	this.addChild(this.history);
+	this.messageInput = new haxe_ui_components_TextField();
+	this.messageInput.set_placeholder("Message text...");
+	this.messageInput.set_width(Chatbox.WIDTH);
+	this.messageInput.set_height(25);
+	this.messageInput.set_y(this.history.get_height() + 5);
+	this.addChild(this.messageInput);
+	this.addEventListener("addedToStage",$bind(this,this.init));
+};
+$hxClasses["Chatbox"] = Chatbox;
+Chatbox.__name__ = "Chatbox";
+Chatbox.__super__ = openfl_display_Sprite;
+Chatbox.prototype = $extend(openfl_display_Sprite.prototype,{
+	history: null
+	,historyText: null
+	,messageInput: null
+	,appendMessage: function(author,text) {
+		var _g = this.historyText;
+		_g.set_htmlText(_g.get_htmlText() + ("<b>" + author + ":</b> " + text + "\n"));
+	}
+	,appendLog: function(text) {
+		var _g = this.historyText;
+		_g.set_htmlText(_g.get_htmlText() + ("<font color=\"grey\"><i>" + text + "</i></font>\n"));
+	}
+	,onKeyPress: function(e) {
+		if(e.keyCode == 13 || e.keyCode == 108) {
+			if(this.messageInput.get_focus() && StringTools.trim(this.messageInput.get_text()) != "") {
+				Networker.sendMessage(this.messageInput.get_text());
+				this.appendMessage(Networker.login,this.messageInput.get_text());
+				this.messageInput.set_text("");
+			}
+		}
+	}
+	,deinit: function(e) {
+		this.removeEventListener("removedFromStage",$bind(this,this.deinit));
+		this.removeEventListener("keyDown",$bind(this,this.deinit));
+	}
+	,init: function(e) {
+		this.removeEventListener("addedToStage",$bind(this,this.init));
+		this.addEventListener("keyDown",$bind(this,this.onKeyPress));
+		this.addEventListener("removedFromStage",$bind(this,this.deinit));
+	}
+	,__class__: Chatbox
 });
 var Colors = function() { };
 $hxClasses["Colors"] = Colors;
@@ -4600,6 +4763,68 @@ Dialogs.chameleonConfirm = function(onConfirmed,onDeclined,onCancelled) {
 		}
 	});
 };
+Dialogs.specifyChallengeParams = function(onConfirm,onCancel) {
+	var cb = function(dialog,startMins,bonusSecs) {
+		if(startMins > 300) {
+			startMins = 300;
+		} else if(startMins < 1) {
+			startMins = 1;
+		}
+		if(bonusSecs > 60) {
+			bonusSecs = 60;
+		} else if(bonusSecs < 0) {
+			bonusSecs = 0;
+		}
+		dialog.hideDialog("OK");
+		onConfirm(startMins * 60,bonusSecs);
+	};
+	var dialog = new haxe_ui_containers_dialogs_Dialog();
+	dialog.set_width(200);
+	var body = new haxe_ui_containers_VBox();
+	var question = new haxe_ui_components_Label();
+	question.set_text("Specify time control for your challenge");
+	question.set_width(200);
+	question.set_textAlign("center");
+	body.addComponent(question);
+	var timeControl = new haxe_ui_containers_HBox();
+	timeControl.set_width(90);
+	timeControl.set_x((dialog.get_width() - timeControl.get_width()) / 2);
+	var baseField = new haxe_ui_components_TextField();
+	baseField.set_width(30);
+	baseField.set_restrictChars("0-9");
+	timeControl.addComponent(baseField);
+	var plusSign = new haxe_ui_components_Label();
+	plusSign.set_text("+");
+	timeControl.addComponent(plusSign);
+	var incrementField = new haxe_ui_components_TextField();
+	incrementField.set_width(30);
+	incrementField.set_restrictChars("0-9");
+	timeControl.addComponent(incrementField);
+	timeControl.set_horizontalAlign("center");
+	body.addComponent(timeControl);
+	var btns = new haxe_ui_containers_HBox();
+	var confirmBtn = new haxe_ui_components_Button();
+	confirmBtn.set_text("Confirm");
+	confirmBtn.set_width(92);
+	confirmBtn.set_onClick(function(e) {
+		cb(dialog,Std.parseInt(baseField.get_text()),Std.parseInt(incrementField.get_text()));
+	});
+	btns.addComponent(confirmBtn);
+	var cancelBtn = new haxe_ui_components_Button();
+	cancelBtn.set_text("Cancel");
+	cancelBtn.set_width(92);
+	cancelBtn.set_onClick(function(e) {
+		onCancel();
+	});
+	btns.addComponent(cancelBtn);
+	body.addComponent(btns);
+	dialog.addComponent(body);
+	dialog.set_title("Challenge parameters");
+	dialog.set_onDialogClosed(function(e) {
+		onCancel();
+	});
+	dialog.showDialog(true);
+};
 Dialogs.figureBtn = function(type,color,callback) {
 	var btn = new haxe_ui_components_Button();
 	var icon = true;
@@ -4723,6 +4948,7 @@ Direction.__empty_constructs__ = [Direction.U,Direction.UL,Direction.UR,Directio
 var Field = function(playerColourName) {
 	openfl_display_Sprite.call(this);
 	this.hexes = [];
+	this.lastMoveSelectedHexes = [];
 	var _g = 0;
 	while(_g < 7) {
 		var j = _g++;
@@ -4864,6 +5090,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 	,figures: null
 	,playersTurn: null
 	,playerColor: null
+	,lastMoveSelectedHexes: null
 	,selected: null
 	,selectedDest: null
 	,init: function(e) {
@@ -4936,6 +5163,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 	}
 	,attemptMove: function(from,to) {
+		var _gthis = this;
 		if(!this.ableToMove(from,to)) {
 			return;
 		}
@@ -4967,6 +5195,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 			},function() {
 				_g1(from2,to2);
 			},function() {
+				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
 			});
 		} else if(this.isFinalForPlayer(to) && figure.type == FigureType.Progressor) {
 			var _g2 = $bind(this,this.makeMove);
@@ -4976,6 +5205,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 				_g2(from3,to3,morphInto);
 			};
 			Dialogs.promotionSelect(this.playerColor,tmp,function() {
+				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
 			});
 		} else {
 			this.makeMove(from,to);
@@ -4987,7 +5217,8 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		var capture = figMoveOnto != null && figMoveOnto.color != this.playerColor;
 		var mate = capture && figMoveOnto.type == FigureType.Intellector;
 		Networker.move(from.i,from.j,to.i,to.j,morphInto);
-		Main.sidebox.makeMove(this.playerColor,movingFigure.type,to,capture,mate);
+		Main.sidebox.makeMove(this.playerColor,movingFigure.type,to,capture,mate,this.isCastle(from,to,movingFigure,figMoveOnto),morphInto);
+		Main.infobox.makeMove(from.i,from.j,to.i,to.j,morphInto);
 		this.move(from,to,morphInto);
 		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
@@ -5004,6 +5235,21 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.disposeFigure(figure,to);
 		this.figures[to.j][to.i] = figure;
 		this.figures[from.j][from.i] = null;
+		var _g = 0;
+		var _g1 = this.lastMoveSelectedHexes;
+		while(_g < _g1.length) {
+			var hex = _g1[_g];
+			++_g;
+			hex.lastMoveDeselect();
+		}
+		this.lastMoveSelectedHexes = [this.hexes[from.j][from.i],this.hexes[to.j][to.i]];
+		var _g = 0;
+		var _g1 = this.lastMoveSelectedHexes;
+		while(_g < _g1.length) {
+			var hex = _g1[_g];
+			++_g;
+			hex.lastMoveSelect();
+		}
 		if(figMoveOnto != null) {
 			if(this.isCastle(from,to,figure,figMoveOnto)) {
 				this.disposeFigure(figMoveOnto,from);
@@ -5886,22 +6132,127 @@ Figure.prototype = $extend(openfl_display_Sprite.prototype,{
 	,color: null
 	,__class__: Figure
 });
+var Outcome = $hxEnums["Outcome"] = { __ename__ : "Outcome", __constructs__ : ["Mate","Breakthrough","Resign","Abandon","DrawAgreement","Repetition","NoProgress"]
+	,Mate: {_hx_index:0,__enum__:"Outcome",toString:$estr}
+	,Breakthrough: {_hx_index:1,__enum__:"Outcome",toString:$estr}
+	,Resign: {_hx_index:2,__enum__:"Outcome",toString:$estr}
+	,Abandon: {_hx_index:3,__enum__:"Outcome",toString:$estr}
+	,DrawAgreement: {_hx_index:4,__enum__:"Outcome",toString:$estr}
+	,Repetition: {_hx_index:5,__enum__:"Outcome",toString:$estr}
+	,NoProgress: {_hx_index:6,__enum__:"Outcome",toString:$estr}
+};
+Outcome.__empty_constructs__ = [Outcome.Mate,Outcome.Breakthrough,Outcome.Resign,Outcome.Abandon,Outcome.DrawAgreement,Outcome.Repetition,Outcome.NoProgress];
+var GameInfoBox = function(width,height,tcStartSeconds,tcBonusSeconds,whiteLogin,blackLogin,playerIsWhite) {
+	openfl_display_Sprite.call(this);
+	this.openingTree = new OpeningTree();
+	this.playerIsWhite = playerIsWhite;
+	this.addChild(components_Shapes.rect(width,height,10066329,1,components_LineStyle.Square,16777215));
+	var shortInfoStyle = new haxe_ui_styles_Style();
+	shortInfoStyle.fontSize = 14;
+	var opponentsStyle = new haxe_ui_styles_Style();
+	opponentsStyle.fontSize = 16;
+	var openingStyle = new haxe_ui_styles_Style();
+	openingStyle.fontSize = 14;
+	var boxWidth = width - 10;
+	this.shortInfoTF = new haxe_ui_components_Label();
+	this.timeControlText = "" + tcStartSeconds / 60 + "+" + tcBonusSeconds + " • ";
+	this.shortInfoTF.set_text(this.timeControlText + "Game is in progress");
+	this.shortInfoTF.customStyle = shortInfoStyle;
+	this.shortInfoTF.set_width(boxWidth);
+	this.shortInfoTF.set_x(5);
+	this.shortInfoTF.set_y(5);
+	this.addChild(this.shortInfoTF);
+	this.opponentsTF = new haxe_ui_components_Label();
+	this.opponentsTF.set_text("" + whiteLogin + " vs " + blackLogin);
+	this.opponentsTF.customStyle = opponentsStyle;
+	this.opponentsTF.set_textAlign("center");
+	this.opponentsTF.set_width(boxWidth);
+	this.opponentsTF.set_x(5);
+	this.opponentsTF.set_y(5 + this.shortInfoTF.get_height() + 25);
+	this.addChild(this.opponentsTF);
+	this.openingTF = new haxe_ui_components_Label();
+	this.openingTF.set_htmlText("<i>Starting position</i>");
+	this.openingTF.customStyle = openingStyle;
+	this.openingTF.set_width(boxWidth);
+	this.openingTF.set_x(5);
+	this.openingTF.set_y(5 + this.shortInfoTF.get_height() + 25 + this.opponentsTF.get_height() + 25);
+	this.addChild(this.openingTF);
+};
+$hxClasses["GameInfoBox"] = GameInfoBox;
+GameInfoBox.__name__ = "GameInfoBox";
+GameInfoBox.__super__ = openfl_display_Sprite;
+GameInfoBox.prototype = $extend(openfl_display_Sprite.prototype,{
+	box: null
+	,shortInfoTF: null
+	,opponentsTF: null
+	,openingTF: null
+	,timeControlText: null
+	,openingTree: null
+	,playerIsWhite: null
+	,changeResolution: function(outcome,winner) {
+		var resolution;
+		switch(outcome._hx_index) {
+		case 0:
+			resolution = "Mate";
+			break;
+		case 1:
+			resolution = "Breakthrough";
+			break;
+		case 2:
+			resolution = winner == FigureColor.White ? "Black resigned" : "White resigned";
+			break;
+		case 3:
+			resolution = winner == FigureColor.White ? "Black disconnected" : "White disconnected";
+			break;
+		case 4:
+			resolution = "Draw by agreement";
+			break;
+		case 5:
+			resolution = "Draw by repetition";
+			break;
+		case 6:
+			resolution = "Draw by 50-move rule";
+			break;
+		}
+		if(winner != null) {
+			resolution += " • " + $hxEnums[winner.__enum__].__constructs__[winner._hx_index] + " is victorious";
+		}
+		this.shortInfoTF.set_text(this.timeControlText + resolution);
+	}
+	,makeMove: function(fromI,fromJ,toI,toJ,morphInto) {
+		if(!this.playerIsWhite) {
+			fromJ = 6 - fromJ - fromI % 2;
+			toJ = 6 - toJ - toI % 2;
+		}
+		if(!this.openingTree.currentNode.terminal) {
+			this.openingTree.makeMove(fromI,fromJ,toI,toJ,morphInto);
+			this.openingTF.set_htmlText("<i>" + this.openingTree.currentNode.name + "</i>");
+		}
+	}
+	,__class__: GameInfoBox
+});
 var Hexagon = function(a,dark) {
 	openfl_display_Sprite.call(this);
 	this.unselectedHex = this.drawHex(a,dark ? Colors.darkHex : Colors.lightHex);
 	this.selectedHex = this.drawHex(a,dark ? Colors.selectedDark : Colors.selectedLight);
+	this.moveSelectedHex = this.drawHex(a,dark ? Colors.lastMoveDark : Colors.lastMoveLight);
+	this.redHex = this.drawHex(a,dark ? Colors.redDark : Colors.redLight);
 	this.dot = new openfl_display_Sprite();
 	this.dot.get_graphics().beginFill(3355443);
 	this.dot.get_graphics().drawCircle(0,0,8);
 	this.dot.get_graphics().endFill();
-	this.selectedHex.set_visible(false);
 	this.round = new openfl_display_Sprite();
 	this.round.get_graphics().lineStyle(4,3355443);
 	this.round.get_graphics().drawCircle(0,0,0.8 * a);
+	this.selectedHex.set_visible(false);
+	this.moveSelectedHex.set_visible(false);
+	this.redHex.set_visible(false);
 	this.round.set_visible(false);
 	this.dot.set_visible(false);
 	this.addChild(this.unselectedHex);
 	this.addChild(this.selectedHex);
+	this.addChild(this.moveSelectedHex);
+	this.addChild(this.redHex);
 	this.addChild(this.dot);
 	this.addChild(this.round);
 };
@@ -5911,6 +6262,8 @@ Hexagon.__super__ = openfl_display_Sprite;
 Hexagon.prototype = $extend(openfl_display_Sprite.prototype,{
 	unselectedHex: null
 	,selectedHex: null
+	,moveSelectedHex: null
+	,redHex: null
 	,dot: null
 	,round: null
 	,select: function() {
@@ -5920,6 +6273,12 @@ Hexagon.prototype = $extend(openfl_display_Sprite.prototype,{
 	,deselect: function() {
 		this.unselectedHex.set_visible(true);
 		this.selectedHex.set_visible(false);
+	}
+	,lastMoveSelect: function() {
+		this.moveSelectedHex.set_visible(true);
+	}
+	,lastMoveDeselect: function() {
+		this.moveSelectedHex.set_visible(false);
 	}
 	,addDot: function() {
 		this.round.set_visible(false);
@@ -6063,6 +6422,9 @@ Lambda.array = function(it) {
 		a.push(i1);
 	}
 	return a;
+};
+Lambda.empty = function(it) {
+	return !$getIterator(it).hasNext();
 };
 var SignType = $hxEnums["SignType"] = { __ename__ : "SignType", __constructs__ : ["SignIn","SignUp"]
 	,SignIn: {_hx_index:0,__enum__:"SignType",toString:$estr}
@@ -6428,12 +6790,13 @@ Math.__name__ = "Math";
 var Networker = function() { };
 $hxClasses["Networker"] = Networker;
 Networker.__name__ = "Networker";
-Networker.connect = function(onGameStated) {
+Networker.connect = function(onGameStated,onConnected) {
 	Networker._ws = new hx_ws_WebSocket("ws://13.48.10.164:5000");
 	Networker._ws.set_onopen(function() {
-		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 63, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 76, className : "Networker", methodName : "connect"});
 		Networker.gameStartHandler = onGameStated;
 		Networker.once("game_started",Networker.gameStartHandler);
+		onConnected();
 	});
 	Networker._ws.set_onmessage(function(msg) {
 		var str = msg.toString();
@@ -6442,14 +6805,14 @@ Networker.connect = function(onGameStated) {
 		if(callback != null) {
 			callback(event.data);
 		} else {
-			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 74, className : "Networker", methodName : "connect"});
+			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 88, className : "Networker", methodName : "connect"});
 		}
 	});
 	Networker._ws.set_onclose(function() {
 		Networker._ws = null;
 	});
 	Networker._ws.set_onerror(function(err) {
-		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 80, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 94, className : "Networker", methodName : "connect"});
 	});
 };
 Networker.signin = function(login,password,onAnswer) {
@@ -6462,17 +6825,34 @@ Networker.register = function(login,password,onAnswer) {
 	Networker.once("register_result",onAnswer);
 	Networker.emit("register",{ login : login, password : password});
 };
-Networker.getGame = function(id,onOpen,onFinished,on404) {
-	Networker.once("game_response",function(data) {
-		if(data.type == "open") {
-			onOpen(data.host);
-		} else if(data.type == "finished") {
-			onFinished(data.log);
-		} else {
-			on404();
-		}
-	});
+Networker.getGame = function(id,onInProcess,onFinished,on404) {
+	var _g = new haxe_ds_StringMap();
+	_g.h["gamestate_ongoing"] = function(data) {
+		onInProcess(data.log);
+	};
+	_g.h["gamestate_over"] = function(data) {
+		onFinished(data.log);
+	};
+	_g.h["gamestate_notfound"] = function(data) {
+		on404();
+	};
+	Networker.onceOneOf(_g);
 	Networker.emit("get_game",{ id : id});
+};
+Networker.getOpenChallenge = function(challenger,onExists,on404) {
+	var _g = new haxe_ds_StringMap();
+	_g.h["openchallenge_info"] = onExists;
+	_g.h["openchallenge_notfound"] = function(data) {
+		on404();
+	};
+	Networker.onceOneOf(_g);
+	Networker.emit("get_challenge",{ challenger : challenger});
+};
+Networker.acceptOpen = function(caller) {
+	if(Networker.login == null) {
+		Networker.login = "guest_" + Math.ceil(Math.random() * 100000);
+	}
+	Networker.emit("accept_open_challenge",{ caller_login : caller, callee_login : Networker.login});
 };
 Networker.challengeReceiver = function(data) {
 	var onConfirmed = function() {
@@ -6484,10 +6864,7 @@ Networker.challengeReceiver = function(data) {
 	openfl_utils_Assets.getSound("sounds/social.mp3").play();
 	Dialogs.confirm("" + data.caller + " wants to play with you. Accept the challenge?","Incoming challenge",onConfirmed,onDeclined);
 };
-Networker.acceptOpen = function(caller) {
-	Networker.emit("accept_open_challenge",{ caller_login : caller, callee_login : Networker.login});
-};
-Networker.sendChallenge = function(callee) {
+Networker.sendChallenge = function(callee,secsStart,secsBonus) {
 	var onSuccess = function(d) {
 		openfl_utils_Assets.getSound("sounds/challenge_sent.mp3").play();
 		Dialogs.info("Challenge sent to " + d.callee + "!","Success");
@@ -6515,7 +6892,13 @@ Networker.sendChallenge = function(callee) {
 	_g.h["callee_unavailable"] = onOffline;
 	_g.h["callee_ingame"] = onIngame;
 	Networker.onceOneOf(_g);
-	Networker.emit("callout",{ caller_login : Networker.login, callee_login : callee, secsStart : 600, secsBonus : 5});
+	Networker.emit("callout",{ caller_login : Networker.login, callee_login : callee, secsStart : secsStart, secsBonus : secsBonus});
+};
+Networker.sendOpenChallenge = function(startSecs,bonusSecs) {
+	Networker.emit("open_callout",{ caller_login : Networker.login, startSecs : startSecs, bonusSecs : bonusSecs});
+};
+Networker.sendMessage = function(text) {
+	Networker.emit("message",{ issuer_login : Networker.login, message : text});
 };
 Networker.reqTimeoutCheck = function() {
 	Networker.emit("request_timeout_check",{ issuer_login : Networker.login});
@@ -6523,17 +6906,22 @@ Networker.reqTimeoutCheck = function() {
 Networker.move = function(fromI,fromJ,toI,toJ,morphInto) {
 	Networker.emit("move",{ issuer_login : Networker.login, fromI : fromI, fromJ : fromJ, toI : toI, toJ : toJ, morphInto : morphInto == null ? null : $hxEnums[morphInto.__enum__].__constructs__[morphInto._hx_index]});
 };
-Networker.registerGameEvents = function(onMove,onTimeCorrection,onOver) {
+Networker.registerGameEvents = function(onMove,onMessage,onTimeCorrection,onOver) {
 	Networker.off("incoming_challenge");
 	Networker.on("move",onMove);
+	Networker.on("message",onMessage);
 	Networker.on("time_correction",onTimeCorrection);
 	Networker.once("game_ended",onOver);
 };
 Networker.registerMainMenuEvents = function() {
 	Networker.off("move");
+	Networker.off("message");
 	Networker.off("time_correction");
 	Networker.on("incoming_challenge",Networker.challengeReceiver);
 	Networker.once("game_started",Networker.gameStartHandler);
+};
+Networker.dropConnection = function() {
+	Networker._ws.close();
 };
 Networker.on = function(eventName,callback) {
 	Networker.eventMap.h[eventName] = callback;
@@ -6570,7 +6958,7 @@ Networker.off = function(eventName) {
 };
 Networker.emit = function(eventName,data) {
 	var event = { name : eventName, data : data};
-	haxe_Log.trace("Emitted: " + JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 197, className : "Networker", methodName : "emit"});
+	haxe_Log.trace("Emitted: " + JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 236, className : "Networker", methodName : "emit"});
 	Networker._ws.send(JSON.stringify(event));
 };
 Networker.combineVoid = function(f1,f2) {
@@ -6590,6 +6978,101 @@ Networker.combineSecond = function(f1,f2) {
 		f1();
 		f2(t);
 	};
+};
+var Branch = function(name,move,packedSuccessors) {
+	this.name = name;
+	this.move = move;
+	var unpackedSuccessors = [];
+	var _g = 0;
+	while(_g < packedSuccessors.length) {
+		var bunch = packedSuccessors[_g];
+		++_g;
+		var _g1 = 0;
+		while(_g1 < bunch.length) {
+			var successor = bunch[_g1];
+			++_g1;
+			unpackedSuccessors.push(successor);
+		}
+	}
+	var _g = new haxe_ds_StringMap();
+	var _g1 = 0;
+	while(_g1 < unpackedSuccessors.length) {
+		var b = unpackedSuccessors[_g1];
+		++_g1;
+		_g.h[b.move] = b;
+	}
+	this.successors = _g;
+	this.terminal = Lambda.empty(this.successors);
+};
+$hxClasses["Branch"] = Branch;
+Branch.__name__ = "Branch";
+Branch.prototype = {
+	name: null
+	,move: null
+	,successors: null
+	,terminal: null
+	,get: function(move) {
+		var exactMove = this.successors.h[move];
+		var otherMove = this.successors.h[""];
+		if(exactMove != null) {
+			return exactMove;
+		} else if(otherMove != null) {
+			return otherMove;
+		} else {
+			return new Branch(this.name,"",[]);
+		}
+	}
+	,__class__: Branch
+};
+var OpeningTree = function() {
+	this.currentNode = OpeningTree.root;
+};
+$hxClasses["OpeningTree"] = OpeningTree;
+OpeningTree.__name__ = "OpeningTree";
+OpeningTree.init = function() {
+	OpeningTree.root = new Branch("Starting position","",[[new Branch("C00. Central Advancement","4544",[[new Branch("C00. Central Advancement","",[[new Branch("C06. Bongcloud Opening","4645",[])]])]])],[new Branch("C01. Open Game","4534",[])],[new Branch("C02. Flank Game","2534",[])],[new Branch("C03. Deflected Progressor Opening","2514",[])],[new Branch("C04. Canal opening","0514",[[new Branch("C04. Canal opening, Twist Counterattack","6071",[[new Branch("C04. Canal opening, Twist Counterattack, Tense Defense","6654",[])],[new Branch("C04. Canal opening, Twist Counterattack, Boulder Defense","7554",[])],OpeningTree.pack("C04. Canal opening, Twist Counterattack Evaded",["4635","4655","3546","5546"],[])])],[new Branch("C04. Canal opening, Overload Counterattack","2011",[[new Branch("C04. Canal opening, Overload Counterattack, Tense Defense","2634",[])],[new Branch("C04. Canal opening, Overload Counterattack, Boulder Defense","1534",[])],OpeningTree.pack("C04. Canal opening, Overload Counterattack Evaded",["4635","4655","3546","5546"],[])])],[new Branch("C04. Canal opening, Central Counterattack","6051",[])],[new Branch("C04. Canal opening, Exchange Invitation","0111",[[new Branch("C04. Canal opening, Exchange Invitation ...Dmxa7","0600",[[new Branch("C04. Canal opening, Exchange Variation","2000",[])]])],[new Branch("C04. Canal opening, Exchange Declined","",[])]])]])],[new Branch("C05. Ware Opening","0504",[])],[new Branch("A00. Aggressor Sac","2660",[[new Branch("A01. Morph Variant","5060Aggressor",[[new Branch("A01. Double Aggressor Sac","6620",[[new Branch("A03. Aggressor-Defensor Confrontation","3020Aggressor",[])],[new Branch("A04. Double Aggressor Sac, Asymmetrical Variation","3020",[])],OpeningTree.pack("A01. Double Aggressor Sac, Coward Variation",["4030","4050","3040","5040"],[]),[new Branch("A01. Deferred Fool's Mate","",[])]])]])],[new Branch("A02. Capture Variant","5060",[[new Branch("A02. Double Aggressor Sac","6620",[[new Branch("A04. Double Aggressor Sac, Asymmetrical Variation","3020Aggressor",[])],[new Branch("A05. Double Aggressor Sac, Deflected Defensors Variation","3020",[])],OpeningTree.pack("A02. Double Aggressor Sac, Coward Variation",["4030","4050","3040","5040"],[]),[new Branch("A02. Deferred Fool's Mate","",[])]])]])],OpeningTree.pack("A00. Intellector Escape",["4030","4050","3040","5040"],[]),[new Branch("A00. Fool's Mate","",[])]])],[new Branch("A06. Flank Attack","2614",[[new Branch("A07. Flank Attack, Tense Defense","2031",[])],[new Branch("A08. Flank Attack, Boulder Defense","1031",[])],[new Branch("A09. Flank Attack, Flank Wall","4131",[])],[new Branch("A10. Flank Attack, Central Wall","2131",[])],OpeningTree.pack("A11. Flank Attack Evaded",["4030","4050","3040","5040"],[]),[new Branch("A06. Flank Attack, Scholar's Mate","",[])]])],[new Branch("A12. Central Attack","2634",[[new Branch("A13. Central Attack, Linear Defense","2011",[])],[new Branch("A14. Central Attack, Step Defense","1011",[])],[new Branch("A15. Central Attack, Canal Defense","0111",[])],[new Branch("A16. Central Attack, Wing Defense","2111",[])],[new Branch("A17. Central Attack, Exchange Variation","6034",[])],[new Branch("A18. Central Attack, Dominator Blunder","",[])]])],[new Branch("B00. Jump Opening","1513",[])],[new Branch("B01. Cannon Opening","1514",[])],[new Branch("B02. Reti Opening","1534",[[new Branch("B02. Reti Opening","",[[new Branch("B03. Mexican Opening","7554",[])],[new Branch("B04. Diverse Defenders Opening","6654",[])]])]])],[new Branch("D00. Wayward Defensor Opening","3534",[])],OpeningTree.pack("D01. Accelerated Bongcloud",["4635","3546"],[])]);
+};
+OpeningTree.pack = function(name,moves,packedSuccessors) {
+	var bunch = [];
+	var _g = 0;
+	while(_g < moves.length) {
+		var move = moves[_g];
+		++_g;
+		bunch.push(new Branch(name,move,packedSuccessors));
+	}
+	return bunch;
+};
+OpeningTree.mirror = function(move) {
+	var fromI = move.charAt(0);
+	var fromJ = move.charAt(1);
+	var toI = move.charAt(2);
+	var toJ = move.charAt(3);
+	var rest = HxOverrides.substr(move,4,null);
+	return "" + (8 - Std.parseInt(fromI)) + fromJ + (8 - Std.parseInt(toI)) + toJ + rest;
+};
+OpeningTree.prototype = {
+	currentNode: null
+	,isMirrored: null
+	,makeMove: function(fromI,fromJ,toI,toJ,morphInto) {
+		if(this.isMirrored == null) {
+			if(fromI == 4) {
+				if(toI == 4) {
+					this.isMirrored = null;
+				} else {
+					this.isMirrored = toI > 5;
+				}
+			} else {
+				this.isMirrored = fromI > 5;
+			}
+		}
+		if(this.isMirrored == true) {
+			fromI = 8 - fromI;
+			toI = 8 - toI;
+		}
+		var collapsedMove = "" + fromI + fromJ + toI + toJ + (morphInto == null ? "" : $hxEnums[morphInto.__enum__].__constructs__[morphInto._hx_index]);
+		this.currentNode = this.currentNode.get(collapsedMove);
+	}
+	,__class__: OpeningTree
 };
 var Reflect = function() { };
 $hxClasses["Reflect"] = Reflect;
@@ -6866,48 +7349,81 @@ Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
 			this.bottomTime.set_text(this.secsToString(correctedSecsBlack));
 		}
 	}
-	,makeMove: function(color,figure,to,capture,mate) {
+	,makeMove: function(color,figure,to,capture,mate,castle,morphInto) {
 		if(this.timer != null) {
 			this.timer.stop();
 		}
 		var moveStr;
-		switch(figure._hx_index) {
-		case 0:
-			moveStr = "P";
-			break;
-		case 1:
-			moveStr = "Ag";
-			break;
-		case 2:
-			moveStr = "Dm";
-			break;
-		case 3:
-			moveStr = "Lb";
-			break;
-		case 4:
-			moveStr = "Df";
-			break;
-		case 5:
-			moveStr = "In";
-			break;
+		if(castle) {
+			moveStr = "O-O";
+		} else {
+			var moveStr1;
+			switch(figure._hx_index) {
+			case 0:
+				moveStr1 = "P";
+				break;
+			case 1:
+				moveStr1 = "Ag";
+				break;
+			case 2:
+				moveStr1 = "Dm";
+				break;
+			case 3:
+				moveStr1 = "Lb";
+				break;
+			case 4:
+				moveStr1 = "Df";
+				break;
+			case 5:
+				moveStr1 = "In";
+				break;
+			}
+			var moveStr2 = moveStr1 + (capture ? "x" : "") + this.locToStr(to);
+			var moveStr1;
+			if(morphInto != null) {
+				var moveStr3;
+				switch(morphInto._hx_index) {
+				case 0:
+					moveStr3 = "P";
+					break;
+				case 1:
+					moveStr3 = "Ag";
+					break;
+				case 2:
+					moveStr3 = "Dm";
+					break;
+				case 3:
+					moveStr3 = "Lb";
+					break;
+				case 4:
+					moveStr3 = "Df";
+					break;
+				case 5:
+					moveStr3 = "In";
+					break;
+				}
+				moveStr1 = "=[" + moveStr3 + "]";
+			} else {
+				moveStr1 = "";
+			}
+			moveStr = moveStr2 + moveStr1 + (mate ? "#" : "");
 		}
-		var moveStr1 = moveStr + (capture ? "x" : "") + this.locToStr(to) + (mate ? "#" : "");
 		if(color == FigureColor.Black) {
-			this.lastMove.black_move = moveStr1;
+			this.lastMove.black_move = moveStr;
 			this.movetable.get_dataSource().update(this.movetable.get_dataSource().get_size() - 1,this.lastMove);
 		} else {
-			this.lastMove = { "num" : "" + this.move, "white_move" : moveStr1, "black_move" : ""};
+			this.lastMove = { "num" : "" + this.move, "white_move" : moveStr, "black_move" : ""};
 			this.movetable.get_dataSource().add(this.lastMove);
 		}
-		if(this.playerTurn) {
-			this.bottomTime.set_text(this.addBonus(this.bottomTime.get_text()));
-		}
 		this.move++;
-		this.playerTurn = color != this.playerColor;
 		if(!mate && this.move > 2) {
+			if(this.playerTurn) {
+				this.bottomTime.set_text(this.addBonus(this.bottomTime.get_text()));
+			}
 			this.timer = new haxe_Timer(1000);
 			this.timer.run = $bind(this,this.timerRun);
 		}
+		this.playerTurn = color != this.playerColor;
 	}
 	,onNonMateEnded: function() {
 		if(this.timer != null) {
@@ -7389,6 +7905,133 @@ Xml.prototype = {
 		return haxe_xml_Printer.print(this);
 	}
 	,__class__: Xml
+};
+var components_LinearGradientDirection = $hxEnums["components.LinearGradientDirection"] = { __ename__ : "components.LinearGradientDirection", __constructs__ : ["Up","Down","Left","Right"]
+	,Up: {_hx_index:0,__enum__:"components.LinearGradientDirection",toString:$estr}
+	,Down: {_hx_index:1,__enum__:"components.LinearGradientDirection",toString:$estr}
+	,Left: {_hx_index:2,__enum__:"components.LinearGradientDirection",toString:$estr}
+	,Right: {_hx_index:3,__enum__:"components.LinearGradientDirection",toString:$estr}
+};
+components_LinearGradientDirection.__empty_constructs__ = [components_LinearGradientDirection.Up,components_LinearGradientDirection.Down,components_LinearGradientDirection.Left,components_LinearGradientDirection.Right];
+var components_LineStyle = $hxEnums["components.LineStyle"] = { __ename__ : "components.LineStyle", __constructs__ : ["Square"]
+	,Square: {_hx_index:0,__enum__:"components.LineStyle",toString:$estr}
+};
+components_LineStyle.__empty_constructs__ = [components_LineStyle.Square];
+var components_Shapes = function() { };
+$hxClasses["components.Shapes"] = components_Shapes;
+components_Shapes.__name__ = "components.Shapes";
+components_Shapes.gradRect = function(width,height,borderColor,borderThickness,borderStyle,fillColour1,fillColour2,dir) {
+	var s = new openfl_display_Sprite();
+	var m = new openfl_geom_Matrix();
+	m.createGradientBox(width,height,components_Shapes.gradRotation(dir));
+	s.get_graphics().lineStyle(borderThickness,borderColor,1,false,2,components_Shapes.caps(borderStyle),components_Shapes.joints(borderStyle));
+	s.get_graphics().beginGradientFill(0,[fillColour1,fillColour2],[1,1],[0,255],m);
+	s.get_graphics().drawRect(0,0,width,height);
+	return s;
+};
+components_Shapes.gradFillOnlyRect = function(width,height,fillColour1,fillColour2,dir,alpha1,alpha2) {
+	if(alpha2 == null) {
+		alpha2 = 1;
+	}
+	if(alpha1 == null) {
+		alpha1 = 1;
+	}
+	var s = new openfl_display_Sprite();
+	var m = new openfl_geom_Matrix();
+	m.createGradientBox(width,height,components_Shapes.gradRotation(dir));
+	s.get_graphics().beginGradientFill(0,[fillColour1,fillColour2],[alpha1,alpha2],[0,255],m);
+	s.get_graphics().drawRect(0,0,width,height);
+	return s;
+};
+components_Shapes.rect = function(width,height,borderColor,borderThickness,borderStyle,fillColour,fillAlpha) {
+	var s = new openfl_display_Sprite();
+	s.get_graphics().lineStyle(borderThickness,borderColor,1,false,2,components_Shapes.caps(borderStyle),components_Shapes.joints(borderStyle));
+	s.get_graphics().beginFill(fillColour,fillAlpha);
+	s.get_graphics().drawRect(0,0,width,height);
+	return s;
+};
+components_Shapes.fillOnlyRect = function(width,height,fillColour,xOffset,yOffset,fillAlpha) {
+	if(yOffset == null) {
+		yOffset = 0;
+	}
+	if(xOffset == null) {
+		xOffset = 0;
+	}
+	var s = new openfl_display_Sprite();
+	s.get_graphics().beginFill(fillColour,fillAlpha);
+	s.get_graphics().drawRect(xOffset,yOffset,width,height);
+	return s;
+};
+components_Shapes.noFillRect = function(width,height,borderColor,borderThickness,borderStyle) {
+	var s = new openfl_display_Sprite();
+	s.get_graphics().lineStyle(borderThickness,borderColor,1,false,2,components_Shapes.caps(borderStyle),components_Shapes.joints(borderStyle));
+	s.get_graphics().drawRect(0,0,width,height);
+	return s;
+};
+components_Shapes.round = function(radius,borderColor,borderThickness,borderAlpha,fillColour,fillAlpha) {
+	var s = new openfl_display_Sprite();
+	s.get_graphics().lineStyle(borderThickness,borderColor,borderAlpha);
+	s.get_graphics().beginFill(fillColour,fillAlpha);
+	s.get_graphics().drawCircle(0,0,radius);
+	return s;
+};
+components_Shapes.line = function(toX,toY,color,thickness,fromX,fromY) {
+	if(fromY == null) {
+		fromY = 0;
+	}
+	if(fromX == null) {
+		fromX = 0;
+	}
+	var s = new openfl_display_Sprite();
+	s.get_graphics().moveTo(fromX,fromY);
+	s.get_graphics().lineStyle(thickness,color);
+	s.get_graphics().lineTo(toX,toY);
+	return s;
+};
+components_Shapes.cross = function(color,width,thickness) {
+	var s = new openfl_display_Sprite();
+	s.addChild(components_Shapes.line(width / 2,width / 2,color,thickness,-width / 2,-width / 2));
+	s.addChild(components_Shapes.line(-width / 2,width / 2,color,thickness,width / 2,-width / 2));
+	return s;
+};
+components_Shapes.rotatedSquare = function(radius,fillColour,borderColor,borderThickness,fillAlpha) {
+	if(fillAlpha == null) {
+		fillAlpha = 1;
+	}
+	var s = new openfl_display_Sprite();
+	if(borderThickness != null) {
+		s.get_graphics().lineStyle(borderThickness,borderColor);
+	}
+	s.get_graphics().beginFill(fillColour,fillAlpha);
+	s.get_graphics().moveTo(0,-radius);
+	s.get_graphics().lineTo(radius,0);
+	s.get_graphics().lineTo(0,radius);
+	s.get_graphics().lineTo(-radius,0);
+	s.get_graphics().lineTo(0,-radius);
+	s.get_graphics().endFill();
+	return s;
+};
+components_Shapes.hoverHighlighter = function(objW,objH) {
+	var s = components_Shapes.gradFillOnlyRect(objW,objH / 2,16777215,16777215,components_LinearGradientDirection.Down,0.8,0);
+	return s;
+};
+components_Shapes.gradRotation = function(dir) {
+	switch(dir._hx_index) {
+	case 0:
+		return 3 * Math.PI / 2;
+	case 1:
+		return Math.PI / 2;
+	case 2:
+		return Math.PI;
+	case 3:
+		return 0;
+	}
+};
+components_Shapes.caps = function(style) {
+	return 2;
+};
+components_Shapes.joints = function(style) {
+	return 1;
 };
 var haxe_StackItem = $hxEnums["haxe.StackItem"] = { __ename__ : "haxe.StackItem", __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"]
 	,CFunction: {_hx_index:0,__enum__:"haxe.StackItem",toString:$estr}
@@ -9378,6 +10021,9 @@ haxe_ds_StringMap.prototype = {
 		} else {
 			return false;
 		}
+	}
+	,iterator: function() {
+		return haxe_ds_StringMap.valueIterator(this.h);
 	}
 	,__class__: haxe_ds_StringMap
 };
@@ -57580,7 +58226,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 138616;
+	this.version = 74400;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -104654,11 +105300,17 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 },function(stack) {
 	stack.set_length(0);
 });
+Changes.changelog = [{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
+Chatbox.WIDTH = 260;
 Colors.border = 6701350;
 Colors.lightHex = 16764831;
 Colors.darkHex = 13732679;
 Colors.selectedLight = 16750384;
 Colors.selectedDark = 13723392;
+Colors.lastMoveLight = 16634688;
+Colors.lastMoveDark = 12491814;
+Colors.redLight = 16738645;
+Colors.redDark = 12465958;
 DateTools.DAY_SHORT_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 DateTools.DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 DateTools.MONTH_SHORT_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];

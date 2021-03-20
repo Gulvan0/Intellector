@@ -43,6 +43,19 @@ typedef TimeData =
     var blackSeconds:Int;
 }
 
+typedef OpenChallengeData = 
+{
+    var challenger:String;
+    var startSecs:Int;
+    var bonusSecs:Int;
+}
+
+typedef MessageData =
+{
+    var issuer_login:String;
+    var message:String;
+}
+
 class Networker
 {
 
@@ -52,7 +65,7 @@ class Networker
     private static var gameStartHandler:BattleData->Void;
     private static var eventMap:Map<String, Dynamic->Void> = [];
 
-    public static function connect(onGameStated:BattleData->Void) 
+    public static function connect(onGameStated:BattleData->Void, onConnected:Void->Void) 
     {
         #if prod
         _ws = new WebSocket("ws://13.48.10.164:5000");
@@ -63,6 +76,7 @@ class Networker
             trace("open");
             gameStartHandler = onGameStated;
             once('game_started', gameStartHandler);
+            onConnected();
         };
         _ws.onmessage = function(msg) {
             var str:String = msg.toString();
@@ -95,17 +109,30 @@ class Networker
         emit('register', {login: login, password: password});
     }
 
-    public static function getGame(id:Int, onOpen:(hostLogin:String)->Void, onFinished:(log:String)->Void, on404:Void->Void) 
+    public static function getGame(id:Int, onInProcess:(log:String)->Void, onFinished:(log:String)->Void, on404:Void->Void) 
     {
-        once('game_response', (data)->{
-            if (data.type == 'open')
-                onOpen(data.host);
-            else if (data.type == 'finished')
-                onFinished(data.log);
-            else 
-                on404();
-        });
+        onceOneOf([
+            'gamestate_ongoing' => (data) -> {onInProcess(data.log);},
+            'gamestate_over' => (data) -> {onFinished(data.log);},
+            'gamestate_notfound' => (data) -> {on404();}
+        ]);
         emit('get_game', {id: id});
+    }
+
+    public static function getOpenChallenge(challenger:String, onExists:OpenChallengeData->Void, on404:Void->Void) 
+    {
+        onceOneOf([
+            'openchallenge_info' => onExists,
+            'openchallenge_notfound' => (data) -> {on404();}
+        ]);
+        emit('get_challenge', {challenger: challenger});
+    }
+
+    public static function acceptOpen(caller:String) 
+    {
+        if (Networker.login == null)
+            Networker.login = "guest_" + Math.ceil(Math.random() * 100000);
+        emit('accept_open_challenge', {caller_login: caller, callee_login: Networker.login});
     }
 
     private static function challengeReceiver(data) 
@@ -117,12 +144,7 @@ class Networker
         Dialogs.confirm('${data.caller} wants to play with you. Accept the challenge?', "Incoming challenge", onConfirmed, onDeclined);
     }
 
-    public static function acceptOpen(caller:String) 
-    {
-        emit('accept_open_challenge', {caller_login: caller, callee_login: Networker.login});
-    }
-
-    public static function sendChallenge(callee:String) 
+    public static function sendChallenge(callee:String, secsStart:Int, secsBonus:Int) 
     {
         var onSuccess = (d) -> {
             Assets.getSound("sounds/challenge_sent.mp3").play();
@@ -136,7 +158,17 @@ class Networker
 
         once('challenge_declined', onDeclined);
         onceOneOf(['callee_same' => onSame, 'callout_success' => onSuccess, 'repeated_callout' => onRepeated, 'callee_unavailable' => onOffline, 'callee_ingame' => onIngame]);
-        emit('callout', {caller_login: Networker.login, callee_login: callee, secsStart: 600, secsBonus: 5});
+        emit('callout', {caller_login: Networker.login, callee_login: callee, secsStart: secsStart, secsBonus: secsBonus});
+    }
+
+    public static function sendOpenChallenge(startSecs:Int, bonusSecs:Int) 
+    {
+        emit('open_callout', {caller_login: Networker.login, startSecs: startSecs, bonusSecs: bonusSecs});
+    }
+
+    public static function sendMessage(text:String) 
+    {
+        emit('message', {issuer_login: Networker.login, message: text});
     }
 
     public static function reqTimeoutCheck() 
@@ -149,10 +181,11 @@ class Networker
         emit('move', {issuer_login: Networker.login, fromI: fromI, fromJ: fromJ, toI: toI, toJ: toJ, morphInto: morphInto == null? null : morphInto.getName()});
     }
 
-    public static function registerGameEvents(onMove:MoveData->Void, onTimeCorrection:TimeData->Void, onOver:GameOverData->Void) 
+    public static function registerGameEvents(onMove:MoveData->Void, onMessage:MessageData->Void, onTimeCorrection:TimeData->Void, onOver:GameOverData->Void) 
     {
         off('incoming_challenge');
         on('move', onMove);
+        on('message', onMessage);
         on('time_correction', onTimeCorrection);
         once('game_ended', onOver);
     }
@@ -160,9 +193,15 @@ class Networker
     public static function registerMainMenuEvents()
     {
         off('move');
+        off('message');
         off('time_correction');
         on('incoming_challenge', challengeReceiver);
         once('game_started', gameStartHandler);
+    }
+
+    public static function dropConnection() 
+    {
+        _ws.close();
     }
 
     private static function on(eventName:String, callback:Dynamic->Void) 

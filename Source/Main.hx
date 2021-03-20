@@ -1,5 +1,9 @@
 package;
 
+import haxe.ui.components.TextField;
+import Networker.OpenChallengeData;
+import Networker.MessageData;
+import haxe.ui.containers.ScrollView;
 import Figure.FigureColor;
 import Networker.TimeData;
 import js.html.URLSearchParams;
@@ -18,6 +22,7 @@ import haxe.ui.Toolkit;
 import openfl.display.SimpleButton;
 import js.Browser;
 import openfl.display.Sprite;
+using StringTools;
 
 enum SignType
 {
@@ -28,11 +33,15 @@ enum SignType
 class Main extends Sprite
 {
 
+	private var changes:Label;
 	private var signinMenu:VBox;
 	private var mainMenu:VBox;
+	private var hostingMenu:VBox;
 	private var joinMenu:VBox;
 	private var gameboard:Field;
 	public static var sidebox:Sidebox;
+	public static var chatbox:Chatbox;
+	public static var infobox:GameInfoBox;
 
 	private var errorLabel:Label;
 	private var fadeTimer:Null<Timer>;
@@ -41,13 +50,28 @@ class Main extends Sprite
 	{
 		super();
 		Toolkit.init();
+		OpeningTree.init();
 		Figure.initFigures();
-		Networker.connect(drawGame);
+		Networker.connect(drawGame, onConnected);
+	}
+
+	private function onConnected()
+	{
+		changes = new Label();
+		changes.htmlText = Changes.getFormatted();
+		changes.width = 300;
+		changes.x = 15;
+		changes.y = 10;
+		changes.visible = false;
+		addChild(changes);
+
 		var searcher = new URLSearchParams(Browser.location.search);
 		if (Cookie.exists("saved_login") && Cookie.exists("saved_password"))
 			Networker.signin(Cookie.get("saved_login"), Cookie.get("saved_password"), onAutologinResults);
 		else if (searcher.has("id"))
-			Networker.getGame(Std.parseInt(searcher.get("id")), drawJoinGame, (s)->{drawSigninMenu();}, drawMainMenu);
+			Networker.getGame(Std.parseInt(searcher.get("id")), (s)->{drawSigninMenu();}, (s)->{drawSigninMenu();}, drawSigninMenu);
+		else if (searcher.has("ch"))
+			Networker.getOpenChallenge(searcher.get("ch"), (data)->{drawJoinGame(data);}, drawSigninMenu);
 		else
 			drawSigninMenu();
 	}
@@ -58,7 +82,9 @@ class Main extends Sprite
 		{
 			var searcher = new URLSearchParams(Browser.location.search);
 			if (searcher.has("id"))
-				Networker.getGame(Std.parseInt(searcher.get("id")), drawJoinGame, (s)->{drawMainMenu();}, drawMainMenu);
+				Networker.getGame(Std.parseInt(searcher.get("id")), (s)->{drawMainMenu();}, (s)->{drawMainMenu();}, drawMainMenu);
+			else if (searcher.has("ch") && searcher.get("ch") != Networker.login)
+				Networker.getOpenChallenge(searcher.get("ch"), (data)->{drawJoinGame(data);}, drawMainMenu);
 			else
 				drawMainMenu();
 		}
@@ -91,6 +117,8 @@ class Main extends Sprite
 
 	private function drawSigninMenu() 
 	{
+		changes.visible = true;
+
 		signinMenu = new VBox();
 		signinMenu.width = 200;
 
@@ -150,6 +178,8 @@ class Main extends Sprite
 
 	private function drawMainMenu() 
 	{
+		changes.visible = true;
+
 		Browser.window.history.pushState({}, "Intellector", "/");
 		Networker.registerMainMenuEvents();
 
@@ -164,8 +194,19 @@ class Main extends Sprite
 		calloutBtn.onClick = (e) -> {
 			var response = Browser.window.prompt("Enter the callee's username");
 
-			if (response != null)
-				Networker.sendChallenge(response);
+			if (response == null)
+				return;
+
+			Dialogs.specifyChallengeParams(Networker.sendChallenge.bind(response), ()->{});
+		}
+
+		var openCalloutBtn = new haxe.ui.components.Button();
+		openCalloutBtn.width = 200;
+		openCalloutBtn.text = "Host open challenge";
+		mainMenu.addComponent(openCalloutBtn);
+
+		openCalloutBtn.onClick = (e) -> {
+			Dialogs.specifyChallengeParams(drawOpenChallengeHosting, ()->{});
 		}
 
 		mainMenu.x = (Browser.window.innerWidth - mainMenu.width) / 2;
@@ -173,27 +214,64 @@ class Main extends Sprite
 		addChild(mainMenu);
 	}
 
-	private function drawJoinGame(enemy:String) 
+	private function drawOpenChallengeHosting(startSecs:Int, bonusSecs:Int) 
 	{
+		Networker.sendOpenChallenge(startSecs, bonusSecs);
+		
+		removeChild(mainMenu);
+		removeChild(changes);
+
+		hostingMenu = new VBox();
+		hostingMenu.width = 800;
+
+		var firstLabel:Label = new Label();
+		firstLabel.htmlText = '<font size="16">Challenge by ${Networker.login}<br>${startSecs/60}+$bonusSecs<br>Share the link to invite your opponent:</font>';
+		firstLabel.textAlign = 'center';
+		firstLabel.width = 800;
+		hostingMenu.addComponent(firstLabel);
+
+		var linkText:TextField = new TextField();
+		linkText.text = 'intellector.surge.sh/?ch=${Networker.login}';
+		linkText.width = 800;
+		hostingMenu.addComponent(linkText);
+
+		var secondLabel:Label = new Label();
+		secondLabel.htmlText = '<font size="16">First one to follow the link will join the game</font>';
+		secondLabel.textAlign = 'center';
+		secondLabel.width = 800;
+		hostingMenu.addComponent(secondLabel);
+
+		hostingMenu.x = (Browser.window.innerWidth - hostingMenu.width) / 2;
+		hostingMenu.y = 100;
+		addChild(hostingMenu);
+	}
+
+	private function drawJoinGame(data:OpenChallengeData) 
+	{
+		changes.visible = false;
+
 		joinMenu = new VBox();
-		joinMenu.width = 400;
+		joinMenu.width = 800;
 
 		var label = new haxe.ui.components.Label();
-		label.width = 400;
+		label.width = 800;
+		label.htmlText = '<font size="16">${data.challenger} is hosting a challenge (${data.startSecs/60}+${data.bonusSecs}). First one to accept it will become an opponent\n';
 		if (Networker.login == null)
-			label.text = '$enemy is hosting a challenge. First one to accept it will become an opponent\nYou will be playing as guest';
+			label.htmlText += 'You will be playing as guest';
 		else
-			label.text = '$enemy is hosting a challenge. First one to accept it will become an opponent\nYou are joining the game as ${Networker.login}';
-		mainMenu.addComponent(label);
+			label.htmlText += 'You are joining the game as ${Networker.login}';
+		label.htmlText += '</font>';
+		label.textAlign = 'center';
+		joinMenu.addComponent(label);
 
 		var joinButton = new haxe.ui.components.Button();
 		joinButton.width = 200;
-		joinButton.x = 100;
+		joinButton.horizontalAlign = 'center';
 		joinButton.text = "Accept challenge";
-		mainMenu.addComponent(joinButton);
+		joinMenu.addComponent(joinButton);
 
 		joinButton.onClick = (e) -> {
-			Networker.acceptOpen(enemy);
+			Networker.acceptOpen(data.challenger);
 		}
 
 		joinMenu.x = (Browser.window.innerWidth - joinMenu.width) / 2;
@@ -223,8 +301,12 @@ class Main extends Sprite
 
 	private function drawGame(data:BattleData) 
 	{
-		Networker.registerGameEvents(onMove, onTimeCorrection, onEnded);
+		changes.visible = false;
+
+		Networker.registerGameEvents(onMove, onMessage, onTimeCorrection, onEnded);
 		removeChild(mainMenu);
+		removeChild(joinMenu);
+		removeChild(hostingMenu);
 
 		gameboard = new Field(data.colour);
 		gameboard.x = (Browser.window.innerWidth - gameboard.width) / 2;
@@ -233,6 +315,18 @@ class Main extends Sprite
 		sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
 		sidebox.x = gameboard.x + gameboard.width + 10;
 		sidebox.y = gameboard.y + (gameboard.height - 380 - Math.sqrt(3) * Field.a) / 2;
+
+		chatbox = new Chatbox(gameboard.height * 0.75);
+		chatbox.x = gameboard.x - Chatbox.WIDTH - Field.a - 30;
+		chatbox.y = gameboard.y + gameboard.height * 0.25 - Field.a * Math.sqrt(3) / 2;
+		addChild(chatbox);
+
+		var whiteLogin = data.colour == 'white'? Networker.login : data.enemy;
+		var blackLogin = data.colour == 'black'? Networker.login : data.enemy;
+		infobox = new GameInfoBox(Chatbox.WIDTH, gameboard.height * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin, data.colour == 'white');
+		infobox.x = gameboard.x - Chatbox.WIDTH - Field.a - 30;
+		infobox.y = gameboard.y - Field.a * Math.sqrt(3) / 2;
+		addChild(infobox);
 
 		Browser.window.history.pushState({}, "Intellector", "?id=" + data.match_id);
 		addChild(gameboard);
@@ -245,6 +339,11 @@ class Main extends Sprite
 		sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
 	}
 
+	private function onMessage(data:MessageData) 
+	{
+		chatbox.appendMessage(data.issuer_login, data.message);
+	}
+
 	private function onMove(data:MoveData) 
 	{
 		var from = new IntPoint(data.fromI, data.fromJ);
@@ -255,8 +354,10 @@ class Main extends Sprite
 		var morphedInto = data.morphInto == null? null : FigureType.createByName(data.morphInto);
 		var capture = ontoFigure != null && ontoFigure.color == gameboard.playerColor;
 		var mate = capture && ontoFigure.type == Intellector;
+		var castle = ontoFigure != null && ontoFigure.color == opponentColor && (ontoFigure.type == Intellector && movingFigure.type == Defensor || ontoFigure.type == Defensor && movingFigure.type == Intellector);
 
-		sidebox.makeMove(opponentColor, movingFigure.type, to, capture, mate);
+		sidebox.makeMove(opponentColor, movingFigure.type, to, capture, mate, castle, morphedInto);
+		infobox.makeMove(data.fromI, data.fromJ, data.toI, data.toJ, morphedInto);
 		gameboard.move(from, to, morphedInto);
 	}
 
@@ -286,9 +387,14 @@ class Main extends Sprite
 		Dialogs.info("Game over. " + resultMessage, "Game ended");
 
 		removeChild(sidebox);
+		removeChild(chatbox);
+		removeChild(infobox);
 		removeChild(gameboard);
 
 		Browser.window.history.pushState({}, "Intellector", "/");
-		addChild(mainMenu);
+		if (Networker.login.startsWith("guest_"))
+			Networker.dropConnection();
+		else 
+			addChild(mainMenu);
 	}
 }

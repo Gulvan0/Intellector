@@ -36,6 +36,7 @@ class Field extends Sprite
     //private var viewedMove:Int;
     //private var moves:Array<Move>;
 
+    private var lastMoveSelectedHexes:Array<Hexagon>;
     private var selected:Null<IntPoint>;
     private var selectedDest:Null<IntPoint>;
 
@@ -43,6 +44,7 @@ class Field extends Sprite
     {
         super();
         hexes = [];
+        lastMoveSelectedHexes = [];
         for (j in 0...7)
         {
             var row:Array<Hexagon> = [];
@@ -214,9 +216,9 @@ class Field extends Sprite
         stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress); //To ignore clicking on dialogs
 
         if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type)
-            Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), ()->{});
+            Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
         else if (isFinalForPlayer(to) && figure.type == Progressor)
-            Dialogs.promotionSelect(playerColor, makeMove.bind(from, to, _), ()->{});
+            Dialogs.promotionSelect(playerColor, makeMove.bind(from, to, _), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
         else 
             makeMove(from, to);
     }
@@ -230,7 +232,8 @@ class Field extends Sprite
         var mate = capture && figMoveOnto.type == Intellector;
 
         Networker.move(from.i, from.j, to.i, to.j, morphInto);
-        Main.sidebox.makeMove(playerColor, movingFigure.type, to, capture, mate);
+        Main.sidebox.makeMove(playerColor, movingFigure.type, to, capture, mate, isCastle(from, to, movingFigure, figMoveOnto), morphInto);
+        Main.infobox.makeMove(from.i, from.j, to.i, to.j, morphInto);
         move(from, to, morphInto);
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
@@ -252,6 +255,14 @@ class Field extends Sprite
         disposeFigure(figure, to);
         figures[to.j][to.i] = figure;
         figures[from.j][from.i] = null;
+
+        for (hex in lastMoveSelectedHexes)
+            hex.lastMoveDeselect();
+
+        lastMoveSelectedHexes = [hexes[from.j][from.i], hexes[to.j][to.i]];
+
+        for (hex in lastMoveSelectedHexes)
+            hex.lastMoveSelect();
 
         if (figMoveOnto != null)
             if (isCastle(from, to, figure, figMoveOnto))

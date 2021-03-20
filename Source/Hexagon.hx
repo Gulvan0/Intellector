@@ -6,6 +6,8 @@ class Hexagon extends Sprite
 {
         private var unselectedHex:Sprite;
         private var selectedHex:Sprite;
+        private var moveSelectedHex:Sprite;
+        private var redHex:Sprite;
         private var dot:Sprite;
         private var round:Sprite;
 
@@ -14,18 +16,28 @@ class Hexagon extends Sprite
                 super();
                 unselectedHex = drawHex(a, dark? Colors.darkHex : Colors.lightHex);
                 selectedHex = drawHex(a, dark? Colors.selectedDark : Colors.selectedLight);
+                moveSelectedHex = drawHex(a, dark? Colors.lastMoveDark : Colors.lastMoveLight);
+                redHex = drawHex(a, dark? Colors.redDark : Colors.redLight);
+
                 dot = new Sprite();
                 dot.graphics.beginFill(0x333333);
                 dot.graphics.drawCircle(0, 0, 8);
                 dot.graphics.endFill();
-                selectedHex.visible = false;
+
                 round = new Sprite();
                 round.graphics.lineStyle(4, 0x333333);
                 round.graphics.drawCircle(0, 0, 0.8 * a);
+
+                selectedHex.visible = false;
+                moveSelectedHex.visible = false;
+                redHex.visible = false;
                 round.visible = false;
                 dot.visible = false;
+
                 addChild(unselectedHex);
                 addChild(selectedHex);
+                addChild(moveSelectedHex);
+                addChild(redHex);
                 addChild(dot);
                 addChild(round);
         }
@@ -40,6 +52,16 @@ class Hexagon extends Sprite
         {
                 unselectedHex.visible = true;
                 selectedHex.visible = false;
+        }
+
+        public function lastMoveSelect()
+        {
+                moveSelectedHex.visible = true;
+        }
+
+        public function lastMoveDeselect()
+        {
+                moveSelectedHex.visible = false;
         }
 
         public function addDot()

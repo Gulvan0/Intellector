@@ -103,12 +103,15 @@ class Sidebox extends Sprite
         }
     }
 
-    public function makeMove(color:FigureColor, figure:FigureType, to:IntPoint, capture:Bool, mate:Bool) 
+    public function makeMove(color:FigureColor, figure:FigureType, to:IntPoint, capture:Bool, mate:Bool, castle:Bool, ?morphInto:FigureType) 
     {
         if (timer != null)
             timer.stop();
 
-        var moveStr = figureAbbreviation(figure) + (capture? "x" : "") + locToStr(to) + (mate? "#" : "");
+        var moveStr;
+        if (castle)
+            moveStr = "O-O";
+        else moveStr = figureAbbreviation(figure) + (capture? "x" : "") + locToStr(to) + (morphInto != null? '=[${figureAbbreviation(morphInto)}]' : '') + (mate? "#" : "");
 
         if (color == Black)
         {
@@ -121,17 +124,17 @@ class Sidebox extends Sprite
             movetable.dataSource.add(lastMove);
         }
 
-        if (playerTurn) //Because corrections have already been applied if it is the opponent's turn ("correct, then move" server rule)
-            bottomTime.text = addBonus(bottomTime.text);
-
         move++;
-        playerTurn = color != playerColor;
 
         if (!mate && move > 2)
         {
+            if (playerTurn) //Because corrections have already been applied if it is the opponent's turn ("correct, then move" server rule)
+                bottomTime.text = addBonus(bottomTime.text);
             timer = new Timer(1000);
             timer.run = timerRun;
         }
+        
+        playerTurn = color != playerColor;
     }
 
     public function onNonMateEnded() 
