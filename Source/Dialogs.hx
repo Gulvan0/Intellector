@@ -136,7 +136,7 @@ class Dialogs
         var cancelBtn:Button = new Button();
         cancelBtn.text = "Cancel";
         cancelBtn.width = 92;
-        cancelBtn.onClick = (e) -> {onCancel();};
+        cancelBtn.onClick = (e) -> {dialog.hideDialog(DialogButton.CANCEL);};
         btns.addComponent(cancelBtn);
 
         body.addComponent(btns);

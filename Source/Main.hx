@@ -1,5 +1,6 @@
 package;
 
+import haxe.ui.components.CheckBox;
 import haxe.ui.components.TextField;
 import Networker.OpenChallengeData;
 import Networker.MessageData;
@@ -96,10 +97,15 @@ class Main extends Sprite
 		}
 	}
 
-	private function onSignResults(type:SignType, result:String)
+	private function onSignResults(type:SignType, login:String, password:String, remember:Bool, result:String)
 	{
 		if (result == 'success')
 		{
+			if (remember)
+			{
+				Cookie.set("saved_login", login, 60 * 60 * 24 * 365 * 5, "/");
+				Cookie.set("saved_password", password, 60 * 60 * 24 * 365 * 5, "/");
+			}
 			removeChild(signinMenu);
 			drawMainMenu();
 		}
@@ -117,6 +123,7 @@ class Main extends Sprite
 
 	private function drawSigninMenu() 
 	{
+		Browser.window.history.pushState({}, "Intellector", "/");
 		changes.visible = true;
 
 		signinMenu = new VBox();
@@ -135,6 +142,12 @@ class Main extends Sprite
 		passField.password = true;
 		signinMenu.addComponent(passField);
 
+		var rememberMe = new CheckBox();
+		rememberMe.selected = false;
+		rememberMe.text = "Remember me";
+		rememberMe.horizontalAlign = 'center';
+		signinMenu.addComponent(rememberMe);
+
 		var btns:HBox = new HBox();
 		btns.horizontalAlign = "center";
 
@@ -147,7 +160,7 @@ class Main extends Sprite
 			if (loginField.text == "" || passField.text == "" || loginField.text == null || passField.text == null)
 				displayLoginError("You need to specify both the login and the password");
 			else
-				Networker.signin(loginField.text, passField.text, onSignResults.bind(SignIn));
+				Networker.signin(loginField.text, passField.text, onSignResults.bind(SignIn, loginField.text, passField.text, rememberMe.selected));
 		}
 
 		var regbtn = new haxe.ui.components.Button();
@@ -159,7 +172,7 @@ class Main extends Sprite
 			if (loginField.text == "" || passField.text == "" || loginField.text == null || passField.text == null)
 				displayLoginError("You need to specify both the login and the password");
 			else
-				Networker.register(loginField.text, passField.text, onSignResults.bind(SignUp));
+				Networker.register(loginField.text, passField.text, onSignResults.bind(SignUp, loginField.text, passField.text, rememberMe.selected));
 		}
 		
 		signinMenu.addComponent(btns);
@@ -178,9 +191,9 @@ class Main extends Sprite
 
 	private function drawMainMenu() 
 	{
+		Browser.window.history.pushState({}, "Intellector", "/");
 		changes.visible = true;
 
-		Browser.window.history.pushState({}, "Intellector", "/");
 		Networker.registerMainMenuEvents();
 
 		mainMenu = new VBox();
@@ -209,9 +222,28 @@ class Main extends Sprite
 			Dialogs.specifyChallengeParams(drawOpenChallengeHosting, ()->{});
 		}
 
+		var logoutBtn = new haxe.ui.components.Button();
+		logoutBtn.text = "Log Out";
+		logoutBtn.width = calloutBtn.width / 2;
+		logoutBtn.horizontalAlign = 'center';
+		mainMenu.addComponent(logoutBtn);
+
+		logoutBtn.onClick = (e) -> {
+			Cookie.remove("saved_login");
+			Cookie.remove("saved_password");
+			renewSession();
+		}
+
 		mainMenu.x = (Browser.window.innerWidth - mainMenu.width) / 2;
 		mainMenu.y = 100;
 		addChild(mainMenu);
+	}
+
+	private function renewSession() 
+	{
+		removeChildren();
+		Networker.dropConnection();
+		Networker.connect(drawGame, onConnected);
 	}
 
 	private function drawOpenChallengeHosting(startSecs:Int, bonusSecs:Int) 
@@ -393,7 +425,7 @@ class Main extends Sprite
 
 		Browser.window.history.pushState({}, "Intellector", "/");
 		if (Networker.login.startsWith("guest_"))
-			Networker.dropConnection();
+			renewSession();
 		else 
 			addChild(mainMenu);
 	}

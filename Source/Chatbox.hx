@@ -1,5 +1,8 @@
 package;
 
+import haxe.ui.components.HorizontalScroll;
+import haxe.Timer;
+import haxe.ui.components.VerticalScroll;
 import openfl.events.Event;
 import haxe.ui.components.Label;
 import openfl.ui.Keyboard;
@@ -19,11 +22,32 @@ class Chatbox extends Sprite
     public function appendMessage(author:String, text:String) 
     {
         historyText.htmlText += '<b>$author:</b> $text\n';
+        waitAndScroll();
     }
 
     public function appendLog(text:String) 
     {
         historyText.htmlText += '<font color="grey"><i>$text</i></font>\n';
+        waitAndScroll();
+    }
+
+    private function waitAndScroll() 
+    {
+        var t:Timer = new Timer(100);
+        t.run = () -> {
+            t.stop(); 
+            scrollToMax();
+        }    
+    }
+
+    private function scrollToMax() 
+    {
+        var hscroll = history.findComponent(HorizontalScroll, false);
+        if (hscroll != null)
+            hscroll.hidden = true;
+        var vscroll = history.findComponent(VerticalScroll, false);
+        if (vscroll != null)
+            vscroll.pos = vscroll.max;
     }
 
     private function onKeyPress(e:KeyboardEvent) 

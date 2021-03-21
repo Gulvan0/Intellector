@@ -892,7 +892,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "12";
+	app.meta.h["build"] = "13";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -4235,8 +4235,12 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			this.drawSigninMenu();
 		}
 	}
-	,onSignResults: function(type,result) {
+	,onSignResults: function(type,login,password,remember,result) {
 		if(result == "success") {
+			if(remember) {
+				js_Cookie.set("saved_login",login,157680000,"/");
+				js_Cookie.set("saved_password",password,157680000,"/");
+			}
 			this.removeChild(this.signinMenu);
 			this.drawMainMenu();
 		} else if(type == SignType.SignIn) {
@@ -4251,6 +4255,7 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,drawSigninMenu: function() {
 		var _gthis = this;
+		window.history.pushState({ },"Intellector","/");
 		this.changes.set_visible(true);
 		this.signinMenu = new haxe_ui_containers_VBox();
 		this.signinMenu.set_width(200);
@@ -4265,6 +4270,11 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		passField.set_restrictChars("A-Za-z0-9");
 		passField.set_password(true);
 		this.signinMenu.addComponent(passField);
+		var rememberMe = new haxe_ui_components_CheckBox();
+		rememberMe.set_selected(false);
+		rememberMe.set_text("Remember me");
+		rememberMe.set_horizontalAlign("center");
+		this.signinMenu.addComponent(rememberMe);
 		var btns = new haxe_ui_containers_HBox();
 		btns.set_horizontalAlign("center");
 		var signinbtn = new haxe_ui_components_Button();
@@ -4279,8 +4289,11 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 				var tmp1 = passField.get_text();
 				var _g = $bind(_gthis,_gthis.onSignResults);
 				var type = SignType.SignIn;
+				var login = loginField.get_text();
+				var password = passField.get_text();
+				var remember = rememberMe.get_selected();
 				Networker.signin(tmp,tmp1,function(result) {
-					_g(type,result);
+					_g(type,login,password,remember,result);
 				});
 			}
 		});
@@ -4296,8 +4309,11 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 				var tmp1 = passField.get_text();
 				var _g = $bind(_gthis,_gthis.onSignResults);
 				var type = SignType.SignUp;
+				var login = loginField.get_text();
+				var password = passField.get_text();
+				var remember = rememberMe.get_selected();
 				Networker.register(tmp,tmp1,function(result) {
-					_g(type,result);
+					_g(type,login,password,remember,result);
 				});
 			}
 		});
@@ -4314,8 +4330,8 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,drawMainMenu: function() {
 		var _gthis = this;
-		this.changes.set_visible(true);
 		window.history.pushState({ },"Intellector","/");
+		this.changes.set_visible(true);
 		Networker.registerMainMenuEvents();
 		this.mainMenu = new haxe_ui_containers_VBox();
 		this.mainMenu.set_width(200);
@@ -4342,9 +4358,24 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			Dialogs.specifyChallengeParams($bind(_gthis,_gthis.drawOpenChallengeHosting),function() {
 			});
 		});
+		var logoutBtn = new haxe_ui_components_Button();
+		logoutBtn.set_text("Log Out");
+		logoutBtn.set_width(calloutBtn.get_width() / 2);
+		logoutBtn.set_horizontalAlign("center");
+		this.mainMenu.addComponent(logoutBtn);
+		logoutBtn.set_onClick(function(e) {
+			js_Cookie.remove("saved_login");
+			js_Cookie.remove("saved_password");
+			_gthis.renewSession();
+		});
 		this.mainMenu.set_x((window.innerWidth - this.mainMenu.get_width()) / 2);
 		this.mainMenu.set_y(100);
 		this.addChild(this.mainMenu);
+	}
+	,renewSession: function() {
+		this.removeChildren();
+		Networker.dropConnection();
+		Networker.connect($bind(this,this.drawGame),$bind(this,this.onConnected));
 	}
 	,drawOpenChallengeHosting: function(startSecs,bonusSecs) {
 		Networker.sendOpenChallenge(startSecs,bonusSecs);
@@ -4498,7 +4529,7 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.removeChild(this.gameboard);
 		window.history.pushState({ },"Intellector","/");
 		if(StringTools.startsWith(Networker.login,"guest_")) {
-			Networker.dropConnection();
+			this.renewSession();
 		} else {
 			this.addChild(this.mainMenu);
 		}
@@ -4559,10 +4590,30 @@ Chatbox.prototype = $extend(openfl_display_Sprite.prototype,{
 	,appendMessage: function(author,text) {
 		var _g = this.historyText;
 		_g.set_htmlText(_g.get_htmlText() + ("<b>" + author + ":</b> " + text + "\n"));
+		this.waitAndScroll();
 	}
 	,appendLog: function(text) {
 		var _g = this.historyText;
 		_g.set_htmlText(_g.get_htmlText() + ("<font color=\"grey\"><i>" + text + "</i></font>\n"));
+		this.waitAndScroll();
+	}
+	,waitAndScroll: function() {
+		var _gthis = this;
+		var t = new haxe_Timer(100);
+		t.run = function() {
+			t.stop();
+			_gthis.scrollToMax();
+		};
+	}
+	,scrollToMax: function() {
+		var hscroll = this.history.findComponent(null,haxe_ui_components_HorizontalScroll,false);
+		if(hscroll != null) {
+			hscroll.set_hidden(true);
+		}
+		var vscroll = this.history.findComponent(null,haxe_ui_components_VerticalScroll,false);
+		if(vscroll != null) {
+			vscroll.set_pos(vscroll.get_max());
+		}
 	}
 	,onKeyPress: function(e) {
 		if(e.keyCode == 13 || e.keyCode == 108) {
@@ -4814,7 +4865,7 @@ Dialogs.specifyChallengeParams = function(onConfirm,onCancel) {
 	cancelBtn.set_text("Cancel");
 	cancelBtn.set_width(92);
 	cancelBtn.set_onClick(function(e) {
-		onCancel();
+		dialog.hideDialog("Cancel");
 	});
 	btns.addComponent(cancelBtn);
 	body.addComponent(btns);
@@ -58226,7 +58277,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 74400;
+	this.version = 66495;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -105300,7 +105351,7 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 },function(stack) {
 	stack.set_length(0);
 });
-Changes.changelog = [{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
+Changes.changelog = [{ date : "21.03.2021", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
 Chatbox.WIDTH = 260;
 Colors.border = 6701350;
 Colors.lightHex = 16764831;
