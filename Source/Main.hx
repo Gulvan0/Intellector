@@ -1,5 +1,6 @@
 package;
 
+import haxe.ui.components.Button;
 import haxe.ui.components.CheckBox;
 import haxe.ui.components.TextField;
 import Networker.OpenChallengeData;
@@ -40,6 +41,7 @@ class Main extends Sprite
 	private var hostingMenu:VBox;
 	private var joinMenu:VBox;
 	private var gameboard:Field;
+	private var analysisboard:AnalysisField;
 	public static var sidebox:Sidebox;
 	public static var chatbox:Chatbox;
 	public static var infobox:GameInfoBox;
@@ -222,6 +224,16 @@ class Main extends Sprite
 			Dialogs.specifyChallengeParams(drawOpenChallengeHosting, ()->{});
 		}
 
+		var analysisBtn = new haxe.ui.components.Button();
+		analysisBtn.text = "Analysis board";
+		analysisBtn.width = calloutBtn.width;
+		analysisBtn.horizontalAlign = 'center';
+		mainMenu.addComponent(analysisBtn);
+
+		analysisBtn.onClick = (e) -> {
+			drawAnalysisBoard();
+		}
+
 		var logoutBtn = new haxe.ui.components.Button();
 		logoutBtn.text = "Log Out";
 		logoutBtn.width = calloutBtn.width / 2;
@@ -333,20 +345,18 @@ class Main extends Sprite
 
 	private function drawGame(data:BattleData) 
 	{
-		changes.visible = false;
-
 		Networker.registerGameEvents(onMove, onMessage, onTimeCorrection, onEnded);
-		removeChild(mainMenu);
-		removeChild(joinMenu);
-		removeChild(hostingMenu);
+		removeChildren();
 
 		gameboard = new Field(data.colour);
 		gameboard.x = (Browser.window.innerWidth - gameboard.width) / 2;
 		gameboard.y = 100;
+		addChild(gameboard);
 
 		sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
 		sidebox.x = gameboard.x + gameboard.width + 10;
 		sidebox.y = gameboard.y + (gameboard.height - 380 - Math.sqrt(3) * Field.a) / 2;
+		addChild(sidebox);
 
 		chatbox = new Chatbox(gameboard.height * 0.75);
 		chatbox.x = gameboard.x - Chatbox.WIDTH - Field.a - 30;
@@ -361,9 +371,30 @@ class Main extends Sprite
 		addChild(infobox);
 
 		Browser.window.history.pushState({}, "Intellector", "?id=" + data.match_id);
-		addChild(gameboard);
-		addChild(sidebox);
 		Assets.getSound("sounds/notify.mp3").play();	
+	}
+
+	private function drawAnalysisBoard() 
+	{
+		removeChildren();
+
+		analysisboard = new AnalysisField();
+		analysisboard.x = (Browser.window.innerWidth - analysisboard.width) / 2;
+		analysisboard.y = 100;
+		addChild(analysisboard);
+
+		var returnBtn = new Button();
+		returnBtn.width = 100;
+		returnBtn.text = "Return";
+
+		returnBtn.onClick = (e) -> {
+			removeChildren();
+			drawMainMenu();
+		}
+
+		returnBtn.x = 10;
+		returnBtn.y = 10;
+		addChild(returnBtn);
 	}
 
 	private function onTimeCorrection(data:TimeData) 

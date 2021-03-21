@@ -8,961 +8,6 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var lime_app_IModule = function() { };
-$hxClasses["lime.app.IModule"] = lime_app_IModule;
-lime_app_IModule.__name__ = "lime.app.IModule";
-lime_app_IModule.__isInterface__ = true;
-lime_app_IModule.prototype = {
-	__registerLimeModule: null
-	,__unregisterLimeModule: null
-	,__class__: lime_app_IModule
-};
-var lime_app_Module = function() {
-	this.onExit = new lime_app__$Event_$Int_$Void();
-};
-$hxClasses["lime.app.Module"] = lime_app_Module;
-lime_app_Module.__name__ = "lime.app.Module";
-lime_app_Module.__interfaces__ = [lime_app_IModule];
-lime_app_Module.prototype = {
-	onExit: null
-	,__registerLimeModule: function(application) {
-	}
-	,__unregisterLimeModule: function(application) {
-	}
-	,__class__: lime_app_Module
-};
-var lime__$internal_backend_html5_HTML5Application = function(parent) {
-	this.gameDeviceCache = new haxe_ds_IntMap();
-	this.parent = parent;
-	this.currentUpdate = 0;
-	this.lastUpdate = 0;
-	this.nextUpdate = 0;
-	this.framePeriod = -1;
-	lime_media_AudioManager.init();
-	this.accelerometer = lime_system_Sensor.registerSensor(lime_system_SensorType.ACCELEROMETER,0);
-};
-$hxClasses["lime._internal.backend.html5.HTML5Application"] = lime__$internal_backend_html5_HTML5Application;
-lime__$internal_backend_html5_HTML5Application.__name__ = "lime._internal.backend.html5.HTML5Application";
-lime__$internal_backend_html5_HTML5Application.prototype = {
-	gameDeviceCache: null
-	,accelerometer: null
-	,currentUpdate: null
-	,deltaTime: null
-	,framePeriod: null
-	,lastUpdate: null
-	,nextUpdate: null
-	,parent: null
-	,convertKeyCode: function(keyCode) {
-		if(keyCode >= 65 && keyCode <= 90) {
-			return keyCode + 32;
-		}
-		switch(keyCode) {
-		case 12:
-			return 1073741980;
-		case 16:
-			return 1073742049;
-		case 17:
-			return 1073742048;
-		case 18:
-			return 1073742050;
-		case 19:
-			return 1073741896;
-		case 20:
-			return 1073741881;
-		case 33:
-			return 1073741899;
-		case 34:
-			return 1073741902;
-		case 35:
-			return 1073741901;
-		case 36:
-			return 1073741898;
-		case 37:
-			return 1073741904;
-		case 38:
-			return 1073741906;
-		case 39:
-			return 1073741903;
-		case 40:
-			return 1073741905;
-		case 41:
-			return 1073741943;
-		case 43:
-			return 1073741940;
-		case 44:
-			return 1073741894;
-		case 45:
-			return 1073741897;
-		case 46:
-			return 127;
-		case 91:
-			return 1073742051;
-		case 92:
-			return 1073742055;
-		case 93:
-			return 1073742055;
-		case 95:
-			return 1073742106;
-		case 96:
-			return 1073741922;
-		case 97:
-			return 1073741913;
-		case 98:
-			return 1073741914;
-		case 99:
-			return 1073741915;
-		case 100:
-			return 1073741916;
-		case 101:
-			return 1073741917;
-		case 102:
-			return 1073741918;
-		case 103:
-			return 1073741919;
-		case 104:
-			return 1073741920;
-		case 105:
-			return 1073741921;
-		case 106:
-			return 1073741909;
-		case 107:
-			return 1073741911;
-		case 108:
-			return 1073741923;
-		case 109:
-			return 1073741910;
-		case 110:
-			return 1073741923;
-		case 111:
-			return 1073741908;
-		case 112:
-			return 1073741882;
-		case 113:
-			return 1073741883;
-		case 114:
-			return 1073741884;
-		case 115:
-			return 1073741885;
-		case 116:
-			return 1073741886;
-		case 117:
-			return 1073741887;
-		case 118:
-			return 1073741888;
-		case 119:
-			return 1073741889;
-		case 120:
-			return 1073741890;
-		case 121:
-			return 1073741891;
-		case 122:
-			return 1073741892;
-		case 123:
-			return 1073741893;
-		case 124:
-			return 1073741928;
-		case 125:
-			return 1073741929;
-		case 126:
-			return 1073741930;
-		case 127:
-			return 1073741931;
-		case 128:
-			return 1073741932;
-		case 129:
-			return 1073741933;
-		case 130:
-			return 1073741934;
-		case 131:
-			return 1073741935;
-		case 132:
-			return 1073741936;
-		case 133:
-			return 1073741937;
-		case 134:
-			return 1073741938;
-		case 135:
-			return 1073741939;
-		case 144:
-			return 1073741907;
-		case 145:
-			return 1073741895;
-		case 160:
-			return 94;
-		case 161:
-			return 33;
-		case 163:
-			return 35;
-		case 164:
-			return 36;
-		case 166:
-			return 1073742094;
-		case 167:
-			return 1073742095;
-		case 168:
-			return 1073742097;
-		case 169:
-			return 41;
-		case 170:
-			return 42;
-		case 171:
-			return 96;
-		case 172:
-			return 1073741898;
-		case 173:
-			return 45;
-		case 174:
-			return 1073741953;
-		case 175:
-			return 1073741952;
-		case 176:
-			return 1073742082;
-		case 177:
-			return 1073742083;
-		case 178:
-			return 1073742084;
-		case 179:
-			return 1073742085;
-		case 180:
-			return 1073742089;
-		case 181:
-			return 1073742086;
-		case 182:
-			return 1073741953;
-		case 183:
-			return 1073741952;
-		case 186:
-			return 59;
-		case 187:
-			return 61;
-		case 188:
-			return 44;
-		case 189:
-			return 45;
-		case 190:
-			return 46;
-		case 191:
-			return 47;
-		case 192:
-			return 96;
-		case 193:
-			return 63;
-		case 194:
-			return 1073741923;
-		case 219:
-			return 91;
-		case 220:
-			return 92;
-		case 221:
-			return 93;
-		case 222:
-			return 39;
-		case 223:
-			return 96;
-		case 224:
-			return 1073742051;
-		case 226:
-			return 92;
-		}
-		return keyCode;
-	}
-	,exec: function() {
-		window.addEventListener("keydown",$bind(this,this.handleKeyEvent),false);
-		window.addEventListener("keyup",$bind(this,this.handleKeyEvent),false);
-		window.addEventListener("focus",$bind(this,this.handleWindowEvent),false);
-		window.addEventListener("blur",$bind(this,this.handleWindowEvent),false);
-		window.addEventListener("resize",$bind(this,this.handleWindowEvent),false);
-		window.addEventListener("beforeunload",$bind(this,this.handleWindowEvent),false);
-		window.addEventListener("devicemotion",$bind(this,this.handleSensorEvent),false);
-		
-			if (!CanvasRenderingContext2D.prototype.isPointInStroke) {
-				CanvasRenderingContext2D.prototype.isPointInStroke = function (path, x, y) {
-					return false;
-				};
-			}
-			if (!CanvasRenderingContext2D.prototype.isPointInPath) {
-				CanvasRenderingContext2D.prototype.isPointInPath = function (path, x, y) {
-					return false;
-				};
-			}
-
-			if ('performance' in window == false) {
-				window.performance = {};
-			}
-
-			if ('now' in window.performance == false) {
-				var offset = Date.now();
-				if (performance.timing && performance.timing.navigationStart) {
-					offset = performance.timing.navigationStart
-				}
-				window.performance.now = function now() {
-					return Date.now() - offset;
-				}
-			}
-
-			var lastTime = 0;
-			var vendors = ['ms', 'moz', 'webkit', 'o'];
-			for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-				window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-				window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
-			}
-
-			if (!window.requestAnimationFrame)
-				window.requestAnimationFrame = function(callback, element) {
-					var currTime = new Date().getTime();
-					var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-					var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-					  timeToCall);
-					lastTime = currTime + timeToCall;
-					return id;
-				};
-
-			if (!window.cancelAnimationFrame)
-				window.cancelAnimationFrame = function(id) {
-					clearTimeout(id);
-				};
-
-			window.requestAnimFrame = window.requestAnimationFrame;
-		;
-		this.lastUpdate = new Date().getTime();
-		this.handleApplicationEvent();
-		return 0;
-	}
-	,exit: function() {
-	}
-	,handleApplicationEvent: function(__) {
-		var _g = 0;
-		var _g1 = this.parent.__windows;
-		while(_g < _g1.length) {
-			var $window = _g1[_g];
-			++_g;
-			$window.__backend.updateSize();
-		}
-		this.updateGameDevices();
-		this.currentUpdate = new Date().getTime();
-		if(this.currentUpdate >= this.nextUpdate) {
-			this.deltaTime = this.currentUpdate - this.lastUpdate;
-			var _g = 0;
-			var _g1 = this.parent.__windows;
-			while(_g < _g1.length) {
-				var $window = _g1[_g];
-				++_g;
-				this.parent.onUpdate.dispatch(this.deltaTime | 0);
-				if($window.context != null) {
-					$window.onRender.dispatch($window.context);
-				}
-			}
-			if(this.framePeriod < 0) {
-				this.nextUpdate = this.currentUpdate;
-			} else {
-				this.nextUpdate = this.currentUpdate - this.currentUpdate % this.framePeriod + this.framePeriod;
-			}
-			this.lastUpdate = this.currentUpdate;
-		}
-		window.requestAnimationFrame($bind(this,this.handleApplicationEvent));
-	}
-	,handleKeyEvent: function(event) {
-		if(this.parent.__window != null) {
-			var keyCode = this.convertKeyCode(event.keyCode != null ? event.keyCode : event.which);
-			var modifier = (event.shiftKey ? 3 : 0) | (event.ctrlKey ? 192 : 0) | (event.altKey ? 768 : 0) | (event.metaKey ? 3072 : 0);
-			if(event.type == "keydown") {
-				this.parent.__window.onKeyDown.dispatch(keyCode,modifier);
-				if(this.parent.__window.onKeyDown.canceled && event.cancelable) {
-					event.preventDefault();
-				}
-			} else {
-				this.parent.__window.onKeyUp.dispatch(keyCode,modifier);
-				if(this.parent.__window.onKeyUp.canceled && event.cancelable) {
-					event.preventDefault();
-				}
-			}
-		}
-	}
-	,handleSensorEvent: function(event) {
-		this.accelerometer.onUpdate.dispatch(event.accelerationIncludingGravity.x,event.accelerationIncludingGravity.y,event.accelerationIncludingGravity.z);
-	}
-	,handleWindowEvent: function(event) {
-		if(this.parent.__window != null) {
-			switch(event.type) {
-			case "beforeunload":
-				break;
-			case "blur":
-				this.parent.__window.onFocusOut.dispatch();
-				this.parent.__window.onDeactivate.dispatch();
-				break;
-			case "focus":
-				this.parent.__window.onFocusIn.dispatch();
-				this.parent.__window.onActivate.dispatch();
-				break;
-			case "resize":
-				this.parent.__window.__backend.handleResizeEvent(event);
-				break;
-			}
-		}
-	}
-	,updateGameDevices: function() {
-		var devices = lime_ui_Joystick.__getDeviceData();
-		if(devices == null) {
-			return;
-		}
-		var id;
-		var gamepad;
-		var joystick;
-		var data;
-		var cache;
-		var _g = 0;
-		var _g1 = devices.length;
-		while(_g < _g1) {
-			var i = _g++;
-			id = i;
-			data = devices[id];
-			if(data == null) {
-				continue;
-			}
-			if(!this.gameDeviceCache.h.hasOwnProperty(id)) {
-				cache = new lime__$internal_backend_html5_GameDeviceData();
-				cache.id = id;
-				cache.connected = data.connected;
-				var _g2 = 0;
-				var _g3 = data.buttons.length;
-				while(_g2 < _g3) {
-					var i1 = _g2++;
-					cache.buttons.push(data.buttons[i1].value);
-				}
-				var _g4 = 0;
-				var _g5 = data.axes.length;
-				while(_g4 < _g5) {
-					var i2 = _g4++;
-					cache.axes.push(data.axes[i2]);
-				}
-				if(data.mapping == "standard") {
-					cache.isGamepad = true;
-				}
-				this.gameDeviceCache.h[id] = cache;
-				if(data.connected) {
-					lime_ui_Joystick.__connect(id);
-					if(cache.isGamepad) {
-						lime_ui_Gamepad.__connect(id);
-					}
-				}
-			}
-			cache = this.gameDeviceCache.h[id];
-			joystick = lime_ui_Joystick.devices.h[id];
-			gamepad = lime_ui_Gamepad.devices.h[id];
-			if(data.connected) {
-				var button;
-				var value;
-				var _g6 = 0;
-				var _g7 = data.buttons.length;
-				while(_g6 < _g7) {
-					var i3 = _g6++;
-					value = data.buttons[i3].value;
-					if(value != cache.buttons[i3]) {
-						if(i3 == 6) {
-							joystick.onAxisMove.dispatch(data.axes.length,value);
-							if(gamepad != null) {
-								gamepad.onAxisMove.dispatch(4,value);
-							}
-						} else if(i3 == 7) {
-							joystick.onAxisMove.dispatch(data.axes.length + 1,value);
-							if(gamepad != null) {
-								gamepad.onAxisMove.dispatch(5,value);
-							}
-						} else {
-							if(value > 0) {
-								joystick.onButtonDown.dispatch(i3);
-							} else {
-								joystick.onButtonUp.dispatch(i3);
-							}
-							if(gamepad != null) {
-								switch(i3) {
-								case 0:
-									button = 0;
-									break;
-								case 1:
-									button = 1;
-									break;
-								case 2:
-									button = 2;
-									break;
-								case 3:
-									button = 3;
-									break;
-								case 4:
-									button = 9;
-									break;
-								case 5:
-									button = 10;
-									break;
-								case 8:
-									button = 4;
-									break;
-								case 9:
-									button = 6;
-									break;
-								case 10:
-									button = 7;
-									break;
-								case 11:
-									button = 8;
-									break;
-								case 12:
-									button = 11;
-									break;
-								case 13:
-									button = 12;
-									break;
-								case 14:
-									button = 13;
-									break;
-								case 15:
-									button = 14;
-									break;
-								case 16:
-									button = 5;
-									break;
-								default:
-									continue;
-								}
-								if(value > 0) {
-									gamepad.onButtonDown.dispatch(button);
-								} else {
-									gamepad.onButtonUp.dispatch(button);
-								}
-							}
-						}
-						cache.buttons[i3] = value;
-					}
-				}
-				var _g8 = 0;
-				var _g9 = data.axes.length;
-				while(_g8 < _g9) {
-					var i4 = _g8++;
-					if(data.axes[i4] != cache.axes[i4]) {
-						joystick.onAxisMove.dispatch(i4,data.axes[i4]);
-						if(gamepad != null) {
-							gamepad.onAxisMove.dispatch(i4,data.axes[i4]);
-						}
-						cache.axes[i4] = data.axes[i4];
-					}
-				}
-			} else if(cache.connected) {
-				cache.connected = false;
-				lime_ui_Joystick.__disconnect(id);
-				lime_ui_Gamepad.__disconnect(id);
-			}
-		}
-	}
-	,__class__: lime__$internal_backend_html5_HTML5Application
-};
-var lime_app_Application = function() {
-	this.onCreateWindow = new lime_app__$Event_$lime_$ui_$Window_$Void();
-	this.onUpdate = new lime_app__$Event_$Int_$Void();
-	lime_app_Module.call(this);
-	if(lime_app_Application.current == null) {
-		lime_app_Application.current = this;
-	}
-	this.meta = new haxe_ds_StringMap();
-	this.modules = [];
-	this.__windowByID = new haxe_ds_IntMap();
-	this.__windows = [];
-	this.__backend = new lime__$internal_backend_html5_HTML5Application(this);
-	this.__registerLimeModule(this);
-	this.__preloader = new lime_utils_Preloader();
-	this.__preloader.onProgress.add($bind(this,this.onPreloadProgress));
-	this.__preloader.onComplete.add($bind(this,this.onPreloadComplete));
-};
-$hxClasses["lime.app.Application"] = lime_app_Application;
-lime_app_Application.__name__ = "lime.app.Application";
-lime_app_Application.__super__ = lime_app_Module;
-lime_app_Application.prototype = $extend(lime_app_Module.prototype,{
-	meta: null
-	,modules: null
-	,onUpdate: null
-	,onCreateWindow: null
-	,preloader: null
-	,window: null
-	,windows: null
-	,__backend: null
-	,__preloader: null
-	,__window: null
-	,__windowByID: null
-	,__windows: null
-	,addModule: function(module) {
-		module.__registerLimeModule(this);
-		this.modules.push(module);
-	}
-	,createWindow: function(attributes) {
-		var $window = this.__createWindow(attributes);
-		this.__addWindow($window);
-		return $window;
-	}
-	,exec: function() {
-		lime_app_Application.current = this;
-		return this.__backend.exec();
-	}
-	,onGamepadAxisMove: function(gamepad,axis,value) {
-	}
-	,onGamepadButtonDown: function(gamepad,button) {
-	}
-	,onGamepadButtonUp: function(gamepad,button) {
-	}
-	,onGamepadConnect: function(gamepad) {
-	}
-	,onGamepadDisconnect: function(gamepad) {
-	}
-	,onJoystickAxisMove: function(joystick,axis,value) {
-	}
-	,onJoystickButtonDown: function(joystick,button) {
-	}
-	,onJoystickButtonUp: function(joystick,button) {
-	}
-	,onJoystickConnect: function(joystick) {
-	}
-	,onJoystickDisconnect: function(joystick) {
-	}
-	,onJoystickHatMove: function(joystick,hat,position) {
-	}
-	,onJoystickTrackballMove: function(joystick,trackball,x,y) {
-	}
-	,onKeyDown: function(keyCode,modifier) {
-	}
-	,onKeyUp: function(keyCode,modifier) {
-	}
-	,onModuleExit: function(code) {
-	}
-	,onMouseDown: function(x,y,button) {
-	}
-	,onMouseMove: function(x,y) {
-	}
-	,onMouseMoveRelative: function(x,y) {
-	}
-	,onMouseUp: function(x,y,button) {
-	}
-	,onMouseWheel: function(deltaX,deltaY,deltaMode) {
-	}
-	,onPreloadComplete: function() {
-	}
-	,onPreloadProgress: function(loaded,total) {
-	}
-	,onRenderContextLost: function() {
-	}
-	,onRenderContextRestored: function(context) {
-	}
-	,onTextEdit: function(text,start,length) {
-	}
-	,onTextInput: function(text) {
-	}
-	,onTouchCancel: function(touch) {
-	}
-	,onTouchEnd: function(touch) {
-	}
-	,onTouchMove: function(touch) {
-	}
-	,onTouchStart: function(touch) {
-	}
-	,onWindowActivate: function() {
-	}
-	,onWindowClose: function() {
-	}
-	,onWindowCreate: function() {
-	}
-	,onWindowDeactivate: function() {
-	}
-	,onWindowDropFile: function(file) {
-	}
-	,onWindowEnter: function() {
-	}
-	,onWindowExpose: function() {
-	}
-	,onWindowFocusIn: function() {
-	}
-	,onWindowFocusOut: function() {
-	}
-	,onWindowFullscreen: function() {
-	}
-	,onWindowLeave: function() {
-	}
-	,onWindowMove: function(x,y) {
-	}
-	,onWindowMinimize: function() {
-	}
-	,onWindowResize: function(width,height) {
-	}
-	,onWindowRestore: function() {
-	}
-	,removeModule: function(module) {
-		if(module != null) {
-			module.__unregisterLimeModule(this);
-			HxOverrides.remove(this.modules,module);
-		}
-	}
-	,render: function(context) {
-	}
-	,update: function(deltaTime) {
-	}
-	,__addWindow: function($window) {
-		if($window != null) {
-			this.__windows.push($window);
-			this.__windowByID.h[$window.id] = $window;
-			var _g = $bind(this,this.__onWindowClose);
-			var window1 = $window;
-			var tmp = function() {
-				_g(window1);
-			};
-			$window.onClose.add(tmp,false,-10000);
-			if(this.__window == null) {
-				this.__window = $window;
-				$window.onActivate.add($bind(this,this.onWindowActivate));
-				$window.onRenderContextLost.add($bind(this,this.onRenderContextLost));
-				$window.onRenderContextRestored.add($bind(this,this.onRenderContextRestored));
-				$window.onDeactivate.add($bind(this,this.onWindowDeactivate));
-				$window.onDropFile.add($bind(this,this.onWindowDropFile));
-				$window.onEnter.add($bind(this,this.onWindowEnter));
-				$window.onExpose.add($bind(this,this.onWindowExpose));
-				$window.onFocusIn.add($bind(this,this.onWindowFocusIn));
-				$window.onFocusOut.add($bind(this,this.onWindowFocusOut));
-				$window.onFullscreen.add($bind(this,this.onWindowFullscreen));
-				$window.onKeyDown.add($bind(this,this.onKeyDown));
-				$window.onKeyUp.add($bind(this,this.onKeyUp));
-				$window.onLeave.add($bind(this,this.onWindowLeave));
-				$window.onMinimize.add($bind(this,this.onWindowMinimize));
-				$window.onMouseDown.add($bind(this,this.onMouseDown));
-				$window.onMouseMove.add($bind(this,this.onMouseMove));
-				$window.onMouseMoveRelative.add($bind(this,this.onMouseMoveRelative));
-				$window.onMouseUp.add($bind(this,this.onMouseUp));
-				$window.onMouseWheel.add($bind(this,this.onMouseWheel));
-				$window.onMove.add($bind(this,this.onWindowMove));
-				$window.onRender.add($bind(this,this.render));
-				$window.onResize.add($bind(this,this.onWindowResize));
-				$window.onRestore.add($bind(this,this.onWindowRestore));
-				$window.onTextEdit.add($bind(this,this.onTextEdit));
-				$window.onTextInput.add($bind(this,this.onTextInput));
-				this.onWindowCreate();
-			}
-			this.onCreateWindow.dispatch($window);
-		}
-	}
-	,__createWindow: function(attributes) {
-		var $window = new lime_ui_Window(this,attributes);
-		if($window.id == -1) {
-			return null;
-		}
-		return $window;
-	}
-	,__registerLimeModule: function(application) {
-		application.onUpdate.add($bind(this,this.update));
-		application.onExit.add($bind(this,this.onModuleExit),false,0);
-		application.onExit.add($bind(this,this.__onModuleExit),false,0);
-		var gamepad = lime_ui_Gamepad.devices.iterator();
-		while(gamepad.hasNext()) {
-			var gamepad1 = gamepad.next();
-			this.__onGamepadConnect(gamepad1);
-		}
-		lime_ui_Gamepad.onConnect.add($bind(this,this.__onGamepadConnect));
-		var joystick = lime_ui_Joystick.devices.iterator();
-		while(joystick.hasNext()) {
-			var joystick1 = joystick.next();
-			this.__onJoystickConnect(joystick1);
-		}
-		lime_ui_Joystick.onConnect.add($bind(this,this.__onJoystickConnect));
-		lime_ui_Touch.onCancel.add($bind(this,this.onTouchCancel));
-		lime_ui_Touch.onStart.add($bind(this,this.onTouchStart));
-		lime_ui_Touch.onMove.add($bind(this,this.onTouchMove));
-		lime_ui_Touch.onEnd.add($bind(this,this.onTouchEnd));
-	}
-	,__removeWindow: function($window) {
-		if($window != null && this.__windowByID.h.hasOwnProperty($window.id)) {
-			if(this.__window == $window) {
-				this.__window = null;
-			}
-			HxOverrides.remove(this.__windows,$window);
-			this.__windowByID.remove($window.id);
-			$window.close();
-			if(this.__windows.length == 0) {
-				lime_system_System.exit(0);
-			}
-		}
-	}
-	,__onGamepadConnect: function(gamepad) {
-		this.onGamepadConnect(gamepad);
-		var _g = $bind(this,this.onGamepadAxisMove);
-		var gamepad1 = gamepad;
-		var tmp = function(axis,value) {
-			_g(gamepad1,axis,value);
-		};
-		gamepad.onAxisMove.add(tmp);
-		var _g1 = $bind(this,this.onGamepadButtonDown);
-		var gamepad2 = gamepad;
-		var tmp = function(button) {
-			_g1(gamepad2,button);
-		};
-		gamepad.onButtonDown.add(tmp);
-		var _g2 = $bind(this,this.onGamepadButtonUp);
-		var gamepad3 = gamepad;
-		var tmp = function(button) {
-			_g2(gamepad3,button);
-		};
-		gamepad.onButtonUp.add(tmp);
-		var _g3 = $bind(this,this.onGamepadDisconnect);
-		var gamepad4 = gamepad;
-		var tmp = function() {
-			_g3(gamepad4);
-		};
-		gamepad.onDisconnect.add(tmp);
-	}
-	,__onJoystickConnect: function(joystick) {
-		this.onJoystickConnect(joystick);
-		var _g = $bind(this,this.onJoystickAxisMove);
-		var joystick1 = joystick;
-		var tmp = function(axis,value) {
-			_g(joystick1,axis,value);
-		};
-		joystick.onAxisMove.add(tmp);
-		var _g1 = $bind(this,this.onJoystickButtonDown);
-		var joystick2 = joystick;
-		var tmp = function(button) {
-			_g1(joystick2,button);
-		};
-		joystick.onButtonDown.add(tmp);
-		var _g2 = $bind(this,this.onJoystickButtonUp);
-		var joystick3 = joystick;
-		var tmp = function(button) {
-			_g2(joystick3,button);
-		};
-		joystick.onButtonUp.add(tmp);
-		var _g3 = $bind(this,this.onJoystickDisconnect);
-		var joystick4 = joystick;
-		var tmp = function() {
-			_g3(joystick4);
-		};
-		joystick.onDisconnect.add(tmp);
-		var _g4 = $bind(this,this.onJoystickHatMove);
-		var joystick5 = joystick;
-		var tmp = function(hat,position) {
-			_g4(joystick5,hat,position);
-		};
-		joystick.onHatMove.add(tmp);
-		var _g5 = $bind(this,this.onJoystickTrackballMove);
-		var joystick6 = joystick;
-		var tmp = function(trackball,x,y) {
-			_g5(joystick6,trackball,x,y);
-		};
-		joystick.onTrackballMove.add(tmp);
-	}
-	,__onModuleExit: function(code) {
-		this.__backend.exit();
-	}
-	,__onWindowClose: function($window) {
-		if(this.__window == $window) {
-			this.onWindowClose();
-		}
-		this.__removeWindow($window);
-	}
-	,__unregisterLimeModule: function(application) {
-		application.onUpdate.remove($bind(this,this.update));
-		application.onExit.remove($bind(this,this.__onModuleExit));
-		application.onExit.remove($bind(this,this.onModuleExit));
-		lime_ui_Gamepad.onConnect.remove($bind(this,this.__onGamepadConnect));
-		lime_ui_Joystick.onConnect.remove($bind(this,this.__onJoystickConnect));
-		lime_ui_Touch.onCancel.remove($bind(this,this.onTouchCancel));
-		lime_ui_Touch.onStart.remove($bind(this,this.onTouchStart));
-		lime_ui_Touch.onMove.remove($bind(this,this.onTouchMove));
-		lime_ui_Touch.onEnd.remove($bind(this,this.onTouchEnd));
-		this.onModuleExit(0);
-	}
-	,get_preloader: function() {
-		return this.__preloader;
-	}
-	,get_window: function() {
-		return this.__window;
-	}
-	,get_windows: function() {
-		return this.__windows;
-	}
-	,__class__: lime_app_Application
-	,__properties__: {get_windows:"get_windows",get_window:"get_window",get_preloader:"get_preloader"}
-});
-var ApplicationMain = function() { };
-$hxClasses["ApplicationMain"] = ApplicationMain;
-ApplicationMain.__name__ = "ApplicationMain";
-ApplicationMain.main = function() {
-	lime_system_System.__registerEntryPoint("Intellector",ApplicationMain.create);
-};
-ApplicationMain.create = function(config) {
-	var app = new openfl_display_Application();
-	ManifestResources.init(config);
-	app.meta.h["build"] = "13";
-	app.meta.h["company"] = "Company Name";
-	app.meta.h["file"] = "Intellector";
-	app.meta.h["name"] = "Intellector";
-	app.meta.h["packageName"] = "com.sample.intellector";
-	app.meta.h["version"] = "1.0.0";
-	var attributes = { allowHighDPI : false, alwaysOnTop : false, borderless : false, element : null, frameRate : 60, height : 0, hidden : false, maximized : false, minimized : false, parameters : { }, resizable : true, title : "Intellector", width : 0, x : null, y : null};
-	attributes.context = { antialiasing : 0, background : 16777215, colorDepth : 32, depth : true, hardware : true, stencil : true, type : null, vsync : false};
-	if(app.__window == null) {
-		if(config != null) {
-			var _g = 0;
-			var _g1 = Reflect.fields(config);
-			while(_g < _g1.length) {
-				var field = _g1[_g];
-				++_g;
-				if(Object.prototype.hasOwnProperty.call(attributes,field)) {
-					attributes[field] = Reflect.field(config,field);
-				} else if(Object.prototype.hasOwnProperty.call(attributes.context,field)) {
-					attributes.context[field] = Reflect.field(config,field);
-				}
-			}
-		}
-	}
-	app.createWindow(attributes);
-	var preloader = new openfl_display_Preloader(new openfl_display_DefaultPreloader());
-	app.__preloader.onProgress.add(function(loaded,total) {
-		preloader.update(loaded,total);
-	});
-	app.__preloader.onComplete.add(function() {
-		preloader.start();
-	});
-	var stage = (js_Boot.__cast(app.__window , openfl_display_Window)).stage;
-	var tmp = function() {
-		ApplicationMain.start(stage);
-	};
-	preloader.onComplete.add(tmp);
-	var _g = 0;
-	var _g1 = ManifestResources.preloadLibraries;
-	while(_g < _g1.length) {
-		var library = _g1[_g];
-		++_g;
-		app.__preloader.addLibrary(library);
-	}
-	var _g = 0;
-	var _g1 = ManifestResources.preloadLibraryNames;
-	while(_g < _g1.length) {
-		var name = _g1[_g];
-		++_g;
-		app.__preloader.addLibraryName(name);
-	}
-	app.__preloader.load();
-	var result = app.exec();
-};
-ApplicationMain.start = function(stage) {
-	try {
-		var current = stage.getChildAt(0);
-		if(current == null || !((current) instanceof openfl_display_DisplayObjectContainer)) {
-			current = new openfl_display_MovieClip();
-			stage.addChild(current);
-		}
-		new DocumentClass(current);
-		stage.dispatchEvent(new openfl_events_Event("resize",false,false));
-		if(stage.window.__fullscreen) {
-			stage.dispatchEvent(new openfl_events_FullScreenEvent("fullScreen",false,false,true,true));
-		}
-	} catch( _g ) {
-		haxe_NativeStackTrace.lastError = _g;
-		var e = haxe_Exception.caught(_g).unwrap();
-		stage.__handleError(e);
-	}
-};
 var openfl_events_IEventDispatcher = function() { };
 $hxClasses["openfl.events.IEventDispatcher"] = openfl_events_IEventDispatcher;
 openfl_events_IEventDispatcher.__name__ = "openfl.events.IEventDispatcher";
@@ -4167,6 +3212,1637 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 	,__class__: openfl_display_Sprite
 	,__properties__: $extend(openfl_display_DisplayObjectContainer.prototype.__properties__,{get_graphics:"get_graphics",set_buttonMode:"set_buttonMode",get_buttonMode:"get_buttonMode"})
 });
+var AnalysisField = function() {
+	openfl_display_Sprite.call(this);
+	this.hexes = [];
+	var _g = 0;
+	while(_g < 7) {
+		var j = _g++;
+		var row = [];
+		var _g1 = 0;
+		while(_g1 < 9) {
+			var i = _g1++;
+			if(!this.hexExists(i,j)) {
+				row.push(null);
+			} else {
+				var hex = new Hexagon(AnalysisField.a,this.isDark(i,j));
+				var coords = this.hexCoords(i,j);
+				hex.set_x(coords.x);
+				hex.set_y(coords.y);
+				this.addChild(hex);
+				row.push(hex);
+			}
+		}
+		this.hexes.push(row);
+	}
+	var _g = [];
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	this.figures = _g;
+	this.figures[0][0] = new Figure(FigureType.Dominator,FigureColor.Black);
+	this.figures[0][1] = new Figure(FigureType.Liberator,FigureColor.Black);
+	this.figures[0][2] = new Figure(FigureType.Aggressor,FigureColor.Black);
+	this.figures[0][3] = new Figure(FigureType.Defensor,FigureColor.Black);
+	this.figures[0][4] = new Figure(FigureType.Intellector,FigureColor.Black);
+	this.figures[0][5] = new Figure(FigureType.Defensor,FigureColor.Black);
+	this.figures[0][6] = new Figure(FigureType.Aggressor,FigureColor.Black);
+	this.figures[0][7] = new Figure(FigureType.Liberator,FigureColor.Black);
+	this.figures[0][8] = new Figure(FigureType.Dominator,FigureColor.Black);
+	this.figures[1][0] = new Figure(FigureType.Progressor,FigureColor.Black);
+	this.figures[1][2] = new Figure(FigureType.Progressor,FigureColor.Black);
+	this.figures[1][4] = new Figure(FigureType.Progressor,FigureColor.Black);
+	this.figures[1][6] = new Figure(FigureType.Progressor,FigureColor.Black);
+	this.figures[1][8] = new Figure(FigureType.Progressor,FigureColor.Black);
+	this.figures[6][0] = new Figure(FigureType.Dominator,FigureColor.White);
+	this.figures[5][1] = new Figure(FigureType.Liberator,FigureColor.White);
+	this.figures[6][2] = new Figure(FigureType.Aggressor,FigureColor.White);
+	this.figures[5][3] = new Figure(FigureType.Defensor,FigureColor.White);
+	this.figures[6][4] = new Figure(FigureType.Intellector,FigureColor.White);
+	this.figures[5][5] = new Figure(FigureType.Defensor,FigureColor.White);
+	this.figures[6][6] = new Figure(FigureType.Aggressor,FigureColor.White);
+	this.figures[5][7] = new Figure(FigureType.Liberator,FigureColor.White);
+	this.figures[6][8] = new Figure(FigureType.Dominator,FigureColor.White);
+	this.figures[5][0] = new Figure(FigureType.Progressor,FigureColor.White);
+	this.figures[5][2] = new Figure(FigureType.Progressor,FigureColor.White);
+	this.figures[5][4] = new Figure(FigureType.Progressor,FigureColor.White);
+	this.figures[5][6] = new Figure(FigureType.Progressor,FigureColor.White);
+	this.figures[5][8] = new Figure(FigureType.Progressor,FigureColor.White);
+	this.placeFigures();
+	this.addEventListener("addedToStage",$bind(this,this.init));
+};
+$hxClasses["AnalysisField"] = AnalysisField;
+AnalysisField.__name__ = "AnalysisField";
+AnalysisField.__super__ = openfl_display_Sprite;
+AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
+	hexes: null
+	,figures: null
+	,selected: null
+	,selectedDest: null
+	,init: function(e) {
+		this.removeEventListener("addedToStage",$bind(this,this.init));
+		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
+	}
+	,onPress: function(e) {
+		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		if(indexes == null) {
+			if(this.selected != null) {
+				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+				this.hexes[this.selected.j][this.selected.i].deselect();
+				this.selected = null;
+			}
+			return;
+		}
+		if(this.selected != null) {
+			var movingFig = this.getFigure(this.selected);
+			var moveOntoFig = this.getFigure(indexes);
+			var _g = 0;
+			var _g1 = this.possibleFields(movingFig,this.selected.i,this.selected.j);
+			while(_g < _g1.length) {
+				var dest = _g1[_g];
+				++_g;
+				this.hexes[dest.j][dest.i].removeMarkers();
+			}
+			if(moveOntoFig != null && moveOntoFig.color == this.getFigure(this.selected).color && !this.isCastle(this.selected,indexes,movingFig,moveOntoFig)) {
+				this.hexes[this.selected.j][this.selected.i].deselect();
+				this.selected = indexes;
+				this.hexes[this.selected.j][this.selected.i].select();
+				var _g = 0;
+				var _g1 = this.possibleFields(moveOntoFig,indexes.i,indexes.j);
+				while(_g < _g1.length) {
+					var dest = _g1[_g];
+					++_g;
+					if(this.getFigure(dest) != null) {
+						this.hexes[dest.j][dest.i].addRound();
+					} else {
+						this.hexes[dest.j][dest.i].addDot();
+					}
+				}
+				return;
+			}
+			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+			if(this.ableToMove(this.selected,indexes)) {
+				this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
+			}
+			this.selectionBackToNormal();
+		} else {
+			var figure = this.figures[indexes.j][indexes.i];
+			if(figure != null) {
+				this.selected = indexes;
+				this.hexes[indexes.j][indexes.i].select();
+				this.removeChild(figure);
+				this.addChild(figure);
+				figure.startDrag(true);
+				var _g = 0;
+				var _g1 = this.possibleFields(figure,indexes.i,indexes.j);
+				while(_g < _g1.length) {
+					var dest = _g1[_g];
+					++_g;
+					if(this.getFigure(dest) != null) {
+						this.hexes[dest.j][dest.i].addRound();
+					} else {
+						this.hexes[dest.j][dest.i].addDot();
+					}
+				}
+				this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
+				this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
+				this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
+			}
+		}
+	}
+	,onMove: function(e) {
+		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		if(this.selectedDest != null) {
+			if(this.selectedDest.equals(indexes)) {
+				return;
+			} else {
+				this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+				this.selectedDest = null;
+			}
+		}
+		if(indexes != null && this.ableToMove(this.selected,indexes)) {
+			this.selectedDest = indexes;
+			this.hexes[this.selectedDest.j][this.selectedDest.i].select();
+		}
+	}
+	,onRelease: function(e) {
+		this.stage.removeEventListener("mouseUp",$bind(this,this.onRelease));
+		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		this.figures[this.selected.j][this.selected.i].stopDrag();
+		if(indexes != null && this.ableToMove(this.selected,indexes) && !indexes.equals(this.selected)) {
+			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+			var _g = 0;
+			var _g1 = this.possibleFields(this.figures[this.selected.j][this.selected.i],this.selected.i,this.selected.j);
+			while(_g < _g1.length) {
+				var dest = _g1[_g];
+				++_g;
+				this.hexes[dest.j][dest.i].removeMarkers();
+			}
+			this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
+			this.selectionBackToNormal();
+		} else {
+			this.disposeFigure(this.figures[this.selected.j][this.selected.i],this.selected.i,this.selected.j);
+		}
+		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
+	}
+	,selectionBackToNormal: function() {
+		this.hexes[this.selected.j][this.selected.i].deselect();
+		if(this.selectedDest != null) {
+			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+		}
+		this.selected = null;
+		this.selectedDest = null;
+	}
+	,ableToMove: function(from,to) {
+		var _g = 0;
+		var _g1 = this.possibleFields(this.getFigure(from),from.i,from.j);
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			if(to.equals(dest)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	,isCastle: function(pos1,pos2,fig1,fig2) {
+		if(fig1 == null || fig2 == null || fig1.color != fig2.color) {
+			return false;
+		}
+		if(!(fig1.type == FigureType.Intellector && fig2.type == FigureType.Defensor || fig1.type == FigureType.Defensor && fig2.type == FigureType.Intellector)) {
+			return false;
+		}
+		var dir = Direction.UL;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.UR;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.D;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.DR;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.DL;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		var dir = Direction.U;
+		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+			return true;
+		}
+		return false;
+	}
+	,possibleFields: function(figure,fromI,fromJ) {
+		var fields = [];
+		switch(figure.type._hx_index) {
+		case 0:
+			var dir = Direction.U;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			break;
+		case 1:
+			var _g = 0;
+			var _g1 = [Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
+			while(_g < _g1.length) {
+				var dir = _g1[_g];
+				++_g;
+				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+				while(destination != null) {
+					var occupier = this.getFigure(destination);
+					if(occupier != null) {
+						if(occupier.color != figure.color) {
+							fields.push(destination);
+						}
+						break;
+					} else {
+						fields.push(destination);
+						destination = this.getCoordsInRelDirection(destination.i,destination.j,dir,figure.color);
+					}
+				}
+			}
+			break;
+		case 2:
+			var _g = 0;
+			var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
+			while(_g < _g1.length) {
+				var dir = _g1[_g];
+				++_g;
+				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+				while(destination != null) {
+					var occupier = this.getFigure(destination);
+					if(occupier != null) {
+						if(occupier.color != figure.color) {
+							fields.push(destination);
+						}
+						break;
+					} else {
+						fields.push(destination);
+						destination = this.getCoordsInRelDirection(destination.i,destination.j,dir,figure.color);
+					}
+				}
+			}
+			break;
+		case 3:
+			var dir = Direction.UL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.D;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			var dir = Direction.U;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+			break;
+		case 4:
+			var dir = Direction.UL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.D;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			var dir = Direction.U;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+				fields.push(destination);
+			}
+			break;
+		case 5:
+			var dir = Direction.UL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.UR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.D;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DR;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.DL;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			var dir = Direction.U;
+			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
+			var occupier = this.getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+				fields.push(destination);
+			}
+			break;
+		}
+		return fields;
+	}
+	,getFigure: function(coords) {
+		if(coords == null || !this.hexExists(coords.i,coords.j) || this.figures[coords.j] == null) {
+			return null;
+		} else {
+			return this.figures[coords.j][coords.i];
+		}
+	}
+	,getCoordsInRelDirection: function(fromI,fromJ,dir,col,steps) {
+		if(steps == null) {
+			steps = 1;
+		}
+		var trueDirection = col == FigureColor.White ? dir : this.oppositeDir(dir);
+		var nextCoords = this.getCoordsInAbsDirection(fromI,fromJ,trueDirection);
+		--steps;
+		while(steps > 0 && nextCoords != null) {
+			nextCoords = this.getCoordsInAbsDirection(nextCoords.i,nextCoords.j,trueDirection);
+			--steps;
+		}
+		return nextCoords;
+	}
+	,oppositeDir: function(dir) {
+		switch(dir._hx_index) {
+		case 0:
+			return Direction.D;
+		case 1:
+			return Direction.DR;
+		case 2:
+			return Direction.DL;
+		case 3:
+			return Direction.U;
+		case 4:
+			return Direction.UR;
+		case 5:
+			return Direction.UL;
+		case 6:
+			return Direction.A_DR;
+		case 7:
+			return Direction.A_DL;
+		case 8:
+			return Direction.A_L;
+		case 9:
+			return Direction.A_UL;
+		case 10:
+			return Direction.A_UR;
+		case 11:
+			return Direction.A_R;
+		}
+	}
+	,getCoordsInAbsDirection: function(fromI,fromJ,dir) {
+		var coords;
+		switch(dir._hx_index) {
+		case 0:
+			coords = new IntPoint(fromI,fromJ - 1);
+			break;
+		case 1:
+			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
+			break;
+		case 2:
+			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
+			break;
+		case 3:
+			coords = new IntPoint(fromI,fromJ + 1);
+			break;
+		case 4:
+			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
+			break;
+		case 5:
+			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
+			break;
+		case 6:
+			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
+			break;
+		case 7:
+			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
+			break;
+		case 8:
+			coords = new IntPoint(fromI + 2,fromJ);
+			break;
+		case 9:
+			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
+			break;
+		case 10:
+			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
+			break;
+		case 11:
+			coords = new IntPoint(fromI - 2,fromJ);
+			break;
+		}
+		if(this.hexExists(coords.i,coords.j)) {
+			return coords;
+		} else {
+			return null;
+		}
+	}
+	,hexExists: function(i,j) {
+		if(i >= 0 && i < 9 && j >= 0 && j < 7) {
+			if(j == 6) {
+				return i % 2 == 0;
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
+	}
+	,move: function(fromI,fromJ,toI,toJ) {
+		var figure = this.figures[fromJ][fromI];
+		var figMoveOnto = this.getFigure(new IntPoint(toI,toJ));
+		this.disposeFigure(figure,toI,toJ);
+		this.figures[toJ][toI] = figure;
+		this.figures[fromJ][fromI] = null;
+		if(figMoveOnto != null) {
+			if(figMoveOnto.color == figure.color) {
+				if(this.isCastle(new IntPoint(fromI,fromJ),new IntPoint(toI,toJ),figure,figMoveOnto)) {
+					this.disposeFigure(figMoveOnto,fromI,fromJ);
+					this.figures[fromJ][fromI] = figMoveOnto;
+				} else {
+					throw haxe_Exception.thrown("Trying to eat own figure");
+				}
+			} else {
+				this.removeChild(figMoveOnto);
+			}
+		}
+	}
+	,posToIndexes: function(x,y) {
+		var closest = null;
+		var distanceSqr = AnalysisField.a * AnalysisField.a;
+		var _g = 0;
+		while(_g < 7) {
+			var j = _g++;
+			var _g1 = 0;
+			while(_g1 < 9) {
+				var i = _g1++;
+				if(!this.hexExists(i,j)) {
+					continue;
+				}
+				var coords = this.hexCoords(i,j);
+				var currDistSqr = (coords.x - x) * (coords.x - x) + (coords.y - y) * (coords.y - y);
+				if(distanceSqr > currDistSqr) {
+					closest = new IntPoint(i,j);
+					distanceSqr = currDistSqr;
+				}
+			}
+		}
+		return closest;
+	}
+	,hexCoords: function(i,j) {
+		var p = new openfl_geom_Point(0,0);
+		p.x = 3 * AnalysisField.a * i / 2;
+		p.y = Math.sqrt(3) * AnalysisField.a * j;
+		if(i % 2 == 1) {
+			p.y += Math.sqrt(3) * AnalysisField.a / 2;
+		}
+		return p;
+	}
+	,placeFigures: function() {
+		var _g = 0;
+		while(_g < 7) {
+			var j = _g++;
+			var _g1 = 0;
+			while(_g1 < 9) {
+				var i = _g1++;
+				var figure = this.figures[j][i];
+				if(figure != null) {
+					var scale = Math.sqrt(3) * AnalysisField.a * 0.85 / figure.get_height();
+					if(figure.type == FigureType.Progressor) {
+						scale *= 0.7;
+					} else if(figure.type == FigureType.Liberator || figure.type == FigureType.Defensor) {
+						scale *= 0.9;
+					}
+					figure.set_scaleX(scale);
+					figure.set_scaleY(scale);
+					this.disposeFigure(figure,i,j);
+					this.addChild(figure);
+				}
+			}
+		}
+	}
+	,disposeFigure: function(figure,i,j) {
+		var coords = this.hexCoords(i,j);
+		figure.set_x(coords.x);
+		figure.set_y(coords.y);
+	}
+	,isDark: function(i,j) {
+		if(j % 3 == 2) {
+			return false;
+		} else if(j % 3 == 0) {
+			return i % 2 == 0;
+		} else {
+			return i % 2 == 1;
+		}
+	}
+	,__class__: AnalysisField
+});
+var lime_app_IModule = function() { };
+$hxClasses["lime.app.IModule"] = lime_app_IModule;
+lime_app_IModule.__name__ = "lime.app.IModule";
+lime_app_IModule.__isInterface__ = true;
+lime_app_IModule.prototype = {
+	__registerLimeModule: null
+	,__unregisterLimeModule: null
+	,__class__: lime_app_IModule
+};
+var lime_app_Module = function() {
+	this.onExit = new lime_app__$Event_$Int_$Void();
+};
+$hxClasses["lime.app.Module"] = lime_app_Module;
+lime_app_Module.__name__ = "lime.app.Module";
+lime_app_Module.__interfaces__ = [lime_app_IModule];
+lime_app_Module.prototype = {
+	onExit: null
+	,__registerLimeModule: function(application) {
+	}
+	,__unregisterLimeModule: function(application) {
+	}
+	,__class__: lime_app_Module
+};
+var lime__$internal_backend_html5_HTML5Application = function(parent) {
+	this.gameDeviceCache = new haxe_ds_IntMap();
+	this.parent = parent;
+	this.currentUpdate = 0;
+	this.lastUpdate = 0;
+	this.nextUpdate = 0;
+	this.framePeriod = -1;
+	lime_media_AudioManager.init();
+	this.accelerometer = lime_system_Sensor.registerSensor(lime_system_SensorType.ACCELEROMETER,0);
+};
+$hxClasses["lime._internal.backend.html5.HTML5Application"] = lime__$internal_backend_html5_HTML5Application;
+lime__$internal_backend_html5_HTML5Application.__name__ = "lime._internal.backend.html5.HTML5Application";
+lime__$internal_backend_html5_HTML5Application.prototype = {
+	gameDeviceCache: null
+	,accelerometer: null
+	,currentUpdate: null
+	,deltaTime: null
+	,framePeriod: null
+	,lastUpdate: null
+	,nextUpdate: null
+	,parent: null
+	,convertKeyCode: function(keyCode) {
+		if(keyCode >= 65 && keyCode <= 90) {
+			return keyCode + 32;
+		}
+		switch(keyCode) {
+		case 12:
+			return 1073741980;
+		case 16:
+			return 1073742049;
+		case 17:
+			return 1073742048;
+		case 18:
+			return 1073742050;
+		case 19:
+			return 1073741896;
+		case 20:
+			return 1073741881;
+		case 33:
+			return 1073741899;
+		case 34:
+			return 1073741902;
+		case 35:
+			return 1073741901;
+		case 36:
+			return 1073741898;
+		case 37:
+			return 1073741904;
+		case 38:
+			return 1073741906;
+		case 39:
+			return 1073741903;
+		case 40:
+			return 1073741905;
+		case 41:
+			return 1073741943;
+		case 43:
+			return 1073741940;
+		case 44:
+			return 1073741894;
+		case 45:
+			return 1073741897;
+		case 46:
+			return 127;
+		case 91:
+			return 1073742051;
+		case 92:
+			return 1073742055;
+		case 93:
+			return 1073742055;
+		case 95:
+			return 1073742106;
+		case 96:
+			return 1073741922;
+		case 97:
+			return 1073741913;
+		case 98:
+			return 1073741914;
+		case 99:
+			return 1073741915;
+		case 100:
+			return 1073741916;
+		case 101:
+			return 1073741917;
+		case 102:
+			return 1073741918;
+		case 103:
+			return 1073741919;
+		case 104:
+			return 1073741920;
+		case 105:
+			return 1073741921;
+		case 106:
+			return 1073741909;
+		case 107:
+			return 1073741911;
+		case 108:
+			return 1073741923;
+		case 109:
+			return 1073741910;
+		case 110:
+			return 1073741923;
+		case 111:
+			return 1073741908;
+		case 112:
+			return 1073741882;
+		case 113:
+			return 1073741883;
+		case 114:
+			return 1073741884;
+		case 115:
+			return 1073741885;
+		case 116:
+			return 1073741886;
+		case 117:
+			return 1073741887;
+		case 118:
+			return 1073741888;
+		case 119:
+			return 1073741889;
+		case 120:
+			return 1073741890;
+		case 121:
+			return 1073741891;
+		case 122:
+			return 1073741892;
+		case 123:
+			return 1073741893;
+		case 124:
+			return 1073741928;
+		case 125:
+			return 1073741929;
+		case 126:
+			return 1073741930;
+		case 127:
+			return 1073741931;
+		case 128:
+			return 1073741932;
+		case 129:
+			return 1073741933;
+		case 130:
+			return 1073741934;
+		case 131:
+			return 1073741935;
+		case 132:
+			return 1073741936;
+		case 133:
+			return 1073741937;
+		case 134:
+			return 1073741938;
+		case 135:
+			return 1073741939;
+		case 144:
+			return 1073741907;
+		case 145:
+			return 1073741895;
+		case 160:
+			return 94;
+		case 161:
+			return 33;
+		case 163:
+			return 35;
+		case 164:
+			return 36;
+		case 166:
+			return 1073742094;
+		case 167:
+			return 1073742095;
+		case 168:
+			return 1073742097;
+		case 169:
+			return 41;
+		case 170:
+			return 42;
+		case 171:
+			return 96;
+		case 172:
+			return 1073741898;
+		case 173:
+			return 45;
+		case 174:
+			return 1073741953;
+		case 175:
+			return 1073741952;
+		case 176:
+			return 1073742082;
+		case 177:
+			return 1073742083;
+		case 178:
+			return 1073742084;
+		case 179:
+			return 1073742085;
+		case 180:
+			return 1073742089;
+		case 181:
+			return 1073742086;
+		case 182:
+			return 1073741953;
+		case 183:
+			return 1073741952;
+		case 186:
+			return 59;
+		case 187:
+			return 61;
+		case 188:
+			return 44;
+		case 189:
+			return 45;
+		case 190:
+			return 46;
+		case 191:
+			return 47;
+		case 192:
+			return 96;
+		case 193:
+			return 63;
+		case 194:
+			return 1073741923;
+		case 219:
+			return 91;
+		case 220:
+			return 92;
+		case 221:
+			return 93;
+		case 222:
+			return 39;
+		case 223:
+			return 96;
+		case 224:
+			return 1073742051;
+		case 226:
+			return 92;
+		}
+		return keyCode;
+	}
+	,exec: function() {
+		window.addEventListener("keydown",$bind(this,this.handleKeyEvent),false);
+		window.addEventListener("keyup",$bind(this,this.handleKeyEvent),false);
+		window.addEventListener("focus",$bind(this,this.handleWindowEvent),false);
+		window.addEventListener("blur",$bind(this,this.handleWindowEvent),false);
+		window.addEventListener("resize",$bind(this,this.handleWindowEvent),false);
+		window.addEventListener("beforeunload",$bind(this,this.handleWindowEvent),false);
+		window.addEventListener("devicemotion",$bind(this,this.handleSensorEvent),false);
+		
+			if (!CanvasRenderingContext2D.prototype.isPointInStroke) {
+				CanvasRenderingContext2D.prototype.isPointInStroke = function (path, x, y) {
+					return false;
+				};
+			}
+			if (!CanvasRenderingContext2D.prototype.isPointInPath) {
+				CanvasRenderingContext2D.prototype.isPointInPath = function (path, x, y) {
+					return false;
+				};
+			}
+
+			if ('performance' in window == false) {
+				window.performance = {};
+			}
+
+			if ('now' in window.performance == false) {
+				var offset = Date.now();
+				if (performance.timing && performance.timing.navigationStart) {
+					offset = performance.timing.navigationStart
+				}
+				window.performance.now = function now() {
+					return Date.now() - offset;
+				}
+			}
+
+			var lastTime = 0;
+			var vendors = ['ms', 'moz', 'webkit', 'o'];
+			for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+				window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+				window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+			}
+
+			if (!window.requestAnimationFrame)
+				window.requestAnimationFrame = function(callback, element) {
+					var currTime = new Date().getTime();
+					var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+					var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+					  timeToCall);
+					lastTime = currTime + timeToCall;
+					return id;
+				};
+
+			if (!window.cancelAnimationFrame)
+				window.cancelAnimationFrame = function(id) {
+					clearTimeout(id);
+				};
+
+			window.requestAnimFrame = window.requestAnimationFrame;
+		;
+		this.lastUpdate = new Date().getTime();
+		this.handleApplicationEvent();
+		return 0;
+	}
+	,exit: function() {
+	}
+	,handleApplicationEvent: function(__) {
+		var _g = 0;
+		var _g1 = this.parent.__windows;
+		while(_g < _g1.length) {
+			var $window = _g1[_g];
+			++_g;
+			$window.__backend.updateSize();
+		}
+		this.updateGameDevices();
+		this.currentUpdate = new Date().getTime();
+		if(this.currentUpdate >= this.nextUpdate) {
+			this.deltaTime = this.currentUpdate - this.lastUpdate;
+			var _g = 0;
+			var _g1 = this.parent.__windows;
+			while(_g < _g1.length) {
+				var $window = _g1[_g];
+				++_g;
+				this.parent.onUpdate.dispatch(this.deltaTime | 0);
+				if($window.context != null) {
+					$window.onRender.dispatch($window.context);
+				}
+			}
+			if(this.framePeriod < 0) {
+				this.nextUpdate = this.currentUpdate;
+			} else {
+				this.nextUpdate = this.currentUpdate - this.currentUpdate % this.framePeriod + this.framePeriod;
+			}
+			this.lastUpdate = this.currentUpdate;
+		}
+		window.requestAnimationFrame($bind(this,this.handleApplicationEvent));
+	}
+	,handleKeyEvent: function(event) {
+		if(this.parent.__window != null) {
+			var keyCode = this.convertKeyCode(event.keyCode != null ? event.keyCode : event.which);
+			var modifier = (event.shiftKey ? 3 : 0) | (event.ctrlKey ? 192 : 0) | (event.altKey ? 768 : 0) | (event.metaKey ? 3072 : 0);
+			if(event.type == "keydown") {
+				this.parent.__window.onKeyDown.dispatch(keyCode,modifier);
+				if(this.parent.__window.onKeyDown.canceled && event.cancelable) {
+					event.preventDefault();
+				}
+			} else {
+				this.parent.__window.onKeyUp.dispatch(keyCode,modifier);
+				if(this.parent.__window.onKeyUp.canceled && event.cancelable) {
+					event.preventDefault();
+				}
+			}
+		}
+	}
+	,handleSensorEvent: function(event) {
+		this.accelerometer.onUpdate.dispatch(event.accelerationIncludingGravity.x,event.accelerationIncludingGravity.y,event.accelerationIncludingGravity.z);
+	}
+	,handleWindowEvent: function(event) {
+		if(this.parent.__window != null) {
+			switch(event.type) {
+			case "beforeunload":
+				break;
+			case "blur":
+				this.parent.__window.onFocusOut.dispatch();
+				this.parent.__window.onDeactivate.dispatch();
+				break;
+			case "focus":
+				this.parent.__window.onFocusIn.dispatch();
+				this.parent.__window.onActivate.dispatch();
+				break;
+			case "resize":
+				this.parent.__window.__backend.handleResizeEvent(event);
+				break;
+			}
+		}
+	}
+	,updateGameDevices: function() {
+		var devices = lime_ui_Joystick.__getDeviceData();
+		if(devices == null) {
+			return;
+		}
+		var id;
+		var gamepad;
+		var joystick;
+		var data;
+		var cache;
+		var _g = 0;
+		var _g1 = devices.length;
+		while(_g < _g1) {
+			var i = _g++;
+			id = i;
+			data = devices[id];
+			if(data == null) {
+				continue;
+			}
+			if(!this.gameDeviceCache.h.hasOwnProperty(id)) {
+				cache = new lime__$internal_backend_html5_GameDeviceData();
+				cache.id = id;
+				cache.connected = data.connected;
+				var _g2 = 0;
+				var _g3 = data.buttons.length;
+				while(_g2 < _g3) {
+					var i1 = _g2++;
+					cache.buttons.push(data.buttons[i1].value);
+				}
+				var _g4 = 0;
+				var _g5 = data.axes.length;
+				while(_g4 < _g5) {
+					var i2 = _g4++;
+					cache.axes.push(data.axes[i2]);
+				}
+				if(data.mapping == "standard") {
+					cache.isGamepad = true;
+				}
+				this.gameDeviceCache.h[id] = cache;
+				if(data.connected) {
+					lime_ui_Joystick.__connect(id);
+					if(cache.isGamepad) {
+						lime_ui_Gamepad.__connect(id);
+					}
+				}
+			}
+			cache = this.gameDeviceCache.h[id];
+			joystick = lime_ui_Joystick.devices.h[id];
+			gamepad = lime_ui_Gamepad.devices.h[id];
+			if(data.connected) {
+				var button;
+				var value;
+				var _g6 = 0;
+				var _g7 = data.buttons.length;
+				while(_g6 < _g7) {
+					var i3 = _g6++;
+					value = data.buttons[i3].value;
+					if(value != cache.buttons[i3]) {
+						if(i3 == 6) {
+							joystick.onAxisMove.dispatch(data.axes.length,value);
+							if(gamepad != null) {
+								gamepad.onAxisMove.dispatch(4,value);
+							}
+						} else if(i3 == 7) {
+							joystick.onAxisMove.dispatch(data.axes.length + 1,value);
+							if(gamepad != null) {
+								gamepad.onAxisMove.dispatch(5,value);
+							}
+						} else {
+							if(value > 0) {
+								joystick.onButtonDown.dispatch(i3);
+							} else {
+								joystick.onButtonUp.dispatch(i3);
+							}
+							if(gamepad != null) {
+								switch(i3) {
+								case 0:
+									button = 0;
+									break;
+								case 1:
+									button = 1;
+									break;
+								case 2:
+									button = 2;
+									break;
+								case 3:
+									button = 3;
+									break;
+								case 4:
+									button = 9;
+									break;
+								case 5:
+									button = 10;
+									break;
+								case 8:
+									button = 4;
+									break;
+								case 9:
+									button = 6;
+									break;
+								case 10:
+									button = 7;
+									break;
+								case 11:
+									button = 8;
+									break;
+								case 12:
+									button = 11;
+									break;
+								case 13:
+									button = 12;
+									break;
+								case 14:
+									button = 13;
+									break;
+								case 15:
+									button = 14;
+									break;
+								case 16:
+									button = 5;
+									break;
+								default:
+									continue;
+								}
+								if(value > 0) {
+									gamepad.onButtonDown.dispatch(button);
+								} else {
+									gamepad.onButtonUp.dispatch(button);
+								}
+							}
+						}
+						cache.buttons[i3] = value;
+					}
+				}
+				var _g8 = 0;
+				var _g9 = data.axes.length;
+				while(_g8 < _g9) {
+					var i4 = _g8++;
+					if(data.axes[i4] != cache.axes[i4]) {
+						joystick.onAxisMove.dispatch(i4,data.axes[i4]);
+						if(gamepad != null) {
+							gamepad.onAxisMove.dispatch(i4,data.axes[i4]);
+						}
+						cache.axes[i4] = data.axes[i4];
+					}
+				}
+			} else if(cache.connected) {
+				cache.connected = false;
+				lime_ui_Joystick.__disconnect(id);
+				lime_ui_Gamepad.__disconnect(id);
+			}
+		}
+	}
+	,__class__: lime__$internal_backend_html5_HTML5Application
+};
+var lime_app_Application = function() {
+	this.onCreateWindow = new lime_app__$Event_$lime_$ui_$Window_$Void();
+	this.onUpdate = new lime_app__$Event_$Int_$Void();
+	lime_app_Module.call(this);
+	if(lime_app_Application.current == null) {
+		lime_app_Application.current = this;
+	}
+	this.meta = new haxe_ds_StringMap();
+	this.modules = [];
+	this.__windowByID = new haxe_ds_IntMap();
+	this.__windows = [];
+	this.__backend = new lime__$internal_backend_html5_HTML5Application(this);
+	this.__registerLimeModule(this);
+	this.__preloader = new lime_utils_Preloader();
+	this.__preloader.onProgress.add($bind(this,this.onPreloadProgress));
+	this.__preloader.onComplete.add($bind(this,this.onPreloadComplete));
+};
+$hxClasses["lime.app.Application"] = lime_app_Application;
+lime_app_Application.__name__ = "lime.app.Application";
+lime_app_Application.__super__ = lime_app_Module;
+lime_app_Application.prototype = $extend(lime_app_Module.prototype,{
+	meta: null
+	,modules: null
+	,onUpdate: null
+	,onCreateWindow: null
+	,preloader: null
+	,window: null
+	,windows: null
+	,__backend: null
+	,__preloader: null
+	,__window: null
+	,__windowByID: null
+	,__windows: null
+	,addModule: function(module) {
+		module.__registerLimeModule(this);
+		this.modules.push(module);
+	}
+	,createWindow: function(attributes) {
+		var $window = this.__createWindow(attributes);
+		this.__addWindow($window);
+		return $window;
+	}
+	,exec: function() {
+		lime_app_Application.current = this;
+		return this.__backend.exec();
+	}
+	,onGamepadAxisMove: function(gamepad,axis,value) {
+	}
+	,onGamepadButtonDown: function(gamepad,button) {
+	}
+	,onGamepadButtonUp: function(gamepad,button) {
+	}
+	,onGamepadConnect: function(gamepad) {
+	}
+	,onGamepadDisconnect: function(gamepad) {
+	}
+	,onJoystickAxisMove: function(joystick,axis,value) {
+	}
+	,onJoystickButtonDown: function(joystick,button) {
+	}
+	,onJoystickButtonUp: function(joystick,button) {
+	}
+	,onJoystickConnect: function(joystick) {
+	}
+	,onJoystickDisconnect: function(joystick) {
+	}
+	,onJoystickHatMove: function(joystick,hat,position) {
+	}
+	,onJoystickTrackballMove: function(joystick,trackball,x,y) {
+	}
+	,onKeyDown: function(keyCode,modifier) {
+	}
+	,onKeyUp: function(keyCode,modifier) {
+	}
+	,onModuleExit: function(code) {
+	}
+	,onMouseDown: function(x,y,button) {
+	}
+	,onMouseMove: function(x,y) {
+	}
+	,onMouseMoveRelative: function(x,y) {
+	}
+	,onMouseUp: function(x,y,button) {
+	}
+	,onMouseWheel: function(deltaX,deltaY,deltaMode) {
+	}
+	,onPreloadComplete: function() {
+	}
+	,onPreloadProgress: function(loaded,total) {
+	}
+	,onRenderContextLost: function() {
+	}
+	,onRenderContextRestored: function(context) {
+	}
+	,onTextEdit: function(text,start,length) {
+	}
+	,onTextInput: function(text) {
+	}
+	,onTouchCancel: function(touch) {
+	}
+	,onTouchEnd: function(touch) {
+	}
+	,onTouchMove: function(touch) {
+	}
+	,onTouchStart: function(touch) {
+	}
+	,onWindowActivate: function() {
+	}
+	,onWindowClose: function() {
+	}
+	,onWindowCreate: function() {
+	}
+	,onWindowDeactivate: function() {
+	}
+	,onWindowDropFile: function(file) {
+	}
+	,onWindowEnter: function() {
+	}
+	,onWindowExpose: function() {
+	}
+	,onWindowFocusIn: function() {
+	}
+	,onWindowFocusOut: function() {
+	}
+	,onWindowFullscreen: function() {
+	}
+	,onWindowLeave: function() {
+	}
+	,onWindowMove: function(x,y) {
+	}
+	,onWindowMinimize: function() {
+	}
+	,onWindowResize: function(width,height) {
+	}
+	,onWindowRestore: function() {
+	}
+	,removeModule: function(module) {
+		if(module != null) {
+			module.__unregisterLimeModule(this);
+			HxOverrides.remove(this.modules,module);
+		}
+	}
+	,render: function(context) {
+	}
+	,update: function(deltaTime) {
+	}
+	,__addWindow: function($window) {
+		if($window != null) {
+			this.__windows.push($window);
+			this.__windowByID.h[$window.id] = $window;
+			var _g = $bind(this,this.__onWindowClose);
+			var window1 = $window;
+			var tmp = function() {
+				_g(window1);
+			};
+			$window.onClose.add(tmp,false,-10000);
+			if(this.__window == null) {
+				this.__window = $window;
+				$window.onActivate.add($bind(this,this.onWindowActivate));
+				$window.onRenderContextLost.add($bind(this,this.onRenderContextLost));
+				$window.onRenderContextRestored.add($bind(this,this.onRenderContextRestored));
+				$window.onDeactivate.add($bind(this,this.onWindowDeactivate));
+				$window.onDropFile.add($bind(this,this.onWindowDropFile));
+				$window.onEnter.add($bind(this,this.onWindowEnter));
+				$window.onExpose.add($bind(this,this.onWindowExpose));
+				$window.onFocusIn.add($bind(this,this.onWindowFocusIn));
+				$window.onFocusOut.add($bind(this,this.onWindowFocusOut));
+				$window.onFullscreen.add($bind(this,this.onWindowFullscreen));
+				$window.onKeyDown.add($bind(this,this.onKeyDown));
+				$window.onKeyUp.add($bind(this,this.onKeyUp));
+				$window.onLeave.add($bind(this,this.onWindowLeave));
+				$window.onMinimize.add($bind(this,this.onWindowMinimize));
+				$window.onMouseDown.add($bind(this,this.onMouseDown));
+				$window.onMouseMove.add($bind(this,this.onMouseMove));
+				$window.onMouseMoveRelative.add($bind(this,this.onMouseMoveRelative));
+				$window.onMouseUp.add($bind(this,this.onMouseUp));
+				$window.onMouseWheel.add($bind(this,this.onMouseWheel));
+				$window.onMove.add($bind(this,this.onWindowMove));
+				$window.onRender.add($bind(this,this.render));
+				$window.onResize.add($bind(this,this.onWindowResize));
+				$window.onRestore.add($bind(this,this.onWindowRestore));
+				$window.onTextEdit.add($bind(this,this.onTextEdit));
+				$window.onTextInput.add($bind(this,this.onTextInput));
+				this.onWindowCreate();
+			}
+			this.onCreateWindow.dispatch($window);
+		}
+	}
+	,__createWindow: function(attributes) {
+		var $window = new lime_ui_Window(this,attributes);
+		if($window.id == -1) {
+			return null;
+		}
+		return $window;
+	}
+	,__registerLimeModule: function(application) {
+		application.onUpdate.add($bind(this,this.update));
+		application.onExit.add($bind(this,this.onModuleExit),false,0);
+		application.onExit.add($bind(this,this.__onModuleExit),false,0);
+		var gamepad = lime_ui_Gamepad.devices.iterator();
+		while(gamepad.hasNext()) {
+			var gamepad1 = gamepad.next();
+			this.__onGamepadConnect(gamepad1);
+		}
+		lime_ui_Gamepad.onConnect.add($bind(this,this.__onGamepadConnect));
+		var joystick = lime_ui_Joystick.devices.iterator();
+		while(joystick.hasNext()) {
+			var joystick1 = joystick.next();
+			this.__onJoystickConnect(joystick1);
+		}
+		lime_ui_Joystick.onConnect.add($bind(this,this.__onJoystickConnect));
+		lime_ui_Touch.onCancel.add($bind(this,this.onTouchCancel));
+		lime_ui_Touch.onStart.add($bind(this,this.onTouchStart));
+		lime_ui_Touch.onMove.add($bind(this,this.onTouchMove));
+		lime_ui_Touch.onEnd.add($bind(this,this.onTouchEnd));
+	}
+	,__removeWindow: function($window) {
+		if($window != null && this.__windowByID.h.hasOwnProperty($window.id)) {
+			if(this.__window == $window) {
+				this.__window = null;
+			}
+			HxOverrides.remove(this.__windows,$window);
+			this.__windowByID.remove($window.id);
+			$window.close();
+			if(this.__windows.length == 0) {
+				lime_system_System.exit(0);
+			}
+		}
+	}
+	,__onGamepadConnect: function(gamepad) {
+		this.onGamepadConnect(gamepad);
+		var _g = $bind(this,this.onGamepadAxisMove);
+		var gamepad1 = gamepad;
+		var tmp = function(axis,value) {
+			_g(gamepad1,axis,value);
+		};
+		gamepad.onAxisMove.add(tmp);
+		var _g1 = $bind(this,this.onGamepadButtonDown);
+		var gamepad2 = gamepad;
+		var tmp = function(button) {
+			_g1(gamepad2,button);
+		};
+		gamepad.onButtonDown.add(tmp);
+		var _g2 = $bind(this,this.onGamepadButtonUp);
+		var gamepad3 = gamepad;
+		var tmp = function(button) {
+			_g2(gamepad3,button);
+		};
+		gamepad.onButtonUp.add(tmp);
+		var _g3 = $bind(this,this.onGamepadDisconnect);
+		var gamepad4 = gamepad;
+		var tmp = function() {
+			_g3(gamepad4);
+		};
+		gamepad.onDisconnect.add(tmp);
+	}
+	,__onJoystickConnect: function(joystick) {
+		this.onJoystickConnect(joystick);
+		var _g = $bind(this,this.onJoystickAxisMove);
+		var joystick1 = joystick;
+		var tmp = function(axis,value) {
+			_g(joystick1,axis,value);
+		};
+		joystick.onAxisMove.add(tmp);
+		var _g1 = $bind(this,this.onJoystickButtonDown);
+		var joystick2 = joystick;
+		var tmp = function(button) {
+			_g1(joystick2,button);
+		};
+		joystick.onButtonDown.add(tmp);
+		var _g2 = $bind(this,this.onJoystickButtonUp);
+		var joystick3 = joystick;
+		var tmp = function(button) {
+			_g2(joystick3,button);
+		};
+		joystick.onButtonUp.add(tmp);
+		var _g3 = $bind(this,this.onJoystickDisconnect);
+		var joystick4 = joystick;
+		var tmp = function() {
+			_g3(joystick4);
+		};
+		joystick.onDisconnect.add(tmp);
+		var _g4 = $bind(this,this.onJoystickHatMove);
+		var joystick5 = joystick;
+		var tmp = function(hat,position) {
+			_g4(joystick5,hat,position);
+		};
+		joystick.onHatMove.add(tmp);
+		var _g5 = $bind(this,this.onJoystickTrackballMove);
+		var joystick6 = joystick;
+		var tmp = function(trackball,x,y) {
+			_g5(joystick6,trackball,x,y);
+		};
+		joystick.onTrackballMove.add(tmp);
+	}
+	,__onModuleExit: function(code) {
+		this.__backend.exit();
+	}
+	,__onWindowClose: function($window) {
+		if(this.__window == $window) {
+			this.onWindowClose();
+		}
+		this.__removeWindow($window);
+	}
+	,__unregisterLimeModule: function(application) {
+		application.onUpdate.remove($bind(this,this.update));
+		application.onExit.remove($bind(this,this.__onModuleExit));
+		application.onExit.remove($bind(this,this.onModuleExit));
+		lime_ui_Gamepad.onConnect.remove($bind(this,this.__onGamepadConnect));
+		lime_ui_Joystick.onConnect.remove($bind(this,this.__onJoystickConnect));
+		lime_ui_Touch.onCancel.remove($bind(this,this.onTouchCancel));
+		lime_ui_Touch.onStart.remove($bind(this,this.onTouchStart));
+		lime_ui_Touch.onMove.remove($bind(this,this.onTouchMove));
+		lime_ui_Touch.onEnd.remove($bind(this,this.onTouchEnd));
+		this.onModuleExit(0);
+	}
+	,get_preloader: function() {
+		return this.__preloader;
+	}
+	,get_window: function() {
+		return this.__window;
+	}
+	,get_windows: function() {
+		return this.__windows;
+	}
+	,__class__: lime_app_Application
+	,__properties__: {get_windows:"get_windows",get_window:"get_window",get_preloader:"get_preloader"}
+});
+var ApplicationMain = function() { };
+$hxClasses["ApplicationMain"] = ApplicationMain;
+ApplicationMain.__name__ = "ApplicationMain";
+ApplicationMain.main = function() {
+	lime_system_System.__registerEntryPoint("Intellector",ApplicationMain.create);
+};
+ApplicationMain.create = function(config) {
+	var app = new openfl_display_Application();
+	ManifestResources.init(config);
+	app.meta.h["build"] = "14";
+	app.meta.h["company"] = "Company Name";
+	app.meta.h["file"] = "Intellector";
+	app.meta.h["name"] = "Intellector";
+	app.meta.h["packageName"] = "com.sample.intellector";
+	app.meta.h["version"] = "1.0.0";
+	var attributes = { allowHighDPI : false, alwaysOnTop : false, borderless : false, element : null, frameRate : 60, height : 0, hidden : false, maximized : false, minimized : false, parameters : { }, resizable : true, title : "Intellector", width : 0, x : null, y : null};
+	attributes.context = { antialiasing : 0, background : 16777215, colorDepth : 32, depth : true, hardware : true, stencil : true, type : null, vsync : false};
+	if(app.__window == null) {
+		if(config != null) {
+			var _g = 0;
+			var _g1 = Reflect.fields(config);
+			while(_g < _g1.length) {
+				var field = _g1[_g];
+				++_g;
+				if(Object.prototype.hasOwnProperty.call(attributes,field)) {
+					attributes[field] = Reflect.field(config,field);
+				} else if(Object.prototype.hasOwnProperty.call(attributes.context,field)) {
+					attributes.context[field] = Reflect.field(config,field);
+				}
+			}
+		}
+	}
+	app.createWindow(attributes);
+	var preloader = new openfl_display_Preloader(new openfl_display_DefaultPreloader());
+	app.__preloader.onProgress.add(function(loaded,total) {
+		preloader.update(loaded,total);
+	});
+	app.__preloader.onComplete.add(function() {
+		preloader.start();
+	});
+	var stage = (js_Boot.__cast(app.__window , openfl_display_Window)).stage;
+	var tmp = function() {
+		ApplicationMain.start(stage);
+	};
+	preloader.onComplete.add(tmp);
+	var _g = 0;
+	var _g1 = ManifestResources.preloadLibraries;
+	while(_g < _g1.length) {
+		var library = _g1[_g];
+		++_g;
+		app.__preloader.addLibrary(library);
+	}
+	var _g = 0;
+	var _g1 = ManifestResources.preloadLibraryNames;
+	while(_g < _g1.length) {
+		var name = _g1[_g];
+		++_g;
+		app.__preloader.addLibraryName(name);
+	}
+	app.__preloader.load();
+	var result = app.exec();
+};
+ApplicationMain.start = function(stage) {
+	try {
+		var current = stage.getChildAt(0);
+		if(current == null || !((current) instanceof openfl_display_DisplayObjectContainer)) {
+			current = new openfl_display_MovieClip();
+			stage.addChild(current);
+		}
+		new DocumentClass(current);
+		stage.dispatchEvent(new openfl_events_Event("resize",false,false));
+		if(stage.window.__fullscreen) {
+			stage.dispatchEvent(new openfl_events_FullScreenEvent("fullScreen",false,false,true,true));
+		}
+	} catch( _g ) {
+		haxe_NativeStackTrace.lastError = _g;
+		var e = haxe_Exception.caught(_g).unwrap();
+		stage.__handleError(e);
+	}
+};
 var Main = function() {
 	openfl_display_Sprite.call(this);
 	haxe_ui_Toolkit.init();
@@ -4184,6 +4860,7 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	,hostingMenu: null
 	,joinMenu: null
 	,gameboard: null
+	,analysisboard: null
 	,errorLabel: null
 	,fadeTimer: null
 	,onConnected: function() {
@@ -4358,6 +5035,14 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			Dialogs.specifyChallengeParams($bind(_gthis,_gthis.drawOpenChallengeHosting),function() {
 			});
 		});
+		var analysisBtn = new haxe_ui_components_Button();
+		analysisBtn.set_text("Analysis board");
+		analysisBtn.set_width(calloutBtn.get_width());
+		analysisBtn.set_horizontalAlign("center");
+		this.mainMenu.addComponent(analysisBtn);
+		analysisBtn.set_onClick(function(e) {
+			_gthis.drawAnalysisBoard();
+		});
 		var logoutBtn = new haxe_ui_components_Button();
 		logoutBtn.set_text("Log Out");
 		logoutBtn.set_width(calloutBtn.get_width() / 2);
@@ -4451,17 +5136,16 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		};
 	}
 	,drawGame: function(data) {
-		this.changes.set_visible(false);
 		Networker.registerGameEvents($bind(this,this.onMove),$bind(this,this.onMessage),$bind(this,this.onTimeCorrection),$bind(this,this.onEnded));
-		this.removeChild(this.mainMenu);
-		this.removeChild(this.joinMenu);
-		this.removeChild(this.hostingMenu);
+		this.removeChildren();
 		this.gameboard = new Field(data.colour);
 		this.gameboard.set_x((window.innerWidth - this.gameboard.get_width()) / 2);
 		this.gameboard.set_y(100);
+		this.addChild(this.gameboard);
 		Main.sidebox = new Sidebox(data.startSecs,data.bonusSecs,Networker.login,data.enemy,data.colour == "white");
 		Main.sidebox.set_x(this.gameboard.get_x() + this.gameboard.get_width() + 10);
 		Main.sidebox.set_y(this.gameboard.get_y() + (this.gameboard.get_height() - 380 - Math.sqrt(3) * Field.a) / 2);
+		this.addChild(Main.sidebox);
 		Main.chatbox = new Chatbox(this.gameboard.get_height() * 0.75);
 		Main.chatbox.set_x(this.gameboard.get_x() - Chatbox.WIDTH - Field.a - 30);
 		Main.chatbox.set_y(this.gameboard.get_y() + this.gameboard.get_height() * 0.25 - Field.a * Math.sqrt(3) / 2);
@@ -4473,9 +5157,25 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		Main.infobox.set_y(this.gameboard.get_y() - Field.a * Math.sqrt(3) / 2);
 		this.addChild(Main.infobox);
 		window.history.pushState({ },"Intellector","?id=" + data.match_id);
-		this.addChild(this.gameboard);
-		this.addChild(Main.sidebox);
 		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
+	}
+	,drawAnalysisBoard: function() {
+		var _gthis = this;
+		this.removeChildren();
+		this.analysisboard = new AnalysisField();
+		this.analysisboard.set_x((window.innerWidth - this.analysisboard.get_width()) / 2);
+		this.analysisboard.set_y(100);
+		this.addChild(this.analysisboard);
+		var returnBtn = new haxe_ui_components_Button();
+		returnBtn.set_width(100);
+		returnBtn.set_text("Return");
+		returnBtn.set_onClick(function(e) {
+			_gthis.removeChildren();
+			_gthis.drawMainMenu();
+		});
+		returnBtn.set_x(10);
+		returnBtn.set_y(10);
+		this.addChild(returnBtn);
 	}
 	,onTimeCorrection: function(data) {
 		Main.sidebox.correctTime(data.whiteSeconds,data.blackSeconds);
@@ -58277,7 +58977,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 66495;
+	this.version = 986493;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -105275,9 +105975,9 @@ haxe_lang_Iterable.prototype = {
 function $getIterator(o) { if( o instanceof Array ) return new haxe_iterators_ArrayIterator(o); else return o.iterator(); }
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $global.$haxeUID++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = m.bind(o); o.hx__closures__[m.__id__] = f; } return f; }
 $global.$haxeUID |= 0;
+haxe_ds_ObjectMap.count = 0;
 var _init = lime__$internal_backend_html5_HTML5Application;
 var init = lime_app_Application;
-haxe_ds_ObjectMap.count = 0;
 if(typeof(performance) != "undefined" ? typeof(performance.now) == "function" : false) {
 	HxOverrides.now = performance.now.bind(performance);
 }
@@ -105351,7 +106051,8 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 },function(stack) {
 	stack.set_length(0);
 });
-Changes.changelog = [{ date : "21.03.2021", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
+AnalysisField.a = 40;
+Changes.changelog = [{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
 Chatbox.WIDTH = 260;
 Colors.border = 6701350;
 Colors.lightHex = 16764831;
