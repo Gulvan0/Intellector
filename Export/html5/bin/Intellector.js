@@ -3214,135 +3214,8 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 });
 var AnalysisField = function() {
 	openfl_display_Sprite.call(this);
-	this.hexes = [];
-	var _g = 0;
-	while(_g < 7) {
-		var j = _g++;
-		var row = [];
-		var _g1 = 0;
-		while(_g1 < 9) {
-			var i = _g1++;
-			if(!this.hexExists(i,j)) {
-				row.push(null);
-			} else {
-				var hex = new Hexagon(AnalysisField.a,this.isDark(i,j));
-				var coords = this.hexCoords(i,j);
-				hex.set_x(coords.x);
-				hex.set_y(coords.y);
-				this.addChild(hex);
-				row.push(hex);
-			}
-		}
-		this.hexes.push(row);
-	}
-	var _g = [];
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	this.figures = _g;
-	this.figures[0][0] = new Figure(FigureType.Dominator,FigureColor.Black);
-	this.figures[0][1] = new Figure(FigureType.Liberator,FigureColor.Black);
-	this.figures[0][2] = new Figure(FigureType.Aggressor,FigureColor.Black);
-	this.figures[0][3] = new Figure(FigureType.Defensor,FigureColor.Black);
-	this.figures[0][4] = new Figure(FigureType.Intellector,FigureColor.Black);
-	this.figures[0][5] = new Figure(FigureType.Defensor,FigureColor.Black);
-	this.figures[0][6] = new Figure(FigureType.Aggressor,FigureColor.Black);
-	this.figures[0][7] = new Figure(FigureType.Liberator,FigureColor.Black);
-	this.figures[0][8] = new Figure(FigureType.Dominator,FigureColor.Black);
-	this.figures[1][0] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[1][2] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[1][4] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[1][6] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[1][8] = new Figure(FigureType.Progressor,FigureColor.Black);
-	this.figures[6][0] = new Figure(FigureType.Dominator,FigureColor.White);
-	this.figures[5][1] = new Figure(FigureType.Liberator,FigureColor.White);
-	this.figures[6][2] = new Figure(FigureType.Aggressor,FigureColor.White);
-	this.figures[5][3] = new Figure(FigureType.Defensor,FigureColor.White);
-	this.figures[6][4] = new Figure(FigureType.Intellector,FigureColor.White);
-	this.figures[5][5] = new Figure(FigureType.Defensor,FigureColor.White);
-	this.figures[6][6] = new Figure(FigureType.Aggressor,FigureColor.White);
-	this.figures[5][7] = new Figure(FigureType.Liberator,FigureColor.White);
-	this.figures[6][8] = new Figure(FigureType.Dominator,FigureColor.White);
-	this.figures[5][0] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.figures[5][2] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.figures[5][4] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.figures[5][6] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.figures[5][8] = new Figure(FigureType.Progressor,FigureColor.White);
-	this.placeFigures();
+	this.drawHexes();
+	this.arrangeDefault();
 	this.addEventListener("addedToStage",$bind(this,this.init));
 };
 $hxClasses["AnalysisField"] = AnalysisField;
@@ -3357,117 +3230,276 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.removeEventListener("addedToStage",$bind(this,this.init));
 		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
-	,onPress: function(e) {
-		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		if(indexes == null) {
-			if(this.selected != null) {
-				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-				this.hexes[this.selected.j][this.selected.i].deselect();
-				this.selected = null;
+	,reset: function() {
+		this.clearBoard();
+		this.arrangeDefault();
+	}
+	,clearBoard: function() {
+		var _g = 0;
+		var _g1 = this.figures;
+		while(_g < _g1.length) {
+			var row = _g1[_g];
+			++_g;
+			var _g2 = 0;
+			while(_g2 < row.length) {
+				var figure = row[_g2];
+				++_g2;
+				if(figure != null) {
+					this.removeChild(figure);
+				}
 			}
+		}
+		var _g = [];
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		this.figures = _g;
+	}
+	,arrangeDefault: function() {
+		var _g = [];
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		var _g1 = [];
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g1.push(null);
+		_g.push(_g1);
+		this.figures = _g;
+		this.figures[0][0] = new Figure(FigureType.Dominator,FigureColor.Black);
+		this.figures[0][1] = new Figure(FigureType.Liberator,FigureColor.Black);
+		this.figures[0][2] = new Figure(FigureType.Aggressor,FigureColor.Black);
+		this.figures[0][3] = new Figure(FigureType.Defensor,FigureColor.Black);
+		this.figures[0][4] = new Figure(FigureType.Intellector,FigureColor.Black);
+		this.figures[0][5] = new Figure(FigureType.Defensor,FigureColor.Black);
+		this.figures[0][6] = new Figure(FigureType.Aggressor,FigureColor.Black);
+		this.figures[0][7] = new Figure(FigureType.Liberator,FigureColor.Black);
+		this.figures[0][8] = new Figure(FigureType.Dominator,FigureColor.Black);
+		this.figures[1][0] = new Figure(FigureType.Progressor,FigureColor.Black);
+		this.figures[1][2] = new Figure(FigureType.Progressor,FigureColor.Black);
+		this.figures[1][4] = new Figure(FigureType.Progressor,FigureColor.Black);
+		this.figures[1][6] = new Figure(FigureType.Progressor,FigureColor.Black);
+		this.figures[1][8] = new Figure(FigureType.Progressor,FigureColor.Black);
+		this.figures[6][0] = new Figure(FigureType.Dominator,FigureColor.White);
+		this.figures[5][1] = new Figure(FigureType.Liberator,FigureColor.White);
+		this.figures[6][2] = new Figure(FigureType.Aggressor,FigureColor.White);
+		this.figures[5][3] = new Figure(FigureType.Defensor,FigureColor.White);
+		this.figures[6][4] = new Figure(FigureType.Intellector,FigureColor.White);
+		this.figures[5][5] = new Figure(FigureType.Defensor,FigureColor.White);
+		this.figures[6][6] = new Figure(FigureType.Aggressor,FigureColor.White);
+		this.figures[5][7] = new Figure(FigureType.Liberator,FigureColor.White);
+		this.figures[6][8] = new Figure(FigureType.Dominator,FigureColor.White);
+		this.figures[5][0] = new Figure(FigureType.Progressor,FigureColor.White);
+		this.figures[5][2] = new Figure(FigureType.Progressor,FigureColor.White);
+		this.figures[5][4] = new Figure(FigureType.Progressor,FigureColor.White);
+		this.figures[5][6] = new Figure(FigureType.Progressor,FigureColor.White);
+		this.figures[5][8] = new Figure(FigureType.Progressor,FigureColor.White);
+		this.placeFigures();
+	}
+	,departurePress: function(pressLocation) {
+		var figure = this.getFigure(pressLocation);
+		if(figure == null) {
 			return;
 		}
+		this.selectDeparture(pressLocation,figure);
+		this.drag(figure);
+		this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
+		this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
+	}
+	,destinationPress: function(pressLocation) {
+		var from = new IntPoint(this.selected.i,this.selected.j);
+		var movingFig = this.getFigure(this.selected);
+		var moveOntoFig = this.getFigure(pressLocation);
+		this.selectionBackToNormal();
+		if(pressLocation != null) {
+			var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !this.isCastle(from,pressLocation,movingFig,moveOntoFig);
+			if(otherOwnClicked) {
+				this.selectDeparture(pressLocation,moveOntoFig);
+			} else {
+				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+				this.attemptMove(from,pressLocation);
+			}
+		}
+	}
+	,onPress: function(e) {
+		var pressLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
 		if(this.selected != null) {
-			var movingFig = this.getFigure(this.selected);
-			var moveOntoFig = this.getFigure(indexes);
-			var _g = 0;
-			var _g1 = this.possibleFields(movingFig,this.selected.i,this.selected.j);
-			while(_g < _g1.length) {
-				var dest = _g1[_g];
-				++_g;
-				this.hexes[dest.j][dest.i].removeMarkers();
-			}
-			if(moveOntoFig != null && moveOntoFig.color == this.getFigure(this.selected).color && !this.isCastle(this.selected,indexes,movingFig,moveOntoFig)) {
-				this.hexes[this.selected.j][this.selected.i].deselect();
-				this.selected = indexes;
-				this.hexes[this.selected.j][this.selected.i].select();
-				var _g = 0;
-				var _g1 = this.possibleFields(moveOntoFig,indexes.i,indexes.j);
-				while(_g < _g1.length) {
-					var dest = _g1[_g];
-					++_g;
-					if(this.getFigure(dest) != null) {
-						this.hexes[dest.j][dest.i].addRound();
-					} else {
-						this.hexes[dest.j][dest.i].addDot();
-					}
-				}
-				return;
-			}
-			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-			if(this.ableToMove(this.selected,indexes)) {
-				this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
-			}
-			this.selectionBackToNormal();
+			this.destinationPress(pressLocation);
 		} else {
-			var figure = this.figures[indexes.j][indexes.i];
-			if(figure != null) {
-				this.selected = indexes;
-				this.hexes[indexes.j][indexes.i].select();
-				this.removeChild(figure);
-				this.addChild(figure);
-				figure.startDrag(true);
-				var _g = 0;
-				var _g1 = this.possibleFields(figure,indexes.i,indexes.j);
-				while(_g < _g1.length) {
-					var dest = _g1[_g];
-					++_g;
-					if(this.getFigure(dest) != null) {
-						this.hexes[dest.j][dest.i].addRound();
-					} else {
-						this.hexes[dest.j][dest.i].addDot();
-					}
-				}
-				this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
-				this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
-				this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
-			}
+			this.departurePress(pressLocation);
 		}
 	}
 	,onMove: function(e) {
-		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		if(this.selectedDest != null) {
-			if(this.selectedDest.equals(indexes)) {
-				return;
-			} else {
-				this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
-				this.selectedDest = null;
-			}
+		var shadowLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		if(shadowLocation != null && this.ableToMove(this.selected,shadowLocation)) {
+			this.hexes[shadowLocation.j][shadowLocation.i].select();
 		}
-		if(indexes != null && this.ableToMove(this.selected,indexes)) {
-			this.selectedDest = indexes;
-			this.hexes[this.selectedDest.j][this.selectedDest.i].select();
+		if(this.selectedDest != null && !this.selectedDest.equals(shadowLocation)) {
+			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
 		}
+		this.selectedDest = shadowLocation;
 	}
 	,onRelease: function(e) {
 		this.stage.removeEventListener("mouseUp",$bind(this,this.onRelease));
-		var indexes = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		this.figures[this.selected.j][this.selected.i].stopDrag();
-		if(indexes != null && this.ableToMove(this.selected,indexes) && !indexes.equals(this.selected)) {
+		var pressedAt = new IntPoint(this.selected.i,this.selected.j);
+		var releasedAt = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		this.figures[pressedAt.j][pressedAt.i].stopDrag();
+		if(releasedAt != null && this.ableToMove(pressedAt,releasedAt) && !releasedAt.equals(pressedAt)) {
 			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-			var _g = 0;
-			var _g1 = this.possibleFields(this.figures[this.selected.j][this.selected.i],this.selected.i,this.selected.j);
-			while(_g < _g1.length) {
-				var dest = _g1[_g];
-				++_g;
-				this.hexes[dest.j][dest.i].removeMarkers();
-			}
-			this.move(this.selected.i,this.selected.j,indexes.i,indexes.j);
 			this.selectionBackToNormal();
+			this.attemptMove(pressedAt,releasedAt);
 		} else {
-			this.disposeFigure(this.figures[this.selected.j][this.selected.i],this.selected.i,this.selected.j);
+			this.disposeFigure(this.figures[pressedAt.j][pressedAt.i],pressedAt);
 		}
-		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
-	}
-	,selectionBackToNormal: function() {
-		this.hexes[this.selected.j][this.selected.i].deselect();
-		if(this.selectedDest != null) {
-			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
-		}
-		this.selected = null;
-		this.selectedDest = null;
 	}
 	,ableToMove: function(from,to) {
+		var movingFigure = this.getFigure(from);
+		if(movingFigure == null) {
+			return false;
+		}
 		var _g = 0;
 		var _g1 = this.possibleFields(this.getFigure(from),from.i,from.j);
 		while(_g < _g1.length) {
@@ -3578,41 +3610,21 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 			}
 			break;
 		case 3:
-			var dir = Direction.UL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.D;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.U;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
+			var _g = 0;
+			var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
+			while(_g < _g1.length) {
+				var dir = _g1[_g];
+				++_g;
+				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,1);
+				var occupier = this.getFigure(destination);
+				if(destination != null && occupier == null) {
+					fields.push(destination);
+				}
+				destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
+				occupier = this.getFigure(destination);
+				if(destination != null && (occupier == null || occupier.color != figure.color)) {
+					fields.push(destination);
+				}
 			}
 			break;
 		case 4:
@@ -3693,13 +3705,6 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 			break;
 		}
 		return fields;
-	}
-	,getFigure: function(coords) {
-		if(coords == null || !this.hexExists(coords.i,coords.j) || this.figures[coords.j] == null) {
-			return null;
-		} else {
-			return this.figures[coords.j][coords.i];
-		}
 	}
 	,getCoordsInRelDirection: function(fromI,fromJ,dir,col,steps) {
 		if(steps == null) {
@@ -3788,35 +3793,106 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 			return null;
 		}
 	}
-	,hexExists: function(i,j) {
-		if(i >= 0 && i < 9 && j >= 0 && j < 7) {
-			if(j == 6) {
-				return i % 2 == 0;
-			} else {
-				return true;
-			}
+	,attemptMove: function(from,to) {
+		var _gthis = this;
+		if(!this.ableToMove(from,to)) {
+			return;
+		}
+		var figure = this.getFigure(from);
+		var moveOntoFigure = this.getFigure(to);
+		var nearIntellector = this.nearOwnIntellector(from,figure.color);
+		this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
+		if(nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type) {
+			var _g = $bind(this,this.makeMove);
+			var from1 = from;
+			var to1 = to;
+			var morphInto = moveOntoFigure.type;
+			var _g1 = $bind(this,this.makeMove);
+			var from2 = from;
+			var to2 = to;
+			Dialogs.chameleonConfirm(function() {
+				_g(from1,to1,morphInto);
+			},function() {
+				_g1(from2,to2);
+			},function() {
+				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
+			});
+		} else if(this.isFinalForPlayer(to) && figure.type == FigureType.Progressor) {
+			var _g2 = $bind(this,this.makeMove);
+			var from3 = from;
+			var to3 = to;
+			var tmp = function(morphInto) {
+				_g2(from3,to3,morphInto);
+			};
+			Dialogs.promotionSelect(figure.color,tmp,function() {
+				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
+			});
 		} else {
-			return false;
+			this.makeMove(from,to);
 		}
 	}
-	,move: function(fromI,fromJ,toI,toJ) {
-		var figure = this.figures[fromJ][fromI];
-		var figMoveOnto = this.getFigure(new IntPoint(toI,toJ));
-		this.disposeFigure(figure,toI,toJ);
-		this.figures[toJ][toI] = figure;
-		this.figures[fromJ][fromI] = null;
+	,makeMove: function(from,to,morphInto) {
+		this.move(from,to,morphInto);
+		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
+	}
+	,move: function(from,to,morphInto) {
+		var figure = this.getFigure(from);
+		var figMoveOnto = this.getFigure(to);
+		if(morphInto != null) {
+			var color = figure.color;
+			this.removeChild(figure);
+			figure = new Figure(morphInto,color);
+			this.scaleFigure(figure);
+			this.addChild(figure);
+		}
+		this.disposeFigure(figure,to);
+		this.figures[to.j][to.i] = figure;
+		this.figures[from.j][from.i] = null;
 		if(figMoveOnto != null) {
-			if(figMoveOnto.color == figure.color) {
-				if(this.isCastle(new IntPoint(fromI,fromJ),new IntPoint(toI,toJ),figure,figMoveOnto)) {
-					this.disposeFigure(figMoveOnto,fromI,fromJ);
-					this.figures[fromJ][fromI] = figMoveOnto;
-				} else {
-					throw haxe_Exception.thrown("Trying to eat own figure");
-				}
+			if(this.isCastle(from,to,figure,figMoveOnto)) {
+				this.disposeFigure(figMoveOnto,from);
+				this.figures[from.j][from.i] = figMoveOnto;
+				openfl_utils_Assets.getSound("sounds/move.mp3").play();
 			} else {
 				this.removeChild(figMoveOnto);
+				openfl_utils_Assets.getSound("sounds/capture.mp3").play();
 			}
+		} else {
+			openfl_utils_Assets.getSound("sounds/move.mp3").play();
 		}
+	}
+	,nearOwnIntellector: function(loc,color) {
+		var dir = Direction.UL;
+		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.UR;
+		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.D;
+		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.DR;
+		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.DL;
+		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.U;
+		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		return false;
 	}
 	,posToIndexes: function(x,y) {
 		var closest = null;
@@ -3840,6 +3916,13 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 		return closest;
 	}
+	,getFigure: function(coords) {
+		if(coords == null || !this.hexExists(coords.i,coords.j) || this.figures[coords.j] == null) {
+			return null;
+		} else {
+			return this.figures[coords.j][coords.i];
+		}
+	}
 	,hexCoords: function(i,j) {
 		var p = new openfl_geom_Point(0,0);
 		p.x = 3 * AnalysisField.a * i / 2;
@@ -3849,33 +3932,23 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 		return p;
 	}
-	,placeFigures: function() {
-		var _g = 0;
-		while(_g < 7) {
-			var j = _g++;
-			var _g1 = 0;
-			while(_g1 < 9) {
-				var i = _g1++;
-				var figure = this.figures[j][i];
-				if(figure != null) {
-					var scale = Math.sqrt(3) * AnalysisField.a * 0.85 / figure.get_height();
-					if(figure.type == FigureType.Progressor) {
-						scale *= 0.7;
-					} else if(figure.type == FigureType.Liberator || figure.type == FigureType.Defensor) {
-						scale *= 0.9;
-					}
-					figure.set_scaleX(scale);
-					figure.set_scaleY(scale);
-					this.disposeFigure(figure,i,j);
-					this.addChild(figure);
-				}
-			}
+	,isFinalForPlayer: function(p) {
+		if(p.j == 0) {
+			return p.i % 2 == 0;
+		} else {
+			return false;
 		}
 	}
-	,disposeFigure: function(figure,i,j) {
-		var coords = this.hexCoords(i,j);
-		figure.set_x(coords.x);
-		figure.set_y(coords.y);
+	,hexExists: function(i,j) {
+		if(i >= 0 && i < 9 && j >= 0 && j < 7) {
+			if(j == 6) {
+				return i % 2 == 0;
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
 	}
 	,isDark: function(i,j) {
 		if(j % 3 == 2) {
@@ -3884,6 +3957,465 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 			return i % 2 == 0;
 		} else {
 			return i % 2 == 1;
+		}
+	}
+	,placeFigures: function() {
+		var figure = this.figures[0][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[0][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,0));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[1][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,1));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[2][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,2));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[3][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,3));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[4][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,4));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[5][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,5));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][0];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(0,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][1];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(1,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][2];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(2,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][3];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(3,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][4];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(4,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][5];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(5,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][6];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(6,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][7];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(7,6));
+			this.addChild(figure);
+		}
+		var figure = this.figures[6][8];
+		if(figure != null) {
+			this.scaleFigure(figure);
+			this.disposeFigure(figure,new IntPoint(8,6));
+			this.addChild(figure);
+		}
+	}
+	,scaleFigure: function(figure) {
+		var scale = Math.sqrt(3) * AnalysisField.a * 0.85 / figure.get_height();
+		if(figure.type == FigureType.Progressor) {
+			scale *= 0.7;
+		} else if(figure.type == FigureType.Liberator || figure.type == FigureType.Defensor) {
+			scale *= 0.9;
+		}
+		figure.set_scaleX(scale);
+		figure.set_scaleY(scale);
+	}
+	,disposeFigure: function(figure,loc) {
+		var coords = this.hexCoords(loc.i,loc.j);
+		figure.set_x(coords.x);
+		figure.set_y(coords.y);
+	}
+	,drag: function(figure) {
+		this.removeChild(figure);
+		this.addChild(figure);
+		figure.startDrag(true);
+	}
+	,addMarkers: function(from,figure) {
+		var _g = 0;
+		var _g1 = this.possibleFields(figure,from.i,from.j);
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			if(this.getFigure(dest) != null) {
+				this.hexes[dest.j][dest.i].addRound();
+			} else {
+				this.hexes[dest.j][dest.i].addDot();
+			}
+		}
+	}
+	,removeMarkers: function(from,figure) {
+		var _g = 0;
+		var _g1 = this.possibleFields(figure,from.i,from.j);
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			this.hexes[dest.j][dest.i].removeMarkers();
+		}
+	}
+	,selectDeparture: function(dep,depFigure) {
+		this.selected = dep;
+		this.hexes[dep.j][dep.i].select();
+		this.addMarkers(dep,depFigure);
+	}
+	,selectionBackToNormal: function() {
+		this.removeMarkers(this.selected,this.getFigure(this.selected));
+		this.hexes[this.selected.j][this.selected.i].deselect();
+		if(this.selectedDest != null) {
+			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+		}
+		this.selected = null;
+		this.selectedDest = null;
+	}
+	,drawHexes: function() {
+		this.hexes = [];
+		var _g = 0;
+		while(_g < 7) {
+			var j = _g++;
+			var row = [];
+			var _g1 = 0;
+			while(_g1 < 9) {
+				var i = _g1++;
+				if(!this.hexExists(i,j)) {
+					row.push(null);
+				} else {
+					var hex = new Hexagon(AnalysisField.a,this.isDark(i,j));
+					var coords = this.hexCoords(i,j);
+					hex.set_x(coords.x);
+					hex.set_y(coords.y);
+					this.addChild(hex);
+					row.push(hex);
+				}
+			}
+			this.hexes.push(row);
 		}
 	}
 	,__class__: AnalysisField
@@ -4772,7 +5304,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "14";
+	app.meta.h["build"] = "15";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -5176,6 +5708,24 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		returnBtn.set_x(10);
 		returnBtn.set_y(10);
 		this.addChild(returnBtn);
+		var actionButtons = new haxe_ui_containers_VBox();
+		var clearBtn = new haxe_ui_components_Button();
+		clearBtn.set_width(200);
+		clearBtn.set_text("Clear");
+		clearBtn.set_onClick(function(e) {
+			_gthis.analysisboard.clearBoard();
+		});
+		actionButtons.addComponent(clearBtn);
+		var resetBtn = new haxe_ui_components_Button();
+		resetBtn.set_width(200);
+		resetBtn.set_text("Reset");
+		resetBtn.set_onClick(function(e) {
+			_gthis.analysisboard.reset();
+		});
+		actionButtons.addComponent(resetBtn);
+		actionButtons.set_x(this.analysisboard.get_x() + this.analysisboard.get_width() + 10);
+		actionButtons.set_y(this.analysisboard.get_y() + (this.analysisboard.get_height() - 40 - Math.sqrt(3) * Field.a) / 2);
+		this.addChild(actionButtons);
 	}
 	,onTimeCorrection: function(data) {
 		Main.sidebox.correctTime(data.whiteSeconds,data.blackSeconds);
@@ -7781,7 +8331,7 @@ var OpeningTree = function() {
 $hxClasses["OpeningTree"] = OpeningTree;
 OpeningTree.__name__ = "OpeningTree";
 OpeningTree.init = function() {
-	OpeningTree.root = new Branch("Starting position","",[[new Branch("C00. Central Advancement","4544",[[new Branch("C00. Central Advancement","",[[new Branch("C06. Bongcloud Opening","4645",[])]])]])],[new Branch("C01. Open Game","4534",[])],[new Branch("C02. Flank Game","2534",[])],[new Branch("C03. Deflected Progressor Opening","2514",[])],[new Branch("C04. Canal opening","0514",[[new Branch("C04. Canal opening, Twist Counterattack","6071",[[new Branch("C04. Canal opening, Twist Counterattack, Tense Defense","6654",[])],[new Branch("C04. Canal opening, Twist Counterattack, Boulder Defense","7554",[])],OpeningTree.pack("C04. Canal opening, Twist Counterattack Evaded",["4635","4655","3546","5546"],[])])],[new Branch("C04. Canal opening, Overload Counterattack","2011",[[new Branch("C04. Canal opening, Overload Counterattack, Tense Defense","2634",[])],[new Branch("C04. Canal opening, Overload Counterattack, Boulder Defense","1534",[])],OpeningTree.pack("C04. Canal opening, Overload Counterattack Evaded",["4635","4655","3546","5546"],[])])],[new Branch("C04. Canal opening, Central Counterattack","6051",[])],[new Branch("C04. Canal opening, Exchange Invitation","0111",[[new Branch("C04. Canal opening, Exchange Invitation ...Dmxa7","0600",[[new Branch("C04. Canal opening, Exchange Variation","2000",[])]])],[new Branch("C04. Canal opening, Exchange Declined","",[])]])]])],[new Branch("C05. Ware Opening","0504",[])],[new Branch("A00. Aggressor Sac","2660",[[new Branch("A01. Morph Variant","5060Aggressor",[[new Branch("A01. Double Aggressor Sac","6620",[[new Branch("A03. Aggressor-Defensor Confrontation","3020Aggressor",[])],[new Branch("A04. Double Aggressor Sac, Asymmetrical Variation","3020",[])],OpeningTree.pack("A01. Double Aggressor Sac, Coward Variation",["4030","4050","3040","5040"],[]),[new Branch("A01. Deferred Fool's Mate","",[])]])]])],[new Branch("A02. Capture Variant","5060",[[new Branch("A02. Double Aggressor Sac","6620",[[new Branch("A04. Double Aggressor Sac, Asymmetrical Variation","3020Aggressor",[])],[new Branch("A05. Double Aggressor Sac, Deflected Defensors Variation","3020",[])],OpeningTree.pack("A02. Double Aggressor Sac, Coward Variation",["4030","4050","3040","5040"],[]),[new Branch("A02. Deferred Fool's Mate","",[])]])]])],OpeningTree.pack("A00. Intellector Escape",["4030","4050","3040","5040"],[]),[new Branch("A00. Fool's Mate","",[])]])],[new Branch("A06. Flank Attack","2614",[[new Branch("A07. Flank Attack, Tense Defense","2031",[])],[new Branch("A08. Flank Attack, Boulder Defense","1031",[])],[new Branch("A09. Flank Attack, Flank Wall","4131",[])],[new Branch("A10. Flank Attack, Central Wall","2131",[])],OpeningTree.pack("A11. Flank Attack Evaded",["4030","4050","3040","5040"],[]),[new Branch("A06. Flank Attack, Scholar's Mate","",[])]])],[new Branch("A12. Central Attack","2634",[[new Branch("A13. Central Attack, Linear Defense","2011",[])],[new Branch("A14. Central Attack, Step Defense","1011",[])],[new Branch("A15. Central Attack, Canal Defense","0111",[])],[new Branch("A16. Central Attack, Wing Defense","2111",[])],[new Branch("A17. Central Attack, Exchange Variation","6034",[])],[new Branch("A18. Central Attack, Dominator Blunder","",[])]])],[new Branch("B00. Jump Opening","1513",[])],[new Branch("B01. Cannon Opening","1514",[])],[new Branch("B02. Reti Opening","1534",[[new Branch("B02. Reti Opening","",[[new Branch("B03. Mexican Opening","7554",[])],[new Branch("B04. Diverse Defenders Opening","6654",[])]])]])],[new Branch("D00. Wayward Defensor Opening","3534",[])],OpeningTree.pack("D01. Accelerated Bongcloud",["4635","3546"],[])]);
+	OpeningTree.root = new Branch("Starting position","",[[new Branch("C00. Central Advancement","4544",[[new Branch("C00. Central Advancement","",[[new Branch("C06. Bongcloud Opening","4645",[])]])]])],[new Branch("C01. Open Game","4534",[])],[new Branch("C02. Flank Game","2534",[])],[new Branch("C03. Deflected Progressor Opening","2514",[])],[new Branch("C04. Canal Opening","0514",[[new Branch("C05. Canal Opening, Twist Counterattack","6071",[[new Branch("C05. Canal Opening, Twist Counterattack, Tense Defense","6654",[])],[new Branch("C05. Canal Opening, Twist Counterattack, Boulder Defense","7554",[])],OpeningTree.pack("C05. Canal Opening, Twist Counterattack Evaded",["4635","4655","3546","5546"],[])])],[new Branch("C06. Canal Opening, Overload Counterattack","2011",[[new Branch("C06. Canal Opening, Overload Counterattack, Tense Defense","2634",[])],[new Branch("C06. Canal Opening, Overload Counterattack, Boulder Defense","1534",[])],OpeningTree.pack("C06. Canal Opening, Overload Counterattack Evaded",["4635","4655","3546","5546"],[])])],[new Branch("C07. Canal Opening, Central Counterattack","6051",[])],[new Branch("C08. Canal Opening, Exchange Invitation","0111",[[new Branch("C08. Canal Opening, Exchange Invitation Accepted","0600",[[new Branch("C08. Canal Opening, Exchange Variation","2000",[[new Branch("C09. Venetian Game","8574",[[new Branch("C09. Venetian Game, Exchange Invitation","8171",[[new Branch("C09. Venetian Game, Exchange Invitation Accepted","8680",[[new Branch("C10. Dominatorless Game","6080",[])]])],[new Branch("C09. Venetian Game, Exchange Declined","",[])]])]])]])]])],[new Branch("C08. Canal Opening, Exchange Declined","",[])]])]])],[new Branch("C11. Ware Opening","0504",[])],[new Branch("A00. Aggressor Sac","2660",[[new Branch("A01. Morph Variant","5060Aggressor",[[new Branch("A01. Double Aggressor Sac","6620",[[new Branch("A03. Aggressor-Defensor Confrontation","3020Aggressor",[])],[new Branch("A04. Double Aggressor Sac, Asymmetrical Variation","3020",[])],OpeningTree.pack("A01. Double Aggressor Sac, Coward Variation",["4030","4050","3040","5040"],[]),[new Branch("A01. Deferred Fool's Mate","",[])]])]])],[new Branch("A02. Capture Variant","5060",[[new Branch("A02. Double Aggressor Sac","6620",[[new Branch("A04. Double Aggressor Sac, Asymmetrical Variation","3020Aggressor",[])],[new Branch("A05. Double Aggressor Sac, Deflected Defensors Variation","3020",[])],OpeningTree.pack("A02. Double Aggressor Sac, Coward Variation",["4030","4050","3040","5040"],[]),[new Branch("A02. Deferred Fool's Mate","",[])]])]])],OpeningTree.pack("A00. Intellector Escape",["4030","4050","3040","5040"],[]),[new Branch("A00. Fool's Mate","",[])]])],[new Branch("A06. Flank Attack","2614",[[new Branch("A07. Flank Attack, Tense Defense","2031",[])],[new Branch("A08. Flank Attack, Boulder Defense","1031",[])],[new Branch("A09. Flank Attack, Flank Wall","4131",[])],[new Branch("A10. Flank Attack, Central Wall","2131",[])],OpeningTree.pack("A11. Flank Attack Evaded",["4030","4050","3040","5040"],[]),[new Branch("A06. Flank Attack, Scholar's Mate","",[])]])],[new Branch("A12. Central Attack","2634",[[new Branch("A13. Central Attack, Linear Defense","2011",[])],[new Branch("A14. Central Attack, Step Defense","1011",[])],[new Branch("A15. Central Attack, Canal Defense","0111",[])],[new Branch("A16. Central Attack, Wing Defense","2111",[])],[new Branch("A17. Central Attack, Exchange Variation","6034",[])],[new Branch("A18. Central Attack, Dominator Blunder","",[])]])],[new Branch("B00. Jump Opening","1513",[[new Branch("B00. Pillar Opening","1012",[])]])],[new Branch("B01. Cannon Opening","1514",[])],[new Branch("B02. Reti Opening","1534",[[new Branch("B02. Reti Opening","",[[new Branch("B03. Mexican Opening","7554",[])],[new Branch("B04. Generalist Opening","6654",[])]])]])],[new Branch("D00. Wayward Defensor Opening","3534",[])],OpeningTree.pack("D01. Accelerated Bongcloud",["4635","3546"],[])]);
 };
 OpeningTree.pack = function(name,moves,packedSuccessors) {
 	var bunch = [];
@@ -58977,7 +59527,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 986493;
+	this.version = 435540;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -106052,7 +106602,7 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 	stack.set_length(0);
 });
 AnalysisField.a = 40;
-Changes.changelog = [{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
+Changes.changelog = [{ date : "22.03.2021", text : "Additional functionality and bugfixes for analysis board. New openings"},{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
 Chatbox.WIDTH = 260;
 Colors.border = 6701350;
 Colors.lightHex = 16764831;

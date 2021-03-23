@@ -74,31 +74,44 @@ class OpeningTree
             [new Branch("C01. Open Game", "4534", [])],
             [new Branch("C02. Flank Game", "2534", [])],
             [new Branch("C03. Deflected Progressor Opening", "2514", [])],
-            [new Branch("C04. Canal opening", "0514", 
+            [new Branch("C04. Canal Opening", "0514", 
             [
-                [new Branch("C04. Canal opening, Twist Counterattack", "6071", 
+                [new Branch("C05. Canal Opening, Twist Counterattack", "6071", 
                 [
-                    [new Branch("C04. Canal opening, Twist Counterattack, Tense Defense", "6654", [])],
-                    [new Branch("C04. Canal opening, Twist Counterattack, Boulder Defense", "7554", [])],
-                    pack("C04. Canal opening, Twist Counterattack Evaded", ["4635","4655","3546","5546"], [])
+                    [new Branch("C05. Canal Opening, Twist Counterattack, Tense Defense", "6654", [])],
+                    [new Branch("C05. Canal Opening, Twist Counterattack, Boulder Defense", "7554", [])],
+                    pack("C05. Canal Opening, Twist Counterattack Evaded", ["4635","4655","3546","5546"], [])
                 ])],
-                [new Branch("C04. Canal opening, Overload Counterattack", "2011", 
+                [new Branch("C06. Canal Opening, Overload Counterattack", "2011", 
                 [
-                    [new Branch("C04. Canal opening, Overload Counterattack, Tense Defense", "2634", [])],
-                    [new Branch("C04. Canal opening, Overload Counterattack, Boulder Defense", "1534", [])],
-                    pack("C04. Canal opening, Overload Counterattack Evaded", ["4635","4655","3546","5546"], [])
+                    [new Branch("C06. Canal Opening, Overload Counterattack, Tense Defense", "2634", [])],
+                    [new Branch("C06. Canal Opening, Overload Counterattack, Boulder Defense", "1534", [])],
+                    pack("C06. Canal Opening, Overload Counterattack Evaded", ["4635","4655","3546","5546"], [])
                 ])],
-                [new Branch("C04. Canal opening, Central Counterattack", "6051", [])],
-                [new Branch("C04. Canal opening, Exchange Invitation", "0111", 
+                [new Branch("C07. Canal Opening, Central Counterattack", "6051", [])],
+                [new Branch("C08. Canal Opening, Exchange Invitation", "0111", 
                 [
-                    [new Branch("C04. Canal opening, Exchange Invitation ...Dmxa7", "0600", 
+                    [new Branch("C08. Canal Opening, Exchange Invitation Accepted", "0600", 
                     [
-                        [new Branch("C04. Canal opening, Exchange Variation", "2000", [])]
+                        [new Branch("C08. Canal Opening, Exchange Variation", "2000", 
+                        [
+                            [new Branch("C09. Venetian Game", "8574", 
+                            [
+                                [new Branch("C09. Venetian Game, Exchange Invitation", "8171", 
+                                [
+                                    [new Branch("C09. Venetian Game, Exchange Invitation Accepted", "8680", 
+                                    [
+                                        [new Branch("C10. Dominatorless Game", "6080", [])]
+                                    ])],
+                                    [new Branch("C09. Venetian Game, Exchange Declined", "", [])]
+                                ])]
+                            ])]
+                        ])]
                     ])],
-                    [new Branch("C04. Canal opening, Exchange Declined", "", [])]
+                    [new Branch("C08. Canal Opening, Exchange Declined", "", [])]
                 ])],
             ])],
-            [new Branch("C05. Ware Opening", "0504", [])],
+            [new Branch("C11. Ware Opening", "0504", [])],
             [new Branch("A00. Aggressor Sac", "2660", 
             [
                 [new Branch("A01. Morph Variant", "5060Aggressor", 
@@ -142,14 +155,17 @@ class OpeningTree
                 [new Branch("A17. Central Attack, Exchange Variation", "6034", [])],
                 [new Branch("A18. Central Attack, Dominator Blunder", "", [])]
             ])],
-            [new Branch("B00. Jump Opening", "1513", [])],
+            [new Branch("B00. Jump Opening", "1513", 
+            [
+                [new Branch("B00. Pillar Opening", "1012", [])]
+            ])],
             [new Branch("B01. Cannon Opening", "1514", [])],
             [new Branch("B02. Reti Opening", "1534", 
             [
                 [new Branch("B02. Reti Opening", "", 
                 [
                     [new Branch("B03. Mexican Opening", "7554", [])],
-                    [new Branch("B04. Diverse Defenders Opening", "6654", [])]
+                    [new Branch("B04. Generalist Opening", "6654", [])]
                 ])]
             ])],
             [new Branch("D00. Wayward Defensor Opening", "3534", [])],

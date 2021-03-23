@@ -395,6 +395,32 @@ class Main extends Sprite
 		returnBtn.x = 10;
 		returnBtn.y = 10;
 		addChild(returnBtn);
+
+		var actionButtons:VBox = new VBox();
+
+		var clearBtn = new Button();
+		clearBtn.width = 200;
+		clearBtn.text = "Clear";
+
+		clearBtn.onClick = (e) -> {
+			analysisboard.clearBoard();
+		}
+
+		actionButtons.addComponent(clearBtn);
+
+		var resetBtn = new Button();
+		resetBtn.width = 200;
+		resetBtn.text = "Reset";
+
+		resetBtn.onClick = (e) -> {
+			analysisboard.reset();
+		}
+
+		actionButtons.addComponent(resetBtn);
+
+		actionButtons.x = analysisboard.x + analysisboard.width + 10;
+		actionButtons.y = analysisboard.y + (analysisboard.height - 40 - Math.sqrt(3) * Field.a) / 2;
+		addChild(actionButtons);
 	}
 
 	private function onTimeCorrection(data:TimeData) 
@@ -428,26 +454,32 @@ class Main extends Sprite
 	{
 		Networker.registerMainMenuEvents();
 
-		if (data.reason != 'mate')
+		if (data.reason != 'mate' && data.reason != 'breakthrough')
 			sidebox.onNonMateEnded();
 
 		var resultMessage;
 		if (data.winner_color == "")
-			resultMessage = "½ - ½.";
+			resultMessage = "½ - ½";
 		else if (data.winner_color == gameboard.playerColor.getName().toLowerCase())
-			if (data.reason == 'mate')
-				resultMessage = "You won.";
-			else if (data.reason == 'timeout')
-				resultMessage = "You won by timeout.";
-			else
-				resultMessage = "Opponent disconnected. You won.";
-		else if (data.reason == 'timeout')
-			resultMessage = "You lost by timeout.";
-		else
-			resultMessage = "You lost.";
+			resultMessage = "You won";
+		else 
+			resultMessage = "You lost";
+
+		var explanation = switch data.reason
+		{
+			case 'mate': ".";
+			case 'breakthrough': " by breakthrough.";
+			case 'timeout': " by timeout.";
+			case 'resignation': " by resignation.";
+			case 'abandon': ". Opponent disconnected.";
+			case 'threefoldrepetition': " (Threefold repetition).";
+			case 'hundredmoverule': " (Hundred move rule).";
+			case 'drawagreement': " (by agreement).";
+			default: "";
+		};
 
 		Assets.getSound("sounds/notify.mp3").play();
-		Dialogs.info("Game over. " + resultMessage, "Game ended");
+		Dialogs.info("Game over. " + resultMessage + explanation, "Game ended");
 
 		removeChild(sidebox);
 		removeChild(chatbox);

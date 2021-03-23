@@ -1,5 +1,7 @@
   package;
 
+import openfl.Assets;
+import Figure.FigureType;
 import Field.Direction;
 import openfl.events.Event;
 import Figure.FigureColor;
@@ -19,24 +21,36 @@ class AnalysisField extends Sprite
     public function new() 
     {
         super();
-        hexes = [];
-        for (j in 0...7)
-        {
-            var row:Array<Hexagon> = [];
-            for (i in 0...9)
-                if (!hexExists(i, j))
-                    row.push(null);
-                else 
-                {
-                    var hex:Hexagon = new Hexagon(a, isDark(i, j));
-                    var coords = hexCoords(i, j);
-                    hex.x = coords.x;
-                    hex.y = coords.y;
-                    addChild(hex);
-                    row.push(hex);
-                }
-            hexes.push(row);
-        }
+        drawHexes();
+        arrangeDefault();
+        addEventListener(Event.ADDED_TO_STAGE, init);
+    }
+
+    private function init(e) 
+    {
+        removeEventListener(Event.ADDED_TO_STAGE, init);
+        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+
+    public function reset() 
+    {
+        clearBoard();
+        arrangeDefault();
+    }
+    
+    public function clearBoard() 
+    {
+        for (row in figures)
+            for (figure in row)
+                if (figure != null)
+                    removeChild(figure);
+        figures = [for (j in 0...7) [for (i in 0...9) null]];
+    }
+
+    private function arrangeDefault() 
+    {
         figures = [for (j in 0...7) [for (i in 0...9) null]];
         figures[0][0] = new Figure(Dominator, Black);
         figures[0][1] = new Figure(Liberator, Black);
@@ -69,130 +83,92 @@ class AnalysisField extends Sprite
         figures[5][8] = new Figure(Progressor, White);
 
         placeFigures();
-        addEventListener(Event.ADDED_TO_STAGE, init);
     }
 
-    private function init(e) 
+    //---------------------------------------------------------------------------------------------------------
+
+    private function departurePress(pressLocation:IntPoint) 
     {
-        removeEventListener(Event.ADDED_TO_STAGE, init);
-        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+        var figure = getFigure(pressLocation);
+        if (figure == null)
+            return;
+
+        selectDeparture(pressLocation, figure);
+        drag(figure);
+
+        stage.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
+        stage.addEventListener(MouseEvent.MOUSE_UP, onRelease);
+    }
+
+    private function destinationPress(pressLocation:IntPoint) 
+    {
+        var from = new IntPoint(selected.i, selected.j);
+        var movingFig = getFigure(selected);
+        var moveOntoFig = getFigure(pressLocation);
+
+        selectionBackToNormal();
+
+        if (pressLocation != null)
+        {
+            var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !isCastle(from, pressLocation, movingFig, moveOntoFig);
+            if (otherOwnClicked)
+                selectDeparture(pressLocation, moveOntoFig);
+            else
+            {
+                stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
+                attemptMove(from, pressLocation);
+            }
+        }
     }
 
     private function onPress(e:MouseEvent) 
     {
-        var indexes = posToIndexes(e.stageX - this.x, e.stageY - this.y);
-        if (indexes == null)
-        {
-            if (selected != null)
-            {
-                stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
-                hexes[selected.j][selected.i].deselect();
-                selected = null;
-            }
-            return;
-        }
+        var pressLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
         if (selected != null)
-        {
-            var movingFig = getFigure(selected);
-            var moveOntoFig = getFigure(indexes);
-
-            for (dest in possibleFields(movingFig, selected.i, selected.j))
-                hexes[dest.j][dest.i].removeMarkers();
-
-            if (moveOntoFig != null && moveOntoFig.color == getFigure(selected).color && !isCastle(selected, indexes, movingFig, moveOntoFig))
-            {
-                hexes[selected.j][selected.i].deselect();
-                selected = indexes;
-                hexes[selected.j][selected.i].select();
-                for (dest in possibleFields(moveOntoFig, indexes.i, indexes.j))
-                    if (getFigure(dest) != null)
-                        hexes[dest.j][dest.i].addRound();
-                    else
-                        hexes[dest.j][dest.i].addDot();
-                return;
-            }
-
-            stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
-            if (ableToMove(selected, indexes))
-                move(selected.i, selected.j, indexes.i, indexes.j);
-            selectionBackToNormal();
-        }
+            destinationPress(pressLocation);
         else
-        {
-            var figure = figures[indexes.j][indexes.i];
-            if (figure != null)
-            {
-                selected = indexes;
-                hexes[indexes.j][indexes.i].select();
-                removeChild(figure);
-                addChild(figure);
-                figure.startDrag(true);
-
-                for (dest in possibleFields(figure, indexes.i, indexes.j))
-                    if (getFigure(dest) != null)
-                        hexes[dest.j][dest.i].addRound();
-                    else
-                        hexes[dest.j][dest.i].addDot();
-
-                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress);
-                stage.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
-                stage.addEventListener(MouseEvent.MOUSE_UP, onRelease);
-            }
-        }
+            departurePress(pressLocation);
     }
 
     private function onMove(e:MouseEvent) 
     {
-        var indexes = posToIndexes(e.stageX - this.x, e.stageY - this.y);
+        var shadowLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
-        if (selectedDest != null)
-            if (selectedDest.equals(indexes))
-                return;
-            else
-            {
-                hexes[selectedDest.j][selectedDest.i].deselect();
-                selectedDest = null;
-            }
+        if (shadowLocation != null && ableToMove(selected, shadowLocation))
+            hexes[shadowLocation.j][shadowLocation.i].select();
 
-        if (indexes != null && ableToMove(selected, indexes))
-        {
-            selectedDest = indexes;
-            hexes[selectedDest.j][selectedDest.i].select();
-        }
+        if (selectedDest != null && !selectedDest.equals(shadowLocation))
+            hexes[selectedDest.j][selectedDest.i].deselect();
+
+        selectedDest = shadowLocation;
     }
 
     private function onRelease(e:MouseEvent) 
     {
         stage.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
 
-        var indexes = posToIndexes(e.stageX - this.x, e.stageY - this.y);
-        figures[selected.j][selected.i].stopDrag();
-        if (indexes != null && ableToMove(selected, indexes) && !indexes.equals(selected))
+        var pressedAt = new IntPoint(selected.i, selected.j);
+        var releasedAt = posToIndexes(e.stageX - this.x, e.stageY - this.y);
+        figures[pressedAt.j][pressedAt.i].stopDrag();
+        if (releasedAt != null && ableToMove(pressedAt, releasedAt) && !releasedAt.equals(pressedAt))
         {
             stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
-            for (dest in possibleFields(figures[selected.j][selected.i], selected.i, selected.j))
-                hexes[dest.j][dest.i].removeMarkers();
-            move(selected.i, selected.j, indexes.i, indexes.j);
             selectionBackToNormal();
+            attemptMove(pressedAt, releasedAt);
         }
         else
-            disposeFigure(figures[selected.j][selected.i], selected.i, selected.j);
-        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+            disposeFigure(figures[pressedAt.j][pressedAt.i], pressedAt);
     }
 
-    private function selectionBackToNormal() 
-    {
-        hexes[selected.j][selected.i].deselect();
-        if (selectedDest != null)
-            hexes[selectedDest.j][selectedDest.i].deselect();
-
-        selected = null;
-        selectedDest = null;
-    }
+    //---------------------------------------------------------------------------------------------------------
 
     private function ableToMove(from:IntPoint, to:IntPoint) 
     {
+        var movingFigure = getFigure(from);
+        if (movingFigure == null)
+            return false;
+
         for (dest in possibleFields(getFigure(from), from.i, from.j))
             if (to.equals(dest))
                 return true;
@@ -270,8 +246,13 @@ class AnalysisField extends Sprite
             case Liberator:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color, 2);
+                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color, 1);
                     var occupier = getFigure(destination);
+                    if (destination != null && occupier == null)
+                        fields.push(destination);
+
+                    destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color, 2);
+                    occupier = getFigure(destination);
                     if (destination != null && (occupier == null || occupier.color != figure.color))
                         fields.push(destination);
                 }
@@ -293,11 +274,6 @@ class AnalysisField extends Sprite
                 }
         }
         return fields;
-    }
-
-    private function getFigure(coords:Null<IntPoint>):Null<Figure>
-    {
-        return (coords == null || !hexExists(coords.i, coords.j) || figures[coords.j] == null)? null : figures[coords.j][coords.i];
     }
 
     private function getCoordsInRelDirection(fromI:Int, fromJ:Int, dir:Direction, col:FigureColor, ?steps:Int = 1):Null<IntPoint>
@@ -352,31 +328,78 @@ class AnalysisField extends Sprite
         return hexExists(coords.i, coords.j)? coords : null;
     }
 
-    private function hexExists(i:Int, j:Int):Bool
+    //------------------------------------------------------------------------------------------------------------------------------------
+
+    private function attemptMove(from:IntPoint, to:IntPoint) 
     {
-        return i >= 0 && i < 9 && j >= 0 && j < 7 && (j != 6 || i % 2 == 0);
+        if (!ableToMove(from, to))
+            return;
+
+        var figure = getFigure(from);
+        var moveOntoFigure = getFigure(to);
+        var nearIntellector:Bool = nearOwnIntellector(from, figure.color);
+        
+        stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress); //To ignore clicking on dialogs
+
+        if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type)
+            Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
+        else if (isFinalForPlayer(to) && figure.type == Progressor)
+            Dialogs.promotionSelect(figure.color, makeMove.bind(from, to, _), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
+        else 
+            makeMove(from, to);
     }
 
-    private function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int) 
+    private function makeMove(from:IntPoint, to:IntPoint, ?morphInto:FigureType) 
     {
-        var figure = figures[fromJ][fromI];
-        var figMoveOnto = getFigure(new IntPoint(toI, toJ));
+        move(from, to, morphInto);
+        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+    }
+
+    public function move(from:IntPoint, to:IntPoint, ?morphInto:FigureType) 
+    {
+        var figure = getFigure(from);
+        var figMoveOnto = getFigure(to);
         
-        disposeFigure(figure, toI, toJ);
-        figures[toJ][toI] = figure;
-        figures[fromJ][fromI] = null;
+        if (morphInto != null)
+        {
+            var color = figure.color;
+            removeChild(figure);
+            figure = new Figure(morphInto, color);
+            scaleFigure(figure);
+            addChild(figure);
+        }
+
+        disposeFigure(figure, to);
+        figures[to.j][to.i] = figure;
+        figures[from.j][from.i] = null;
 
         if (figMoveOnto != null)
-            if (figMoveOnto.color == figure.color)
-                if (isCastle(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), figure, figMoveOnto))
-                {
-                    disposeFigure(figMoveOnto, fromI, fromJ);
-                    figures[fromJ][fromI] = figMoveOnto;
-                }
-                else 
-                    throw "Trying to eat own figure";
+            if (isCastle(from, to, figure, figMoveOnto))
+            {
+                disposeFigure(figMoveOnto, from);
+                figures[from.j][from.i] = figMoveOnto;
+                Assets.getSound("sounds/move.mp3").play();
+            }
             else 
+            {
                 removeChild(figMoveOnto);
+                Assets.getSound("sounds/capture.mp3").play();
+            }
+        else 
+            Assets.getSound("sounds/move.mp3").play();
+    }
+
+    //-------------------------------------------------------------------------------------------------------------------------------
+
+    private function nearOwnIntellector(loc:IntPoint, color:FigureColor):Bool
+    {
+        for (dir in [UL, UR, D, DR, DL, U])
+        {
+            var neighbour = getFigure(getCoordsInRelDirection(loc.i, loc.j, dir, color));
+            if (neighbour != null && neighbour.color == color && neighbour.type == Intellector)
+                return true;
+        }
+        return false;
     }
 
     private function posToIndexes(x:Float, y:Float):Null<IntPoint>
@@ -399,6 +422,11 @@ class AnalysisField extends Sprite
         return closest;
     }
 
+    private function getFigure(coords:Null<IntPoint>):Null<Figure>
+    {
+        return (coords == null || !hexExists(coords.i, coords.j) || figures[coords.j] == null)? null : figures[coords.j][coords.i];
+    }
+
     private function hexCoords(i:Int, j:Int):Point
     {
         var p:Point = new Point(0, 0);
@@ -409,32 +437,14 @@ class AnalysisField extends Sprite
         return p;
     }
 
-    private function placeFigures() 
+    private function isFinalForPlayer(p:IntPoint):Bool
     {
-        for (j in 0...7)
-            for (i in 0...9)
-            {
-                var figure = figures[j][i];
-                if (figure != null)
-                {
-                    var scale = Math.sqrt(3) * a * 0.85 / figure.height;
-                    if (figure.type == Progressor)
-                        scale *= 0.7;
-                    else if (figure.type == Liberator || figure.type == Defensor)
-                        scale *= 0.9;
-                    figure.scaleX = scale;
-                    figure.scaleY = scale;
-                    disposeFigure(figure, i, j);
-                    addChild(figure);
-                }
-            }
+        return p.j == 0 && p.i % 2 == 0;
     }
 
-    private function disposeFigure(figure:Figure, i:Int, j:Int) 
+    private function hexExists(i:Int, j:Int):Bool
     {
-        var coords = hexCoords(i, j);
-        figure.x = coords.x;
-        figure.y = coords.y;
+        return i >= 0 && i < 9 && j >= 0 && j < 7 && (j != 6 || i % 2 == 0);
     }
 
     private function isDark(i:Int, j:Int) 
@@ -445,5 +455,107 @@ class AnalysisField extends Sprite
             return i % 2 == 0;
         else 
             return i % 2 == 1;
+    }
+
+    //----------------------------------------------------------------------------------------------------------------------------------------------
+
+    private function placeFigures() 
+    {
+        for (j in 0...7)
+            for (i in 0...9)
+            {
+                var figure = figures[j][i];
+                if (figure != null)
+                {
+                    scaleFigure(figure);
+                    disposeFigure(figure, new IntPoint(i, j));
+                    addChild(figure);
+                }
+            }
+    }
+
+    private function scaleFigure(figure:Figure) 
+    {
+        var scale = Math.sqrt(3) * a * 0.85 / figure.height;
+        if (figure.type == Progressor)
+            scale *= 0.7;
+        else if (figure.type == Liberator || figure.type == Defensor)
+            scale *= 0.9;
+        figure.scaleX = scale;
+        figure.scaleY = scale;
+    }
+
+    private function disposeFigure(figure:Figure, loc:IntPoint) 
+    {
+        var coords = hexCoords(loc.i, loc.j);
+        figure.x = coords.x;
+        figure.y = coords.y;
+    }
+
+    //----------------------------------------------------------------------------------------------------------------------------------------------
+
+    private function drag(figure:Figure) 
+    {
+        removeChild(figure);
+        addChild(figure);
+        figure.startDrag(true);
+    }
+
+    private function addMarkers(from:IntPoint, figure:Figure) 
+    {
+        for (dest in possibleFields(figure, from.i, from.j))
+            if (getFigure(dest) != null)
+                hexes[dest.j][dest.i].addRound();
+            else
+                hexes[dest.j][dest.i].addDot();
+    }
+
+    private function removeMarkers(from:IntPoint, figure:Figure) 
+    {
+        for (dest in possibleFields(figure, from.i, from.j))
+            hexes[dest.j][dest.i].removeMarkers();
+    }
+
+    private function selectDeparture(dep:IntPoint, depFigure:Figure) 
+    {
+        selected = dep;
+        hexes[dep.j][dep.i].select();
+        addMarkers(dep, depFigure);
+    }
+
+    private function selectionBackToNormal() 
+    {
+        removeMarkers(selected, getFigure(selected));
+
+        hexes[selected.j][selected.i].deselect();
+        if (selectedDest != null)
+            hexes[selectedDest.j][selectedDest.i].deselect();
+
+        selected = null;
+        selectedDest = null;
+    }
+
+    //----------------------------------------------------------------------------------------------------------------------------------------------
+
+    private function drawHexes() 
+    {
+        hexes = [];
+        for (j in 0...7)
+        {
+            var row:Array<Hexagon> = [];
+            for (i in 0...9)
+                if (!hexExists(i, j))
+                    row.push(null);
+                else 
+                {
+                    var hex:Hexagon = new Hexagon(a, isDark(i, j));
+                    var coords = hexCoords(i, j);
+                    hex.x = coords.x;
+                    hex.y = coords.y;
+                    addChild(hex);
+                    row.push(hex);
+                }
+            hexes.push(row);
+        }
     }
 }
