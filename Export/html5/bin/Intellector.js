@@ -5304,7 +5304,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "15";
+	app.meta.h["build"] = "16";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -5749,30 +5749,51 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,onEnded: function(data) {
 		Networker.registerMainMenuEvents();
-		if(data.reason != "mate") {
+		if(data.reason != "mate" && data.reason != "breakthrough") {
 			Main.sidebox.onNonMateEnded();
 		}
 		var resultMessage;
 		if(data.winner_color == "") {
-			resultMessage = "½ - ½.";
+			resultMessage = "½ - ½";
 		} else {
 			var e = this.gameboard.playerColor;
 			if(data.winner_color == $hxEnums[e.__enum__].__constructs__[e._hx_index].toLowerCase()) {
-				if(data.reason == "mate") {
-					resultMessage = "You won.";
-				} else if(data.reason == "timeout") {
-					resultMessage = "You won by timeout.";
-				} else {
-					resultMessage = "Opponent disconnected. You won.";
-				}
-			} else if(data.reason == "timeout") {
-				resultMessage = "You lost by timeout.";
+				resultMessage = "You won";
 			} else {
-				resultMessage = "You lost.";
+				resultMessage = "You lost";
 			}
 		}
+		var explanation;
+		switch(data.reason) {
+		case "abandon":
+			explanation = ". Opponent disconnected.";
+			break;
+		case "breakthrough":
+			explanation = " by breakthrough.";
+			break;
+		case "drawagreement":
+			explanation = " (by agreement).";
+			break;
+		case "hundredmoverule":
+			explanation = " (Hundred move rule).";
+			break;
+		case "mate":
+			explanation = ".";
+			break;
+		case "resignation":
+			explanation = " by resignation.";
+			break;
+		case "threefoldrepetition":
+			explanation = " (Threefold repetition).";
+			break;
+		case "timeout":
+			explanation = " by timeout.";
+			break;
+		default:
+			explanation = "";
+		}
 		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
-		Dialogs.info("Game over. " + resultMessage,"Game ended");
+		Dialogs.info("Game over. " + resultMessage + explanation,"Game ended");
 		this.removeChild(Main.sidebox);
 		this.removeChild(Main.chatbox);
 		this.removeChild(Main.infobox);
@@ -59527,7 +59548,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 435540;
+	this.version = 26115;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -106602,7 +106623,7 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 	stack.set_length(0);
 });
 AnalysisField.a = 40;
-Changes.changelog = [{ date : "22.03.2021", text : "Additional functionality and bugfixes for analysis board. New openings"},{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
+Changes.changelog = [{ date : "23.03.2021", text : "Threefold repetition & 100 move rule"},{ date : "22.03.2021", text : "Additional functionality and bugfixes for analysis board. New openings"},{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
 Chatbox.WIDTH = 260;
 Colors.border = 6701350;
 Colors.lightHex = 16764831;

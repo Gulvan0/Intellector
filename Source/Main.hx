@@ -1,5 +1,6 @@
 package;
 
+import Networker.OngoingBattleData;
 import haxe.ui.components.Button;
 import haxe.ui.components.CheckBox;
 import haxe.ui.components.TextField;
@@ -40,11 +41,7 @@ class Main extends Sprite
 	private var mainMenu:VBox;
 	private var hostingMenu:VBox;
 	private var joinMenu:VBox;
-	private var gameboard:Field;
-	private var analysisboard:AnalysisField;
-	public static var sidebox:Sidebox;
-	public static var chatbox:Chatbox;
-	public static var infobox:GameInfoBox;
+	private var game:GameCompound;
 
 	private var errorLabel:Label;
 	private var fadeTimer:Null<Timer>;
@@ -348,27 +345,8 @@ class Main extends Sprite
 		Networker.registerGameEvents(onMove, onMessage, onTimeCorrection, onEnded);
 		removeChildren();
 
-		gameboard = new Field(data.colour);
-		gameboard.x = (Browser.window.innerWidth - gameboard.width) / 2;
-		gameboard.y = 100;
-		addChild(gameboard);
-
-		sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
-		sidebox.x = gameboard.x + gameboard.width + 10;
-		sidebox.y = gameboard.y + (gameboard.height - 380 - Math.sqrt(3) * Field.a) / 2;
-		addChild(sidebox);
-
-		chatbox = new Chatbox(gameboard.height * 0.75);
-		chatbox.x = gameboard.x - Chatbox.WIDTH - Field.a - 30;
-		chatbox.y = gameboard.y + gameboard.height * 0.25 - Field.a * Math.sqrt(3) / 2;
-		addChild(chatbox);
-
-		var whiteLogin = data.colour == 'white'? Networker.login : data.enemy;
-		var blackLogin = data.colour == 'black'? Networker.login : data.enemy;
-		infobox = new GameInfoBox(Chatbox.WIDTH, gameboard.height * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin, data.colour == 'white');
-		infobox.x = gameboard.x - Chatbox.WIDTH - Field.a - 30;
-		infobox.y = gameboard.y - Field.a * Math.sqrt(3) / 2;
-		addChild(infobox);
+		game = GameCompound.buildActive(data);
+		addChild(game);
 
 		Browser.window.history.pushState({}, "Intellector", "?id=" + data.match_id);
 		Assets.getSound("sounds/notify.mp3").play();	
@@ -377,90 +355,49 @@ class Main extends Sprite
 	private function drawAnalysisBoard() 
 	{
 		removeChildren();
+		game = GameCompound.buildAnalysis(onReturn);
+		addChild(game);
+	}
 
-		analysisboard = new AnalysisField();
-		analysisboard.x = (Browser.window.innerWidth - analysisboard.width) / 2;
-		analysisboard.y = 100;
-		addChild(analysisboard);
+	private function drawSpectation(data:OngoingBattleData) 
+	{
+		removeChildren();
+		game = GameCompound.buildSpectators(data, onReturn);
+		addChild(game);
+	}
 
-		var returnBtn = new Button();
-		returnBtn.width = 100;
-		returnBtn.text = "Return";
-
-		returnBtn.onClick = (e) -> {
-			removeChildren();
-			drawMainMenu();
-		}
-
-		returnBtn.x = 10;
-		returnBtn.y = 10;
-		addChild(returnBtn);
-
-		var actionButtons:VBox = new VBox();
-
-		var clearBtn = new Button();
-		clearBtn.width = 200;
-		clearBtn.text = "Clear";
-
-		clearBtn.onClick = (e) -> {
-			analysisboard.clearBoard();
-		}
-
-		actionButtons.addComponent(clearBtn);
-
-		var resetBtn = new Button();
-		resetBtn.width = 200;
-		resetBtn.text = "Reset";
-
-		resetBtn.onClick = (e) -> {
-			analysisboard.reset();
-		}
-
-		actionButtons.addComponent(resetBtn);
-
-		actionButtons.x = analysisboard.x + analysisboard.width + 10;
-		actionButtons.y = analysisboard.y + (analysisboard.height - 40 - Math.sqrt(3) * Field.a) / 2;
-		addChild(actionButtons);
+	private function onReturn()
+	{
+		removeChild(game);
+		game = null;
+		drawMainMenu();
 	}
 
 	private function onTimeCorrection(data:TimeData) 
 	{
-		sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
+		game.onTimeCorrection(data);
 	}
 
 	private function onMessage(data:MessageData) 
 	{
-		chatbox.appendMessage(data.issuer_login, data.message);
+		game.onMessage(data);
 	}
 
 	private function onMove(data:MoveData) 
 	{
-		var from = new IntPoint(data.fromI, data.fromJ);
-		var to = new IntPoint(data.toI, data.toJ);
-		var movingFigure = gameboard.getFigure(from);
-		var ontoFigure = gameboard.getFigure(to);
-		var opponentColor:FigureColor = gameboard.playerColor == White? Black : White;
-		var morphedInto = data.morphInto == null? null : FigureType.createByName(data.morphInto);
-		var capture = ontoFigure != null && ontoFigure.color == gameboard.playerColor;
-		var mate = capture && ontoFigure.type == Intellector;
-		var castle = ontoFigure != null && ontoFigure.color == opponentColor && (ontoFigure.type == Intellector && movingFigure.type == Defensor || ontoFigure.type == Defensor && movingFigure.type == Intellector);
-
-		sidebox.makeMove(opponentColor, movingFigure.type, to, capture, mate, castle, morphedInto);
-		infobox.makeMove(data.fromI, data.fromJ, data.toI, data.toJ, morphedInto);
-		gameboard.move(from, to, morphedInto);
+		game.onMove(data);
 	}
 
 	private function onEnded(data:GameOverData) 
 	{
 		Networker.registerMainMenuEvents();
 
-		if (data.reason != 'mate' && data.reason != 'breakthrough')
-			sidebox.onNonMateEnded();
+		game.terminate();
 
 		var resultMessage;
 		if (data.winner_color == "")
 			resultMessage = "½ - ½";
-		else if (data.winner_color == gameboard.playerColor.getName().toLowerCase())
+		else if (data.winner_color == game.playerColor.getName().toLowerCase())
 			resultMessage = "You won";
 		else 
 			resultMessage = "You lost";
@@ -481,10 +418,8 @@ class Main extends Sprite
 		Assets.getSound("sounds/notify.mp3").play();
 		Dialogs.info("Game over. " + resultMessage + explanation, "Game ended");
 
-		removeChild(sidebox);
-		removeChild(chatbox);
-		removeChild(infobox);
-		removeChild(gameboard);
+		removeChild(game);
+		game = null;
 
 		Browser.window.history.pushState({}, "Intellector", "/");
 		if (Networker.login.startsWith("guest_"))

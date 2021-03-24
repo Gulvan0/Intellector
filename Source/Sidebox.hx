@@ -63,7 +63,7 @@ class Sidebox extends Sprite
         {
             if (timeNumbers[0] == "00")
             {
-                onNonMateEnded();
+                terminate();
                 Networker.reqTimeoutCheck();
                 return;
             }
@@ -111,7 +111,8 @@ class Sidebox extends Sprite
         var moveStr;
         if (castle)
             moveStr = "O-O";
-        else moveStr = figureAbbreviation(figure) + (capture? "x" : "") + locToStr(to) + (morphInto != null? '=[${figureAbbreviation(morphInto)}]' : '') + (mate? "#" : "");
+        else 
+            moveStr = figureAbbreviation(figure) + (capture? "x" : "") + locToStr(to) + (morphInto != null? '=[${figureAbbreviation(morphInto)}]' : '') + (mate? "#" : "");
 
         if (color == Black)
         {
@@ -130,14 +131,36 @@ class Sidebox extends Sprite
         {
             if (playerTurn) //Because corrections have already been applied if it is the opponent's turn ("correct, then move" server rule)
                 bottomTime.text = addBonus(bottomTime.text);
-            timer = new Timer(1000);
-            timer.run = timerRun;
+            launchTimer();
         }
         
         playerTurn = color != playerColor;
     }
 
-    public function onNonMateEnded() 
+    public function writeMove(color:FigureColor, s:String)
+    {
+        if (color == Black)
+        {
+            lastMove.black_move = s;
+            movetable.dataSource.update(movetable.dataSource.size - 1, lastMove);
+        }
+        else 
+        {
+            lastMove = {"num": '$move', "white_move": s, "black_move": ""};
+            movetable.dataSource.add(lastMove);
+        }
+
+        move++;
+        playerTurn = color != playerColor;
+    }
+
+    public function launchTimer()
+    {
+        timer = new Timer(1000);
+        timer.run = timerRun;
+    }
+
+    public function terminate() 
     {
         if (timer != null)
             timer.stop();

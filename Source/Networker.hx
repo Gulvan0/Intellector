@@ -56,6 +56,20 @@ typedef MessageData =
     var message:String;
 }
 
+typedef OngoingBattleData =
+{
+    var match_id:Int;
+    var requestedColor:String;
+    var whiteLogin:String;
+    var blackLogin:String;
+    var startSecs:Int;
+    var bonusSecs:Int;
+    var whiteSeconds:Int;
+    var blackSeconds:Int;
+    var position:String;
+    var movesPlayed:Array<String>;
+}
+
 class Networker
 {
 

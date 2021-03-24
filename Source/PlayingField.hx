@@ -1,20 +1,28 @@
-  package;
+package;
 
-import openfl.Assets;
+import Rules.Direction;
 import Figure.FigureType;
-import Field.Direction;
+import openfl.Assets;
 import openfl.events.Event;
 import Figure.FigureColor;
 import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import openfl.display.Sprite;
 
-class AnalysisField extends Field
+class PlayingField extends Field
 {
-    public function new() 
+    public var playersTurn:Bool;
+    public var playerColor:FigureColor;
+
+    public function new(playerColourName:String) 
     {
         super();
-        arrangeDefault();
+        var playerIsWhite = playerColourName == 'white';
+
+        playerColor = playerIsWhite? White : Black;
+        playersTurn = playerIsWhite;
+
+        figures = Factory.produceFiguresFromDefault(playerIsWhite, this);
         addEventListener(Event.ADDED_TO_STAGE, init);
     }
 
@@ -26,40 +34,24 @@ class AnalysisField extends Field
 
     //---------------------------------------------------------------------------------------------------------
 
-    public function reset() 
-    {
-        clearBoard();
-        arrangeDefault();
-    }
-    
-    public function clearBoard() 
-    {
-        for (row in figures)
-            for (figure in row)
-                if (figure != null)
-                    removeChild(figure);
-        figures = [for (j in 0...7) [for (i in 0...9) null]];
-    }
-
-    private function arrangeDefault() 
-    {
-        figures = Factory.produceFiguresFromDefault(true, this);
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-
     private override function onPress(e:MouseEvent) 
     {
+        if (!playersTurn)
+            return;
+
         var pressLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
         if (selected != null)
             destinationPress(pressLocation);
         else
-            departurePress(pressLocation, c->true);
+            departurePress(pressLocation, c -> (c == playerColor));
     }
 
     private override function onMove(e:MouseEvent) 
     {
+        if (!playersTurn)
+            return;
+        
         var shadowLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
         if (shadowLocation != null && ableToMove(selected, shadowLocation))
@@ -73,6 +65,9 @@ class AnalysisField extends Field
 
     private override function onRelease(e:MouseEvent) 
     {
+        if (!playersTurn)
+            return;
+        
         stage.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
 
         var pressedAt = new IntPoint(selected.i, selected.j);
@@ -88,12 +83,20 @@ class AnalysisField extends Field
             disposeFigure(figures[pressedAt.j][pressedAt.i], pressedAt);
     }
 
-    //------------------------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------
 
     private override function makeMove(from:IntPoint, to:IntPoint, ?morphInto:FigureType) 
     {
+        var movingFigure = getFigure(from);
+        var figMoveOnto = getFigure(to);
+
+        var capture = figMoveOnto != null && figMoveOnto.color != playerColor;
+        var mate = capture && figMoveOnto.type == Intellector;
+
+        Networker.move(from.i, from.j, to.i, to.j, morphInto);
+        Main.sidebox.makeMove(playerColor, movingFigure.type, to, capture, mate, isCastle(from, to, movingFigure, figMoveOnto), morphInto);
+        Main.infobox.makeMove(from.i, from.j, to.i, to.j, morphInto);
         move(from, to, morphInto);
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
-    
 }
