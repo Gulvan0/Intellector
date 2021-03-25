@@ -1,18 +1,16 @@
 package;
 
-import Rules.Direction;
+import Networker.MoveData;
 import Figure.FigureType;
-import openfl.Assets;
 import openfl.events.Event;
 import Figure.FigureColor;
 import openfl.events.MouseEvent;
-import openfl.geom.Point;
-import openfl.display.Sprite;
 
 class PlayingField extends Field
 {
-    public var playersTurn:Bool;
     public var playerColor:FigureColor;
+
+    public var onPlayerMadeMove:MoveData->Void;
 
     public function new(playerColourName:String) 
     {
@@ -87,16 +85,13 @@ class PlayingField extends Field
 
     private override function makeMove(from:IntPoint, to:IntPoint, ?morphInto:FigureType) 
     {
-        var movingFigure = getFigure(from);
-        var figMoveOnto = getFigure(to);
-
-        var capture = figMoveOnto != null && figMoveOnto.color != playerColor;
-        var mate = capture && figMoveOnto.type == Intellector;
-
-        Networker.move(from.i, from.j, to.i, to.j, morphInto);
-        Main.sidebox.makeMove(playerColor, movingFigure.type, to, capture, mate, isCastle(from, to, movingFigure, figMoveOnto), morphInto);
-        Main.infobox.makeMove(from.i, from.j, to.i, to.j, morphInto);
+        onPlayerMadeMove({issuer_login: Networker.login, fromI: from.i, toI: to.i, fromJ: from.j, toJ: to.j, morphInto: morphInto == null? null : morphInto.getName()});
         move(from, to, morphInto);
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+    }
+
+    private override function isOrientationNormal(movingFigure:FigureColor):Bool
+    {   
+        return playerColor == movingFigure;
     }
 }

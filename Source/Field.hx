@@ -19,6 +19,8 @@ class Field extends Sprite
     private var selectedDest:Null<IntPoint>;
     private var lastMoveSelectedHexes:Array<Hexagon>;
 
+    public var playersTurn:Bool = true;
+
     public function new() 
     {
         super();
@@ -43,6 +45,11 @@ class Field extends Sprite
 
     private function makeMove(from:IntPoint, to:IntPoint, ?morphInto:FigureType) 
     {
+        throw "To be overriden";
+    }
+
+    private function isOrientationNormal(movingFigure:FigureColor):Bool
+    {   
         throw "To be overriden";
     }
 
@@ -143,6 +150,8 @@ class Field extends Sprite
             }
         else 
             Assets.getSound("sounds/move.mp3").play();
+
+        playersTurn = !playersTurn;
     }
 
     private function isCastle(pos1:IntPoint, pos2:IntPoint, fig1:Figure, fig2:Figure)
@@ -154,7 +163,7 @@ class Field extends Sprite
     {
         for (dir in [UL, UR, D, DR, DL, U])
         {
-            var neighbour = getFigure(Rules.getCoordsInRelDirection(loc.i, loc.j, dir, color));
+            var neighbour = getFigure(Rules.getCoordsInRelDirection(loc.i, loc.j, dir, true));
             if (neighbour != null && neighbour.color == color && neighbour.type == Intellector)
                 return true;
         }
@@ -189,7 +198,7 @@ class Field extends Sprite
         if (movingFigure == null)
             return false;
 
-        for (dest in Rules.possibleFields(from.i, from.j, getFigure))
+        for (dest in Rules.possibleFields(from.i, from.j, getFigure, isOrientationNormal(movingFigure.color)))
             if (to.equals(dest))
                 return true;
         return false;    
@@ -242,7 +251,7 @@ class Field extends Sprite
 
     private function addMarkers(from:IntPoint) 
     {
-        for (dest in Rules.possibleFields(from.i, from.j, getFigure))
+        for (dest in Rules.possibleFields(from.i, from.j, getFigure, isOrientationNormal(getFigure(from).color)))
             if (getFigure(dest) != null)
                 hexes[dest.j][dest.i].addRound();
             else
@@ -251,7 +260,7 @@ class Field extends Sprite
 
     private function removeMarkers(from:IntPoint) 
     {
-        for (dest in Rules.possibleFields(from.i, from.j, getFigure))
+        for (dest in Rules.possibleFields(from.i, from.j, getFigure, isOrientationNormal(getFigure(from).color)))
             hexes[dest.j][dest.i].removeMarkers();
     }
 

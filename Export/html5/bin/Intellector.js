@@ -3212,21 +3212,312 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 	,__class__: openfl_display_Sprite
 	,__properties__: $extend(openfl_display_DisplayObjectContainer.prototype.__properties__,{get_graphics:"get_graphics",set_buttonMode:"set_buttonMode",get_buttonMode:"get_buttonMode"})
 });
-var AnalysisField = function() {
+var Field = function() {
+	this.playersTurn = true;
 	openfl_display_Sprite.call(this);
-	this.drawHexes();
+	this.hexes = Factory.produceHexes(this);
+	this.lastMoveSelectedHexes = [];
+};
+$hxClasses["Field"] = Field;
+Field.__name__ = "Field";
+Field.hexExists = function(i,j) {
+	if(i >= 0 && i < 9 && j >= 0 && j < 7) {
+		if(j == 6) {
+			return i % 2 == 0;
+		} else {
+			return true;
+		}
+	} else {
+		return false;
+	}
+};
+Field.hexCoords = function(i,j) {
+	var p = new openfl_geom_Point(0,0);
+	p.x = 3 * Field.a * i / 2;
+	p.y = Math.sqrt(3) * Field.a * j;
+	if(i % 2 == 1) {
+		p.y += Math.sqrt(3) * Field.a / 2;
+	}
+	return p;
+};
+Field.__super__ = openfl_display_Sprite;
+Field.prototype = $extend(openfl_display_Sprite.prototype,{
+	hexes: null
+	,figures: null
+	,selected: null
+	,selectedDest: null
+	,lastMoveSelectedHexes: null
+	,playersTurn: null
+	,onPress: function(e) {
+		throw haxe_Exception.thrown("To be overriden");
+	}
+	,onMove: function(e) {
+		throw haxe_Exception.thrown("To be overriden");
+	}
+	,onRelease: function(e) {
+		throw haxe_Exception.thrown("To be overriden");
+	}
+	,makeMove: function(from,to,morphInto) {
+		throw haxe_Exception.thrown("To be overriden");
+	}
+	,isOrientationNormal: function(movingFigure) {
+		throw haxe_Exception.thrown("To be overriden");
+	}
+	,departurePress: function(pressLocation,playerIsOwner) {
+		var figure = this.getFigure(pressLocation);
+		if(figure == null || !playerIsOwner(figure.color)) {
+			return;
+		}
+		this.selectDeparture(pressLocation);
+		this.drag(figure);
+		this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
+		this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
+	}
+	,destinationPress: function(pressLocation) {
+		var from = new IntPoint(this.selected.i,this.selected.j);
+		var movingFig = this.getFigure(this.selected);
+		var moveOntoFig = this.getFigure(pressLocation);
+		this.selectionBackToNormal();
+		if(pressLocation != null) {
+			var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !this.isCastle(from,pressLocation,movingFig,moveOntoFig);
+			if(otherOwnClicked) {
+				this.selectDeparture(pressLocation);
+			} else {
+				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+				this.attemptMove(from,pressLocation);
+			}
+		}
+	}
+	,attemptMove: function(from,to) {
+		var _gthis = this;
+		if(!this.ableToMove(from,to)) {
+			return;
+		}
+		var figure = this.getFigure(from);
+		var moveOntoFigure = this.getFigure(to);
+		var nearIntellector = this.nearOwnIntellector(from,figure.color);
+		this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
+		if(nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type) {
+			var _g = $bind(this,this.makeMove);
+			var from1 = from;
+			var to1 = to;
+			var morphInto = moveOntoFigure.type;
+			var _g1 = $bind(this,this.makeMove);
+			var from2 = from;
+			var to2 = to;
+			Dialogs.chameleonConfirm(function() {
+				_g(from1,to1,morphInto);
+			},function() {
+				_g1(from2,to2);
+			},function() {
+				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
+			});
+		} else if(this.isFinalForPlayer(to) && figure.type == FigureType.Progressor) {
+			var _g2 = $bind(this,this.makeMove);
+			var from3 = from;
+			var to3 = to;
+			var tmp = function(morphInto) {
+				_g2(from3,to3,morphInto);
+			};
+			Dialogs.promotionSelect(figure.color,tmp,function() {
+				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
+			});
+		} else {
+			this.makeMove(from,to);
+		}
+	}
+	,move: function(from,to,morphInto) {
+		var figure = this.getFigure(from);
+		var figMoveOnto = this.getFigure(to);
+		if(morphInto != null) {
+			var color = figure.color;
+			this.removeChild(figure);
+			figure = new Figure(morphInto,color);
+			Factory.addFigure(figure,to,this);
+		} else {
+			this.disposeFigure(figure,to);
+		}
+		this.figures[to.j][to.i] = figure;
+		this.figures[from.j][from.i] = null;
+		var _g = 0;
+		var _g1 = this.lastMoveSelectedHexes;
+		while(_g < _g1.length) {
+			var hex = _g1[_g];
+			++_g;
+			hex.lastMoveDeselect();
+		}
+		this.lastMoveSelectedHexes = [this.hexes[from.j][from.i],this.hexes[to.j][to.i]];
+		var _g = 0;
+		var _g1 = this.lastMoveSelectedHexes;
+		while(_g < _g1.length) {
+			var hex = _g1[_g];
+			++_g;
+			hex.lastMoveSelect();
+		}
+		if(figMoveOnto != null) {
+			if(this.isCastle(from,to,figure,figMoveOnto)) {
+				this.disposeFigure(figMoveOnto,from);
+				this.figures[from.j][from.i] = figMoveOnto;
+				openfl_utils_Assets.getSound("sounds/move.mp3").play();
+			} else {
+				this.removeChild(figMoveOnto);
+				openfl_utils_Assets.getSound("sounds/capture.mp3").play();
+			}
+		} else {
+			openfl_utils_Assets.getSound("sounds/move.mp3").play();
+		}
+		this.playersTurn = !this.playersTurn;
+	}
+	,isCastle: function(pos1,pos2,fig1,fig2) {
+		if(fig1.type == FigureType.Intellector && fig2.type == FigureType.Defensor || fig1.type == FigureType.Defensor && fig2.type == FigureType.Intellector) {
+			return fig1.color == fig2.color;
+		} else {
+			return false;
+		}
+	}
+	,nearOwnIntellector: function(loc,color) {
+		var dir = Direction.UL;
+		var neighbour = this.getFigure(Rules.getCoordsInRelDirection(loc.i,loc.j,dir,true));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.UR;
+		var neighbour = this.getFigure(Rules.getCoordsInRelDirection(loc.i,loc.j,dir,true));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.D;
+		var neighbour = this.getFigure(Rules.getCoordsInRelDirection(loc.i,loc.j,dir,true));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.DR;
+		var neighbour = this.getFigure(Rules.getCoordsInRelDirection(loc.i,loc.j,dir,true));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.DL;
+		var neighbour = this.getFigure(Rules.getCoordsInRelDirection(loc.i,loc.j,dir,true));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		var dir = Direction.U;
+		var neighbour = this.getFigure(Rules.getCoordsInRelDirection(loc.i,loc.j,dir,true));
+		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
+			return true;
+		}
+		return false;
+	}
+	,posToIndexes: function(x,y) {
+		var closest = null;
+		var distanceSqr = Field.a * Field.a;
+		var _g = 0;
+		while(_g < 7) {
+			var j = _g++;
+			var _g1 = 0;
+			while(_g1 < 9) {
+				var i = _g1++;
+				if(!Field.hexExists(i,j)) {
+					continue;
+				}
+				var coords = Field.hexCoords(i,j);
+				var currDistSqr = (coords.x - x) * (coords.x - x) + (coords.y - y) * (coords.y - y);
+				if(distanceSqr > currDistSqr) {
+					closest = new IntPoint(i,j);
+					distanceSqr = currDistSqr;
+				}
+			}
+		}
+		return closest;
+	}
+	,ableToMove: function(from,to) {
+		var movingFigure = this.getFigure(from);
+		if(movingFigure == null) {
+			return false;
+		}
+		var _g = 0;
+		var _g1 = Rules.possibleFields(from.i,from.j,$bind(this,this.getFigure),this.isOrientationNormal(movingFigure.color));
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			if(to.equals(dest)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	,disposeFigure: function(figure,loc) {
+		var coords = Field.hexCoords(loc.i,loc.j);
+		figure.set_x(coords.x);
+		figure.set_y(coords.y);
+	}
+	,getFigure: function(coords) {
+		if(coords == null || !Field.hexExists(coords.i,coords.j)) {
+			return null;
+		} else {
+			return this.figures[coords.j][coords.i];
+		}
+	}
+	,isFinalForPlayer: function(p) {
+		if(p.j == 0) {
+			return p.i % 2 == 0;
+		} else {
+			return false;
+		}
+	}
+	,drag: function(figure) {
+		this.removeChild(figure);
+		this.addChild(figure);
+		figure.startDrag(true);
+	}
+	,addMarkers: function(from) {
+		var _g = 0;
+		var _g1 = Rules.possibleFields(from.i,from.j,$bind(this,this.getFigure),this.isOrientationNormal(this.getFigure(from).color));
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			if(this.getFigure(dest) != null) {
+				this.hexes[dest.j][dest.i].addRound();
+			} else {
+				this.hexes[dest.j][dest.i].addDot();
+			}
+		}
+	}
+	,removeMarkers: function(from) {
+		var _g = 0;
+		var _g1 = Rules.possibleFields(from.i,from.j,$bind(this,this.getFigure),this.isOrientationNormal(this.getFigure(from).color));
+		while(_g < _g1.length) {
+			var dest = _g1[_g];
+			++_g;
+			this.hexes[dest.j][dest.i].removeMarkers();
+		}
+	}
+	,selectDeparture: function(dep) {
+		this.selected = dep;
+		this.hexes[dep.j][dep.i].select();
+		this.addMarkers(dep);
+	}
+	,selectionBackToNormal: function() {
+		this.removeMarkers(this.selected);
+		this.hexes[this.selected.j][this.selected.i].deselect();
+		if(this.selectedDest != null) {
+			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+		}
+		this.selected = null;
+		this.selectedDest = null;
+	}
+	,__class__: Field
+});
+var AnalysisField = function() {
+	Field.call(this);
 	this.arrangeDefault();
 	this.addEventListener("addedToStage",$bind(this,this.init));
 };
 $hxClasses["AnalysisField"] = AnalysisField;
 AnalysisField.__name__ = "AnalysisField";
-AnalysisField.__super__ = openfl_display_Sprite;
-AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
-	hexes: null
-	,figures: null
-	,selected: null
-	,selectedDest: null
-	,init: function(e) {
+AnalysisField.__super__ = Field;
+AnalysisField.prototype = $extend(Field.prototype,{
+	init: function(e) {
 		this.removeEventListener("addedToStage",$bind(this,this.init));
 		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
@@ -3328,148 +3619,26 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 		_g1.push(null);
 		_g.push(_g1);
 		this.figures = _g;
+		var _g = 0;
+		var _g1 = this.lastMoveSelectedHexes;
+		while(_g < _g1.length) {
+			var hex = _g1[_g];
+			++_g;
+			hex.lastMoveDeselect();
+		}
+		this.lastMoveSelectedHexes = [];
 	}
 	,arrangeDefault: function() {
-		var _g = [];
-		var _g1 = [];
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g.push(_g1);
-		var _g1 = [];
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g.push(_g1);
-		var _g1 = [];
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g.push(_g1);
-		var _g1 = [];
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g.push(_g1);
-		var _g1 = [];
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g.push(_g1);
-		var _g1 = [];
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g.push(_g1);
-		var _g1 = [];
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g1.push(null);
-		_g.push(_g1);
-		this.figures = _g;
-		this.figures[0][0] = new Figure(FigureType.Dominator,FigureColor.Black);
-		this.figures[0][1] = new Figure(FigureType.Liberator,FigureColor.Black);
-		this.figures[0][2] = new Figure(FigureType.Aggressor,FigureColor.Black);
-		this.figures[0][3] = new Figure(FigureType.Defensor,FigureColor.Black);
-		this.figures[0][4] = new Figure(FigureType.Intellector,FigureColor.Black);
-		this.figures[0][5] = new Figure(FigureType.Defensor,FigureColor.Black);
-		this.figures[0][6] = new Figure(FigureType.Aggressor,FigureColor.Black);
-		this.figures[0][7] = new Figure(FigureType.Liberator,FigureColor.Black);
-		this.figures[0][8] = new Figure(FigureType.Dominator,FigureColor.Black);
-		this.figures[1][0] = new Figure(FigureType.Progressor,FigureColor.Black);
-		this.figures[1][2] = new Figure(FigureType.Progressor,FigureColor.Black);
-		this.figures[1][4] = new Figure(FigureType.Progressor,FigureColor.Black);
-		this.figures[1][6] = new Figure(FigureType.Progressor,FigureColor.Black);
-		this.figures[1][8] = new Figure(FigureType.Progressor,FigureColor.Black);
-		this.figures[6][0] = new Figure(FigureType.Dominator,FigureColor.White);
-		this.figures[5][1] = new Figure(FigureType.Liberator,FigureColor.White);
-		this.figures[6][2] = new Figure(FigureType.Aggressor,FigureColor.White);
-		this.figures[5][3] = new Figure(FigureType.Defensor,FigureColor.White);
-		this.figures[6][4] = new Figure(FigureType.Intellector,FigureColor.White);
-		this.figures[5][5] = new Figure(FigureType.Defensor,FigureColor.White);
-		this.figures[6][6] = new Figure(FigureType.Aggressor,FigureColor.White);
-		this.figures[5][7] = new Figure(FigureType.Liberator,FigureColor.White);
-		this.figures[6][8] = new Figure(FigureType.Dominator,FigureColor.White);
-		this.figures[5][0] = new Figure(FigureType.Progressor,FigureColor.White);
-		this.figures[5][2] = new Figure(FigureType.Progressor,FigureColor.White);
-		this.figures[5][4] = new Figure(FigureType.Progressor,FigureColor.White);
-		this.figures[5][6] = new Figure(FigureType.Progressor,FigureColor.White);
-		this.figures[5][8] = new Figure(FigureType.Progressor,FigureColor.White);
-		this.placeFigures();
-	}
-	,departurePress: function(pressLocation) {
-		var figure = this.getFigure(pressLocation);
-		if(figure == null) {
-			return;
-		}
-		this.selectDeparture(pressLocation,figure);
-		this.drag(figure);
-		this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
-		this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
-	}
-	,destinationPress: function(pressLocation) {
-		var from = new IntPoint(this.selected.i,this.selected.j);
-		var movingFig = this.getFigure(this.selected);
-		var moveOntoFig = this.getFigure(pressLocation);
-		this.selectionBackToNormal();
-		if(pressLocation != null) {
-			var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !this.isCastle(from,pressLocation,movingFig,moveOntoFig);
-			if(otherOwnClicked) {
-				this.selectDeparture(pressLocation,moveOntoFig);
-			} else {
-				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-				this.attemptMove(from,pressLocation);
-			}
-		}
+		this.figures = Factory.produceFiguresFromDefault(true,this);
 	}
 	,onPress: function(e) {
 		var pressLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
 		if(this.selected != null) {
 			this.destinationPress(pressLocation);
 		} else {
-			this.departurePress(pressLocation);
+			this.departurePress(pressLocation,function(c) {
+				return true;
+			});
 		}
 	}
 	,onMove: function(e) {
@@ -3495,928 +3664,12 @@ AnalysisField.prototype = $extend(openfl_display_Sprite.prototype,{
 			this.disposeFigure(this.figures[pressedAt.j][pressedAt.i],pressedAt);
 		}
 	}
-	,ableToMove: function(from,to) {
-		var movingFigure = this.getFigure(from);
-		if(movingFigure == null) {
-			return false;
-		}
-		var _g = 0;
-		var _g1 = this.possibleFields(this.getFigure(from),from.i,from.j);
-		while(_g < _g1.length) {
-			var dest = _g1[_g];
-			++_g;
-			if(to.equals(dest)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	,isCastle: function(pos1,pos2,fig1,fig2) {
-		if(fig1 == null || fig2 == null || fig1.color != fig2.color) {
-			return false;
-		}
-		if(!(fig1.type == FigureType.Intellector && fig2.type == FigureType.Defensor || fig1.type == FigureType.Defensor && fig2.type == FigureType.Intellector)) {
-			return false;
-		}
-		var dir = Direction.UL;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.UR;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.D;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.DR;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.DL;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.U;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		return false;
-	}
-	,possibleFields: function(figure,fromI,fromJ) {
-		var fields = [];
-		switch(figure.type._hx_index) {
-		case 0:
-			var dir = Direction.U;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			break;
-		case 1:
-			var _g = 0;
-			var _g1 = [Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
-			while(_g < _g1.length) {
-				var dir = _g1[_g];
-				++_g;
-				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-				while(destination != null) {
-					var occupier = this.getFigure(destination);
-					if(occupier != null) {
-						if(occupier.color != figure.color) {
-							fields.push(destination);
-						}
-						break;
-					} else {
-						fields.push(destination);
-						destination = this.getCoordsInRelDirection(destination.i,destination.j,dir,figure.color);
-					}
-				}
-			}
-			break;
-		case 2:
-			var _g = 0;
-			var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
-			while(_g < _g1.length) {
-				var dir = _g1[_g];
-				++_g;
-				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-				while(destination != null) {
-					var occupier = this.getFigure(destination);
-					if(occupier != null) {
-						if(occupier.color != figure.color) {
-							fields.push(destination);
-						}
-						break;
-					} else {
-						fields.push(destination);
-						destination = this.getCoordsInRelDirection(destination.i,destination.j,dir,figure.color);
-					}
-				}
-			}
-			break;
-		case 3:
-			var _g = 0;
-			var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
-			while(_g < _g1.length) {
-				var dir = _g1[_g];
-				++_g;
-				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,1);
-				var occupier = this.getFigure(destination);
-				if(destination != null && occupier == null) {
-					fields.push(destination);
-				}
-				destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-				occupier = this.getFigure(destination);
-				if(destination != null && (occupier == null || occupier.color != figure.color)) {
-					fields.push(destination);
-				}
-			}
-			break;
-		case 4:
-			var dir = Direction.UL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.D;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.U;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			break;
-		case 5:
-			var dir = Direction.UL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.D;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.U;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			break;
-		}
-		return fields;
-	}
-	,getCoordsInRelDirection: function(fromI,fromJ,dir,col,steps) {
-		if(steps == null) {
-			steps = 1;
-		}
-		var trueDirection = col == FigureColor.White ? dir : this.oppositeDir(dir);
-		var nextCoords = this.getCoordsInAbsDirection(fromI,fromJ,trueDirection);
-		--steps;
-		while(steps > 0 && nextCoords != null) {
-			nextCoords = this.getCoordsInAbsDirection(nextCoords.i,nextCoords.j,trueDirection);
-			--steps;
-		}
-		return nextCoords;
-	}
-	,oppositeDir: function(dir) {
-		switch(dir._hx_index) {
-		case 0:
-			return Direction.D;
-		case 1:
-			return Direction.DR;
-		case 2:
-			return Direction.DL;
-		case 3:
-			return Direction.U;
-		case 4:
-			return Direction.UR;
-		case 5:
-			return Direction.UL;
-		case 6:
-			return Direction.A_DR;
-		case 7:
-			return Direction.A_DL;
-		case 8:
-			return Direction.A_L;
-		case 9:
-			return Direction.A_UL;
-		case 10:
-			return Direction.A_UR;
-		case 11:
-			return Direction.A_R;
-		}
-	}
-	,getCoordsInAbsDirection: function(fromI,fromJ,dir) {
-		var coords;
-		switch(dir._hx_index) {
-		case 0:
-			coords = new IntPoint(fromI,fromJ - 1);
-			break;
-		case 1:
-			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
-			break;
-		case 2:
-			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
-			break;
-		case 3:
-			coords = new IntPoint(fromI,fromJ + 1);
-			break;
-		case 4:
-			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
-			break;
-		case 5:
-			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
-			break;
-		case 6:
-			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
-			break;
-		case 7:
-			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
-			break;
-		case 8:
-			coords = new IntPoint(fromI + 2,fromJ);
-			break;
-		case 9:
-			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
-			break;
-		case 10:
-			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
-			break;
-		case 11:
-			coords = new IntPoint(fromI - 2,fromJ);
-			break;
-		}
-		if(this.hexExists(coords.i,coords.j)) {
-			return coords;
-		} else {
-			return null;
-		}
-	}
-	,attemptMove: function(from,to) {
-		var _gthis = this;
-		if(!this.ableToMove(from,to)) {
-			return;
-		}
-		var figure = this.getFigure(from);
-		var moveOntoFigure = this.getFigure(to);
-		var nearIntellector = this.nearOwnIntellector(from,figure.color);
-		this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
-		if(nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type) {
-			var _g = $bind(this,this.makeMove);
-			var from1 = from;
-			var to1 = to;
-			var morphInto = moveOntoFigure.type;
-			var _g1 = $bind(this,this.makeMove);
-			var from2 = from;
-			var to2 = to;
-			Dialogs.chameleonConfirm(function() {
-				_g(from1,to1,morphInto);
-			},function() {
-				_g1(from2,to2);
-			},function() {
-				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
-			});
-		} else if(this.isFinalForPlayer(to) && figure.type == FigureType.Progressor) {
-			var _g2 = $bind(this,this.makeMove);
-			var from3 = from;
-			var to3 = to;
-			var tmp = function(morphInto) {
-				_g2(from3,to3,morphInto);
-			};
-			Dialogs.promotionSelect(figure.color,tmp,function() {
-				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
-			});
-		} else {
-			this.makeMove(from,to);
-		}
-	}
 	,makeMove: function(from,to,morphInto) {
 		this.move(from,to,morphInto);
 		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
 	}
-	,move: function(from,to,morphInto) {
-		var figure = this.getFigure(from);
-		var figMoveOnto = this.getFigure(to);
-		if(morphInto != null) {
-			var color = figure.color;
-			this.removeChild(figure);
-			figure = new Figure(morphInto,color);
-			this.scaleFigure(figure);
-			this.addChild(figure);
-		}
-		this.disposeFigure(figure,to);
-		this.figures[to.j][to.i] = figure;
-		this.figures[from.j][from.i] = null;
-		if(figMoveOnto != null) {
-			if(this.isCastle(from,to,figure,figMoveOnto)) {
-				this.disposeFigure(figMoveOnto,from);
-				this.figures[from.j][from.i] = figMoveOnto;
-				openfl_utils_Assets.getSound("sounds/move.mp3").play();
-			} else {
-				this.removeChild(figMoveOnto);
-				openfl_utils_Assets.getSound("sounds/capture.mp3").play();
-			}
-		} else {
-			openfl_utils_Assets.getSound("sounds/move.mp3").play();
-		}
-	}
-	,nearOwnIntellector: function(loc,color) {
-		var dir = Direction.UL;
-		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
-		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
-			return true;
-		}
-		var dir = Direction.UR;
-		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
-		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
-			return true;
-		}
-		var dir = Direction.D;
-		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
-		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
-			return true;
-		}
-		var dir = Direction.DR;
-		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
-		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
-			return true;
-		}
-		var dir = Direction.DL;
-		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
-		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
-			return true;
-		}
-		var dir = Direction.U;
-		var neighbour = this.getFigure(this.getCoordsInRelDirection(loc.i,loc.j,dir,color));
-		if(neighbour != null && neighbour.color == color && neighbour.type == FigureType.Intellector) {
-			return true;
-		}
-		return false;
-	}
-	,posToIndexes: function(x,y) {
-		var closest = null;
-		var distanceSqr = AnalysisField.a * AnalysisField.a;
-		var _g = 0;
-		while(_g < 7) {
-			var j = _g++;
-			var _g1 = 0;
-			while(_g1 < 9) {
-				var i = _g1++;
-				if(!this.hexExists(i,j)) {
-					continue;
-				}
-				var coords = this.hexCoords(i,j);
-				var currDistSqr = (coords.x - x) * (coords.x - x) + (coords.y - y) * (coords.y - y);
-				if(distanceSqr > currDistSqr) {
-					closest = new IntPoint(i,j);
-					distanceSqr = currDistSqr;
-				}
-			}
-		}
-		return closest;
-	}
-	,getFigure: function(coords) {
-		if(coords == null || !this.hexExists(coords.i,coords.j) || this.figures[coords.j] == null) {
-			return null;
-		} else {
-			return this.figures[coords.j][coords.i];
-		}
-	}
-	,hexCoords: function(i,j) {
-		var p = new openfl_geom_Point(0,0);
-		p.x = 3 * AnalysisField.a * i / 2;
-		p.y = Math.sqrt(3) * AnalysisField.a * j;
-		if(i % 2 == 1) {
-			p.y += Math.sqrt(3) * AnalysisField.a / 2;
-		}
-		return p;
-	}
-	,isFinalForPlayer: function(p) {
-		if(p.j == 0) {
-			return p.i % 2 == 0;
-		} else {
-			return false;
-		}
-	}
-	,hexExists: function(i,j) {
-		if(i >= 0 && i < 9 && j >= 0 && j < 7) {
-			if(j == 6) {
-				return i % 2 == 0;
-			} else {
-				return true;
-			}
-		} else {
-			return false;
-		}
-	}
-	,isDark: function(i,j) {
-		if(j % 3 == 2) {
-			return false;
-		} else if(j % 3 == 0) {
-			return i % 2 == 0;
-		} else {
-			return i % 2 == 1;
-		}
-	}
-	,placeFigures: function() {
-		var figure = this.figures[0][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,6));
-			this.addChild(figure);
-		}
-	}
-	,scaleFigure: function(figure) {
-		var scale = Math.sqrt(3) * AnalysisField.a * 0.85 / figure.get_height();
-		if(figure.type == FigureType.Progressor) {
-			scale *= 0.7;
-		} else if(figure.type == FigureType.Liberator || figure.type == FigureType.Defensor) {
-			scale *= 0.9;
-		}
-		figure.set_scaleX(scale);
-		figure.set_scaleY(scale);
-	}
-	,disposeFigure: function(figure,loc) {
-		var coords = this.hexCoords(loc.i,loc.j);
-		figure.set_x(coords.x);
-		figure.set_y(coords.y);
-	}
-	,drag: function(figure) {
-		this.removeChild(figure);
-		this.addChild(figure);
-		figure.startDrag(true);
-	}
-	,addMarkers: function(from,figure) {
-		var _g = 0;
-		var _g1 = this.possibleFields(figure,from.i,from.j);
-		while(_g < _g1.length) {
-			var dest = _g1[_g];
-			++_g;
-			if(this.getFigure(dest) != null) {
-				this.hexes[dest.j][dest.i].addRound();
-			} else {
-				this.hexes[dest.j][dest.i].addDot();
-			}
-		}
-	}
-	,removeMarkers: function(from,figure) {
-		var _g = 0;
-		var _g1 = this.possibleFields(figure,from.i,from.j);
-		while(_g < _g1.length) {
-			var dest = _g1[_g];
-			++_g;
-			this.hexes[dest.j][dest.i].removeMarkers();
-		}
-	}
-	,selectDeparture: function(dep,depFigure) {
-		this.selected = dep;
-		this.hexes[dep.j][dep.i].select();
-		this.addMarkers(dep,depFigure);
-	}
-	,selectionBackToNormal: function() {
-		this.removeMarkers(this.selected,this.getFigure(this.selected));
-		this.hexes[this.selected.j][this.selected.i].deselect();
-		if(this.selectedDest != null) {
-			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
-		}
-		this.selected = null;
-		this.selectedDest = null;
-	}
-	,drawHexes: function() {
-		this.hexes = [];
-		var _g = 0;
-		while(_g < 7) {
-			var j = _g++;
-			var row = [];
-			var _g1 = 0;
-			while(_g1 < 9) {
-				var i = _g1++;
-				if(!this.hexExists(i,j)) {
-					row.push(null);
-				} else {
-					var hex = new Hexagon(AnalysisField.a,this.isDark(i,j));
-					var coords = this.hexCoords(i,j);
-					hex.set_x(coords.x);
-					hex.set_y(coords.y);
-					this.addChild(hex);
-					row.push(hex);
-				}
-			}
-			this.hexes.push(row);
-		}
+	,isOrientationNormal: function(movingFigure) {
+		return movingFigure == FigureColor.White;
 	}
 	,__class__: AnalysisField
 });
@@ -5304,7 +4557,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "16";
+	app.meta.h["build"] = "17";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -5391,8 +4644,7 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	,mainMenu: null
 	,hostingMenu: null
 	,joinMenu: null
-	,gameboard: null
-	,analysisboard: null
+	,game: null
 	,errorLabel: null
 	,fadeTimer: null
 	,onConnected: function() {
@@ -5550,14 +4802,13 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.mainMenu.addComponent(calloutBtn);
 		calloutBtn.set_onClick(function(e) {
 			var response = window.prompt("Enter the callee's username");
-			if(response == null) {
-				return;
+			if(response != null) {
+				var callee = response;
+				Dialogs.specifyChallengeParams(function(secsStart,secsBonus) {
+					Networker.sendChallenge(callee,secsStart,secsBonus);
+				},function() {
+				});
 			}
-			var callee = response;
-			Dialogs.specifyChallengeParams(function(secsStart,secsBonus) {
-				Networker.sendChallenge(callee,secsStart,secsBonus);
-			},function() {
-			});
 		});
 		var openCalloutBtn = new haxe_ui_components_Button();
 		openCalloutBtn.set_width(200);
@@ -5574,6 +4825,21 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.mainMenu.addComponent(analysisBtn);
 		analysisBtn.set_onClick(function(e) {
 			_gthis.drawAnalysisBoard();
+		});
+		var spectateBtn = new haxe_ui_components_Button();
+		spectateBtn.set_text("Spectate");
+		spectateBtn.set_width(calloutBtn.get_width());
+		spectateBtn.set_horizontalAlign("center");
+		this.mainMenu.addComponent(spectateBtn);
+		spectateBtn.set_onClick(function(e) {
+			var response = window.prompt("Enter the username of a player whose game you want to spectate");
+			if(response != null) {
+				Networker.spectate(response,$bind(_gthis,_gthis.drawSpectation),function(d) {
+					_gthis.game.onMove(d);
+				},function(d) {
+					_gthis.game.onTimeCorrection(d);
+				});
+			}
 		});
 		var logoutBtn = new haxe_ui_components_Button();
 		logoutBtn.set_text("Log Out");
@@ -5668,95 +4934,40 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		};
 	}
 	,drawGame: function(data) {
-		Networker.registerGameEvents($bind(this,this.onMove),$bind(this,this.onMessage),$bind(this,this.onTimeCorrection),$bind(this,this.onEnded));
 		this.removeChildren();
-		this.gameboard = new Field(data.colour);
-		this.gameboard.set_x((window.innerWidth - this.gameboard.get_width()) / 2);
-		this.gameboard.set_y(100);
-		this.addChild(this.gameboard);
-		Main.sidebox = new Sidebox(data.startSecs,data.bonusSecs,Networker.login,data.enemy,data.colour == "white");
-		Main.sidebox.set_x(this.gameboard.get_x() + this.gameboard.get_width() + 10);
-		Main.sidebox.set_y(this.gameboard.get_y() + (this.gameboard.get_height() - 380 - Math.sqrt(3) * Field.a) / 2);
-		this.addChild(Main.sidebox);
-		Main.chatbox = new Chatbox(this.gameboard.get_height() * 0.75);
-		Main.chatbox.set_x(this.gameboard.get_x() - Chatbox.WIDTH - Field.a - 30);
-		Main.chatbox.set_y(this.gameboard.get_y() + this.gameboard.get_height() * 0.25 - Field.a * Math.sqrt(3) / 2);
-		this.addChild(Main.chatbox);
-		var whiteLogin = data.colour == "white" ? Networker.login : data.enemy;
-		var blackLogin = data.colour == "black" ? Networker.login : data.enemy;
-		Main.infobox = new GameInfoBox(Chatbox.WIDTH,this.gameboard.get_height() * 0.23,data.startSecs,data.bonusSecs,whiteLogin,blackLogin,data.colour == "white");
-		Main.infobox.set_x(this.gameboard.get_x() - Chatbox.WIDTH - Field.a - 30);
-		Main.infobox.set_y(this.gameboard.get_y() - Field.a * Math.sqrt(3) / 2);
-		this.addChild(Main.infobox);
+		this.game = GameCompound.buildActive(data);
+		this.addChild(this.game);
+		Networker.registerGameEvents(($_=this.game,$bind($_,$_.onMove)),($_=this.game,$bind($_,$_.onMessage)),($_=this.game,$bind($_,$_.onTimeCorrection)),$bind(this,this.onEnded),($_=this.game,$bind($_,$_.onSpectatorConnected)),($_=this.game,$bind($_,$_.onSpectatorDisonnected)));
 		window.history.pushState({ },"Intellector","?id=" + data.match_id);
 		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
 	}
 	,drawAnalysisBoard: function() {
+		this.removeChildren();
+		this.game = GameCompound.buildAnalysis($bind(this,this.onReturn));
+		this.addChild(this.game);
+	}
+	,drawSpectation: function(data) {
 		var _gthis = this;
 		this.removeChildren();
-		this.analysisboard = new AnalysisField();
-		this.analysisboard.set_x((window.innerWidth - this.analysisboard.get_width()) / 2);
-		this.analysisboard.set_y(100);
-		this.addChild(this.analysisboard);
-		var returnBtn = new haxe_ui_components_Button();
-		returnBtn.set_width(100);
-		returnBtn.set_text("Return");
-		returnBtn.set_onClick(function(e) {
-			_gthis.removeChildren();
-			_gthis.drawMainMenu();
+		this.game = GameCompound.buildSpectators(data,function() {
+			Networker.stopSpectate();
+			_gthis.onReturn();
 		});
-		returnBtn.set_x(10);
-		returnBtn.set_y(10);
-		this.addChild(returnBtn);
-		var actionButtons = new haxe_ui_containers_VBox();
-		var clearBtn = new haxe_ui_components_Button();
-		clearBtn.set_width(200);
-		clearBtn.set_text("Clear");
-		clearBtn.set_onClick(function(e) {
-			_gthis.analysisboard.clearBoard();
-		});
-		actionButtons.addComponent(clearBtn);
-		var resetBtn = new haxe_ui_components_Button();
-		resetBtn.set_width(200);
-		resetBtn.set_text("Reset");
-		resetBtn.set_onClick(function(e) {
-			_gthis.analysisboard.reset();
-		});
-		actionButtons.addComponent(resetBtn);
-		actionButtons.set_x(this.analysisboard.get_x() + this.analysisboard.get_width() + 10);
-		actionButtons.set_y(this.analysisboard.get_y() + (this.analysisboard.get_height() - 40 - Math.sqrt(3) * Field.a) / 2);
-		this.addChild(actionButtons);
+		this.addChild(this.game);
 	}
-	,onTimeCorrection: function(data) {
-		Main.sidebox.correctTime(data.whiteSeconds,data.blackSeconds);
-	}
-	,onMessage: function(data) {
-		Main.chatbox.appendMessage(data.issuer_login,data.message);
-	}
-	,onMove: function(data) {
-		var from = new IntPoint(data.fromI,data.fromJ);
-		var to = new IntPoint(data.toI,data.toJ);
-		var movingFigure = this.gameboard.getFigure(from);
-		var ontoFigure = this.gameboard.getFigure(to);
-		var opponentColor = this.gameboard.playerColor == FigureColor.White ? FigureColor.Black : FigureColor.White;
-		var morphedInto = data.morphInto == null ? null : Type.createEnum(FigureType,data.morphInto,null);
-		var capture = ontoFigure != null && ontoFigure.color == this.gameboard.playerColor;
-		var mate = capture && ontoFigure.type == FigureType.Intellector;
-		var castle = ontoFigure != null && ontoFigure.color == opponentColor && (ontoFigure.type == FigureType.Intellector && movingFigure.type == FigureType.Defensor || ontoFigure.type == FigureType.Defensor && movingFigure.type == FigureType.Intellector);
-		Main.sidebox.makeMove(opponentColor,movingFigure.type,to,capture,mate,castle,morphedInto);
-		Main.infobox.makeMove(data.fromI,data.fromJ,data.toI,data.toJ,morphedInto);
-		this.gameboard.move(from,to,morphedInto);
+	,onReturn: function() {
+		this.removeChild(this.game);
+		this.game = null;
+		this.drawMainMenu();
 	}
 	,onEnded: function(data) {
 		Networker.registerMainMenuEvents();
-		if(data.reason != "mate" && data.reason != "breakthrough") {
-			Main.sidebox.onNonMateEnded();
-		}
+		this.game.terminate();
 		var resultMessage;
 		if(data.winner_color == "") {
 			resultMessage = "½ - ½";
 		} else {
-			var e = this.gameboard.playerColor;
+			var e = this.game.playerColor;
 			if(data.winner_color == $hxEnums[e.__enum__].__constructs__[e._hx_index].toLowerCase()) {
 				resultMessage = "You won";
 			} else {
@@ -5794,10 +5005,8 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		}
 		openfl_utils_Assets.getSound("sounds/notify.mp3").play();
 		Dialogs.info("Game over. " + resultMessage + explanation,"Game ended");
-		this.removeChild(Main.sidebox);
-		this.removeChild(Main.chatbox);
-		this.removeChild(Main.infobox);
-		this.removeChild(this.gameboard);
+		this.removeChild(this.game);
+		this.game = null;
 		window.history.pushState({ },"Intellector","/");
 		if(StringTools.startsWith(Networker.login,"guest_")) {
 			this.renewSession();
@@ -6252,25 +5461,21 @@ EReg.prototype = {
 	}
 	,__class__: EReg
 };
-var Direction = $hxEnums["Direction"] = { __ename__ : "Direction", __constructs__ : ["U","UL","UR","D","DL","DR","A_UL","A_UR","A_R","A_DR","A_DL","A_L"]
-	,U: {_hx_index:0,__enum__:"Direction",toString:$estr}
-	,UL: {_hx_index:1,__enum__:"Direction",toString:$estr}
-	,UR: {_hx_index:2,__enum__:"Direction",toString:$estr}
-	,D: {_hx_index:3,__enum__:"Direction",toString:$estr}
-	,DL: {_hx_index:4,__enum__:"Direction",toString:$estr}
-	,DR: {_hx_index:5,__enum__:"Direction",toString:$estr}
-	,A_UL: {_hx_index:6,__enum__:"Direction",toString:$estr}
-	,A_UR: {_hx_index:7,__enum__:"Direction",toString:$estr}
-	,A_R: {_hx_index:8,__enum__:"Direction",toString:$estr}
-	,A_DR: {_hx_index:9,__enum__:"Direction",toString:$estr}
-	,A_DL: {_hx_index:10,__enum__:"Direction",toString:$estr}
-	,A_L: {_hx_index:11,__enum__:"Direction",toString:$estr}
+var Factory = function() { };
+$hxClasses["Factory"] = Factory;
+Factory.__name__ = "Factory";
+Factory.produceFiguresFromSerialized = function(serializedPosition,watchedSide,addOnto) {
+	var figures = Position.buildFigureArray(serializedPosition,watchedSide);
+	Factory.scaleMove(figures,addOnto);
+	return figures;
 };
-Direction.__empty_constructs__ = [Direction.U,Direction.UL,Direction.UR,Direction.D,Direction.DL,Direction.DR,Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
-var Field = function(playerColourName) {
-	openfl_display_Sprite.call(this);
-	this.hexes = [];
-	this.lastMoveSelectedHexes = [];
+Factory.produceFiguresFromDefault = function(normalOrientation,addOnto) {
+	var figures = Position.buildDefault(normalOrientation);
+	Factory.scaleMove(figures,addOnto);
+	return figures;
+};
+Factory.produceHexes = function(addOnto) {
+	var hexes = [];
 	var _g = 0;
 	while(_g < 7) {
 		var j = _g++;
@@ -6278,1118 +5483,241 @@ var Field = function(playerColourName) {
 		var _g1 = 0;
 		while(_g1 < 9) {
 			var i = _g1++;
-			if(!this.hexExists(i,j)) {
+			if(!Field.hexExists(i,j)) {
 				row.push(null);
 			} else {
-				var hex = new Hexagon(Field.a,this.isDark(i,j));
-				var coords = this.hexCoords(i,j);
+				var hex = new Hexagon(Factory.a,Factory.isDark(i,j));
+				var coords = Field.hexCoords(i,j);
 				hex.set_x(coords.x);
 				hex.set_y(coords.y);
-				this.addChild(hex);
+				addOnto.addChild(hex);
 				row.push(hex);
 			}
 		}
-		this.hexes.push(row);
+		hexes.push(row);
 	}
-	this.playerColor = playerColourName == "white" ? FigureColor.White : FigureColor.Black;
-	var enemyColour = playerColourName == "white" ? FigureColor.Black : FigureColor.White;
-	this.playersTurn = playerColourName == "white";
-	var _g = [];
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	var _g1 = [];
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g1.push(null);
-	_g.push(_g1);
-	this.figures = _g;
-	this.figures[0][0] = new Figure(FigureType.Dominator,enemyColour);
-	this.figures[0][1] = new Figure(FigureType.Liberator,enemyColour);
-	this.figures[0][2] = new Figure(FigureType.Aggressor,enemyColour);
-	this.figures[0][3] = new Figure(FigureType.Defensor,enemyColour);
-	this.figures[0][4] = new Figure(FigureType.Intellector,enemyColour);
-	this.figures[0][5] = new Figure(FigureType.Defensor,enemyColour);
-	this.figures[0][6] = new Figure(FigureType.Aggressor,enemyColour);
-	this.figures[0][7] = new Figure(FigureType.Liberator,enemyColour);
-	this.figures[0][8] = new Figure(FigureType.Dominator,enemyColour);
-	this.figures[1][0] = new Figure(FigureType.Progressor,enemyColour);
-	this.figures[1][2] = new Figure(FigureType.Progressor,enemyColour);
-	this.figures[1][4] = new Figure(FigureType.Progressor,enemyColour);
-	this.figures[1][6] = new Figure(FigureType.Progressor,enemyColour);
-	this.figures[1][8] = new Figure(FigureType.Progressor,enemyColour);
-	this.figures[6][0] = new Figure(FigureType.Dominator,this.playerColor);
-	this.figures[5][1] = new Figure(FigureType.Liberator,this.playerColor);
-	this.figures[6][2] = new Figure(FigureType.Aggressor,this.playerColor);
-	this.figures[5][3] = new Figure(FigureType.Defensor,this.playerColor);
-	this.figures[6][4] = new Figure(FigureType.Intellector,this.playerColor);
-	this.figures[5][5] = new Figure(FigureType.Defensor,this.playerColor);
-	this.figures[6][6] = new Figure(FigureType.Aggressor,this.playerColor);
-	this.figures[5][7] = new Figure(FigureType.Liberator,this.playerColor);
-	this.figures[6][8] = new Figure(FigureType.Dominator,this.playerColor);
-	this.figures[5][0] = new Figure(FigureType.Progressor,this.playerColor);
-	this.figures[5][2] = new Figure(FigureType.Progressor,this.playerColor);
-	this.figures[5][4] = new Figure(FigureType.Progressor,this.playerColor);
-	this.figures[5][6] = new Figure(FigureType.Progressor,this.playerColor);
-	this.figures[5][8] = new Figure(FigureType.Progressor,this.playerColor);
-	this.placeFigures();
-	this.addEventListener("addedToStage",$bind(this,this.init));
+	return hexes;
 };
-$hxClasses["Field"] = Field;
-Field.__name__ = "Field";
-Field.__super__ = openfl_display_Sprite;
-Field.prototype = $extend(openfl_display_Sprite.prototype,{
-	hexes: null
-	,figures: null
-	,playersTurn: null
-	,playerColor: null
-	,lastMoveSelectedHexes: null
-	,selected: null
-	,selectedDest: null
-	,init: function(e) {
-		this.removeEventListener("addedToStage",$bind(this,this.init));
-		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
+Factory.scaleMove = function(figures,addOnto) {
+	if(figures[0][0] != null) {
+		Factory.addFigure(figures[0][0],new IntPoint(0,0),addOnto);
 	}
-	,departurePress: function(pressLocation) {
-		var figure = this.getFigure(pressLocation);
-		if(figure == null || figure.color != this.playerColor) {
-			return;
-		}
-		this.selectDeparture(pressLocation,figure);
-		this.drag(figure);
-		this.stage.addEventListener("mouseMove",$bind(this,this.onMove));
-		this.stage.addEventListener("mouseUp",$bind(this,this.onRelease));
+	if(figures[0][1] != null) {
+		Factory.addFigure(figures[0][1],new IntPoint(1,0),addOnto);
 	}
-	,destinationPress: function(pressLocation) {
-		var from = new IntPoint(this.selected.i,this.selected.j);
-		var movingFig = this.getFigure(this.selected);
-		var moveOntoFig = this.getFigure(pressLocation);
-		this.selectionBackToNormal();
-		if(pressLocation != null) {
-			var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !this.isCastle(from,pressLocation,movingFig,moveOntoFig);
-			if(otherOwnClicked) {
-				this.selectDeparture(pressLocation,moveOntoFig);
-			} else {
-				this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-				this.attemptMove(from,pressLocation);
-			}
-		}
+	if(figures[0][2] != null) {
+		Factory.addFigure(figures[0][2],new IntPoint(2,0),addOnto);
 	}
-	,onPress: function(e) {
-		if(!this.playersTurn) {
-			return;
-		}
-		var pressLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		if(this.selected != null) {
-			this.destinationPress(pressLocation);
-		} else {
-			this.departurePress(pressLocation);
-		}
+	if(figures[0][3] != null) {
+		Factory.addFigure(figures[0][3],new IntPoint(3,0),addOnto);
 	}
-	,onMove: function(e) {
-		if(!this.playersTurn) {
-			return;
-		}
-		var shadowLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		if(shadowLocation != null && this.ableToMove(this.selected,shadowLocation)) {
-			this.hexes[shadowLocation.j][shadowLocation.i].select();
-		}
-		if(this.selectedDest != null && !this.selectedDest.equals(shadowLocation)) {
-			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
-		}
-		this.selectedDest = shadowLocation;
+	if(figures[0][4] != null) {
+		Factory.addFigure(figures[0][4],new IntPoint(4,0),addOnto);
 	}
-	,onRelease: function(e) {
-		if(!this.playersTurn) {
-			return;
-		}
-		this.stage.removeEventListener("mouseUp",$bind(this,this.onRelease));
-		var pressedAt = new IntPoint(this.selected.i,this.selected.j);
-		var releasedAt = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
-		this.figures[pressedAt.j][pressedAt.i].stopDrag();
-		if(releasedAt != null && this.ableToMove(pressedAt,releasedAt) && !releasedAt.equals(pressedAt)) {
-			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
-			this.selectionBackToNormal();
-			this.attemptMove(pressedAt,releasedAt);
-		} else {
-			this.disposeFigure(this.figures[pressedAt.j][pressedAt.i],pressedAt);
-		}
+	if(figures[0][5] != null) {
+		Factory.addFigure(figures[0][5],new IntPoint(5,0),addOnto);
 	}
-	,attemptMove: function(from,to) {
-		var _gthis = this;
-		if(!this.ableToMove(from,to)) {
-			return;
-		}
-		var figure = this.getFigure(from);
-		var moveOntoFigure = this.getFigure(to);
-		var nearIntellector = false;
-		var _g = 0;
-		var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
-		while(_g < _g1.length) {
-			var dir = _g1[_g];
-			++_g;
-			var neighbour = this.getFigure(this.getCoordsInRelDirection(from.i,from.j,dir,figure.color));
-			if(neighbour != null && neighbour.color == figure.color && neighbour.type == FigureType.Intellector) {
-				nearIntellector = true;
-				break;
-			}
-		}
-		this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
-		if(nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type) {
-			var _g = $bind(this,this.makeMove);
-			var from1 = from;
-			var to1 = to;
-			var morphInto = moveOntoFigure.type;
-			var _g1 = $bind(this,this.makeMove);
-			var from2 = from;
-			var to2 = to;
-			Dialogs.chameleonConfirm(function() {
-				_g(from1,to1,morphInto);
-			},function() {
-				_g1(from2,to2);
-			},function() {
-				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
-			});
-		} else if(this.isFinalForPlayer(to) && figure.type == FigureType.Progressor) {
-			var _g2 = $bind(this,this.makeMove);
-			var from3 = from;
-			var to3 = to;
-			var tmp = function(morphInto) {
-				_g2(from3,to3,morphInto);
-			};
-			Dialogs.promotionSelect(this.playerColor,tmp,function() {
-				_gthis.stage.addEventListener("mouseDown",$bind(_gthis,_gthis.onPress));
-			});
-		} else {
-			this.makeMove(from,to);
-		}
+	if(figures[0][6] != null) {
+		Factory.addFigure(figures[0][6],new IntPoint(6,0),addOnto);
 	}
-	,makeMove: function(from,to,morphInto) {
-		var movingFigure = this.getFigure(from);
-		var figMoveOnto = this.getFigure(to);
-		var capture = figMoveOnto != null && figMoveOnto.color != this.playerColor;
-		var mate = capture && figMoveOnto.type == FigureType.Intellector;
-		Networker.move(from.i,from.j,to.i,to.j,morphInto);
-		Main.sidebox.makeMove(this.playerColor,movingFigure.type,to,capture,mate,this.isCastle(from,to,movingFigure,figMoveOnto),morphInto);
-		Main.infobox.makeMove(from.i,from.j,to.i,to.j,morphInto);
-		this.move(from,to,morphInto);
-		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
+	if(figures[0][7] != null) {
+		Factory.addFigure(figures[0][7],new IntPoint(7,0),addOnto);
 	}
-	,move: function(from,to,morphInto) {
-		var figure = this.getFigure(from);
-		var figMoveOnto = this.getFigure(to);
-		if(morphInto != null) {
-			var color = figure.color;
-			this.removeChild(figure);
-			figure = new Figure(morphInto,color);
-			this.scaleFigure(figure);
-			this.addChild(figure);
-		}
-		this.disposeFigure(figure,to);
-		this.figures[to.j][to.i] = figure;
-		this.figures[from.j][from.i] = null;
-		var _g = 0;
-		var _g1 = this.lastMoveSelectedHexes;
-		while(_g < _g1.length) {
-			var hex = _g1[_g];
-			++_g;
-			hex.lastMoveDeselect();
-		}
-		this.lastMoveSelectedHexes = [this.hexes[from.j][from.i],this.hexes[to.j][to.i]];
-		var _g = 0;
-		var _g1 = this.lastMoveSelectedHexes;
-		while(_g < _g1.length) {
-			var hex = _g1[_g];
-			++_g;
-			hex.lastMoveSelect();
-		}
-		if(figMoveOnto != null) {
-			if(this.isCastle(from,to,figure,figMoveOnto)) {
-				this.disposeFigure(figMoveOnto,from);
-				this.figures[from.j][from.i] = figMoveOnto;
-				openfl_utils_Assets.getSound("sounds/move.mp3").play();
-			} else {
-				this.removeChild(figMoveOnto);
-				openfl_utils_Assets.getSound("sounds/capture.mp3").play();
-			}
-		} else {
-			openfl_utils_Assets.getSound("sounds/move.mp3").play();
-		}
-		this.playersTurn = !this.playersTurn;
+	if(figures[0][8] != null) {
+		Factory.addFigure(figures[0][8],new IntPoint(8,0),addOnto);
 	}
-	,ableToMove: function(from,to) {
-		if(!this.playersTurn) {
-			return false;
-		}
-		var movingFigure = this.getFigure(from);
-		if(movingFigure == null || movingFigure.color != this.playerColor) {
-			return false;
-		}
-		var _g = 0;
-		var _g1 = this.possibleFields(this.getFigure(from),from.i,from.j);
-		while(_g < _g1.length) {
-			var dest = _g1[_g];
-			++_g;
-			if(to.equals(dest)) {
-				return true;
-			}
-		}
+	if(figures[1][0] != null) {
+		Factory.addFigure(figures[1][0],new IntPoint(0,1),addOnto);
+	}
+	if(figures[1][1] != null) {
+		Factory.addFigure(figures[1][1],new IntPoint(1,1),addOnto);
+	}
+	if(figures[1][2] != null) {
+		Factory.addFigure(figures[1][2],new IntPoint(2,1),addOnto);
+	}
+	if(figures[1][3] != null) {
+		Factory.addFigure(figures[1][3],new IntPoint(3,1),addOnto);
+	}
+	if(figures[1][4] != null) {
+		Factory.addFigure(figures[1][4],new IntPoint(4,1),addOnto);
+	}
+	if(figures[1][5] != null) {
+		Factory.addFigure(figures[1][5],new IntPoint(5,1),addOnto);
+	}
+	if(figures[1][6] != null) {
+		Factory.addFigure(figures[1][6],new IntPoint(6,1),addOnto);
+	}
+	if(figures[1][7] != null) {
+		Factory.addFigure(figures[1][7],new IntPoint(7,1),addOnto);
+	}
+	if(figures[1][8] != null) {
+		Factory.addFigure(figures[1][8],new IntPoint(8,1),addOnto);
+	}
+	if(figures[2][0] != null) {
+		Factory.addFigure(figures[2][0],new IntPoint(0,2),addOnto);
+	}
+	if(figures[2][1] != null) {
+		Factory.addFigure(figures[2][1],new IntPoint(1,2),addOnto);
+	}
+	if(figures[2][2] != null) {
+		Factory.addFigure(figures[2][2],new IntPoint(2,2),addOnto);
+	}
+	if(figures[2][3] != null) {
+		Factory.addFigure(figures[2][3],new IntPoint(3,2),addOnto);
+	}
+	if(figures[2][4] != null) {
+		Factory.addFigure(figures[2][4],new IntPoint(4,2),addOnto);
+	}
+	if(figures[2][5] != null) {
+		Factory.addFigure(figures[2][5],new IntPoint(5,2),addOnto);
+	}
+	if(figures[2][6] != null) {
+		Factory.addFigure(figures[2][6],new IntPoint(6,2),addOnto);
+	}
+	if(figures[2][7] != null) {
+		Factory.addFigure(figures[2][7],new IntPoint(7,2),addOnto);
+	}
+	if(figures[2][8] != null) {
+		Factory.addFigure(figures[2][8],new IntPoint(8,2),addOnto);
+	}
+	if(figures[3][0] != null) {
+		Factory.addFigure(figures[3][0],new IntPoint(0,3),addOnto);
+	}
+	if(figures[3][1] != null) {
+		Factory.addFigure(figures[3][1],new IntPoint(1,3),addOnto);
+	}
+	if(figures[3][2] != null) {
+		Factory.addFigure(figures[3][2],new IntPoint(2,3),addOnto);
+	}
+	if(figures[3][3] != null) {
+		Factory.addFigure(figures[3][3],new IntPoint(3,3),addOnto);
+	}
+	if(figures[3][4] != null) {
+		Factory.addFigure(figures[3][4],new IntPoint(4,3),addOnto);
+	}
+	if(figures[3][5] != null) {
+		Factory.addFigure(figures[3][5],new IntPoint(5,3),addOnto);
+	}
+	if(figures[3][6] != null) {
+		Factory.addFigure(figures[3][6],new IntPoint(6,3),addOnto);
+	}
+	if(figures[3][7] != null) {
+		Factory.addFigure(figures[3][7],new IntPoint(7,3),addOnto);
+	}
+	if(figures[3][8] != null) {
+		Factory.addFigure(figures[3][8],new IntPoint(8,3),addOnto);
+	}
+	if(figures[4][0] != null) {
+		Factory.addFigure(figures[4][0],new IntPoint(0,4),addOnto);
+	}
+	if(figures[4][1] != null) {
+		Factory.addFigure(figures[4][1],new IntPoint(1,4),addOnto);
+	}
+	if(figures[4][2] != null) {
+		Factory.addFigure(figures[4][2],new IntPoint(2,4),addOnto);
+	}
+	if(figures[4][3] != null) {
+		Factory.addFigure(figures[4][3],new IntPoint(3,4),addOnto);
+	}
+	if(figures[4][4] != null) {
+		Factory.addFigure(figures[4][4],new IntPoint(4,4),addOnto);
+	}
+	if(figures[4][5] != null) {
+		Factory.addFigure(figures[4][5],new IntPoint(5,4),addOnto);
+	}
+	if(figures[4][6] != null) {
+		Factory.addFigure(figures[4][6],new IntPoint(6,4),addOnto);
+	}
+	if(figures[4][7] != null) {
+		Factory.addFigure(figures[4][7],new IntPoint(7,4),addOnto);
+	}
+	if(figures[4][8] != null) {
+		Factory.addFigure(figures[4][8],new IntPoint(8,4),addOnto);
+	}
+	if(figures[5][0] != null) {
+		Factory.addFigure(figures[5][0],new IntPoint(0,5),addOnto);
+	}
+	if(figures[5][1] != null) {
+		Factory.addFigure(figures[5][1],new IntPoint(1,5),addOnto);
+	}
+	if(figures[5][2] != null) {
+		Factory.addFigure(figures[5][2],new IntPoint(2,5),addOnto);
+	}
+	if(figures[5][3] != null) {
+		Factory.addFigure(figures[5][3],new IntPoint(3,5),addOnto);
+	}
+	if(figures[5][4] != null) {
+		Factory.addFigure(figures[5][4],new IntPoint(4,5),addOnto);
+	}
+	if(figures[5][5] != null) {
+		Factory.addFigure(figures[5][5],new IntPoint(5,5),addOnto);
+	}
+	if(figures[5][6] != null) {
+		Factory.addFigure(figures[5][6],new IntPoint(6,5),addOnto);
+	}
+	if(figures[5][7] != null) {
+		Factory.addFigure(figures[5][7],new IntPoint(7,5),addOnto);
+	}
+	if(figures[5][8] != null) {
+		Factory.addFigure(figures[5][8],new IntPoint(8,5),addOnto);
+	}
+	if(figures[6][0] != null) {
+		Factory.addFigure(figures[6][0],new IntPoint(0,6),addOnto);
+	}
+	if(figures[6][1] != null) {
+		Factory.addFigure(figures[6][1],new IntPoint(1,6),addOnto);
+	}
+	if(figures[6][2] != null) {
+		Factory.addFigure(figures[6][2],new IntPoint(2,6),addOnto);
+	}
+	if(figures[6][3] != null) {
+		Factory.addFigure(figures[6][3],new IntPoint(3,6),addOnto);
+	}
+	if(figures[6][4] != null) {
+		Factory.addFigure(figures[6][4],new IntPoint(4,6),addOnto);
+	}
+	if(figures[6][5] != null) {
+		Factory.addFigure(figures[6][5],new IntPoint(5,6),addOnto);
+	}
+	if(figures[6][6] != null) {
+		Factory.addFigure(figures[6][6],new IntPoint(6,6),addOnto);
+	}
+	if(figures[6][7] != null) {
+		Factory.addFigure(figures[6][7],new IntPoint(7,6),addOnto);
+	}
+	if(figures[6][8] != null) {
+		Factory.addFigure(figures[6][8],new IntPoint(8,6),addOnto);
+	}
+};
+Factory.addFigure = function(fig,loc,addOnto) {
+	Factory.scaleFigure(fig);
+	Factory.disposeFigure(fig,loc);
+	addOnto.addChild(fig);
+};
+Factory.scaleFigure = function(figure) {
+	var scale = Math.sqrt(3) * Factory.a * 0.85 / figure.get_height();
+	if(figure.type == FigureType.Progressor) {
+		scale *= 0.7;
+	} else if(figure.type == FigureType.Liberator || figure.type == FigureType.Defensor) {
+		scale *= 0.9;
+	}
+	figure.set_scaleX(scale);
+	figure.set_scaleY(scale);
+};
+Factory.disposeFigure = function(figure,loc) {
+	var coords = Field.hexCoords(loc.i,loc.j);
+	figure.set_x(coords.x);
+	figure.set_y(coords.y);
+};
+Factory.isDark = function(i,j) {
+	if(j % 3 == 2) {
 		return false;
+	} else if(j % 3 == 0) {
+		return i % 2 == 0;
+	} else {
+		return i % 2 == 1;
 	}
-	,isCastle: function(pos1,pos2,fig1,fig2) {
-		if(fig1 == null || fig2 == null || fig1.color != fig2.color) {
-			return false;
-		}
-		if(!(fig1.type == FigureType.Intellector && fig2.type == FigureType.Defensor || fig1.type == FigureType.Defensor && fig2.type == FigureType.Intellector)) {
-			return false;
-		}
-		var dir = Direction.UL;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.UR;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.D;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.DR;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.DL;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		var dir = Direction.U;
-		if(pos2.equals(this.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
-			return true;
-		}
-		return false;
-	}
-	,possibleFields: function(figure,fromI,fromJ) {
-		var fields = [];
-		switch(figure.type._hx_index) {
-		case 0:
-			var dir = Direction.U;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color)) {
-				fields.push(destination);
-			}
-			break;
-		case 1:
-			var _g = 0;
-			var _g1 = [Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
-			while(_g < _g1.length) {
-				var dir = _g1[_g];
-				++_g;
-				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-				while(destination != null) {
-					var occupier = this.getFigure(destination);
-					if(occupier != null) {
-						if(occupier.color != figure.color) {
-							fields.push(destination);
-						}
-						break;
-					} else {
-						fields.push(destination);
-						destination = this.getCoordsInRelDirection(destination.i,destination.j,dir,figure.color);
-					}
-				}
-			}
-			break;
-		case 2:
-			var _g = 0;
-			var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
-			while(_g < _g1.length) {
-				var dir = _g1[_g];
-				++_g;
-				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-				while(destination != null) {
-					var occupier = this.getFigure(destination);
-					if(occupier != null) {
-						if(occupier.color != figure.color) {
-							fields.push(destination);
-						}
-						break;
-					} else {
-						fields.push(destination);
-						destination = this.getCoordsInRelDirection(destination.i,destination.j,dir,figure.color);
-					}
-				}
-			}
-			break;
-		case 3:
-			var _g = 0;
-			var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
-			while(_g < _g1.length) {
-				var dir = _g1[_g];
-				++_g;
-				var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,1);
-				var occupier = this.getFigure(destination);
-				if(destination != null && occupier == null) {
-					fields.push(destination);
-				}
-				destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color,2);
-				occupier = this.getFigure(destination);
-				if(destination != null && (occupier == null || occupier.color != figure.color)) {
-					fields.push(destination);
-				}
-			}
-			break;
-		case 4:
-			var dir = Direction.UL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.D;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			var dir = Direction.U;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
-				fields.push(destination);
-			}
-			break;
-		case 5:
-			var dir = Direction.UL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.UR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.D;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DR;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.DL;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			var dir = Direction.U;
-			var destination = this.getCoordsInRelDirection(fromI,fromJ,dir,figure.color);
-			var occupier = this.getFigure(destination);
-			if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
-				fields.push(destination);
-			}
-			break;
-		}
-		return fields;
-	}
-	,getCoordsInRelDirection: function(fromI,fromJ,dir,col,steps) {
-		if(steps == null) {
-			steps = 1;
-		}
-		var trueDirection = col == this.playerColor ? dir : this.oppositeDir(dir);
-		var nextCoords = this.getCoordsInAbsDirection(fromI,fromJ,trueDirection);
-		--steps;
-		while(steps > 0 && nextCoords != null) {
-			nextCoords = this.getCoordsInAbsDirection(nextCoords.i,nextCoords.j,trueDirection);
-			--steps;
-		}
-		return nextCoords;
-	}
-	,oppositeDir: function(dir) {
-		switch(dir._hx_index) {
-		case 0:
-			return Direction.D;
-		case 1:
-			return Direction.DR;
-		case 2:
-			return Direction.DL;
-		case 3:
-			return Direction.U;
-		case 4:
-			return Direction.UR;
-		case 5:
-			return Direction.UL;
-		case 6:
-			return Direction.A_DR;
-		case 7:
-			return Direction.A_DL;
-		case 8:
-			return Direction.A_L;
-		case 9:
-			return Direction.A_UL;
-		case 10:
-			return Direction.A_UR;
-		case 11:
-			return Direction.A_R;
-		}
-	}
-	,getCoordsInAbsDirection: function(fromI,fromJ,dir) {
-		var coords;
-		switch(dir._hx_index) {
-		case 0:
-			coords = new IntPoint(fromI,fromJ - 1);
-			break;
-		case 1:
-			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
-			break;
-		case 2:
-			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
-			break;
-		case 3:
-			coords = new IntPoint(fromI,fromJ + 1);
-			break;
-		case 4:
-			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
-			break;
-		case 5:
-			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
-			break;
-		case 6:
-			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
-			break;
-		case 7:
-			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
-			break;
-		case 8:
-			coords = new IntPoint(fromI + 2,fromJ);
-			break;
-		case 9:
-			coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
-			break;
-		case 10:
-			coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
-			break;
-		case 11:
-			coords = new IntPoint(fromI - 2,fromJ);
-			break;
-		}
-		if(this.hexExists(coords.i,coords.j)) {
-			return coords;
-		} else {
-			return null;
-		}
-	}
-	,posToIndexes: function(x,y) {
-		var closest = null;
-		var distanceSqr = Field.a * Field.a;
-		var _g = 0;
-		while(_g < 7) {
-			var j = _g++;
-			var _g1 = 0;
-			while(_g1 < 9) {
-				var i = _g1++;
-				if(!this.hexExists(i,j)) {
-					continue;
-				}
-				var coords = this.hexCoords(i,j);
-				var currDistSqr = (coords.x - x) * (coords.x - x) + (coords.y - y) * (coords.y - y);
-				if(distanceSqr > currDistSqr) {
-					closest = new IntPoint(i,j);
-					distanceSqr = currDistSqr;
-				}
-			}
-		}
-		return closest;
-	}
-	,getFigure: function(coords) {
-		if(coords == null || !this.hexExists(coords.i,coords.j)) {
-			return null;
-		} else {
-			return this.figures[coords.j][coords.i];
-		}
-	}
-	,hexCoords: function(i,j) {
-		var p = new openfl_geom_Point(0,0);
-		p.x = 3 * Field.a * i / 2;
-		p.y = Math.sqrt(3) * Field.a * j;
-		if(i % 2 == 1) {
-			p.y += Math.sqrt(3) * Field.a / 2;
-		}
-		return p;
-	}
-	,isFinalForPlayer: function(p) {
-		if(p.j == 0) {
-			return p.i % 2 == 0;
-		} else {
-			return false;
-		}
-	}
-	,hexExists: function(i,j) {
-		if(i >= 0 && i < 9 && j >= 0 && j < 7) {
-			if(j == 6) {
-				return i % 2 == 0;
-			} else {
-				return true;
-			}
-		} else {
-			return false;
-		}
-	}
-	,placeFigures: function() {
-		var figure = this.figures[0][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[0][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,0));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[1][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,1));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[2][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,2));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[3][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,3));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[4][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,4));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[5][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,5));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][0];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(0,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][1];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(1,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][2];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(2,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][3];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(3,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][4];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(4,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][5];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(5,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][6];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(6,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][7];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(7,6));
-			this.addChild(figure);
-		}
-		var figure = this.figures[6][8];
-		if(figure != null) {
-			this.scaleFigure(figure);
-			this.disposeFigure(figure,new IntPoint(8,6));
-			this.addChild(figure);
-		}
-	}
-	,scaleFigure: function(figure) {
-		var scale = Math.sqrt(3) * Field.a * 0.85 / figure.get_height();
-		if(figure.type == FigureType.Progressor) {
-			scale *= 0.7;
-		} else if(figure.type == FigureType.Liberator || figure.type == FigureType.Defensor) {
-			scale *= 0.9;
-		}
-		figure.set_scaleX(scale);
-		figure.set_scaleY(scale);
-	}
-	,disposeFigure: function(figure,loc) {
-		var coords = this.hexCoords(loc.i,loc.j);
-		figure.set_x(coords.x);
-		figure.set_y(coords.y);
-	}
-	,isDark: function(i,j) {
-		if(j % 3 == 2) {
-			return false;
-		} else if(j % 3 == 0) {
-			return i % 2 == 0;
-		} else {
-			return i % 2 == 1;
-		}
-	}
-	,drag: function(figure) {
-		this.removeChild(figure);
-		this.addChild(figure);
-		figure.startDrag(true);
-	}
-	,addMarkers: function(from,figure) {
-		var _g = 0;
-		var _g1 = this.possibleFields(figure,from.i,from.j);
-		while(_g < _g1.length) {
-			var dest = _g1[_g];
-			++_g;
-			if(this.getFigure(dest) != null) {
-				this.hexes[dest.j][dest.i].addRound();
-			} else {
-				this.hexes[dest.j][dest.i].addDot();
-			}
-		}
-	}
-	,removeMarkers: function(from,figure) {
-		var _g = 0;
-		var _g1 = this.possibleFields(figure,from.i,from.j);
-		while(_g < _g1.length) {
-			var dest = _g1[_g];
-			++_g;
-			this.hexes[dest.j][dest.i].removeMarkers();
-		}
-	}
-	,selectDeparture: function(dep,depFigure) {
-		this.selected = dep;
-		this.hexes[dep.j][dep.i].select();
-		this.addMarkers(dep,depFigure);
-	}
-	,selectionBackToNormal: function() {
-		this.removeMarkers(this.selected,this.getFigure(this.selected));
-		this.hexes[this.selected.j][this.selected.i].deselect();
-		if(this.selectedDest != null) {
-			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
-		}
-		this.selected = null;
-		this.selectedDest = null;
-	}
-	,__class__: Field
-});
+};
 var FigureType = $hxEnums["FigureType"] = { __ename__ : "FigureType", __constructs__ : ["Progressor","Aggressor","Dominator","Liberator","Defensor","Intellector"]
 	,Progressor: {_hx_index:0,__enum__:"FigureType",toString:$estr}
 	,Aggressor: {_hx_index:1,__enum__:"FigureType",toString:$estr}
@@ -7453,6 +5781,146 @@ Figure.prototype = $extend(openfl_display_Sprite.prototype,{
 	type: null
 	,color: null
 	,__class__: Figure
+});
+var GameCompound = function(field,sidebox,chatbox,infobox,onReturn) {
+	openfl_display_Sprite.call(this);
+	this.field = field;
+	this.sidebox = sidebox;
+	this.chatbox = chatbox;
+	this.infobox = infobox;
+	field.set_x((window.innerWidth - field.get_width()) / 2);
+	field.set_y(100);
+	this.addChild(field);
+	if(sidebox != null) {
+		sidebox.set_x(field.get_x() + field.get_width() + 10);
+		sidebox.set_y(field.get_y() + (field.get_height() - 380 - Math.sqrt(3) * Field.a) / 2);
+		this.addChild(sidebox);
+	}
+	if(chatbox != null) {
+		chatbox.set_x(field.get_x() - Chatbox.WIDTH - Field.a - 30);
+		chatbox.set_y(field.get_y() + field.get_height() * 0.25 - Field.a * Math.sqrt(3) / 2);
+		this.addChild(chatbox);
+	}
+	if(infobox != null) {
+		infobox.set_x(field.get_x() - Chatbox.WIDTH - Field.a - 30);
+		infobox.set_y(field.get_y() - Field.a * Math.sqrt(3) / 2);
+		this.addChild(infobox);
+	}
+	if(onReturn != null) {
+		this.returnBtn = new haxe_ui_components_Button();
+		this.returnBtn.set_width(100);
+		this.returnBtn.set_text("Return");
+		this.returnBtn.set_onClick(function(e) {
+			onReturn();
+		});
+		this.returnBtn.set_x(10);
+		this.returnBtn.set_y(10);
+		this.addChild(this.returnBtn);
+	}
+	if(((field) instanceof AnalysisField)) {
+		var actionButtons = new haxe_ui_containers_VBox();
+		var clearBtn = new haxe_ui_components_Button();
+		clearBtn.set_width(200);
+		clearBtn.set_text("Clear");
+		clearBtn.set_onClick(function(e) {
+			(js_Boot.__cast(field , AnalysisField)).clearBoard();
+		});
+		actionButtons.addComponent(clearBtn);
+		var resetBtn = new haxe_ui_components_Button();
+		resetBtn.set_width(200);
+		resetBtn.set_text("Reset");
+		resetBtn.set_onClick(function(e) {
+			(js_Boot.__cast(field , AnalysisField)).reset();
+		});
+		actionButtons.addComponent(resetBtn);
+		actionButtons.set_x(field.get_x() + field.get_width() + 10);
+		actionButtons.set_y(field.get_y() + (field.get_height() - 40 - Math.sqrt(3) * Field.a) / 2);
+		this.addChild(actionButtons);
+	}
+};
+$hxClasses["GameCompound"] = GameCompound;
+GameCompound.__name__ = "GameCompound";
+GameCompound.buildActive = function(data) {
+	var whiteLogin = data.colour == "white" ? Networker.login : data.enemy;
+	var blackLogin = data.colour == "black" ? Networker.login : data.enemy;
+	var field = new PlayingField(data.colour);
+	var sidebox = new Sidebox(data.startSecs,data.bonusSecs,Networker.login,data.enemy,data.colour == "white");
+	var chatbox = new Chatbox(field.get_height() * 0.75);
+	var infobox = new GameInfoBox(Chatbox.WIDTH,field.get_height() * 0.23,data.startSecs,data.bonusSecs,whiteLogin,blackLogin,data.colour == "white");
+	var compound = new GameCompound(field,sidebox,chatbox,infobox);
+	compound.playerColor = data.colour == "white" ? FigureColor.White : FigureColor.Black;
+	field.onPlayerMadeMove = $bind(compound,compound.onMove);
+	return compound;
+};
+GameCompound.buildSpectators = function(data,onReturn) {
+	var whiteRequested = data.requestedColor == "white";
+	var watchedColor = whiteRequested ? FigureColor.White : FigureColor.Black;
+	var bottomLogin = whiteRequested ? data.whiteLogin : data.blackLogin;
+	var upperLogin = whiteRequested ? data.blackLogin : data.whiteLogin;
+	var field = new SpectatorsField(data.position,watchedColor);
+	var sidebox = new Sidebox(data.startSecs,data.bonusSecs,bottomLogin,upperLogin,whiteRequested);
+	var color = FigureColor.White;
+	var _g = 0;
+	var _g1 = data.movesPlayed;
+	while(_g < _g1.length) {
+		var move = _g1[_g];
+		++_g;
+		sidebox.writeMove(color,move);
+		color = color == FigureColor.White ? FigureColor.Black : FigureColor.White;
+	}
+	sidebox.correctTime(data.whiteSeconds,data.blackSeconds);
+	sidebox.launchTimer();
+	return new GameCompound(field,sidebox,null,null,onReturn);
+};
+GameCompound.buildAnalysis = function(onReturn) {
+	var field = new AnalysisField();
+	return new GameCompound(field,null,null,null,onReturn);
+};
+GameCompound.__super__ = openfl_display_Sprite;
+GameCompound.prototype = $extend(openfl_display_Sprite.prototype,{
+	returnBtn: null
+	,field: null
+	,sidebox: null
+	,chatbox: null
+	,infobox: null
+	,playerColor: null
+	,onMove: function(data) {
+		var from = new IntPoint(data.fromI,data.fromJ);
+		var to = new IntPoint(data.toI,data.toJ);
+		var movingFigure = this.field.getFigure(from);
+		var ontoFigure = this.field.getFigure(to);
+		var morphedInto = data.morphInto == null ? null : Type.createEnum(FigureType,data.morphInto,null);
+		var capture = ontoFigure != null && ontoFigure.color != movingFigure.color;
+		var mate = capture && ontoFigure.type == FigureType.Intellector;
+		var castle = ontoFigure != null && ontoFigure.color == movingFigure.color && (ontoFigure.type == FigureType.Intellector && movingFigure.type == FigureType.Defensor || ontoFigure.type == FigureType.Defensor && movingFigure.type == FigureType.Intellector);
+		this.sidebox.makeMove(movingFigure.color,movingFigure.type,to,capture,mate,castle,morphedInto);
+		if(this.infobox != null) {
+			this.infobox.makeMove(data.fromI,data.fromJ,data.toI,data.toJ,morphedInto);
+		}
+		if(data.issuer_login != Networker.login) {
+			this.field.move(from,to,morphedInto);
+		} else {
+			Networker.move(data.fromI,data.fromJ,data.toI,data.toJ,data.morphInto == null ? null : Type.createEnum(FigureType,data.morphInto,null));
+		}
+	}
+	,onTimeCorrection: function(data) {
+		this.sidebox.correctTime(data.whiteSeconds,data.blackSeconds);
+	}
+	,onMessage: function(data) {
+		this.chatbox.appendMessage(data.issuer_login,data.message);
+	}
+	,onSpectatorConnected: function(data) {
+		this.chatbox.appendLog("" + data.login + " is now spectating");
+	}
+	,onSpectatorDisonnected: function(data) {
+		this.chatbox.appendLog("" + data.login + " left");
+	}
+	,terminate: function() {
+		if(this.sidebox != null) {
+			this.sidebox.terminate();
+		}
+	}
+	,__class__: GameCompound
 });
 var Outcome = $hxEnums["Outcome"] = { __ename__ : "Outcome", __constructs__ : ["Mate","Breakthrough","Resign","Abandon","DrawAgreement","Repetition","NoProgress"]
 	,Mate: {_hx_index:0,__enum__:"Outcome",toString:$estr}
@@ -8115,7 +6583,7 @@ Networker.__name__ = "Networker";
 Networker.connect = function(onGameStated,onConnected) {
 	Networker._ws = new hx_ws_WebSocket("ws://13.48.10.164:5000");
 	Networker._ws.set_onopen(function() {
-		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 76, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("open",{ fileName : "Source/Networker.hx", lineNumber : 90, className : "Networker", methodName : "connect"});
 		Networker.gameStartHandler = onGameStated;
 		Networker.once("game_started",Networker.gameStartHandler);
 		onConnected();
@@ -8127,14 +6595,14 @@ Networker.connect = function(onGameStated,onConnected) {
 		if(callback != null) {
 			callback(event.data);
 		} else {
-			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 88, className : "Networker", methodName : "connect"});
+			haxe_Log.trace("Uncaught event: " + event.name,{ fileName : "Source/Networker.hx", lineNumber : 102, className : "Networker", methodName : "connect"});
 		}
 	});
 	Networker._ws.set_onclose(function() {
 		Networker._ws = null;
 	});
 	Networker._ws.set_onerror(function(err) {
-		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 94, className : "Networker", methodName : "connect"});
+		haxe_Log.trace("error: " + err.toString(),{ fileName : "Source/Networker.hx", lineNumber : 108, className : "Networker", methodName : "connect"});
 	});
 };
 Networker.signin = function(login,password,onAnswer) {
@@ -8175,6 +6643,27 @@ Networker.acceptOpen = function(caller) {
 		Networker.login = "guest_" + Math.ceil(Math.random() * 100000);
 	}
 	Networker.emit("accept_open_challenge",{ caller_login : caller, callee_login : Networker.login});
+};
+Networker.spectate = function(watchedLogin,onStarted,onMove,onTimeCorrection) {
+	var _g = new haxe_ds_StringMap();
+	_g.h["watched_unavailable"] = function(data) {
+		Dialogs.alert("Player is offline","Spectation error");
+	};
+	_g.h["watched_notingame"] = function(data) {
+		Dialogs.alert("Player is not in game","Spectation error");
+	};
+	_g.h["spectation_data"] = function(data) {
+		Networker.on("move",onMove);
+		Networker.on("time_correction",onTimeCorrection);
+		onStarted(data);
+	};
+	Networker.onceOneOf(_g);
+	Networker.emit("spectate",{ watched_login : watchedLogin});
+};
+Networker.stopSpectate = function() {
+	Networker.off("move");
+	Networker.off("time_correction");
+	Networker.emit("stop_spectate",{ });
 };
 Networker.challengeReceiver = function(data) {
 	var onConfirmed = function() {
@@ -8228,17 +6717,21 @@ Networker.reqTimeoutCheck = function() {
 Networker.move = function(fromI,fromJ,toI,toJ,morphInto) {
 	Networker.emit("move",{ issuer_login : Networker.login, fromI : fromI, fromJ : fromJ, toI : toI, toJ : toJ, morphInto : morphInto == null ? null : $hxEnums[morphInto.__enum__].__constructs__[morphInto._hx_index]});
 };
-Networker.registerGameEvents = function(onMove,onMessage,onTimeCorrection,onOver) {
+Networker.registerGameEvents = function(onMove,onMessage,onTimeCorrection,onOver,onSpectatorEnter,onSpectatorLeft) {
 	Networker.off("incoming_challenge");
 	Networker.on("move",onMove);
 	Networker.on("message",onMessage);
 	Networker.on("time_correction",onTimeCorrection);
+	Networker.on("new_spectator",onSpectatorEnter);
+	Networker.on("spectator_left",onSpectatorLeft);
 	Networker.once("game_ended",onOver);
 };
 Networker.registerMainMenuEvents = function() {
 	Networker.off("move");
 	Networker.off("message");
 	Networker.off("time_correction");
+	Networker.off("new_spectator");
+	Networker.off("spectator_left");
 	Networker.on("incoming_challenge",Networker.challengeReceiver);
 	Networker.once("game_started",Networker.gameStartHandler);
 };
@@ -8280,7 +6773,7 @@ Networker.off = function(eventName) {
 };
 Networker.emit = function(eventName,data) {
 	var event = { name : eventName, data : data};
-	haxe_Log.trace("Emitted: " + JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 236, className : "Networker", methodName : "emit"});
+	haxe_Log.trace("Emitted: " + JSON.stringify(event),{ fileName : "Source/Networker.hx", lineNumber : 275, className : "Networker", methodName : "emit"});
 	Networker._ws.send(JSON.stringify(event));
 };
 Networker.combineVoid = function(f1,f2) {
@@ -8395,6 +6888,387 @@ OpeningTree.prototype = {
 		this.currentNode = this.currentNode.get(collapsedMove);
 	}
 	,__class__: OpeningTree
+};
+var PlayingField = function(playerColourName) {
+	Field.call(this);
+	var playerIsWhite = playerColourName == "white";
+	this.playerColor = playerIsWhite ? FigureColor.White : FigureColor.Black;
+	this.playersTurn = playerIsWhite;
+	this.figures = Factory.produceFiguresFromDefault(playerIsWhite,this);
+	this.addEventListener("addedToStage",$bind(this,this.init));
+};
+$hxClasses["PlayingField"] = PlayingField;
+PlayingField.__name__ = "PlayingField";
+PlayingField.__super__ = Field;
+PlayingField.prototype = $extend(Field.prototype,{
+	playerColor: null
+	,onPlayerMadeMove: null
+	,init: function(e) {
+		this.removeEventListener("addedToStage",$bind(this,this.init));
+		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
+	}
+	,onPress: function(e) {
+		var _gthis = this;
+		if(!this.playersTurn) {
+			return;
+		}
+		var pressLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		if(this.selected != null) {
+			this.destinationPress(pressLocation);
+		} else {
+			this.departurePress(pressLocation,function(c) {
+				return c == _gthis.playerColor;
+			});
+		}
+	}
+	,onMove: function(e) {
+		if(!this.playersTurn) {
+			return;
+		}
+		var shadowLocation = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		if(shadowLocation != null && this.ableToMove(this.selected,shadowLocation)) {
+			this.hexes[shadowLocation.j][shadowLocation.i].select();
+		}
+		if(this.selectedDest != null && !this.selectedDest.equals(shadowLocation)) {
+			this.hexes[this.selectedDest.j][this.selectedDest.i].deselect();
+		}
+		this.selectedDest = shadowLocation;
+	}
+	,onRelease: function(e) {
+		if(!this.playersTurn) {
+			return;
+		}
+		this.stage.removeEventListener("mouseUp",$bind(this,this.onRelease));
+		var pressedAt = new IntPoint(this.selected.i,this.selected.j);
+		var releasedAt = this.posToIndexes(e.stageX - this.get_x(),e.stageY - this.get_y());
+		this.figures[pressedAt.j][pressedAt.i].stopDrag();
+		if(releasedAt != null && this.ableToMove(pressedAt,releasedAt) && !releasedAt.equals(pressedAt)) {
+			this.stage.removeEventListener("mouseMove",$bind(this,this.onMove));
+			this.selectionBackToNormal();
+			this.attemptMove(pressedAt,releasedAt);
+		} else {
+			this.disposeFigure(this.figures[pressedAt.j][pressedAt.i],pressedAt);
+		}
+	}
+	,makeMove: function(from,to,morphInto) {
+		this.onPlayerMadeMove({ issuer_login : Networker.login, fromI : from.i, toI : to.i, fromJ : from.j, toJ : to.j, morphInto : morphInto == null ? null : $hxEnums[morphInto.__enum__].__constructs__[morphInto._hx_index]});
+		this.move(from,to,morphInto);
+		this.stage.addEventListener("mouseDown",$bind(this,this.onPress));
+	}
+	,isOrientationNormal: function(movingFigure) {
+		return this.playerColor == movingFigure;
+	}
+	,__class__: PlayingField
+});
+var Position = function() { };
+$hxClasses["Position"] = Position;
+Position.__name__ = "Position";
+Position.buildFigureArray = function(serializedPosition,watchedSide) {
+	var _g = [];
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var figures = _g;
+	var inversed = watchedSide == FigureColor.Black;
+	var ci = 1;
+	while(ci < serializedPosition.length) {
+		var i = Std.parseInt(serializedPosition.charAt(ci));
+		var j = Std.parseInt(serializedPosition.charAt(ci + 1));
+		var type = Position.typeByCode(serializedPosition.charAt(ci + 2));
+		var color = serializedPosition.charAt(ci + 3) == "w" ? FigureColor.White : FigureColor.Black;
+		if(inversed) {
+			j = Position.inversedJ(i,j);
+		}
+		figures[j][i] = new Figure(type,color);
+		ci += 4;
+	}
+	return figures;
+};
+Position.buildDefault = function(normalOrientation) {
+	var playerColor = normalOrientation ? FigureColor.White : FigureColor.Black;
+	var enemyColour = normalOrientation ? FigureColor.Black : FigureColor.White;
+	var _g = [];
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var figures = _g;
+	var _g = [];
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	var _g1 = [];
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g1.push(null);
+	_g.push(_g1);
+	figures = _g;
+	figures[0][0] = new Figure(FigureType.Dominator,enemyColour);
+	figures[0][1] = new Figure(FigureType.Liberator,enemyColour);
+	figures[0][2] = new Figure(FigureType.Aggressor,enemyColour);
+	figures[0][3] = new Figure(FigureType.Defensor,enemyColour);
+	figures[0][4] = new Figure(FigureType.Intellector,enemyColour);
+	figures[0][5] = new Figure(FigureType.Defensor,enemyColour);
+	figures[0][6] = new Figure(FigureType.Aggressor,enemyColour);
+	figures[0][7] = new Figure(FigureType.Liberator,enemyColour);
+	figures[0][8] = new Figure(FigureType.Dominator,enemyColour);
+	figures[1][0] = new Figure(FigureType.Progressor,enemyColour);
+	figures[1][2] = new Figure(FigureType.Progressor,enemyColour);
+	figures[1][4] = new Figure(FigureType.Progressor,enemyColour);
+	figures[1][6] = new Figure(FigureType.Progressor,enemyColour);
+	figures[1][8] = new Figure(FigureType.Progressor,enemyColour);
+	figures[6][0] = new Figure(FigureType.Dominator,playerColor);
+	figures[5][1] = new Figure(FigureType.Liberator,playerColor);
+	figures[6][2] = new Figure(FigureType.Aggressor,playerColor);
+	figures[5][3] = new Figure(FigureType.Defensor,playerColor);
+	figures[6][4] = new Figure(FigureType.Intellector,playerColor);
+	figures[5][5] = new Figure(FigureType.Defensor,playerColor);
+	figures[6][6] = new Figure(FigureType.Aggressor,playerColor);
+	figures[5][7] = new Figure(FigureType.Liberator,playerColor);
+	figures[6][8] = new Figure(FigureType.Dominator,playerColor);
+	figures[5][0] = new Figure(FigureType.Progressor,playerColor);
+	figures[5][2] = new Figure(FigureType.Progressor,playerColor);
+	figures[5][4] = new Figure(FigureType.Progressor,playerColor);
+	figures[5][6] = new Figure(FigureType.Progressor,playerColor);
+	figures[5][8] = new Figure(FigureType.Progressor,playerColor);
+	return figures;
+};
+Position.typeByCode = function(c) {
+	switch(c) {
+	case "e":
+		return FigureType.Defensor;
+	case "g":
+		return FigureType.Aggressor;
+	case "i":
+		return FigureType.Liberator;
+	case "n":
+		return FigureType.Intellector;
+	case "o":
+		return FigureType.Dominator;
+	case "r":
+		return FigureType.Progressor;
+	default:
+		return null;
+	}
+};
+Position.inversedJ = function(i,j) {
+	return 6 - j - i % 2;
 };
 var Reflect = function() { };
 $hxClasses["Reflect"] = Reflect;
@@ -8519,6 +7393,307 @@ Reflect.makeVarArgs = function(f) {
 		return f(a2);
 	};
 };
+var Direction = $hxEnums["Direction"] = { __ename__ : "Direction", __constructs__ : ["U","UL","UR","D","DL","DR","A_UL","A_UR","A_R","A_DR","A_DL","A_L"]
+	,U: {_hx_index:0,__enum__:"Direction",toString:$estr}
+	,UL: {_hx_index:1,__enum__:"Direction",toString:$estr}
+	,UR: {_hx_index:2,__enum__:"Direction",toString:$estr}
+	,D: {_hx_index:3,__enum__:"Direction",toString:$estr}
+	,DL: {_hx_index:4,__enum__:"Direction",toString:$estr}
+	,DR: {_hx_index:5,__enum__:"Direction",toString:$estr}
+	,A_UL: {_hx_index:6,__enum__:"Direction",toString:$estr}
+	,A_UR: {_hx_index:7,__enum__:"Direction",toString:$estr}
+	,A_R: {_hx_index:8,__enum__:"Direction",toString:$estr}
+	,A_DR: {_hx_index:9,__enum__:"Direction",toString:$estr}
+	,A_DL: {_hx_index:10,__enum__:"Direction",toString:$estr}
+	,A_L: {_hx_index:11,__enum__:"Direction",toString:$estr}
+};
+Direction.__empty_constructs__ = [Direction.U,Direction.UL,Direction.UR,Direction.D,Direction.DL,Direction.DR,Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
+var Rules = function() { };
+$hxClasses["Rules"] = Rules;
+Rules.__name__ = "Rules";
+Rules.isCastle = function(pos1,pos2,fig1,fig2) {
+	if(fig1 == null || fig2 == null || fig1.color != fig2.color) {
+		return false;
+	}
+	if(!(fig1.type == FigureType.Intellector && fig2.type == FigureType.Defensor || fig1.type == FigureType.Defensor && fig2.type == FigureType.Intellector)) {
+		return false;
+	}
+	var dir = Direction.UL;
+	if(pos2.equals(Rules.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+		return true;
+	}
+	var dir = Direction.UR;
+	if(pos2.equals(Rules.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+		return true;
+	}
+	var dir = Direction.D;
+	if(pos2.equals(Rules.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+		return true;
+	}
+	var dir = Direction.DR;
+	if(pos2.equals(Rules.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+		return true;
+	}
+	var dir = Direction.DL;
+	if(pos2.equals(Rules.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+		return true;
+	}
+	var dir = Direction.U;
+	if(pos2.equals(Rules.getCoordsInAbsDirection(pos1.i,pos1.j,dir))) {
+		return true;
+	}
+	return false;
+};
+Rules.possibleFields = function(fromI,fromJ,getFigure,normalOrientation) {
+	var fields = [];
+	var figure = getFigure(new IntPoint(fromI,fromJ));
+	switch(figure.type._hx_index) {
+	case 0:
+		var dir = Direction.U;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color)) {
+			fields.push(destination);
+		}
+		var dir = Direction.UL;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color)) {
+			fields.push(destination);
+		}
+		var dir = Direction.UR;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color)) {
+			fields.push(destination);
+		}
+		break;
+	case 1:
+		var _g = 0;
+		var _g1 = [Direction.A_UL,Direction.A_UR,Direction.A_R,Direction.A_DR,Direction.A_DL,Direction.A_L];
+		while(_g < _g1.length) {
+			var dir = _g1[_g];
+			++_g;
+			var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+			while(destination != null) {
+				var occupier = getFigure(destination);
+				if(occupier != null) {
+					if(occupier.color != figure.color) {
+						fields.push(destination);
+					}
+					break;
+				} else {
+					fields.push(destination);
+					destination = Rules.getCoordsInRelDirection(destination.i,destination.j,dir,normalOrientation);
+				}
+			}
+		}
+		break;
+	case 2:
+		var _g = 0;
+		var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
+		while(_g < _g1.length) {
+			var dir = _g1[_g];
+			++_g;
+			var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+			while(destination != null) {
+				var occupier = getFigure(destination);
+				if(occupier != null) {
+					if(occupier.color != figure.color) {
+						fields.push(destination);
+					}
+					break;
+				} else {
+					fields.push(destination);
+					destination = Rules.getCoordsInRelDirection(destination.i,destination.j,dir,normalOrientation);
+				}
+			}
+		}
+		break;
+	case 3:
+		var _g = 0;
+		var _g1 = [Direction.UL,Direction.UR,Direction.D,Direction.DR,Direction.DL,Direction.U];
+		while(_g < _g1.length) {
+			var dir = _g1[_g];
+			++_g;
+			var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation,1);
+			var occupier = getFigure(destination);
+			if(destination != null && occupier == null) {
+				fields.push(destination);
+			}
+			destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation,2);
+			occupier = getFigure(destination);
+			if(destination != null && (occupier == null || occupier.color != figure.color)) {
+				fields.push(destination);
+			}
+		}
+		break;
+	case 4:
+		var dir = Direction.UL;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+			fields.push(destination);
+		}
+		var dir = Direction.UR;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+			fields.push(destination);
+		}
+		var dir = Direction.D;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+			fields.push(destination);
+		}
+		var dir = Direction.DR;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+			fields.push(destination);
+		}
+		var dir = Direction.DL;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+			fields.push(destination);
+		}
+		var dir = Direction.U;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color != figure.color || occupier.type == FigureType.Intellector)) {
+			fields.push(destination);
+		}
+		break;
+	case 5:
+		var dir = Direction.UL;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+			fields.push(destination);
+		}
+		var dir = Direction.UR;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+			fields.push(destination);
+		}
+		var dir = Direction.D;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+			fields.push(destination);
+		}
+		var dir = Direction.DR;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+			fields.push(destination);
+		}
+		var dir = Direction.DL;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+			fields.push(destination);
+		}
+		var dir = Direction.U;
+		var destination = Rules.getCoordsInRelDirection(fromI,fromJ,dir,normalOrientation);
+		var occupier = getFigure(destination);
+		if(destination != null && (occupier == null || occupier.color == figure.color && occupier.type == FigureType.Defensor)) {
+			fields.push(destination);
+		}
+		break;
+	}
+	return fields;
+};
+Rules.getCoordsInRelDirection = function(fromI,fromJ,dir,normalOrientation,steps) {
+	if(steps == null) {
+		steps = 1;
+	}
+	var trueDirection = normalOrientation ? dir : Rules.oppositeDir(dir);
+	var nextCoords = Rules.getCoordsInAbsDirection(fromI,fromJ,trueDirection);
+	--steps;
+	while(steps > 0 && nextCoords != null) {
+		nextCoords = Rules.getCoordsInAbsDirection(nextCoords.i,nextCoords.j,trueDirection);
+		--steps;
+	}
+	return nextCoords;
+};
+Rules.oppositeDir = function(dir) {
+	switch(dir._hx_index) {
+	case 0:
+		return Direction.D;
+	case 1:
+		return Direction.DR;
+	case 2:
+		return Direction.DL;
+	case 3:
+		return Direction.U;
+	case 4:
+		return Direction.UR;
+	case 5:
+		return Direction.UL;
+	case 6:
+		return Direction.A_DR;
+	case 7:
+		return Direction.A_DL;
+	case 8:
+		return Direction.A_L;
+	case 9:
+		return Direction.A_UL;
+	case 10:
+		return Direction.A_UR;
+	case 11:
+		return Direction.A_R;
+	}
+};
+Rules.getCoordsInAbsDirection = function(fromI,fromJ,dir) {
+	var coords;
+	switch(dir._hx_index) {
+	case 0:
+		coords = new IntPoint(fromI,fromJ - 1);
+		break;
+	case 1:
+		coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
+		break;
+	case 2:
+		coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 1 : fromJ);
+		break;
+	case 3:
+		coords = new IntPoint(fromI,fromJ + 1);
+		break;
+	case 4:
+		coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
+		break;
+	case 5:
+		coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ : fromJ + 1);
+		break;
+	case 6:
+		coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
+		break;
+	case 7:
+		coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ - 2 : fromJ - 1);
+		break;
+	case 8:
+		coords = new IntPoint(fromI + 2,fromJ);
+		break;
+	case 9:
+		coords = new IntPoint(fromI + 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
+		break;
+	case 10:
+		coords = new IntPoint(fromI - 1,fromI % 2 == 0 ? fromJ + 1 : fromJ + 2);
+		break;
+	case 11:
+		coords = new IntPoint(fromI - 2,fromJ);
+		break;
+	}
+	if(Field.hexExists(coords.i,coords.j)) {
+		return coords;
+	} else {
+		return null;
+	}
+};
 var Sidebox = function(startSecs,secsPerTurn,playerLogin,opponentLogin,playerIsWhite) {
 	openfl_display_Sprite.call(this);
 	this.move = 1;
@@ -8625,7 +7800,7 @@ Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
 		var timeNumbers = timeLabel.get_text().split(":");
 		if(timeNumbers[1] == "00") {
 			if(timeNumbers[0] == "00") {
-				this.onNonMateEnded();
+				this.terminate();
 				Networker.reqTimeoutCheck();
 				return;
 			}
@@ -8656,7 +7831,7 @@ Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
 	,locToStr: function(loc) {
 		if(this.playerColor == FigureColor.White) {
 			var code = 97 + loc.i;
-			return String.fromCodePoint(code) + (7 - loc.j - loc.i % 2);
+			return String.fromCodePoint(code) + (1 + Position.inversedJ(loc.i,loc.j));
 		} else {
 			var code = 97 + loc.i;
 			return String.fromCodePoint(code) + (1 + loc.j);
@@ -8742,17 +7917,41 @@ Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
 			if(this.playerTurn) {
 				this.bottomTime.set_text(this.addBonus(this.bottomTime.get_text()));
 			}
-			this.timer = new haxe_Timer(1000);
-			this.timer.run = $bind(this,this.timerRun);
+			this.launchTimer();
 		}
 		this.playerTurn = color != this.playerColor;
 	}
-	,onNonMateEnded: function() {
+	,writeMove: function(color,s) {
+		if(color == FigureColor.Black) {
+			this.lastMove.black_move = s;
+			this.movetable.get_dataSource().update(this.movetable.get_dataSource().get_size() - 1,this.lastMove);
+		} else {
+			this.lastMove = { "num" : "" + this.move, "white_move" : s, "black_move" : ""};
+			this.movetable.get_dataSource().add(this.lastMove);
+		}
+		this.move++;
+		this.playerTurn = color != this.playerColor;
+	}
+	,launchTimer: function() {
+		this.timer = new haxe_Timer(1000);
+		this.timer.run = $bind(this,this.timerRun);
+	}
+	,terminate: function() {
 		if(this.timer != null) {
 			this.timer.stop();
 		}
 	}
 	,__class__: Sidebox
+});
+var SpectatorsField = function(serializedPosition,watchedSide) {
+	Field.call(this);
+	this.figures = Factory.produceFiguresFromSerialized(serializedPosition,watchedSide,this);
+};
+$hxClasses["SpectatorsField"] = SpectatorsField;
+SpectatorsField.__name__ = "SpectatorsField";
+SpectatorsField.__super__ = Field;
+SpectatorsField.prototype = $extend(Field.prototype,{
+	__class__: SpectatorsField
 });
 var Std = function() { };
 $hxClasses["Std"] = Std;
@@ -59548,7 +58747,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 26115;
+	this.version = 729993;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -106622,8 +105821,8 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 },function(stack) {
 	stack.set_length(0);
 });
-AnalysisField.a = 40;
-Changes.changelog = [{ date : "23.03.2021", text : "Threefold repetition & 100 move rule"},{ date : "22.03.2021", text : "Additional functionality and bugfixes for analysis board. New openings"},{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
+Field.a = 40;
+Changes.changelog = [{ date : "25.03.2021", text : "Spectation"},{ date : "23.03.2021", text : "Threefold repetition & 100 move rule"},{ date : "22.03.2021", text : "Additional functionality and bugfixes for analysis board. New openings"},{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
 Chatbox.WIDTH = 260;
 Colors.border = 6701350;
 Colors.lightHex = 16764831;
@@ -106638,7 +105837,7 @@ DateTools.DAY_SHORT_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 DateTools.DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 DateTools.MONTH_SHORT_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 DateTools.MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-Field.a = 40;
+Factory.a = Field.a;
 openfl_text_Font.__fontByName = new haxe_ds_StringMap();
 openfl_text_Font.__registeredFonts = [];
 Networker.eventMap = new haxe_ds_StringMap();

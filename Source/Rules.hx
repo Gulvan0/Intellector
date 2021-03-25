@@ -35,7 +35,7 @@ class Rules
         return false;
     }
 
-    public static function possibleFields(fromI:Int, fromJ:Int, getFigure:Null<IntPoint>->Figure):Array<IntPoint> 
+    public static function possibleFields(fromI:Int, fromJ:Int, getFigure:Null<IntPoint>->Figure, normalOrientation:Bool):Array<IntPoint> 
     {
         var fields:Array<IntPoint> = [];
         var figure = getFigure(new IntPoint(fromI, fromJ));
@@ -44,7 +44,7 @@ class Rules
             case Progressor:
                 for (dir in [U, UL, UR])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color);
+                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
                     var occupier = getFigure(destination);
                     if (destination != null && (occupier == null || occupier.color != figure.color))
                         fields.push(destination);
@@ -52,7 +52,7 @@ class Rules
             case Aggressor:
                 for (dir in [A_UL, A_UR, A_R, A_DR, A_DL, A_L])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color);
+                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
                     while (destination != null)
                     {
                         var occupier = getFigure(destination);
@@ -65,14 +65,14 @@ class Rules
                         else 
                         {
                             fields.push(destination);
-                            destination = getCoordsInRelDirection(destination.i, destination.j, dir, figure.color);
+                            destination = getCoordsInRelDirection(destination.i, destination.j, dir, normalOrientation);
                         }
                     }
                 }
             case Dominator:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color);
+                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
                     while (destination != null)
                     {
                         var occupier = getFigure(destination);
@@ -85,19 +85,19 @@ class Rules
                         else 
                         {
                             fields.push(destination);
-                            destination = getCoordsInRelDirection(destination.i, destination.j, dir, figure.color);
+                            destination = getCoordsInRelDirection(destination.i, destination.j, dir, normalOrientation);
                         }
                     }
                 }
             case Liberator:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color, 1);
+                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation, 1);
                     var occupier = getFigure(destination);
                     if (destination != null && occupier == null)
                         fields.push(destination);
 
-                    destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color, 2);
+                    destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation, 2);
                     occupier = getFigure(destination);
                     if (destination != null && (occupier == null || occupier.color != figure.color))
                         fields.push(destination);
@@ -105,7 +105,7 @@ class Rules
             case Defensor:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color);
+                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
                     var occupier = getFigure(destination);
                     if (destination != null && (occupier == null || occupier.color != figure.color || occupier.type == Intellector))
                         fields.push(destination);
@@ -113,7 +113,7 @@ class Rules
             case Intellector:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, figure.color);
+                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
                     var occupier = getFigure(destination);
                     if (destination != null && (occupier == null || (occupier.color == figure.color && occupier.type == Defensor)))
                         fields.push(destination);
@@ -122,9 +122,9 @@ class Rules
         return fields;
     }
 
-    public static function getCoordsInRelDirection(fromI:Int, fromJ:Int, dir:Direction, col:FigureColor, ?steps:Int = 1):Null<IntPoint>
+    public static function getCoordsInRelDirection(fromI:Int, fromJ:Int, dir:Direction, normalOrientation:Bool, ?steps:Int = 1):Null<IntPoint>
     {
-        var trueDirection = col == White? dir : oppositeDir(dir);
+        var trueDirection = normalOrientation? dir : oppositeDir(dir);
         var nextCoords = getCoordsInAbsDirection(fromI, fromJ, trueDirection);
         steps--;
         while (steps > 0 && nextCoords != null)

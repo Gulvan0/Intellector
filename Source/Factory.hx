@@ -1,5 +1,6 @@
 package;
 
+import Figure.FigureColor;
 import openfl.display.Sprite;
 import openfl.geom.Point;
 
@@ -7,9 +8,9 @@ class Factory
 {
     public static var a:Float = Field.a;
 
-    public static function produceFiguresFromSerialized(serializedPosition:String, addOnto:Sprite):Array<Array<Null<Figure>>>
+    public static function produceFiguresFromSerialized(serializedPosition:String, watchedSide:FigureColor, addOnto:Sprite):Array<Array<Null<Figure>>>
     {
-        var figures = Position.buildFigureArray(serializedPosition);
+        var figures = Position.buildFigureArray(serializedPosition, watchedSide);
         scaleMove(figures, addOnto);
         return figures;
     }    

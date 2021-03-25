@@ -2,13 +2,13 @@ package;
 
 import Figure.FigureType;
 import Figure.FigureColor;
-import openfl.geom.Point;
 
 class Position
 {
-    public static function buildFigureArray(serializedPosition:String):Array<Array<Null<Figure>>>
+    public static function buildFigureArray(serializedPosition:String, watchedSide:FigureColor):Array<Array<Null<Figure>>>
     {
         var figures = [for (j in 0...7) [for (i in 0...9) null]];
+        var inversed = watchedSide == Black;
 
         var ci = 1;
         while (ci < serializedPosition.length)
@@ -17,6 +17,9 @@ class Position
             var j = Std.parseInt(serializedPosition.charAt(ci + 1));
             var type = typeByCode(serializedPosition.charAt(ci + 2));
             var color = serializedPosition.charAt(ci + 3) == "w"? White : Black;
+
+            if (inversed)
+                j = inversedJ(i, j);
 
             figures[j][i] = new Figure(type, color);
             ci += 4;
@@ -77,5 +80,10 @@ class Position
             case "n": Intellector;
             default: null;
         }
+    }
+
+    public static function inversedJ(i:Int, j:Int):Int
+    {
+        return 6 - j - i % 2;
     }
 }

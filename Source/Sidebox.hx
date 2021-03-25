@@ -84,7 +84,7 @@ class Sidebox extends Sprite
     private function locToStr(loc:IntPoint):String
     {
         if (playerColor == White)
-            return String.fromCharCode('a'.code + loc.i) + (7 - loc.j - loc.i % 2);
+            return String.fromCharCode('a'.code + loc.i) + (1 + Position.inversedJ(loc.i, loc.j));
         else
             return String.fromCharCode('a'.code + loc.i) + (1 + loc.j);
     }

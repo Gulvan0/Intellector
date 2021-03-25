@@ -149,6 +149,27 @@ class Networker
         emit('accept_open_challenge', {caller_login: caller, callee_login: Networker.login});
     }
 
+    public static function spectate(watchedLogin:String, onStarted:OngoingBattleData->Void, onMove:MoveData->Void, onTimeCorrection:TimeData->Void) 
+    {
+        onceOneOf([
+            'watched_unavailable' => (data) -> {Dialogs.alert("Player is offline", "Spectation error");},
+            'watched_notingame' => (data) -> {Dialogs.alert("Player is not in game", "Spectation error");},
+            'spectation_data' => (data:OngoingBattleData) -> {
+                on('move', onMove);
+                on('time_correction', onTimeCorrection);
+                onStarted(data);
+            }
+        ]);
+        emit('spectate', {watched_login: watchedLogin});
+    }
+
+    public static function stopSpectate() 
+    {
+        off('move');
+        off('time_correction');
+        emit('stop_spectate', {});
+    }
+
     private static function challengeReceiver(data) 
     {
         var onConfirmed = () -> {emit('accept_challenge', {caller_login: data.caller, callee_login: Networker.login});};
@@ -195,12 +216,14 @@ class Networker
         emit('move', {issuer_login: Networker.login, fromI: fromI, fromJ: fromJ, toI: toI, toJ: toJ, morphInto: morphInto == null? null : morphInto.getName()});
     }
 
-    public static function registerGameEvents(onMove:MoveData->Void, onMessage:MessageData->Void, onTimeCorrection:TimeData->Void, onOver:GameOverData->Void) 
+    public static function registerGameEvents(onMove:MoveData->Void, onMessage:MessageData->Void, onTimeCorrection:TimeData->Void, onOver:GameOverData->Void, onSpectatorEnter:{login:String}->Void, onSpectatorLeft:{login:String}->Void) 
     {
         off('incoming_challenge');
         on('move', onMove);
         on('message', onMessage);
         on('time_correction', onTimeCorrection);
+        on('new_spectator', onSpectatorEnter);
+        on('spectator_left', onSpectatorLeft);
         once('game_ended', onOver);
     }
 
@@ -209,6 +232,8 @@ class Networker
         off('move');
         off('message');
         off('time_correction');
+        off('new_spectator');
+        off('spectator_left');
         on('incoming_challenge', challengeReceiver);
         once('game_started', gameStartHandler);
     }

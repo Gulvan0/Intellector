@@ -34,16 +34,18 @@ class GameCompound extends Sprite
 
         var compound = new GameCompound(field, sidebox, chatbox, infobox);
         compound.playerColor = data.colour == 'white'? White : Black;
+        field.onPlayerMadeMove = compound.onMove;
         return compound;
     }
 
     public static function buildSpectators(data:OngoingBattleData, onReturn:Void->Void):GameCompound
     {
         var whiteRequested:Bool = data.requestedColor == "white";
+        var watchedColor:FigureColor = whiteRequested? White : Black;
         var bottomLogin:String = whiteRequested? data.whiteLogin : data.blackLogin;
         var upperLogin:String = whiteRequested? data.blackLogin : data.whiteLogin;
 
-        var field:SpectatorsField = new SpectatorsField(data.position);
+        var field:SpectatorsField = new SpectatorsField(data.position, watchedColor);
         var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested);
         var color:FigureColor = White;
         for (move in data.movesPlayed)
@@ -81,7 +83,10 @@ class GameCompound extends Sprite
         sidebox.makeMove(movingFigure.color, movingFigure.type, to, capture, mate, castle, morphedInto);
         if (infobox != null)
             infobox.makeMove(data.fromI, data.fromJ, data.toI, data.toJ, morphedInto);
-        field.move(from, to, morphedInto);
+        if (data.issuer_login != Networker.login)
+            field.move(from, to, morphedInto);
+        else
+            Networker.move(data.fromI, data.fromJ, data.toI, data.toJ, data.morphInto == null? null : FigureType.createByName(data.morphInto));
     }
 
     public function onTimeCorrection(data:TimeData)
@@ -92,6 +97,16 @@ class GameCompound extends Sprite
     public function onMessage(data:MessageData)
     {
         chatbox.appendMessage(data.issuer_login, data.message);
+    }
+
+    public function onSpectatorConnected(data:{login:String})
+    {
+        chatbox.appendLog('${data.login} is now spectating');
+    }
+
+    public function onSpectatorDisonnected(data:{login:String})
+    {
+        chatbox.appendLog('${data.login} left');
     }
 
     public function terminate()

@@ -1,19 +1,13 @@
 package;
 
-import Figure.FigureType;
-import openfl.Assets;
-import openfl.events.Event;
 import Figure.FigureColor;
-import openfl.events.MouseEvent;
-import openfl.geom.Point;
-import openfl.display.Sprite;
 
 class SpectatorsField extends Field
 {
 
-    public function new(serializedPosition:String) 
+    public function new(serializedPosition:String, watchedSide:FigureColor) 
     {
         super();
-        figures = Factory.produceFiguresFromSerialized(serializedPosition, this);
+        figures = Factory.produceFiguresFromSerialized(serializedPosition, watchedSide, this);
     }
 }

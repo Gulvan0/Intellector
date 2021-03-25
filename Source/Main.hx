@@ -206,10 +206,8 @@ class Main extends Sprite
 		calloutBtn.onClick = (e) -> {
 			var response = Browser.window.prompt("Enter the callee's username");
 
-			if (response == null)
-				return;
-
-			Dialogs.specifyChallengeParams(Networker.sendChallenge.bind(response), ()->{});
+			if (response != null)
+				Dialogs.specifyChallengeParams(Networker.sendChallenge.bind(response), ()->{});
 		}
 
 		var openCalloutBtn = new haxe.ui.components.Button();
@@ -229,6 +227,19 @@ class Main extends Sprite
 
 		analysisBtn.onClick = (e) -> {
 			drawAnalysisBoard();
+		}
+
+		var spectateBtn = new haxe.ui.components.Button();
+		spectateBtn.text = "Spectate";
+		spectateBtn.width = calloutBtn.width;
+		spectateBtn.horizontalAlign = 'center';
+		mainMenu.addComponent(spectateBtn);
+
+		spectateBtn.onClick = (e) -> {
+			var response = Browser.window.prompt("Enter the username of a player whose game you want to spectate");
+
+			if (response != null)
+				Networker.spectate(response, drawSpectation, (d)->{game.onMove(d);}, (d)->{game.onTimeCorrection(d);});
 		}
 
 		var logoutBtn = new haxe.ui.components.Button();
@@ -342,11 +353,12 @@ class Main extends Sprite
 
 	private function drawGame(data:BattleData) 
 	{
-		Networker.registerGameEvents(onMove, onMessage, onTimeCorrection, onEnded);
 		removeChildren();
 
 		game = GameCompound.buildActive(data);
 		addChild(game);
+
+		Networker.registerGameEvents(game.onMove, game.onMessage, game.onTimeCorrection, onEnded, game.onSpectatorConnected, game.onSpectatorDisonnected);
 
 		Browser.window.history.pushState({}, "Intellector", "?id=" + data.match_id);
 		Assets.getSound("sounds/notify.mp3").play();	
@@ -362,7 +374,10 @@ class Main extends Sprite
 	private function drawSpectation(data:OngoingBattleData) 
 	{
 		removeChildren();
-		game = GameCompound.buildSpectators(data, onReturn);
+		game = GameCompound.buildSpectators(data, () -> {
+			Networker.stopSpectate(); 
+			onReturn();
+		});
 		addChild(game);
 	}
 
@@ -371,21 +386,6 @@ class Main extends Sprite
 		removeChild(game);
 		game = null;
 		drawMainMenu();
-	}
-
-	private function onTimeCorrection(data:TimeData) 
-	{
-		game.onTimeCorrection(data);
-	}
-
-	private function onMessage(data:MessageData) 
-	{
-		game.onMessage(data);
-	}
-
-	private function onMove(data:MoveData) 
-	{
-		game.onMove(data);
 	}
 
 	private function onEnded(data:GameOverData) 

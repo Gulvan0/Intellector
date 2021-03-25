@@ -2,7 +2,6 @@
 
 import openfl.Assets;
 import Figure.FigureType;
-import Field.Direction;
 import openfl.events.Event;
 import Figure.FigureColor;
 import openfl.events.MouseEvent;
@@ -39,6 +38,10 @@ class AnalysisField extends Field
                 if (figure != null)
                     removeChild(figure);
         figures = [for (j in 0...7) [for (i in 0...9) null]];
+
+        for (hex in lastMoveSelectedHexes)
+            hex.lastMoveDeselect();
+        lastMoveSelectedHexes = [];
     }
 
     private function arrangeDefault() 
@@ -94,6 +97,11 @@ class AnalysisField extends Field
     {
         move(from, to, morphInto);
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+    }
+
+    private override function isOrientationNormal(movingFigure:FigureColor):Bool
+    {   
+        return movingFigure == White;
     }
     
 }
