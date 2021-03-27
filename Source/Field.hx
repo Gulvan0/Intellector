@@ -1,5 +1,8 @@
 package;
 
+import js.Cookie;
+import openfl.text.TextFormat;
+import openfl.text.TextField;
 import Rules.Direction;
 import Figure.FigureType;
 import openfl.Assets;
@@ -9,9 +12,18 @@ import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import openfl.display.Sprite;
 
+enum Markup 
+{
+    None;
+    Side;
+    Over;
+}
+
 class Field extends Sprite
 {
     public static var a:Float = 40;
+    public static var markup:Markup = Over;
+
     public var hexes:Array<Array<Hexagon>>;
     public var figures:Array<Array<Null<Figure>>>;
 
@@ -24,8 +36,33 @@ class Field extends Sprite
     public function new() 
     {
         super();
-        hexes = Factory.produceHexes(this);
         lastMoveSelectedHexes = [];
+    }
+
+    public static function initConstants() 
+    {
+        if (Cookie.exists("markup"))
+            markup = Markup.createByName(Cookie.get("markup"));
+    }
+
+    public function getHeight():Float
+    {
+        return Field.a * Math.sqrt(3) * 7;
+    }
+
+    private function disposeLetters() 
+    {
+        if (Field.markup == None)
+            return;
+
+        var bottomLocations = [for (i in 0...9) new IntPoint(i, (i % 2 == 0)? 6 : 5)];
+        for (loc in bottomLocations)
+        {
+            var letter = createLetter(Position.notationI(loc.i));
+            letter.x = hexes[loc.j][loc.i].x - letter.textWidth/2 - 5;
+            letter.y = hexes[loc.j][loc.i].y + Field.a * Math.sqrt(3) / 2;
+            addChild(letter); 
+        }
     }
 
     private function onPress(e) 
@@ -102,7 +139,7 @@ class Field extends Sprite
         
         stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress); //To ignore clicking on dialogs
 
-        if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type)
+        if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type && figure.type != Progressor)
             Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
         else if (isFinalForPlayer(to) && figure.type == Progressor)
             Dialogs.promotionSelect(figure.color, makeMove.bind(from, to, _), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
@@ -281,5 +318,14 @@ class Field extends Sprite
 
         selected = null;
         selectedDest = null;
+    }
+
+    private function createLetter(letter:String):TextField 
+    {
+        var tf = new TextField();
+        tf.text = letter;
+        tf.setTextFormat(new TextFormat(null, 28, Colors.border, true));
+        tf.selectable = false;
+        return tf;
     }
 }

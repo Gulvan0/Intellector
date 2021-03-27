@@ -3212,14 +3212,24 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 	,__class__: openfl_display_Sprite
 	,__properties__: $extend(openfl_display_DisplayObjectContainer.prototype.__properties__,{get_graphics:"get_graphics",set_buttonMode:"set_buttonMode",get_buttonMode:"get_buttonMode"})
 });
+var Markup = $hxEnums["Markup"] = { __ename__ : "Markup", __constructs__ : ["None","Side","Over"]
+	,None: {_hx_index:0,__enum__:"Markup",toString:$estr}
+	,Side: {_hx_index:1,__enum__:"Markup",toString:$estr}
+	,Over: {_hx_index:2,__enum__:"Markup",toString:$estr}
+};
+Markup.__empty_constructs__ = [Markup.None,Markup.Side,Markup.Over];
 var Field = function() {
 	this.playersTurn = true;
 	openfl_display_Sprite.call(this);
-	this.hexes = Factory.produceHexes(this);
 	this.lastMoveSelectedHexes = [];
 };
 $hxClasses["Field"] = Field;
 Field.__name__ = "Field";
+Field.initConstants = function() {
+	if(js_Cookie.exists("markup")) {
+		Field.markup = Type.createEnum(Markup,js_Cookie.get("markup"),null);
+	}
+};
 Field.hexExists = function(i,j) {
 	if(i >= 0 && i < 9 && j >= 0 && j < 7) {
 		if(j == 6) {
@@ -3248,6 +3258,34 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 	,selectedDest: null
 	,lastMoveSelectedHexes: null
 	,playersTurn: null
+	,getHeight: function() {
+		return Field.a * Math.sqrt(3) * 7;
+	}
+	,disposeLetters: function() {
+		if(Field.markup == Markup.None) {
+			return;
+		}
+		var _g = [];
+		_g.push(new IntPoint(0,0 % 2 == 0 ? 6 : 5));
+		_g.push(new IntPoint(1,1 % 2 == 0 ? 6 : 5));
+		_g.push(new IntPoint(2,2 % 2 == 0 ? 6 : 5));
+		_g.push(new IntPoint(3,3 % 2 == 0 ? 6 : 5));
+		_g.push(new IntPoint(4,4 % 2 == 0 ? 6 : 5));
+		_g.push(new IntPoint(5,5 % 2 == 0 ? 6 : 5));
+		_g.push(new IntPoint(6,6 % 2 == 0 ? 6 : 5));
+		_g.push(new IntPoint(7,7 % 2 == 0 ? 6 : 5));
+		_g.push(new IntPoint(8,8 % 2 == 0 ? 6 : 5));
+		var bottomLocations = _g;
+		var _g = 0;
+		while(_g < bottomLocations.length) {
+			var loc = bottomLocations[_g];
+			++_g;
+			var letter = this.createLetter(Position.notationI(loc.i));
+			letter.set_x(this.hexes[loc.j][loc.i].get_x() - letter.get_textWidth() / 2 - 5);
+			letter.set_y(this.hexes[loc.j][loc.i].get_y() + Field.a * Math.sqrt(3) / 2);
+			this.addChild(letter);
+		}
+	}
 	,onPress: function(e) {
 		throw haxe_Exception.thrown("To be overriden");
 	}
@@ -3297,7 +3335,7 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		var moveOntoFigure = this.getFigure(to);
 		var nearIntellector = this.nearOwnIntellector(from,figure.color);
 		this.stage.removeEventListener("mouseDown",$bind(this,this.onPress));
-		if(nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type) {
+		if(nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type && figure.type != FigureType.Progressor) {
 			var _g = $bind(this,this.makeMove);
 			var from1 = from;
 			var to1 = to;
@@ -3506,10 +3544,19 @@ Field.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.selected = null;
 		this.selectedDest = null;
 	}
+	,createLetter: function(letter) {
+		var tf = new openfl_text_TextField();
+		tf.set_text(letter);
+		tf.setTextFormat(new openfl_text_TextFormat(null,28,Colors.border,true));
+		tf.set_selectable(false);
+		return tf;
+	}
 	,__class__: Field
 });
 var AnalysisField = function() {
 	Field.call(this);
+	this.hexes = Factory.produceHexes(true,this);
+	this.disposeLetters();
 	this.arrangeDefault();
 	this.addEventListener("addedToStage",$bind(this,this.init));
 };
@@ -4557,7 +4604,7 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "17";
+	app.meta.h["build"] = "18";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "Intellector";
 	app.meta.h["name"] = "Intellector";
@@ -4633,6 +4680,7 @@ var Main = function() {
 	haxe_ui_Toolkit.init();
 	OpeningTree.init();
 	Figure.initFigures();
+	Field.initConstants();
 	Networker.connect($bind(this,this.drawGame),$bind(this,this.onConnected));
 };
 $hxClasses["Main"] = Main;
@@ -4834,12 +4882,16 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		spectateBtn.set_onClick(function(e) {
 			var response = window.prompt("Enter the username of a player whose game you want to spectate");
 			if(response != null) {
-				Networker.spectate(response,$bind(_gthis,_gthis.drawSpectation),function(d) {
-					_gthis.game.onMove(d);
-				},function(d) {
-					_gthis.game.onTimeCorrection(d);
-				});
+				_gthis.sendSpectateRequest(response);
 			}
+		});
+		var settingsBtn = new haxe_ui_components_Button();
+		settingsBtn.set_text("Settings");
+		settingsBtn.set_width(calloutBtn.get_width());
+		settingsBtn.set_horizontalAlign("center");
+		this.mainMenu.addComponent(settingsBtn);
+		settingsBtn.set_onClick(function(e) {
+			_gthis.drawSettings();
 		});
 		var logoutBtn = new haxe_ui_components_Button();
 		logoutBtn.set_text("Log Out");
@@ -4854,6 +4906,80 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.mainMenu.set_x((window.innerWidth - this.mainMenu.get_width()) / 2);
 		this.mainMenu.set_y(100);
 		this.addChild(this.mainMenu);
+	}
+	,drawSettings: function() {
+		var _gthis = this;
+		this.removeChildren();
+		var box = new haxe_ui_containers_VBox();
+		var header = new haxe_ui_components_Label();
+		header.set_htmlText("<font size=\"16\">Settings</font>");
+		header.set_horizontalAlign("center");
+		box.addComponent(header);
+		var markup = new haxe_ui_containers_HBox();
+		var markupLabel = new haxe_ui_components_Label();
+		markupLabel.set_text("Markup: ");
+		markup.addComponent(markupLabel);
+		var markupNone = new haxe_ui_components_OptionBox();
+		markupNone.set_text("None");
+		markup.addComponent(markupNone);
+		var markupSide = new haxe_ui_components_OptionBox();
+		markupSide.set_text("On the side");
+		markup.addComponent(markupSide);
+		var markupOver = new haxe_ui_components_OptionBox();
+		markupOver.set_text("Overboard");
+		markup.addComponent(markupOver);
+		switch(Field.markup._hx_index) {
+		case 0:
+			markupNone.set_selected(true);
+			break;
+		case 1:
+			markupSide.set_selected(true);
+			break;
+		case 2:
+			markupOver.set_selected(true);
+			break;
+		}
+		markupNone.set_onChange(function(e) {
+			if(markupNone.get_selected()) {
+				Field.markup = Markup.None;
+				js_Cookie.set("markup","None",157680000);
+			}
+		});
+		markupSide.set_onChange(function(e) {
+			if(markupSide.get_selected()) {
+				Field.markup = Markup.Side;
+				js_Cookie.set("markup","Side",157680000);
+			}
+		});
+		markupOver.set_onChange(function(e) {
+			if(markupOver.get_selected()) {
+				Field.markup = Markup.Over;
+				js_Cookie.set("markup","Over",157680000);
+			}
+		});
+		box.addComponent(markup);
+		box.set_x((window.innerWidth - 290) / 2);
+		box.set_y(100);
+		this.addChild(box);
+		var returnBtn = new haxe_ui_components_Button();
+		returnBtn.set_width(100);
+		returnBtn.set_text("Return");
+		returnBtn.set_onClick(function(e) {
+			_gthis.removeChild(returnBtn);
+			_gthis.removeChild(box);
+			_gthis.drawMainMenu();
+		});
+		returnBtn.set_x(10);
+		returnBtn.set_y(10);
+		this.addChild(returnBtn);
+	}
+	,sendSpectateRequest: function(player) {
+		var _gthis = this;
+		Networker.spectate(player,$bind(this,this.drawSpectation),function(d) {
+			_gthis.game.onMove(d);
+		},function(d) {
+			_gthis.game.onTimeCorrection(d);
+		});
 	}
 	,renewSession: function() {
 		this.removeChildren();
@@ -5474,7 +5600,7 @@ Factory.produceFiguresFromDefault = function(normalOrientation,addOnto) {
 	Factory.scaleMove(figures,addOnto);
 	return figures;
 };
-Factory.produceHexes = function(addOnto) {
+Factory.produceHexes = function(normalOrientation,addOnto) {
 	var hexes = [];
 	var _g = 0;
 	while(_g < 7) {
@@ -5486,7 +5612,7 @@ Factory.produceHexes = function(addOnto) {
 			if(!Field.hexExists(i,j)) {
 				row.push(null);
 			} else {
-				var hex = new Hexagon(Factory.a,Factory.isDark(i,j));
+				var hex = new Hexagon(Factory.a,i,j,normalOrientation);
 				var coords = Field.hexCoords(i,j);
 				hex.set_x(coords.x);
 				hex.set_y(coords.y);
@@ -5709,15 +5835,6 @@ Factory.disposeFigure = function(figure,loc) {
 	figure.set_x(coords.x);
 	figure.set_y(coords.y);
 };
-Factory.isDark = function(i,j) {
-	if(j % 3 == 2) {
-		return false;
-	} else if(j % 3 == 0) {
-		return i % 2 == 0;
-	} else {
-		return i % 2 == 1;
-	}
-};
 var FigureType = $hxEnums["FigureType"] = { __ename__ : "FigureType", __constructs__ : ["Progressor","Aggressor","Dominator","Liberator","Defensor","Intellector"]
 	,Progressor: {_hx_index:0,__enum__:"FigureType",toString:$estr}
 	,Aggressor: {_hx_index:1,__enum__:"FigureType",toString:$estr}
@@ -5793,12 +5910,12 @@ var GameCompound = function(field,sidebox,chatbox,infobox,onReturn) {
 	this.addChild(field);
 	if(sidebox != null) {
 		sidebox.set_x(field.get_x() + field.get_width() + 10);
-		sidebox.set_y(field.get_y() + (field.get_height() - 380 - Math.sqrt(3) * Field.a) / 2);
+		sidebox.set_y(field.get_y() + (field.getHeight() - 380 - Math.sqrt(3) * Field.a) / 2);
 		this.addChild(sidebox);
 	}
 	if(chatbox != null) {
 		chatbox.set_x(field.get_x() - Chatbox.WIDTH - Field.a - 30);
-		chatbox.set_y(field.get_y() + field.get_height() * 0.25 - Field.a * Math.sqrt(3) / 2);
+		chatbox.set_y(field.get_y() + field.getHeight() * 0.25 - Field.a * Math.sqrt(3) / 2);
 		this.addChild(chatbox);
 	}
 	if(infobox != null) {
@@ -5834,7 +5951,7 @@ var GameCompound = function(field,sidebox,chatbox,infobox,onReturn) {
 		});
 		actionButtons.addComponent(resetBtn);
 		actionButtons.set_x(field.get_x() + field.get_width() + 10);
-		actionButtons.set_y(field.get_y() + (field.get_height() - 40 - Math.sqrt(3) * Field.a) / 2);
+		actionButtons.set_y(field.get_y() + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2);
 		this.addChild(actionButtons);
 	}
 };
@@ -5845,8 +5962,8 @@ GameCompound.buildActive = function(data) {
 	var blackLogin = data.colour == "black" ? Networker.login : data.enemy;
 	var field = new PlayingField(data.colour);
 	var sidebox = new Sidebox(data.startSecs,data.bonusSecs,Networker.login,data.enemy,data.colour == "white");
-	var chatbox = new Chatbox(field.get_height() * 0.75);
-	var infobox = new GameInfoBox(Chatbox.WIDTH,field.get_height() * 0.23,data.startSecs,data.bonusSecs,whiteLogin,blackLogin,data.colour == "white");
+	var chatbox = new Chatbox(field.getHeight() * 0.75);
+	var infobox = new GameInfoBox(Chatbox.WIDTH,field.getHeight() * 0.23,data.startSecs,data.bonusSecs,whiteLogin,blackLogin,data.colour == "white");
 	var compound = new GameCompound(field,sidebox,chatbox,infobox);
 	compound.playerColor = data.colour == "white" ? FigureColor.White : FigureColor.Black;
 	field.onPlayerMadeMove = $bind(compound,compound.onMove);
@@ -6021,12 +6138,19 @@ GameInfoBox.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,__class__: GameInfoBox
 });
-var Hexagon = function(a,dark) {
+var Hexagon = function(a,i,j,normalOrientation) {
 	openfl_display_Sprite.call(this);
+	var dark = this.isDark(i,j);
 	this.unselectedHex = this.drawHex(a,dark ? Colors.darkHex : Colors.lightHex);
 	this.selectedHex = this.drawHex(a,dark ? Colors.selectedDark : Colors.selectedLight);
 	this.moveSelectedHex = this.drawHex(a,dark ? Colors.lastMoveDark : Colors.lastMoveLight);
 	this.redHex = this.drawHex(a,dark ? Colors.redDark : Colors.redLight);
+	this.number = new openfl_text_TextField();
+	this.number.set_text(Position.notationJ(i,j,normalOrientation));
+	this.number.setTextFormat(new openfl_text_TextFormat(null,14,dark ? Colors.lightNumber : Colors.darkNumber,true));
+	this.number.set_selectable(false);
+	this.number.set_x(-a * 0.85);
+	this.number.set_y(-this.number.get_textHeight() * 0.75);
 	this.dot = new openfl_display_Sprite();
 	this.dot.get_graphics().beginFill(3355443);
 	this.dot.get_graphics().drawCircle(0,0,8);
@@ -6037,12 +6161,16 @@ var Hexagon = function(a,dark) {
 	this.selectedHex.set_visible(false);
 	this.moveSelectedHex.set_visible(false);
 	this.redHex.set_visible(false);
+	if(Field.markup != Markup.Over) {
+		this.number.set_visible(false);
+	}
 	this.round.set_visible(false);
 	this.dot.set_visible(false);
 	this.addChild(this.unselectedHex);
 	this.addChild(this.selectedHex);
 	this.addChild(this.moveSelectedHex);
 	this.addChild(this.redHex);
+	this.addChild(this.number);
 	this.addChild(this.dot);
 	this.addChild(this.round);
 };
@@ -6054,6 +6182,7 @@ Hexagon.prototype = $extend(openfl_display_Sprite.prototype,{
 	,selectedHex: null
 	,moveSelectedHex: null
 	,redHex: null
+	,number: null
 	,dot: null
 	,round: null
 	,select: function() {
@@ -6097,6 +6226,15 @@ Hexagon.prototype = $extend(openfl_display_Sprite.prototype,{
 		sprite.get_graphics().lineTo(-rationalStep,-irrationalStep);
 		sprite.get_graphics().endFill();
 		return sprite;
+	}
+	,isDark: function(i,j) {
+		if(j % 3 == 2) {
+			return false;
+		} else if(j % 3 == 0) {
+			return i % 2 == 0;
+		} else {
+			return i % 2 == 1;
+		}
 	}
 	,__class__: Hexagon
 });
@@ -6894,6 +7032,8 @@ var PlayingField = function(playerColourName) {
 	var playerIsWhite = playerColourName == "white";
 	this.playerColor = playerIsWhite ? FigureColor.White : FigureColor.Black;
 	this.playersTurn = playerIsWhite;
+	this.hexes = Factory.produceHexes(playerIsWhite,this);
+	this.disposeLetters();
 	this.figures = Factory.produceFiguresFromDefault(playerIsWhite,this);
 	this.addEventListener("addedToStage",$bind(this,this.init));
 };
@@ -7269,6 +7409,13 @@ Position.typeByCode = function(c) {
 };
 Position.inversedJ = function(i,j) {
 	return 6 - j - i % 2;
+};
+Position.notationJ = function(i,j,normalOrientation) {
+	var newJ = 1 + (normalOrientation ? Position.inversedJ(i,j) : j);
+	return "" + newJ;
+};
+Position.notationI = function(i) {
+	return String.fromCodePoint((97 + i));
 };
 var Reflect = function() { };
 $hxClasses["Reflect"] = Reflect;
@@ -7829,13 +7976,7 @@ Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
 		return "" + (v < 10 ? "0" + v : "" + v) + ":" + (v1 < 10 ? "0" + v1 : "" + v1);
 	}
 	,locToStr: function(loc) {
-		if(this.playerColor == FigureColor.White) {
-			var code = 97 + loc.i;
-			return String.fromCodePoint(code) + (1 + Position.inversedJ(loc.i,loc.j));
-		} else {
-			var code = 97 + loc.i;
-			return String.fromCodePoint(code) + (1 + loc.j);
-		}
+		return Position.notationI(loc.i) + Position.notationJ(loc.i,loc.j,this.playerColor == FigureColor.White);
 	}
 	,correctTime: function(correctedSecsWhite,correctedSecsBlack) {
 		if(this.playerColor == FigureColor.White) {
@@ -7912,6 +8053,7 @@ Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
 			this.lastMove = { "num" : "" + this.move, "white_move" : moveStr, "black_move" : ""};
 			this.movetable.get_dataSource().add(this.lastMove);
 		}
+		this.waitAndScroll();
 		this.move++;
 		if(!mate && this.move > 2) {
 			if(this.playerTurn) {
@@ -7920,6 +8062,20 @@ Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
 			this.launchTimer();
 		}
 		this.playerTurn = color != this.playerColor;
+	}
+	,waitAndScroll: function() {
+		var _gthis = this;
+		var t = new haxe_Timer(100);
+		t.run = function() {
+			t.stop();
+			_gthis.scrollToMax();
+		};
+	}
+	,scrollToMax: function() {
+		var vscroll = this.movetable.findComponent(null,haxe_ui_components_VerticalScroll,false);
+		if(vscroll != null) {
+			vscroll.set_pos(vscroll.get_max());
+		}
 	}
 	,writeMove: function(color,s) {
 		if(color == FigureColor.Black) {
@@ -7945,6 +8101,8 @@ Sidebox.prototype = $extend(openfl_display_Sprite.prototype,{
 });
 var SpectatorsField = function(serializedPosition,watchedSide) {
 	Field.call(this);
+	this.hexes = Factory.produceHexes(watchedSide == FigureColor.White,this);
+	this.disposeLetters();
 	this.figures = Factory.produceFiguresFromSerialized(serializedPosition,watchedSide,this);
 };
 $hxClasses["SpectatorsField"] = SpectatorsField;
@@ -58747,7 +58905,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 729993;
+	this.version = 35178;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -105822,7 +105980,8 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 	stack.set_length(0);
 });
 Field.a = 40;
-Changes.changelog = [{ date : "25.03.2021", text : "Spectation"},{ date : "23.03.2021", text : "Threefold repetition & 100 move rule"},{ date : "22.03.2021", text : "Additional functionality and bugfixes for analysis board. New openings"},{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
+Field.markup = Markup.Over;
+Changes.changelog = [{ date : "27.03.2021", text : "Marks & Settings menu"},{ date : "25.03.2021", text : "Spectation"},{ date : "23.03.2021", text : "Threefold repetition & 100 move rule"},{ date : "22.03.2021", text : "Additional functionality and bugfixes for analysis board. New openings"},{ date : "21.03.2021/2", text : "Added simple analysis board"},{ date : "21.03.2021/1", text : "Added 'Remember me' option and logout button"},{ date : "20.03.2021", text : "Added game info and opening database"},{ date : "19.03.2021", text : "Added in-game chat, open challenges and arbitrary time control"},{ date : "17.03.2021", text : "Added changelog"}];
 Chatbox.WIDTH = 260;
 Colors.border = 6701350;
 Colors.lightHex = 16764831;
@@ -105833,6 +105992,8 @@ Colors.lastMoveLight = 16634688;
 Colors.lastMoveDark = 12491814;
 Colors.redLight = 16738645;
 Colors.redDark = 12465958;
+Colors.lightNumber = 16767154;
+Colors.darkNumber = 6701350;
 DateTools.DAY_SHORT_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 DateTools.DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 DateTools.MONTH_SHORT_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];

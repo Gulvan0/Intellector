@@ -1,5 +1,7 @@
 package;
 
+import openfl.text.TextFormat;
+import openfl.text.TextField;
 import openfl.display.Sprite;
 
 class Hexagon extends Sprite
@@ -8,16 +10,25 @@ class Hexagon extends Sprite
         private var selectedHex:Sprite;
         private var moveSelectedHex:Sprite;
         private var redHex:Sprite;
+        private var number:TextField;
         private var dot:Sprite;
         private var round:Sprite;
 
-        public function new(a:Float, dark:Bool)
+        public function new(a:Float, i:Int, j:Int, normalOrientation:Bool)
         {
                 super();
+                var dark:Bool = isDark(i, j);
                 unselectedHex = drawHex(a, dark? Colors.darkHex : Colors.lightHex);
                 selectedHex = drawHex(a, dark? Colors.selectedDark : Colors.selectedLight);
                 moveSelectedHex = drawHex(a, dark? Colors.lastMoveDark : Colors.lastMoveLight);
                 redHex = drawHex(a, dark? Colors.redDark : Colors.redLight);
+
+                number = new TextField();
+                number.text = Position.notationJ(i, j, normalOrientation);
+                number.setTextFormat(new TextFormat(null, 14, dark? Colors.lightNumber : Colors.darkNumber, true));
+                number.selectable = false;
+                number.x = -a * 0.85;
+                number.y = -number.textHeight * 0.75;
 
                 dot = new Sprite();
                 dot.graphics.beginFill(0x333333);
@@ -31,6 +42,8 @@ class Hexagon extends Sprite
                 selectedHex.visible = false;
                 moveSelectedHex.visible = false;
                 redHex.visible = false;
+                if (Field.markup != Over)
+                        number.visible = false;
                 round.visible = false;
                 dot.visible = false;
 
@@ -38,6 +51,7 @@ class Hexagon extends Sprite
                 addChild(selectedHex);
                 addChild(moveSelectedHex);
                 addChild(redHex);
+                addChild(number);
                 addChild(dot);
                 addChild(round);
         }
@@ -101,4 +115,16 @@ class Hexagon extends Sprite
 
                 return sprite;
         }
+
+        
+
+    private function isDark(i:Int, j:Int) 
+    {
+        if (j % 3 == 2)
+            return false;
+        else if (j % 3 == 0)
+            return i % 2 == 0;
+        else 
+            return i % 2 == 1;
+    }
 }

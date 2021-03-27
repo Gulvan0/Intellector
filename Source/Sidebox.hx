@@ -1,5 +1,6 @@
 package;
 
+import haxe.ui.components.VerticalScroll;
 import openfl.display.StageAlign;
 import haxe.Timer;
 import Figure.FigureType;
@@ -83,10 +84,7 @@ class Sidebox extends Sprite
 
     private function locToStr(loc:IntPoint):String
     {
-        if (playerColor == White)
-            return String.fromCharCode('a'.code + loc.i) + (1 + Position.inversedJ(loc.i, loc.j));
-        else
-            return String.fromCharCode('a'.code + loc.i) + (1 + loc.j);
+        return Position.notationI(loc.i) + Position.notationJ(loc.i, loc.j, playerColor == White);
     }
 
     public function correctTime(correctedSecsWhite:Int, correctedSecsBlack:Int) 
@@ -124,6 +122,7 @@ class Sidebox extends Sprite
             lastMove = {"num": '$move', "white_move": moveStr, "black_move": ""};
             movetable.dataSource.add(lastMove);
         }
+        waitAndScroll();
 
         move++;
 
@@ -135,6 +134,22 @@ class Sidebox extends Sprite
         }
         
         playerTurn = color != playerColor;
+    }
+
+    private function waitAndScroll() 
+    {
+        var t:Timer = new Timer(100);
+        t.run = () -> {
+            t.stop(); 
+            scrollToMax();
+        }    
+    }
+
+    private function scrollToMax() 
+    {
+        var vscroll = movetable.findComponent(VerticalScroll, false);
+        if (vscroll != null)
+            vscroll.pos = vscroll.max;
     }
 
     public function writeMove(color:FigureColor, s:String)

@@ -29,8 +29,8 @@ class GameCompound extends Sprite
         
         var field:PlayingField = new PlayingField(data.colour);
         var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
-        var chatbox:Chatbox = new Chatbox(field.height * 0.75);
-        var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.height * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin, data.colour == 'white');
+        var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
+        var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin, data.colour == 'white');
 
         var compound = new GameCompound(field, sidebox, chatbox, infobox);
         compound.playerColor = data.colour == 'white'? White : Black;
@@ -131,14 +131,14 @@ class GameCompound extends Sprite
         if (sidebox != null)
         {
             sidebox.x = field.x + field.width + 10;
-            sidebox.y = field.y + (field.height - 380 - Math.sqrt(3) * Field.a) / 2;
+            sidebox.y = field.y + (field.getHeight() - 380 - Math.sqrt(3) * Field.a) / 2;
             addChild(sidebox);
         }
 
 		if (chatbox != null)
         {
             chatbox.x = field.x - Chatbox.WIDTH - Field.a - 30;
-            chatbox.y = field.y + field.height * 0.25 - Field.a * Math.sqrt(3) / 2;
+            chatbox.y = field.y + field.getHeight() * 0.25 - Field.a * Math.sqrt(3) / 2;
             addChild(chatbox);
         }
 
@@ -186,7 +186,7 @@ class GameCompound extends Sprite
             actionButtons.addComponent(resetBtn);
     
             actionButtons.x = field.x + field.width + 10;
-            actionButtons.y = field.y + (field.height - 40 - Math.sqrt(3) * Field.a) / 2;
+            actionButtons.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
             addChild(actionButtons);
         }
     }    

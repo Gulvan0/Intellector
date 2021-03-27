@@ -86,4 +86,15 @@ class Position
     {
         return 6 - j - i % 2;
     }
+
+    public static function notationJ(i:Int, j:Int, normalOrientation:Bool):String
+    {
+        var newJ = 1 + (normalOrientation? Position.inversedJ(i, j) : j);
+        return '$newJ';
+    }
+
+    public static function notationI(i:Int):String
+    {
+        return String.fromCharCode('a'.code + i);
+    }
 }

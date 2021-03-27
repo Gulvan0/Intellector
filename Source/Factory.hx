@@ -22,7 +22,7 @@ class Factory
         return figures;
     }
 
-    public static function produceHexes(addOnto:Sprite):Array<Array<Null<Hexagon>>>
+    public static function produceHexes(normalOrientation:Bool, addOnto:Sprite):Array<Array<Null<Hexagon>>>
     {
         var hexes:Array<Array<Null<Hexagon>>> = [];
         for (j in 0...7)
@@ -33,7 +33,7 @@ class Factory
                     row.push(null);
                 else 
                 {
-                    var hex:Hexagon = new Hexagon(a, isDark(i, j));
+                    var hex:Hexagon = new Hexagon(a, i, j, normalOrientation);
                     var coords = Field.hexCoords(i, j);
                     hex.x = coords.x;
                     hex.y = coords.y;
@@ -76,15 +76,5 @@ class Factory
         var coords = Field.hexCoords(loc.i, loc.j);
         figure.x = coords.x;
         figure.y = coords.y;
-    }
-
-    private static function isDark(i:Int, j:Int) 
-    {
-        if (j % 3 == 2)
-            return false;
-        else if (j % 3 == 0)
-            return i % 2 == 0;
-        else 
-            return i % 2 == 1;
     }
 }

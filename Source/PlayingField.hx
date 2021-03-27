@@ -20,6 +20,8 @@ class PlayingField extends Field
         playerColor = playerIsWhite? White : Black;
         playersTurn = playerIsWhite;
 
+        hexes = Factory.produceHexes(playerIsWhite, this);
+        disposeLetters();
         figures = Factory.produceFiguresFromDefault(playerIsWhite, this);
         addEventListener(Event.ADDED_TO_STAGE, init);
     }

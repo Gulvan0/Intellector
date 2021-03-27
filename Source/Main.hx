@@ -1,5 +1,7 @@
 package;
 
+import haxe.ui.events.UIEvent;
+import haxe.ui.components.OptionBox;
 import Networker.OngoingBattleData;
 import haxe.ui.components.Button;
 import haxe.ui.components.CheckBox;
@@ -52,6 +54,7 @@ class Main extends Sprite
 		Toolkit.init();
 		OpeningTree.init();
 		Figure.initFigures();
+		Field.initConstants();
 		Networker.connect(drawGame, onConnected);
 	}
 
@@ -239,7 +242,17 @@ class Main extends Sprite
 			var response = Browser.window.prompt("Enter the username of a player whose game you want to spectate");
 
 			if (response != null)
-				Networker.spectate(response, drawSpectation, (d)->{game.onMove(d);}, (d)->{game.onTimeCorrection(d);});
+				sendSpectateRequest(response);
+		}
+
+		var settingsBtn = new haxe.ui.components.Button();
+		settingsBtn.text = "Settings";
+		settingsBtn.width = calloutBtn.width;
+		settingsBtn.horizontalAlign = 'center';
+		mainMenu.addComponent(settingsBtn);
+
+		settingsBtn.onClick = (e) -> {
+			drawSettings();
 		}
 
 		var logoutBtn = new haxe.ui.components.Button();
@@ -257,6 +270,89 @@ class Main extends Sprite
 		mainMenu.x = (Browser.window.innerWidth - mainMenu.width) / 2;
 		mainMenu.y = 100;
 		addChild(mainMenu);
+	}
+
+	private function drawSettings() 
+	{
+		removeChildren();
+
+		var box:VBox = new VBox();
+
+		var header:Label = new Label();
+		header.htmlText = '<font size="16">Settings</font>';
+		header.horizontalAlign = "center";
+		box.addComponent(header);
+
+		var markup:HBox = new HBox();
+
+		var markupLabel:Label = new Label();
+		markupLabel.text = "Markup: ";
+		markup.addComponent(markupLabel);
+
+		var markupNone:OptionBox = new OptionBox();
+		markupNone.text = "None";
+		markup.addComponent(markupNone);
+
+		var markupSide:OptionBox = new OptionBox();
+		markupSide.text = "On the side";
+		markup.addComponent(markupSide);
+
+		var markupOver:OptionBox = new OptionBox();
+		markupOver.text = "Overboard";
+		markup.addComponent(markupOver);
+
+		switch Field.markup 
+		{
+			case None: markupNone.selected = true;
+			case Side: markupSide.selected = true;
+			case Over: markupOver.selected = true;
+		}
+		
+		markupNone.onChange = (e) -> {
+			if (markupNone.selected)
+			{
+				Field.markup = None;
+				Cookie.set("markup", "None", 60 * 60 * 24 * 365 * 5);
+			}
+		};
+		markupSide.onChange = (e) -> {
+			if (markupSide.selected)
+			{
+				Field.markup = Side;
+				Cookie.set("markup", "Side", 60 * 60 * 24 * 365 * 5);
+			}
+		};
+		markupOver.onChange = (e) -> {
+			if (markupOver.selected)
+			{
+				Field.markup = Over;
+				Cookie.set("markup", "Over", 60 * 60 * 24 * 365 * 5);
+			}
+		};
+
+		box.addComponent(markup);
+
+		box.x = (Browser.window.innerWidth - 290) / 2;
+		box.y = 100;
+		addChild(box);
+
+		var returnBtn = new Button();
+		returnBtn.width = 100;
+		returnBtn.text = "Return";
+		returnBtn.onClick = (e) -> {
+			removeChild(returnBtn);
+			removeChild(box);
+			drawMainMenu();
+		};
+            
+        returnBtn.x = 10;
+	    returnBtn.y = 10;
+	    addChild(returnBtn);
+	}
+
+	private function sendSpectateRequest(player:String) 
+	{
+		Networker.spectate(player, drawSpectation, (d)->{game.onMove(d);}, (d)->{game.onTimeCorrection(d);});
 	}
 
 	private function renewSession() 
