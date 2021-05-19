@@ -9,6 +9,7 @@ typedef Entry =
 class Changes
 {
     private static var changelog:Array<Entry> = [
+        {date: "19.05.2021", text:"Secure websocket connection"},
         {date: "04.04.2021/2", text:"Reconnect to a game, Spectate by link, Disconnection handling"},
         {date: "04.04.2021/1", text:"RMB actions (hex selection & arrow drawing)"},
         {date: "27.03.2021", text:"Marks & Settings menu"},

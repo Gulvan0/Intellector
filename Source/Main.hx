@@ -145,7 +145,7 @@ class Main extends Sprite
 
 	private function drawSigninMenu() 
 	{
-		Browser.window.history.pushState({}, "Intellector", "/");
+		URLEditor.clear();
 		changes.visible = true;
 
 		signinMenu = new VBox();
@@ -213,7 +213,7 @@ class Main extends Sprite
 
 	private function drawMainMenu() 
 	{
-		Browser.window.history.pushState({}, "Intellector", "/");
+		URLEditor.clear();
 		changes.visible = true;
 
 		Networker.registerMainMenuEvents();
@@ -399,7 +399,7 @@ class Main extends Sprite
 		hostingMenu.addComponent(firstLabel);
 
 		var linkText:TextField = new TextField();
-		linkText.text = '${Browser.location.host}/?ch=${Networker.login}';
+		linkText.text = URLEditor.getChallengeLink(Networker.login);
 		linkText.width = 800;
 		hostingMenu.addComponent(linkText);
 
@@ -476,7 +476,7 @@ class Main extends Sprite
 
 		Networker.registerGameEvents(game.onMove, game.onMessage, game.onTimeCorrection, onEnded, game.onSpectatorConnected, game.onSpectatorDisonnected);
 
-		Browser.window.history.pushState({}, "Intellector", "?id=" + data.match_id);
+		URLEditor.assignID(data.match_id);
 		Assets.getSound("sounds/notify.mp3").play();	
 	}
 
@@ -489,7 +489,7 @@ class Main extends Sprite
 
 		Networker.registerGameEvents(game.onMove, game.onMessage, game.onTimeCorrection, onEnded, game.onSpectatorConnected, game.onSpectatorDisonnected);
 
-		Browser.window.history.pushState({}, "Intellector", "?id=" + data.match_id);
+		URLEditor.assignID(data.match_id);
 		Assets.getSound("sounds/notify.mp3").play();	
 	}
 
@@ -550,7 +550,7 @@ class Main extends Sprite
 		removeChild(game);
 		game = null;
 
-		Browser.window.history.pushState({}, "Intellector", "/");
+		URLEditor.clear();
 		if (Networker.login.startsWith("guest_"))
 			renewSession();
 		else 
