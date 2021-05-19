@@ -51,11 +51,12 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
+		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
 		Toolkit.init();
 		OpeningTree.init();
 		Figure.initFigures();
 		Field.initConstants();
-		Networker.connect(drawGame, onConnected);
+		Networker.connect(drawGame, onConnected, renewSession);
 	}
 
 	private function onConnected()
@@ -72,29 +73,48 @@ class Main extends Sprite
 		if (Cookie.exists("saved_login") && Cookie.exists("saved_password"))
 			Networker.signin(Cookie.get("saved_login"), Cookie.get("saved_password"), onAutologinResults);
 		else if (searcher.has("id"))
-			Networker.getGame(Std.parseInt(searcher.get("id")), (s)->{drawSigninMenu();}, (s)->{drawSigninMenu();}, drawSigninMenu);
+			Networker.getGame(Std.parseInt(searcher.get("id")), (d)->{drawSigninMenu();}, (s)->{drawSigninMenu();}, drawSigninMenu);
 		else if (searcher.has("ch"))
-			Networker.getOpenChallenge(searcher.get("ch"), (data)->{drawJoinGame(data);}, drawSigninMenu);
+			Networker.getOpenChallenge(searcher.get("ch"), (data)->{drawJoinGame(data);}, (d)->{drawSigninMenu();}, drawSigninMenu);
 		else
 			drawSigninMenu();
 	}
 
 	private function onAutologinResults(result:String)
 	{
+		function onGameInProcess(data:OngoingBattleData)
+		{
+			if (data.whiteLogin.toLowerCase() == Networker.login.toLowerCase())
+			{
+				data.whiteLogin = Networker.login;
+				drawGameOnReconnect(data);
+			}
+			else if (data.blackLogin.toLowerCase() == Networker.login.toLowerCase())
+			{
+				data.blackLogin = Networker.login;
+				drawGameOnReconnect(data);
+			}
+			else
+				drawSpectation(data);
+		}
+
 		if (result == 'success')
 		{
 			var searcher = new URLSearchParams(Browser.location.search);
 			if (searcher.has("id"))
-				Networker.getGame(Std.parseInt(searcher.get("id")), (s)->{drawMainMenu();}, (s)->{drawMainMenu();}, drawMainMenu);
+				Networker.getGame(Std.parseInt(searcher.get("id")), onGameInProcess, (s)->{drawMainMenu();}, drawMainMenu);
 			else if (searcher.has("ch") && searcher.get("ch") != Networker.login)
-				Networker.getOpenChallenge(searcher.get("ch"), (data)->{drawJoinGame(data);}, drawMainMenu);
+				Networker.getOpenChallenge(searcher.get("ch"), (data)->{drawJoinGame(data);}, onGameInProcess, drawMainMenu);
 			else
 				drawMainMenu();
 		}
 		else
 		{
-			Cookie.remove("saved_login");
-			Cookie.remove("saved_password");
+			if (result != 'online')
+			{
+				Cookie.remove("saved_login");
+				Cookie.remove("saved_password");
+			}
 			drawSigninMenu();
 		}
 	}
@@ -359,7 +379,7 @@ class Main extends Sprite
 	{
 		removeChildren();
 		Networker.dropConnection();
-		Networker.connect(drawGame, onConnected);
+		Networker.connect(drawGame, onConnected, renewSession);
 	}
 
 	private function drawOpenChallengeHosting(startSecs:Int, bonusSecs:Int) 
@@ -379,7 +399,7 @@ class Main extends Sprite
 		hostingMenu.addComponent(firstLabel);
 
 		var linkText:TextField = new TextField();
-		linkText.text = 'intellector.surge.sh/?ch=${Networker.login}';
+		linkText.text = '${Browser.location.host}/?ch=${Networker.login}';
 		linkText.width = 800;
 		hostingMenu.addComponent(linkText);
 
@@ -452,6 +472,19 @@ class Main extends Sprite
 		removeChildren();
 
 		game = GameCompound.buildActive(data);
+		addChild(game);
+
+		Networker.registerGameEvents(game.onMove, game.onMessage, game.onTimeCorrection, onEnded, game.onSpectatorConnected, game.onSpectatorDisonnected);
+
+		Browser.window.history.pushState({}, "Intellector", "?id=" + data.match_id);
+		Assets.getSound("sounds/notify.mp3").play();	
+	}
+
+	private function drawGameOnReconnect(data:OngoingBattleData) 
+	{
+		removeChildren();
+
+		game = GameCompound.buildActiveReconnect(data);
 		addChild(game);
 
 		Networker.registerGameEvents(game.onMove, game.onMessage, game.onTimeCorrection, onEnded, game.onSpectatorConnected, game.onSpectatorDisonnected);

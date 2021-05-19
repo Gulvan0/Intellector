@@ -35,6 +35,8 @@ class AnalysisField extends Field
     
     public function clearBoard() 
     {
+        rmbSelectionBackToNormal();
+        
         for (row in figures)
             for (figure in row)
                 if (figure != null)
@@ -101,9 +103,12 @@ class AnalysisField extends Field
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
 
-    private override function isOrientationNormal(movingFigure:FigureColor):Bool
+    private override function isOrientationNormal(?movingFigure:FigureColor):Bool
     {   
-        return movingFigure == White;
+        if (movingFigure == null)
+            return true;
+        else
+            return movingFigure == White;
     }
     
 }

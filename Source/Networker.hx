@@ -68,6 +68,7 @@ typedef OngoingBattleData =
     var blackSeconds:Int;
     var position:String;
     var movesPlayed:Array<String>;
+    var currentLog:String;
 }
 
 class Networker
@@ -79,12 +80,12 @@ class Networker
     private static var gameStartHandler:BattleData->Void;
     private static var eventMap:Map<String, Dynamic->Void> = [];
 
-    public static function connect(onGameStated:BattleData->Void, onConnected:Void->Void) 
+    public static function connect(onGameStated:BattleData->Void, onConnected:Void->Void, onClosed:Void->Void) 
     {
         #if prod
-        _ws = new WebSocket("ws://13.48.10.164:5000");
+        _ws = new WebSocket("wss://play-intellector.ru:5000");
         #else
-        _ws = new WebSocket("ws://localhost:5000");
+        _ws = new WebSocket("wss://localhost:5000");
         #end
         _ws.onopen = function() {
             trace("open");
@@ -103,9 +104,11 @@ class Networker
         };
         _ws.onclose = function() {
             _ws = null;
+            onClosed();
+            Dialogs.alert("Connection lost", "Alert");
         };
         _ws.onerror = function(err) {
-            trace("error: " + err.toString());
+            Dialogs.alert("Connection error occured: " + err.toString(), "Error");
         }
     }
 
@@ -123,20 +126,21 @@ class Networker
         emit('register', {login: login, password: password});
     }
 
-    public static function getGame(id:Int, onInProcess:(log:String)->Void, onFinished:(log:String)->Void, on404:Void->Void) 
+    public static function getGame(id:Int, onInProcess:OngoingBattleData->Void, onFinished:(log:String)->Void, on404:Void->Void) 
     {
         onceOneOf([
-            'gamestate_ongoing' => (data) -> {onInProcess(data.log);},
+            'gamestate_ongoing' => onInProcess,
             'gamestate_over' => (data) -> {onFinished(data.log);},
             'gamestate_notfound' => (data) -> {on404();}
         ]);
         emit('get_game', {id: id});
     }
 
-    public static function getOpenChallenge(challenger:String, onExists:OpenChallengeData->Void, on404:Void->Void) 
+    public static function getOpenChallenge(challenger:String, onExists:OpenChallengeData->Void, onInProcess:OngoingBattleData->Void, on404:Void->Void) 
     {
         onceOneOf([
             'openchallenge_info' => onExists,
+            'openchallenge_ongoing' => onInProcess,
             'openchallenge_notfound' => (data) -> {on404();}
         ]);
         emit('get_challenge', {challenger: challenger});
@@ -240,7 +244,11 @@ class Networker
 
     public static function dropConnection() 
     {
-        _ws.close();
+        if (_ws != null)
+        {
+            _ws.close();
+            _ws = null;
+        }
     }
 
     private static function on(eventName:String, callback:Dynamic->Void) 

@@ -111,6 +111,7 @@ class Dialogs
         var baseField:TextField = new TextField();
         baseField.width = 30;
         baseField.restrictChars = "0-9";
+        baseField.text = "10";
         timeControl.addComponent(baseField);
 
         var plusSign:Label = new Label();
@@ -120,6 +121,7 @@ class Dialogs
         var incrementField:TextField = new TextField();
         incrementField.width = 30;
         incrementField.restrictChars = "0-9";
+        incrementField.text = "5";
         timeControl.addComponent(incrementField);
 
         timeControl.horizontalAlign = 'center';

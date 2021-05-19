@@ -84,7 +84,8 @@ class Sidebox extends Sprite
 
     private function locToStr(loc:IntPoint):String
     {
-        return Position.notationI(loc.i) + Position.notationJ(loc.i, loc.j, playerColor == White);
+        var normalOrientation = playerColor == White;
+        return Position.notationI(loc.i, true) + Position.notationJ(loc.i, loc.j, normalOrientation);
     }
 
     public function correctTime(correctedSecsWhite:Int, correctedSecsBlack:Int) 
@@ -190,10 +191,8 @@ class Sidebox extends Sprite
         playerTurn = playerIsWhite;
 
         var strStart = secsToString(startSecs);
-        var timeStyle = new Style();
-        timeStyle.fontSize = 40;
-        var loginStyle = new Style();
-        loginStyle.fontSize = 24;
+        var timeStyle:Style = {fontSize: 40};
+        var loginStyle:Style = {fontSize: 24};
 
         var box:VBox = new VBox();
 

@@ -14,6 +14,8 @@ class Hexagon extends Sprite
         private var dot:Sprite;
         private var round:Sprite;
 
+        public var redSelected:Bool;
+
         public function new(a:Float, i:Int, j:Int, normalOrientation:Bool)
         {
                 super();
@@ -47,6 +49,8 @@ class Hexagon extends Sprite
                 round.visible = false;
                 dot.visible = false;
 
+                redSelected = false;
+
                 addChild(unselectedHex);
                 addChild(selectedHex);
                 addChild(moveSelectedHex);
@@ -76,6 +80,18 @@ class Hexagon extends Sprite
         public function lastMoveDeselect()
         {
                 moveSelectedHex.visible = false;
+        }
+
+        public function redSelect()
+        {
+                redHex.visible = true;
+                redSelected = true;
+        }
+
+        public function redDeselect()
+        {
+                redHex.visible = false;
+                redSelected = false;
         }
 
         public function addDot()

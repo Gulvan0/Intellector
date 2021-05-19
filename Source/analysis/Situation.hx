@@ -1,0 +1,6 @@
+package analysis;
+
+class Situation 
+{
+        
+}

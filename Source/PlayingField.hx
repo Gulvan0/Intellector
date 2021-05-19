@@ -1,5 +1,6 @@
 package;
 
+import Networker.OngoingBattleData;
 import Networker.MoveData;
 import Figure.FigureType;
 import openfl.events.Event;
@@ -12,17 +13,23 @@ class PlayingField extends Field
 
     public var onPlayerMadeMove:MoveData->Void;
 
-    public function new(playerColourName:String) 
+    public function new(playerColourName:String, ?sourceData:OngoingBattleData) 
     {
         super();
-        var playerIsWhite = playerColourName == 'white';
+        var playerIsWhite = sourceData != null? sourceData.whiteLogin == Networker.login : playerColourName == 'white';
 
         playerColor = playerIsWhite? White : Black;
-        playersTurn = playerIsWhite;
+        if (sourceData != null)
+            playersTurn = sourceData.position.charAt(0) == "w"? playerIsWhite : !playerIsWhite;
+        else
+            playersTurn = playerIsWhite;
 
         hexes = Factory.produceHexes(playerIsWhite, this);
         disposeLetters();
-        figures = Factory.produceFiguresFromDefault(playerIsWhite, this);
+        if (sourceData != null)
+            figures = Factory.produceFiguresFromSerialized(sourceData.position, playerColor, this);
+        else
+            figures = Factory.produceFiguresFromDefault(playerIsWhite, this);
         addEventListener(Event.ADDED_TO_STAGE, init);
     }
 
@@ -30,6 +37,13 @@ class PlayingField extends Field
     {
         removeEventListener(Event.ADDED_TO_STAGE, init);
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+        addEventListener(Event.REMOVED_FROM_STAGE, terminate);
+    }
+
+    private function terminate(e) 
+    {
+        stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress);
+        removeEventListener(Event.REMOVED_FROM_STAGE, terminate);
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -92,8 +106,11 @@ class PlayingField extends Field
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
 
-    private override function isOrientationNormal(movingFigure:FigureColor):Bool
+    private override function isOrientationNormal(?movingFigure:FigureColor):Bool
     {   
-        return playerColor == movingFigure;
+        if (movingFigure == null)
+            return playerColor == White;
+        else
+            return playerColor == movingFigure;
     }
 }

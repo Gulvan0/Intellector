@@ -93,8 +93,8 @@ class Position
         return '$newJ';
     }
 
-    public static function notationI(i:Int):String
+    public static function notationI(i:Int, normalOrientation:Bool):String
     {
-        return String.fromCharCode('a'.code + i);
+        return String.fromCharCode('a'.code + (normalOrientation? i : (8 - i)));
     }
 }

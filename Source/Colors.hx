@@ -13,4 +13,5 @@ class Colors
     public static var redDark:Int = 0xBE3726;
     public static var lightNumber:Int = 0xFFD8B2;
     public static var darkNumber:Int = 0x664126;
+    public static var arrow:Int = 0x108D99;
 }

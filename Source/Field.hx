@@ -1,5 +1,8 @@
 package;
 
+import js.lib.Math;
+import openfl.display.JointStyle;
+import openfl.display.CapsStyle;
 import js.Cookie;
 import openfl.text.TextFormat;
 import openfl.text.TextField;
@@ -31,12 +34,33 @@ class Field extends Sprite
     private var selectedDest:Null<IntPoint>;
     private var lastMoveSelectedHexes:Array<Hexagon>;
 
+    private var redSelectedHexes:Array<Hexagon>;
+    private var drawnArrows:Map<String, Sprite>;
+
+    private var rmbStart:Null<IntPoint>;
+
     public var playersTurn:Bool = true;
 
     public function new() 
     {
         super();
         lastMoveSelectedHexes = [];
+        redSelectedHexes = [];
+        drawnArrows = [];
+        addEventListener(Event.ADDED_TO_STAGE, initRMB);
+    }
+
+    private function initRMB(e) 
+    {
+        removeEventListener(Event.ADDED_TO_STAGE, initRMB);
+        stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRMBPress);
+        addEventListener(Event.REMOVED_FROM_STAGE, removeListeners);
+    }
+
+    private function removeListeners(e) 
+    {
+        stage.removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRMBPress);
+        removeEventListener(Event.REMOVED_FROM_STAGE, removeListeners);
     }
 
     public static function initConstants() 
@@ -50,20 +74,7 @@ class Field extends Sprite
         return Field.a * Math.sqrt(3) * 7;
     }
 
-    private function disposeLetters() 
-    {
-        if (Field.markup == None)
-            return;
-
-        var bottomLocations = [for (i in 0...9) new IntPoint(i, (i % 2 == 0)? 6 : 5)];
-        for (loc in bottomLocations)
-        {
-            var letter = createLetter(Position.notationI(loc.i));
-            letter.x = hexes[loc.j][loc.i].x - letter.textWidth/2 - 5;
-            letter.y = hexes[loc.j][loc.i].y + Field.a * Math.sqrt(3) / 2;
-            addChild(letter); 
-        }
-    }
+    //----------------------------------------------------------------------------------------------------------
 
     private function onPress(e) 
     {
@@ -85,9 +96,58 @@ class Field extends Sprite
         throw "To be overriden";
     }
 
-    private function isOrientationNormal(movingFigure:FigureColor):Bool
+    private function isOrientationNormal(?movingFigure:FigureColor):Bool
     {   
         throw "To be overriden";
+    }
+
+    //----------------------------------------------------------------------------------------------------------
+
+    private function onRMBPress(e:MouseEvent) 
+    {
+        rmbStart = posToIndexes(e.stageX - x, e.stageY - y);
+        if (rmbStart != null)
+            stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onRMBRelease);
+    }
+
+    private function onRMBRelease(e) 
+    {
+        stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onRMBRelease);
+
+        var rmbEnd = posToIndexes(e.stageX - x, e.stageY - y);
+        if (rmbStart != null && rmbEnd != null)
+            if (rmbStart.equals(rmbEnd))
+            {
+                var hexToSelect = hexes[rmbStart.j][rmbStart.i];
+                if (hexToSelect.redSelected)
+                {
+                    hexToSelect.redDeselect();
+                    redSelectedHexes.remove(hexToSelect);
+                }
+                else 
+                {
+                    hexToSelect.redSelect();
+                    redSelectedHexes.push(hexToSelect);
+
+                }
+            }
+            else
+            {
+                var code = '${rmbStart.i}${rmbStart.j}${rmbEnd.i}${rmbEnd.j}';
+                if (drawnArrows.exists(code))
+                {
+                    removeChild(drawnArrows[code]);
+                    drawnArrows.remove(code);
+                }
+                else 
+                {
+                    var arrow = drawArrow(rmbStart, rmbEnd);
+                    drawnArrows.set(code, arrow);
+                    addChild(arrow);
+                }
+            }
+
+        rmbStart = null;
     }
 
     //----------------------------------------------------------------------------------------------------------
@@ -98,6 +158,7 @@ class Field extends Sprite
         if (figure == null || !playerIsOwner(figure.color))
             return;
 
+        rmbSelectionBackToNormal();
         selectDeparture(pressLocation);
         drag(figure);
 
@@ -111,6 +172,7 @@ class Field extends Sprite
         var movingFig = getFigure(selected);
         var moveOntoFig = getFigure(pressLocation);
 
+        rmbSelectionBackToNormal();
         selectionBackToNormal();
 
         if (pressLocation != null)
@@ -318,6 +380,59 @@ class Field extends Sprite
 
         selected = null;
         selectedDest = null;
+    }
+
+    private function rmbSelectionBackToNormal() 
+    {
+        for (hex in redSelectedHexes)
+            hex.redDeselect();
+        for (arrow in drawnArrows)
+            removeChild(arrow);
+        drawnArrows = [];
+    }
+    
+    //----------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static function drawArrow(from:IntPoint, to:IntPoint):Sprite
+    {
+        var fromPos:Point = hexCoords(from.i, from.j);
+        var toPos:Point = hexCoords(to.i, to.j);
+
+        var thickness:Float = 10;
+        var alpha:Float = Math.atan2(toPos.x - fromPos.x, toPos.y - fromPos.y);
+        var lPos:Point = new Point(toPos.x - 3 * thickness * Math.sin(alpha + Math.PI / 6), toPos.y - 3 * thickness * Math.cos(alpha + Math.PI / 6));
+        var rPos:Point = new Point(toPos.x - 3 * thickness * Math.sin(alpha - Math.PI / 6), toPos.y - 3 * thickness * Math.cos(alpha - Math.PI / 6));
+
+        var arrow:Sprite = new Sprite();
+        arrow.graphics.lineStyle(thickness, Colors.arrow, 0.7, null, null, CapsStyle.SQUARE, JointStyle.MITER);
+        arrow.graphics.moveTo(fromPos.x, fromPos.y);
+        arrow.graphics.lineTo(toPos.x - Math.sin(alpha) * thickness * Math.sqrt(3) * 1.75, toPos.y - Math.cos(alpha) * Math.sqrt(3) * thickness * 1.75);
+        arrow.graphics.moveTo(toPos.x, toPos.y);
+        arrow.graphics.lineStyle(1, Colors.arrow, 0.7, null, null, CapsStyle.SQUARE, JointStyle.MITER);
+        arrow.graphics.beginFill(Colors.arrow, 0.7);
+        arrow.graphics.lineTo(toPos.x, toPos.y);
+        arrow.graphics.lineTo(lPos.x, lPos.y);
+        arrow.graphics.lineTo(rPos.x, rPos.y);
+        arrow.graphics.lineTo(toPos.x, toPos.y);
+        arrow.graphics.endFill();
+        return arrow;
+    }
+    
+    //----------------------------------------------------------------------------------------------------------------------------------------------
+
+    private function disposeLetters() 
+    {
+        if (Field.markup == None)
+            return;
+
+        var bottomLocations = [for (i in 0...9) new IntPoint(i, (i % 2 == 0)? 6 : 5)];
+        for (loc in bottomLocations)
+        {
+            var letter = createLetter(Position.notationI(loc.i, isOrientationNormal()));
+            letter.x = hexes[loc.j][loc.i].x - letter.textWidth/2 - 5;
+            letter.y = hexes[loc.j][loc.i].y + Field.a * Math.sqrt(3) / 2;
+            addChild(letter); 
+        }
     }
 
     private function createLetter(letter:String):TextField 

@@ -38,6 +38,40 @@ class GameCompound extends Sprite
         return compound;
     }
 
+    public static function buildActiveReconnect(data:OngoingBattleData):GameCompound
+    {
+        var playerIsWhite:Bool = data.whiteLogin == Networker.login;
+        var enemyLogin:String = playerIsWhite? data.blackLogin : data.whiteLogin;
+
+        var field:PlayingField = new PlayingField(playerIsWhite? 'white' : 'black', data);
+        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, enemyLogin, playerIsWhite);
+        var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
+        var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin, playerIsWhite);
+
+        for (move in data.currentLog.split(";"))
+        {
+            var trimmed = StringTools.trim(move);
+            if (StringTools.contains(trimmed, ":") || trimmed.length < 4)
+                continue;
+
+            infobox.makeMove(Std.parseInt(trimmed.charAt(0)), Std.parseInt(trimmed.charAt(1)), Std.parseInt(trimmed.charAt(2)), Std.parseInt(trimmed.charAt(3)), trimmed.length == 4? null : FigureType.createByName(trimmed.substr(4)));
+        }
+
+        var color:FigureColor = White;
+        for (move in data.movesPlayed)
+        {
+            sidebox.writeMove(color, move);
+            color = color == White? Black : White;
+        }
+        sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
+        sidebox.launchTimer();
+
+        var compound = new GameCompound(field, sidebox, chatbox, infobox);
+        compound.playerColor = playerIsWhite? White : Black;
+        field.onPlayerMadeMove = compound.onMove;
+        return compound;
+    }
+
     public static function buildSpectators(data:OngoingBattleData, onReturn:Void->Void):GameCompound
     {
         var whiteRequested:Bool = data.requestedColor == "white";
