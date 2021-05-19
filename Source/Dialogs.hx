@@ -1,5 +1,6 @@
 package;
 
+import dict.Dictionary;
 import haxe.ui.components.TextField;
 import haxe.ui.components.Button;
 import Figure.FigureColor;
@@ -47,7 +48,7 @@ class Dialogs
         var body:VBox = new VBox();
 
         var question:Label = new Label();
-        question.text = "Select a piece to which you want to promote";
+        question.text = Dictionary.getPhrase(PROMOTION_DIALOG_QUESTION);
         question.width = 430;
         question.textAlign = "center";
         body.addComponent(question);
@@ -58,7 +59,7 @@ class Dialogs
         body.addComponent(btns);
 
         dialog.addComponent(body);
-        dialog.title = "Promotion selection";
+        dialog.title = Dictionary.getPhrase(PROMOTION_DIALOG_TITLE);
         dialog.buttons = DialogButton.CANCEL;
         dialog.onDialogClosed = (e) -> {onCancel();};
         dialog.showDialog(false);
@@ -66,7 +67,7 @@ class Dialogs
 
     public static function chameleonConfirm(onConfirmed:Void->Void, onDeclined:Void->Void, onCancelled:Void->Void)
     {
-        Screen.instance.messageBox("Morph into an eaten figure?", "Chameleon confirmation", MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
+        Screen.instance.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
             if (btn == DialogButton.YES)
                 onConfirmed();
             else if (btn == DialogButton.NO)
@@ -99,7 +100,7 @@ class Dialogs
         var body:VBox = new VBox();
 
         var question:Label = new Label();
-        question.text = "Specify time control for your challenge";
+        question.text = Dictionary.getPhrase(CHOOSE_TIME_CONTROL);
         question.width = 200;
         question.textAlign = "center";
         body.addComponent(question);
@@ -130,13 +131,13 @@ class Dialogs
         var btns:HBox = new HBox();
 
         var confirmBtn:Button = new Button();
-        confirmBtn.text = "Confirm";
+        confirmBtn.text = Dictionary.getPhrase(CONFIRM);
         confirmBtn.width = 92;
         confirmBtn.onClick = (e) -> {cb(dialog, Std.parseInt(baseField.text), Std.parseInt(incrementField.text));};
         btns.addComponent(confirmBtn);
 
         var cancelBtn:Button = new Button();
-        cancelBtn.text = "Cancel";
+        cancelBtn.text = Dictionary.getPhrase(CANCEL);
         cancelBtn.width = 92;
         cancelBtn.onClick = (e) -> {dialog.hideDialog(DialogButton.CANCEL);};
         btns.addComponent(cancelBtn);
@@ -144,7 +145,7 @@ class Dialogs
         body.addComponent(btns);
 
         dialog.addComponent(body);
-        dialog.title = "Challenge parameters";
+        dialog.title = Dictionary.getPhrase(CHALLENGE_PARAMS_TITLE);
         dialog.onDialogClosed = (e) -> {onCancel();};
         dialog.showDialog(true);
     }

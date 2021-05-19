@@ -1,5 +1,6 @@
 package;
 
+import dict.Dictionary;
 import Figure.FigureType;
 import Figure.FigureColor;
 import haxe.ui.styles.Style;
@@ -36,16 +37,16 @@ class GameInfoBox extends Sprite
     {
         var resolution = switch outcome 
         {
-            case Mate: 'Mate';
-            case Breakthrough: 'Breakthrough';
-            case Resign: winner == White? 'Black resigned' : 'White resigned';
-            case Abandon: winner == White? 'Black disconnected' : 'White disconnected';
-            case DrawAgreement: 'Draw by agreement';
-            case Repetition: 'Draw by repetition';
-            case NoProgress: 'Draw by 50-move rule';
+            case Mate: Dictionary.getPhrase(RESOLUTION_MATE);
+            case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH);
+            case Resign: Dictionary.colorReferring(winner) + Dictionary.getPhrase(RESOLUTION_RESIGN);
+            case Abandon: Dictionary.colorReferring(winner) + Dictionary.getPhrase(RESOLUTION_DISCONNECT);
+            case DrawAgreement: Dictionary.getPhrase(RESOLUTION_AGREEMENT);
+            case Repetition: Dictionary.getPhrase(RESOLUTION_REPETITON);
+            case NoProgress: Dictionary.getPhrase(RESOLUTION_HUNDRED);
         }
         if (winner != null)
-            resolution += ' • ${winner.getName()} is victorious';
+            resolution += ' • ${winner.getName()}' + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
         shortInfoTF.text = timeControlText + resolution;
     }
 
@@ -79,7 +80,7 @@ class GameInfoBox extends Sprite
 
         shortInfoTF = new Label();
         timeControlText = '${tcStartSeconds/60}+$tcBonusSeconds • ';
-        shortInfoTF.text = timeControlText + 'Game is in progress';
+        shortInfoTF.text = timeControlText + Dictionary.getPhrase(RESOLUTION_NONE);
         shortInfoTF.customStyle = shortInfoStyle;
         shortInfoTF.width = boxWidth;
         shortInfoTF.x = 5;
@@ -96,7 +97,7 @@ class GameInfoBox extends Sprite
         addChild(opponentsTF);
 
         openingTF = new Label();
-        openingTF.htmlText = '<i>Starting position</i>';
+        openingTF.htmlText = '<i>' + Dictionary.getPhrase(OPENING_STARTING_POSITION) + '</i>';
         openingTF.customStyle = openingStyle;
         openingTF.width = boxWidth;
         openingTF.x = 5;

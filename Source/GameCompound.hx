@@ -1,5 +1,6 @@
 package;
 
+import dict.Dictionary;
 import Networker.OngoingBattleData;
 import Figure.FigureType;
 import Figure.FigureColor;
@@ -135,12 +136,12 @@ class GameCompound extends Sprite
 
     public function onSpectatorConnected(data:{login:String})
     {
-        chatbox.appendLog('${data.login} is now spectating');
+        chatbox.appendLog('${data.login}' + Dictionary.getPhrase(SPECTATOR_JOINED_MESSAGE));
     }
 
     public function onSpectatorDisonnected(data:{login:String})
     {
-        chatbox.appendLog('${data.login} left');
+        chatbox.appendLog('${data.login}' + Dictionary.getPhrase(SPECTATOR_LEFT_MESSAGE));
     }
 
     public function terminate()
@@ -187,7 +188,7 @@ class GameCompound extends Sprite
         {
             returnBtn = new Button();
 		    returnBtn.width = 100;
-		    returnBtn.text = "Return";
+		    returnBtn.text = Dictionary.getPhrase(RETURN);
             returnBtn.onClick = (e) -> {onReturn();};
             
             returnBtn.x = 10;
@@ -201,7 +202,7 @@ class GameCompound extends Sprite
 
             var clearBtn = new Button();
             clearBtn.width = 200;
-            clearBtn.text = "Clear";
+            clearBtn.text = Dictionary.getPhrase(ANALYSIS_CLEAR);
     
             clearBtn.onClick = (e) -> {
                 cast(field, AnalysisField).clearBoard();
@@ -211,7 +212,7 @@ class GameCompound extends Sprite
     
             var resetBtn = new Button();
             resetBtn.width = 200;
-            resetBtn.text = "Reset";
+            resetBtn.text = Dictionary.getPhrase(ANALYSIS_RESET);
     
             resetBtn.onClick = (e) -> {
                 cast(field, AnalysisField).reset();

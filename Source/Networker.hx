@@ -1,5 +1,6 @@
 package;
 
+import dict.Dictionary;
 import Figure.FigureType;
 import openfl.utils.Assets;
 import js.Browser;
@@ -105,10 +106,10 @@ class Networker
         _ws.onclose = function() {
             _ws = null;
             onClosed();
-            Dialogs.alert("Connection lost", "Alert");
+            Dialogs.alert(Dictionary.getPhrase(CONNECTION_LOST_ERROR), "Alert");
         };
         _ws.onerror = function(err) {
-            Dialogs.alert("Connection error occured: " + err.toString(), "Error");
+            Dialogs.alert(Dictionary.getPhrase(CONNECTION_ERROR_OCCURED) + err.toString(), "Error");
         }
     }
 
@@ -156,8 +157,8 @@ class Networker
     public static function spectate(watchedLogin:String, onStarted:OngoingBattleData->Void, onMove:MoveData->Void, onTimeCorrection:TimeData->Void) 
     {
         onceOneOf([
-            'watched_unavailable' => (data) -> {Dialogs.alert("Player is offline", "Spectation error");},
-            'watched_notingame' => (data) -> {Dialogs.alert("Player is not in game", "Spectation error");},
+            'watched_unavailable' => (data) -> {Dialogs.alert(Dictionary.getPhrase(SPECTATION_ERROR_REASON_OFFLINE), Dictionary.getPhrase(SPECTATION_ERROR_TITLE));},
+            'watched_notingame' => (data) -> {Dialogs.alert(Dictionary.getPhrase(SPECTATION_ERROR_REASON_NOTINGAME), Dictionary.getPhrase(SPECTATION_ERROR_TITLE));},
             'spectation_data' => (data:OngoingBattleData) -> {
                 on('move', onMove);
                 on('time_correction', onTimeCorrection);
@@ -180,20 +181,20 @@ class Networker
         var onDeclined = () -> {emit('decline_challenge', {caller_login: data.caller, callee_login: Networker.login});};
 
         Assets.getSound("sounds/social.mp3").play();
-        Dialogs.confirm('${data.caller} wants to play with you. Accept the challenge?', "Incoming challenge", onConfirmed, onDeclined);
+        Dialogs.confirm('${data.caller}' + Dictionary.getPhrase(INCOMING_CHALLENGE_QUESTION), Dictionary.getPhrase(INCOMING_CHALLENGE_TITLE), onConfirmed, onDeclined);
     }
 
     public static function sendChallenge(callee:String, secsStart:Int, secsBonus:Int) 
     {
         var onSuccess = (d) -> {
             Assets.getSound("sounds/challenge_sent.mp3").play();
-            Dialogs.info('Challenge sent to ${d.callee}!', "Success");
+            Dialogs.info(Dictionary.getPhrase(SEND_CHALLENGE_RESULT_SUCCESS) + '${d.callee}!', Dictionary.getPhrase(SEND_CHALLENGE_RESULT_SUCCESS_TITLE));
         };
-        var onDeclined = (d) -> {Dialogs.info('${d.callee} has declined your challenge', "Challenge declined");};
-        var onSame = (d) -> {Dialogs.alert("You can't challenge yourself", "Challenge error");};
-        var onRepeated = (d) -> {Dialogs.alert("You have already sent a challenge to this player", "Challenge error");};
-        var onOffline = (d) -> {Dialogs.alert("Callee is offline", "Challenge error");};
-        var onIngame = (d) -> {Dialogs.alert("Callee is currently playing", "Challenge error");};
+        var onDeclined = (d) -> {Dialogs.info('${d.callee}' + Dictionary.getPhrase(SEND_CHALLENGE_RESULT_DECLINED), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_DECLINED_TITLE));};
+        var onSame = (d) -> {Dialogs.alert(Dictionary.getPhrase(SEND_CHALLENGE_RESULT_SAME), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));};
+        var onRepeated = (d) -> {Dialogs.alert(Dictionary.getPhrase(SEND_CHALLENGE_RESULT_REPEATED), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));};
+        var onOffline = (d) -> {Dialogs.alert(Dictionary.getPhrase(SEND_CHALLENGE_RESULT_OFFLINE), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));};
+        var onIngame = (d) -> {Dialogs.alert(Dictionary.getPhrase(SEND_CHALLENGE_RESULT_BUSY), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));};
 
         once('challenge_declined', onDeclined);
         onceOneOf(['callee_same' => onSame, 'callout_success' => onSuccess, 'repeated_callout' => onRepeated, 'callee_unavailable' => onOffline, 'callee_ingame' => onIngame]);

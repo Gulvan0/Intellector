@@ -1,5 +1,6 @@
 package;
 
+import dict.Dictionary;
 import Figure.FigureType;
 
 class Branch
@@ -62,7 +63,7 @@ class OpeningTree
 
     public static function init() 
     {
-        root = new Branch("Starting position", "",
+        root = new Branch(Dictionary.getPhrase(OPENING_STARTING_POSITION), "",
         [
             [new Branch("C00. Central Advancement", "4544", 
             [

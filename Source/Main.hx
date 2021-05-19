@@ -1,5 +1,6 @@
 package;
 
+import dict.Dictionary;
 import haxe.ui.events.UIEvent;
 import haxe.ui.components.OptionBox;
 import Networker.OngoingBattleData;
@@ -55,9 +56,18 @@ class Main extends Sprite
 		Toolkit.init();
 		OpeningTree.init();
 		Figure.initFigures();
-		Field.initConstants();
+		initConstants();
+		Changes.initChangelog();
 		Networker.connect(drawGame, onConnected, renewSession);
 	}
+
+    private function initConstants() 
+    {
+        if (Cookie.exists("markup"))
+            Field.markup = Markup.createByName(Cookie.get("markup"));
+        if (Cookie.exists("lang"))
+            Dictionary.lang = Language.createByName(Cookie.get("lang"));
+    }
 
 	private function onConnected()
 	{
@@ -135,11 +145,11 @@ class Main extends Sprite
 		{
 			if (type == SignIn)
 				if (result == 'online')
-					displayLoginError("An user with this login is already online");
+					displayLoginError(Dictionary.getPhrase(ALREADY_LOGGED));
 				else
-					displayLoginError("Invalid login/password");
+					displayLoginError(Dictionary.getPhrase(INVALID_PASSWORD));
 			else
-				displayLoginError("An user with this login already exists");
+				displayLoginError(Dictionary.getPhrase(ALREADY_REGISTERED));
 		}
 	}
 
@@ -152,13 +162,13 @@ class Main extends Sprite
 		signinMenu.width = 200;
 
 		var loginField = new haxe.ui.components.TextField();
-		loginField.placeholder = "Login";
+		loginField.placeholder = Dictionary.getPhrase(LOGIN_FIELD_TITLE);
 		loginField.width = 200;
 		loginField.restrictChars = "A-Za-z0-9";
 		signinMenu.addComponent(loginField);
 
 		var passField = new haxe.ui.components.TextField();
-		passField.placeholder = "Password";
+		passField.placeholder = Dictionary.getPhrase(PASSWORD_FIELD_TITLE);
 		passField.width = loginField.width;
 		passField.restrictChars = "A-Za-z0-9";
 		passField.password = true;
@@ -166,7 +176,7 @@ class Main extends Sprite
 
 		var rememberMe = new CheckBox();
 		rememberMe.selected = false;
-		rememberMe.text = "Remember me";
+		rememberMe.text = Dictionary.getPhrase(REMEMBER_ME_CHECKBOX_TITLE);
 		rememberMe.horizontalAlign = 'center';
 		signinMenu.addComponent(rememberMe);
 
@@ -174,25 +184,25 @@ class Main extends Sprite
 		btns.horizontalAlign = "center";
 
 		var signinbtn = new haxe.ui.components.Button();
-		signinbtn.text = "Sign In";
+		signinbtn.text = Dictionary.getPhrase(SIGN_IN_BTN);
 		signinbtn.width = loginField.width / 2 - 5;
 		btns.addComponent(signinbtn);
 
 		signinbtn.onClick = (e) -> {
 			if (loginField.text == "" || passField.text == "" || loginField.text == null || passField.text == null)
-				displayLoginError("You need to specify both the login and the password");
+				displayLoginError(Dictionary.getPhrase(SPECIFY_BOTH_REG_ERROR));
 			else
 				Networker.signin(loginField.text, passField.text, onSignResults.bind(SignIn, loginField.text, passField.text, rememberMe.selected));
 		}
 
 		var regbtn = new haxe.ui.components.Button();
-		regbtn.text = "Register";
+		regbtn.text = Dictionary.getPhrase(REGISTER_BTN);
 		regbtn.width = loginField.width / 2 - 5;
 		btns.addComponent(regbtn);
 
 		regbtn.onClick = (e) -> {
 			if (loginField.text == "" || passField.text == "" || loginField.text == null || passField.text == null)
-				displayLoginError("You need to specify both the login and the password");
+				displayLoginError(Dictionary.getPhrase(SPECIFY_BOTH_REG_ERROR));
 			else
 				Networker.register(loginField.text, passField.text, onSignResults.bind(SignUp, loginField.text, passField.text, rememberMe.selected));
 		}
@@ -200,7 +210,7 @@ class Main extends Sprite
 		signinMenu.addComponent(btns);
 
 		errorLabel = new haxe.ui.components.Label();
-		errorLabel.text = "Invalid login/password";
+		errorLabel.text = Dictionary.getPhrase(INVALID_PASSWORD);
 		errorLabel.alpha = 0;
 		errorLabel.width = loginField.width;
 		errorLabel.textAlign = "center";
@@ -223,11 +233,11 @@ class Main extends Sprite
 
 		var calloutBtn = new haxe.ui.components.Button();
 		calloutBtn.width = 200;
-		calloutBtn.text = "Send challenge";
+		calloutBtn.text = Dictionary.getPhrase(SEND_CHALLENGE);
 		mainMenu.addComponent(calloutBtn);
 
 		calloutBtn.onClick = (e) -> {
-			var response = Browser.window.prompt("Enter the callee's username");
+			var response = Browser.window.prompt(Dictionary.getPhrase(ENTER_CALLEE));
 
 			if (response != null)
 				Dialogs.specifyChallengeParams(Networker.sendChallenge.bind(response), ()->{});
@@ -235,7 +245,7 @@ class Main extends Sprite
 
 		var openCalloutBtn = new haxe.ui.components.Button();
 		openCalloutBtn.width = 200;
-		openCalloutBtn.text = "Host open challenge";
+		openCalloutBtn.text = Dictionary.getPhrase(OPEN_CHALLENGE_BTN);
 		mainMenu.addComponent(openCalloutBtn);
 
 		openCalloutBtn.onClick = (e) -> {
@@ -243,7 +253,7 @@ class Main extends Sprite
 		}
 
 		var analysisBtn = new haxe.ui.components.Button();
-		analysisBtn.text = "Analysis board";
+		analysisBtn.text = Dictionary.getPhrase(ANALYSIS_BTN);
 		analysisBtn.width = calloutBtn.width;
 		analysisBtn.horizontalAlign = 'center';
 		mainMenu.addComponent(analysisBtn);
@@ -253,20 +263,20 @@ class Main extends Sprite
 		}
 
 		var spectateBtn = new haxe.ui.components.Button();
-		spectateBtn.text = "Spectate";
+		spectateBtn.text = Dictionary.getPhrase(SPECTATE_BTN);
 		spectateBtn.width = calloutBtn.width;
 		spectateBtn.horizontalAlign = 'center';
 		mainMenu.addComponent(spectateBtn);
 
 		spectateBtn.onClick = (e) -> {
-			var response = Browser.window.prompt("Enter the username of a player whose game you want to spectate");
+			var response = Browser.window.prompt(Dictionary.getPhrase(ENTER_SPECTATED));
 
 			if (response != null)
 				sendSpectateRequest(response);
 		}
 
 		var settingsBtn = new haxe.ui.components.Button();
-		settingsBtn.text = "Settings";
+		settingsBtn.text = Dictionary.getPhrase(SETTINGS_BTN);
 		settingsBtn.width = calloutBtn.width;
 		settingsBtn.horizontalAlign = 'center';
 		mainMenu.addComponent(settingsBtn);
@@ -276,7 +286,7 @@ class Main extends Sprite
 		}
 
 		var logoutBtn = new haxe.ui.components.Button();
-		logoutBtn.text = "Log Out";
+		logoutBtn.text = Dictionary.getPhrase(LOG_OUT_BTN);
 		logoutBtn.width = calloutBtn.width / 2;
 		logoutBtn.horizontalAlign = 'center';
 		mainMenu.addComponent(logoutBtn);
@@ -299,26 +309,26 @@ class Main extends Sprite
 		var box:VBox = new VBox();
 
 		var header:Label = new Label();
-		header.htmlText = '<font size="16">Settings</font>';
+		header.htmlText = '<font size="16">' + Dictionary.getPhrase(SETTINGS_TITLE) + '</font>';
 		header.horizontalAlign = "center";
 		box.addComponent(header);
 
 		var markup:HBox = new HBox();
 
 		var markupLabel:Label = new Label();
-		markupLabel.text = "Markup: ";
+		markupLabel.text = Dictionary.getPhrase(SETTINGS_MARKUP_TITLE);
 		markup.addComponent(markupLabel);
 
 		var markupNone:OptionBox = new OptionBox();
-		markupNone.text = "None";
+		markupNone.text = Dictionary.getPhrase(SETTINGS_MARKUP_TYPE_NONE);
 		markup.addComponent(markupNone);
 
 		var markupSide:OptionBox = new OptionBox();
-		markupSide.text = "On the side";
+		markupSide.text = Dictionary.getPhrase(SETTINGS_MARKUP_TYPE_SIDE);
 		markup.addComponent(markupSide);
 
 		var markupOver:OptionBox = new OptionBox();
-		markupOver.text = "Overboard";
+		markupOver.text = Dictionary.getPhrase(SETTINGS_MARKUP_TYPE_OVER);
 		markup.addComponent(markupOver);
 
 		switch Field.markup 
@@ -352,13 +362,52 @@ class Main extends Sprite
 
 		box.addComponent(markup);
 
+
+		var lang:HBox = new HBox();
+
+		var langLabel:Label = new Label();
+		langLabel.text = Dictionary.getPhrase(SETTINGS_LANGUAGE_TITLE);
+		lang.addComponent(langLabel);
+
+		var langEN:OptionBox = new OptionBox();
+		langEN.text = "English";
+		lang.addComponent(langEN);
+
+		var langRU:OptionBox = new OptionBox();
+		langRU.text = "Русский";
+		lang.addComponent(langRU);
+
+		switch Dictionary.lang
+		{
+			case EN: langEN.selected = true;
+			case RU: langRU.selected = true;
+		}
+		
+		langEN.onChange = (e) -> {
+			if (langEN.selected)
+			{
+				Dictionary.lang = EN;
+				Cookie.set("lang", "EN", 60 * 60 * 24 * 365 * 5);
+			}
+		};
+		langRU.onChange = (e) -> {
+			if (langRU.selected)
+			{
+				Dictionary.lang = RU;
+				Cookie.set("lang", "RU", 60 * 60 * 24 * 365 * 5);
+			}
+		};
+
+		box.addComponent(lang);
+
+
 		box.x = (Browser.window.innerWidth - 290) / 2;
 		box.y = 100;
 		addChild(box);
 
 		var returnBtn = new Button();
 		returnBtn.width = 100;
-		returnBtn.text = "Return";
+		returnBtn.text = Dictionary.getPhrase(RETURN);
 		returnBtn.onClick = (e) -> {
 			removeChild(returnBtn);
 			removeChild(box);
@@ -393,7 +442,7 @@ class Main extends Sprite
 		hostingMenu.width = 800;
 
 		var firstLabel:Label = new Label();
-		firstLabel.htmlText = '<font size="16">Challenge by ${Networker.login}<br>${startSecs/60}+$bonusSecs<br>Share the link to invite your opponent:</font>';
+		firstLabel.htmlText = Dictionary.challengeByHTMLText(Networker.login, startSecs, bonusSecs);
 		firstLabel.textAlign = 'center';
 		firstLabel.width = 800;
 		hostingMenu.addComponent(firstLabel);
@@ -404,7 +453,7 @@ class Main extends Sprite
 		hostingMenu.addComponent(linkText);
 
 		var secondLabel:Label = new Label();
-		secondLabel.htmlText = '<font size="16">First one to follow the link will join the game</font>';
+		secondLabel.htmlText = Dictionary.firstOneToFollowHTMLText();
 		secondLabel.textAlign = 'center';
 		secondLabel.width = 800;
 		hostingMenu.addComponent(secondLabel);
@@ -423,11 +472,11 @@ class Main extends Sprite
 
 		var label = new haxe.ui.components.Label();
 		label.width = 800;
-		label.htmlText = '<font size="16">${data.challenger} is hosting a challenge (${data.startSecs/60}+${data.bonusSecs}). First one to accept it will become an opponent\n';
+		label.htmlText = Dictionary.isHostingAChallengeHTMLText(data);
 		if (Networker.login == null)
-			label.htmlText += 'You will be playing as guest';
+			label.htmlText += Dictionary.getPhrase(WILL_BE_GUEST);
 		else
-			label.htmlText += 'You are joining the game as ${Networker.login}';
+			label.htmlText += Dictionary.getPhrase(JOINING_AS) + Networker.login;
 		label.htmlText += '</font>';
 		label.textAlign = 'center';
 		joinMenu.addComponent(label);
@@ -435,7 +484,7 @@ class Main extends Sprite
 		var joinButton = new haxe.ui.components.Button();
 		joinButton.width = 200;
 		joinButton.horizontalAlign = 'center';
-		joinButton.text = "Accept challenge";
+		joinButton.text = Dictionary.getPhrase(ACCEPT_CHALLENGE);
 		joinMenu.addComponent(joinButton);
 
 		joinButton.onClick = (e) -> {
@@ -527,25 +576,25 @@ class Main extends Sprite
 		if (data.winner_color == "")
 			resultMessage = "½ - ½";
 		else if (data.winner_color == game.playerColor.getName().toLowerCase())
-			resultMessage = "You won";
+			resultMessage = Dictionary.getPhrase(WIN_MESSAGE_PREAMBLE);
 		else 
-			resultMessage = "You lost";
+			resultMessage = Dictionary.getPhrase(LOSS_MESSAGE_PREAMBLE);
 
 		var explanation = switch data.reason
 		{
 			case 'mate': ".";
-			case 'breakthrough': " by breakthrough.";
-			case 'timeout': " by timeout.";
-			case 'resignation': " by resignation.";
-			case 'abandon': ". Opponent disconnected.";
-			case 'threefoldrepetition': " (Threefold repetition).";
-			case 'hundredmoverule': " (Hundred move rule).";
-			case 'drawagreement': " (by agreement).";
+			case 'breakthrough': Dictionary.getPhrase(GAME_OVER_REASON_BREAKTHROUGH);
+			case 'timeout': Dictionary.getPhrase(GAME_OVER_REASON_TIMEOUT);
+			case 'resignation': Dictionary.getPhrase(GAME_OVER_REASON_RESIGN);
+			case 'abandon': Dictionary.getPhrase(GAME_OVER_REASON_DISCONNECT);
+			case 'threefoldrepetition': Dictionary.getPhrase(GAME_OVER_REASON_THREEFOLD);
+			case 'hundredmoverule': Dictionary.getPhrase(GAME_OVER_REASON_HUNDRED);
+			case 'drawagreement': Dictionary.getPhrase(GAME_OVER_REASON_AGREEMENT);
 			default: "";
 		};
 
 		Assets.getSound("sounds/notify.mp3").play();
-		Dialogs.info("Game over. " + resultMessage + explanation, "Game ended");
+		Dialogs.info(Dictionary.getPhrase(GAME_OVER) + resultMessage + explanation, Dictionary.getPhrase(GAME_ENDED));
 
 		removeChild(game);
 		game = null;

@@ -63,12 +63,6 @@ class Field extends Sprite
         removeEventListener(Event.REMOVED_FROM_STAGE, removeListeners);
     }
 
-    public static function initConstants() 
-    {
-        if (Cookie.exists("markup"))
-            markup = Markup.createByName(Cookie.get("markup"));
-    }
-
     public function getHeight():Float
     {
         return Field.a * Math.sqrt(3) * 7;

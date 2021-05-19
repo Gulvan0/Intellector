@@ -1,5 +1,6 @@
 package;
 
+import dict.Dictionary;
 import haxe.ui.components.HorizontalScroll;
 import haxe.Timer;
 import haxe.ui.components.VerticalScroll;
@@ -90,7 +91,7 @@ class Chatbox extends Sprite
         addChild(history);
         
         messageInput = new TextField();
-        messageInput.placeholder = "Message text...";
+        messageInput.placeholder = Dictionary.getPhrase(CHATBOX_MESSAGE_PLACEHOLDER);
         messageInput.width = WIDTH;
         messageInput.height = 25;
         messageInput.y = history.height + 5;
