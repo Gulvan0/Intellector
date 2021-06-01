@@ -16,6 +16,7 @@ class Changes
     {
         if (Dictionary.lang == EN)
             changelog = [
+                {date: "01.06.2021", text:"Text display bug fixed"},
                 {date: "19.05.2021/2", text:"Language select and Russian translation"},
                 {date: "19.05.2021/1", text:"Secure websocket connection"},
                 {date: "04.04.2021/2", text:"Reconnect to a game, Spectate by link, Disconnection handling"},
@@ -32,6 +33,7 @@ class Changes
             ];
         else if (Dictionary.lang == RU)
             changelog = [
+                {date: "01.06.2021", text:"Исправлена ошибка отображения текста"},
                 {date: "19.05.2021/2", text:"Выбор языка и русский перевод"},
                 {date: "19.05.2021/1", text:"Соединение по протоколу wss://"},
                 {date: "04.04.2021/2", text:"Переподключение к игре, наблюдение по ссылке, обработка ошибок соединения"},

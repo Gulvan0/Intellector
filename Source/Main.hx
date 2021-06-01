@@ -309,7 +309,8 @@ class Main extends Sprite
 		var box:VBox = new VBox();
 
 		var header:Label = new Label();
-		header.htmlText = '<font size="16">' + Dictionary.getPhrase(SETTINGS_TITLE) + '</font>';
+		header.text = Dictionary.getPhrase(SETTINGS_TITLE);
+		header.customStyle = {fontSize: 16};
 		header.horizontalAlign = "center";
 		box.addComponent(header);
 
@@ -442,7 +443,8 @@ class Main extends Sprite
 		hostingMenu.width = 800;
 
 		var firstLabel:Label = new Label();
-		firstLabel.htmlText = Dictionary.challengeByHTMLText(Networker.login, startSecs, bonusSecs);
+		firstLabel.customStyle = {fontSize: 16};
+		firstLabel.text = Dictionary.challengeByText(Networker.login, startSecs, bonusSecs);
 		firstLabel.textAlign = 'center';
 		firstLabel.width = 800;
 		hostingMenu.addComponent(firstLabel);
@@ -453,7 +455,8 @@ class Main extends Sprite
 		hostingMenu.addComponent(linkText);
 
 		var secondLabel:Label = new Label();
-		secondLabel.htmlText = Dictionary.firstOneToFollowHTMLText();
+		secondLabel.text = Dictionary.getPhrase(OPEN_CHALLENGE_FIRST_TO_FOLLOW_NOTE);
+		secondLabel.customStyle = {fontSize: 16};
 		secondLabel.textAlign = 'center';
 		secondLabel.width = 800;
 		hostingMenu.addComponent(secondLabel);
@@ -472,12 +475,12 @@ class Main extends Sprite
 
 		var label = new haxe.ui.components.Label();
 		label.width = 800;
-		label.htmlText = Dictionary.isHostingAChallengeHTMLText(data);
+		label.text = Dictionary.isHostingAChallengeText(data);
 		if (Networker.login == null)
-			label.htmlText += Dictionary.getPhrase(WILL_BE_GUEST);
+			label.text += Dictionary.getPhrase(WILL_BE_GUEST);
 		else
-			label.htmlText += Dictionary.getPhrase(JOINING_AS) + Networker.login;
-		label.htmlText += '</font>';
+			label.text += Dictionary.getPhrase(JOINING_AS) + Networker.login;
+		label.customStyle = {fontSize: 16};
 		label.textAlign = 'center';
 		joinMenu.addComponent(label);
 

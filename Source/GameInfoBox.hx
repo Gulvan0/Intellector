@@ -60,7 +60,7 @@ class GameInfoBox extends Sprite
         if (!openingTree.currentNode.terminal)
         {
             openingTree.makeMove(fromI, fromJ, toI, toJ, morphInto);
-            openingTF.htmlText = '<i>' + openingTree.currentNode.name + '</i>';
+            openingTF.text = openingTree.currentNode.name;
         }
     }
 
@@ -74,7 +74,7 @@ class GameInfoBox extends Sprite
         
         var shortInfoStyle:Style = {fontSize: 14};
         var opponentsStyle:Style = {fontSize: 16};
-        var openingStyle:Style = {fontSize: 14};
+        var openingStyle:Style = {fontSize: 14, fontItalic: true};
 
         var boxWidth = width - 10;
 
@@ -97,7 +97,7 @@ class GameInfoBox extends Sprite
         addChild(opponentsTF);
 
         openingTF = new Label();
-        openingTF.htmlText = '<i>' + Dictionary.getPhrase(OPENING_STARTING_POSITION) + '</i>';
+        openingTF.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         openingTF.customStyle = openingStyle;
         openingTF.width = boxWidth;
         openingTF.x = 5;

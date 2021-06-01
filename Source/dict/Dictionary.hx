@@ -85,7 +85,8 @@ class Dictionary
         RESOLUTION_WINNER_POSTFIX => [" is victorious", " победил(а)"],
         WILL_BE_GUEST => ['You will be playing as guest', "Вы будете играть как гость"],
         JOINING_AS => ["You are joining the game as ", "Вы будете играть как "],
-        OPENING_STARTING_POSITION => ["Starting position", "Начальная позиция"]
+        OPENING_STARTING_POSITION => ["Starting position", "Начальная позиция"],
+        OPEN_CHALLENGE_FIRST_TO_FOLLOW_NOTE => ['First one to follow the link will join the game', 'Первый, кто перейдет по ссылке, примет вызов']
     ];
 
     public static function getPhrase(phrase:Phrase):String
@@ -93,27 +94,21 @@ class Dictionary
         return dict.get(phrase)[order.indexOf(lang)];
     }
 
-    public static function challengeByHTMLText(login:String, start:Int, bonus:Int):String
+    public static function challengeByText(login:String, start:Int, bonus:Int):String
     {
+        var timeControlStr = '${start/60}+$bonus';
         return switch lang {
-            case EN: '<font size="16">Challenge by $login<br>${start/60}+$bonus<br>Share the link to invite your opponent:</font>';
-            case RU: '<font size="16">Вызов $login<br>${start/60}+$bonus<br>Ссылка-приглашение:</font>';
+            case EN: 'Challenge by $login\n$timeControlStr\nShare the link to invite your opponent:';
+            case RU: 'Вызов $login\n$timeControlStr\nСсылка-приглашение:';
         }
     }
 
-    public static function firstOneToFollowHTMLText():String
+    public static function isHostingAChallengeText(data):String
     {
+        var timeControlStr = '${data.startSecs/60}+${data.bonusSecs/1}';
         return switch lang {
-            case EN: '<font size="16">First one to follow the link will join the game</font>';
-            case RU: '<font size="16">Первый, кто перейдет по ссылке, примет вызов</font>';
-        }
-    }
-
-    public static function isHostingAChallengeHTMLText(data):String
-    {
-        return switch lang {
-            case EN: '<font size="16">${data.challenger} is hosting a challenge (${data.startSecs/60}+${data.bonusSecs/1}). First one to accept it will become an opponent\n';
-            case RU: '<font size="16">${data.challenger} вызывает на бой (${data.startSecs/60}+${data.bonusSecs/1}). Первый, кто его примет, станет противником\n';
+            case EN: '${data.challenger} is hosting a challenge ($timeControlStr). First one to accept it will become an opponent\n';
+            case RU: '${data.challenger} вызывает на бой ($timeControlStr). Первый, кто его примет, станет противником\n';
         }
     }
 

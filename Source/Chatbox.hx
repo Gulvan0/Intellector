@@ -22,13 +22,13 @@ class Chatbox extends Sprite
 
     public function appendMessage(author:String, text:String) 
     {
-        historyText.htmlText += '<b>$author:</b> $text\n';
+        historyText.htmlText += '<p><b>$author:</b> $text</p>';
         waitAndScroll();
     }
 
     public function appendLog(text:String) 
     {
-        historyText.htmlText += '<font color="grey"><i>$text</i></font>\n';
+        historyText.htmlText += '<p><i>$text</i></p>';
         waitAndScroll();
     }
 
@@ -84,7 +84,7 @@ class Chatbox extends Sprite
         history.height = totalHeight - 5 - 25;
 
         historyText = new Label();
-        historyText.htmlText = "";
+        historyText.text = "";
         historyText.width = WIDTH - 20;
 
         history.addComponent(historyText);
