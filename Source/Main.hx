@@ -322,14 +322,17 @@ class Main extends Sprite
 
 		var markupNone:OptionBox = new OptionBox();
 		markupNone.text = Dictionary.getPhrase(SETTINGS_MARKUP_TYPE_NONE);
+		markupNone.componentGroup = "settings-markup";
 		markup.addComponent(markupNone);
 
 		var markupSide:OptionBox = new OptionBox();
 		markupSide.text = Dictionary.getPhrase(SETTINGS_MARKUP_TYPE_SIDE);
+		markupSide.componentGroup = "settings-markup";
 		markup.addComponent(markupSide);
 
 		var markupOver:OptionBox = new OptionBox();
 		markupOver.text = Dictionary.getPhrase(SETTINGS_MARKUP_TYPE_OVER);
+		markupOver.componentGroup = "settings-markup";
 		markup.addComponent(markupOver);
 
 		switch Field.markup 
@@ -372,10 +375,12 @@ class Main extends Sprite
 
 		var langEN:OptionBox = new OptionBox();
 		langEN.text = "English";
+		langEN.componentGroup = "settings-lang";
 		lang.addComponent(langEN);
 
 		var langRU:OptionBox = new OptionBox();
 		langRU.text = "Русский";
+		langRU.componentGroup = "settings-lang";
 		lang.addComponent(langRU);
 
 		switch Dictionary.lang
