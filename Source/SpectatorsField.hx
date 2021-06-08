@@ -16,6 +16,11 @@ class SpectatorsField extends Field
             return movingFigure == Black;
     }
 
+    private override function onPress(e) 
+    {
+        rmbSelectionBackToNormal();
+    }
+
     public function new(serializedPosition:String, watchedSide:FigureColor) 
     {
         super();

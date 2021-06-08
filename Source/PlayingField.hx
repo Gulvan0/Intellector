@@ -50,6 +50,7 @@ class PlayingField extends Field
 
     private override function onPress(e:MouseEvent) 
     {
+        rmbSelectionBackToNormal();
         if (!playersTurn)
             return;
 

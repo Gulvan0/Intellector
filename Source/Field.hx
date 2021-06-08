@@ -392,23 +392,23 @@ class Field extends Sprite
         var fromPos:Point = hexCoords(from.i, from.j);
         var toPos:Point = hexCoords(to.i, to.j);
 
-        var thickness:Float = 10;
-        var alpha:Float = Math.atan2(toPos.x - fromPos.x, toPos.y - fromPos.y);
-        var lPos:Point = new Point(toPos.x - 3 * thickness * Math.sin(alpha + Math.PI / 6), toPos.y - 3 * thickness * Math.cos(alpha + Math.PI / 6));
-        var rPos:Point = new Point(toPos.x - 3 * thickness * Math.sin(alpha - Math.PI / 6), toPos.y - 3 * thickness * Math.cos(alpha - Math.PI / 6));
+        var thickness:Float = Field.a / 6;
+        var lrLength:Float = Field.a / 2;
+        var dr = fromPos.subtract(toPos);
+        var rotated1 = new Point(Math.sqrt(3)/2 * dr.x + 1/2 * dr.y, -1/2 * dr.x + Math.sqrt(3)/2 * dr.y);
+        var rotated2 = new Point(Math.sqrt(3)/2 * dr.x - 1/2 * dr.y, 1/2 * dr.x + Math.sqrt(3)/2 * dr.y);
+        rotated1.normalize(lrLength);
+        rotated2.normalize(lrLength);
+        var branch1 = toPos.add(rotated1);
+        var branch2 = toPos.add(rotated2);
 
         var arrow:Sprite = new Sprite();
         arrow.graphics.lineStyle(thickness, Colors.arrow, 0.7, null, null, CapsStyle.SQUARE, JointStyle.MITER);
         arrow.graphics.moveTo(fromPos.x, fromPos.y);
-        arrow.graphics.lineTo(toPos.x - Math.sin(alpha) * thickness * Math.sqrt(3) * 1.75, toPos.y - Math.cos(alpha) * Math.sqrt(3) * thickness * 1.75);
+        arrow.graphics.lineTo(toPos.x, toPos.y);
+        arrow.graphics.lineTo(branch1.x, branch1.y);
         arrow.graphics.moveTo(toPos.x, toPos.y);
-        arrow.graphics.lineStyle(1, Colors.arrow, 0.7, null, null, CapsStyle.SQUARE, JointStyle.MITER);
-        arrow.graphics.beginFill(Colors.arrow, 0.7);
-        arrow.graphics.lineTo(toPos.x, toPos.y);
-        arrow.graphics.lineTo(lPos.x, lPos.y);
-        arrow.graphics.lineTo(rPos.x, rPos.y);
-        arrow.graphics.lineTo(toPos.x, toPos.y);
-        arrow.graphics.endFill();
+        arrow.graphics.lineTo(branch2.x, branch2.y);
         return arrow;
     }
     
