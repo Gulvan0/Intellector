@@ -10,34 +10,31 @@ class Factory
 {
     public static var a:Float = Field.a;
 
-    public static function produceFiguresFromSerialized(serializedSituation:String, orientation:PieceColor, addOnto:Sprite):Array<Array<Null<Figure>>>
+    public static function produceFiguresFromSerialized(serializedSituation:String, isOrientationNormal:Bool, addOnto:Sprite):Array<Array<Null<Figure>>>
     {
         var situation = SituationDeserializer.deserialize(serializedSituation);
-        return produceFiguresFromSituation(situation, orientation, addOnto);
+        return produceFiguresFromSituation(situation, isOrientationNormal, addOnto);
     }    
 
-    public static function produceFiguresFromDefault(orientation:PieceColor, addOnto:Sprite):Array<Array<Null<Figure>>>
+    public static function produceFiguresFromDefault(isOrientationNormal:Bool, addOnto:Sprite):Array<Array<Null<Figure>>>
     {
         var situation = Situation.starting();
-        return produceFiguresFromSituation(situation, orientation, addOnto);
+        return produceFiguresFromSituation(situation, isOrientationNormal, addOnto);
     }
 
-    public static function produceFiguresFromSituation(situation:Situation, orientation:PieceColor, addOnto:Sprite):Array<Array<Null<Figure>>>
+    public static function produceFiguresFromSituation(situation:Situation, isOrientationNormal:Bool, addOnto:Sprite):Array<Array<Null<Figure>>>
     {
         var figures = [for (j in 0...7) [for (i in 0...9) null]];
 
         for (p => hex in situation.collectOccupiedHexes())
-        {
-            var relativePoint = p.toRelative(orientation);
-            figures[relativePoint.j][relativePoint.i] = Figure.fromHex(hex);
-        }
+            figures[p.j][p.i] = Figure.fromHex(hex);
 
-        scaleMove(figures, addOnto);
+        scaleMove(figures, isOrientationNormal, addOnto);
 
         return figures;
     }
 
-    public static function produceHexes(normalOrientation:Bool, addOnto:Sprite):Array<Array<Null<Hexagon>>>
+    public static function produceHexes(addOnto:Sprite, isOrientationNormal:Bool):Array<Array<Null<Hexagon>>>
     {
         var hexes:Array<Array<Null<Hexagon>>> = [];
         for (j in 0...7)
@@ -48,8 +45,8 @@ class Factory
                     row.push(null);
                 else 
                 {
-                    var hex:Hexagon = new Hexagon(a, i, j, normalOrientation);
-                    var coords = Field.hexCoords(i, j);
+                    var hex:Hexagon = new Hexagon(a, i, j);
+                    var coords = Field.absHexCoords(i, j, isOrientationNormal);
                     hex.x = coords.x;
                     hex.y = coords.y;
                     addOnto.addChild(hex);
@@ -60,18 +57,18 @@ class Factory
         return hexes;
     }
 
-    private static function scaleMove(figures:Array<Array<Null<Figure>>>, addOnto:Sprite)
+    private static function scaleMove(figures:Array<Array<Null<Figure>>>, isOrientationNormal:Bool, addOnto:Sprite)
     {
         for (j in 0...7) 
             for (i in 0...9)
                 if (figures[j][i] != null)
-                    addFigure(figures[j][i], new IntPoint(i, j), addOnto);
+                    addFigure(figures[j][i], new IntPoint(i, j), isOrientationNormal, addOnto);
     }
 
-    public static function addFigure(fig:Figure, loc:IntPoint, addOnto:Sprite)
+    public static function addFigure(fig:Figure, loc:IntPoint, isOrientationNormal:Bool, addOnto:Sprite)
     {
         scaleFigure(fig);
-        disposeFigure(fig, loc);
+        disposeFigure(fig, loc, isOrientationNormal);
         addOnto.addChild(fig);
     }
 
@@ -86,9 +83,9 @@ class Factory
         figure.scaleY = scale;
     }
 
-    private static function disposeFigure(figure:Figure, loc:IntPoint) 
+    private static function disposeFigure(figure:Figure, loc:IntPoint, isOrientationNormal:Bool) 
     {
-        var coords = Field.hexCoords(loc.i, loc.j);
+        var coords = Field.absHexCoords(loc.i, loc.j, isOrientationNormal);
         figure.x = coords.x;
         figure.y = coords.y;
     }

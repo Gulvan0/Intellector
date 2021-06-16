@@ -1,5 +1,6 @@
 package;
 
+import struct.Hex;
 import struct.PieceType;
 import struct.PieceColor;
 
@@ -21,116 +22,90 @@ enum Direction
 
 class Rules
 {
-    public static function isCastle(pos1:IntPoint, pos2:IntPoint, fig1:Figure, fig2:Figure)
-    {
-        if (fig1 == null || fig2 == null || fig1.color != fig2.color)
-            return false;
 
-        if (!((fig1.type == Intellector && fig2.type == Defensor) || (fig1.type == Defensor && fig2.type == Intellector)))
-            return false;
-
-        for (dir in [UL, UR, D, DR, DL, U])
-            if (pos2.equals(getCoordsInAbsDirection(pos1.i, pos1.j, dir)))
-                return true;
-
-        return false;
-    }
-
-    public static function possibleFields<T>(fromI:Int, fromJ:Int, getFigure:Null<IntPoint>->T, normalOrientation:Bool):Array<IntPoint> 
+    public static function possibleFields(from:IntPoint, getHex:Null<IntPoint>->Hex):Array<IntPoint> 
     {
         var fields:Array<IntPoint> = [];
-        var figure:T = getFigure(new IntPoint(fromI, fromJ));
+        var figure:Hex = getHex(from);
+
         switch figure.type 
         {
             case Progressor:
                 for (dir in [U, UL, UR])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
-                    var occupier = getFigure(destination);
-                    if (destination != null && (occupier == null || occupier.color != figure.color))
+                    var destination = getOneStepCoords(from.i, from.j, dir);
+                    var hex = getHex(destination);
+                    if (destination != null && (hex.isEmpty() || hex.color != figure.color))
                         fields.push(destination);
                 }
             case Aggressor:
                 for (dir in [A_UL, A_UR, A_R, A_DR, A_DL, A_L])
-                {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
-                    while (destination != null)
-                    {
-                        var occupier = getFigure(destination);
-                        if (occupier != null)
-                        {
-                            if (occupier.color != figure.color)
-                                fields.push(destination);
-                            break;
-                        }
-                        else 
-                        {
-                            fields.push(destination);
-                            destination = getCoordsInRelDirection(destination.i, destination.j, dir, normalOrientation);
-                        }
-                    }
-                }
+                    fields = fields.concat(avalanche(from, dir, figure.color, getHex));
             case Dominator:
                 for (dir in [UL, UR, D, DR, DL, U])
-                {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
-                    while (destination != null)
-                    {
-                        var occupier = getFigure(destination);
-                        if (occupier != null)
-                        {
-                            if (occupier.color != figure.color)
-                                fields.push(destination);
-                            break;
-                        }
-                        else 
-                        {
-                            fields.push(destination);
-                            destination = getCoordsInRelDirection(destination.i, destination.j, dir, normalOrientation);
-                        }
-                    }
-                }
+                    fields = fields.concat(avalanche(from, dir, figure.color, getHex));
             case Liberator:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation, 1);
-                    var occupier = getFigure(destination);
-                    if (destination != null && occupier == null)
+                    var destination = getOneStepCoords(from.i, from.j, dir);
+                    var hex1 = getHex(destination);
+                    if (destination != null && hex1.isEmpty())
                         fields.push(destination);
 
-                    destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation, 2);
-                    occupier = getFigure(destination);
-                    if (destination != null && (occupier == null || occupier.color != figure.color))
+                    destination = getCoordsInDirection(from.i, from.j, dir, 2);
+                    var hex2 = getHex(destination);
+                    if (destination != null && (hex2.isEmpty() || hex2.color != figure.color))
                         fields.push(destination);
                 }
             case Defensor:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
-                    var occupier = getFigure(destination);
-                    if (destination != null && (occupier == null || occupier.color != figure.color || occupier.type == Intellector))
+                    var destination = getOneStepCoords(from.i, from.j, dir);
+                    var hex = getHex(destination);
+                    if (destination != null && (hex.isEmpty() || hex.color != figure.color || hex.type == Intellector))
                         fields.push(destination);
                 }
             case Intellector:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
-                    var destination = getCoordsInRelDirection(fromI, fromJ, dir, normalOrientation);
-                    var occupier = getFigure(destination);
-                    if (destination != null && (occupier == null || (occupier.color == figure.color && occupier.type == Defensor)))
+                    var destination = getOneStepCoords(from.i, from.j, dir);
+                    var hex = getHex(destination);
+                    if (destination != null && (hex.isEmpty() || (hex.color == figure.color && hex.type == Defensor)))
                         fields.push(destination);
                 }
         }
         return fields;
     }
 
-    public static function getCoordsInRelDirection(fromI:Int, fromJ:Int, dir:Direction, normalOrientation:Bool, ?steps:Int = 1):Null<IntPoint>
+    private static function avalanche(start:IntPoint, dir:Direction, color:PieceColor, getHex:Null<IntPoint>->Hex):Array<IntPoint>
     {
-        var trueDirection = normalOrientation? dir : oppositeDir(dir);
-        var nextCoords = getCoordsInAbsDirection(fromI, fromJ, trueDirection);
+        var hexesCollected:Array<IntPoint> = [];
+        var destination = getOneStepCoords(start.i, start.j, dir);
+        while (destination != null)
+        {
+            var hex = getHex(destination);
+            if (hex.isEmpty())
+            {
+                hexesCollected.push(destination);
+                destination = getOneStepCoords(start.i, start.j, dir);
+            }
+            else
+            {
+                if (hex.color != color)
+                    hexesCollected.push(destination);
+                break;
+            }
+        }
+        return hexesCollected;
+    }
+
+    public static function getCoordsInDirection(fromI:Int, fromJ:Int, dir:Direction, ?steps:Int = 1):Null<IntPoint>
+    {
+        var nextCoords = getOneStepCoords(fromI, fromJ, dir);
         steps--;
         while (steps > 0 && nextCoords != null)
         {
-            nextCoords = getCoordsInAbsDirection(nextCoords.i, nextCoords.j, trueDirection);
+            nextCoords = getOneStepCoords(nextCoords.i, nextCoords.j, dir);
             steps--;
         }
         return nextCoords;
@@ -155,7 +130,7 @@ class Rules
         }    
     }
 
-    public static function getCoordsInAbsDirection(fromI:Int, fromJ:Int, dir:Direction):Null<IntPoint>
+    public static function getOneStepCoords(fromI:Int, fromJ:Int, dir:Direction):Null<IntPoint>
     {
         var coords = switch dir 
         {

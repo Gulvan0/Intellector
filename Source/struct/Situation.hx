@@ -76,28 +76,26 @@ class Situation
     {
         var result:Array<Ply> = [];
 
-        for (i in 0...9)
-            for (j in 0...(7 - i % 2))
-            {
-                var hex:Hex = getC(i, j);
-                if (hex.color != turnColor)
-                    continue;
+        for (p => hex in collectOccupiedHexes())
+        {
+            if (hex.color != turnColor)
+                continue;
 
-                var destCoords = Rules.possibleFields(i, j, get, turnColor == White);
-                for (coords in destCoords)
+            var destCoords = Rules.possibleFields(p, get);
+            for (coords in destCoords)
+            {
+                var ply:Ply = new Ply();
+                ply.from = p.copy();
+                ply.to = coords;
+                result.push(ply);
+                if (get(coords).color != turnColor)
                 {
-                    var ply:Ply = new Ply();
-                    ply.from = new IntPoint(i, j);
-                    ply.to = coords;
-                    result.push(ply);
-                    if (get(coords).color != turnColor)
-                    {
-                        var chameleonPly:Ply = ply.copy();
-                        ply.morphInto = get(coords).type;
-                        result.push(chameleonPly);
-                    }
+                    var chameleonPly:Ply = ply.copy();
+                    ply.morphInto = get(coords).type;
+                    result.push(chameleonPly);
                 }
             }
+        }
         
         return result;
     }

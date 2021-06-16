@@ -1,5 +1,7 @@
 package;
 
+import struct.Situation;
+import struct.Ply;
 import haxe.ui.components.VerticalScroll;
 import openfl.display.StageAlign;
 import haxe.Timer;
@@ -83,18 +85,13 @@ class Sidebox extends Sprite
         }
     }
 
-    public function makeMove(color:PieceColor, figure:PieceType, to:IntPoint, capture:Bool, mate:Bool, castle:Bool, ?morphInto:PieceType) 
+    public function makeMove(ply:Ply, situation:Situation) 
     {
         if (timer != null)
             timer.stop();
 
-        var moveStr;
-        if (castle)
-            moveStr = "O-O";
-        else 
-            moveStr = figureAbbreviation(figure) + (capture? "x" : "") + locToStr(to) + (morphInto != null? '=[${figureAbbreviation(morphInto)}]' : '') + (mate? "#" : "");
-
-        if (color == Black)
+        var moveStr = ply.toNotation(situation);
+        if (situation.turnColor == Black)
         {
             lastMove.black_move = moveStr;
             movetable.dataSource.update(movetable.dataSource.size - 1, lastMove);
@@ -108,14 +105,14 @@ class Sidebox extends Sprite
 
         move++;
 
-        if (!mate && move > 2)
+        if (!situation.isMating(ply) && move > 2)
         {
             if (playerTurn) //Because corrections have already been applied if it is the opponent's turn ("correct, then move" server rule)
                 bottomTime.text = addBonus(bottomTime.text);
             launchTimer();
         }
         
-        playerTurn = color != playerColor;
+        playerTurn = situation.turnColor != playerColor;
     }
 
     private function waitAndScroll() 

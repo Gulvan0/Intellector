@@ -25,8 +25,8 @@ class SpectatorsField extends Field
     {
         super();
         normalOrientation = watchedSide == White;
-        hexes = Factory.produceHexes(normalOrientation, this);
+        hexes = Factory.produceHexes(this, normalOrientation);
         disposeLetters();
-        figures = Factory.produceFiguresFromSerialized(serializedPosition, watchedSide, this);
+        figures = Factory.produceFiguresFromSerialized(serializedPosition, normalOrientation, this);
     }
 }

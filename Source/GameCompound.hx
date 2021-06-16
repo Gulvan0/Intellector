@@ -1,5 +1,11 @@
 package;
 
+import struct.Hex;
+import struct.Situation;
+import struct.Ply;
+import gameboards.AnalysisField;
+import gameboards.SpectatorsField;
+import gameboards.PlayingField;
 import dict.Dictionary;
 import Networker.OngoingBattleData;
 import struct.PieceType;
@@ -106,20 +112,20 @@ class GameCompound extends Sprite
 
     public function onMove(data:MoveData)
     {
-        var from = new IntPoint(data.fromI, data.fromJ);
-        var to = new IntPoint(data.toI, data.toJ);
-        var movingFigure = field.getFigure(from);
-        var ontoFigure = field.getFigure(to);
-        var morphedInto = data.morphInto == null? null : PieceType.createByName(data.morphInto);
-        var capture = ontoFigure != null && ontoFigure.color != movingFigure.color;
-        var mate = capture && ontoFigure.type == Intellector;
-        var castle = ontoFigure != null && ontoFigure.color == movingFigure.color && (ontoFigure.type == Intellector && movingFigure.type == Defensor || ontoFigure.type == Defensor && movingFigure.type == Intellector);
+        var ply:Ply = new Ply();
+        ply.from = new IntPoint(data.fromI, data.fromJ);
+        ply.to = new IntPoint(data.toI, data.toJ);
+        ply.morphInto = data.morphInto == null? null : PieceType.createByName(data.morphInto);
 
-        sidebox.makeMove(movingFigure.color, movingFigure.type, to, capture, mate, castle, morphedInto);
+        var situation:Situation = new Situation();
+        situation.figureArray = [for (row in field.figures) [for (figure in row) figure == null? Hex.empty() : figure.hex.copy()]];
+        situation.turnColor = field.getFigure(ply.from).color;
+
+        sidebox.makeMove(ply, situation);
         if (infobox != null)
-            infobox.makeMove(data.fromI, data.fromJ, data.toI, data.toJ, morphedInto);
+            infobox.makeMove(data.fromI, data.fromJ, data.toI, data.toJ, ply.morphInto);
         if (data.issuer_login != Networker.login)
-            field.move(from, to, morphedInto);
+            field.move(ply.from, ply.to, ply.morphInto);
         else
             Networker.move(data.fromI, data.fromJ, data.toI, data.toJ, data.morphInto == null? null : PieceType.createByName(data.morphInto));
     }

@@ -25,7 +25,7 @@ class Ply
             
             if (addend == "")
             {
-                for (p in Rules.possibleFields(ply.from.i, ply.from.j, context.get, true))
+                for (p in Rules.possibleFields(ply.from, context.get))
                     if (context.get(p).type == Defensor)
                     {
                         ply.to = p.copy();
@@ -69,7 +69,7 @@ class Ply
 
                 for (p => hex in context.collectOccupiedHexes())
                     if (hex.color == context.turnColor && hex.type == movingPiece)
-                        if (Lambda.exists(Rules.possibleFields(p.i, p.j, context.get, true), p -> p.equals(ply.to)))
+                        if (Lambda.exists(Rules.possibleFields(p, context.get), p -> p.equals(ply.to)))
                         {
                             ply.from = p.copy();
                             break;
@@ -111,7 +111,7 @@ class Ply
             }
 
             var anotherDefensorLocation = null;
-            for (p in Rules.possibleFields(intellectorLocation.i, intellectorLocation.j, context.get, true))
+            for (p in Rules.possibleFields(intellectorLocation, context.get))
                 if (!p.equals(defensorLocation))
                     if (!context.get(p).isEmpty())
                     {
@@ -130,7 +130,7 @@ class Ply
         for (p => hex in context.collectOccupiedHexes())
             if (!p.equals(from))
                 if (hex.type == hexFrom.type && hex.color == hexFrom.color)
-                    if (Lambda.exists(Rules.possibleFields(p.i, p.j, context.get, true), to.equals))
+                    if (Lambda.exists(Rules.possibleFields(p, context.get), to.equals))
                     {
                         another = p.copy();
                         break;

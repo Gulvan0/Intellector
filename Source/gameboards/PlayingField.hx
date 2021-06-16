@@ -24,10 +24,10 @@ class PlayingField extends Field
         else
             playersTurn = playerIsWhite;
 
-        hexes = Factory.produceHexes(playerIsWhite, this);
+        hexes = Factory.produceHexes(this, playerIsWhite);
         disposeLetters();
         if (sourceData != null)
-            figures = Factory.produceFiguresFromSerialized(sourceData.position, playerColor, this);
+            figures = Factory.produceFiguresFromSerialized(sourceData.position, playerIsWhite, this);
         else
             figures = Factory.produceFiguresFromDefault(playerIsWhite, this);
         addEventListener(Event.ADDED_TO_STAGE, init);

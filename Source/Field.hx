@@ -1,5 +1,6 @@
 package;
 
+import struct.Hex;
 import js.lib.Math;
 import openfl.display.JointStyle;
 import openfl.display.CapsStyle;
@@ -146,10 +147,10 @@ class Field extends Sprite
 
     //----------------------------------------------------------------------------------------------------------
 
-    private function departurePress(pressLocation:IntPoint, playerIsOwner:PieceColor->Bool) 
+    private function departurePress(pressLocation:IntPoint, isPlayerOwner:PieceColor->Bool) 
     {
         var figure = getFigure(pressLocation);
-        if (figure == null || !playerIsOwner(figure.color))
+        if (figure == null || !isPlayerOwner(figure.color))
             return;
 
         rmbSelectionBackToNormal();
@@ -213,7 +214,7 @@ class Field extends Sprite
             var color = figure.color;
             removeChild(figure);
             figure = new Figure(morphInto, color);
-            Factory.addFigure(figure, to, this);
+            Factory.addFigure(figure, to, isOrientationNormal(), this);
         }
         else
             disposeFigure(figure, to);
@@ -256,7 +257,7 @@ class Field extends Sprite
     {
         for (dir in [UL, UR, D, DR, DL, U])
         {
-            var neighbour = getFigure(Rules.getCoordsInRelDirection(loc.i, loc.j, dir, true));
+            var neighbour = getFigure(Rules.getOneStepCoords(loc.i, loc.j, dir));
             if (neighbour != null && neighbour.color == color && neighbour.type == Intellector)
                 return true;
         }
@@ -282,7 +283,7 @@ class Field extends Sprite
                     distanceSqr = currDistSqr;
                 }
             }
-        return closest;
+        return isOrientationNormal()? closest : closest.invert();
     }
     
     private function ableToMove(from:IntPoint, to:IntPoint) 
@@ -291,7 +292,7 @@ class Field extends Sprite
         if (movingFigure == null)
             return false;
 
-        for (dest in Rules.possibleFields(from.i, from.j, getFigure, isOrientationNormal(movingFigure.color)))
+        for (dest in Rules.possibleFields(from, getHex))
             if (to.equals(dest))
                 return true;
         return false;    
@@ -308,6 +309,11 @@ class Field extends Sprite
 
     //----------------------------------------------------------------------------------------------------------------------------------------
 
+    public function getHex(coords:Null<IntPoint>):Null<Hex>
+    {
+        return getFigure(coords).hex;
+    }
+    
     public function getFigure(coords:Null<IntPoint>):Null<Figure>
     {
         return (coords == null || !hexExists(coords.i, coords.j))? null : figures[coords.j][coords.i];
@@ -315,11 +321,19 @@ class Field extends Sprite
 
     public static function hexExists(i:Int, j:Int):Bool
     {
-        return i >= 0 && i < 9 && j >= 0 && j < 7 && (j != 6 || i % 2 == 0);
+        return i >= 0 && i < 9 && j >= 0 && j < 7 - i % 2;
     }
 
-    public static function hexCoords(i:Int, j:Int):Point
+    public function hexCoords(i:Int, j:Int):Point
     {
+        return absHexCoords(i, j, isOrientationNormal());
+    }
+
+    public static function absHexCoords(i:Int, j:Int, isOrientationNormal:Bool):Point
+    {
+        if (!isOrientationNormal)
+            j = 6 - j - i % 2;
+
         var p:Point = new Point(0, 0);
         p.x = 3 * a * i / 2;
         p.y = Math.sqrt(3) * a * j;
@@ -344,7 +358,7 @@ class Field extends Sprite
 
     private function addMarkers(from:IntPoint) 
     {
-        for (dest in Rules.possibleFields(from.i, from.j, getFigure, isOrientationNormal(getFigure(from).color)))
+        for (dest in Rules.possibleFields(from, getHex))
             if (getFigure(dest) != null)
                 hexes[dest.j][dest.i].addRound();
             else
@@ -353,7 +367,7 @@ class Field extends Sprite
 
     private function removeMarkers(from:IntPoint) 
     {
-        for (dest in Rules.possibleFields(from.i, from.j, getFigure, isOrientationNormal(getFigure(from).color)))
+        for (dest in Rules.possibleFields(from, getHex))
             hexes[dest.j][dest.i].removeMarkers();
     }
 
@@ -387,7 +401,7 @@ class Field extends Sprite
     
     //----------------------------------------------------------------------------------------------------------------------------------------------
 
-    public static function drawArrow(from:IntPoint, to:IntPoint):Sprite
+    public function drawArrow(from:IntPoint, to:IntPoint):Sprite
     {
         var fromPos:Point = hexCoords(from.i, from.j);
         var toPos:Point = hexCoords(to.i, to.j);
@@ -422,7 +436,7 @@ class Field extends Sprite
         var bottomLocations = [for (i in 0...9) new IntPoint(i, (i % 2 == 0)? 6 : 5)];
         for (loc in bottomLocations)
         {
-            var letter = createLetter(Position.notationI(loc.i, isOrientationNormal()));
+            var letter = createLetter(Notation.getColumn(loc.i));
             letter.x = hexes[loc.j][loc.i].x - letter.textWidth/2 - 5;
             letter.y = hexes[loc.j][loc.i].y + Field.a * Math.sqrt(3) / 2;
             addChild(letter); 

@@ -13,7 +13,7 @@ class AnalysisField extends Field
     public function new() 
     {
         super();
-        hexes = Factory.produceHexes(true, this);
+        hexes = Factory.produceHexes(this, true);
         disposeLetters();
         arrangeDefault();
         addEventListener(Event.ADDED_TO_STAGE, init);

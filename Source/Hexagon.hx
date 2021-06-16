@@ -1,6 +1,5 @@
 package;
 
-import serialization.PlyConverter;
 import openfl.text.TextFormat;
 import openfl.text.TextField;
 import openfl.display.Sprite;
@@ -17,7 +16,7 @@ class Hexagon extends Sprite
 
         public var redSelected:Bool;
 
-        public function new(a:Float, i:Int, j:Int, normalOrientation:Bool)
+        public function new(a:Float, i:Int, j:Int)
         {
                 super();
                 var dark:Bool = isDark(i, j);
@@ -27,7 +26,7 @@ class Hexagon extends Sprite
                 redHex = drawHex(a, dark? Colors.redDark : Colors.redLight);
 
                 number = new TextField();
-                number.text = PlyConverter.notationJ(i, j, normalOrientation);
+                number.text = Notation.getRow(i, j);
                 number.setTextFormat(new TextFormat(null, 14, dark? Colors.lightNumber : Colors.darkNumber, true));
                 number.selectable = false;
                 number.x = -a * 0.85;
