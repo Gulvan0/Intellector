@@ -7,10 +7,10 @@ import js.Cookie;
 import openfl.text.TextFormat;
 import openfl.text.TextField;
 import Rules.Direction;
-import Figure.FigureType;
+import struct.PieceType;
 import openfl.Assets;
 import openfl.events.Event;
-import Figure.FigureColor;
+import struct.PieceColor;
 import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import openfl.display.Sprite;
@@ -85,12 +85,12 @@ class Field extends Sprite
         throw "To be overriden";
     }
 
-    private function makeMove(from:IntPoint, to:IntPoint, ?morphInto:FigureType) 
+    private function makeMove(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
     {
         throw "To be overriden";
     }
 
-    private function isOrientationNormal(?movingFigure:FigureColor):Bool
+    private function isOrientationNormal(?movingFigure:PieceColor):Bool
     {   
         throw "To be overriden";
     }
@@ -146,7 +146,7 @@ class Field extends Sprite
 
     //----------------------------------------------------------------------------------------------------------
 
-    private function departurePress(pressLocation:IntPoint, playerIsOwner:FigureColor->Bool) 
+    private function departurePress(pressLocation:IntPoint, playerIsOwner:PieceColor->Bool) 
     {
         var figure = getFigure(pressLocation);
         if (figure == null || !playerIsOwner(figure.color))
@@ -203,7 +203,7 @@ class Field extends Sprite
             makeMove(from, to);
     }
 
-    public function move(from:IntPoint, to:IntPoint, ?morphInto:FigureType) 
+    public function move(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
     {
         var figure = getFigure(from);
         var figMoveOnto = getFigure(to);
@@ -252,7 +252,7 @@ class Field extends Sprite
         return ((fig1.type == Intellector && fig2.type == Defensor) || (fig1.type == Defensor && fig2.type == Intellector)) && fig1.color == fig2.color;
     }
 
-    private function nearOwnIntellector(loc:IntPoint, color:FigureColor):Bool
+    private function nearOwnIntellector(loc:IntPoint, color:PieceColor):Bool
     {
         for (dir in [UL, UR, D, DR, DL, U])
         {

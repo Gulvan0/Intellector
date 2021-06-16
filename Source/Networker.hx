@@ -1,7 +1,7 @@
 package;
 
 import dict.Dictionary;
-import Figure.FigureType;
+import struct.PieceType;
 import openfl.utils.Assets;
 import js.Browser;
 import haxe.Json;
@@ -216,7 +216,7 @@ class Networker
         emit('request_timeout_check', {issuer_login: Networker.login});
     }
 
-    public static function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:FigureType) 
+    public static function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:PieceType) 
     {
         emit('move', {issuer_login: Networker.login, fromI: fromI, fromJ: fromJ, toI: toI, toJ: toJ, morphInto: morphInto == null? null : morphInto.getName()});
     }

@@ -3,8 +3,8 @@ package;
 import haxe.ui.components.VerticalScroll;
 import openfl.display.StageAlign;
 import haxe.Timer;
-import Figure.FigureType;
-import Figure.FigureColor;
+import struct.PieceType;
+import struct.PieceColor;
 import haxe.ui.macros.ComponentMacros;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.VBox;
@@ -25,7 +25,7 @@ class Sidebox extends Sprite
     private var secsPerTurn:Int;
     private var move:Int;
 
-    private var playerColor:FigureColor;
+    private var playerColor:PieceColor;
     private var playerTurn:Bool;
     private var lastMove:Dynamic;
 
@@ -41,19 +41,6 @@ class Sidebox extends Sprite
         var minRepresentation = numRep(minsLeft);
         var secRepresentation = numRep(secsLeft);
         return '$minRepresentation:$secRepresentation';    
-    }
-
-    private inline function figureAbbreviation(figure:FigureType):String
-    {
-        return switch figure 
-        {
-            case Progressor: "P";
-            case Aggressor: "Ag";
-            case Dominator: "Dm";
-            case Liberator: "Lb";
-            case Defensor: "Df";
-            case Intellector: "In";
-        }
     }
 
     private function timerRun() 
@@ -82,12 +69,6 @@ class Sidebox extends Sprite
         return '${numRep(timeNumbers[0])}:${numRep(timeNumbers[1])}';
     }
 
-    private function locToStr(loc:IntPoint):String
-    {
-        var normalOrientation = playerColor == White;
-        return Position.notationI(loc.i, true) + Position.notationJ(loc.i, loc.j, normalOrientation);
-    }
-
     public function correctTime(correctedSecsWhite:Int, correctedSecsBlack:Int) 
     {
         if (playerColor == White)
@@ -102,7 +83,7 @@ class Sidebox extends Sprite
         }
     }
 
-    public function makeMove(color:FigureColor, figure:FigureType, to:IntPoint, capture:Bool, mate:Bool, castle:Bool, ?morphInto:FigureType) 
+    public function makeMove(color:PieceColor, figure:PieceType, to:IntPoint, capture:Bool, mate:Bool, castle:Bool, ?morphInto:PieceType) 
     {
         if (timer != null)
             timer.stop();
@@ -153,7 +134,7 @@ class Sidebox extends Sprite
             vscroll.pos = vscroll.max;
     }
 
-    public function writeMove(color:FigureColor, s:String)
+    public function writeMove(color:PieceColor, s:String)
     {
         if (color == Black)
         {

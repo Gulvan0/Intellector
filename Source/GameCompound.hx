@@ -2,8 +2,8 @@ package;
 
 import dict.Dictionary;
 import Networker.OngoingBattleData;
-import Figure.FigureType;
-import Figure.FigureColor;
+import struct.PieceType;
+import struct.PieceColor;
 import haxe.ui.containers.VBox;
 import haxe.ui.components.Button;
 import Networker.BattleData;
@@ -21,7 +21,7 @@ class GameCompound extends Sprite
     private var chatbox:Null<Chatbox>;
     private var infobox:Null<GameInfoBox>;
 
-    public var playerColor:FigureColor;
+    public var playerColor:PieceColor;
 
     public static function buildActive(data:BattleData):GameCompound
     {
@@ -55,10 +55,10 @@ class GameCompound extends Sprite
             if (StringTools.contains(trimmed, ":") || trimmed.length < 4)
                 continue;
 
-            infobox.makeMove(Std.parseInt(trimmed.charAt(0)), Std.parseInt(trimmed.charAt(1)), Std.parseInt(trimmed.charAt(2)), Std.parseInt(trimmed.charAt(3)), trimmed.length == 4? null : FigureType.createByName(trimmed.substr(4)));
+            infobox.makeMove(Std.parseInt(trimmed.charAt(0)), Std.parseInt(trimmed.charAt(1)), Std.parseInt(trimmed.charAt(2)), Std.parseInt(trimmed.charAt(3)), trimmed.length == 4? null : PieceType.createByName(trimmed.substr(4)));
         }
 
-        var color:FigureColor = White;
+        var color:PieceColor = White;
         for (move in data.movesPlayed)
         {
             sidebox.writeMove(color, move);
@@ -76,13 +76,13 @@ class GameCompound extends Sprite
     public static function buildSpectators(data:OngoingBattleData, onReturn:Void->Void):GameCompound
     {
         var whiteRequested:Bool = data.requestedColor == "white";
-        var watchedColor:FigureColor = whiteRequested? White : Black;
+        var watchedColor:PieceColor = whiteRequested? White : Black;
         var bottomLogin:String = whiteRequested? data.whiteLogin : data.blackLogin;
         var upperLogin:String = whiteRequested? data.blackLogin : data.whiteLogin;
 
         var field:SpectatorsField = new SpectatorsField(data.position, watchedColor);
         var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested);
-        var color:FigureColor = White;
+        var color:PieceColor = White;
         for (move in data.movesPlayed)
         {
             sidebox.writeMove(color, move);
@@ -110,7 +110,7 @@ class GameCompound extends Sprite
         var to = new IntPoint(data.toI, data.toJ);
         var movingFigure = field.getFigure(from);
         var ontoFigure = field.getFigure(to);
-        var morphedInto = data.morphInto == null? null : FigureType.createByName(data.morphInto);
+        var morphedInto = data.morphInto == null? null : PieceType.createByName(data.morphInto);
         var capture = ontoFigure != null && ontoFigure.color != movingFigure.color;
         var mate = capture && ontoFigure.type == Intellector;
         var castle = ontoFigure != null && ontoFigure.color == movingFigure.color && (ontoFigure.type == Intellector && movingFigure.type == Defensor || ontoFigure.type == Defensor && movingFigure.type == Intellector);
@@ -121,7 +121,7 @@ class GameCompound extends Sprite
         if (data.issuer_login != Networker.login)
             field.move(from, to, morphedInto);
         else
-            Networker.move(data.fromI, data.fromJ, data.toI, data.toJ, data.morphInto == null? null : FigureType.createByName(data.morphInto));
+            Networker.move(data.fromI, data.fromJ, data.toI, data.toJ, data.morphInto == null? null : PieceType.createByName(data.morphInto));
     }
 
     public function onTimeCorrection(data:TimeData)

@@ -1,8 +1,8 @@
 package;
 
 import dict.Dictionary;
-import Figure.FigureType;
-import Figure.FigureColor;
+import struct.PieceType;
+import struct.PieceColor;
 import haxe.ui.styles.Style;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
@@ -33,7 +33,7 @@ class GameInfoBox extends Sprite
     private var openingTree:OpeningTree;
     private var playerIsWhite:Bool;
 
-    public function changeResolution(outcome:Outcome, winner:Null<FigureColor>) 
+    public function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
     {
         var resolution = switch outcome 
         {
@@ -50,7 +50,7 @@ class GameInfoBox extends Sprite
         shortInfoTF.text = timeControlText + resolution;
     }
 
-    public function makeMove(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:FigureType)
+    public function makeMove(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:PieceType)
     {
         if (!playerIsWhite)
         {

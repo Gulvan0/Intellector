@@ -1,7 +1,7 @@
 package;
 
 import dict.Dictionary;
-import Figure.FigureType;
+import struct.PieceType;
 
 class Branch
 {
@@ -37,7 +37,7 @@ class OpeningTree
     public var currentNode:Branch;
     public var isMirrored:Null<Bool>;
 
-    public function makeMove(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:FigureType) 
+    public function makeMove(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:PieceType) 
     {
         if (isMirrored == null)
             if (fromI == 4)

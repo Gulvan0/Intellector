@@ -1,6 +1,8 @@
 package;
 
-import Figure.FigureColor;
+import serialization.SituationDeserializer;
+import struct.Situation;
+import struct.PieceColor;
 import openfl.display.Sprite;
 import openfl.geom.Point;
 
@@ -8,17 +10,30 @@ class Factory
 {
     public static var a:Float = Field.a;
 
-    public static function produceFiguresFromSerialized(serializedPosition:String, watchedSide:FigureColor, addOnto:Sprite):Array<Array<Null<Figure>>>
+    public static function produceFiguresFromSerialized(serializedSituation:String, orientation:PieceColor, addOnto:Sprite):Array<Array<Null<Figure>>>
     {
-        var figures = Position.buildFigureArray(serializedPosition, watchedSide);
-        scaleMove(figures, addOnto);
-        return figures;
+        var situation = SituationDeserializer.deserialize(serializedSituation);
+        return produceFiguresFromSituation(situation, orientation, addOnto);
     }    
 
-    public static function produceFiguresFromDefault(normalOrientation:Bool, addOnto:Sprite):Array<Array<Null<Figure>>>
+    public static function produceFiguresFromDefault(orientation:PieceColor, addOnto:Sprite):Array<Array<Null<Figure>>>
     {
-        var figures = Position.buildDefault(normalOrientation);
+        var situation = Situation.starting();
+        return produceFiguresFromSituation(situation, orientation, addOnto);
+    }
+
+    public static function produceFiguresFromSituation(situation:Situation, orientation:PieceColor, addOnto:Sprite):Array<Array<Null<Figure>>>
+    {
+        var figures = [for (j in 0...7) [for (i in 0...9) null]];
+
+        for (p => hex in situation.collectOccupiedHexes())
+        {
+            var relativePoint = p.toRelative(orientation);
+            figures[relativePoint.j][relativePoint.i] = Figure.fromHex(hex);
+        }
+
         scaleMove(figures, addOnto);
+
         return figures;
     }
 

@@ -1,6 +1,7 @@
 package;
 
-import Figure.FigureColor;
+import struct.PieceType;
+import struct.PieceColor;
 
 enum Direction
 {
@@ -35,10 +36,10 @@ class Rules
         return false;
     }
 
-    public static function possibleFields(fromI:Int, fromJ:Int, getFigure:Null<IntPoint>->Figure, normalOrientation:Bool):Array<IntPoint> 
+    public static function possibleFields<T>(fromI:Int, fromJ:Int, getFigure:Null<IntPoint>->T, normalOrientation:Bool):Array<IntPoint> 
     {
         var fields:Array<IntPoint> = [];
-        var figure = getFigure(new IntPoint(fromI, fromJ));
+        var figure:T = getFigure(new IntPoint(fromI, fromJ));
         switch figure.type 
         {
             case Progressor:

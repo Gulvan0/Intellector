@@ -1,6 +1,6 @@
 package dict;
 
-import Figure.FigureColor;
+import struct.PieceColor;
 
 class Dictionary 
 {
@@ -112,7 +112,7 @@ class Dictionary
         }
     }
 
-    public static function colorReferring(color:FigureColor):String
+    public static function colorReferring(color:PieceColor):String
     {
         return switch lang {
             case EN: color == White? "White" : "Black";

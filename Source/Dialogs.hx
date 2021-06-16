@@ -3,12 +3,12 @@ package;
 import dict.Dictionary;
 import haxe.ui.components.TextField;
 import haxe.ui.components.Button;
-import Figure.FigureColor;
+import struct.PieceColor;
 import haxe.ui.containers.HBox;
 import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;
 import haxe.ui.containers.dialogs.Dialog;
-import Figure.FigureType;
+import struct.PieceType;
 import haxe.ui.containers.dialogs.Dialog.DialogButton;
 import haxe.ui.containers.dialogs.MessageBox.MessageBoxType;
 import haxe.ui.core.Screen;
@@ -35,9 +35,9 @@ class Dialogs
         Screen.instance.messageBox(message, title, MessageBoxType.TYPE_INFO, true);
     }
 
-    public static function promotionSelect(color:FigureColor, callback:FigureType->Void, onCancel:Void->Void)
+    public static function promotionSelect(color:PieceColor, callback:PieceType->Void, onCancel:Void->Void)
     {
-        function cb(dialog:Dialog, type:FigureType) 
+        function cb(dialog:Dialog, type:PieceType) 
         {
             dialog.hideDialog(DialogButton.OK);
             callback(type);
@@ -150,10 +150,10 @@ class Dialogs
         dialog.showDialog(true);
     }
 
-    private static function figureBtn(type:FigureType, color:FigureColor, callback:Void->Void):Button
+    private static function figureBtn(type:PieceType, color:PieceColor, callback:Void->Void):Button
     {
         var btn:Button = new Button();
-        btn.icon = Figure.pathToImage(type, color, true);
+        btn.icon = AssetManager.pathToImage(type, color, true);
         btn.width = 100;
         btn.height = 100;
         btn.onClick = (e) -> {callback();};

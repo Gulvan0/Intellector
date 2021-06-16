@@ -1,60 +1,46 @@
 package;
 
+import struct.PieceColor;
+import struct.PieceType;
+import struct.Hex;
 import openfl.Assets;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.Sprite;
 
-enum FigureType
-{
-    Progressor;
-    Aggressor;
-    Dominator;
-    Liberator;
-    Defensor;
-    Intellector;
-}
-
-enum FigureColor
-{
-    White;
-    Black;
-}
-
 class Figure extends Sprite 
 {
-    public static var bitmaps:Map<FigureType, Map<FigureColor, BitmapData>>;
-    public var type:FigureType;
-    public var color:FigureColor;
+    public var hex:Hex;
+    public var type(get, never):PieceType;
+    public var color(get, never):PieceColor;
 
-    public function new(type:FigureType, color:FigureColor)
+    public static function fromHex(h:Hex):Figure
+    {
+        return new Figure(h.type, h.color);
+    }
+
+    public function new(type:PieceType, color:PieceColor)
     {
         super();
-        this.type = type;
-        this.color = color;
-        var bitmap = new Bitmap(bitmaps[type][color]);
+        this.hex = Hex.occupied(type, color);
+        draw();
+    }
+
+    public function get_type():PieceType
+    {
+        return hex.type;
+    }
+
+    public function get_color():PieceColor
+    {
+        return hex.color;
+    }
+
+    private function draw() 
+    {
+        var bitmap = new Bitmap(AssetManager.pieceBitmaps[type][color]);
         bitmap.x = -bitmap.width / 2;
         bitmap.y = -bitmap.height / 2;
-        addChild (bitmap);
-    }
-
-    public static function initFigures()
-    {
-        bitmaps = [];
-        for (fig in FigureType.createAll())
-        {
-            bitmaps[fig] = new Map<FigureColor, BitmapData>();
-            for (col in FigureColor.createAll())
-                bitmaps[fig][col] = Assets.getBitmapData(pathToImage(fig, col));
-        }
-    }
-
-    public static inline function pathToImage(type:FigureType, color:FigureColor, ?icon:Bool = false):String
-    {
-        var filename:String = type.getName() + "_" + color.getName().toLowerCase();
-        if (icon)
-            return 'assets/figicons/$filename.png';
-        else
-            return 'assets/figures/$filename.png';
+        addChild(bitmap);    
     }
 }

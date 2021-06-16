@@ -1,0 +1,23 @@
+Situation
+{
+    turnColor (w|b : first letter of color)
+
+    [
+        i (0-8)
+        j (0-6)
+        type (r|g|o|n|e|i : second letter of figure type)
+        color (w|b : first letter of color)
+    ]
+}
+example: w00ob01nb45nw -> w 00ob 01nb 45nw
+
+Ply
+{
+    fromI (0-8)
+    fromJ (0-6)
+    toI (0-8)
+    toJ (0-6)
+    morphInto (PieceType.getName(); optional)
+}
+example: 3132
+example: 6160Dominator
