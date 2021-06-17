@@ -31,11 +31,12 @@ class Rules
         switch figure.type 
         {
             case Progressor:
-                for (dir in [U, UL, UR])
+                var directions:Array<Direction> = figure.color == White? [U, UL, UR] : [D, DL, DR];
+                for (dir in directions)
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
                     var hex = getHex(destination);
-                    if (destination != null && (hex.isEmpty() || hex.color != figure.color))
+                    if (destination != null && hex != null && (hex.isEmpty() || hex.color != figure.color))
                         fields.push(destination);
                 }
             case Aggressor:
@@ -49,12 +50,12 @@ class Rules
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
                     var hex1 = getHex(destination);
-                    if (destination != null && hex1.isEmpty())
+                    if (destination != null && hex1 != null && hex1.isEmpty())
                         fields.push(destination);
 
                     destination = getCoordsInDirection(from.i, from.j, dir, 2);
                     var hex2 = getHex(destination);
-                    if (destination != null && (hex2.isEmpty() || hex2.color != figure.color))
+                    if (destination != null && hex2 != null && (hex2.isEmpty() || hex2.color != figure.color))
                         fields.push(destination);
                 }
             case Defensor:
@@ -62,7 +63,7 @@ class Rules
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
                     var hex = getHex(destination);
-                    if (destination != null && (hex.isEmpty() || hex.color != figure.color || hex.type == Intellector))
+                    if (destination != null && hex != null && (hex.isEmpty() || hex.color != figure.color || hex.type == Intellector))
                         fields.push(destination);
                 }
             case Intellector:
@@ -70,7 +71,7 @@ class Rules
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
                     var hex = getHex(destination);
-                    if (destination != null && (hex.isEmpty() || (hex.color == figure.color && hex.type == Defensor)))
+                    if (destination != null && hex != null && (hex.isEmpty() || (hex.color == figure.color && hex.type == Defensor)))
                         fields.push(destination);
                 }
         }
@@ -84,14 +85,14 @@ class Rules
         while (destination != null)
         {
             var hex = getHex(destination);
-            if (hex.isEmpty())
+            if (hex != null && hex.isEmpty())
             {
                 hexesCollected.push(destination);
-                destination = getOneStepCoords(start.i, start.j, dir);
+                destination = getOneStepCoords(destination.i, destination.j, dir);
             }
             else
             {
-                if (hex.color != color)
+                if (hex != null && hex.color != color)
                     hexesCollected.push(destination);
                 break;
             }

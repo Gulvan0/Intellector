@@ -10,7 +10,7 @@ class Situation
     public static function starting():Situation
     {
         var situation = new Situation();
-        situation.figureArray = [for (j in 0...6) []];
+        situation.figureArray = [for (j in 0...7) [for (i in 0...9) Hex.empty()]];
         situation.turnColor = White;
 
         situation.figureArray[0][0] = Hex.occupied(Dominator, Black);

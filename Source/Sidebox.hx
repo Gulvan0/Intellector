@@ -29,7 +29,7 @@ class Sidebox extends Sprite
 
     private var playerColor:PieceColor;
     private var playerTurn:Bool;
-    private var lastMove:Dynamic;
+    private var lastMoveEntry:Dynamic;
 
     private inline function numRep(v:Int)
     {
@@ -93,13 +93,13 @@ class Sidebox extends Sprite
         var moveStr = ply.toNotation(situation);
         if (situation.turnColor == Black)
         {
-            lastMove.black_move = moveStr;
-            movetable.dataSource.update(movetable.dataSource.size - 1, lastMove);
+            lastMoveEntry.black_move = moveStr;
+            movetable.dataSource.update(movetable.dataSource.size - 1, lastMoveEntry);
         }
         else 
         {
-            lastMove = {"num": '$move', "white_move": moveStr, "black_move": ""};
-            movetable.dataSource.add(lastMove);
+            lastMoveEntry = {"num": '$move', "white_move": moveStr, "black_move": ""};
+            movetable.dataSource.add(lastMoveEntry);
         }
         waitAndScroll();
 
@@ -135,13 +135,13 @@ class Sidebox extends Sprite
     {
         if (color == Black)
         {
-            lastMove.black_move = s;
-            movetable.dataSource.update(movetable.dataSource.size - 1, lastMove);
+            lastMoveEntry.black_move = s;
+            movetable.dataSource.update(movetable.dataSource.size - 1, lastMoveEntry);
         }
         else 
         {
-            lastMove = {"num": '$move', "white_move": s, "black_move": ""};
-            movetable.dataSource.add(lastMove);
+            lastMoveEntry = {"num": '$move', "white_move": s, "black_move": ""};
+            movetable.dataSource.add(lastMoveEntry);
         }
 
         move++;

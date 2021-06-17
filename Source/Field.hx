@@ -198,7 +198,7 @@ class Field extends Sprite
 
         if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type && figure.type != Progressor)
             Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
-        else if (isFinalForPlayer(to) && figure.type == Progressor)
+        else if (isFinalForColor(to, figure.color) && figure.type == Progressor)
             Dialogs.promotionSelect(figure.color, makeMove.bind(from, to, _), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
         else 
             makeMove(from, to);
@@ -311,7 +311,16 @@ class Field extends Sprite
 
     public function getHex(coords:Null<IntPoint>):Null<Hex>
     {
-        return getFigure(coords).hex;
+        if (coords == null || !hexExists(coords.i, coords.j))
+            return null;
+        else
+        {
+            var occupier:Null<Figure> = figures[coords.j][coords.i];
+            if (occupier == null)
+                return Hex.empty();
+            else 
+                return occupier.hex;
+        }
     }
     
     public function getFigure(coords:Null<IntPoint>):Null<Figure>
@@ -342,9 +351,12 @@ class Field extends Sprite
         return p;
     }
     
-    private function isFinalForPlayer(p:IntPoint):Bool
+    private function isFinalForColor(p:IntPoint, color:PieceColor):Bool
     {
-        return p.j == 0 && p.i % 2 == 0;
+        if (color == White)
+            return p.j == 0 && p.i % 2 == 0;
+        else 
+            return p.j == 6 && p.i % 2 == 0;
     }
     
     //----------------------------------------------------------------------------------------------------------------------------------------------
