@@ -86,7 +86,7 @@ class Networker
         #if prod
         _ws = new WebSocket("wss://play-intellector.ru:5000");
         #else
-        _ws = new WebSocket("wss://localhost:5000");
+        _ws = new WebSocket("ws://localhost:5000");
         #end
         _ws.onopen = function() {
             trace("open");

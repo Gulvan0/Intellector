@@ -1,5 +1,7 @@
 package;
 
+import struct.Ply;
+import openings.OpeningTree;
 import dict.Dictionary;
 import struct.PieceType;
 import struct.PieceColor;
@@ -50,16 +52,11 @@ class GameInfoBox extends Sprite
         shortInfoTF.text = timeControlText + resolution;
     }
 
-    public function makeMove(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:PieceType)
+    public function makeMove(ply:Ply)
     {
-        if (!playerIsWhite)
-        {
-            fromJ = 6 - fromJ - fromI % 2;
-            toJ = 6 - toJ - toI % 2;
-        }
         if (!openingTree.currentNode.terminal)
         {
-            openingTree.makeMove(fromI, fromJ, toI, toJ, morphInto);
+            openingTree.makeMove(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
             openingTF.text = openingTree.currentNode.name;
         }
     }

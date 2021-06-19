@@ -35,9 +35,12 @@ class Rules
                 for (dir in directions)
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
-                    var hex = getHex(destination);
-                    if (destination != null && hex != null && (hex.isEmpty() || hex.color != figure.color))
-                        fields.push(destination);
+                    if (destination != null)
+                    {
+                        var hex = getHex(destination);
+                        if (hex != null && (hex.isEmpty() || hex.color != figure.color))
+                            fields.push(destination);
+                    }
                 }
             case Aggressor:
                 for (dir in [A_UL, A_UR, A_R, A_DR, A_DL, A_L])
@@ -49,30 +52,42 @@ class Rules
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
-                    var hex1 = getHex(destination);
-                    if (destination != null && hex1 != null && hex1.isEmpty())
-                        fields.push(destination);
+                    if (destination != null)
+                    {
+                        var hex1 = getHex(destination);
+                        if (hex1 != null && hex1.isEmpty())
+                            fields.push(destination);
+                    }
 
                     destination = getCoordsInDirection(from.i, from.j, dir, 2);
-                    var hex2 = getHex(destination);
-                    if (destination != null && hex2 != null && (hex2.isEmpty() || hex2.color != figure.color))
-                        fields.push(destination);
+                    if (destination != null)
+                    {
+                        var hex2 = getHex(destination);
+                        if (hex2 != null && (hex2.isEmpty() || hex2.color != figure.color))
+                            fields.push(destination);
+                    }
                 }
             case Defensor:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
-                    var hex = getHex(destination);
-                    if (destination != null && hex != null && (hex.isEmpty() || hex.color != figure.color || hex.type == Intellector))
-                        fields.push(destination);
+                    if (destination != null)
+                    {
+                        var hex = getHex(destination);
+                        if (hex != null && (hex.isEmpty() || hex.color != figure.color || hex.type == Intellector))
+                            fields.push(destination);
+                    }
                 }
             case Intellector:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
-                    var hex = getHex(destination);
-                    if (destination != null && hex != null && (hex.isEmpty() || (hex.color == figure.color && hex.type == Defensor)))
-                        fields.push(destination);
+                    if (destination != null)
+                    {
+                        var hex = getHex(destination);
+                        if (hex != null && (hex.isEmpty() || (hex.color == figure.color && hex.type == Defensor)))
+                            fields.push(destination);
+                    }
                 }
         }
         return fields;

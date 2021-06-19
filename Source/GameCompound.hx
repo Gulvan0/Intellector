@@ -1,5 +1,6 @@
 package;
 
+import serialization.PlyDeserializer;
 import struct.Hex;
 import struct.Situation;
 import struct.Ply;
@@ -61,7 +62,7 @@ class GameCompound extends Sprite
             if (StringTools.contains(trimmed, ":") || trimmed.length < 4)
                 continue;
 
-            infobox.makeMove(Std.parseInt(trimmed.charAt(0)), Std.parseInt(trimmed.charAt(1)), Std.parseInt(trimmed.charAt(2)), Std.parseInt(trimmed.charAt(3)), trimmed.length == 4? null : PieceType.createByName(trimmed.substr(4)));
+            infobox.makeMove(PlyDeserializer.deserialize(trimmed));
         }
 
         var color:PieceColor = White;
@@ -118,12 +119,12 @@ class GameCompound extends Sprite
         ply.morphInto = data.morphInto == null? null : PieceType.createByName(data.morphInto);
 
         var situation:Situation = new Situation();
-        situation.figureArray = [for (row in field.figures) [for (figure in row) figure == null? Hex.empty() : figure.hex.copy()]];
+        situation.figureArray = [for (j in 0...7) [for (i in 0...9) field.getHex(new IntPoint(i, j))]];
         situation.turnColor = field.getFigure(ply.from).color;
 
         sidebox.makeMove(ply, situation);
         if (infobox != null)
-            infobox.makeMove(data.fromI, data.fromJ, data.toI, data.toJ, ply.morphInto);
+            infobox.makeMove(ply);
         if (data.issuer_login != Networker.login)
             field.move(ply.from, ply.to, ply.morphInto);
         else

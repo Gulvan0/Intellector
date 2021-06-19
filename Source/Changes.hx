@@ -16,6 +16,7 @@ class Changes
     {
         if (Dictionary.lang == EN)
             changelog = [
+                {date: "19.06.2021", text:"Bugfixes & Notation update"},
                 {date: "08.06.2021", text:"Bugfixes"},
                 {date: "01.06.2021", text:"Text display bug fixed"},
                 {date: "19.05.2021/2", text:"Language select and Russian translation"},
@@ -34,6 +35,7 @@ class Changes
             ];
         else if (Dictionary.lang == RU)
             changelog = [
+                {date: "19.06.2021", text:"Исправления багов и обновление нотации"},
                 {date: "08.06.2021", text:"Исправления багов"},
                 {date: "01.06.2021", text:"Исправлена ошибка отображения текста"},
                 {date: "19.05.2021/2", text:"Выбор языка и русский перевод"},

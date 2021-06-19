@@ -1,5 +1,6 @@
 package;
 
+import openings.OpeningTree;
 import dict.Dictionary;
 import haxe.ui.events.UIEvent;
 import haxe.ui.components.OptionBox;

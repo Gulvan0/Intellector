@@ -14,7 +14,7 @@ class Ply
         {
             ply.morphInto = null;
 
-            var addend:String = plyStr.substr(3);
+            var addend:String = plyStr.substr(4);
 
             for (p => hex in context.collectOccupiedHexes())
                 if (hex.color == context.turnColor && hex.type == Intellector)
@@ -42,26 +42,26 @@ class Ply
             if (plyStr.charAt(0) == "P")
             {
                 movingPiece = Progressor;
-                plyStr = plyStr.substr(1);
+                plyStr = plyStr.substr(2);
             }
             else
             {
                 movingPiece = Notation.pieceFromAbbreviation(plyStr.substr(0, 2));
-                plyStr = plyStr.substr(2);
+                plyStr = plyStr.substr(3);
             }
 
-            if (StringTools.contains(plyStr, ":") || (StringTools.contains(plyStr, "x") && plyStr.charAt(0) != "x"))
+            if (StringTools.contains(plyStr, "~") || (StringTools.contains(plyStr, "⨯") && plyStr.charAt(0) != "⨯"))
             {
                 ply.from = Notation.parseIntPoint(plyStr.substr(0, 2));
                 plyStr = plyStr.substr(2);
-                if (plyStr.charAt(0) == "x" || plyStr.charAt(0) == ":")
+                if (plyStr.charAt(0) == "⨯" || plyStr.charAt(0) == "~")
                     plyStr = plyStr.substr(1);
                 ply.to = Notation.parseIntPoint(plyStr.substr(0, 2));
                 plyStr = plyStr.substr(2);
             }
             else
             {
-                if (plyStr.charAt(0) == "x")
+                if (plyStr.charAt(0) == "⨯")
                     plyStr = plyStr.substr(1);
 
                 ply.to = Notation.parseIntPoint(plyStr.substr(0, 2));
@@ -119,7 +119,7 @@ class Ply
                         break;
                     }
             if (anotherDefensorLocation != null)
-                return "O-O" + Notation.hexNotation(defensorLocation);
+                return "O-O-" + Notation.hexNotation(defensorLocation);
             else 
                 return "O-O";
         }
@@ -136,14 +136,15 @@ class Ply
                         break;
                     }
 
-        str += Notation.pieceAbbreviation(hexFrom.type);
+        str += Notation.pieceAbbreviation(hexFrom.type) + ".";
+
         if (another != null)
             str += Notation.hexNotation(from);
 
         if (capture)
-            str += "x";
+            str += "⨯";
         else if (another != null)
-            str += ":";
+            str += "~";
 
         str += Notation.hexNotation(to);
 

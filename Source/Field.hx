@@ -283,7 +283,7 @@ class Field extends Sprite
                     distanceSqr = currDistSqr;
                 }
             }
-        return isOrientationNormal()? closest : closest.invert();
+        return closest;
     }
     
     private function ableToMove(from:IntPoint, to:IntPoint) 
@@ -445,7 +445,7 @@ class Field extends Sprite
         if (Field.markup == None)
             return;
 
-        var bottomLocations = [for (i in 0...9) new IntPoint(i, (i % 2 == 0)? 6 : 5)];
+        var bottomLocations = [for (i in 0...9) new IntPoint(i, isOrientationNormal()? 6 - i % 2 : 0)];
         for (loc in bottomLocations)
         {
             var letter = createLetter(Notation.getColumn(loc.i));

@@ -1,4 +1,4 @@
-package;
+package openings;
 
 import dict.Dictionary;
 import struct.PieceType;
