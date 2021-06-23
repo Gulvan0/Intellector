@@ -1,5 +1,9 @@
 package;
 
+import struct.Situation;
+import struct.HexTransform;
+import struct.ReversiblePly;
+import struct.Ply;
 import struct.Hex;
 import js.lib.Math;
 import openfl.display.JointStyle;
@@ -15,6 +19,7 @@ import struct.PieceColor;
 import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import openfl.display.Sprite;
+using Lambda;
 
 enum Markup 
 {
@@ -30,6 +35,10 @@ class Field extends Sprite
 
     public var hexes:Array<Array<Hexagon>>;
     public var figures:Array<Array<Null<Figure>>>;
+
+    private var currentSituation:Situation;
+    private var plyHistory:Array<ReversiblePly>;
+    private var plyPointer:Int;
 
     private var selected:Null<IntPoint>;
     private var selectedDest:Null<IntPoint>;
@@ -48,6 +57,11 @@ class Field extends Sprite
         lastMoveSelectedHexes = [];
         redSelectedHexes = [];
         drawnArrows = [];
+
+        currentSituation = Situation.starting();
+        plyHistory = [];
+        plyPointer = 0;
+
         addEventListener(Event.ADDED_TO_STAGE, initRMB);
     }
 
@@ -185,6 +199,106 @@ class Field extends Sprite
 
     //----------------------------------------------------------------------------------------------------------
 
+    public function homePly() 
+    {
+        undoSequence(plyHistory.slice(0, plyPointer), null);
+        plyPointer = 0;
+    }
+
+    public function prevPly() 
+    {
+        if (plyPointer > 0)
+        {
+            undoSequence([plyHistory[plyPointer-1]], plyPointer > 1? plyHistory[plyPointer-2] : null);
+            plyPointer--;
+        }
+    }
+
+    public function nextPly() 
+    {
+        if (plyPointer < plyHistory.length)
+        {
+            redoSequence([plyHistory[plyPointer]]);
+            plyPointer++;
+        }
+    }
+
+    public function endPly() 
+    {
+        redoSequence(plyHistory.slice(plyPointer));
+        plyPointer = plyHistory.length;
+    }
+
+    //----------------------------------------------------------------------------------------------------------
+
+    /**Traverses the list starting from the last element (The list should be sorted chronologically)**/
+    private function undoSequence(seq:Array<ReversiblePly>, ?previousPly:ReversiblePly)
+    {
+        var transforms:Array<HexTransform> = collapsePlySeq(seq, true);
+        for (transform in transforms)
+        {
+            if (!transform.former.isEmpty())
+                removeChild(figures[transform.coords.j][transform.coords.i]);
+
+            if (transform.former.isEmpty())
+                figures[transform.coords.j][transform.coords.i] = null;
+            else
+            {
+                var figure = Figure.fromHex(transform.former);
+                Factory.addFigure(figure, transform.coords, isOrientationNormal(), this);
+                figures[transform.coords.j][transform.coords.i] = figure;
+            }
+        }
+        if (previousPly != null)
+            highlightMove([for (transform in previousPly) transform.coords]);
+    }
+
+    private function redoSequence(seq:Array<ReversiblePly>)
+    {
+        var transforms:Array<HexTransform> = collapsePlySeq(seq);
+        for (transform in transforms)
+        {
+            if (!transform.former.isEmpty())
+                removeChild(figures[transform.coords.j][transform.coords.i]);
+
+            if (transform.latter.isEmpty())
+                figures[transform.coords.j][transform.coords.i] = null;
+            else
+            {
+                var figure = Figure.fromHex(transform.latter);
+                Factory.addFigure(figure, transform.coords, isOrientationNormal(), this);
+                figures[transform.coords.j][transform.coords.i] = figure;
+            }
+        }
+        highlightMove([for (transform in seq[seq.length - 1]) transform.coords]);
+    }
+
+    private function collapsePlySeq(seq:Array<ReversiblePly>, ?reversed:Bool = false):Array<HexTransform>
+    {
+        var keys:Array<IntPoint> = [];
+        var map:Map<IntPoint, HexTransform> = [];
+
+        var orderedSeq:Array<ReversiblePly> = seq.copy();
+        if (reversed)
+            orderedSeq.reverse();
+
+        for (ply in orderedSeq)
+            for (transform in ply)
+            {
+                var key = keys.find(transform.coords.equals);
+                if (key != null)
+                    if (reversed)
+                        map[key].latter = transform.latter;
+                    else
+                        map[key].former = transform.former;
+                else
+                    map[key] = transform.copy();
+            }
+        return map.array();   
+    }
+
+    //----------------------------------------------------------------------------------------------------------
+
     private function attemptMove(from:IntPoint, to:IntPoint) 
     {
         if (!ableToMove(from, to))
@@ -204,7 +318,25 @@ class Field extends Sprite
             makeMove(from, to);
     }
 
-    public function move(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
+    public function move(ply:Ply, ?ignoreHistory:Bool = false) 
+    {
+        if (!ignoreHistory)
+        {
+            endPly();
+
+            plyHistory.push(ply.toReversible(currentSituation));
+            currentSituation.makeMove(ply);
+            plyPointer++;
+        }
+
+        translateFigures(ply.from, ply.to, ply.morphInto);
+        highlightMove([ply.from, ply.to]);
+        playSound(ply);
+
+        playersTurn = !playersTurn;
+    }
+
+    public function translateFigures(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
     {
         var figure = getFigure(from);
         var figMoveOnto = getFigure(to);
@@ -222,30 +354,36 @@ class Field extends Sprite
         figures[to.j][to.i] = figure;
         figures[from.j][from.i] = null;
 
-        for (hex in lastMoveSelectedHexes)
-            hex.lastMoveDeselect();
-
-        lastMoveSelectedHexes = [hexes[from.j][from.i], hexes[to.j][to.i]];
-
-        for (hex in lastMoveSelectedHexes)
-            hex.lastMoveSelect();
-
         if (figMoveOnto != null)
             if (isCastle(from, to, figure, figMoveOnto))
             {
                 disposeFigure(figMoveOnto, from);
                 figures[from.j][from.i] = figMoveOnto;
-                Assets.getSound("sounds/move.mp3").play();
             }
             else 
-            {
                 removeChild(figMoveOnto);
-                Assets.getSound("sounds/capture.mp3").play();
-            }
-        else 
-            Assets.getSound("sounds/move.mp3").play();
+    }
 
-        playersTurn = !playersTurn;
+    public function highlightMove(hexesCoords:Array<IntPoint>) 
+    {
+        for (hex in lastMoveSelectedHexes)
+            hex.lastMoveDeselect();
+
+        lastMoveSelectedHexes = [for (coords in hexesCoords) hexes[coords.j][coords.i]];
+
+        for (hex in lastMoveSelectedHexes)
+            hex.lastMoveSelect();
+    }
+
+    public function playSound(ply:Ply)
+    {
+        var figure = getFigure(ply.from);
+        var figMoveOnto = getFigure(ply.to);
+
+        if (figMoveOnto == null || isCastle(ply.from, ply.to, figure, figMoveOnto))
+            Assets.getSound("sounds/move.mp3").play();
+        else 
+            Assets.getSound("sounds/capture.mp3").play();
     }
 
     private function isCastle(pos1:IntPoint, pos2:IntPoint, fig1:Figure, fig2:Figure)

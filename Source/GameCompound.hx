@@ -126,7 +126,7 @@ class GameCompound extends Sprite
         if (infobox != null)
             infobox.makeMove(ply);
         if (data.issuer_login != Networker.login)
-            field.move(ply.from, ply.to, ply.morphInto);
+            field.move(ply);
         else
             Networker.move(data.fromI, data.fromJ, data.toI, data.toJ, data.morphInto == null? null : PieceType.createByName(data.morphInto));
     }

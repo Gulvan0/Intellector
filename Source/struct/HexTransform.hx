@@ -6,6 +6,11 @@ package struct;
     public var former:Hex;
     public var latter:Hex;
 
+    public function copy():HexTransform
+    {
+        return new HexTransform(coords, former.copy(), latter.copy());
+    }
+
     public function new(coords, former, latter) 
     {
         this.coords = coords;

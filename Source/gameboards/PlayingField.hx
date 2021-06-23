@@ -1,5 +1,6 @@
 package gameboards;
 
+import struct.Ply;
 import Networker.OngoingBattleData;
 import Networker.MoveData;
 import struct.PieceType;
@@ -54,6 +55,7 @@ class PlayingField extends Field
         if (!playersTurn)
             return;
 
+        endPly();
         var pressLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
         if (selected != null)
@@ -102,8 +104,13 @@ class PlayingField extends Field
 
     private override function makeMove(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
     {
-        onPlayerMadeMove({issuer_login: Networker.login, fromI: from.i, toI: to.i, fromJ: from.j, toJ: to.j, morphInto: morphInto == null? null : morphInto.getName()});
-        move(from, to, morphInto);
+        var ply:Ply = new Ply();
+        ply.from = from;
+        ply.to = to;
+        ply.morphInto = morphInto;
+
+        onPlayerMadeMove(ply.toMoveData());
+        move(ply);
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
 

@@ -59,11 +59,7 @@ class Main extends Sprite
 		AssetManager.init();
 		initConstants();
 		Changes.initChangelog();
-		var sidebox:Sidebox = new Sidebox(3*60, 2, "Gulvan", "Kazvixx", true);
-		sidebox.x = 600;
-		sidebox.y = 100;
-		addChild(sidebox);
-		//Networker.connect(drawGame, onConnected, removeChildren);
+		Networker.connect(drawGame, onConnected, removeChildren);
 	}
 
     private function initConstants() 

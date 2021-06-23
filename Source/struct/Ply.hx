@@ -1,4 +1,5 @@
 package struct;
+import Networker.MoveData;
 using StringTools;
 
 class Ply 
@@ -106,6 +107,11 @@ class Ply
             str += "#";
 
         return str;
+    }
+
+    public function toMoveData():MoveData
+    {
+        return {issuer_login: Networker.login, fromI: from.i, toI: to.i, fromJ: from.j, toJ: to.j, morphInto: morphInto == null? null : morphInto.getName()};
     }
 
     public function copy():Ply

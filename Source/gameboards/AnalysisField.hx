@@ -1,5 +1,6 @@
 package gameboards;
 
+import struct.Ply;
 import struct.PieceColor;
 import struct.PieceType;
 import openfl.Assets;
@@ -99,7 +100,12 @@ class AnalysisField extends Field
 
     private override function makeMove(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
     {
-        move(from, to, morphInto);
+        var ply:Ply = new Ply();
+        ply.from = from;
+        ply.to = to;
+        ply.morphInto = morphInto;
+
+        move(ply, true);
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
 
