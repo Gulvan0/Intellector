@@ -1,4 +1,5 @@
 package struct;
+using StringTools;
 
 class Ply 
 {
@@ -10,58 +11,37 @@ class Ply
     {
         var ply:Ply = new Ply();
 
-        if (plyStr.substr(0, 3) == "O-O")
+        if (plyStr.contains(":"))
         {
+            var splitted = plyStr.split(":");
+
+            ply.from = Notation.parseIntPoint(splitted[0]);
+            ply.to = Notation.parseIntPoint(splitted[1]);
             ply.morphInto = null;
-
-            var addend:String = plyStr.substr(4);
-
-            for (p => hex in context.collectOccupiedHexes())
-                if (hex.color == context.turnColor && hex.type == Intellector)
-                {
-                    ply.from = p.copy();
-                    break;
-                }
-            
-            if (addend == "")
-            {
-                for (p in Rules.possibleFields(ply.from, context.get))
-                    if (context.get(p).type == Defensor)
-                    {
-                        ply.to = p.copy();
-                        break;
-                    }
-            }
-            else
-                ply.to = Notation.parseIntPoint(addend);
         }
         else
         {
             var movingPiece:PieceType;
 
-            if (plyStr.charAt(0) == "P")
+            if (["P", "A", "D", "L", "F", "I"].contains(plyStr.charAt(0)))
             {
-                movingPiece = Progressor;
-                plyStr = plyStr.substr(2);
+                movingPiece = Notation.pieceFromAbbreviation(plyStr.charAt(0));
+                plyStr = plyStr.substr(1);
+                
             }
             else
-            {
-                movingPiece = Notation.pieceFromAbbreviation(plyStr.substr(0, 2));
-                plyStr = plyStr.substr(3);
-            }
+                movingPiece = Progressor;
 
-            if (StringTools.contains(plyStr, "~") || (StringTools.contains(plyStr, "⨯") && plyStr.charAt(0) != "⨯"))
+            if (plyStr.contains("~") || (plyStr.contains("X") && plyStr.charAt(0) != "X"))
             {
                 ply.from = Notation.parseIntPoint(plyStr.substr(0, 2));
-                plyStr = plyStr.substr(2);
-                if (plyStr.charAt(0) == "⨯" || plyStr.charAt(0) == "~")
-                    plyStr = plyStr.substr(1);
+                plyStr = plyStr.substr(3);
                 ply.to = Notation.parseIntPoint(plyStr.substr(0, 2));
                 plyStr = plyStr.substr(2);
             }
             else
             {
-                if (plyStr.charAt(0) == "⨯")
+                if (plyStr.charAt(0) == "X")
                     plyStr = plyStr.substr(1);
 
                 ply.to = Notation.parseIntPoint(plyStr.substr(0, 2));
@@ -77,10 +57,7 @@ class Ply
             }
 
             if (plyStr.charAt(0) == "=")
-                if (plyStr.charAt(2) == "P")
-                    ply.morphInto = Progressor;
-                else
-                    ply.morphInto = Notation.pieceFromAbbreviation(plyStr.substr(2, 2));
+                ply.morphInto = Notation.pieceFromAbbreviation(plyStr.charAt(1));
         }
 
         return ply;
@@ -96,35 +73,11 @@ class Ply
         var mate = capture && hexTo.type == Intellector;
 
         if (castle)
-        {
-            var intellectorLocation:IntPoint;
-            var defensorLocation:IntPoint;
-            if (hexTo.type == Intellector)
-            {
-                intellectorLocation = to;
-                defensorLocation = from;
-            }
-            else 
-            {
-                intellectorLocation = from;
-                defensorLocation = to;
-            }
-
-            var anotherDefensorLocation = null;
-            for (p in Rules.possibleFields(intellectorLocation, context.get))
-                if (!p.equals(defensorLocation))
-                    if (!context.get(p).isEmpty())
-                    {
-                        anotherDefensorLocation = p.copy();
-                        break;
-                    }
-            if (anotherDefensorLocation != null)
-                return "O-O-" + Notation.hexNotation(defensorLocation);
-            else 
-                return "O-O";
-        }
+            return Notation.hexNotation(from).toUpperCase() + ":" + Notation.hexNotation(to).toUpperCase();
 
         var str:String = "";
+
+        str += Notation.pieceAbbreviation(hexFrom.type);
 
         var another = null;
         for (p => hex in context.collectOccupiedHexes())
@@ -136,20 +89,18 @@ class Ply
                         break;
                     }
 
-        str += Notation.pieceAbbreviation(hexFrom.type) + ".";
-
         if (another != null)
             str += Notation.hexNotation(from);
 
         if (capture)
-            str += "⨯";
+            str += "X";
         else if (another != null)
             str += "~";
 
         str += Notation.hexNotation(to);
 
         if (morphInto != null)
-            str += '=[${Notation.pieceAbbreviation(morphInto)}]';
+            str += '=${Notation.pieceAbbreviation(morphInto, true)}';
 
         if (mate)
             str += "#";

@@ -81,7 +81,9 @@ class Networker
     private static var gameStartHandler:BattleData->Void;
     private static var eventMap:Map<String, Dynamic->Void> = [];
 
-    public static function connect(onGameStated:BattleData->Void, onConnected:Void->Void, onClosed:Void->Void) 
+    public static var suppressAlert:Bool;
+
+    public static function connect(onGameStated:BattleData->Void, onConnected:Void->Void, removeChildren:?Int->?Int->Void) 
     {
         #if prod
         _ws = new WebSocket("wss://play-intellector.ru:5000");
@@ -89,7 +91,7 @@ class Networker
         _ws = new WebSocket("ws://localhost:5000");
         #end
         _ws.onopen = function() {
-            trace("open");
+            suppressAlert = false;
             gameStartHandler = onGameStated;
             once('game_started', gameStartHandler);
             onConnected();
@@ -105,11 +107,24 @@ class Networker
         };
         _ws.onclose = function() {
             _ws = null;
-            onClosed();
-            Dialogs.alert(Dictionary.getPhrase(CONNECTION_LOST_ERROR), "Alert");
+            removeChildren();
+            if (suppressAlert)
+                trace("Connection closed");
+            else
+            {
+                Dialogs.alert(Dictionary.getPhrase(CONNECTION_LOST_ERROR), "Alert");
+                suppressAlert = true;
+            }
+            connect(onGameStated, onConnected, removeChildren);
         };
         _ws.onerror = function(err) {
-            Dialogs.alert(Dictionary.getPhrase(CONNECTION_ERROR_OCCURED) + err.toString(), "Error");
+            if (suppressAlert)
+                trace("Connection abrupted: " + err.toString());
+            else
+            {
+                Dialogs.alert(Dictionary.getPhrase(CONNECTION_ERROR_OCCURED) + err.toString(), "Error");
+                suppressAlert = true;
+            }
         }
     }
 
@@ -221,6 +236,26 @@ class Networker
         emit('move', {issuer_login: Networker.login, fromI: fromI, fromJ: fromJ, toI: toI, toJ: toJ, morphInto: morphInto == null? null : morphInto.getName()});
     }
 
+    public static function offerDraw() 
+    {
+        
+    }
+
+    public static function offerTakeback() 
+    {
+        
+    }
+
+    public static function cancelDraw() 
+    {
+        
+    }
+
+    public static function cancelTakeback() 
+    {
+        
+    }
+
     public static function registerGameEvents(onMove:MoveData->Void, onMessage:MessageData->Void, onTimeCorrection:TimeData->Void, onOver:GameOverData->Void, onSpectatorEnter:{login:String}->Void, onSpectatorLeft:{login:String}->Void) 
     {
         off('incoming_challenge');
@@ -247,6 +282,7 @@ class Networker
     {
         if (_ws != null)
         {
+            suppressAlert = true;
             _ws.close();
             _ws = null;
         }
@@ -278,10 +314,9 @@ class Networker
         eventMap.remove(eventName);
     }
 
-    private static function emit(eventName:String, data:Dynamic) 
+    public static function emit(eventName:String, data:Dynamic) 
     {
         var event:Event = {name: eventName, data: data};
-        trace("Emitted: " + Json.stringify(event));
         _ws.send(Json.stringify(event));
     }
 

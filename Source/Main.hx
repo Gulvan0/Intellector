@@ -59,7 +59,11 @@ class Main extends Sprite
 		AssetManager.init();
 		initConstants();
 		Changes.initChangelog();
-		Networker.connect(drawGame, onConnected, renewSession);
+		var sidebox:Sidebox = new Sidebox(3*60, 2, "Gulvan", "Kazvixx", true);
+		sidebox.x = 600;
+		sidebox.y = 100;
+		addChild(sidebox);
+		//Networker.connect(drawGame, onConnected, removeChildren);
 	}
 
     private function initConstants() 
@@ -295,7 +299,7 @@ class Main extends Sprite
 		logoutBtn.onClick = (e) -> {
 			Cookie.remove("saved_login");
 			Cookie.remove("saved_password");
-			renewSession();
+			Networker.dropConnection();
 		}
 
 		mainMenu.x = (Browser.window.innerWidth - mainMenu.width) / 2;
@@ -429,13 +433,6 @@ class Main extends Sprite
 	private function sendSpectateRequest(player:String) 
 	{
 		Networker.spectate(player, drawSpectation, (d)->{game.onMove(d);}, (d)->{game.onTimeCorrection(d);});
-	}
-
-	private function renewSession() 
-	{
-		removeChildren();
-		Networker.dropConnection();
-		Networker.connect(drawGame, onConnected, renewSession);
 	}
 
 	private function drawOpenChallengeHosting(startSecs:Int, bonusSecs:Int) 
@@ -610,7 +607,7 @@ class Main extends Sprite
 
 		URLEditor.clear();
 		if (Networker.login.startsWith("guest_"))
-			renewSession();
+			Networker.dropConnection();
 		else 
 			addChild(mainMenu);
 	}

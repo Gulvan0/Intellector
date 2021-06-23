@@ -4,16 +4,16 @@ import struct.PieceType;
 
 class Notation 
 {
-    public static inline function pieceAbbreviation(piece:PieceType):String
+    public static inline function pieceAbbreviation(piece:PieceType, progressorNonEmpty:Bool = false):String
     {
         return switch piece 
         {
-            case Progressor: "P";
-            case Aggressor: "Ag";
-            case Dominator: "Dm";
-            case Liberator: "Lb";
-            case Defensor: "Df";
-            case Intellector: "In";
+            case Progressor: progressorNonEmpty? "P" : "";
+            case Aggressor: "A";
+            case Dominator: "D";
+            case Liberator: "L";
+            case Defensor: "F";
+            case Intellector: "I";
         }
     }
 
@@ -21,12 +21,13 @@ class Notation
     {
         return switch abb 
         {
+            case "": Progressor;
             case "P": Progressor;
-            case "Ag": Aggressor;
-            case "Dm": Dominator;
-            case "Lb": Liberator;
-            case "Df": Defensor;
-            case "In": Intellector;
+            case "A": Aggressor;
+            case "D": Dominator;
+            case "L": Liberator;
+            case "F": Defensor;
+            case "I": Intellector;
             default: null;
         }
     }
@@ -38,6 +39,7 @@ class Notation
 
     public static function parseIntPoint(s:String):IntPoint
     {
+        s = s.toLowerCase();
         var i = s.charCodeAt(0) - 'a'.code;
         var j = 7 - Std.parseInt(s.charAt(1)) - i % 2;
         return new IntPoint(i, j);

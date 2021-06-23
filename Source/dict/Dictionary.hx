@@ -86,7 +86,23 @@ class Dictionary
         WILL_BE_GUEST => ['You will be playing as guest', "Вы будете играть как гость"],
         JOINING_AS => ["You are joining the game as ", "Вы будете играть как "],
         OPENING_STARTING_POSITION => ["Starting position", "Начальная позиция"],
-        OPEN_CHALLENGE_FIRST_TO_FOLLOW_NOTE => ['First one to follow the link will join the game', 'Первый, кто перейдет по ссылке, примет вызов']
+        OPEN_CHALLENGE_FIRST_TO_FOLLOW_NOTE => ['First one to follow the link will join the game', 'Первый, кто перейдет по ссылке, примет вызов'],
+        RESIGN_BTN_TEXT => ["Resign", "Сдаться"],
+        RESIGN_CONFIRMATION_MESSAGE => ["Are you sure you want to resign?", "Вы уверены, что хотите сдаться?"],
+        OFFER_DRAW_BTN_TEXT => ["Offer draw", "Ничья"],
+        TAKEBACK_BTN_TEXT => ["Takeback", "Запросить отмену хода"],
+        DRAW_QUESTION_TEXT => ["Accept draw?", "Принять ничью?"],
+        TAKEBACK_QUESTION_TEXT => ["Accept takeback?", "Разрешить переходить?"],
+        DRAW_OFFERED_MESSAGE => ["Draw offered", "Ничья предложена"],
+        DRAW_CANCELLED_MESSAGE => ["Draw cancelled", "Предложение ничьи отменено"],
+        DRAW_ACCEPTED_MESSAGE => ["Draw accepted", "Ничья принята"],
+        DRAW_DECLINED_MESSAGE => ["Draw declined", "Ничья отклонена"],
+        TAKEBACK_OFFERED_MESSAGE => ["Takeback offered", "Тейкбек предложен"],
+        TAKEBACK_CANCELLED_MESSAGE => ["Takeback cancelled", "Запрос тейкбека отменен"],
+        TAKEBACK_ACCEPTED_MESSAGE => ["Takeback accepted", "Тейкбек принят"],
+        TAKEBACK_DECLINED_MESSAGE => ["Takeback declined", "Тейкбек отклонен"],
+        CANCEL_DRAW_BTN_TEXT => ["Cancel draw", "Отменить ничью"],
+        CANCEL_TAKEBACK_BTN_TEXT => ["Cancel takeback", "Отменить тейкбек"]
     ];
 
     public static function getPhrase(phrase:Phrase):String

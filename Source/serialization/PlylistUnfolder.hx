@@ -6,6 +6,7 @@ import struct.PieceType;
 import struct.Hex;
 import struct.HexTransform;
 import struct.ReversiblePly;
+using StringTools;
 
 class PlylistUnfolder 
 {
@@ -18,6 +19,7 @@ class PlylistUnfolder
         
         for (line in lines)
         {
+            line = line.trim();
             if (line.charCodeAt(0) < "0".code || line.charCodeAt(0) > "9".code)
                 continue;
 
