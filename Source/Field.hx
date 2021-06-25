@@ -234,10 +234,13 @@ class Field extends Sprite
     /**Traverses the list starting from the last element (The list should be sorted chronologically)**/
     private function undoSequence(seq:Array<ReversiblePly>, ?previousPly:ReversiblePly)
     {
+        if (seq.empty())
+            return;
+
         var transforms:Array<HexTransform> = collapsePlySeq(seq, true);
         for (transform in transforms)
         {
-            if (!transform.former.isEmpty())
+            if (!transform.latter.isEmpty())
                 removeChild(figures[transform.coords.j][transform.coords.i]);
 
             if (transform.former.isEmpty())
@@ -251,10 +254,15 @@ class Field extends Sprite
         }
         if (previousPly != null)
             highlightMove([for (transform in previousPly) transform.coords]);
+        else 
+            highlightMove([]);
     }
 
     private function redoSequence(seq:Array<ReversiblePly>)
     {
+        if (seq.empty())
+            return;
+
         var transforms:Array<HexTransform> = collapsePlySeq(seq);
         for (transform in transforms)
         {
@@ -292,7 +300,10 @@ class Field extends Sprite
                     else
                         map[key].former = transform.former;
                 else
-                    map[key] = transform.copy();
+                {
+                    map[transform.coords] = transform.copy();
+                    keys.push(transform.coords);
+                }
             }
         return map.array();   
     }
@@ -329,9 +340,9 @@ class Field extends Sprite
             plyPointer++;
         }
 
+        playSound(ply);
         translateFigures(ply.from, ply.to, ply.morphInto);
         highlightMove([ply.from, ply.to]);
-        playSound(ply);
 
         playersTurn = !playersTurn;
     }

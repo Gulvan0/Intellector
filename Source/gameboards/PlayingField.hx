@@ -55,8 +55,10 @@ class PlayingField extends Field
         if (!playersTurn)
             return;
 
-        endPly();
         var pressLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
+        
+        if (pressLocation != null && plyPointer < plyHistory.length)
+            endPly();
 
         if (selected != null)
             destinationPress(pressLocation);
