@@ -237,7 +237,7 @@ class Field extends Sprite
         if (seq.empty())
             return;
 
-        var transforms:Array<HexTransform> = collapsePlySeq(seq, true);
+        var transforms:Array<HexTransform> = collapsePlySeq(seq);
         for (transform in transforms)
         {
             if (!transform.latter.isEmpty())
@@ -281,24 +281,17 @@ class Field extends Sprite
         highlightMove([for (transform in seq[seq.length - 1]) transform.coords]);
     }
 
-    private function collapsePlySeq(seq:Array<ReversiblePly>, ?reversed:Bool = false):Array<HexTransform>
+    private function collapsePlySeq(seq:Array<ReversiblePly>):Array<HexTransform>
     {
         var keys:Array<IntPoint> = [];
         var map:Map<IntPoint, HexTransform> = [];
 
-        var orderedSeq:Array<ReversiblePly> = seq.copy();
-        if (reversed)
-            orderedSeq.reverse();
-
-        for (ply in orderedSeq)
+        for (ply in seq)
             for (transform in ply)
             {
                 var key = keys.find(transform.coords.equals);
                 if (key != null)
-                    if (reversed)
-                        map[key].latter = transform.latter;
-                    else
-                        map[key].former = transform.former;
+                    map[key].latter = transform.latter;
                 else
                 {
                     map[transform.coords] = transform.copy();
@@ -336,7 +329,7 @@ class Field extends Sprite
             endPly();
 
             plyHistory.push(ply.toReversible(currentSituation));
-            currentSituation.makeMove(ply);
+            currentSituation = currentSituation.makeMove(ply);
             plyPointer++;
         }
 
