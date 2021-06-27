@@ -20,6 +20,13 @@ import Networker.MoveData;
 import js.Browser;
 import openfl.display.Sprite;
 
+enum GameCompoundType
+{
+    Active;
+    Analysis;
+    Spectator;
+}
+
 class GameCompound extends Sprite
 {
     private var returnBtn:Button;
@@ -28,6 +35,7 @@ class GameCompound extends Sprite
     private var chatbox:Null<Chatbox>;
     private var infobox:Null<GameInfoBox>;
 
+    public var type(default, null):GameCompoundType;
     public var playerColor:PieceColor;
 
     public static function buildActive(data:BattleData):GameCompound
@@ -36,13 +44,14 @@ class GameCompound extends Sprite
         var blackLogin = data.colour == 'black'? Networker.login : data.enemy;
         
         var field:PlayingField = new PlayingField(data.colour);
-        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white', field.homePly, field.prevPly, field.nextPly, field.endPly);
+        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin, data.colour == 'white');
 
-        var compound = new GameCompound(field, sidebox, chatbox, infobox);
+        var compound = new GameCompound(Active, field, sidebox, chatbox, infobox);
         compound.playerColor = data.colour == 'white'? White : Black;
         field.onPlayerMadeMove = compound.onMove;
+        compound.bindComponentButtonCallbacks();
         return compound;
     }
 
@@ -52,7 +61,7 @@ class GameCompound extends Sprite
         var enemyLogin:String = playerIsWhite? data.blackLogin : data.whiteLogin;
 
         var field:PlayingField = new PlayingField(playerIsWhite? 'white' : 'black', data);
-        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, enemyLogin, playerIsWhite, field.homePly, field.prevPly, field.nextPly, field.endPly);
+        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, enemyLogin, playerIsWhite);
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin, playerIsWhite);
 
@@ -74,9 +83,10 @@ class GameCompound extends Sprite
         sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
         sidebox.launchTimer();
 
-        var compound = new GameCompound(field, sidebox, chatbox, infobox);
+        var compound = new GameCompound(Active, field, sidebox, chatbox, infobox);
         compound.playerColor = playerIsWhite? White : Black;
         field.onPlayerMadeMove = compound.onMove;
+        compound.bindComponentButtonCallbacks();
         return compound;
     }
 
@@ -88,7 +98,8 @@ class GameCompound extends Sprite
         var upperLogin:String = whiteRequested? data.blackLogin : data.whiteLogin;
 
         var field:SpectatorsField = new SpectatorsField(data.position, watchedColor);
-        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested, field.homePly, field.prevPly, field.nextPly, field.endPly);
+        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested);
+        
         var color:PieceColor = White;
         for (move in data.movesPlayed)
         {
@@ -101,14 +112,16 @@ class GameCompound extends Sprite
         //var chatbox:Chatbox;
         //var infobox:GameInfoBox;
         
-        return new GameCompound(field, sidebox, null, null, onReturn);
+        var compound = new GameCompound(Spectator, field, sidebox, null, null, onReturn);
+        compound.bindComponentButtonCallbacks();
+        return compound;
     }
 
     public static function buildAnalysis(onReturn:Void->Void):GameCompound
     {
         var field:AnalysisField = new AnalysisField();
 
-        return new GameCompound(field, null, null, null, onReturn);
+        return new GameCompound(Analysis, field, null, null, null, onReturn);
     }
 
     public function onMove(data:MoveData)
@@ -151,16 +164,87 @@ class GameCompound extends Sprite
         chatbox.appendLog('${data.login}' + Dictionary.getPhrase(SPECTATOR_LEFT_MESSAGE));
     }
 
+    public function onDrawOffered()
+    {
+        if (type == Active)
+            sidebox.showDrawRequestBox();
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getPhrase(DRAW_OFFERED_MESSAGE));
+    }
+
+    public function onDrawCancelled()
+    {
+        if (type == Active)
+            sidebox.hideDrawRequestBox();
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE));
+    }
+
+    public function onDrawAccepted()
+    {
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE));
+    }
+
+    public function onDrawDeclined()
+    {
+        if (type == Active)
+            sidebox.drawOfferShowCancelHide();
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE));
+    }
+
+    private function bindComponentButtonCallbacks() 
+    {
+        sidebox.onHomePressed = field.homePly;
+        sidebox.onPrevPressed = field.prevPly;
+        sidebox.onNextPressed = field.nextPly;
+        sidebox.onEndPressed = field.endPly;
+        sidebox.onOfferDrawPressed = onOfferDrawPressed;
+        sidebox.onCancelDrawPressed = onCancelDrawPressed;
+        sidebox.onAcceptDrawPressed = onAcceptDrawPressed;
+        sidebox.onDeclineDrawPressed = onDeclineDrawPressed;
+    }
+
+    private function onOfferDrawPressed()
+    {
+        sidebox.drawOfferHideCancelShow();
+        chatbox.appendLog(Dictionary.getPhrase(DRAW_OFFERED_MESSAGE));
+        Networker.offerDraw();
+    }
+
+    private function onCancelDrawPressed()
+    {
+        sidebox.drawOfferShowCancelHide();
+        chatbox.appendLog(Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE));
+        Networker.cancelDraw();
+    }
+
+    private function onAcceptDrawPressed()
+    {
+        sidebox.hideDrawRequestBox();
+        chatbox.appendLog(Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE));
+        Networker.acceptDraw();
+    }
+
+    private function onDeclineDrawPressed()
+    {
+        sidebox.hideDrawRequestBox();
+        chatbox.appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE));
+        Networker.declineDraw();
+    }
+
     public function terminate()
     {
         if (sidebox != null)
             sidebox.terminate();
     }
 
-    private function new(field, sidebox, chatbox, infobox, ?onReturn:Void->Void) 
+    private function new(type, field, sidebox, chatbox, infobox, ?onReturn:Void->Void) 
     {
         super();
 
+        this.type = type;
         this.field = field;
         this.sidebox = sidebox;
         this.chatbox = chatbox;

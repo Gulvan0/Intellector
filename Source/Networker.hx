@@ -83,6 +83,9 @@ class Networker
 
     public static var suppressAlert:Bool;
 
+    /**The one to receive all game-related events**/
+    public static var currentGameCompound:Null<GameCompound>;
+
     public static function connect(onGameStated:BattleData->Void, onConnected:Void->Void, removeChildren:?Int->?Int->Void) 
     {
         #if prod
@@ -177,6 +180,7 @@ class Networker
             'spectation_data' => (data:OngoingBattleData) -> {
                 on('move', onMove);
                 on('time_correction', onTimeCorrection);
+                on('draw_offered', onDrawOffered);
                 onStarted(data);
             }
         ]);
@@ -187,6 +191,10 @@ class Networker
     {
         off('move');
         off('time_correction');
+        off('draw_offered');
+        off('draw_cancelled');
+        off('draw_accepted');
+        off('draw_declined');
         emit('stop_spectate', {});
     }
 
@@ -238,15 +246,51 @@ class Networker
 
     public static function offerDraw() 
     {
-        
-    }
-
-    public static function offerTakeback() 
-    {
-        
+        onceOneOf(['draw_accepted' => onDrawAccepted, 'draw_declined' => onDrawDeclined]);
+        emit('draw_offer', {});
     }
 
     public static function cancelDraw() 
+    {
+        emit('draw_cancel', {});
+        off('draw_accepted');
+        off('draw_declined');
+    }
+
+    public static function acceptDraw() 
+    {
+        emit('draw_accept', {});
+        off('draw_cancelled');
+    }
+
+    public static function declineDraw() 
+    {
+        emit('draw_decline', {});
+        off('draw_cancelled');
+    }
+
+    public static function onDrawOffered(e) 
+    {
+        once('draw_cancelled', onDrawCancelled);
+        currentGameCompound.onDrawOffered();
+    }
+
+    public static function onDrawCancelled(e) 
+    {
+        currentGameCompound.onDrawCancelled();
+    }
+
+    public static function onDrawAccepted(e) 
+    {
+        currentGameCompound.onDrawAccepted();
+    }
+
+    public static function onDrawDeclined(e) 
+    {
+        currentGameCompound.onDrawDeclined();
+    }
+
+    public static function offerTakeback() 
     {
         
     }
@@ -264,6 +308,7 @@ class Networker
         on('time_correction', onTimeCorrection);
         on('new_spectator', onSpectatorEnter);
         on('spectator_left', onSpectatorLeft);
+        on('draw_offered', onDrawOffered);
         once('game_ended', onOver);
     }
 
@@ -274,6 +319,10 @@ class Networker
         off('time_correction');
         off('new_spectator');
         off('spectator_left');
+        off('draw_offered');
+        off('draw_cancelled');
+        off('draw_accepted');
+        off('draw_declined');
         on('incoming_challenge', challengeReceiver);
         once('game_started', gameStartHandler);
     }

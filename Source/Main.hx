@@ -525,6 +525,7 @@ class Main extends Sprite
 		game = GameCompound.buildActive(data);
 		addChild(game);
 
+		Networker.currentGameCompound = game;
 		Networker.registerGameEvents(game.onMove, game.onMessage, game.onTimeCorrection, onEnded, game.onSpectatorConnected, game.onSpectatorDisonnected);
 
 		URLEditor.assignID(data.match_id);
@@ -538,6 +539,7 @@ class Main extends Sprite
 		game = GameCompound.buildActiveReconnect(data);
 		addChild(game);
 
+		Networker.currentGameCompound = game;
 		Networker.registerGameEvents(game.onMove, game.onMessage, game.onTimeCorrection, onEnded, game.onSpectatorConnected, game.onSpectatorDisonnected);
 
 		URLEditor.assignID(data.match_id);
@@ -559,6 +561,7 @@ class Main extends Sprite
 			onReturn();
 		});
 		addChild(game);
+		Networker.currentGameCompound = game;
 	}
 
 	private function onReturn()
@@ -570,6 +573,7 @@ class Main extends Sprite
 
 	private function onEnded(data:GameOverData) 
 	{
+		Networker.currentGameCompound = null;
 		Networker.registerMainMenuEvents();
 
 		game.terminate();

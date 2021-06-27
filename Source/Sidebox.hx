@@ -34,10 +34,14 @@ class Sidebox extends Sprite
     private var offerTakebackBtn:Button;
     private var cancelTakebackBtn:Button;
 
-    private var onHomePressed:Void->Void;
-    private var onPrevPressed:Void->Void;
-    private var onNextPressed:Void->Void;
-    private var onEndPressed:Void->Void;
+    public var onHomePressed:Void->Void;
+    public var onPrevPressed:Void->Void;
+    public var onNextPressed:Void->Void;
+    public var onEndPressed:Void->Void;
+    public var onOfferDrawPressed:Void->Void;
+    public var onCancelDrawPressed:Void->Void;
+    public var onAcceptDrawPressed:Void->Void;
+    public var onDeclineDrawPressed:Void->Void;
 
     private var timer:Timer;
     private var secsPerTurn:Int;
@@ -176,22 +180,22 @@ class Sidebox extends Sprite
             timer.stop();
     }
 
-    public function offerDraw() 
+    public function showDrawRequestBox() 
     {
         drawRequestBox.visible = true;
     }
 
-    public function cancelDraw() 
+    public function hideDrawRequestBox() 
     {
         drawRequestBox.visible = false;
     }
 
-    public function offerTakeback() 
+    public function showTakebackRequestBox() 
     {
         takebackRequestBox.visible = true;
     }
 
-    public function cancelTakeback() 
+    public function hideTakebackRequestBox() 
     {
         takebackRequestBox.visible = false;
     }
@@ -220,7 +224,7 @@ class Sidebox extends Sprite
         cancelTakebackBtn.visible = false;
     }
 
-    public function new(startSecs:Int, secsPerTurn:Int, playerLogin:String, opponentLogin:String, playerIsWhite:Bool, onHomePressed:Void->Void, onPrevPressed:Void->Void, onNextPressed:Void->Void, onEndPressed:Void->Void) 
+    public function new(startSecs:Int, secsPerTurn:Int, playerLogin:String, opponentLogin:String, playerIsWhite:Bool) 
     {
         super();
         move = 1;
@@ -231,11 +235,6 @@ class Sidebox extends Sprite
         var strStart = secsToString(startSecs);
         var timeStyle:Style = {fontSize: 40};
         var loginStyle:Style = {fontSize: 24};
-
-        this.onHomePressed = onHomePressed;
-        this.onPrevPressed = onPrevPressed;
-        this.onNextPressed = onNextPressed;
-        this.onEndPressed = onEndPressed;
 
         var box:VBox = new VBox();
 
@@ -258,8 +257,7 @@ class Sidebox extends Sprite
 		takebackRequestBox.addComponent(declineBtn);
 
 		declineBtn.onClick = (e) -> {
-            takebackRequestBox.visible = false;
-            Networker.emit('takeback_answer', false);
+            //TODO: delegate
         }
 
         var requestLabel:Label = new Label();
@@ -275,8 +273,7 @@ class Sidebox extends Sprite
 		takebackRequestBox.addComponent(acceptBtn);
 
 		acceptBtn.onClick = (e) -> {
-			takebackRequestBox.visible = false;
-            Networker.emit('takeback_answer', true);
+			//TODO: delegate
         }
 
         takebackRequestBox.visible = false;
@@ -291,8 +288,7 @@ class Sidebox extends Sprite
 		drawRequestBox.addComponent(declineBtn2);
 
 		declineBtn2.onClick = (e) -> {
-			drawRequestBox.visible = false;
-            Networker.emit('draw_answer', false);
+			onDeclineDrawPressed();
         }
 
         var requestLabel2:Label = new Label();
@@ -308,8 +304,7 @@ class Sidebox extends Sprite
 		drawRequestBox.addComponent(acceptBtn2);
 
 		acceptBtn2.onClick = (e) -> {
-			drawRequestBox.visible = false;
-            Networker.emit('draw_answer', true);
+			onAcceptDrawPressed();
         }
 
         drawRequestBox.visible = false;
@@ -378,8 +373,7 @@ class Sidebox extends Sprite
 		resignAndDraw.addComponent(offerDrawBtn);
 
 		offerDrawBtn.onClick = (e) -> {
-            drawOfferHideCancelShow();
-		    Networker.offerDraw();
+            onOfferDrawPressed();
         }
         
         cancelDrawBtn = new Button();
@@ -389,8 +383,7 @@ class Sidebox extends Sprite
 		resignAndDraw.addComponent(cancelDrawBtn);
 
 		cancelDrawBtn.onClick = (e) -> {
-            drawOfferShowCancelHide();
-		    Networker.cancelDraw();
+            onCancelDrawPressed();
         }
         
         box.addComponent(resignAndDraw);
