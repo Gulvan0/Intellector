@@ -44,7 +44,7 @@ class GameCompound extends Sprite
         var blackLogin = data.colour == 'black'? Networker.login : data.enemy;
         
         var field:PlayingField = new PlayingField(data.colour);
-        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
+        var sidebox:Sidebox = new Sidebox(false, data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin, data.colour == 'white');
 
@@ -61,7 +61,7 @@ class GameCompound extends Sprite
         var enemyLogin:String = playerIsWhite? data.blackLogin : data.whiteLogin;
 
         var field:PlayingField = new PlayingField(playerIsWhite? 'white' : 'black', data);
-        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, Networker.login, enemyLogin, playerIsWhite);
+        var sidebox:Sidebox = new Sidebox(false, data.startSecs, data.bonusSecs, Networker.login, enemyLogin, playerIsWhite);
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin, playerIsWhite);
 
@@ -98,7 +98,7 @@ class GameCompound extends Sprite
         var upperLogin:String = whiteRequested? data.blackLogin : data.whiteLogin;
 
         var field:SpectatorsField = new SpectatorsField(data.position, watchedColor);
-        var sidebox:Sidebox = new Sidebox(data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested);
+        var sidebox:Sidebox = new Sidebox(true, data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested);
         
         var color:PieceColor = White;
         for (move in data.movesPlayed)

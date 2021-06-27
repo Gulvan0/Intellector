@@ -224,61 +224,10 @@ class Sidebox extends Sprite
         cancelTakebackBtn.visible = false;
     }
 
-    public function new(startSecs:Int, secsPerTurn:Int, playerLogin:String, opponentLogin:String, playerIsWhite:Bool) 
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private function buildDrawRequestBox(container:VBox)
     {
-        super();
-        move = 1;
-        this.secsPerTurn = secsPerTurn;
-        playerColor = playerIsWhite? White : Black;
-        playerTurn = playerIsWhite;
-
-        var strStart = secsToString(startSecs);
-        var timeStyle:Style = {fontSize: 40};
-        var loginStyle:Style = {fontSize: 24};
-
-        var box:VBox = new VBox();
-
-        upperTime = new Label();
-        upperTime.text = strStart;
-        upperTime.customStyle = timeStyle;
-        box.addComponent(upperTime);
-
-        upperLogin = new Label();
-        upperLogin.text = opponentLogin;
-        upperLogin.customStyle = loginStyle;
-        box.addComponent(upperLogin);
-
-        takebackRequestBox = new HBox();
-
-        var declineBtn = new haxe.ui.components.Button();
-		declineBtn.width = 40;
-        declineBtn.text = "✘";
-        declineBtn.color = Color.fromString("red");
-		takebackRequestBox.addComponent(declineBtn);
-
-		declineBtn.onClick = (e) -> {
-            //TODO: delegate
-        }
-
-        var requestLabel:Label = new Label();
-        requestLabel.text = Dictionary.getPhrase(TAKEBACK_QUESTION_TEXT);
-        requestLabel.width = 250 - 40 * 2 - 10;
-        requestLabel.textAlign = "center";
-        takebackRequestBox.addComponent(requestLabel);
-
-        var acceptBtn = new haxe.ui.components.Button();
-		acceptBtn.width = 40;
-        acceptBtn.text = "✔";
-        acceptBtn.color = Color.fromString("green");
-		takebackRequestBox.addComponent(acceptBtn);
-
-		acceptBtn.onClick = (e) -> {
-			//TODO: delegate
-        }
-
-        takebackRequestBox.visible = false;
-        box.addComponent(takebackRequestBox);
-
         drawRequestBox = new HBox();
 
         var declineBtn2 = new haxe.ui.components.Button();
@@ -308,8 +257,45 @@ class Sidebox extends Sprite
         }
 
         drawRequestBox.visible = false;
-        box.addComponent(drawRequestBox);
+        container.addComponent(drawRequestBox);
+    }
 
+    private function buildTakebackRequestBox(container:VBox)
+    {
+        takebackRequestBox = new HBox();
+
+        var declineBtn = new haxe.ui.components.Button();
+		declineBtn.width = 40;
+        declineBtn.text = "✘";
+        declineBtn.color = Color.fromString("red");
+		takebackRequestBox.addComponent(declineBtn);
+
+		declineBtn.onClick = (e) -> {
+            //TODO: delegate
+        }
+
+        var requestLabel:Label = new Label();
+        requestLabel.text = Dictionary.getPhrase(TAKEBACK_QUESTION_TEXT);
+        requestLabel.width = 250 - 40 * 2 - 10;
+        requestLabel.textAlign = "center";
+        takebackRequestBox.addComponent(requestLabel);
+
+        var acceptBtn = new haxe.ui.components.Button();
+		acceptBtn.width = 40;
+        acceptBtn.text = "✔";
+        acceptBtn.color = Color.fromString("green");
+		takebackRequestBox.addComponent(acceptBtn);
+
+		acceptBtn.onClick = (e) -> {
+			//TODO: delegate
+        }
+
+        takebackRequestBox.visible = false;
+        container.addComponent(takebackRequestBox);
+    }
+
+    private function buildPlyScrollBtns(container:VBox)
+    {
         var matchViewControls:HBox = new HBox();
 
         var homeBtn = new haxe.ui.components.Button();
@@ -348,11 +334,11 @@ class Sidebox extends Sprite
 			onEndPressed();
         }
 
-        box.addComponent(matchViewControls);
+        container.addComponent(matchViewControls);
+    }
 
-        movetable = ComponentMacros.buildComponent("assets/layouts/movetable.xml");
-        box.addComponent(movetable);
-
+    private function buildSpecialBtns(container:VBox)
+    {
         var resignAndDraw:HBox = new HBox();
 
         var resignBtn = new haxe.ui.components.Button();
@@ -386,12 +372,12 @@ class Sidebox extends Sprite
             onCancelDrawPressed();
         }
         
-        box.addComponent(resignAndDraw);
+        container.addComponent(resignAndDraw);
 
         offerTakebackBtn = new Button();
 		offerTakebackBtn.width = 250;
 		offerTakebackBtn.text = Dictionary.getPhrase(TAKEBACK_BTN_TEXT);
-		box.addComponent(offerTakebackBtn);
+		container.addComponent(offerTakebackBtn);
 
 		offerTakebackBtn.onClick = (e) -> {
             takebackOfferHideCancelShow();
@@ -402,12 +388,53 @@ class Sidebox extends Sprite
 		cancelTakebackBtn.width = 250;
 		cancelTakebackBtn.text = Dictionary.getPhrase(CANCEL_TAKEBACK_BTN_TEXT);
         cancelTakebackBtn.visible = false;
-		box.addComponent(cancelTakebackBtn);
+		container.addComponent(cancelTakebackBtn);
 
 		cancelTakebackBtn.onClick = (e) -> {
             takebackOfferShowCancelHide();
 		    Networker.cancelTakeback();
         }
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public function new(simplified:Bool, startSecs:Int, secsPerTurn:Int, playerLogin:String, opponentLogin:String, playerIsWhite:Bool) 
+    {
+        super();
+        move = 1;
+        this.secsPerTurn = secsPerTurn;
+        playerColor = playerIsWhite? White : Black;
+        playerTurn = playerIsWhite;
+
+        var strStart = secsToString(startSecs);
+        var timeStyle:Style = {fontSize: 40};
+        var loginStyle:Style = {fontSize: 24};
+
+        var box:VBox = new VBox();
+
+        upperTime = new Label();
+        upperTime.text = strStart;
+        upperTime.customStyle = timeStyle;
+        box.addComponent(upperTime);
+
+        upperLogin = new Label();
+        upperLogin.text = opponentLogin;
+        upperLogin.customStyle = loginStyle;
+        box.addComponent(upperLogin);
+
+        if (!simplified)
+        {
+            buildTakebackRequestBox(box);
+            buildDrawRequestBox(box);
+        }
+
+        buildPlyScrollBtns(box);
+
+        movetable = ComponentMacros.buildComponent("assets/layouts/movetable.xml");
+        box.addComponent(movetable);
+
+        if (!simplified)
+            buildSpecialBtns(box);
 
         bottomLogin = new Label();
         bottomLogin.text = playerLogin;
