@@ -1,5 +1,6 @@
 package;
 
+import gfx.components.Shapes;
 import struct.Ply;
 import openings.OpeningTree;
 import dict.Dictionary;
@@ -8,7 +9,6 @@ import struct.PieceColor;
 import haxe.ui.styles.Style;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
-import components.Shapes;
 import openfl.text.TextField;
 import openfl.display.Sprite;
 

@@ -78,7 +78,6 @@ class Networker
     private static var _ws:WebSocket;
     public static var login:String;
 
-    private static var gameStartHandler:BattleData->Void;
     private static var eventMap:Map<String, Dynamic->Void> = [];
 
     public static var suppressAlert:Bool;
@@ -86,7 +85,7 @@ class Networker
     /**The one to receive all game-related events**/
     public static var currentGameCompound:Null<GameCompound>;
 
-    public static function connect(onGameStated:BattleData->Void, onConnected:Void->Void, removeChildren:?Int->?Int->Void) 
+    public static function connect(onConnected:Void->Void) 
     {
         #if prod
         _ws = new WebSocket("wss://play-intellector.ru:5000");
@@ -95,8 +94,6 @@ class Networker
         #end
         _ws.onopen = function() {
             suppressAlert = false;
-            gameStartHandler = onGameStated;
-            once('game_started', gameStartHandler);
             onConnected();
         };
         _ws.onmessage = function(msg) {
@@ -110,7 +107,7 @@ class Networker
         };
         _ws.onclose = function() {
             _ws = null;
-            removeChildren();
+            ScreenManager.instance.toEmpty();
             if (suppressAlert)
                 trace("Connection closed");
             else
@@ -118,7 +115,7 @@ class Networker
                 Dialogs.alert(Dictionary.getPhrase(CONNECTION_LOST_ERROR), "Alert");
                 suppressAlert = true;
             }
-            connect(onGameStated, onConnected, removeChildren);
+            connect(onConnected);
         };
         _ws.onerror = function(err) {
             if (suppressAlert)
@@ -172,14 +169,14 @@ class Networker
         emit('accept_open_challenge', {caller_login: caller, callee_login: Networker.login});
     }
 
-    public static function spectate(watchedLogin:String, onStarted:OngoingBattleData->Void, onMove:MoveData->Void, onTimeCorrection:TimeData->Void) 
+    public static function spectate(watchedLogin:String, onStarted:OngoingBattleData->Void) 
     {
         onceOneOf([
             'watched_unavailable' => (data) -> {Dialogs.alert(Dictionary.getPhrase(SPECTATION_ERROR_REASON_OFFLINE), Dictionary.getPhrase(SPECTATION_ERROR_TITLE));},
             'watched_notingame' => (data) -> {Dialogs.alert(Dictionary.getPhrase(SPECTATION_ERROR_REASON_NOTINGAME), Dictionary.getPhrase(SPECTATION_ERROR_TITLE));},
             'spectation_data' => (data:OngoingBattleData) -> {
-                on('move', onMove);
-                on('time_correction', onTimeCorrection);
+                on('move', currentGameCompound.onMove);
+                on('time_correction', currentGameCompound.onTimeCorrection);
                 on('draw_offered', onDrawOffered);
                 onStarted(data);
             }
@@ -300,14 +297,14 @@ class Networker
         
     }
 
-    public static function registerGameEvents(onMove:MoveData->Void, onMessage:MessageData->Void, onTimeCorrection:TimeData->Void, onOver:GameOverData->Void, onSpectatorEnter:{login:String}->Void, onSpectatorLeft:{login:String}->Void) 
+    public static function registerGameEvents(onOver:GameOverData->Void) 
     {
         off('incoming_challenge');
-        on('move', onMove);
-        on('message', onMessage);
-        on('time_correction', onTimeCorrection);
-        on('new_spectator', onSpectatorEnter);
-        on('spectator_left', onSpectatorLeft);
+        on('move', currentGameCompound.onMove);
+        on('message', currentGameCompound.onMessage);
+        on('time_correction', currentGameCompound.onTimeCorrection);
+        on('new_spectator', currentGameCompound.onSpectatorConnected);
+        on('spectator_left', currentGameCompound.onSpectatorDisonnected);
         on('draw_offered', onDrawOffered);
         once('game_ended', onOver);
     }
@@ -324,7 +321,7 @@ class Networker
         off('draw_accepted');
         off('draw_declined');
         on('incoming_challenge', challengeReceiver);
-        once('game_started', gameStartHandler);
+        once('game_started', ScreenManager.instance.toGameStart);
     }
 
     public static function dropConnection() 

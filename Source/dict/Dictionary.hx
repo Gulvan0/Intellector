@@ -1,5 +1,7 @@
 package dict;
 
+import Field.Markup;
+import gfx.screens.MainMenu.MainMenuButton;
 import struct.PieceColor;
 
 class Dictionary 
@@ -47,6 +49,7 @@ class Dictionary
         SETTINGS_TITLE => ["Setings", "Настройки"],
         WIN_MESSAGE_PREAMBLE => ["You won", "Вы победили"],
         LOSS_MESSAGE_PREAMBLE => ["You lost", "Вы проиграли"],
+        GAME_OVER_REASON_MATE => [".", "."],
         GAME_OVER_REASON_BREAKTHROUGH => [" by breakthrough.", " - Интеллектор добежал"],
         GAME_OVER_REASON_TIMEOUT => [" by timeout.", " по времени."],
         GAME_OVER_REASON_RESIGN => [" by resignation.", " (проигравший сдался)."],
@@ -108,6 +111,48 @@ class Dictionary
     public static function getPhrase(phrase:Phrase):String
     {
         return dict.get(phrase)[order.indexOf(lang)];
+    }
+
+    public static function getMainMenuBtnText(type:MainMenuButton):String
+    {
+        var phrase:Phrase = switch type 
+        {
+            case SendChallenge: SEND_CHALLENGE;
+            case OpenChallenge: OPEN_CHALLENGE_BTN;
+            case AnalysisBoard: ANALYSIS_BTN;
+            case Spectate: SPECTATE_BTN;
+            case Settings: SETTINGS_BTN;
+            case LogOut: LOG_OUT_BTN;
+        }
+        return Dictionary.getPhrase(phrase);
+    }
+
+    public static function getMarkupOptionText(type:Markup):String
+    {
+        var phrase:Phrase = switch type 
+        {
+            case None: SETTINGS_MARKUP_TYPE_NONE;
+            case Side: SETTINGS_MARKUP_TYPE_SIDE;
+            case Over: SETTINGS_MARKUP_TYPE_OVER;
+        }
+        return Dictionary.getPhrase(phrase);
+    }
+
+    public static function getGameOverExplanation(reason:String):String
+    {
+        var phrase:Phrase = switch reason
+		{
+			case 'mate': GAME_OVER_REASON_MATE;
+			case 'breakthrough': GAME_OVER_REASON_BREAKTHROUGH;
+			case 'timeout': GAME_OVER_REASON_TIMEOUT;
+			case 'resignation': GAME_OVER_REASON_RESIGN;
+			case 'abandon': GAME_OVER_REASON_DISCONNECT;
+			case 'threefoldrepetition': GAME_OVER_REASON_THREEFOLD;
+			case 'hundredmoverule': GAME_OVER_REASON_HUNDRED;
+			case 'drawagreement': GAME_OVER_REASON_AGREEMENT;
+			default: GAME_OVER_REASON_MATE;
+		};
+        return Dictionary.getPhrase(phrase);
     }
 
     public static function challengeByText(login:String, start:Int, bonus:Int):String
