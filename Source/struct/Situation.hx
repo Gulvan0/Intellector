@@ -67,6 +67,21 @@ class Situation
         return next;
     }
 
+    public function unmakeMoves(plys:Array<ReversiblePly>):Situation 
+    {
+        var formerSituation:Situation = this.copy();
+        var reversedPlys = plys.copy();
+        reversedPlys.reverse();
+
+        for (ply in reversedPlys)
+            for (transform in ply)
+                formerSituation.set(transform.coords, transform.former);
+
+        if (plys.length % 2 == 1)
+            formerSituation.turnColor = opposite(turnColor);
+        return formerSituation;
+    }
+
     public function isMating(ply:Ply):Bool
     {
         return get(ply.to).type == Intellector && get(ply.from).color != get(ply.to).color;

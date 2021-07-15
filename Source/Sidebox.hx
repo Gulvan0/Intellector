@@ -42,6 +42,10 @@ class Sidebox extends Sprite
     public var onCancelDrawPressed:Void->Void;
     public var onAcceptDrawPressed:Void->Void;
     public var onDeclineDrawPressed:Void->Void;
+    public var onOfferTakebackPressed:Void->Void;
+    public var onCancelTakebackPressed:Void->Void;
+    public var onAcceptTakebackPressed:Void->Void;
+    public var onDeclineTakebackPressed:Void->Void;
 
     private var timer:Timer;
     private var secsPerTurn:Int;
@@ -133,6 +137,34 @@ class Sidebox extends Sprite
         }
         
         playerTurn = situation.turnColor != playerColor;
+    }
+
+    public function revertPlys(cnt:Int) 
+    {
+        if (cnt < 1)
+            return;
+        
+        if (cnt % 2 == 1)
+            playerTurn = !playerTurn;
+
+        if (lastMoveEntry.black_move == "")
+        {
+            movetable.dataSource.removeAt(movetable.dataSource.size - 1);
+            cnt--;
+        }
+
+        while (cnt >= 2)
+        {
+            movetable.dataSource.removeAt(movetable.dataSource.size - 1);
+            cnt -= 2;
+        }
+
+        lastMoveEntry = movetable.dataSource.get(movetable.dataSource.size - 1);
+        if (cnt == 1)
+        {
+            lastMoveEntry.black_move = "";
+            movetable.dataSource.update(movetable.dataSource.size - 1, lastMoveEntry);
+        }
     }
 
     private function waitAndScroll() 
@@ -380,8 +412,7 @@ class Sidebox extends Sprite
 		container.addComponent(offerTakebackBtn);
 
 		offerTakebackBtn.onClick = (e) -> {
-            takebackOfferHideCancelShow();
-            Networker.offerTakeback();
+            onOfferTakebackPressed();
         }
 
         cancelTakebackBtn = new Button();
@@ -391,8 +422,7 @@ class Sidebox extends Sprite
 		container.addComponent(cancelTakebackBtn);
 
 		cancelTakebackBtn.onClick = (e) -> {
-            takebackOfferShowCancelHide();
-		    Networker.cancelTakeback();
+            onCancelTakebackPressed();
         }
     }
 

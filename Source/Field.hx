@@ -112,6 +112,21 @@ class Field extends Sprite
 
     //----------------------------------------------------------------------------------------------------------
 
+    public function revertPlys(cnt:Int) 
+    {
+        if (cnt < 1)
+            return;
+        
+        endPly();
+
+        var toRevert:Array<ReversiblePly> = plyHistory.splice(plyPointer - cnt, cnt);
+        undoSequence(toRevert, cnt < plyPointer? plyHistory[plyPointer - cnt - 1] : null);
+        currentSituation = currentSituation.unmakeMoves(toRevert);
+        plyPointer -= cnt;
+    }
+
+    //----------------------------------------------------------------------------------------------------------
+
     private function onRMBPress(e:MouseEvent) 
     {
         rmbStart = posToIndexes(e.stageX - x, e.stageY - y);

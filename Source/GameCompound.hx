@@ -74,14 +74,7 @@ class GameCompound extends Sprite
             infobox.makeMove(PlyDeserializer.deserialize(trimmed));
         }
 
-        var color:PieceColor = White;
-        for (move in data.movesPlayed)
-        {
-            sidebox.writeMove(color, move);
-            color = color == White? Black : White;
-        }
-        sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
-        sidebox.launchTimer();
+        actualizeSidebox(sidebox, data);
 
         var compound = new GameCompound(Active, field, sidebox, chatbox, infobox);
         compound.playerColor = playerIsWhite? White : Black;
@@ -100,14 +93,7 @@ class GameCompound extends Sprite
         var field:SpectatorsField = new SpectatorsField(data.position, watchedColor);
         var sidebox:Sidebox = new Sidebox(true, data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested);
         
-        var color:PieceColor = White;
-        for (move in data.movesPlayed)
-        {
-            sidebox.writeMove(color, move);
-            color = color == White? Black : White;
-        }
-        sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
-        sidebox.launchTimer();
+        actualizeSidebox(sidebox, data);
 
         //var chatbox:Chatbox;
         //var infobox:GameInfoBox;
@@ -122,6 +108,20 @@ class GameCompound extends Sprite
         var field:AnalysisField = new AnalysisField();
 
         return new GameCompound(Analysis, field, null, null, null, onReturn);
+    }
+
+    private static function actualizeSidebox(sidebox:Sidebox, data:OngoingBattleData)
+    {
+        var situation:Situation = Situation.starting();
+        for (move in data.currentLog.split(";"))
+        {
+            var trimmedMove = StringTools.trim(move);
+            var ply = PlyDeserializer.deserialize(trimmedMove);
+            sidebox.writeMove(situation.turnColor, ply.toNotation(situation));
+            situation.makeMove(ply);
+        }
+        sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
+        sidebox.launchTimer();
     }
 
     public function onMove(data:MoveData)
@@ -194,6 +194,42 @@ class GameCompound extends Sprite
             chatbox.appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE));
     }
 
+    public function onTakebackOffered()
+    {
+        if (type == Active)
+            sidebox.showTakebackRequestBox();
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE));
+    }
+
+    public function onTakebackCancelled()
+    {
+        if (type == Active)
+            sidebox.hideTakebackRequestBox();
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE));
+    }
+
+    public function onTakebackAccepted()
+    {
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE));
+    }
+
+    public function onTakebackDeclined()
+    {
+        if (type == Active)
+            sidebox.takebackOfferShowCancelHide();
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE));
+    }
+
+    public function onRollbackCommand(cnt:Int) 
+    {
+        field.revertPlys(cnt);
+        sidebox.revertPlys(cnt);
+    }
+
     private function bindComponentButtonCallbacks() 
     {
         sidebox.onHomePressed = field.homePly;
@@ -204,6 +240,10 @@ class GameCompound extends Sprite
         sidebox.onCancelDrawPressed = onCancelDrawPressed;
         sidebox.onAcceptDrawPressed = onAcceptDrawPressed;
         sidebox.onDeclineDrawPressed = onDeclineDrawPressed;
+        sidebox.onOfferTakebackPressed = onOfferTakebackPressed;
+        sidebox.onCancelTakebackPressed = onCancelTakebackPressed;
+        sidebox.onAcceptTakebackPressed = onAcceptTakebackPressed;
+        sidebox.onDeclineTakebackPressed = onDeclineTakebackPressed;
     }
 
     private function onOfferDrawPressed()
@@ -232,6 +272,34 @@ class GameCompound extends Sprite
         sidebox.hideDrawRequestBox();
         chatbox.appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE));
         Networker.declineDraw();
+    }
+
+    private function onOfferTakebackPressed()
+    {
+        sidebox.takebackOfferHideCancelShow();
+        chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE));
+        Networker.offerTakeback();
+    }
+
+    private function onCancelTakebackPressed()
+    {
+        sidebox.takebackOfferShowCancelHide();
+        chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE));
+        Networker.cancelTakeback();
+    }
+
+    private function onAcceptTakebackPressed()
+    {
+        sidebox.hideTakebackRequestBox();
+        chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE));
+        Networker.acceptTakeback();
+    }
+
+    private function onDeclineTakebackPressed()
+    {
+        sidebox.hideTakebackRequestBox();
+        chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE));
+        Networker.declineTakeback();
     }
 
     public function terminate()

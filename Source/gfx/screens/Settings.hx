@@ -13,7 +13,7 @@ import Field.Markup;
 
 class Settings extends Sprite
 {
-    private var markupOptionBoxes:Map<Markup, OptionBox>;
+    private var markupOptionBoxes:Map<Markup, OptionBox> = [];
 
     public function new() 
     {

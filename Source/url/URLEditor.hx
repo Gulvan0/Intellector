@@ -6,24 +6,24 @@ class URLEditor
 {
     public static function clear() 
     {
-        #if prod
-        Browser.window.history.pushState({}, "Intellector", "/game/");
-        #else
-        Browser.window.history.pushState({}, "Intellector", "/");
-        #end
+        Browser.window.history.pushState({}, "Intellector", pathname());
     }
     
     public static function assignID(id:Int) 
     {
-        #if prod
-        Browser.window.history.pushState({}, "Intellector", "/game/?id=" + id);
-        #else
-        Browser.window.history.pushState({}, "Intellector", "/?id=" + id);
-        #end
+        Browser.window.history.pushState({}, "Intellector", pathname() + "?id=" + id);
     }
 
     public static function getChallengeLink(login:String):String
     {
         return '${Browser.location.host}${Browser.location.pathname}?ch=${login}';
+    }
+
+    private static function pathname():String
+    {
+        if (Browser.location.hostname == "intellector.info")
+            return "/game/";
+        else 
+            return "/";
     }
 }

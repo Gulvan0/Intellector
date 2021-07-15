@@ -68,7 +68,6 @@ typedef OngoingBattleData =
     var whiteSeconds:Int;
     var blackSeconds:Int;
     var position:String;
-    var movesPlayed:Array<String>;
     var currentLog:String;
 }
 
@@ -289,12 +288,53 @@ class Networker
 
     public static function offerTakeback() 
     {
-        
+        onceOneOf(['takeback_accepted' => onTakebackAccepted, 'takeback_declined' => onTakebackDeclined]);
+        emit('takeback_offer', {});
     }
 
     public static function cancelTakeback() 
     {
-        
+        emit('takeback_cancel', {});
+        off('takeback_accepted');
+        off('takeback_declined');
+    }
+
+    public static function acceptTakeback() 
+    {
+        emit('takeback_accept', {});
+        off('takeback_cancelled');
+    }
+
+    public static function declineTakeback() 
+    {
+        emit('takeback_decline', {});
+        off('takeback_cancelled');
+    }
+
+    public static function onTakebackOffered(e) 
+    {
+        once('takeback_cancelled', onTakebackCancelled);
+        currentGameCompound.onTakebackOffered();
+    }
+
+    public static function onTakebackCancelled(e) 
+    {
+        currentGameCompound.onTakebackCancelled();
+    }
+
+    public static function onTakebackAccepted(e) 
+    {
+        currentGameCompound.onTakebackAccepted();
+    }
+
+    public static function onTakebackDeclined(e) 
+    {
+        currentGameCompound.onTakebackDeclined();
+    }
+
+    public static function onRollbackCommand(cnt:Int) 
+    {
+        currentGameCompound.onRollbackCommand(cnt);
     }
 
     public static function registerGameEvents(onOver:GameOverData->Void) 
@@ -306,6 +346,8 @@ class Networker
         on('new_spectator', currentGameCompound.onSpectatorConnected);
         on('spectator_left', currentGameCompound.onSpectatorDisonnected);
         on('draw_offered', onDrawOffered);
+        on('takeback_offered', onTakebackOffered);
+        on('rollback', onRollbackCommand);
         once('game_ended', onOver);
     }
 
@@ -320,6 +362,11 @@ class Networker
         off('draw_cancelled');
         off('draw_accepted');
         off('draw_declined');
+        off('takeback_offered');
+        off('takeback_cancelled');
+        off('takeback_accepted');
+        off('takeback_declined');
+        off('rollback');
         on('incoming_challenge', challengeReceiver);
         once('game_started', ScreenManager.instance.toGameStart);
     }
