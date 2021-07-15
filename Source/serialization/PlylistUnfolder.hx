@@ -25,7 +25,7 @@ class PlylistUnfolder
 
             var ply:Ply = PlyDeserializer.deserialize(line);
             game.push(ply.toReversible(situation));
-            situation.makeMove(ply);
+            situation = situation.makeMove(ply);
         }
 
         return game;

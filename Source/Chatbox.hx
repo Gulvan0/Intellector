@@ -84,14 +84,14 @@ class Chatbox extends Sprite
         history.height = totalHeight - 5 - 25;
 
         historyText = new Label();
-        historyText.text = "";
+        historyText.htmlText = "";
         historyText.width = WIDTH - 20;
 
         history.addComponent(historyText);
         addChild(history);
         
         messageInput = new TextField();
-        messageInput.placeholder = Dictionary.getPhrase(CHATBOX_MESSAGE_PLACEHOLDER);
+        //messageInput.placeholder = Dictionary.getPhrase(CHATBOX_MESSAGE_PLACEHOLDER);
         messageInput.width = WIDTH;
         messageInput.height = 25;
         messageInput.y = history.height + 5;

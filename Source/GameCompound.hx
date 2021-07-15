@@ -65,16 +65,7 @@ class GameCompound extends Sprite
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin, playerIsWhite);
 
-        for (move in data.currentLog.split(";"))
-        {
-            var trimmed = StringTools.trim(move);
-            if (StringTools.contains(trimmed, ":") || trimmed.length < 4)
-                continue;
-
-            infobox.makeMove(PlyDeserializer.deserialize(trimmed));
-        }
-
-        actualizeSidebox(sidebox, data);
+        actualizeBoxes(data, sidebox, infobox);
 
         var compound = new GameCompound(Active, field, sidebox, chatbox, infobox);
         compound.playerColor = playerIsWhite? White : Black;
@@ -92,11 +83,10 @@ class GameCompound extends Sprite
 
         var field:SpectatorsField = new SpectatorsField(data.position, watchedColor);
         var sidebox:Sidebox = new Sidebox(true, data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested);
-        
-        actualizeSidebox(sidebox, data);
-
         //var chatbox:Chatbox;
         //var infobox:GameInfoBox;
+        
+        actualizeBoxes(data, sidebox);
         
         var compound = new GameCompound(Spectator, field, sidebox, null, null, onReturn);
         compound.bindComponentButtonCallbacks();
@@ -110,18 +100,24 @@ class GameCompound extends Sprite
         return new GameCompound(Analysis, field, null, null, null, onReturn);
     }
 
-    private static function actualizeSidebox(sidebox:Sidebox, data:OngoingBattleData)
+    private static function actualizeBoxes(data:OngoingBattleData, sidebox:Sidebox, ?infobox:GameInfoBox)
     {
         var situation:Situation = Situation.starting();
         for (move in data.currentLog.split(";"))
         {
             var trimmedMove = StringTools.trim(move);
+            if (StringTools.contains(trimmedMove, ":") || trimmedMove.length < 4)
+                continue;
+
             var ply = PlyDeserializer.deserialize(trimmedMove);
-            sidebox.writeMove(situation.turnColor, ply.toNotation(situation));
-            situation.makeMove(ply);
+            sidebox.makeMove(ply, situation);
+
+            if (infobox != null)
+                infobox.makeMove(ply);
+
+            situation = situation.makeMove(ply);
         }
         sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
-        sidebox.launchTimer();
     }
 
     public function onMove(data:MoveData)
@@ -212,6 +208,8 @@ class GameCompound extends Sprite
 
     public function onTakebackAccepted()
     {
+        if (type == Active)
+            sidebox.takebackOfferShowCancelHide();
         if (chatbox != null)
             chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE));
     }
@@ -228,6 +226,8 @@ class GameCompound extends Sprite
     {
         field.revertPlys(cnt);
         sidebox.revertPlys(cnt);
+        if (infobox != null)
+            infobox.revertPlys(cnt);
     }
 
     private function bindComponentButtonCallbacks() 
@@ -324,8 +324,8 @@ class GameCompound extends Sprite
 
         if (sidebox != null)
         {
-            sidebox.x = field.x + field.width + 10;
-            sidebox.y = field.y + (field.getHeight() - 380 - Math.sqrt(3) * Field.a) / 2;
+            sidebox.x = field.right - 22;
+            sidebox.y = field.top;
             addChild(sidebox);
         }
 

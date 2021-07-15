@@ -177,6 +177,7 @@ class Networker
                 on('move', currentGameCompound.onMove);
                 on('time_correction', currentGameCompound.onTimeCorrection);
                 on('draw_offered', onDrawOffered);
+                on('takeback_offered', onTakebackOffered);
                 onStarted(data);
             }
         ]);

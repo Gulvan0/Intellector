@@ -122,7 +122,7 @@ class Sidebox extends Sprite
         }
         else 
         {
-            lastMoveEntry = {"num": '$move', "white_move": moveStr, "black_move": ""};
+            lastMoveEntry = {"num": '$move', "white_move": moveStr, "black_move": " "};
             movetable.dataSource.add(lastMoveEntry);
         }
         waitAndScroll();
@@ -143,11 +143,13 @@ class Sidebox extends Sprite
     {
         if (cnt < 1)
             return;
+
+        move -= cnt;
         
         if (cnt % 2 == 1)
             playerTurn = !playerTurn;
 
-        if (lastMoveEntry.black_move == "")
+        if (lastMoveEntry.black_move == " ")
         {
             movetable.dataSource.removeAt(movetable.dataSource.size - 1);
             cnt--;
@@ -162,7 +164,7 @@ class Sidebox extends Sprite
         lastMoveEntry = movetable.dataSource.get(movetable.dataSource.size - 1);
         if (cnt == 1)
         {
-            lastMoveEntry.black_move = "";
+            lastMoveEntry.black_move = " ";
             movetable.dataSource.update(movetable.dataSource.size - 1, lastMoveEntry);
         }
     }
@@ -183,8 +185,8 @@ class Sidebox extends Sprite
             vscroll.pos = vscroll.max;
     }
 
-    public function writeMove(color:PieceColor, s:String)
-    {
+    ////public function writeMove(color:PieceColor, s:String)
+    /*{
         if (color == Black)
         {
             lastMoveEntry.black_move = s;
@@ -192,13 +194,13 @@ class Sidebox extends Sprite
         }
         else 
         {
-            lastMoveEntry = {"num": '$move', "white_move": s, "black_move": ""};
+            lastMoveEntry = {"num": '$move', "white_move": s, "black_move": " "};
             movetable.dataSource.add(lastMoveEntry);
         }
 
         move++;
         playerTurn = color != playerColor;
-    }
+    }*/
 
     public function launchTimer()
     {
@@ -238,13 +240,13 @@ class Sidebox extends Sprite
         cancelDrawBtn.visible = true;
     }
 
-    public function takebackOfferHideCancelShow() 
+    public function drawOfferShowCancelHide() 
     {
         offerDrawBtn.visible = true;
         cancelDrawBtn.visible = false;
     }
 
-    public function drawOfferShowCancelHide() 
+    public function takebackOfferHideCancelShow() 
     {
         offerTakebackBtn.visible = false;
         cancelTakebackBtn.visible = true;
@@ -303,7 +305,7 @@ class Sidebox extends Sprite
 		takebackRequestBox.addComponent(declineBtn);
 
 		declineBtn.onClick = (e) -> {
-            //TODO: delegate
+            onDeclineTakebackPressed();
         }
 
         var requestLabel:Label = new Label();
@@ -319,7 +321,7 @@ class Sidebox extends Sprite
 		takebackRequestBox.addComponent(acceptBtn);
 
 		acceptBtn.onClick = (e) -> {
-			//TODO: delegate
+			onAcceptTakebackPressed();
         }
 
         takebackRequestBox.visible = false;

@@ -61,6 +61,12 @@ class GameInfoBox extends Sprite
         }
     }
 
+    public function revertPlys(cnt:Int) 
+    {
+        openingTree.revertMoves(cnt);
+        openingTF.text = openingTree.currentNode.name;
+    }
+
     public function new(width:Float, height:Float, tcStartSeconds:Int, tcBonusSeconds:Int, whiteLogin:String, blackLogin:String, playerIsWhite:Bool) 
     {
         super();

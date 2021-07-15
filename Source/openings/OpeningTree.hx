@@ -36,6 +36,7 @@ class OpeningTree
 
     public var currentNode:Branch;
     public var isMirrored:Null<Bool>;
+    private var prevNodes:Array<Branch>;
 
     public function makeMove(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:PieceType) 
     {
@@ -53,12 +54,19 @@ class OpeningTree
             toI = 8 - toI;
         }
         var collapsedMove:String = '$fromI$fromJ$toI$toJ' + (morphInto == null? "" : morphInto.getName());
+        prevNodes.push(currentNode);
         currentNode = currentNode.get(collapsedMove);
+    }
+
+    public function revertMoves(cnt:Int) 
+    {
+        currentNode = prevNodes.splice(prevNodes.length - cnt, cnt)[0];
     }
 
     public function new() 
     {
         currentNode = root;
+        prevNodes = [];
     }
 
     public static function init() 

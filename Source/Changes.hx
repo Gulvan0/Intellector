@@ -16,6 +16,7 @@ class Changes
     {
         if (Dictionary.lang == EN)
             changelog = [
+                {date: "16.07.2021", text:"Extended side box functionality"},
                 {date: "19.06.2021", text:"Bugfixes & Notation update"},
                 {date: "08.06.2021", text:"Bugfixes"},
                 {date: "01.06.2021", text:"Text display bug fixed"},
@@ -35,6 +36,7 @@ class Changes
             ];
         else if (Dictionary.lang == RU)
             changelog = [
+                {date: "16.07.2021", text:"Новые функции боковой панели"},
                 {date: "19.06.2021", text:"Исправления багов и обновление нотации"},
                 {date: "08.06.2021", text:"Исправления багов"},
                 {date: "01.06.2021", text:"Исправлена ошибка отображения текста"},

@@ -33,6 +33,11 @@ class Field extends Sprite
     public static var a:Float = 40;
     public static var markup:Markup = Over;
 
+    public var left(get, never):Float;
+    public var top(get, never):Float;
+    public var right(get, never):Float;
+    public var bottom(get, never):Float;
+
     public var hexes:Array<Array<Hexagon>>;
     public var figures:Array<Array<Null<Figure>>>;
 
@@ -50,6 +55,26 @@ class Field extends Sprite
     private var rmbStart:Null<IntPoint>;
 
     public var playersTurn:Bool = true;
+
+    public function get_left():Float
+    {
+        return x - a;
+    }
+
+    public function get_top():Float
+    {
+        return y - a * Math.sqrt(3) / 2;
+    }
+
+    public function get_right():Float
+    {
+        return left + width;
+    }
+
+    public function get_bottom():Float
+    {
+        return top + height;
+    }
 
     public function new() 
     {
@@ -123,6 +148,9 @@ class Field extends Sprite
         undoSequence(toRevert, cnt < plyPointer? plyHistory[plyPointer - cnt - 1] : null);
         currentSituation = currentSituation.unmakeMoves(toRevert);
         plyPointer -= cnt;
+
+        if (cnt % 2 == 1)
+            playersTurn = !playersTurn;
     }
 
     //----------------------------------------------------------------------------------------------------------

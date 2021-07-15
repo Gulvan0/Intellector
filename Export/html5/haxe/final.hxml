@@ -18,6 +18,7 @@
 -cp Source
 -D tools=7.9.0
 -D lime-canvas
+-D prod
 -D howlerjs
 -D no-compilation
 -D openfl-html5
