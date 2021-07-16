@@ -1,5 +1,6 @@
 package gameboards;
 
+import serialization.PlyDeserializer;
 import struct.Ply;
 import Networker.OngoingBattleData;
 import Networker.MoveData;
@@ -7,6 +8,7 @@ import struct.PieceType;
 import openfl.events.Event;
 import struct.PieceColor;
 import openfl.events.MouseEvent;
+using StringTools;
 
 class PlayingField extends Field
 {
@@ -28,7 +30,16 @@ class PlayingField extends Field
         hexes = Factory.produceHexes(this, playerIsWhite);
         disposeLetters();
         if (sourceData != null)
+        {
+            if (sourceData.currentLog.length > 2)
+            {
+                var lastMoveStr:String = sourceData.currentLog.split(";")[sourceData.currentLog.length - 2].trim();
+                var lastMove:Ply = PlyDeserializer.deserialize(lastMoveStr);
+                highlightMove(lastMove.modifiedHexes());
+            }
+
             figures = Factory.produceFiguresFromSerialized(sourceData.position, playerIsWhite, this);
+        }
         else
             figures = Factory.produceFiguresFromDefault(playerIsWhite, this);
         addEventListener(Event.ADDED_TO_STAGE, init);

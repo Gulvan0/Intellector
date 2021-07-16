@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.styles.Style;
 import js.Browser;
 import url.URLEditor;
 import dict.Dictionary;
@@ -39,7 +40,8 @@ class OpenChallengeHosting extends Sprite
     private function drawLabel():Label
     {
         var label:Label = new Label();
-		label.customStyle = {fontSize: 16};
+		label.customStyle = new Style();
+		label.customStyle.fontSize = 16;
 		label.textAlign = 'center';
         label.width = hostingBoxWidth;
         return label;

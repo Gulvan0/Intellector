@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.styles.Style;
 import haxe.ui.containers.VBox;
 import dict.Dictionary;
 import js.Browser;
@@ -23,7 +24,8 @@ class OpenChallengeJoining extends Sprite
 			label.text += Dictionary.getPhrase(WILL_BE_GUEST);
 		else
 			label.text += Dictionary.getPhrase(JOINING_AS) + Networker.login;
-		label.customStyle = {fontSize: 16};
+		label.customStyle = new Style();
+		label.customStyle.fontSize = 16;
 		label.textAlign = 'center';
 		joinMenu.addComponent(label);
 

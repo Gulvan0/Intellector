@@ -92,6 +92,7 @@ class Main extends Sprite
 				case Main:
 					ScreenManager.instance.toMain();
 				case OpenChallengeInvitation(issuer):
+					Networker.once('game_started', ScreenManager.instance.toGameStart);
 					Networker.getOpenChallenge(issuer, ScreenManager.instance.toOpenChallengeJoiningRoom, onGameInProcess, ScreenManager.instance.toMain);
 				case Game(id):
 					Networker.getGame(id, onGameInProcess, (s)->{ScreenManager.instance.toMain();}, ScreenManager.instance.toMain);

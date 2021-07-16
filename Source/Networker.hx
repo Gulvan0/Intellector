@@ -387,7 +387,7 @@ class Networker
         eventMap[eventName] = callback;
     }
 
-    private static function once(eventName:String, callback:Dynamic->Void) 
+    public static function once(eventName:String, callback:Dynamic->Void) 
     {
         eventMap[eventName] = combineSecond(off.bind(eventName), callback);
     }

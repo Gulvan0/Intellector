@@ -109,6 +109,11 @@ class Ply
         return str;
     }
 
+    public function modifiedHexes():Array<IntPoint>
+    {
+        return [from.copy(), to.copy()];
+    }
+
     public function toMoveData():MoveData
     {
         return {issuer_login: Networker.login, fromI: from.i, toI: to.i, fromJ: from.j, toJ: to.j, morphInto: morphInto == null? null : morphInto.getName()};
