@@ -439,10 +439,8 @@ class Sidebox extends Sprite
         playerTurn = playerIsWhite;
 
         var strStart = secsToString(startSecs);
-        var timeStyle:Style = new Style();
-        timeStyle.fontSize = 40;
-        var loginStyle:Style = new Style();
-        loginStyle.fontSize = 24;
+        var timeStyle:Style = {fontSize: 40};
+        var loginStyle:Style = {fontSize: 24};
 
         var box:VBox = new VBox();
 

@@ -24,8 +24,7 @@ class OpenChallengeJoining extends Sprite
 			label.text += Dictionary.getPhrase(WILL_BE_GUEST);
 		else
 			label.text += Dictionary.getPhrase(JOINING_AS) + Networker.login;
-		label.customStyle = new Style();
-		label.customStyle.fontSize = 16;
+		label.customStyle = {fontSize: 16};
 		label.textAlign = 'center';
 		joinMenu.addComponent(label);
 

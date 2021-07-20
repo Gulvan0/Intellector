@@ -160,6 +160,16 @@ class GameCompound extends Sprite
         chatbox.appendLog('${data.login}' + Dictionary.getPhrase(SPECTATOR_LEFT_MESSAGE));
     }
 
+    public function onOpponentReconnected()
+    {
+        chatbox.appendLog(opposite(playerColor).getName() + Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE));
+    }
+
+    public function onOpponentDisconnected()
+    {
+        chatbox.appendLog(opposite(playerColor).getName() + Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE));
+    }
+
     public function onDrawOffered()
     {
         if (type == Active)

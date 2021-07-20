@@ -105,7 +105,9 @@ class Dictionary
         TAKEBACK_ACCEPTED_MESSAGE => ["Takeback accepted", "Тейкбек принят"],
         TAKEBACK_DECLINED_MESSAGE => ["Takeback declined", "Тейкбек отклонен"],
         CANCEL_DRAW_BTN_TEXT => ["Cancel draw", "Отменить ничью"],
-        CANCEL_TAKEBACK_BTN_TEXT => ["Cancel takeback", "Отменить тейкбек"]
+        CANCEL_TAKEBACK_BTN_TEXT => ["Cancel takeback", "Отменить тейкбек"],
+        OPPONENT_DISCONNECTED_MESSAGE => [" disconnected", " отключился"],
+        OPPONENT_RECONNECTED_MESSAGE => [" reconnected", " переподключился"]
     ];
 
     public static function getPhrase(phrase:Phrase):String

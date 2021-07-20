@@ -266,23 +266,23 @@ class Networker
         off('draw_cancelled');
     }
 
-    public static function onDrawOffered(e) 
+    private static function onDrawOffered(e) 
     {
         once('draw_cancelled', onDrawCancelled);
         currentGameCompound.onDrawOffered();
     }
 
-    public static function onDrawCancelled(e) 
+    private static function onDrawCancelled(e) 
     {
         currentGameCompound.onDrawCancelled();
     }
 
-    public static function onDrawAccepted(e) 
+    private static function onDrawAccepted(e) 
     {
         currentGameCompound.onDrawAccepted();
     }
 
-    public static function onDrawDeclined(e) 
+    private static function onDrawDeclined(e) 
     {
         currentGameCompound.onDrawDeclined();
     }
@@ -312,30 +312,40 @@ class Networker
         off('takeback_cancelled');
     }
 
-    public static function onTakebackOffered(e) 
+    private static function onTakebackOffered(e) 
     {
         once('takeback_cancelled', onTakebackCancelled);
         currentGameCompound.onTakebackOffered();
     }
 
-    public static function onTakebackCancelled(e) 
+    private static function onTakebackCancelled(e) 
     {
         currentGameCompound.onTakebackCancelled();
     }
 
-    public static function onTakebackAccepted(e) 
+    private static function onTakebackAccepted(e) 
     {
         currentGameCompound.onTakebackAccepted();
     }
 
-    public static function onTakebackDeclined(e) 
+    private static function onTakebackDeclined(e) 
     {
         currentGameCompound.onTakebackDeclined();
     }
 
-    public static function onRollbackCommand(cnt:Int) 
+    private static function onRollbackCommand(cnt:Int) 
     {
         currentGameCompound.onRollbackCommand(cnt);
+    }
+
+    private static function onOpponentDisconnected(e) 
+    {
+        currentGameCompound.onOpponentDisconnected();
+    }
+
+    private static function onOpponentReconnected(e) 
+    {
+        currentGameCompound.onOpponentReconnected();
     }
 
     public static function registerGameEvents(onOver:GameOverData->Void) 
@@ -349,6 +359,8 @@ class Networker
         on('draw_offered', onDrawOffered);
         on('takeback_offered', onTakebackOffered);
         on('rollback', onRollbackCommand);
+        on('opponent_disconnected', onOpponentDisconnected);
+        on('opponent_reconnected', onOpponentReconnected);
         once('game_ended', onOver);
     }
 
@@ -368,6 +380,8 @@ class Networker
         off('takeback_accepted');
         off('takeback_declined');
         off('rollback');
+        off('opponent_disconnected');
+        off('opponent_reconnected');
         on('incoming_challenge', challengeReceiver);
         once('game_started', ScreenManager.instance.toGameStart);
     }

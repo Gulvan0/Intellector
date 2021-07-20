@@ -75,12 +75,9 @@ class GameInfoBox extends Sprite
 
         addChild(Shapes.rect(width, height, 0x999999, 1, LineStyle.Square, 0xFFFFFF));
         
-        var shortInfoStyle:Style = new Style();
-        shortInfoStyle.fontSize = 14;
-        var opponentsStyle:Style = new Style();
-        opponentsStyle.fontSize = 16;
-        var openingStyle:Style = new Style();
-        openingStyle.fontSize = 14;
+        var shortInfoStyle:Style = {fontSize: 14};
+        var opponentsStyle:Style = {fontSize: 16};
+        var openingStyle:Style = {fontSize: 14};
         openingStyle.fontItalic = true;
 
         var boxWidth = width - 10;

@@ -40,8 +40,7 @@ class OpenChallengeHosting extends Sprite
     private function drawLabel():Label
     {
         var label:Label = new Label();
-		label.customStyle = new Style();
-		label.customStyle.fontSize = 16;
+		label.customStyle = {fontSize: 16};
 		label.textAlign = 'center';
         label.width = hostingBoxWidth;
         return label;

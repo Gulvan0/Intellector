@@ -23,8 +23,7 @@ class Settings extends Sprite
 
 		var header:Label = new Label();
 		header.text = Dictionary.getPhrase(SETTINGS_TITLE);
-		header.customStyle = new Style();
-		header.customStyle.fontSize = 16;
+		header.customStyle = {fontSize: 16};
 		header.horizontalAlign = "center";
 		box.addComponent(header);
 

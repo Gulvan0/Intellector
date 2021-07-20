@@ -31,9 +31,10 @@ class PlayingField extends Field
         disposeLetters();
         if (sourceData != null)
         {
-            if (sourceData.currentLog.length > 2)
+            var logLines:Array<String> = sourceData.currentLog.split(";");
+            if (logLines.length > 2)
             {
-                var lastMoveStr:String = sourceData.currentLog.split(";")[sourceData.currentLog.length - 2].trim();
+                var lastMoveStr:String = logLines[logLines.length - 2].trim();
                 var lastMove:Ply = PlyDeserializer.deserialize(lastMoveStr);
                 highlightMove(lastMove.modifiedHexes());
             }
