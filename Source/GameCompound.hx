@@ -1,5 +1,8 @@
 package;
 
+import analysis.AlphaBeta;
+import haxe.ui.components.Label;
+import haxe.ui.containers.HBox;
 import serialization.PlyDeserializer;
 import struct.Hex;
 import struct.Situation;
@@ -367,31 +370,10 @@ class GameCompound extends Sprite
 
         if (Std.isOfType(field, AnalysisField))
         {
-            var actionButtons:VBox = new VBox();
-
-            var clearBtn = new Button();
-            clearBtn.width = 200;
-            clearBtn.text = Dictionary.getPhrase(ANALYSIS_CLEAR);
-    
-            clearBtn.onClick = (e) -> {
-                cast(field, AnalysisField).clearBoard();
-            }
-    
-            actionButtons.addComponent(clearBtn);
-    
-            var resetBtn = new Button();
-            resetBtn.width = 200;
-            resetBtn.text = Dictionary.getPhrase(ANALYSIS_RESET);
-    
-            resetBtn.onClick = (e) -> {
-                cast(field, AnalysisField).reset();
-            }
-    
-            actionButtons.addComponent(resetBtn);
-    
-            actionButtons.x = field.x + field.width + 10;
-            actionButtons.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
-            addChild(actionButtons);
+            var panel:AnalysisBoardPanel = new AnalysisBoardPanel(cast(field, AnalysisField));
+            panel.x = field.x + field.width + 10;
+            panel.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
+            addChild(panel);
         }
     }    
 }

@@ -41,7 +41,7 @@ class Field extends Sprite
     public var hexes:Array<Array<Hexagon>>;
     public var figures:Array<Array<Null<Figure>>>;
 
-    private var currentSituation:Situation;
+    public var currentSituation(default, null):Situation;
     private var plyHistory:Array<ReversiblePly>;
     private var plyPointer:Int;
 
@@ -192,11 +192,7 @@ class Field extends Sprite
                     drawnArrows.remove(code);
                 }
                 else 
-                {
-                    var arrow = drawArrow(rmbStart, rmbEnd);
-                    drawnArrows.set(code, arrow);
-                    addChild(arrow);
-                }
+                    drawArrow(rmbStart, rmbEnd);
             }
 
         rmbStart = null;
@@ -372,10 +368,10 @@ class Field extends Sprite
             endPly();
 
             plyHistory.push(ply.toReversible(currentSituation));
-            currentSituation = currentSituation.makeMove(ply);
             plyPointer++;
         }
 
+        currentSituation = currentSituation.makeMove(ply);
         playSound(ply);
         translateFigures(ply.from, ply.to, ply.morphInto);
         highlightMove([ply.from, ply.to]);
@@ -587,7 +583,7 @@ class Field extends Sprite
         selectedDest = null;
     }
 
-    private function rmbSelectionBackToNormal() 
+    public function rmbSelectionBackToNormal() 
     {
         for (hex in redSelectedHexes)
             hex.redDeselect();
@@ -598,7 +594,7 @@ class Field extends Sprite
     
     //----------------------------------------------------------------------------------------------------------------------------------------------
 
-    public function drawArrow(from:IntPoint, to:IntPoint):Sprite
+    public function drawArrow(from:IntPoint, to:IntPoint)
     {
         var fromPos:Point = hexCoords(from.i, from.j);
         var toPos:Point = hexCoords(to.i, to.j);
@@ -620,7 +616,10 @@ class Field extends Sprite
         arrow.graphics.lineTo(branch1.x, branch1.y);
         arrow.graphics.moveTo(toPos.x, toPos.y);
         arrow.graphics.lineTo(branch2.x, branch2.y);
-        return arrow;
+        
+        var code = '${from.i}${from.j}${to.i}${to.j}';
+        drawnArrows.set(code, arrow);
+        addChild(arrow);
     }
     
     //----------------------------------------------------------------------------------------------------------------------------------------------

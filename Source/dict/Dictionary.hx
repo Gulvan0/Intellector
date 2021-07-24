@@ -107,7 +107,9 @@ class Dictionary
         CANCEL_DRAW_BTN_TEXT => ["Cancel draw", "Отменить ничью"],
         CANCEL_TAKEBACK_BTN_TEXT => ["Cancel takeback", "Отменить тейкбек"],
         OPPONENT_DISCONNECTED_MESSAGE => [" disconnected", " отключился"],
-        OPPONENT_RECONNECTED_MESSAGE => [" reconnected", " переподключился"]
+        OPPONENT_RECONNECTED_MESSAGE => [" reconnected", " переподключился"],
+        ANALYSIS_ANALYZE_WHITE => ["Analyze as white", "Анализ за белых"],
+        ANALYSIS_ANALYZE_BLACK => ["Analyze as black", "Анализ за черных"]
     ];
 
     public static function getPhrase(phrase:Phrase):String

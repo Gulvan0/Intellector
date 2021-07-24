@@ -20,7 +20,10 @@ abstract Score(ScoreType) from ScoreType to ScoreType
                 {
                     case Mate(turns2, winner2):
                         if (winner1 == winner2)
-                            return turns1 < turns2;
+                            if (winner1 == White)
+                                return turns1 < turns2;
+                            else
+                                return turns1 > turns2
                         else
                             return winner1 == White;
                     case Normal(value2):
@@ -86,6 +89,25 @@ abstract Score(ScoreType) from ScoreType to ScoreType
             case Mate(turns, winner): Mate(turns + 1, winner);
             default: this;
         }
+    }
+
+    public function toString():String
+    {
+        var s:String = "";
+
+        switch this 
+        {
+            case Mate(turns, winner):
+                s += winner == White? "+" : "-";
+                s += "M";
+                s += turns;
+            case Normal(value):
+                if (value > 0)
+                    s += "+";
+                s += MathUtils.proundStr(value, 2);
+        }
+
+        return s;
     }
 
     public function new(v:ScoreType) 

@@ -34,7 +34,7 @@ class AlphaBeta
             return {score: evaluateHeuristic(situation), plySequence: []};
 
         var beta:Null<Score> = null;
-        var optimalSequence:Array<Ply>;
+        var optimalSequence:Array<Ply> = [];
         var neededChildDepth:Int = remainingDepth - 1;
 
         for (ply in situation.availablePlys())
