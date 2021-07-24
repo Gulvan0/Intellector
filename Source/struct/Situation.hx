@@ -87,6 +87,14 @@ class Situation
         return get(ply.to).type == Intellector && get(ply.from).color != get(ply.to).color;
     }
 
+    public function isMate():Bool
+    {
+        for (p => hex in collectOccupiedHexes())
+            if (hex.color == turnColor && hex.type == Intellector)
+                return false;
+        return true;
+    }
+
     public function availablePlys():Array<Ply>
     {
         var result:Array<Ply> = [];
