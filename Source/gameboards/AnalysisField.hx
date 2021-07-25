@@ -1,5 +1,6 @@
 package gameboards;
 
+import struct.Situation;
 import struct.Ply;
 import struct.PieceColor;
 import struct.PieceType;
@@ -52,6 +53,7 @@ class AnalysisField extends Field
     private function arrangeDefault() 
     {
         figures = Factory.produceFiguresFromDefault(true, this);
+        currentSituation = Situation.starting();
     }
 
     //---------------------------------------------------------------------------------------------------------

@@ -110,13 +110,18 @@ class Situation
                 var ply:Ply = new Ply();
                 ply.from = p.copy();
                 ply.to = coords;
-                result.push(ply);
-                if (get(coords).color != turnColor)
+                if (get(coords).isEmpty())
+                    result.push(ply);
+                else 
+                    result.insert(0, ply);
+
+                //TODO: Rewrite (has fundamental mistakes)
+                /*if (get(coords).color == opposite(turnColor))
                 {
                     var chameleonPly:Ply = ply.copy();
                     ply.morphInto = get(coords).type;
                     result.push(chameleonPly);
-                }
+                }*/
             }
         }
         
