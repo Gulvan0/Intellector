@@ -355,7 +355,7 @@ class Field extends Sprite
 
         if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type && figure.type != Progressor)
             Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
-        else if (isFinalForColor(to, figure.color) && figure.type == Progressor)
+        else if (to.isFinalForColor(figure.color) && figure.type == Progressor)
             Dialogs.promotionSelect(figure.color, makeMove.bind(from, to, _), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
         else 
             makeMove(from, to);
@@ -530,14 +530,6 @@ class Field extends Sprite
         if (i % 2 == 1)
             p.y += Math.sqrt(3) * a / 2;
         return p;
-    }
-    
-    private function isFinalForColor(p:IntPoint, color:PieceColor):Bool
-    {
-        if (color == White)
-            return p.j == 0 && p.i % 2 == 0;
-        else 
-            return p.j == 6 && p.i % 2 == 0;
     }
     
     //----------------------------------------------------------------------------------------------------------------------------------------------

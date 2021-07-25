@@ -16,7 +16,14 @@ class MathUtils
     public static function proundStr(num:Float, order:Int):String
     {
         var shiftMultiplier = Math.pow(10, order);
-        var raw = "" + Math.round(num * shiftMultiplier);
-        return raw.substr(0, raw.length - 2) + "." + raw.substr(raw.length - 2, 2);
+        var shiftedNum = Math.round(num * shiftMultiplier);
+        var raw = "" + shiftedNum;
+
+        if (shiftedNum <= -100 || shiftedNum >= 100)
+            return raw.substr(0, raw.length - 2) + "." + raw.substr(raw.length - 2, 2);
+        else if (shiftedNum <= -10 || shiftedNum >= 10)
+            return raw.substr(0, raw.length - 2) + "0." + raw.substr(raw.length - 2, 2);
+        else
+            return raw.substr(0, raw.length - 1) + "0.0" + raw.substr(raw.length - 1, 1);
     }
 }

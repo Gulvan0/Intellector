@@ -374,6 +374,8 @@ class GameCompound extends Sprite
             panel.x = field.x + field.width + 10;
             panel.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
             addChild(panel);
+
+            cast(field, AnalysisField).onMadeMove = panel.deprecateScore;
         }
     }    
 }

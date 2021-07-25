@@ -1,5 +1,7 @@
 package struct;
 
+import js.html.Window;
+import analysis.PieceValues;
 import struct.PieceColor.opposite;
 
 class Situation 
@@ -7,11 +9,14 @@ class Situation
     public var figureArray:Array<Array<Hex>>;
     public var turnColor:PieceColor;
 
+    private var intellectorPos:Map<PieceColor, IntPoint>;
+
     public static function starting():Situation
     {
         var situation = new Situation();
         situation.figureArray = [for (j in 0...7) [for (i in 0...9) Hex.empty()]];
         situation.turnColor = White;
+        situation.intellectorPos = [White => new IntPoint(4, 6), Black => new IntPoint(4, 0)];
 
         situation.figureArray[0][0] = Hex.occupied(Dominator, Black);
         situation.figureArray[0][1] = Hex.occupied(Liberator, Black);
@@ -64,6 +69,9 @@ class Situation
         else 
             next.set(ply.from, Hex.empty());
 
+        if (fromHex.type == Intellector)
+            next.intellectorPos[fromHex.color] = ply.to.copy();
+
         return next;
     }
 
@@ -75,7 +83,11 @@ class Situation
 
         for (ply in reversedPlys)
             for (transform in ply)
+            {
                 formerSituation.set(transform.coords, transform.former);
+                if (transform.former.type == Intellector)
+                    formerSituation.intellectorPos[transform.former.color] = transform.coords;
+            }
 
         if (plys.length % 2 == 1)
             formerSituation.turnColor = opposite(turnColor);
@@ -84,48 +96,77 @@ class Situation
 
     public function isMating(ply:Ply):Bool
     {
-        return get(ply.to).type == Intellector && get(ply.from).color != get(ply.to).color;
+        var hexFrom = get(ply.from);
+        var mate = ply.to == intellectorPos[opposite(hexFrom.color)];
+        var breakthrough = hexFrom.type == Intellector && ply.to.isFinalForColor(hexFrom.color);
+        return mate || breakthrough;
     }
 
     public function isMate():Bool
     {
-        for (p => hex in collectOccupiedHexes())
-            if (hex.color == turnColor && hex.type == Intellector)
-                return false;
-        return true;
+        var lastMoveColor = opposite(turnColor);
+        var playerEaten:Bool = get(intellectorPos[turnColor]).color != turnColor;
+        var opponentOnFinal:Bool = intellectorPos[lastMoveColor].isFinalForColor(lastMoveColor);
+
+        return playerEaten || opponentOnFinal;
     }
 
     public function availablePlys():Array<Ply>
     {
-        var result:Array<Ply> = [];
+        var captures:Array<Ply> = [];
+        //var checks:Array<Ply> = [];
+        var normalPlys:Array<Ply> = [];
+        var intellectorMovements:Array<Ply> = [];
 
-        for (p => hex in collectOccupiedHexes())
+        var enemyColor = opposite(turnColor);
+
+        for (p in IntPoint.allHexCoords)
         {
-            if (hex.color != turnColor)
+            var hex:Hex = get(p);
+            if (hex.color != turnColor) //Also covers the case when hex is empty
                 continue;
 
             var destCoords = Rules.possibleFields(p, get);
             for (coords in destCoords)
             {
+                var hexOnto:Hex = get(coords);
+
                 var ply:Ply = new Ply();
                 ply.from = p.copy();
                 ply.to = coords;
-                if (get(coords).isEmpty())
-                    result.push(ply);
-                else 
-                    result.insert(0, ply);
 
-                //TODO: Rewrite (has fundamental mistakes)
-                /*if (get(coords).color == opposite(turnColor))
+                if (hexOnto.isEmpty())
                 {
-                    var chameleonPly:Ply = ply.copy();
-                    ply.morphInto = get(coords).type;
-                    result.push(chameleonPly);
-                }*/
+                    if (ply.from.equals(intellectorPos[turnColor])) //Intellector moves are considered last
+                        intellectorMovements.push(ply);
+                    else
+                        normalPlys.push(ply);
+                }
+                else 
+                {
+                    if (!ply.from.equals(intellectorPos[turnColor])) //Intellector moves onto piece => castle => ignore as duplicate for castle from defensor pos
+                        if (ply.to.equals(intellectorPos[enemyColor]))
+                            return [ply]; //If mate is found, do not consider any other move
+                        else
+                        {
+                            captures.push(ply);
+
+                            if (Rules.areNeighbours(intellectorPos[turnColor], ply.from)) 
+                            {
+                                var chameleonPly:Ply = ply.copy();
+                                ply.morphInto = hexOnto.type;
+                                
+                                if (PieceValues.firstHasHigherPriority(hexOnto.type, hex.type))
+                                    captures.insert(0, chameleonPly);
+                                else
+                                    captures.push(chameleonPly);
+                            }
+                        }
+                }
             }
         }
         
-        return result;
+        return captures.concat(normalPlys).concat(intellectorMovements);
     }
 
     public function collectOccupiedHexes():Map<IntPoint, Hex>
@@ -158,6 +199,7 @@ class Situation
         var s = new Situation();
         s.figureArray = [for (i in 0...this.figureArray.length) [for (j in 0...this.figureArray[i].length) this.figureArray[i][j].copy()]];
         s.turnColor = this.turnColor;
+        s.intellectorPos = [White => intellectorPos[PieceColor.White].copy(), Black => intellectorPos[PieceColor.Black].copy()];
         return s;
     }
 

@@ -12,9 +12,12 @@ import openfl.display.Sprite;
 
 class AnalysisField extends Field
 {
+    public var onMadeMove:Void->Void;
+    
     public function new() 
     {
         super();
+
         hexes = Factory.produceHexes(this, true);
         disposeLetters();
         arrangeDefault();
@@ -108,6 +111,7 @@ class AnalysisField extends Field
         ply.morphInto = morphInto;
 
         move(ply, true);
+        onMadeMove();
         stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
 

@@ -31,6 +31,14 @@ class IntPoint
         return new IntPoint(i, j);
     }
 
+    public function isFinalForColor(color:PieceColor):Bool
+    {
+        if (color == White)
+            return j == 0 && i % 2 == 0;
+        else 
+            return j == 6 && i % 2 == 0;
+    }
+
     public function new(i:Int, j:Int) 
     {
         this.i = i;

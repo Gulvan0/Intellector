@@ -165,4 +165,12 @@ class Rules
         }
         return Field.hexExists(coords.i, coords.j)? coords : null;
     }
+
+    public static function areNeighbours(coords1:IntPoint, coords2:IntPoint):Bool
+    {
+        for (dir in [UL, UR, D, DR, DL, U])
+            if (coords2.equals(getOneStepCoords(coords1.i, coords1.j, dir)))
+                return true;
+        return false;
+    }
 }

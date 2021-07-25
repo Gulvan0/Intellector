@@ -1,5 +1,7 @@
 package;
 
+import haxe.ui.styles.Style;
+import haxe.Timer;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import analysis.AlphaBeta;
@@ -14,21 +16,42 @@ import openfl.display.Sprite;
 
 class AnalysisBoardPanel extends Sprite
 {
+    private static var defaultScoreStyle:Style = {fontSize: 24};
     private var field:AnalysisField;
     private var scoreLabel:Label;
 
     private function onAnalyzePressed(color:PieceColor) 
     {
+        scoreLabel.customStyle = defaultScoreStyle;
         scoreLabel.text = "...";
 
-        var situation:Situation = field.currentSituation.copy();
-        situation.turnColor = color;
-        var result = AlphaBeta.evaluate(situation, 6, color == White);
-        var recommendedMove = result.plySequence[0];
-            
-        scoreLabel.text = result.score.toString();
-        field.rmbSelectionBackToNormal();
-        field.drawArrow(recommendedMove.from, recommendedMove.to);
+        Timer.delay(() -> {
+            var situation:Situation = field.currentSituation.copy();
+            situation.turnColor = color;
+            var result = AlphaBeta.evaluate(situation, 6, color == White);
+            var recommendedMove = result.plySequence[0];
+                
+            scoreLabel.text = result.score.toString();
+            field.rmbSelectionBackToNormal();
+            field.drawArrow(recommendedMove.from, recommendedMove.to);
+        }, 20);
+    }
+
+    private function onClearPressed() 
+    {
+        scoreLabel.text = "";
+        field.clearBoard();
+    }
+
+    private function onResetPressed() 
+    {
+        scoreLabel.text = "";
+        field.reset();
+    }
+
+    public function deprecateScore() 
+    {
+        scoreLabel.customStyle = {fontSize: 24, color: 0xCCCCCC};
     }
 
     public function new(field:AnalysisField) 
@@ -38,8 +61,8 @@ class AnalysisBoardPanel extends Sprite
 
         var actionButtons:VBox = new VBox();
 
-        actionButtons.addComponent(createBtn(ANALYSIS_CLEAR, 200, field.clearBoard));
-        actionButtons.addComponent(createBtn(ANALYSIS_RESET, 200, field.reset));
+        actionButtons.addComponent(createBtn(ANALYSIS_CLEAR, 200, onClearPressed));
+        actionButtons.addComponent(createBtn(ANALYSIS_RESET, 200, onResetPressed));
 
         var analysisBtns:HBox = new HBox();
         analysisBtns.addComponent(createBtn(ANALYSIS_ANALYZE_WHITE, 95, onAnalyzePressed.bind(White)));
@@ -47,7 +70,7 @@ class AnalysisBoardPanel extends Sprite
         actionButtons.addComponent(analysisBtns);
 
         scoreLabel = new Label();
-        scoreLabel.customStyle = {fontSize: 24};
+        scoreLabel.customStyle = defaultScoreStyle;
         scoreLabel.width = 200;
         scoreLabel.textAlign = "center";
         actionButtons.addComponent(scoreLabel);

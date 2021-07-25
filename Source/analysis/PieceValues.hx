@@ -77,5 +77,13 @@ class PieceValues
         }
     }
 
-
+    public static inline function firstHasHigherPriority(type1:PieceType, type2:PieceType):Bool
+    {
+        if (type1 == Aggressor && type2 == Defensor) //Aggressor is more aggressive, so the outcome is more obvious
+            return true;
+        else if (type2 == Aggressor && type1 == Defensor)
+            return false;
+        else
+            return rawValue(type1) > rawValue(type2);
+    }
 }
