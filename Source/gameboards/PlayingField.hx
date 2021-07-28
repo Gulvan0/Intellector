@@ -56,6 +56,8 @@ class PlayingField extends Field
     private function terminate(e) 
     {
         stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress);
+        stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
+        stage.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
         removeEventListener(Event.REMOVED_FROM_STAGE, terminate);
     }
 
@@ -64,7 +66,7 @@ class PlayingField extends Field
     private override function onPress(e:MouseEvent) 
     {
         rmbSelectionBackToNormal();
-        if (!playersTurn)
+        if (!playersTurn || terminated)
             return;
 
         var pressLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
@@ -80,7 +82,7 @@ class PlayingField extends Field
 
     private override function onMove(e:MouseEvent) 
     {
-        if (!playersTurn)
+        if (!playersTurn || terminated)
             return;
         
         var shadowLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
@@ -96,7 +98,7 @@ class PlayingField extends Field
 
     private override function onRelease(e:MouseEvent) 
     {
-        if (!playersTurn)
+        if (!playersTurn || terminated)
             return;
         
         stage.removeEventListener(MouseEvent.MOUSE_UP, onRelease);

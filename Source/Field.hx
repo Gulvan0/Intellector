@@ -38,10 +38,12 @@ class Field extends Sprite
     public var right(get, never):Float;
     public var bottom(get, never):Float;
 
+    public var terminated:Bool = false;
+
     public var hexes:Array<Array<Hexagon>>;
     public var figures:Array<Array<Null<Figure>>>;
 
-    public var currentSituation(default, null):Situation;
+    public var currentSituation:Situation;
     private var plyHistory:Array<ReversiblePly>;
     private var plyPointer:Int;
 

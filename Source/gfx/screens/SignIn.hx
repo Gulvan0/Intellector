@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import Networker.OngoingBattleData;
 import js.Cookie;
 import js.Browser;
 import haxe.Timer;
@@ -52,7 +53,7 @@ class SignIn extends Sprite
 	private function onSignInPressed()
 	{
 		var onResults:String->Void = onEntranceResults.bind(LogIn, loginField.text, passField.text, rememberMe.selected);
-		Networker.signin(loginField.text, passField.text, onResults);
+		Networker.signin(loginField.text, passField.text, onResults, onOngoingGame);
 	}
 
 	private function onRegisterPressed()
@@ -72,13 +73,19 @@ class SignIn extends Sprite
 		else
 		{
 			if (type == LogIn)
-				if (result == 'online')
-					displayLoginError(Dictionary.getPhrase(ALREADY_LOGGED));
-				else
-					displayLoginError(Dictionary.getPhrase(INVALID_PASSWORD));
+				displayLoginError(Dictionary.getPhrase(INVALID_PASSWORD));
 			else
 				displayLoginError(Dictionary.getPhrase(ALREADY_REGISTERED));
 		}
+	}
+
+	private function onOngoingGame(data:OngoingBattleData) 
+	{
+		if (data.whiteLogin.toLowerCase() == Networker.login.toLowerCase())
+			data.whiteLogin = Networker.login;
+		else if (data.blackLogin.toLowerCase() == Networker.login.toLowerCase())
+			data.blackLogin = Networker.login;
+		ScreenManager.instance.toGameReconnect(data);
 	}
 
     public function new() 

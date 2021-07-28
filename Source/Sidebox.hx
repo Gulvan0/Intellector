@@ -29,6 +29,7 @@ class Sidebox extends Sprite
     private var bottomLogin:Label;
     private var upperLogin:Label;
     private var movetable:TableView;
+    private var resignBtn:Button;
     private var offerDrawBtn:Button;
     private var cancelDrawBtn:Button;
     private var offerTakebackBtn:Button;
@@ -185,25 +186,10 @@ class Sidebox extends Sprite
             vscroll.pos = vscroll.max;
     }
 
-    ////public function writeMove(color:PieceColor, s:String)
-    /*{
-        if (color == Black)
-        {
-            lastMoveEntry.black_move = s;
-            movetable.dataSource.update(movetable.dataSource.size - 1, lastMoveEntry);
-        }
-        else 
-        {
-            lastMoveEntry = {"num": '$move', "white_move": s, "black_move": " "};
-            movetable.dataSource.add(lastMoveEntry);
-        }
-
-        move++;
-        playerTurn = color != playerColor;
-    }*/
-
     public function launchTimer()
     {
+        if (timer != null)
+            timer.stop();
         timer = new Timer(1000);
         timer.run = timerRun;
     }
@@ -212,6 +198,12 @@ class Sidebox extends Sprite
     {
         if (timer != null)
             timer.stop();
+
+        resignBtn.disabled = true;
+        offerDrawBtn.disabled = true;
+        cancelDrawBtn.disabled = true;
+        offerTakebackBtn.disabled = true;
+        cancelTakebackBtn.disabled = true;
     }
 
     public function showDrawRequestBox() 
@@ -375,7 +367,7 @@ class Sidebox extends Sprite
     {
         var resignAndDraw:HBox = new HBox();
 
-        var resignBtn = new haxe.ui.components.Button();
+        resignBtn = new Button();
 		resignBtn.width = (250 - 5.3) / 2;
 		resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_TEXT);
 		resignAndDraw.addComponent(resignBtn);

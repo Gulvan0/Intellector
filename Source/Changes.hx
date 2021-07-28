@@ -16,6 +16,8 @@ class Changes
     {
         if (Dictionary.lang == EN)
             changelog = [
+                {date: "27.07.2021", text:"Now you can scroll the game after it has ended. Also bugfixes"},
+                {date: "25.07.2021", text:"Sodium α"},
                 {date: "18.07.2021", text:"Bugfixes"},
                 {date: "16.07.2021", text:"Extended side box functionality"},
                 {date: "19.06.2021", text:"Bugfixes & Notation update"},
@@ -37,7 +39,9 @@ class Changes
             ];
         else if (Dictionary.lang == RU)
             changelog = [
-                {date: "18.07.2021", text:"Bugfixes"},
+                {date: "27.07.2021", text:"Просмотр партии после окончания и исправления багов"},
+                {date: "25.07.2021", text:"Sodium α"},
+                {date: "18.07.2021", text:"Исправления багов"},
                 {date: "16.07.2021", text:"Новые функции боковой панели"},
                 {date: "19.06.2021", text:"Исправления багов и обновление нотации"},
                 {date: "08.06.2021", text:"Исправления багов"},

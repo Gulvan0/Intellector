@@ -1,5 +1,6 @@
 package;
 
+import struct.PieceColor;
 import gfx.screens.MainMenu;
 import gfx.screens.Settings;
 import dict.Dictionary;
@@ -62,12 +63,16 @@ class ScreenManager extends Sprite
 
     public function toGameStart(data:BattleData) 
     {
-        toGameGeneric(data.match_id, GameCompound.buildActive(data));
+        var isGuest = Networker.login.startsWith("guest_");
+        var onReturnPressed = isGuest? Networker.dropConnection : toMain;
+        toGameGeneric(data.match_id, GameCompound.buildActive(data, onReturnPressed));
     }
 
     public function toGameReconnect(data:OngoingBattleData) 
     {
-        toGameGeneric(data.match_id, GameCompound.buildActiveReconnect(data));
+        var isGuest = Networker.login.startsWith("guest_");
+        var onReturnPressed = isGuest? Networker.dropConnection : toMain;
+        toGameGeneric(data.match_id, GameCompound.buildActiveReconnect(data, onReturnPressed));
     }
 
     private function toGameGeneric(id:Int, game:GameCompound) 
@@ -79,8 +84,8 @@ class ScreenManager extends Sprite
 		Networker.currentGameCompound = game;
 		Networker.registerGameEvents(onGameEnded);
 
-        addChild(current);
 		Assets.getSound("sounds/notify.mp3").play();
+        addChild(current);
     }
 
     public function toOpenChallengeHostingRoom(startSecs:Int, bonusSecs:Int) 
@@ -106,7 +111,11 @@ class ScreenManager extends Sprite
         clear();
         URLEditor.clear();
         
-        current = GameCompound.buildAnalysis(onReturn);
+        current = GameCompound.buildAnalysis(() ->
+        {
+            Networker.currentGameCompound = null;
+		    toMain();
+        });
         addChild(current);
     }
 
@@ -118,7 +127,8 @@ class ScreenManager extends Sprite
         var game = GameCompound.buildSpectators(data, () -> 
         {
             Networker.stopSpectate(); 
-            onReturn();
+            Networker.currentGameCompound = null;
+		    toMain();
         });
         
 		current = game;
@@ -134,23 +144,19 @@ class ScreenManager extends Sprite
         current = new Settings();
         addChild(current);
     }
-
-    private function onReturn() 
-    {
-        Networker.currentGameCompound = null;
-		toMain();
-    }
     
     private function onGameEnded(data:GameOverData) 
 	{
-        var playerColor:String = Networker.currentGameCompound.playerColor.getName().toLowerCase();
-		Networker.currentGameCompound.terminate();
+        var playerColor:PieceColor = Networker.currentGameCompound.playerColor;
+        var playerColorStr:String = playerColor.getName().toLowerCase();
+        var playerIsWinner:Bool = data.winner_color == playerColorStr;
+		Networker.currentGameCompound.terminate(data);
 		Networker.currentGameCompound = null;
 
 		var resultMessage;
 		if (data.winner_color == "")
 			resultMessage = "½ - ½";
-		else if (data.winner_color == playerColor)
+		else if (playerIsWinner)
 			resultMessage = Dictionary.getPhrase(WIN_MESSAGE_PREAMBLE);
 		else 
 			resultMessage = Dictionary.getPhrase(LOSS_MESSAGE_PREAMBLE);
@@ -159,12 +165,6 @@ class ScreenManager extends Sprite
 
 		Assets.getSound("sounds/notify.mp3").play();
 		Dialogs.info(Dictionary.getPhrase(GAME_OVER) + resultMessage + explanation, Dictionary.getPhrase(GAME_ENDED));
-
-		ScreenManager.instance.toEmpty();
-		if (Networker.login.startsWith("guest_"))
-			Networker.dropConnection();
-		else
-			ScreenManager.instance.toMain();
 	}
 
     public function new() 

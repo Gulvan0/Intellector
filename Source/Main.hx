@@ -39,9 +39,9 @@ class Main extends Sprite
 		super();
 		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
 		Toolkit.init();
+		Utils.initSettings();
 		OpeningTree.init();
 		AssetManager.init();
-		Utils.initSettings();
 		Changes.initChangelog();
 		addChild(new ScreenManager());
 		Networker.connect(onConnected);
@@ -49,9 +49,8 @@ class Main extends Sprite
 
 	private function onConnected()
 	{
-		var searcher = new URLSearchParams(Browser.location.search);
 		if (Cookie.exists("saved_login") && Cookie.exists("saved_password"))
-			Networker.signin(Cookie.get("saved_login"), Cookie.get("saved_password"), onAutoLogin);
+			Networker.signin(Cookie.get("saved_login"), Cookie.get("saved_password"), onAutoLogin, onOngoingGame);
 		else 
 			onNoLogin();
 	}
@@ -61,10 +60,20 @@ class Main extends Sprite
 		switch Utils.getShallowSection() 
 		{
 			case OpenChallengeInvitation(issuer):
+				Networker.once('game_started', ScreenManager.instance.toGameStart);
 				Networker.getOpenChallenge(issuer, ScreenManager.instance.toOpenChallengeJoiningRoom, (d)->{ScreenManager.instance.toSignIn();}, ScreenManager.instance.toSignIn);
 			default: 
 				ScreenManager.instance.toSignIn();
 		}
+	}
+
+	private function onOngoingGame(data:OngoingBattleData) 
+	{
+		if (data.whiteLogin.toLowerCase() == Networker.login.toLowerCase())
+			data.whiteLogin = Networker.login;
+		else if (data.blackLogin.toLowerCase() == Networker.login.toLowerCase())
+			data.blackLogin = Networker.login;
+		ScreenManager.instance.toGameReconnect(data);
 	}
 
 	private function onAutoLogin(result:String)
@@ -100,9 +109,9 @@ class Main extends Sprite
 		}
 		else
 		{
-			if (result != 'online')
-				Utils.removeLoginDetails();
-			ScreenManager.instance.toSignIn();
+			Utils.removeLoginDetails();
+			Networker.login = null;
+			onNoLogin();
 		}
 	}
 }

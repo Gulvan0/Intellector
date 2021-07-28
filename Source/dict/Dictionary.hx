@@ -85,7 +85,8 @@ class Dictionary
         RESOLUTION_AGREEMENT => ["Draw by agreement", "Ничья по согласию"],
         RESOLUTION_REPETITON => ["Draw by repetition", "Ничья по троекратному повторению"],
         RESOLUTION_HUNDRED => ["Draw by 100-move rule", "Ничья ввиду правила 100 ходов"],
-        RESOLUTION_WINNER_POSTFIX => [" is victorious", " победил(а)"],
+        RESOLUTION_TIMEOUT => ["Timeout", "Законичилось время"],
+        RESOLUTION_WINNER_POSTFIX => [" is victorious", " победили"],
         WILL_BE_GUEST => ['You will be playing as guest', "Вы будете играть как гость"],
         JOINING_AS => ["You are joining the game as ", "Вы будете играть как "],
         OPENING_STARTING_POSITION => ["Starting position", "Начальная позиция"],
@@ -106,10 +107,15 @@ class Dictionary
         TAKEBACK_DECLINED_MESSAGE => ["Takeback declined", "Тейкбек отклонен"],
         CANCEL_DRAW_BTN_TEXT => ["Cancel draw", "Отменить ничью"],
         CANCEL_TAKEBACK_BTN_TEXT => ["Cancel takeback", "Отменить тейкбек"],
-        OPPONENT_DISCONNECTED_MESSAGE => [" disconnected", " отключился"],
-        OPPONENT_RECONNECTED_MESSAGE => [" reconnected", " переподключился"],
+        OPPONENT_DISCONNECTED_MESSAGE => [" disconnected", " отключились"],
+        OPPONENT_RECONNECTED_MESSAGE => [" reconnected", " переподключились"],
         ANALYSIS_ANALYZE_WHITE => ["Analyze as white", "Анализ за белых"],
-        ANALYSIS_ANALYZE_BLACK => ["Analyze as black", "Анализ за черных"]
+        ANALYSIS_ANALYZE_BLACK => ["Analyze as black", "Анализ за черных"],
+        GAME_OVER_MESSAGE_SUFFIX_WIN => [" won", " победили"],
+        GAME_OVER_MESSAGE_SUFFIX_TIMEOUT => [" time out", " просрочили время"],
+        GAME_OVER_MESSAGE_SUFFIX_RESIGN => [" resigned", " сдались"],
+        GAME_OVER_MESSAGE_SUFFIX_DISCONNECT => [" abandoned", " покинули партию"],
+        GAME_OVER_MESSAGE_DRAW => ["Game ended as a draw", "Игра окончена вничью"]
     ];
 
     public static function getPhrase(phrase:Phrase):String
@@ -159,6 +165,28 @@ class Dictionary
         return Dictionary.getPhrase(phrase);
     }
 
+    public static function getColorName(color:PieceColor) 
+    {
+        return switch lang 
+        {
+            case EN: color.getName();
+            case RU: color == White? "Белые" : "Черные";
+        }
+    }
+
+    public static function getGameOverChatMessage(winnerColor:PieceColor, reason:String):String
+    {
+        return switch reason
+		{
+			case 'mate': getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
+			case 'breakthrough': getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
+			case 'timeout': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_TIMEOUT);
+			case 'resignation': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_RESIGN);
+			case 'abandon': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_DISCONNECT);
+			default: Dictionary.getPhrase(GAME_OVER_MESSAGE_DRAW);
+        };
+    }
+
     public static function challengeByText(login:String, start:Int, bonus:Int):String
     {
         var timeControlStr = '${start/60}+$bonus';
@@ -175,13 +203,5 @@ class Dictionary
             case EN: '${data.challenger} is hosting a challenge ($timeControlStr). First one to accept it will become an opponent\n';
             case RU: '${data.challenger} вызывает на бой ($timeControlStr). Первый, кто его примет, станет противником\n';
         }
-    }
-
-    public static function colorReferring(color:PieceColor):String
-    {
-        return switch lang {
-            case EN: color == White? "White" : "Black";
-            case RU: color == White? "Белые" : "Черные";
-        } 
     }
 }

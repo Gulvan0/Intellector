@@ -1,5 +1,7 @@
 package;
 
+import GameInfoBox.Outcome;
+import Networker.GameOverData;
 import analysis.AlphaBeta;
 import haxe.ui.components.Label;
 import haxe.ui.containers.HBox;
@@ -41,7 +43,7 @@ class GameCompound extends Sprite
     public var type(default, null):GameCompoundType;
     public var playerColor:PieceColor;
 
-    public static function buildActive(data:BattleData):GameCompound
+    public static function buildActive(data:BattleData, onReturn:Void->Void):GameCompound
     {
         var whiteLogin = data.colour == 'white'? Networker.login : data.enemy;
         var blackLogin = data.colour == 'black'? Networker.login : data.enemy;
@@ -51,16 +53,16 @@ class GameCompound extends Sprite
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin, data.colour == 'white');
 
-        var compound = new GameCompound(Active, field, sidebox, chatbox, infobox);
+        var compound = new GameCompound(Active, field, sidebox, chatbox, infobox, onReturn);
         compound.playerColor = data.colour == 'white'? White : Black;
         field.onPlayerMadeMove = compound.onMove;
         compound.bindComponentButtonCallbacks();
         return compound;
     }
 
-    public static function buildActiveReconnect(data:OngoingBattleData):GameCompound
+    public static function buildActiveReconnect(data:OngoingBattleData, onReturn:Void->Void):GameCompound
     {
-        var playerIsWhite:Bool = data.whiteLogin == Networker.login;
+        var playerIsWhite:Bool = data.whiteLogin.toLowerCase() == Networker.login.toLowerCase();
         var enemyLogin:String = playerIsWhite? data.blackLogin : data.whiteLogin;
 
         var field:PlayingField = new PlayingField(playerIsWhite? 'white' : 'black', data);
@@ -68,9 +70,9 @@ class GameCompound extends Sprite
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin, playerIsWhite);
 
-        actualizeBoxes(data, sidebox, infobox);
+        actualizeBoxes(data, field, sidebox, infobox);
 
-        var compound = new GameCompound(Active, field, sidebox, chatbox, infobox);
+        var compound = new GameCompound(Active, field, sidebox, chatbox, infobox, onReturn);
         compound.playerColor = playerIsWhite? White : Black;
         field.onPlayerMadeMove = compound.onMove;
         compound.bindComponentButtonCallbacks();
@@ -89,7 +91,7 @@ class GameCompound extends Sprite
         //var chatbox:Chatbox;
         //var infobox:GameInfoBox;
         
-        actualizeBoxes(data, sidebox);
+        actualizeBoxes(data, field, sidebox);
         
         var compound = new GameCompound(Spectator, field, sidebox, null, null, onReturn);
         compound.bindComponentButtonCallbacks();
@@ -103,7 +105,7 @@ class GameCompound extends Sprite
         return new GameCompound(Analysis, field, null, null, null, onReturn);
     }
 
-    private static function actualizeBoxes(data:OngoingBattleData, sidebox:Sidebox, ?infobox:GameInfoBox)
+    private static function actualizeBoxes(data:OngoingBattleData, field:Field, sidebox:Sidebox, ?infobox:GameInfoBox)
     {
         var situation:Situation = Situation.starting();
         for (move in data.currentLog.split(";"))
@@ -120,6 +122,7 @@ class GameCompound extends Sprite
 
             situation = situation.makeMove(ply);
         }
+        field.currentSituation = situation.copy();
         sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
     }
 
@@ -130,9 +133,7 @@ class GameCompound extends Sprite
         ply.to = new IntPoint(data.toI, data.toJ);
         ply.morphInto = data.morphInto == null? null : PieceType.createByName(data.morphInto);
 
-        var situation:Situation = new Situation();
-        situation.figureArray = [for (j in 0...7) [for (i in 0...9) field.getHex(new IntPoint(i, j))]];
-        situation.turnColor = field.getFigure(ply.from).color;
+        var situation:Situation = field.currentSituation.copy();
 
         sidebox.makeMove(ply, situation);
         if (infobox != null)
@@ -165,12 +166,12 @@ class GameCompound extends Sprite
 
     public function onOpponentReconnected()
     {
-        chatbox.appendLog(opposite(playerColor).getName() + Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE));
+        chatbox.appendLog(Dictionary.getColorName(opposite(playerColor)) + Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE));
     }
 
     public function onOpponentDisconnected()
     {
-        chatbox.appendLog(opposite(playerColor).getName() + Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE));
+        chatbox.appendLog(Dictionary.getColorName(opposite(playerColor)) + Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE));
     }
 
     public function onDrawOffered()
@@ -315,10 +316,30 @@ class GameCompound extends Sprite
         Networker.declineTakeback();
     }
 
-    public function terminate()
+    public function terminate(data:GameOverData)
     {
+        var winnerColor:PieceColor = data.winner_color == 'white'? White : Black;
+        var outcome:Outcome = switch data.reason
+        {
+            case 'mate': Mate;
+			case 'breakthrough': Breakthrough;
+			case 'timeout': Timeout;
+			case 'resignation': Resign;
+			case 'abandon': Abandon;
+			case 'threefoldrepetition': Repetition;
+			case 'hundredmoverule': NoProgress;
+			case 'drawagreement': DrawAgreement;
+            default: Mate;
+        }
+
+        field.terminated = true;
         if (sidebox != null)
             sidebox.terminate();
+        if (infobox != null)
+            infobox.changeResolution(outcome, winnerColor);
+        if (chatbox != null)
+            chatbox.appendLog(Dictionary.getGameOverChatMessage(winnerColor, data.reason));
+        returnBtn.visible = true;
     }
 
     private function new(type, field, sidebox, chatbox, infobox, ?onReturn:Void->Void) 
@@ -362,13 +383,15 @@ class GameCompound extends Sprite
 		    returnBtn.width = 100;
 		    returnBtn.text = Dictionary.getPhrase(RETURN);
             returnBtn.onClick = (e) -> {onReturn();};
+            if (type == Active)
+                returnBtn.visible = false;
             
             returnBtn.x = 10;
 		    returnBtn.y = 10;
 		    addChild(returnBtn);
         }
 
-        if (Std.isOfType(field, AnalysisField))
+        if (type == Analysis)
         {
             var panel:AnalysisBoardPanel = new AnalysisBoardPanel(cast(field, AnalysisField));
             panel.x = field.x + field.width + 10;

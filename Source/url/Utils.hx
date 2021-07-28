@@ -15,8 +15,17 @@ class Utils
 
     public static function removeLoginDetails() 
     {
-        Cookie.remove("saved_login");
-		Cookie.remove("saved_password");
+        while (Cookie.exists("saved_login"))
+        {
+            Cookie.remove("saved_login");
+            Cookie.remove("saved_login", "/");
+        }
+
+        while (Cookie.exists("saved_password"))
+        {
+            Cookie.remove("saved_password");
+            Cookie.remove("saved_password", "/");
+        }
     }
 
     public static function getShallowSection():Section

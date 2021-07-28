@@ -1,5 +1,6 @@
 package;
 
+import url.Utils;
 import dict.Dictionary;
 import struct.PieceType;
 import openfl.utils.Assets;
@@ -80,6 +81,7 @@ class Networker
     private static var eventMap:Map<String, Dynamic->Void> = [];
 
     public static var suppressAlert:Bool;
+    public static var doNotReconnect:Bool = false;
 
     /**The one to receive all game-related events**/
     public static var currentGameCompound:Null<GameCompound>;
@@ -93,6 +95,7 @@ class Networker
         #end
         _ws.onopen = function() {
             suppressAlert = false;
+            on("dont_reconnect", onReconnectionForbidden);
             onConnected();
         };
         _ws.onmessage = function(msg) {
@@ -114,23 +117,33 @@ class Networker
                 Dialogs.alert(Dictionary.getPhrase(CONNECTION_LOST_ERROR), "Alert");
                 suppressAlert = true;
             }
-            connect(onConnected);
+            if (!doNotReconnect)
+                connect(onConnected);
         };
-        _ws.onerror = function(err) {
+        _ws.onerror = function(err:js.html.Event) {
             if (suppressAlert)
-                trace("Connection abrupted: " + err.toString());
+                trace("Connection abrupted: " + err.);
             else
             {
-                Dialogs.alert(Dictionary.getPhrase(CONNECTION_ERROR_OCCURED) + err.toString(), "Error");
+                Dialogs.alert(Dictionary.getPhrase(CONNECTION_ERROR_OCCURED) + err.type, "Error");
                 suppressAlert = true;
             }
         }
     }
 
-    public static function signin(login:String, password:String, onAnswer:String->Void) 
+    private static function onReconnectionForbidden(e) 
+    {
+        doNotReconnect = true;
+        Dialogs.alert("Session closed", "Alert");
+    }
+
+    public static function signin(login:String, password:String, onPlainAnswer:String->Void, onOngoingGame:OngoingBattleData->Void) 
     {
         Networker.login = login;
-        once('login_result', onAnswer);
+        onceOneOf([
+            'login_result' => onPlainAnswer,
+            'ongoing_game' => onOngoingGame
+        ]);
         emit('login', {login: login, password: password});
     }
 
@@ -165,6 +178,10 @@ class Networker
     {
         if (Networker.login == null)
             Networker.login = "guest_" + Math.ceil(Math.random() * 100000);
+        once("one_time_login_details", (data) ->
+        {
+            Utils.saveLoginDetails(login, data.password);
+        });
         emit('accept_open_challenge', {caller_login: caller, callee_login: Networker.login});
     }
 
