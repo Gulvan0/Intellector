@@ -44,8 +44,8 @@ class Field extends Sprite
     public var figures:Array<Array<Null<Figure>>>;
 
     public var currentSituation:Situation;
-    private var plyHistory:Array<ReversiblePly>;
-    private var plyPointer:Int;
+    public var plyHistory:Array<ReversiblePly>;
+    public var plyPointer:Int;
 
     private var selected:Null<IntPoint>;
     private var selectedDest:Null<IntPoint>;

@@ -1,5 +1,6 @@
 package gameboards;
 
+import openfl.display.Stage;
 import struct.Situation;
 import struct.Ply;
 import struct.PieceColor;
@@ -13,6 +14,7 @@ import openfl.display.Sprite;
 class AnalysisField extends Field
 {
     public var onMadeMove:Void->Void;
+    private var stageRef:Stage;
     
     public function new() 
     {
@@ -27,7 +29,18 @@ class AnalysisField extends Field
     private function init(e) 
     {
         removeEventListener(Event.ADDED_TO_STAGE, init);
-        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+
+        stageRef = stage;
+        stageRef.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+        addEventListener(Event.REMOVED_FROM_STAGE, terminate);
+    }
+
+    private function terminate(e) 
+    {
+        removeEventListener(Event.REMOVED_FROM_STAGE, terminate);
+        stageRef.removeEventListener(MouseEvent.MOUSE_DOWN, onPress);
+        stageRef.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
+        stageRef.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -86,14 +99,14 @@ class AnalysisField extends Field
 
     private override function onRelease(e:MouseEvent) 
     {
-        stage.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
+        stageRef.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
 
         var pressedAt = new IntPoint(selected.i, selected.j);
         var releasedAt = posToIndexes(e.stageX - this.x, e.stageY - this.y);
         figures[pressedAt.j][pressedAt.i].stopDrag();
         if (releasedAt != null && ableToMove(pressedAt, releasedAt) && !releasedAt.equals(pressedAt))
         {
-            stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
+            stageRef.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
             selectionBackToNormal();
             attemptMove(pressedAt, releasedAt);
         }
@@ -112,7 +125,7 @@ class AnalysisField extends Field
 
         move(ply, true);
         onMadeMove();
-        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+        stageRef.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
 
     private override function isOrientationNormal(?movingFigure:PieceColor):Bool

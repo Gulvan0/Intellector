@@ -115,7 +115,9 @@ class Dictionary
         GAME_OVER_MESSAGE_SUFFIX_TIMEOUT => [" time out", " просрочили время"],
         GAME_OVER_MESSAGE_SUFFIX_RESIGN => [" resigned", " сдались"],
         GAME_OVER_MESSAGE_SUFFIX_DISCONNECT => [" abandoned", " покинули партию"],
-        GAME_OVER_MESSAGE_DRAW => ["Game ended as a draw", "Игра окончена вничью"]
+        GAME_OVER_MESSAGE_DRAW => ["Game ended as a draw", "Игра окончена вничью"],
+        RESIGN_BTN_ABORT_TEXT => ["Abort", "Прервать"],
+        ABORT_CONFIRMATION_MESSAGE => ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"]
     ];
 
     public static function getPhrase(phrase:Phrase):String

@@ -115,6 +115,10 @@ class GameCompound extends Sprite
                 continue;
 
             var ply = PlyDeserializer.deserialize(trimmedMove);
+
+            field.plyHistory.push(ply.toReversible(situation));
+            field.plyPointer++;
+
             sidebox.makeMove(ply, situation);
 
             if (infobox != null)
@@ -290,8 +294,14 @@ class GameCompound extends Sprite
 
     private function onOfferTakebackPressed()
     {
-        sidebox.takebackOfferHideCancelShow();
-        chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE));
+        if (sidebox.hasIncomingTakebackRequest())
+            chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE));
+        else
+        {
+            sidebox.takebackOfferHideCancelShow();
+            chatbox.appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE));
+        }
+        
         Networker.offerTakeback();
     }
 

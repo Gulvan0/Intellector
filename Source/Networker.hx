@@ -122,7 +122,7 @@ class Networker
         };
         _ws.onerror = function(err:js.html.Event) {
             if (suppressAlert)
-                trace("Connection abrupted: " + err.);
+                trace("Connection abrupted");
             else
             {
                 Dialogs.alert(Dictionary.getPhrase(CONNECTION_ERROR_OCCURED) + err.type, "Error");
@@ -157,7 +157,7 @@ class Networker
     public static function getGame(id:Int, onInProcess:OngoingBattleData->Void, onFinished:(log:String)->Void, on404:Void->Void) 
     {
         onceOneOf([
-            'gamestate_ongoing' => onInProcess,
+            'ongoing_game' => onInProcess,
             'gamestate_over' => (data) -> {onFinished(data.log);},
             'gamestate_notfound' => (data) -> {on404();}
         ]);

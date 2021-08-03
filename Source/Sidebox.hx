@@ -48,6 +48,8 @@ class Sidebox extends Sprite
     public var onAcceptTakebackPressed:Void->Void;
     public var onDeclineTakebackPressed:Void->Void;
 
+    private var resignConfirmationMessage:String;
+
     private var timer:Timer;
     private var secsPerTurn:Int;
     private var move:Int;
@@ -96,6 +98,11 @@ class Sidebox extends Sprite
         return '${numRep(timeNumbers[0])}:${numRep(timeNumbers[1])}';
     }
 
+    public function hasIncomingTakebackRequest():Bool
+    {
+        return takebackRequestBox.visible;
+    }
+
     public function correctTime(correctedSecsWhite:Int, correctedSecsBlack:Int) 
     {
         if (playerColor == White)
@@ -129,6 +136,18 @@ class Sidebox extends Sprite
         waitAndScroll();
 
         move++;
+        if (move == 2 && playerColor == White || move == 3 && playerColor == Black)
+        {
+            offerTakebackBtn.disabled = false;
+            cancelTakebackBtn.disabled = false;
+        }
+        if (move == 3)
+        {
+            offerDrawBtn.disabled = false;
+            cancelDrawBtn.disabled = false;
+            resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_TEXT);
+            resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
+        }
 
         if (!situation.isMating(ply) && move > 2)
         {
@@ -145,7 +164,22 @@ class Sidebox extends Sprite
         if (cnt < 1)
             return;
 
+        hideTakebackRequestBox();
+        takebackOfferShowCancelHide();
+
         move -= cnt;
+        if (move < 2 && playerColor == White || move < 3 && playerColor == Black)
+        {
+            offerTakebackBtn.disabled = true;
+            cancelTakebackBtn.disabled = true;
+        }
+        if (move < 3)
+        {
+            offerDrawBtn.disabled = true;
+            cancelDrawBtn.disabled = true;
+            resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_ABORT_TEXT);
+            resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
+        }
         
         if (cnt % 2 == 1)
             playerTurn = !playerTurn;
@@ -373,7 +407,7 @@ class Sidebox extends Sprite
 		resignAndDraw.addComponent(resignBtn);
 
 		resignBtn.onClick = (e) -> {
-			var confirmed = Browser.window.confirm(Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE));
+			var confirmed = Browser.window.confirm(resignConfirmationMessage);
 
 			if (confirmed)
 				Networker.emit("resign", {});
@@ -418,6 +452,13 @@ class Sidebox extends Sprite
 		cancelTakebackBtn.onClick = (e) -> {
             onCancelTakebackPressed();
         }
+
+        offerDrawBtn.disabled = true;
+        cancelDrawBtn.disabled = true;
+        offerTakebackBtn.disabled = true;
+        cancelTakebackBtn.disabled = true;
+        resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_ABORT_TEXT);
+        resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
     }
 
     //--------------------------------------------------------------------------------------------------------------------------------------------------------
