@@ -1,5 +1,6 @@
 package;
 
+import struct.PieceColor;
 import url.Utils;
 import dict.Dictionary;
 import struct.PieceType;
@@ -50,6 +51,7 @@ typedef OpenChallengeData =
     var challenger:String;
     var startSecs:Int;
     var bonusSecs:Int;
+    var color:Null<String>;
 }
 
 typedef MessageData =
@@ -191,8 +193,8 @@ class Networker
             'watched_unavailable' => (data) -> {Dialogs.alert(Dictionary.getPhrase(SPECTATION_ERROR_REASON_OFFLINE), Dictionary.getPhrase(SPECTATION_ERROR_TITLE));},
             'watched_notingame' => (data) -> {Dialogs.alert(Dictionary.getPhrase(SPECTATION_ERROR_REASON_NOTINGAME), Dictionary.getPhrase(SPECTATION_ERROR_TITLE));},
             'spectation_data' => (data:OngoingBattleData) -> {
-                on('move', currentGameCompound.onMove);
-                on('time_correction', currentGameCompound.onTimeCorrection);
+                on('move', (data) -> {currentGameCompound.onMove(data);});
+                on('time_correction', (data) -> {currentGameCompound.onTimeCorrection(data);});
                 on('draw_offered', onDrawOffered);
                 on('takeback_offered', onTakebackOffered);
                 onStarted(data);
@@ -212,16 +214,16 @@ class Networker
         emit('stop_spectate', {});
     }
 
-    private static function challengeReceiver(data) 
+    private static function challengeReceiver(data:{caller:String, startSecs:Int, bonusSecs:Int, color:String}) 
     {
         var onConfirmed = () -> {emit('accept_challenge', {caller_login: data.caller, callee_login: Networker.login});};
         var onDeclined = () -> {emit('decline_challenge', {caller_login: data.caller, callee_login: Networker.login});};
 
         Assets.getSound("sounds/social.mp3").play();
-        Dialogs.confirm('${data.caller}' + Dictionary.getPhrase(INCOMING_CHALLENGE_QUESTION), Dictionary.getPhrase(INCOMING_CHALLENGE_TITLE), onConfirmed, onDeclined);
+        Dialogs.confirm(Dictionary.getIncomingChallengeText(data), Dictionary.getPhrase(INCOMING_CHALLENGE_TITLE), onConfirmed, onDeclined);
     }
 
-    public static function sendChallenge(callee:String, secsStart:Int, secsBonus:Int) 
+    public static function sendChallenge(callee:String, secsStart:Int, secsBonus:Int, color:Null<PieceColor>) 
     {
         var onSuccess = (d) -> {
             Assets.getSound("sounds/challenge_sent.mp3").play();
@@ -235,12 +237,17 @@ class Networker
 
         once('challenge_declined', onDeclined);
         onceOneOf(['callee_same' => onSame, 'callout_success' => onSuccess, 'repeated_callout' => onRepeated, 'callee_unavailable' => onOffline, 'callee_ingame' => onIngame]);
-        emit('callout', {caller_login: Networker.login, callee_login: callee, secsStart: secsStart, secsBonus: secsBonus});
+        emit('callout', {caller_login: Networker.login, callee_login: callee, secsStart: secsStart, secsBonus: secsBonus, color: color == null? null : color.getName()});
     }
 
-    public static function sendOpenChallenge(startSecs:Int, bonusSecs:Int) 
+    public static function sendOpenChallenge(startSecs:Int, bonusSecs:Int, color:Null<PieceColor>) 
     {
-        emit('open_callout', {caller_login: Networker.login, startSecs: startSecs, bonusSecs: bonusSecs});
+        emit('open_callout', {caller_login: Networker.login, startSecs: startSecs, bonusSecs: bonusSecs, color: color == null? null : color.getName()});
+    }
+
+    public static function cancelOpenChallenge() 
+    {
+        emit('cancel_open_callout', {caller_login: Networker.login});
     }
 
     public static function sendMessage(text:String) 

@@ -1,5 +1,8 @@
 package;
 
+import gfx.components.main.ChallengeParamsDialog;
+import dict.Phrase;
+import haxe.ui.components.OptionBox;
 import dict.Dictionary;
 import haxe.ui.components.TextField;
 import haxe.ui.components.Button;
@@ -77,76 +80,9 @@ class Dialogs
         });
     }
 
-    public static function specifyChallengeParams(onConfirm:(startSecs:Int, bonusSecs:Int)->Void, onCancel:Void->Void)
+    public static function specifyChallengeParams(onConfirm:(startSecs:Int, bonusSecs:Int, callerColor:Null<PieceColor>)->Void, onCancel:Void->Void)
     {
-        function cb(dialog:Dialog, startMins:Int, bonusSecs:Int) 
-        {
-            if (startMins > 60 * 5)
-                startMins = 300;
-            else if (startMins < 1)
-                startMins = 1;
-
-            if (bonusSecs > 60)
-                bonusSecs = 60;
-            else if (bonusSecs < 0)
-                bonusSecs = 0;
-
-            dialog.hideDialog(DialogButton.OK);
-            onConfirm(startMins*60, bonusSecs);
-        }
-
-        var dialog:Dialog = new Dialog();
-        dialog.width = 200;
-        var body:VBox = new VBox();
-
-        var question:Label = new Label();
-        question.text = Dictionary.getPhrase(CHOOSE_TIME_CONTROL);
-        question.width = 200;
-        question.textAlign = "center";
-        body.addComponent(question);
-
-        var timeControl:HBox = new HBox();
-        timeControl.width = 90;
-        timeControl.x = (dialog.width - timeControl.width) / 2;
-
-        var baseField:TextField = new TextField();
-        baseField.width = 30;
-        baseField.restrictChars = "0-9";
-        baseField.text = "10";
-        timeControl.addComponent(baseField);
-
-        var plusSign:Label = new Label();
-        plusSign.text = "+";
-        timeControl.addComponent(plusSign);
-
-        var incrementField:TextField = new TextField();
-        incrementField.width = 30;
-        incrementField.restrictChars = "0-9";
-        incrementField.text = "5";
-        timeControl.addComponent(incrementField);
-
-        timeControl.horizontalAlign = 'center';
-        body.addComponent(timeControl);
-
-        var btns:HBox = new HBox();
-
-        var confirmBtn:Button = new Button();
-        confirmBtn.text = Dictionary.getPhrase(CONFIRM);
-        confirmBtn.width = 92;
-        confirmBtn.onClick = (e) -> {cb(dialog, Std.parseInt(baseField.text), Std.parseInt(incrementField.text));};
-        btns.addComponent(confirmBtn);
-
-        var cancelBtn:Button = new Button();
-        cancelBtn.text = Dictionary.getPhrase(CANCEL);
-        cancelBtn.width = 92;
-        cancelBtn.onClick = (e) -> {dialog.hideDialog(DialogButton.CANCEL);};
-        btns.addComponent(cancelBtn);
-
-        body.addComponent(btns);
-
-        dialog.addComponent(body);
-        dialog.title = Dictionary.getPhrase(CHALLENGE_PARAMS_TITLE);
-        dialog.onDialogClosed = (e) -> {onCancel();};
+        var dialog:Dialog = new ChallengeParamsDialog(onConfirm, onCancel);
         dialog.showDialog(true);
     }
 

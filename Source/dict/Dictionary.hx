@@ -16,7 +16,9 @@ class Dictionary
         PROMOTION_DIALOG_TITLE => ["Promotion selection", "Превращение"],
         CHAMELEON_DIALOG_QUESTION => ["Morph into an eaten figure?", "Превратиться в съеденную фигуру?"],
         CHAMELEON_DIALOG_TITLE => ["Chameleon confirmation", "Хамелеон"],
-        CHOOSE_TIME_CONTROL => ["Specify time control for your challenge", "Выберите контроль времени"],
+        CHOOSE_TIME_CONTROL => ["Time control:", "Контроль времени:"],
+        CHOOSE_COLOR => ["Color:", "Цвет:"],
+        COLOR_RANDOM => ["Random", "Случайно"],
         CONFIRM => ["Confirm", "ОК"],
         CANCEL => ["Cancel", "Отмена"],
         CHALLENGE_PARAMS_TITLE => ["Challenge parameters", "Параметры вызова"],
@@ -64,7 +66,6 @@ class Dictionary
         SPECTATION_ERROR_TITLE => ["Spectation error", "Ошибка наблюдения"],
         SPECTATION_ERROR_REASON_OFFLINE => ["Player is offline", "Игрок не в сети"],
         SPECTATION_ERROR_REASON_NOTINGAME => ["Player is not in game", "Игрок не в игре"],
-        INCOMING_CHALLENGE_QUESTION => [" wants to play with you. Accept the challenge?", " хочет с вами сыграть. Принять вызов?"],
         INCOMING_CHALLENGE_TITLE => ["Incoming challenge", "Входящий вызов"],
         SEND_CHALLENGE_RESULT_SUCCESS => ["Challenge sent to ", "Вызов отправлен игроку "],
         SEND_CHALLENGE_RESULT_DECLINED => [" has declined your challenge", " отклонил(а) ваш вызов"],
@@ -117,12 +118,25 @@ class Dictionary
         GAME_OVER_MESSAGE_SUFFIX_DISCONNECT => [" abandoned", " покинули партию"],
         GAME_OVER_MESSAGE_DRAW => ["Game ended as a draw", "Игра окончена вничью"],
         RESIGN_BTN_ABORT_TEXT => ["Abort", "Прервать"],
-        ABORT_CONFIRMATION_MESSAGE => ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"]
+        ABORT_CONFIRMATION_MESSAGE => ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"],
+        OPEN_CHALLENGE_CANCEL_CONFIRMATION => ["Cancel challenge and return to the main menu?", "Отменить вызов и вернуться в главное меню?"]
     ];
 
     public static function getPhrase(phrase:Phrase):String
     {
         return dict.get(phrase)[order.indexOf(lang)];
+    }
+
+    public static function getIncomingChallengeText(data):String
+    {
+        var timeControlStr = '${data.startSecs/60}+${data.bonusSecs/1}';
+        var colorSuffix:String = data.color == null? "" : ", " + getColorName(PieceColor.createByName(data.color));
+        var detailsStr = timeControlStr + colorSuffix;
+        return switch lang 
+        {
+            case EN: '${data.caller} wants to play with you ($detailsStr). Accept the challenge?';
+            case RU: '${data.caller} хочет с вами сыграть ($detailsStr). Принять вызов?';
+        }
     }
 
     public static function getMainMenuBtnText(type:MainMenuButton):String
@@ -189,21 +203,24 @@ class Dictionary
         };
     }
 
-    public static function challengeByText(login:String, start:Int, bonus:Int):String
+    public static function challengeByText(login:String, start:Int, bonus:Int, color:Null<PieceColor>):String
     {
         var timeControlStr = '${start/60}+$bonus';
+        var colorStr:String = color == null? getPhrase(COLOR_RANDOM) : getColorName(color);
         return switch lang {
-            case EN: 'Challenge by $login\n$timeControlStr\nShare the link to invite your opponent:';
-            case RU: 'Вызов $login\n$timeControlStr\nСсылка-приглашение:';
+            case EN: 'Challenge by $login\n$timeControlStr ($login plays as $colorStr)\nShare the link to invite your opponent:';
+            case RU: 'Вызов $login\n$timeControlStr (Цвет $login: $colorStr)\nОтправьте эту ссылку-приглашение противнику:';
         }
     }
 
     public static function isHostingAChallengeText(data):String
     {
         var timeControlStr = '${data.startSecs/60}+${data.bonusSecs/1}';
+        var colorSuffix:String = data.color == null? "" : ", " + getColorName(PieceColor.createByName(data.color));
+        var detailsStr = timeControlStr + colorSuffix;
         return switch lang {
-            case EN: '${data.challenger} is hosting a challenge ($timeControlStr). First one to accept it will become an opponent\n';
-            case RU: '${data.challenger} вызывает на бой ($timeControlStr). Первый, кто его примет, станет противником\n';
+            case EN: '${data.challenger} is hosting a challenge ($detailsStr). First one to accept it will become an opponent\n';
+            case RU: '${data.challenger} вызывает на бой ($detailsStr). Первый, кто примет вызов, станет противником\n';
         }
     }
 }

@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import struct.PieceColor;
 import haxe.ui.containers.VBox;
 import js.Browser;
 import dict.Dictionary;
@@ -33,9 +34,9 @@ class MainMenu extends Sprite
 
     private function onOpenChallenge(e) 
     {
-        var onSpecified = (startSecs:Int, bonusSecs:Int) -> {
-            Networker.sendOpenChallenge(startSecs, bonusSecs);
-            ScreenManager.instance.toOpenChallengeHostingRoom(startSecs, bonusSecs);
+        var onSpecified = (startSecs:Int, bonusSecs:Int, color:Null<PieceColor>) -> {
+            Networker.sendOpenChallenge(startSecs, bonusSecs, color);
+            ScreenManager.instance.toOpenChallengeHostingRoom(startSecs, bonusSecs, color);
         }
 
         Dialogs.specifyChallengeParams(onSpecified, ()->{});

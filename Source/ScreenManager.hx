@@ -88,12 +88,12 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
-    public function toOpenChallengeHostingRoom(startSecs:Int, bonusSecs:Int) 
+    public function toOpenChallengeHostingRoom(startSecs:Int, bonusSecs:Int, color:Null<PieceColor>) 
     {
         clear();
         URLEditor.clear();
         
-        current = new OpenChallengeHosting(startSecs, bonusSecs);
+        current = new OpenChallengeHosting(startSecs, bonusSecs, color);
         addChild(current);
     }
 

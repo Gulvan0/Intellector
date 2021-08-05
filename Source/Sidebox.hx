@@ -21,6 +21,7 @@ import openfl.display.Sprite;
 
 class Sidebox extends Sprite
 {
+    public var simplified:Bool;
 
     private var takebackRequestBox:HBox;
     private var drawRequestBox:HBox;
@@ -136,17 +137,21 @@ class Sidebox extends Sprite
         waitAndScroll();
 
         move++;
-        if (move == 2 && playerColor == White || move == 3 && playerColor == Black)
+        if (!simplified)
         {
-            offerTakebackBtn.disabled = false;
-            cancelTakebackBtn.disabled = false;
-        }
-        if (move == 3)
-        {
-            offerDrawBtn.disabled = false;
-            cancelDrawBtn.disabled = false;
-            resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_TEXT);
-            resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
+            if (move == 2 && playerColor == White || move == 3 && playerColor == Black)
+            {
+                offerTakebackBtn.disabled = false;
+                cancelTakebackBtn.disabled = false;
+            }
+
+            if (move == 3)
+            {
+                offerDrawBtn.disabled = false;
+                cancelDrawBtn.disabled = false;
+                resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_TEXT);
+                resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
+            }
         }
 
         if (!situation.isMating(ply) && move > 2)
@@ -168,17 +173,21 @@ class Sidebox extends Sprite
         takebackOfferShowCancelHide();
 
         move -= cnt;
-        if (move < 2 && playerColor == White || move < 3 && playerColor == Black)
+        if (!simplified)
         {
-            offerTakebackBtn.disabled = true;
-            cancelTakebackBtn.disabled = true;
-        }
-        if (move < 3)
-        {
-            offerDrawBtn.disabled = true;
-            cancelDrawBtn.disabled = true;
-            resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_ABORT_TEXT);
-            resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
+            if (move < 2 && playerColor == White || move < 3 && playerColor == Black)
+            {
+                offerTakebackBtn.disabled = true;
+                cancelTakebackBtn.disabled = true;
+            }
+
+            if (move < 3)
+            {
+                offerDrawBtn.disabled = true;
+                cancelDrawBtn.disabled = true;
+                resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_ABORT_TEXT);
+                resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
+            }
         }
         
         if (cnt % 2 == 1)
@@ -233,11 +242,14 @@ class Sidebox extends Sprite
         if (timer != null)
             timer.stop();
 
-        resignBtn.disabled = true;
-        offerDrawBtn.disabled = true;
-        cancelDrawBtn.disabled = true;
-        offerTakebackBtn.disabled = true;
-        cancelTakebackBtn.disabled = true;
+        if (!simplified)
+        {
+            resignBtn.disabled = true;
+            offerDrawBtn.disabled = true;
+            cancelDrawBtn.disabled = true;
+            offerTakebackBtn.disabled = true;
+            cancelTakebackBtn.disabled = true;
+        }
     }
 
     public function showDrawRequestBox() 
@@ -466,8 +478,9 @@ class Sidebox extends Sprite
     public function new(simplified:Bool, startSecs:Int, secsPerTurn:Int, playerLogin:String, opponentLogin:String, playerIsWhite:Bool) 
     {
         super();
-        move = 1;
+        this.simplified = simplified;
         this.secsPerTurn = secsPerTurn;
+        move = 1;
         playerColor = playerIsWhite? White : Black;
         playerTurn = playerIsWhite;
 

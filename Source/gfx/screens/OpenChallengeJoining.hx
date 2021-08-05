@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.components.Button;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.VBox;
 import dict.Dictionary;
@@ -41,5 +42,19 @@ class OpenChallengeJoining extends Sprite
 		joinMenu.x = (Browser.window.innerWidth - boxWidth) / 2;
 		joinMenu.y = 100;
 		addChild(joinMenu);
+
+		var returnBtn = new Button();
+		returnBtn.width = 100;
+		returnBtn.text = Dictionary.getPhrase(RETURN);
+		returnBtn.onClick = (e) -> {
+			if (Networker.login != null)
+				ScreenManager.instance.toMain();
+			else
+				Networker.dropConnection();
+		};
+            
+        returnBtn.x = 10;
+	    returnBtn.y = 10;
+	    addChild(returnBtn);
     }
 }
