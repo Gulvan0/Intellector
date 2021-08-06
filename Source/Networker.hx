@@ -132,12 +132,24 @@ class Networker
             }
         }
     }
+    
+    public static function dropConnection() 
+    {
+        if (_ws != null)
+        {
+            suppressAlert = true;
+            _ws.close();
+            _ws = null;
+        }
+    }
 
     private static function onReconnectionForbidden(e) 
     {
         doNotReconnect = true;
         Dialogs.alert("Session closed", "Alert");
     }
+
+    //------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public static function signin(login:String, password:String, onPlainAnswer:String->Void, onOngoingGame:OngoingBattleData->Void) 
     {
@@ -156,21 +168,23 @@ class Networker
         emit('register', {login: login, password: password});
     }
 
-    public static function getGame(id:Int, onInProcess:OngoingBattleData->Void, onFinished:(log:String)->Void, on404:Void->Void) 
+    public static function getGame(id:Int, onNotOwnInProcess:OngoingBattleData->Void, onOwnInProcess:OngoingBattleData->Void, onFinished:(log:String)->Void, on404:Void->Void) 
     {
         onceOneOf([
-            'ongoing_game' => onInProcess,
+            'gamestate_own_ongoing' => onOwnInProcess,
+            'spectation_data' => onNotOwnInProcess,
             'gamestate_over' => (data) -> {onFinished(data.log);},
             'gamestate_notfound' => (data) -> {on404();}
         ]);
         emit('get_game', {id: id});
     }
 
-    public static function getOpenChallenge(challenger:String, onExists:OpenChallengeData->Void, onInProcess:OngoingBattleData->Void, on404:Void->Void) 
+    public static function getOpenChallenge(challenger:String, onExists:OpenChallengeData->Void, onNotOwnInProcess:OngoingBattleData->Void, onOwnInProcess:OngoingBattleData->Void, on404:Void->Void) 
     {
         onceOneOf([
             'openchallenge_info' => onExists,
-            'openchallenge_ongoing' => onInProcess,
+            'openchallenge_own_ongoing' => onOwnInProcess,
+            'spectation_data' => onNotOwnInProcess,
             'openchallenge_notfound' => (data) -> {on404();}
         ]);
         emit('get_challenge', {challenger: challenger});
@@ -192,25 +206,14 @@ class Networker
         onceOneOf([
             'watched_unavailable' => (data) -> {Dialogs.alert(Dictionary.getPhrase(SPECTATION_ERROR_REASON_OFFLINE), Dictionary.getPhrase(SPECTATION_ERROR_TITLE));},
             'watched_notingame' => (data) -> {Dialogs.alert(Dictionary.getPhrase(SPECTATION_ERROR_REASON_NOTINGAME), Dictionary.getPhrase(SPECTATION_ERROR_TITLE));},
-            'spectation_data' => (data:OngoingBattleData) -> {
-                on('move', (data) -> {currentGameCompound.onMove(data);});
-                on('time_correction', (data) -> {currentGameCompound.onTimeCorrection(data);});
-                on('draw_offered', onDrawOffered);
-                on('takeback_offered', onTakebackOffered);
-                onStarted(data);
-            }
+            'spectation_data' => onStarted
         ]);
         emit('spectate', {watched_login: watchedLogin});
     }
 
-    public static function stopSpectate() 
+    public static function stopSpectation() 
     {
-        off('move');
-        off('time_correction');
-        off('draw_offered');
-        off('draw_cancelled');
-        off('draw_accepted');
-        off('draw_declined');
+        disableSpectationEvents();
         emit('stop_spectate', {});
     }
 
@@ -249,132 +252,13 @@ class Networker
     {
         emit('cancel_open_callout', {caller_login: Networker.login});
     }
+    
+    /*********************************************************************************************************************************************
+        Handler controls
+    **********************************************************************************************************************************************/
 
-    public static function sendMessage(text:String) 
+    public static function enableIngameEvents(onOver:GameOverData->Void) 
     {
-        emit('message', {issuer_login: Networker.login, message: text});
-    }
-
-    public static function reqTimeoutCheck() 
-    {
-        emit('request_timeout_check', {issuer_login: Networker.login});
-    }
-
-    public static function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:PieceType) 
-    {
-        emit('move', {issuer_login: Networker.login, fromI: fromI, fromJ: fromJ, toI: toI, toJ: toJ, morphInto: morphInto == null? null : morphInto.getName()});
-    }
-
-    public static function offerDraw() 
-    {
-        onceOneOf(['draw_accepted' => onDrawAccepted, 'draw_declined' => onDrawDeclined]);
-        emit('draw_offer', {});
-    }
-
-    public static function cancelDraw() 
-    {
-        emit('draw_cancel', {});
-        off('draw_accepted');
-        off('draw_declined');
-    }
-
-    public static function acceptDraw() 
-    {
-        emit('draw_accept', {});
-        off('draw_cancelled');
-    }
-
-    public static function declineDraw() 
-    {
-        emit('draw_decline', {});
-        off('draw_cancelled');
-    }
-
-    private static function onDrawOffered(e) 
-    {
-        once('draw_cancelled', onDrawCancelled);
-        currentGameCompound.onDrawOffered();
-    }
-
-    private static function onDrawCancelled(e) 
-    {
-        currentGameCompound.onDrawCancelled();
-    }
-
-    private static function onDrawAccepted(e) 
-    {
-        currentGameCompound.onDrawAccepted();
-    }
-
-    private static function onDrawDeclined(e) 
-    {
-        currentGameCompound.onDrawDeclined();
-    }
-
-    public static function offerTakeback() 
-    {
-        onceOneOf(['takeback_accepted' => onTakebackAccepted, 'takeback_declined' => onTakebackDeclined]);
-        emit('takeback_offer', {});
-    }
-
-    public static function cancelTakeback() 
-    {
-        emit('takeback_cancel', {});
-        off('takeback_accepted');
-        off('takeback_declined');
-    }
-
-    public static function acceptTakeback() 
-    {
-        emit('takeback_accept', {});
-        off('takeback_cancelled');
-    }
-
-    public static function declineTakeback() 
-    {
-        emit('takeback_decline', {});
-        off('takeback_cancelled');
-    }
-
-    private static function onTakebackOffered(e) 
-    {
-        once('takeback_cancelled', onTakebackCancelled);
-        currentGameCompound.onTakebackOffered();
-    }
-
-    private static function onTakebackCancelled(e) 
-    {
-        currentGameCompound.onTakebackCancelled();
-    }
-
-    private static function onTakebackAccepted(e) 
-    {
-        currentGameCompound.onTakebackAccepted();
-    }
-
-    private static function onTakebackDeclined(e) 
-    {
-        currentGameCompound.onTakebackDeclined();
-    }
-
-    private static function onRollbackCommand(cnt:Int) 
-    {
-        currentGameCompound.onRollbackCommand(cnt);
-    }
-
-    private static function onOpponentDisconnected(e) 
-    {
-        currentGameCompound.onOpponentDisconnected();
-    }
-
-    private static function onOpponentReconnected(e) 
-    {
-        currentGameCompound.onOpponentReconnected();
-    }
-
-    public static function registerGameEvents(onOver:GameOverData->Void) 
-    {
-        off('incoming_challenge');
         on('move', currentGameCompound.onMove);
         on('message', currentGameCompound.onMessage);
         on('time_correction', currentGameCompound.onTimeCorrection);
@@ -388,7 +272,7 @@ class Networker
         once('game_ended', onOver);
     }
 
-    public static function registerMainMenuEvents()
+    public static function disableIngameEvents() 
     {
         off('move');
         off('message');
@@ -406,19 +290,207 @@ class Networker
         off('rollback');
         off('opponent_disconnected');
         off('opponent_reconnected');
-        on('incoming_challenge', challengeReceiver);
-        once('game_started', ScreenManager.instance.toGameStart);
+        off('game_started');
     }
 
-    public static function dropConnection() 
+    public static function enableMainMenuEvents(onGameStarted:BattleData->Void)
     {
-        if (_ws != null)
-        {
-            suppressAlert = true;
-            _ws.close();
-            _ws = null;
-        }
+        on('incoming_challenge', challengeReceiver);
+        once('game_started', onGameStarted);
     }
+
+    public static function disableMainMenuEvents()
+    {
+        off('incoming_challenge');
+        off('game_started');
+    }
+
+    public static function enableSpectationEvents(onEnded:GameOverData->Void) 
+    {
+        on('move', onMove);
+        on('time_correction', onTimeCorrection);
+        on('draw_offered', onDrawOffered);
+        on('draw_accepted', onDrawAccepted);
+        on('draw_declined', onDrawDeclined);
+        on('takeback_offered', onTakebackOffered);
+        on('takeback_accepted', onTakebackAccepted);
+        on('takeback_declined', onTakebackDeclined);
+        on('rollback', onRollbackCommand);
+        on('game_ended', onEnded);
+    }
+
+    public static function disableSpectationEvents() 
+    {
+        off('move');
+        off('time_correction');
+        off('draw_offered');
+        off('draw_cancelled');
+        off('draw_accepted');
+        off('draw_declined');
+        off('takeback_offered');
+        off('takeback_cancelled');
+        off('takeback_accepted');
+        off('takeback_declined');
+        off('rollback');
+        off('game_ended');
+
+    }
+    
+    /*********************************************************************************************************************************************
+        Client -> Server game event senders
+    **********************************************************************************************************************************************/
+
+    //Offerer's methods
+
+    public static function offerDraw() 
+    {
+        onceOneOf(['draw_accepted' => onDrawAccepted, 'draw_declined' => onDrawDeclined]);
+        emit('draw_offer', {});
+    }
+
+    public static function cancelDraw() 
+    {
+        emit('draw_cancel', {});
+        off('draw_accepted');
+        off('draw_declined');
+    }
+    
+    public static function offerTakeback() 
+    {
+        onceOneOf(['takeback_accepted' => onTakebackAccepted, 'takeback_declined' => onTakebackDeclined]);
+        emit('takeback_offer', {});
+    }
+
+    public static function cancelTakeback() 
+    {
+        emit('takeback_cancel', {});
+        off('takeback_accepted');
+        off('takeback_declined');
+    }
+
+    //Recipient's methods
+    
+    public static function acceptDraw() 
+    {
+        emit('draw_accept', {});
+        off('draw_cancelled');
+    }
+
+    public static function declineDraw() 
+    {
+        emit('draw_decline', {});
+        off('draw_cancelled');
+    }
+
+    public static function acceptTakeback() 
+    {
+        emit('takeback_accept', {});
+        off('takeback_cancelled');
+    }
+
+    public static function declineTakeback() 
+    {
+        emit('takeback_decline', {});
+        off('takeback_cancelled');
+    }
+
+    //Other
+
+    public static function sendMessage(text:String) 
+    {
+        emit('message', {issuer_login: Networker.login, message: text});
+    }
+
+    public static function reqTimeoutCheck() 
+    {
+        emit('request_timeout_check', {issuer_login: Networker.login});
+    }
+
+    public static function move(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:PieceType) 
+    {
+        emit('move', {issuer_login: Networker.login, fromI: fromI, fromJ: fromJ, toI: toI, toJ: toJ, morphInto: morphInto == null? null : morphInto.getName()});
+    }
+
+    /*********************************************************************************************************************************************
+        Server -> Client game event handlers (delegators)
+    **********************************************************************************************************************************************/
+
+    //Offerer's handlers
+
+    private static function onTakebackAccepted(e) 
+    {
+        currentGameCompound.onTakebackAccepted();
+    }
+
+    private static function onTakebackDeclined(e) 
+    {
+        currentGameCompound.onTakebackDeclined();
+    }
+
+    private static function onDrawAccepted(e) 
+    {
+        currentGameCompound.onDrawAccepted();
+    }
+
+    private static function onDrawDeclined(e) 
+    {
+        currentGameCompound.onDrawDeclined();
+    }
+
+    //Offer recipient's handlers
+
+    private static function onTakebackOffered(e) 
+    {
+        once('takeback_cancelled', onTakebackCancelled);
+        currentGameCompound.onTakebackOffered();
+    }
+
+    private static function onTakebackCancelled(e) 
+    {
+        currentGameCompound.onTakebackCancelled();
+    }
+
+    private static function onDrawOffered(e) 
+    {
+        once('draw_cancelled', onDrawCancelled);
+        currentGameCompound.onDrawOffered();
+    }
+
+    private static function onDrawCancelled(e) 
+    {
+        currentGameCompound.onDrawCancelled();
+    }
+
+    //Other
+
+    private static function onMove(data) 
+    {
+        currentGameCompound.onMove(data);
+    }
+
+    private static function onTimeCorrection(data) 
+    {
+        currentGameCompound.onTimeCorrection(data);
+    }
+
+    private static function onRollbackCommand(cnt:Int) 
+    {
+        currentGameCompound.onRollbackCommand(cnt);
+    }
+
+    private static function onOpponentDisconnected(e) 
+    {
+        currentGameCompound.onOpponentDisconnected();
+    }
+
+    private static function onOpponentReconnected(e) 
+    {
+        currentGameCompound.onOpponentReconnected();
+    }
+
+    /*********************************************************************************************************************************************
+        Basic underlying methods
+    **********************************************************************************************************************************************/
 
     private static function on(eventName:String, callback:Dynamic->Void) 
     {

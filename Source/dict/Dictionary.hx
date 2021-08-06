@@ -85,6 +85,7 @@ class Dictionary
         RESOLUTION_DISCONNECT => [" disconnected", " покинули игру"],
         RESOLUTION_AGREEMENT => ["Draw by agreement", "Ничья по согласию"],
         RESOLUTION_REPETITON => ["Draw by repetition", "Ничья по троекратному повторению"],
+        RESOLUTION_ABORT => ["Game aborted", "Игра прервана"],
         RESOLUTION_HUNDRED => ["Draw by 100-move rule", "Ничья ввиду правила 100 ходов"],
         RESOLUTION_TIMEOUT => ["Timeout", "Законичилось время"],
         RESOLUTION_WINNER_POSTFIX => [" is victorious", " победили"],

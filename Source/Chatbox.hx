@@ -92,6 +92,7 @@ class Chatbox extends Sprite
         
         messageInput = new TextField();
         messageInput.placeholder = Dictionary.getPhrase(CHATBOX_MESSAGE_PLACEHOLDER);
+        messageInput.restrictChars = "^#;/\\\\|\u0000-\u001F\u007F-\u009F";
         messageInput.width = WIDTH;
         messageInput.height = 25;
         messageInput.y = history.height + 5;

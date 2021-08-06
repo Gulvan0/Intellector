@@ -338,7 +338,8 @@ class GameCompound extends Sprite
 			case 'abandon': Abandon;
 			case 'threefoldrepetition': Repetition;
 			case 'hundredmoverule': NoProgress;
-			case 'drawagreement': DrawAgreement;
+            case 'drawagreement': DrawAgreement;
+            case 'abort': Abort;
             default: Mate;
         }
 

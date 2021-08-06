@@ -61,7 +61,7 @@ class Main extends Sprite
 		{
 			case OpenChallengeInvitation(issuer):
 				Networker.once('game_started', ScreenManager.instance.toGameStart);
-				Networker.getOpenChallenge(issuer, ScreenManager.instance.toOpenChallengeJoiningRoom, (d)->{ScreenManager.instance.toSignIn();}, ScreenManager.instance.toSignIn);
+				Networker.getOpenChallenge(issuer, ScreenManager.instance.toOpenChallengeJoiningRoom, (d)->{ScreenManager.instance.toSignIn();}, (d)->{ScreenManager.instance.toSignIn();}, ScreenManager.instance.toSignIn);
 			default: 
 				ScreenManager.instance.toSignIn();
 		}
@@ -78,22 +78,6 @@ class Main extends Sprite
 
 	private function onAutoLogin(result:String)
 	{
-		function onGameInProcess(data:OngoingBattleData)
-		{
-			if (data.whiteLogin.toLowerCase() == Networker.login.toLowerCase())
-			{
-				data.whiteLogin = Networker.login;
-				ScreenManager.instance.toGameReconnect(data);
-			}
-			else if (data.blackLogin.toLowerCase() == Networker.login.toLowerCase())
-			{
-				data.blackLogin = Networker.login;
-				ScreenManager.instance.toGameReconnect(data);
-			}
-			else
-				ScreenManager.instance.toSpectation(data);
-		}
-
 		if (result == 'success')
 		{
 			switch Utils.getShallowSection() 
@@ -102,9 +86,9 @@ class Main extends Sprite
 					ScreenManager.instance.toMain();
 				case OpenChallengeInvitation(issuer):
 					Networker.once('game_started', ScreenManager.instance.toGameStart);
-					Networker.getOpenChallenge(issuer, ScreenManager.instance.toOpenChallengeJoiningRoom, onGameInProcess, ScreenManager.instance.toMain);
+					Networker.getOpenChallenge(issuer, ScreenManager.instance.toOpenChallengeJoiningRoom, ScreenManager.instance.toSpectation, ScreenManager.instance.toGameReconnect, ScreenManager.instance.toMain);
 				case Game(id):
-					Networker.getGame(id, onGameInProcess, (s)->{ScreenManager.instance.toMain();}, ScreenManager.instance.toMain);
+					Networker.getGame(id, ScreenManager.instance.toSpectation, ScreenManager.instance.toGameReconnect, (s)->{ScreenManager.instance.toMain();}, ScreenManager.instance.toMain);
 			}
 		}
 		else

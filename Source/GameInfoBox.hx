@@ -23,6 +23,7 @@ enum Outcome
     Repetition;
     NoProgress;
     Timeout;
+    Abort;
 }
 
 class GameInfoBox extends Sprite
@@ -44,6 +45,7 @@ class GameInfoBox extends Sprite
             case Mate: Dictionary.getPhrase(RESOLUTION_MATE) + ' • ' + Dictionary.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
             case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH) + ' • ' + Dictionary.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
             case Resign: Dictionary.getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_RESIGN);
+            case Abort: Dictionary.getPhrase(RESOLUTION_ABORT);
             case Abandon: Dictionary.getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_DISCONNECT);
             case DrawAgreement: Dictionary.getPhrase(RESOLUTION_AGREEMENT);
             case Repetition: Dictionary.getPhrase(RESOLUTION_REPETITON);

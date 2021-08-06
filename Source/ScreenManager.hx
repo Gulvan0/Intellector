@@ -54,7 +54,9 @@ class ScreenManager extends Sprite
     {
         clear();
         URLEditor.clear();
-        Networker.registerMainMenuEvents();
+        Networker.disableIngameEvents();
+        Networker.disableSpectationEvents();
+        Networker.enableMainMenuEvents(toGameStart);
         
         current = new MainMenu();
         addChild(current);
@@ -81,8 +83,9 @@ class ScreenManager extends Sprite
         URLEditor.assignID(id);
 
         current = game;
-		Networker.currentGameCompound = game;
-		Networker.registerGameEvents(onGameEnded);
+        Networker.currentGameCompound = game;
+        Networker.disableMainMenuEvents();
+		Networker.enableIngameEvents(onGameEnded);
 
 		Assets.getSound("sounds/notify.mp3").play();
         addChild(current);
@@ -126,13 +129,17 @@ class ScreenManager extends Sprite
 
         var game = GameCompound.buildSpectators(data, () -> 
         {
-            Networker.stopSpectate(); 
+            Networker.stopSpectation(); 
             Networker.currentGameCompound = null;
 		    toMain();
         });
         
 		current = game;
-		Networker.currentGameCompound = game;
+        Networker.currentGameCompound = game;
+        Networker.enableSpectationEvents((data) -> {
+            Networker.disableSpectationEvents();
+            Networker.currentGameCompound.terminate(data);
+        });
         addChild(current);
 	}
 
