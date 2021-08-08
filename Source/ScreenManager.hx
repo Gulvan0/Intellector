@@ -136,12 +136,41 @@ class ScreenManager extends Sprite
         
 		current = game;
         Networker.currentGameCompound = game;
+        Networker.enableMainMenuEvents((data) -> {
+            Networker.stopSpectation(); 
+            Networker.currentGameCompound = null;
+            toGameStart(data);
+        });
         Networker.enableSpectationEvents((data) -> {
             Networker.disableSpectationEvents();
             Networker.currentGameCompound.terminate(data);
         });
         addChild(current);
-	}
+    }
+    
+    public function toRevisit(id:Int, log:String) 
+    {
+        clear();
+        URLEditor.assignID(id);
+        var ereg:EReg = ~/#P\|([A-Za-z0-9]*):([A-Za-z0-9]*);/;
+        ereg.match(log);
+
+        var mockData:OngoingBattleData = {
+            match_id: id, 
+            requestedColor: 'white', 
+            whiteLogin: ereg.matched(1), 
+            blackLogin: ereg.matched(2), 
+            startSecs: null,
+            bonusSecs: null, 
+            whiteSeconds: null, 
+            blackSeconds: null, 
+            position: null,
+            currentLog: log
+        };
+
+        current = GameCompound.buildSpectators(mockData, toMain, true);
+        addChild(current);
+    }
 
     public function toSettings() 
     {
@@ -168,10 +197,16 @@ class ScreenManager extends Sprite
 		else 
 			resultMessage = Dictionary.getPhrase(LOSS_MESSAGE_PREAMBLE);
 
-		var explanation = Dictionary.getGameOverExplanation(data.reason);
+        var explanation = Dictionary.getGameOverExplanation(data.reason);
+        
+        Networker.disableIngameEvents();
+        Networker.enableMainMenuEvents(toGameStart);
 
-		Assets.getSound("sounds/notify.mp3").play();
-		Dialogs.info(Dictionary.getPhrase(GAME_OVER) + resultMessage + explanation, Dictionary.getPhrase(GAME_ENDED));
+        Assets.getSound("sounds/notify.mp3").play();
+        if (data.reason == 'abort')
+            Dialogs.info(Dictionary.getPhrase(GAME_OVER_REASON_ABORT), Dictionary.getPhrase(GAME_ENDED));
+        else
+		    Dialogs.info(Dictionary.getPhrase(GAME_OVER) + resultMessage + explanation, Dictionary.getPhrase(GAME_ENDED));
 	}
 
     public function new() 

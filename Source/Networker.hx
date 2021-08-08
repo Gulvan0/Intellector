@@ -260,10 +260,10 @@ class Networker
     public static function enableIngameEvents(onOver:GameOverData->Void) 
     {
         on('move', currentGameCompound.onMove);
-        on('message', currentGameCompound.onMessage);
-        on('time_correction', currentGameCompound.onTimeCorrection);
-        on('new_spectator', currentGameCompound.onSpectatorConnected);
-        on('spectator_left', currentGameCompound.onSpectatorDisonnected);
+        on('message', onMessage);
+        on('time_correction', onTimeCorrection);
+        on('new_spectator', onSpectatorConnected);
+        on('spectator_left', onSpectatorDisonnected);
         on('draw_offered', onDrawOffered);
         on('takeback_offered', onTakebackOffered);
         on('rollback', onRollbackCommand);
@@ -308,6 +308,10 @@ class Networker
     public static function enableSpectationEvents(onEnded:GameOverData->Void) 
     {
         on('move', onMove);
+        on('message', onMessage);
+        on('spectator_message', onSpectatorMessage);
+        on('new_spectator', onSpectatorConnected);
+        on('spectator_left', onSpectatorDisonnected);
         on('time_correction', onTimeCorrection);
         on('draw_offered', onDrawOffered);
         on('draw_accepted', onDrawAccepted);
@@ -322,6 +326,10 @@ class Networker
     public static function disableSpectationEvents() 
     {
         off('move');
+        off('spectator_message');
+        off('new_spectator');
+        off('spectator_left');
+        off('message');
         off('time_correction');
         off('draw_offered');
         off('draw_cancelled');
@@ -473,19 +481,39 @@ class Networker
         currentGameCompound.onTimeCorrection(data);
     }
 
+    private static function onMessage(data) 
+    {
+        currentGameCompound.onMessage(data);
+    }
+
+    private static function onSpectatorMessage(data) 
+    {
+        currentGameCompound.onSpectatorMessage(data);
+    }
+
+    private static function onSpectatorConnected(data) 
+    {
+        currentGameCompound.onSpectatorConnected(data);
+    }
+
+    private static function onSpectatorDisonnected(data) 
+    {
+        currentGameCompound.onSpectatorDisonnected(data);
+    }
+
     private static function onRollbackCommand(cnt:Int) 
     {
         currentGameCompound.onRollbackCommand(cnt);
     }
 
-    private static function onOpponentDisconnected(e) 
+    private static function onOpponentDisconnected(data) 
     {
-        currentGameCompound.onOpponentDisconnected();
+        currentGameCompound.onOpponentDisconnected(data);
     }
 
-    private static function onOpponentReconnected(e) 
+    private static function onOpponentReconnected(data) 
     {
-        currentGameCompound.onOpponentReconnected();
+        currentGameCompound.onOpponentReconnected(data);
     }
 
     /*********************************************************************************************************************************************

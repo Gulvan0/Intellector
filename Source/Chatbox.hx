@@ -1,5 +1,6 @@
 package;
 
+import struct.PieceColor;
 import dict.Dictionary;
 import haxe.ui.components.HorizontalScroll;
 import haxe.Timer;
@@ -19,6 +20,7 @@ class Chatbox extends Sprite
     private var history:ScrollView;
     private var historyText:Label;
     private var messageInput:TextField;
+    private var isOwnerSpectator:Bool;
 
     public function appendMessage(author:String, text:String) 
     {
@@ -26,10 +28,26 @@ class Chatbox extends Sprite
         waitAndScroll();
     }
 
+    public function appendSpectatorMessage(author:String, text:String) 
+    {
+        historyText.htmlText += '<p><i><b>$author:</b> $text</i></p>';
+        waitAndScroll();
+    }
+
     public function appendLog(text:String) 
     {
         historyText.htmlText += '<p><i>$text</i></p>';
         waitAndScroll();
+    }
+
+    public function onDisconnected(disconnectedColor:PieceColor) 
+    {
+        appendLog(Dictionary.getColorName(disconnectedColor) + Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE));
+    }
+
+    public function onReconnected(reconnectedColor:PieceColor) 
+    {
+        appendLog(Dictionary.getColorName(reconnectedColor) + Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE));
     }
 
     private function waitAndScroll() 
@@ -54,30 +72,59 @@ class Chatbox extends Sprite
     private function onKeyPress(e:KeyboardEvent) 
     {
         if (e.keyCode == Keyboard.ENTER || e.keyCode == Keyboard.NUMPAD_ENTER)
-            if (messageInput.focus && messageInput.text.trim() != "")
+        {
+            if (messageInput.focus)
             {
-                Networker.sendMessage(messageInput.text);
-                appendMessage(Networker.login, messageInput.text);
+                var formerText = messageInput.text.trim();
+                var text = "";
+                var lastIndex = cast(Math.min(500, formerText.length), Int);
+
                 messageInput.text = "";
+
+                for (index in 0...lastIndex)
+                    if (isLegalChar(formerText.charCodeAt(index)))
+                        text += formerText.charAt(index);
+
+                if (text != "")
+                {
+                    Networker.sendMessage(text);
+                    if (isOwnerSpectator)
+                        appendSpectatorMessage(Networker.login, text);
+                    else 
+                        appendMessage(Networker.login, text);
+                }
             }
+        }
     }
 
-    private function deinit(e) 
+    private function isLegalChar(code:Int) 
     {
-        removeEventListener(Event.REMOVED_FROM_STAGE, deinit);
-        removeEventListener(KeyboardEvent.KEY_DOWN, deinit);
+        if (code == "#".code || code == ";".code || code == "/".code || code == "\\".code || code == "|".code)
+            return false;
+        else if (code < 32)
+            return false;
+        else if (code > 126 && code < 161)
+            return false;
+        else 
+            return true;
+    }
+
+    public function terminate() 
+    {
+        messageInput.disabled = true;
+        removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
     }
 
     private function init(e) 
     {
         removeEventListener(Event.ADDED_TO_STAGE, init);
         addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-        addEventListener(Event.REMOVED_FROM_STAGE, deinit);
     }
 
-    public function new(totalHeight:Float) 
+    public function new(totalHeight:Float, isOwnerSpectator:Bool = false) 
     {
         super();
+        this.isOwnerSpectator = isOwnerSpectator;
 
         history = new ScrollView();
         history.width = WIDTH;
@@ -92,7 +139,6 @@ class Chatbox extends Sprite
         
         messageInput = new TextField();
         messageInput.placeholder = Dictionary.getPhrase(CHATBOX_MESSAGE_PLACEHOLDER);
-        messageInput.restrictChars = "^#;/\\\\|\u0000-\u001F\u007F-\u009F";
         messageInput.width = WIDTH;
         messageInput.height = 25;
         messageInput.y = history.height + 5;

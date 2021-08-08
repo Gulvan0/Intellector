@@ -36,7 +36,6 @@ class GameInfoBox extends Sprite
 
     private var timeControlText:String;
     private var openingTree:OpeningTree;
-    private var playerIsWhite:Bool;
 
     public function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
     {
@@ -70,11 +69,10 @@ class GameInfoBox extends Sprite
         openingTF.text = openingTree.currentNode.name;
     }
 
-    public function new(width:Float, height:Float, tcStartSeconds:Int, tcBonusSeconds:Int, whiteLogin:String, blackLogin:String, playerIsWhite:Bool) 
+    public function new(width:Float, height:Float, tcStartSeconds:Null<Int>, tcBonusSeconds:Null<Int>, whiteLogin:String, blackLogin:String) 
     {
         super();
         openingTree = new OpeningTree();
-        this.playerIsWhite = playerIsWhite;
 
         addChild(Shapes.rect(width, height, 0x999999, 1, LineStyle.Square, 0xFFFFFF));
         
@@ -89,7 +87,10 @@ class GameInfoBox extends Sprite
         vbox.y = 5;
 
         shortInfoTF = new Label();
-        timeControlText = '${tcStartSeconds/60}+$tcBonusSeconds • ';
+        if (tcStartSeconds != null && tcBonusSeconds != null)
+            timeControlText = '${tcStartSeconds/60}+$tcBonusSeconds • ';
+        else
+            timeControlText = "";
         shortInfoTF.text = timeControlText + Dictionary.getPhrase(RESOLUTION_NONE);
         shortInfoTF.customStyle = shortInfoStyle;
         shortInfoTF.width = boxWidth;

@@ -363,7 +363,7 @@ class Field extends Sprite
             makeMove(from, to);
     }
 
-    public function move(ply:Ply, ?ignoreHistory:Bool = false) 
+    public function move(ply:Ply, ?ignoreHistory:Bool = false, ?noSound:Bool = false) 
     {
         if (!ignoreHistory)
         {
@@ -374,7 +374,8 @@ class Field extends Sprite
         }
 
         currentSituation = currentSituation.makeMove(ply);
-        playSound(ply);
+        if (!noSound)
+            playSound(ply);
         translateFigures(ply.from, ply.to, ply.morphInto);
         highlightMove([ply.from, ply.to]);
 

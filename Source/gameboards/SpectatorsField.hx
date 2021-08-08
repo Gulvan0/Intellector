@@ -21,12 +21,12 @@ class SpectatorsField extends Field
         rmbSelectionBackToNormal();
     }
 
-    public function new(serializedPosition:String, watchedSide:PieceColor) 
+    public function new(watchedSide:PieceColor) 
     {
         super();
         normalOrientation = watchedSide == White;
         hexes = Factory.produceHexes(this, normalOrientation);
         disposeLetters();
-        figures = Factory.produceFiguresFromSerialized(serializedPosition, normalOrientation, this);
+        figures = Factory.produceFiguresFromDefault(normalOrientation, this);
     }
 }

@@ -59,6 +59,7 @@ class Dictionary
         GAME_OVER_REASON_THREEFOLD => [" (Threefold repetition).", " (Тройное повторение)."],
         GAME_OVER_REASON_HUNDRED => [" (Hundred move rule).", " (Правило 100 ходов)."],
         GAME_OVER_REASON_AGREEMENT => [" (by agreement).", " (по взаимному согласию)."],
+        GAME_OVER_REASON_ABORT => ["Game aborted", "Игра прервана"],
         GAME_OVER => ["Game over. ", "Игра окончена. "],
         GAME_ENDED => ["Game ended", "Игра окончена"],
         CONNECTION_LOST_ERROR => ["Connection lost", "Потеряно соединение"],
@@ -118,6 +119,7 @@ class Dictionary
         GAME_OVER_MESSAGE_SUFFIX_RESIGN => [" resigned", " сдались"],
         GAME_OVER_MESSAGE_SUFFIX_DISCONNECT => [" abandoned", " покинули партию"],
         GAME_OVER_MESSAGE_DRAW => ["Game ended as a draw", "Игра окончена вничью"],
+        GAME_OVER_MESSAGE_ABORT => ["Game aborted", "Игра прервана"],
         RESIGN_BTN_ABORT_TEXT => ["Abort", "Прервать"],
         ABORT_CONFIRMATION_MESSAGE => ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"],
         OPEN_CHALLENGE_CANCEL_CONFIRMATION => ["Cancel challenge and return to the main menu?", "Отменить вызов и вернуться в главное меню?"]
@@ -176,7 +178,8 @@ class Dictionary
 			case 'abandon': GAME_OVER_REASON_DISCONNECT;
 			case 'threefoldrepetition': GAME_OVER_REASON_THREEFOLD;
 			case 'hundredmoverule': GAME_OVER_REASON_HUNDRED;
-			case 'drawagreement': GAME_OVER_REASON_AGREEMENT;
+            case 'drawagreement': GAME_OVER_REASON_AGREEMENT;
+            case 'abort': GAME_OVER_REASON_ABORT;
 			default: GAME_OVER_REASON_MATE;
 		};
         return Dictionary.getPhrase(phrase);
@@ -199,7 +202,8 @@ class Dictionary
 			case 'breakthrough': getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
 			case 'timeout': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_TIMEOUT);
 			case 'resignation': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_RESIGN);
-			case 'abandon': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_DISCONNECT);
+            case 'abandon': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_DISCONNECT);
+            case 'abort': Dictionary.getPhrase(GAME_OVER_MESSAGE_ABORT);
 			default: Dictionary.getPhrase(GAME_OVER_MESSAGE_DRAW);
         };
     }

@@ -154,7 +154,7 @@ class Sidebox extends Sprite
             }
         }
 
-        if (!situation.isMating(ply) && move > 2)
+        if (!situation.isMating(ply) && move > 2 && secsPerTurn != null)
         {
             if (playerTurn) //Because corrections have already been applied if it is the opponent's turn ("correct, then move" server rule)
                 bottomTime.text = addBonus(bottomTime.text);
@@ -168,13 +168,14 @@ class Sidebox extends Sprite
     {
         if (cnt < 1)
             return;
-
-        hideTakebackRequestBox();
-        takebackOfferShowCancelHide();
-
+        
         move -= cnt;
+
         if (!simplified)
         {
+            hideTakebackRequestBox();
+            takebackOfferShowCancelHide();
+
             if (move < 2 && playerColor == White || move < 3 && playerColor == Black)
             {
                 offerTakebackBtn.disabled = true;
@@ -475,7 +476,7 @@ class Sidebox extends Sprite
 
     //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public function new(simplified:Bool, startSecs:Int, secsPerTurn:Int, playerLogin:String, opponentLogin:String, playerIsWhite:Bool) 
+    public function new(simplified:Bool, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerLogin:String, opponentLogin:String, playerIsWhite:Bool) 
     {
         super();
         this.simplified = simplified;
@@ -484,16 +485,19 @@ class Sidebox extends Sprite
         playerColor = playerIsWhite? White : Black;
         playerTurn = playerIsWhite;
 
-        var strStart = secsToString(startSecs);
+        var strStart = startSecs == null? null : secsToString(startSecs);
         var timeStyle:Style = {fontSize: 40};
         var loginStyle:Style = {fontSize: 24};
 
         var box:VBox = new VBox();
 
-        upperTime = new Label();
-        upperTime.text = strStart;
-        upperTime.customStyle = timeStyle;
-        box.addComponent(upperTime);
+        if (startSecs != null && secsPerTurn != null)
+        {
+            upperTime = new Label();
+            upperTime.text = strStart;
+            upperTime.customStyle = timeStyle;
+            box.addComponent(upperTime);
+        }
 
         upperLogin = new Label();
         upperLogin.text = opponentLogin;
@@ -519,10 +523,13 @@ class Sidebox extends Sprite
         bottomLogin.customStyle = loginStyle;
         box.addComponent(bottomLogin);
 
-        bottomTime = new Label();
-        bottomTime.text = strStart;
-        bottomTime.customStyle = timeStyle;
-        box.addComponent(bottomTime);
+        if (startSecs != null && secsPerTurn != null)
+        {
+            bottomTime = new Label();
+            bottomTime.text = strStart;
+            bottomTime.customStyle = timeStyle;
+            box.addComponent(bottomTime);
+        }
 
         addChild(box);
     }
