@@ -1,5 +1,7 @@
 package analysis;
 
+import haxe.Int64;
+import haxe.Timer;
 import struct.Ply;
 import analysis.Score;
 import struct.PieceColor.opposite;
@@ -8,47 +10,172 @@ import struct.Situation;
 typedef EvaluationResult = 
 {
     var score:Score;
-    var plySequence:Array<Ply>;
+    var optimalPly:Ply;
+    var remainingDepth:Int;
+}
+
+enum MeasuredProcess
+{
+    IsMate;
+    Heuristic;
+    OccupiedHexes;
+    PosVal;
+    AvailablePlys;
+    Sorting;
 }
 
 class AlphaBeta 
 {
+    private static var evaluationCache:ZobristMap<EvaluationResult> = new ZobristMap<EvaluationResult>();
+    public static var calls:Map<MeasuredProcess, Int> = [];
+    public static var totalTime:Map<MeasuredProcess, Float> = [];
+    public static var prunedCount:Int = 0;
+    public static var evaluatedCount:Int = 0;
+
+    public static function initMeasuredIndicators() 
+    {
+        prunedCount = 0;
+        evaluatedCount = 0;
+        for (k in MeasuredProcess.createAll())
+        {
+            totalTime[k] = 0;
+            calls[k] = 0;
+        }
+    }
+
+    public static function evaluate(situation:Situation, depth:Int):EvaluationResult
+    {
+        var maximize:Bool = situation.turnColor == White;
+        return evaluateRecursive(situation, depth, maximize);
+    }
 
     private static function evaluateHeuristic(situation:Situation):Score
     {
         var value:Float = 0;
-        for (coords => hex in situation.collectOccupiedHexes()) 
-            if (hex.color == White)
-                value += PieceValues.posValue(hex.type, coords.i, coords.j);
-            else
-                value -= PieceValues.posValue(hex.type, coords.i, coords.j);
+        var ts;
+
+        #if measure_time
+        ts = Timer.stamp();
+        #end
+        var occupied = situation.collectOccupiedFast();
+        #if measure_time
+        totalTime[OccupiedHexes] += Timer.stamp() - ts;
+        calls[OccupiedHexes]++;
+        #end
+        for (hex in occupied) 
+        {
+            #if measure_time
+            ts = Timer.stamp();
+            #end
+            value += PieceValues.posValueFast(hex.type, hex.color, hex.i, hex.j);
+            #if measure_time
+            totalTime[PosVal] += Timer.stamp() - ts;
+            calls[PosVal]++;
+            #end
+        }
         return new Score(Normal(value));
     }
 
-    public static function evaluate(situation:Situation, remainingDepth:Int, maximize:Bool, ?alpha:Score, ?pply, ?prevSit):EvaluationResult
+    private static function evaluateRecursive(situation:Situation, remainingDepth:Int, maximize:Bool, ?alpha:Score, ?pply, ?prevSit):EvaluationResult
     {
+        var cached = evaluationCache.zget(situation.zobristHash);
+        if (cached != null && cached.remainingDepth >= remainingDepth)
+        {
+            #if measure_time
+            prunedCount++;
+            #end
+            return cached;
+        }
+        #if measure_time
+        evaluatedCount++;
+        var ts;
+        ts = Timer.stamp();
+        #end
         if (situation.isMate())
-            return {score: new Score(Mate(0, opposite(situation.turnColor))), plySequence: []};
+        {
+            var result = {score: new Score(Mate(0, opposite(situation.turnColor))), optimalPly: null, remainingDepth: 9999};
+            evaluationCache.zset(situation.zobristHash, result);
+            return result;
+        }
+        #if measure_time
+        totalTime[IsMate] += Timer.stamp() - ts;
+        calls[IsMate]++;
+        #end
 
         if (remainingDepth == 0)
-            return {score: evaluateHeuristic(situation), plySequence: []};
+        {
+            #if measure_time
+            ts = Timer.stamp();
+            #end
+            var score = evaluateHeuristic(situation);
+            #if measure_time
+            totalTime[Heuristic] += Timer.stamp() - ts;
+            calls[Heuristic]++;
+            #end
+            var result = {score: score, optimalPly: null, remainingDepth: 0};
+            evaluationCache.zset(situation.zobristHash, result);
+            return result;
+        }
 
         var beta:Null<Score> = null;
-        var optimalSequence:Array<Ply> = [];
+        var optimalPly:Ply;
         var neededChildDepth:Int = remainingDepth - 1;
+        #if measure_time
+        ts = Timer.stamp();
+        #end
+        var branches = situation.availablePlys();
+        #if measure_time
+        totalTime[AvailablePlys] += Timer.stamp() - ts;
+        calls[AvailablePlys]++;
+        #end
 
-        for (ply in situation.availablePlys())
+        if (remainingDepth == 1)
+        {
+            var ply = branches[0];
+            var bestResult:EvaluationResult = {score: evaluateRecursive(situation.makeMove(ply), 0, null).score, optimalPly: ply, remainingDepth: 1};
+            for (i in 1...branches.length)
+            {
+                ply = branches[i];
+                var score = evaluateRecursive(situation.makeMove(ply), 0, null).score;
+                if (maximize)
+                {
+                    if (bestResult.score < score)
+                        bestResult = {score: score, optimalPly: ply, remainingDepth: 1};
+                }
+                else
+                    if (bestResult.score > score)
+                        bestResult = {score: score, optimalPly: ply, remainingDepth: 1};
+            }
+            var result = {score: bestResult.score.incrementedMate(), optimalPly: bestResult.optimalPly, remainingDepth: 1};
+            evaluationCache.zset(situation.zobristHash, result);
+            return result;
+        }
+
+        var shallowResults = [for (ply in branches) ply => evaluateRecursive(situation.makeMove(ply), Math.floor(neededChildDepth / 2), !maximize)];
+        #if measure_time
+        ts = Timer.stamp();
+        #end
+        if (maximize)
+            branches.sort((ply1, ply2) -> (shallowResults.get(ply2).score > shallowResults.get(ply1).score? 1 : -1));
+        else
+            branches.sort((ply1, ply2) -> (shallowResults.get(ply1).score > shallowResults.get(ply2).score? 1 : -1));
+        #if measure_time
+        totalTime[Sorting] += Timer.stamp() - ts;
+        calls[Sorting]++;
+        #end
+
+        for (ply in branches)
         {
             #if verbose_analysis
-            var res:EvaluationResult = evaluate(situation.makeMove(ply), neededChildDepth, !maximize, beta, ply, situation);
+            var res:EvaluationResult = evaluateRecursive(situation.makeMove(ply), neededChildDepth, !maximize, beta, ply, situation);
             #else
-            var res:EvaluationResult = evaluate(situation.makeMove(ply), neededChildDepth, !maximize, beta);
+            var res:EvaluationResult = evaluateRecursive(situation.makeMove(ply), neededChildDepth, !maximize, beta);
             #end
 
             if (beta == null || (maximize && (res.score > beta) || !maximize && beta > res.score))
             {
                 beta = res.score;
-                optimalSequence = [ply].concat(res.plySequence);
+                optimalPly = ply;
                 if (alpha != null && (maximize && (alpha <= beta) || !maximize && (alpha >= beta)))
                     break;
             }
@@ -72,9 +199,11 @@ class AlphaBeta
             s += ".";
         if (pply != null)
             s += pply.toNotation(prevSit) + " | ";
-        trace(s + beta.incrementedMate() + " | " + optimalSequence[0].toNotation(situation));
+        trace(s + beta.incrementedMate() + " | " + optimalPly.toNotation(situation));
         #end
         
-        return {score: beta.incrementedMate(), plySequence: optimalSequence};
+        var result = {score: beta.incrementedMate(), optimalPly: optimalPly, remainingDepth: remainingDepth};
+        evaluationCache.zset(situation.zobristHash, result);
+        return result;
     }
 }

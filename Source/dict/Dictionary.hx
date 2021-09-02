@@ -1,5 +1,6 @@
 package dict;
 
+import GameInfoBox.Outcome;
 import Field.Markup;
 import gfx.screens.MainMenu.MainMenuButton;
 import struct.PieceColor;
@@ -42,6 +43,7 @@ class Dictionary
         SETTINGS_BTN => ["Settings", "Настройки"],
         LOG_OUT_BTN => ["Log out", "Выйти"],
         SPECTATE_BTN => ["Spectate", "Наблюдать"],
+        PROFILE_BTN => ["Visit player's profile", "Открыть профиль игрока"],
         ENTER_SPECTATED => ["Enter the username of a player whose game you want to spectate", "За чьей игрой наблюдать?"],
         SETTINGS_MARKUP_TITLE => ["Markup: ", "Метки: "],
         SETTINGS_MARKUP_TYPE_NONE => ["None", "Нет"],
@@ -122,7 +124,8 @@ class Dictionary
         GAME_OVER_MESSAGE_ABORT => ["Game aborted", "Игра прервана"],
         RESIGN_BTN_ABORT_TEXT => ["Abort", "Прервать"],
         ABORT_CONFIRMATION_MESSAGE => ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"],
-        OPEN_CHALLENGE_CANCEL_CONFIRMATION => ["Cancel challenge and return to the main menu?", "Отменить вызов и вернуться в главное меню?"]
+        OPEN_CHALLENGE_CANCEL_CONFIRMATION => ["Cancel challenge and return to the main menu?", "Отменить вызов и вернуться в главное меню?"],
+        ENTER_PROFILE_OWNER => ["Enter the login of a profile owner", "Введите логин игрока, профиль которого вы хотите посетить"]
     ];
 
     public static function getPhrase(phrase:Phrase):String
@@ -150,6 +153,7 @@ class Dictionary
             case OpenChallenge: OPEN_CHALLENGE_BTN;
             case AnalysisBoard: ANALYSIS_BTN;
             case Spectate: SPECTATE_BTN;
+            case Profile: PROFILE_BTN;
             case Settings: SETTINGS_BTN;
             case LogOut: LOG_OUT_BTN;
         }
@@ -185,6 +189,62 @@ class Dictionary
         return Dictionary.getPhrase(phrase);
     }
 
+    public static function getMatchlistResultText(winner:Null<PieceColor>, outcome:Null<Outcome>) 
+    {
+        return getMatchlistWinnerText(winner) + " (" + getMatchlistOutcomeText(outcome) + ")";
+    }
+
+    private static function getMatchlistWinnerText(color:Null<PieceColor>) 
+    {
+        if (color == null)
+            return switch lang 
+            {
+                case EN: "Draw";
+                case RU: "Ничья";
+            }
+        else
+            return getColorName(color) + switch lang 
+            {
+                case EN: " won";
+                case RU: " победили";
+            }
+    }
+
+    private static function getMatchlistOutcomeText(outcome:Null<Outcome>) 
+    {
+        switch lang 
+        {
+            case EN: 
+                return switch outcome 
+                {
+                    case Mate: "Mate";
+                    case Breakthrough: "Breakthrough";
+                    case Resign: "Resignation";
+                    case Abandon: "Abandon";
+                    case DrawAgreement: "Agreement";
+                    case Repetition: "Threefold repetition";
+                    case NoProgress: "100-move rule";
+                    case Timeout: "Time out";
+                    case Abort: "Aborted";
+                    case null: "Unknown reason";
+                };
+            case RU: 
+                return switch outcome 
+                {
+                    case Mate: "Мат";
+                    case Breakthrough: "Добегание";
+                    case Resign: "Оппонент сдался";
+                    case Abandon: "Оппонент покинул игру";
+                    case DrawAgreement: "По согласию";
+                    case Repetition: "По троекратному повторению";
+                    case NoProgress: "По правилу 100 ходов";
+                    case Timeout: "Вышло время";
+                    case Abort: "Игра прервана";
+                    case null: "Неизвестная причина";
+                };
+        }
+    }
+
     public static function getColorName(color:PieceColor) 
     {
         return switch lang 
@@ -194,7 +254,7 @@ class Dictionary
         }
     }
 
-    public static function getGameOverChatMessage(winnerColor:PieceColor, reason:String):String
+    public static function getGameOverChatMessage(winnerColor:Null<PieceColor>, reason:String):String
     {
         return switch reason
 		{

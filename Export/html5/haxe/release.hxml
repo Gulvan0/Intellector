@@ -22,6 +22,7 @@
 -D howlerjs
 -D no-compilation
 -D openfl-html5
+-D measure_time
 -D lime-webgl
 -D lime-dom
 -D lime-howlerjs

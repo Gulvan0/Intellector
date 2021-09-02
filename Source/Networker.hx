@@ -168,6 +168,12 @@ class Networker
         emit('register', {login: login, password: password});
     }
 
+    public static function getGames(login:String, callback:String->Void) 
+    {
+        once('games_list', callback);
+        emit('get_player_games', {login: login});
+    }
+
     public static function getGame(id:Int, onNotOwnInProcess:OngoingBattleData->Void, onOwnInProcess:OngoingBattleData->Void, onFinished:(log:String)->Void, on404:Void->Void) 
     {
         onceOneOf([

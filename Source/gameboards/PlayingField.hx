@@ -19,22 +19,16 @@ class PlayingField extends Field
 
     private var stageRef:Stage;
 
-    public function new(playerIsWhite:Bool, ?serializedPosition:String) 
+    public function new(playerIsWhite:Bool) 
     {
         super();
 
         playerColor = playerIsWhite? White : Black;
-        if (serializedPosition != null)
-            playersTurn = serializedPosition.charAt(0) == "w"? playerIsWhite : !playerIsWhite;
-        else
-            playersTurn = playerIsWhite;
+        playersTurn = playerIsWhite;
 
         hexes = Factory.produceHexes(this, playerIsWhite);
         disposeLetters();
-        if (serializedPosition != null)
-            figures = Factory.produceFiguresFromSerialized(serializedPosition, playerIsWhite, this);
-        else
-            figures = Factory.produceFiguresFromDefault(playerIsWhite, this);
+        figures = Factory.produceFiguresFromDefault(playerIsWhite, this);
         addEventListener(Event.ADDED_TO_STAGE, init);
     }
 

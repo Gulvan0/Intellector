@@ -229,7 +229,11 @@ class Field extends Sprite
         {
             var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !isCastle(from, pressLocation, movingFig, moveOntoFig);
             if (otherOwnClicked)
-                selectDeparture(pressLocation);
+            {
+                stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
+                stage.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
+                departurePress(pressLocation, c->true);
+            }
             else
             {
                 stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);

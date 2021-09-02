@@ -1,5 +1,6 @@
 package;
 
+import serialization.GameLogDeserializer;
 import GameInfoBox.Outcome;
 import Networker.GameOverData;
 import analysis.AlphaBeta;
@@ -399,7 +400,7 @@ class GameCompound extends Sprite
 
     public function terminate(data:GameOverData)
     {
-        var winnerColor:PieceColor = data.winner_color == 'white'? White : Black;
+        var winnerColor:PieceColor = GameLogDeserializer.decodeColor(data.winner_color);
         var outcome:Outcome = switch data.reason
         {
             case 'mate': Mate;

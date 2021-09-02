@@ -27,9 +27,20 @@ class AnalysisBoardPanel extends Sprite
 
         Timer.delay(() -> {
             var situation:Situation = field.currentSituation.copy();
-            situation.turnColor = color;
-            var result = AlphaBeta.evaluate(situation, 6, color == White);
-            var recommendedMove = result.plySequence[0];
+            situation.setTurnWithZobris(color);
+            #if measure_time
+            AlphaBeta.initMeasuredIndicators();
+            #end
+            var result = AlphaBeta.evaluate(situation, 6);
+            #if measure_time
+            trace("Prune count: " + AlphaBeta.prunedCount + "; Prune ratio: " + AlphaBeta.prunedCount / (AlphaBeta.prunedCount + AlphaBeta.evaluatedCount));
+            for (act in MeasuredProcess.createAll())
+            {
+                trace(act.getName());
+                trace("Calls: " + AlphaBeta.calls[act] + "; Avg: " + (AlphaBeta.totalTime[act] / AlphaBeta.calls[act]) + "; Total: " + AlphaBeta.totalTime[act]);
+            }
+            #end
+            var recommendedMove = result.optimalPly;
                 
             scoreLabel.text = result.score.toString();
             field.rmbSelectionBackToNormal();

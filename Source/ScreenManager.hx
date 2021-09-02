@@ -1,5 +1,6 @@
 package;
 
+import gfx.screens.PlayerProfile;
 import struct.PieceColor;
 import gfx.screens.MainMenu;
 import gfx.screens.Settings;
@@ -152,7 +153,7 @@ class ScreenManager extends Sprite
     {
         clear();
         URLEditor.assignID(id);
-        var ereg:EReg = ~/#P\|([A-Za-z0-9]*):([A-Za-z0-9]*);/;
+        var ereg:EReg = ~/#P\|([A-Za-z0-9_]*):([A-Za-z0-9_]*);/;
         ereg.match(log);
 
         var mockData:OngoingBattleData = {
@@ -172,6 +173,15 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
+    public function toProfile(login:String, gamesList:String) 
+    {
+        clear();
+        URLEditor.assignProfileLogin(login);
+
+        current = new PlayerProfile(login, gamesList);
+        addChild(current);
+    }
+
     public function toSettings() 
     {
         clear();
@@ -184,13 +194,12 @@ class ScreenManager extends Sprite
     private function onGameEnded(data:GameOverData) 
 	{
         var playerColor:PieceColor = Networker.currentGameCompound.playerColor;
-        var playerColorStr:String = playerColor.getName().toLowerCase();
-        var playerIsWinner:Bool = data.winner_color == playerColorStr;
+        var playerIsWinner:Bool = data.winner_color == letter(playerColor);
 		Networker.currentGameCompound.terminate(data);
 		Networker.currentGameCompound = null;
 
 		var resultMessage;
-		if (data.winner_color == "")
+		if (data.winner_color == "d")
 			resultMessage = "½ - ½";
 		else if (playerIsWinner)
 			resultMessage = Dictionary.getPhrase(WIN_MESSAGE_PREAMBLE);

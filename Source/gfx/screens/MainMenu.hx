@@ -13,6 +13,7 @@ enum MainMenuButton
     OpenChallenge;
     AnalysisBoard;
     Spectate;
+    Profile;
     Settings;
     LogOut;
 }
@@ -60,6 +61,14 @@ class MainMenu extends Sprite
         ScreenManager.instance.toSettings();
     }
 
+    private function onProfile(e) 
+    {
+        var response = Browser.window.prompt(Dictionary.getPhrase(ENTER_PROFILE_OWNER));
+
+        if (response != null)
+			Networker.getGames(response, ScreenManager.instance.toProfile.bind(response));
+    }
+
     private function onLogOut(e) 
     {
         url.Utils.removeLoginDetails();
@@ -93,6 +102,7 @@ class MainMenu extends Sprite
             case OpenChallenge: onOpenChallenge;
             case AnalysisBoard: onAnalysisBoard;
             case Spectate: onSpectate;
+            case Profile: onProfile;
             case Settings: onSettings;
             case LogOut: onLogOut;
         };

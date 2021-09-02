@@ -1,52 +1,58 @@
 package struct;
 
+import analysis.ZobristHashing;
+import haxe.Int64;
+import analysis.ConcreteHex;
+import struct.PieceColor.letter;
 import js.html.Window;
 import analysis.PieceValues;
 import struct.PieceColor.opposite;
 
 class Situation 
 {
-    public var figureArray:Array<Array<Hex>>;
-    public var turnColor:PieceColor;
+    private var figureArray:Array<Hex>;
+    public var turnColor(default, null):PieceColor;
+    public var zobristHash(default, null):Int64;
 
     private var intellectorPos:Map<PieceColor, IntPoint>;
 
     public static function starting():Situation
     {
         var situation = new Situation();
-        situation.figureArray = [for (j in 0...7) [for (i in 0...9) Hex.empty()]];
         situation.turnColor = White;
         situation.intellectorPos = [White => new IntPoint(4, 6), Black => new IntPoint(4, 0)];
+        situation.zobristHash = ZobristHashing.startPosHash.copy();
+        situation.figureArray = [for (t in 0...63) Hex.empty()];
 
-        situation.figureArray[0][0] = Hex.occupied(Dominator, Black);
-        situation.figureArray[0][1] = Hex.occupied(Liberator, Black);
-        situation.figureArray[0][2] = Hex.occupied(Aggressor, Black);
-        situation.figureArray[0][3] = Hex.occupied(Defensor, Black);
-        situation.figureArray[0][4] = Hex.occupied(Intellector, Black);
-        situation.figureArray[0][5] = Hex.occupied(Defensor, Black);
-        situation.figureArray[0][6] = Hex.occupied(Aggressor, Black);
-        situation.figureArray[0][7] = Hex.occupied(Liberator, Black);
-        situation.figureArray[0][8] = Hex.occupied(Dominator, Black);
-        situation.figureArray[1][0] = Hex.occupied(Progressor, Black);
-        situation.figureArray[1][2] = Hex.occupied(Progressor, Black);
-        situation.figureArray[1][4] = Hex.occupied(Progressor, Black);
-        situation.figureArray[1][6] = Hex.occupied(Progressor, Black);
-        situation.figureArray[1][8] = Hex.occupied(Progressor, Black);
+        situation.setC(0, 0, Hex.occupied(Dominator, Black));
+        situation.setC(1, 0, Hex.occupied(Liberator, Black));
+        situation.setC(2, 0, Hex.occupied(Aggressor, Black));
+        situation.setC(3, 0, Hex.occupied(Defensor, Black));
+        situation.setC(4, 0, Hex.occupied(Intellector, Black));
+        situation.setC(5, 0, Hex.occupied(Defensor, Black));
+        situation.setC(6, 0, Hex.occupied(Aggressor, Black));
+        situation.setC(7, 0, Hex.occupied(Liberator, Black));
+        situation.setC(8, 0, Hex.occupied(Dominator, Black));
+        situation.setC(0, 1, Hex.occupied(Progressor, Black));
+        situation.setC(2, 1, Hex.occupied(Progressor, Black));
+        situation.setC(4, 1, Hex.occupied(Progressor, Black));
+        situation.setC(6, 1, Hex.occupied(Progressor, Black));
+        situation.setC(8, 1, Hex.occupied(Progressor, Black));
 
-        situation.figureArray[6][0] = Hex.occupied(Dominator, White);
-        situation.figureArray[5][1] = Hex.occupied(Liberator, White);
-        situation.figureArray[6][2] = Hex.occupied(Aggressor, White);
-        situation.figureArray[5][3] = Hex.occupied(Defensor, White);
-        situation.figureArray[6][4] = Hex.occupied(Intellector, White);
-        situation.figureArray[5][5] = Hex.occupied(Defensor, White);
-        situation.figureArray[6][6] = Hex.occupied(Aggressor, White);
-        situation.figureArray[5][7] = Hex.occupied(Liberator, White);
-        situation.figureArray[6][8] = Hex.occupied(Dominator, White);
-        situation.figureArray[5][0] = Hex.occupied(Progressor, White);
-        situation.figureArray[5][2] = Hex.occupied(Progressor, White);
-        situation.figureArray[5][4] = Hex.occupied(Progressor, White);
-        situation.figureArray[5][6] = Hex.occupied(Progressor, White);
-        situation.figureArray[5][8] = Hex.occupied(Progressor, White);
+        situation.setC(0, 6, Hex.occupied(Dominator, White));
+        situation.setC(1, 5, Hex.occupied(Liberator, White));
+        situation.setC(2, 6, Hex.occupied(Aggressor, White));
+        situation.setC(3, 5, Hex.occupied(Defensor, White));
+        situation.setC(4, 6, Hex.occupied(Intellector, White));
+        situation.setC(5, 5, Hex.occupied(Defensor, White));
+        situation.setC(6, 6, Hex.occupied(Aggressor, White));
+        situation.setC(7, 5, Hex.occupied(Liberator, White));
+        situation.setC(8, 6, Hex.occupied(Dominator, White));
+        situation.setC(0, 5, Hex.occupied(Progressor, White));
+        situation.setC(2, 5, Hex.occupied(Progressor, White));
+        situation.setC(4, 5, Hex.occupied(Progressor, White));
+        situation.setC(6, 5, Hex.occupied(Progressor, White));
+        situation.setC(8, 5, Hex.occupied(Progressor, White));
 
         return situation;
     }
@@ -55,19 +61,20 @@ class Situation
     {
         var next:Situation = this.copy();
         next.turnColor = opposite(turnColor);
+        next.zobristHash ^= ZobristHashing.hashes[0];
 
         var fromHex = get(ply.from);
         var toHex = get(ply.to);
 
         if (ply.morphInto == null)
-            next.set(ply.to, fromHex.copy());
+            next.setWithZobris(ply.to, fromHex.copy(), toHex);
         else
-            next.set(ply.to, Hex.occupied(ply.morphInto, fromHex.color)); //Promotion or chameleon
+            next.setWithZobris(ply.to, Hex.occupied(ply.morphInto, fromHex.color), toHex); //Promotion or chameleon
 
         if (toHex.color == fromHex.color)
-            next.set(ply.from, toHex.copy()); //Castle               
+            next.setWithZobris(ply.from, toHex.copy(), fromHex); //Castle               
         else 
-            next.set(ply.from, Hex.empty());
+            next.setWithZobris(ply.from, Hex.empty(), fromHex);
 
         if (fromHex.type == Intellector)
             next.intellectorPos[fromHex.color] = ply.to.copy();
@@ -84,13 +91,17 @@ class Situation
         for (ply in reversedPlys)
             for (transform in ply)
             {
-                formerSituation.set(transform.coords, transform.former);
+                formerSituation.setWithZobris(transform.coords, transform.former, transform.latter);
                 if (transform.former.type == Intellector)
                     formerSituation.intellectorPos[transform.former.color] = transform.coords;
             }
 
         if (plys.length % 2 == 1)
+        {
             formerSituation.turnColor = opposite(turnColor);
+            formerSituation.zobristHash ^= ZobristHashing.hashes[0];
+        }
+            
         return formerSituation;
     }
 
@@ -113,11 +124,7 @@ class Situation
 
     public function availablePlys():Array<Ply>
     {
-        var captures:Array<Ply> = [];
-        //var checks:Array<Ply> = [];
-        var normalPlys:Array<Ply> = [];
-        var intellectorMovements:Array<Ply> = [];
-
+        var plys:Array<Ply> = [];
         var enemyColor = opposite(turnColor);
 
         for (p in IntPoint.allHexCoords)
@@ -136,70 +143,119 @@ class Situation
                 ply.to = coords;
 
                 if (hexOnto.isEmpty())
-                {
-                    if (ply.from.equals(intellectorPos[turnColor])) //Intellector moves are considered last
-                        intellectorMovements.push(ply);
-                    else
-                        normalPlys.push(ply);
-                }
+                    plys.push(ply);
                 else 
                 {
-                    if (!ply.from.equals(intellectorPos[turnColor])) //Intellector moves onto piece => castle => ignore as duplicate for castle from defensor pos
-                        if (ply.to.equals(intellectorPos[enemyColor]))
+                    var ownIntPos = intellectorPos[turnColor];
+                    var enemyIntPos = intellectorPos[enemyColor];
+                    if (!ply.to.equals(ownIntPos)) //to avoid duplicates, we consider castling only if it starts from Intellector
+                        if (ply.to.equals(enemyIntPos))
                             return [ply]; //If mate is found, do not consider any other move
                         else
                         {
-                            captures.push(ply);
+                            plys.push(ply);
 
-                            if (Rules.areNeighbours(intellectorPos[turnColor], ply.from)) 
+                            if (Rules.areNeighbours(ownIntPos, ply.from)) 
                             {
                                 var chameleonPly:Ply = ply.copy();
                                 ply.morphInto = hexOnto.type;
-                                
-                                if (PieceValues.firstHasHigherPriority(hexOnto.type, hex.type))
-                                    captures.insert(0, chameleonPly);
-                                else
-                                    captures.push(chameleonPly);
+                                plys.push(chameleonPly);
                             }
                         }
                 }
             }
         }
         
-        return captures.concat(normalPlys).concat(intellectorMovements);
+        return plys;
     }
 
     public function collectOccupiedHexes():Map<IntPoint, Hex>
     {
-        return [for (p in IntPoint.allHexCoords) if (!get(p).isEmpty()) p.copy() => get(p)];
+        var map:Map<IntPoint, Hex> = [];
+        for (i in 0...9) 
+            for (j in 0...(7 - i % 2))
+            {
+                var hex = getC(i, j);
+                if (hex.type != null)
+                    map.set(new IntPoint(i, j), hex);
+            }
+            
+        return map;
     }
 
-    public function get(coords:IntPoint):Hex
+    public function collectOccupiedFast():Array<ConcreteHex>
+    {
+        var arr = [];
+        for (i in 0...9) 
+            for (j in 0...(7 - i % 2))
+            {
+                var hex = getC(i, j);
+                if (hex.type != null)
+                    arr.push(new ConcreteHex(i, j, hex.type, hex.color));
+            }
+            
+        return arr;
+    }
+
+    public function serialize():String
+    {
+        var s = PieceColor.letter(turnColor);
+        for (t in 0...63)
+        {
+            var fig = figureArray[t];
+            if (fig.type == null)
+                s += '0';
+            else
+                s += '${PieceType.letter(fig.type)}${PieceColor.letter(fig.color)}';
+        }
+        return s;
+    }
+
+    public inline function get(coords:IntPoint):Hex
     {
         return getC(coords.i, coords.j);
     }
 
-    public function getC(i:Int, j:Int):Hex
+    private inline function getC(i:Int, j:Int):Hex
     {
-        return figureArray[j][i];
+        return figureArray[j * 9 + i];
     }
 
-    public function set(coords:IntPoint, hex:Hex) 
+    public inline function set(coords:IntPoint, hex:Hex) 
     {
         setC(coords.i, coords.j, hex);
     }
 
-    public function setC(i:Int, j:Int, hex:Hex)
+    public inline function setWithZobris(coords:IntPoint, hex:Hex, formerHex:Hex) 
     {
-        figureArray[j][i] = hex;
+        set(coords, hex);
+        if (formerHex.type != null)
+            zobristHash ^= ZobristHashing.getForPiece(coords.i, coords.j, formerHex.type, formerHex.color);
+        if (hex.type != null)
+            zobristHash ^= ZobristHashing.getForPiece(coords.i, coords.j, hex.type, hex.color);
+    }
+
+    public function setTurnWithZobris(color:PieceColor) 
+    {
+        if (turnColor == null && color == Black)
+            zobristHash ^= ZobristHashing.hashes[0];
+        else if (turnColor != color)
+            zobristHash ^= ZobristHashing.hashes[0];
+        turnColor = color;
+    }
+
+    private inline function setC(i:Int, j:Int, hex:Hex)
+    {
+        figureArray[j * 9 + i] = hex;
     }
 
     public function copy():Situation 
     {
         var s = new Situation();
-        s.figureArray = [for (i in 0...this.figureArray.length) [for (j in 0...this.figureArray[i].length) this.figureArray[i][j].copy()]];
+        s.figureArray = [for (t in 0...this.figureArray.length) this.figureArray[t].copy()];
         s.turnColor = this.turnColor;
         s.intellectorPos = [White => intellectorPos[PieceColor.White].copy(), Black => intellectorPos[PieceColor.Black].copy()];
+        s.zobristHash = zobristHash.copy();
         return s;
     }
 

@@ -1,5 +1,6 @@
 package analysis;
 
+import struct.PieceColor;
 import struct.PieceType;
 
 class PieceValues
@@ -47,6 +48,24 @@ class PieceValues
         [2, null, 3, null, 3, null, 3, null, 2]
     ];
     private static var oldLiberatorMaxManeurability:Int = 6;
+
+    private static var values:Map<PieceType, Array<Float>> = [];
+
+    public static function initValues()
+    {
+        for (type in PieceType.createAll())
+        {
+            values[type] = [];
+            for (j in 0...7)
+                for (i in 0...9)
+                    values[type].push(posValue(type, i, j));
+        }
+    }
+
+    public static inline function posValueFast(type:PieceType, color:PieceColor, i:Int, j:Int) 
+    {
+        return values[type][j * 9 + i] * (color == White? 1 : -1);
+    }
 
     public static function posValue(type:Null<PieceType>, i:Int, j:Int) 
     {

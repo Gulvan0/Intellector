@@ -10,11 +10,12 @@ class Factory
 {
     public static var a:Float = Field.a;
 
-    public static function produceFiguresFromSerialized(serializedSituation:String, isOrientationNormal:Bool, addOnto:Sprite):Array<Array<Null<Figure>>>
+    ////Deprecated
+    /*public static function produceFiguresFromSerialized(serializedSituation:String, isOrientationNormal:Bool, addOnto:Sprite):Array<Array<Null<Figure>>>
     {
         var situation = SituationDeserializer.deserialize(serializedSituation);
         return produceFiguresFromSituation(situation, isOrientationNormal, addOnto);
-    }    
+    }*/    
 
     public static function produceFiguresFromDefault(isOrientationNormal:Bool, addOnto:Sprite):Array<Array<Null<Figure>>>
     {

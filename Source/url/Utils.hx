@@ -35,7 +35,9 @@ class Utils
 			return Game(Std.parseInt(searcher.get("id")));
         else if (searcher.has("ch"))
             return OpenChallengeInvitation(searcher.get("ch"));
-		else
+        else if (searcher.has("p"))
+            return Profile(searcher.get("p"))
+        else
 			return Main;
     }
 

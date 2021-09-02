@@ -16,6 +16,7 @@ class Changes
     {
         if (Dictionary.lang == EN)
             changelog = [
+                {date: "11.08.2021", text:"Player profile page"},
                 {date: "08.08.2021", text:"Revisiting games, Spectation enhancements, Chat history"},
                 {date: "05.08.2021", text:"Color selection"},
                 {date: "03.08.2021", text:"Bugfixes"},
@@ -42,6 +43,7 @@ class Changes
             ];
         else if (Dictionary.lang == RU)
             changelog = [
+                {date: "11.08.2021", text:"Профиль игрока"},
                 {date: "08.08.2021", text:"Просмотр прошедших игр, история чата, улучшения наблюдения"},
                 {date: "05.08.2021", text:"Выбор цвета"},
                 {date: "03.08.2021", text:"Исправления багов"},

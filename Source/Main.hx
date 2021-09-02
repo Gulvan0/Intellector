@@ -1,5 +1,8 @@
 package;
 
+import struct.Situation;
+import analysis.ZobristHashing;
+import analysis.PieceValues;
 import url.Utils;
 import openings.OpeningTree;
 import dict.Dictionary;
@@ -41,10 +44,13 @@ class Main extends Sprite
 		Toolkit.init();
 		Utils.initSettings();
 		OpeningTree.init();
+		PieceValues.initValues();
+		ZobristHashing.init();
 		AssetManager.init();
 		Changes.initChangelog();
 		addChild(new ScreenManager());
-		Networker.connect(onConnected);
+		//Networker.connect(onConnected);
+		ScreenManager.instance.toAnalysisBoard();
 	}
 
 	private function onConnected()
@@ -89,6 +95,8 @@ class Main extends Sprite
 					Networker.getOpenChallenge(issuer, ScreenManager.instance.toOpenChallengeJoiningRoom, ScreenManager.instance.toSpectation, ScreenManager.instance.toGameReconnect, ScreenManager.instance.toMain);
 				case Game(id):
 					Networker.getGame(id, ScreenManager.instance.toSpectation, ScreenManager.instance.toGameReconnect, ScreenManager.instance.toRevisit.bind(id), ScreenManager.instance.toMain);
+				case Profile(login):
+					Networker.getGames(login, ScreenManager.instance.toProfile.bind(login));
 			}
 		}
 		else
