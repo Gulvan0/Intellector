@@ -14,13 +14,14 @@ import haxe.ui.containers.dialogs.Dialog;
 import struct.PieceType;
 import haxe.ui.containers.dialogs.Dialog.DialogButton;
 import haxe.ui.containers.dialogs.MessageBox.MessageBoxType;
+import haxe.ui.containers.dialogs.Dialogs as DialogManager;
 import haxe.ui.core.Screen;
 
 class Dialogs
 {
     public static function confirm(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)
     {
-        Screen.instance.messageBox(message, title, MessageBoxType.TYPE_QUESTION, true, (btn:DialogButton) -> {
+        DialogManager.messageBox(message, title, MessageBoxType.TYPE_QUESTION, true, (btn:DialogButton) -> {
             if (btn == DialogButton.YES)
                 onConfirmed();
             else
@@ -30,12 +31,12 @@ class Dialogs
 
     public static function alert(message:String, title:String)
     {
-        Screen.instance.messageBox(message, title, MessageBoxType.TYPE_WARNING, true);
+        DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true);
     }
 
     public static function info(message:String, title:String)
     {
-        Screen.instance.messageBox(message, title, MessageBoxType.TYPE_INFO, true);
+        DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true);
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void, onCancel:Void->Void)
@@ -70,7 +71,7 @@ class Dialogs
 
     public static function chameleonConfirm(onConfirmed:Void->Void, onDeclined:Void->Void, onCancelled:Void->Void)
     {
-        Screen.instance.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
+        DialogManager.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
             if (btn == DialogButton.YES)
                 onConfirmed();
             else if (btn == DialogButton.NO)

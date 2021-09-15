@@ -28,10 +28,8 @@ class AnalysisBoardPanel extends Sprite
         Timer.delay(() -> {
             var situation:Situation = field.currentSituation.copy();
             situation.setTurnWithZobris(color);
-            #if measure_time
             AlphaBeta.initMeasuredIndicators();
-            #end
-            var result = AlphaBeta.evaluate(situation, 6);
+            var result = AlphaBeta.findMate(situation, 10, situation.turnColor == White);//AlphaBeta.evaluate(situation, 6);
             #if measure_time
             trace("Prune count: " + AlphaBeta.prunedCount + "; Prune ratio: " + AlphaBeta.prunedCount / (AlphaBeta.prunedCount + AlphaBeta.evaluatedCount));
             for (act in MeasuredProcess.createAll())

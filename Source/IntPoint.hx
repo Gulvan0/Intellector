@@ -23,7 +23,7 @@ class IntPoint
 
     public function invert():IntPoint
     {
-        return new IntPoint(i, 6 - j - i % 2);
+        return new IntPoint(8 - i, 6 - j - i % 2);
     }
 
     public function copy():IntPoint

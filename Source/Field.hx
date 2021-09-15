@@ -359,12 +359,20 @@ class Field extends Sprite
         
         stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress); //To ignore clicking on dialogs
 
-        if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type && figure.type != Progressor)
-            Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
-        else if (to.isFinalForColor(figure.color) && figure.type == Progressor)
-            Dialogs.promotionSelect(figure.color, makeMove.bind(from, to, _), ()->{stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);});
+        var onCanceled:Void->Void = onMoveCanceled.bind(from, figure);
+
+        if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type && figure.type != Progressor && moveOntoFigure.type != Intellector)
+            Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), onCanceled);
+        else if (to.isFinalForColor(figure.color) && figure.type == Progressor && moveOntoFigure.type != Intellector)
+            Dialogs.promotionSelect(figure.color, makeMove.bind(from, to, _), onCanceled);
         else 
             makeMove(from, to);
+    }
+
+    private function onMoveCanceled(departureCoords:IntPoint, movingPiece:Figure) 
+    {
+        disposeFigure(movingPiece, departureCoords);
+        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
     }
 
     public function move(ply:Ply, ?ignoreHistory:Bool = false, ?noSound:Bool = false) 
@@ -529,7 +537,11 @@ class Field extends Sprite
     public static function absHexCoords(i:Int, j:Int, isOrientationNormal:Bool):Point
     {
         if (!isOrientationNormal)
+        {
             j = 6 - j - i % 2;
+            i = 8 - i;
+        }
+            
 
         var p:Point = new Point(0, 0);
         p.x = 3 * a * i / 2;

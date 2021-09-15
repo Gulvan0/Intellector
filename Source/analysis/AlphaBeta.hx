@@ -34,6 +34,7 @@ class AlphaBeta
 
     public static function initMeasuredIndicators() 
     {
+        AlphaBeta.evaluationCache = new ZobristMap<EvaluationResult>();
         prunedCount = 0;
         evaluatedCount = 0;
         for (k in MeasuredProcess.createAll())
@@ -41,6 +42,59 @@ class AlphaBeta
             totalTime[k] = 0;
             calls[k] = 0;
         }
+    }
+
+    public static function findMate(situation:Situation, remainingDepth:Int, maximize:Bool, ?alpha:Score):EvaluationResult
+    {
+        var cached = evaluationCache.zget(situation.zobristHash);
+        if (cached != null)
+            return cached;
+
+        if (situation.isMate())
+        {
+            var result = {score: new Score(Mate(0, opposite(situation.turnColor))), optimalPly: null, remainingDepth: 9999};
+            evaluationCache.zset(situation.zobristHash, result);
+            return result;
+        }
+
+        if (remainingDepth == 0)
+            return {score: Normal(0), optimalPly: null, remainingDepth: 0};
+
+        var beta:Null<Score> = null;
+        var optimalPly:Ply = new Ply();
+        var neededChildDepth:Int = remainingDepth - 1;
+        var branches = situation.availablePlys();
+
+        for (ply in branches)
+        {
+            var res:EvaluationResult = findMate(situation.makeMove(ply), neededChildDepth, !maximize, beta);
+
+            if (beta == null || (maximize && (res.score > beta) || !maximize && beta > res.score))
+            {
+                beta = res.score;
+                optimalPly = ply;
+                if (alpha != null && (maximize && (alpha <= beta) || !maximize && (alpha >= beta)))
+                    break;
+            }
+
+            switch cast(res.score, ScoreType) 
+            {
+                case Mate(turns, winner):
+                    if (winner == situation.turnColor)
+                    {
+                        if (neededChildDepth > turns - 2)
+                            neededChildDepth = turns - 2;
+                        if (neededChildDepth < 0)
+                            break;
+                    }
+                default:
+            }
+        }
+
+        var result = {score: beta.incrementedMate(), optimalPly: optimalPly, remainingDepth: remainingDepth};
+        //if (beta.getName() == "Mate")
+           // evaluationCache.zset(situation.zobristHash, result);
+        return result;
     }
 
     public static function evaluate(situation:Situation, depth:Int):EvaluationResult
