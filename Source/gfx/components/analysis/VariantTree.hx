@@ -9,8 +9,9 @@ class VariantTree extends Sprite
 {
     private static var BLOCK_INTERVAL_X:Float = 15;
     private static var BLOCK_INTERVAL_Y:Float = 30;
-    private static var ARROW_TRIANGLE_SIDE:Float = 8;
-    private static var STRAIGHT_ARROW_SEGMENT_SIZE:Float = 3;
+    private static var ARROW_THICKNESS:Float = 2;
+    private static var ARROW_TRIANGLE_SIDE:Float = 12;
+    private static var STRAIGHT_ARROW_SEGMENT_SIZE:Float = 5;
 
     private var onClick:(nodeCode:String)->Void;
 
@@ -21,15 +22,15 @@ class VariantTree extends Sprite
 
     private function drawArrow(from:Point, to:Point) 
     {
-        var vertex1:Point = rotatedPoint(new Point(0, -ARROW_TRIANGLE_SIDE), - Math.PI / 7).add(to);
-        var vertex2:Point = rotatedPoint(new Point(0, -ARROW_TRIANGLE_SIDE), Math.PI / 7).add(to);
+        var vertex1:Point = rotatedPoint(new Point(0, -ARROW_TRIANGLE_SIDE), - Math.PI / 8).add(to);
+        var vertex2:Point = rotatedPoint(new Point(0, -ARROW_TRIANGLE_SIDE), Math.PI / 8).add(to);
         var upperSideVector = vertex2.subtract(vertex1);
         upperSideVector.normalize(upperSideVector.length / 2);
         var inputVertex:Point = vertex1.add(upperSideVector);
         var fracturePoint:Point = inputVertex.subtract(new Point(0, STRAIGHT_ARROW_SEGMENT_SIZE));
 
         var arrow:Sprite = new Sprite();
-        arrow.graphics.lineStyle(1.5);
+        arrow.graphics.lineStyle(ARROW_THICKNESS, 0x333333);
         arrow.graphics.moveTo(from.x, from.y);
         arrow.graphics.lineTo(fracturePoint.x, fracturePoint.y);
         arrow.graphics.lineTo(inputVertex.x, inputVertex.y);
@@ -47,11 +48,11 @@ class VariantTree extends Sprite
         addChild(arrow);
     }
 
-    private function drawChildrenRecursive(parent:VariantNode, parentCode:String, parentLeftX:Float, parentBottomY:Float, ?parentWidth:Float):Float
+    private function drawChildrenRecursive(parent:VariantNode, parentCode:String, parentCenterX:Float, parentBottomY:Float):Float
     {
         var accumulatedWidth:Float = 0;
         var childNum:Int = 0;
-        var offsetToCenter:Null<Float> = parentWidth == null? null : parentWidth / 2;
+        var firstChildWidth:Float = -1;
 
         for (child in parent.children)
         {
@@ -60,30 +61,38 @@ class VariantTree extends Sprite
             var link:Link = new Link();
             link.text = child.plyStr;
             link.onClick = (e) -> {onClick(childCode);};
-
-            if (offsetToCenter == null)
-                offsetToCenter = 50 / 2;
-
-            link.x = parentLeftX + accumulatedWidth;
-            link.y = parentBottomY + BLOCK_INTERVAL_Y;
             addChild(link);
+            link.validateNow();
 
-            drawArrow(new Point(parentLeftX + offsetToCenter, parentBottomY), new Point(link.x + 50/2, link.y));
+            if (childNum == 0)
+            {
+                link.x = parentCenterX - link.width / 2;
+                firstChildWidth = link.width;
+            }
+            else 
+                link.x = parentCenterX - firstChildWidth / 2 + accumulatedWidth;
+            link.y = parentBottomY + BLOCK_INTERVAL_Y;
 
-            var descendantsWidth:Float = drawChildrenRecursive(child, childCode, link.x, link.y + 15, 50);
+            drawArrow(new Point(parentCenterX, parentBottomY), new Point(link.x + link.width/2, link.y));
 
-            accumulatedWidth += Math.max(50, descendantsWidth) + BLOCK_INTERVAL_X;
+            var descendantsWidth:Float = drawChildrenRecursive(child, childCode, link.x + link.width/2, link.y + link.height + 5);
+
+            accumulatedWidth += Math.max(link.width, descendantsWidth) + BLOCK_INTERVAL_X;
             childNum++;
         }
 
         return accumulatedWidth;
     }
 
-    public function new(variant:Variant, onClick:(nodeCode:String)->Void) 
+    public function init(variant:Variant) 
+    {
+        removeChildren();
+        drawChildrenRecursive(variant, "", 0, 0);
+    }
+
+    public function new(onClick:(nodeCode:String)->Void) 
     {
         super();
         this.onClick = onClick;
-
-        drawChildrenRecursive(variant, "", 0, 0);
     }
 }

@@ -66,10 +66,11 @@ class Main extends Sprite
 		variantRoot.c("1.Lh3").c("2.Lh5").c("3.i2~h2").addChild(emptyPly, "4.LXh3");
 		variantRoot.c("1.Lh3").addChild(emptyPly, "2.AXg1");
 
-		var tree = new VariantTree(variantRoot, s->{trace(s);});
+		var tree = new VariantTree(s->{trace(s);});
 		tree.x = 50;
 		tree.y = 50;
 		addChild(tree);
+		tree.init(variantRoot);
 		//ScreenManager.instance.toAnalysisBoard();
 	}
 

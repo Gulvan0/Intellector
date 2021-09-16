@@ -125,7 +125,10 @@ class Dictionary
         RESIGN_BTN_ABORT_TEXT => ["Abort", "Прервать"],
         ABORT_CONFIRMATION_MESSAGE => ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"],
         OPEN_CHALLENGE_CANCEL_CONFIRMATION => ["Cancel challenge and return to the main menu?", "Отменить вызов и вернуться в главное меню?"],
-        ENTER_PROFILE_OWNER => ["Enter the login of a profile owner", "Введите логин игрока, профиль которого вы хотите посетить"]
+        ENTER_PROFILE_OWNER => ["Enter the login of a profile owner", "Введите логин игрока, профиль которого вы хотите посетить"],
+        ANALYSIS_APPLY => ["Apply", "ОК"],
+        ANALYSIS_APPLY_CHANGES => ["Apply changes", "Применить изменения"],
+        ANALYSIS_DISCARD_CHANGES => ["Discard changes", "Отклонить изменения"]
     ];
 
     public static function getPhrase(phrase:Phrase):String
@@ -288,4 +291,12 @@ class Dictionary
             case RU: '${data.challenger} вызывает на бой ($detailsStr). Первый, кто примет вызов, станет противником\n';
         }
     }
+
+    public static function getAnalysisTurnColorSelectLabel(color:PieceColor):String 
+    {
+		return switch lang {
+            case EN: color == White? "White to move" : "Black to move";
+            case RU: color == White? "Ход белых" : "Ход черных";
+        }
+	}
 }
