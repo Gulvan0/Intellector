@@ -52,7 +52,7 @@ class GameCompound extends Sprite
         var blackLogin = playerIsWhite? data.enemy : Networker.login;
         
         var field:PlayingField = new PlayingField(playerIsWhite);
-        var sidebox:Sidebox = new Sidebox(false, data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
+        var sidebox:Sidebox = new Sidebox(false, data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white', field.applyScrolling);
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin);
 
@@ -69,7 +69,7 @@ class GameCompound extends Sprite
         var enemyLogin:String = playerIsWhite? data.blackLogin : data.whiteLogin;
 
         var field:PlayingField = new PlayingField(playerIsWhite);
-        var sidebox:Sidebox = new Sidebox(false, data.startSecs, data.bonusSecs, Networker.login, enemyLogin, playerIsWhite);
+        var sidebox:Sidebox = new Sidebox(false, data.startSecs, data.bonusSecs, Networker.login, enemyLogin, playerIsWhite, field.applyScrolling);
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin);
 
@@ -90,7 +90,7 @@ class GameCompound extends Sprite
         var upperLogin:String = whiteRequested? data.blackLogin : data.whiteLogin;
 
         var field:SpectatorsField = new SpectatorsField(watchedColor);
-        var sidebox:Sidebox = new Sidebox(true, data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested);
+        var sidebox:Sidebox = new Sidebox(true, data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested, field.applyScrolling);
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75, true);
         var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin);
         
@@ -322,10 +322,6 @@ class GameCompound extends Sprite
 
     private function bindComponentButtonCallbacks() 
     {
-        sidebox.onHomePressed = field.homePly;
-        sidebox.onPrevPressed = field.prevPly;
-        sidebox.onNextPressed = field.nextPly;
-        sidebox.onEndPressed = field.endPly;
         sidebox.onOfferDrawPressed = onOfferDrawPressed;
         sidebox.onCancelDrawPressed = onCancelDrawPressed;
         sidebox.onAcceptDrawPressed = onAcceptDrawPressed;

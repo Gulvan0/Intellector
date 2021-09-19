@@ -1,5 +1,6 @@
 package;
 
+import gfx.components.utils.PlyScrollType;
 import struct.Situation;
 import struct.HexTransform;
 import struct.ReversiblePly;
@@ -243,6 +244,17 @@ class Field extends Sprite
     }
 
     //----------------------------------------------------------------------------------------------------------
+
+    public function applyScrolling(type:PlyScrollType) 
+    {
+        switch type 
+        {
+            case Home: homePly();
+            case Prev: prevPly();
+            case Next: nextPly();
+            case End: endPly();
+        }
+    }
 
     public function homePly() 
     {

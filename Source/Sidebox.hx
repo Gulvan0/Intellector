@@ -1,5 +1,7 @@
 package;
 
+import gfx.components.utils.PlyScrollType;
+import gfx.components.common.MoveNavigator;
 import haxe.ui.components.Button;
 import haxe.ui.util.Color;
 import dict.Dictionary;
@@ -27,19 +29,15 @@ class Sidebox extends Sprite
     private var drawRequestBox:HBox;
     private var bottomTime:Label;
     private var upperTime:Label;
+    private var navigator:MoveNavigator;
     private var bottomLogin:Label;
     private var upperLogin:Label;
-    private var movetable:TableView;
     private var resignBtn:Button;
     private var offerDrawBtn:Button;
     private var cancelDrawBtn:Button;
     private var offerTakebackBtn:Button;
     private var cancelTakebackBtn:Button;
 
-    public var onHomePressed:Void->Void;
-    public var onPrevPressed:Void->Void;
-    public var onNextPressed:Void->Void;
-    public var onEndPressed:Void->Void;
     public var onOfferDrawPressed:Void->Void;
     public var onCancelDrawPressed:Void->Void;
     public var onAcceptDrawPressed:Void->Void;
@@ -57,7 +55,6 @@ class Sidebox extends Sprite
 
     private var playerColor:PieceColor;
     private var playerTurn:Bool;
-    private var lastMoveEntry:Dynamic;
 
     private inline function numRep(v:Int)
     {
@@ -123,18 +120,8 @@ class Sidebox extends Sprite
         if (timer != null)
             timer.stop();
 
-        var moveStr = ply.toNotation(situation);
-        if (situation.turnColor == Black)
-        {
-            lastMoveEntry.black_move = moveStr;
-            movetable.dataSource.update(movetable.dataSource.size - 1, lastMoveEntry);
-        }
-        else 
-        {
-            lastMoveEntry = {"num": '$move', "white_move": moveStr, "black_move": " "};
-            movetable.dataSource.add(lastMoveEntry);
-        }
-        waitAndScroll();
+        navigator.writePly(ply, situation);
+        navigator.scrollAfterDelay();
 
         move++;
         if (!simplified)
@@ -194,40 +181,7 @@ class Sidebox extends Sprite
         if (cnt % 2 == 1)
             playerTurn = !playerTurn;
 
-        if (lastMoveEntry.black_move == " ")
-        {
-            movetable.dataSource.removeAt(movetable.dataSource.size - 1);
-            cnt--;
-        }
-
-        while (cnt >= 2)
-        {
-            movetable.dataSource.removeAt(movetable.dataSource.size - 1);
-            cnt -= 2;
-        }
-
-        lastMoveEntry = movetable.dataSource.get(movetable.dataSource.size - 1);
-        if (cnt == 1)
-        {
-            lastMoveEntry.black_move = " ";
-            movetable.dataSource.update(movetable.dataSource.size - 1, lastMoveEntry);
-        }
-    }
-
-    private function waitAndScroll() 
-    {
-        var t:Timer = new Timer(100);
-        t.run = () -> {
-            t.stop(); 
-            scrollToMax();
-        }    
-    }
-
-    private function scrollToMax() 
-    {
-        var vscroll = movetable.findComponent(VerticalScroll, false);
-        if (vscroll != null)
-            vscroll.pos = vscroll.max;
+        navigator.revertPlys(cnt);
     }
 
     public function launchTimer()
@@ -367,49 +321,6 @@ class Sidebox extends Sprite
         container.addComponent(takebackRequestBox);
     }
 
-    private function buildPlyScrollBtns(container:VBox)
-    {
-        var matchViewControls:HBox = new HBox();
-
-        var homeBtn = new haxe.ui.components.Button();
-		homeBtn.width = (250 - 5.3 * 3) / 4;
-		homeBtn.text = "❙◄◄";
-		matchViewControls.addComponent(homeBtn);
-
-		homeBtn.onClick = (e) -> {
-			onHomePressed();
-        }
-
-        var prevBtn = new haxe.ui.components.Button();
-		prevBtn.width = (250 - 5.3 * 3) / 4;
-		prevBtn.text = "◄";
-		matchViewControls.addComponent(prevBtn);
-
-		prevBtn.onClick = (e) -> {
-			onPrevPressed();
-        }
-
-        var nextBtn = new haxe.ui.components.Button();
-		nextBtn.width = (250 - 5.3 * 3) / 4;
-		nextBtn.text = "►";
-		matchViewControls.addComponent(nextBtn);
-
-		nextBtn.onClick = (e) -> {
-			onNextPressed();
-        }
-
-        var endBtn = new haxe.ui.components.Button();
-		endBtn.width = (250 - 5.3 * 3) / 4;
-		endBtn.text = "►►❙";
-		matchViewControls.addComponent(endBtn);
-
-		endBtn.onClick = (e) -> {
-			onEndPressed();
-        }
-
-        container.addComponent(matchViewControls);
-    }
-
     private function buildSpecialBtns(container:VBox)
     {
         var resignAndDraw:HBox = new HBox();
@@ -476,7 +387,7 @@ class Sidebox extends Sprite
 
     //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public function new(simplified:Bool, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerLogin:String, opponentLogin:String, playerIsWhite:Bool) 
+    public function new(simplified:Bool, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerLogin:String, opponentLogin:String, playerIsWhite:Bool, onClickCallback:PlyScrollType->Void) 
     {
         super();
         this.simplified = simplified;
@@ -510,10 +421,8 @@ class Sidebox extends Sprite
             buildDrawRequestBox(box);
         }
 
-        buildPlyScrollBtns(box);
-
-        movetable = ComponentMacros.buildComponent("assets/layouts/movetable.xml");
-        box.addComponent(movetable);
+        navigator = new MoveNavigator(onClickCallback);
+        box.addComponent(navigator);
 
         if (!simplified)
             buildSpecialBtns(box);

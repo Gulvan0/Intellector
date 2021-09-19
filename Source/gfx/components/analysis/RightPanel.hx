@@ -161,6 +161,7 @@ class RightPanel extends Sprite
     private function createControlTabs() 
     {
         //TODO: Simplified sidebox, (<- ?) flip board btn, analyze btns, export btns, edit position btn
+        var sidebox:Sidebox;
 
         var overviewTab:Box = new Box();
         overviewTab.text = "Overview"; //! Replace
