@@ -7,26 +7,26 @@ import struct.Situation;
 
 class SituationDeserializer 
 {
-    //! Deprecated: doesn't set intellector pos & doesn't set empty hexes
-    /*public static function deserialize(serialized:String):Situation
+    public static function deserialize(sip:String):Situation
     {
-        var situation:Situation = Situation.starting();
-        situation.turnColor = serialized.charAt(0) == "w"? White : Black;
+        var situation:Situation = Situation.empty();
+        var turnColor:PieceColor = sip.charAt(0) == "w"? White : Black;
+        situation.setTurnWithZobris(turnColor);
 
         var ci = 1;
-        while (ci < serialized.length)
+        while (ci < sip.length)
         {
-            var i = Std.parseInt(serialized.charAt(ci));
-            var j = Std.parseInt(serialized.charAt(ci + 1));
-            var type = typeByCode(serialized.charAt(ci + 2));
-            var color = serialized.charAt(ci + 3) == "w"? White : Black;
+            var i = Std.parseInt(sip.charAt(ci));
+            var j = Std.parseInt(sip.charAt(ci + 1));
+            var type = typeByCode(sip.charAt(ci + 2));
+            var color = sip.charAt(ci + 3) == "w"? White : Black;
 
-            situation.setC(i, j, Hex.occupied(type, color));
+            situation.setWithZobris(new IntPoint(i, j), Hex.occupied(type, color), Hex.empty());
             ci += 4;
         }
 
         return situation;
-    }*/
+    }
 
     public static function typeByCode(c:String):PieceType 
     {

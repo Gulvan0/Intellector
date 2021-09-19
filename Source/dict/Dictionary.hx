@@ -128,7 +128,14 @@ class Dictionary
         ENTER_PROFILE_OWNER => ["Enter the login of a profile owner", "Введите логин игрока, профиль которого вы хотите посетить"],
         ANALYSIS_APPLY => ["Apply", "ОК"],
         ANALYSIS_APPLY_CHANGES => ["Apply changes", "Применить изменения"],
-        ANALYSIS_DISCARD_CHANGES => ["Discard changes", "Отклонить изменения"]
+        ANALYSIS_DISCARD_CHANGES => ["Discard changes", "Отклонить изменения"],
+        ANALYSIS_EXPORT_SIP => ["Export SIP", "Экспорт SIP"],
+        ANALYSIS_SET_POSITION => ["Set position", "Задать позицию"],
+        ANALYSIS_OVERVIEW_TAB_NAME => ["Overview", "Обзор"],
+        ANALYSIS_BRANCHES_TAB_NAME => ["Branches", "Ветви"],
+        ANALYSIS_OPENINGS_TAB_NAME => ["Openings", "Дебюты"],
+        ANALYSIS_OPENINGS_TEASER_TEXT => ["Coming soon", "Скоро"],
+        ANALYSIS_EXPORTED_SIP_MESSAGE => ["SIP:", "SIP:"]
     ];
 
     public static function getPhrase(phrase:Phrase):String

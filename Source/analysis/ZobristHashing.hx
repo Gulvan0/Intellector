@@ -11,6 +11,7 @@ class ZobristHashing
 {
     public static var hashes:Array<Int64> = [];
     public static var startPosHash:Int64;
+	public static var emptyHash:Int64 = 0;
     
     public static function init() 
     {
@@ -21,7 +22,7 @@ class ZobristHashing
                 for (i in 0...9)
                     for (c in [1, 0])
                         hashes.push(fromSeed('GULVAN$t$j$i$c'));
-        startPosHash = 0;
+        startPosHash = emptyHash;
         var startingSituation:Situation = Situation.starting();
         for (hex in startingSituation.collectOccupiedFast())
             startPosHash ^= getForPiece(hex.i, hex.j, hex.type, hex.color);

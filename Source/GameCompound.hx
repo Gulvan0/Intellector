@@ -1,5 +1,6 @@
 package;
 
+import gfx.components.analysis.RightPanel;
 import serialization.GameLogDeserializer;
 import GameInfoBox.Outcome;
 import Networker.GameOverData;
@@ -475,7 +476,7 @@ class GameCompound extends Sprite
 
         if (type == Analysis)
         {
-            var panel:AnalysisBoardPanel = new AnalysisBoardPanel(cast(field, AnalysisField));
+            var panel:RightPanel = new RightPanel(cast(field, AnalysisField));
             panel.x = field.x + field.width + 10;
             panel.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
             addChild(panel);

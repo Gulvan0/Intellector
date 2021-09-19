@@ -1,5 +1,7 @@
 package gameboards;
 
+import serialization.SituationDeserializer;
+import gfx.components.analysis.PosEditMode;
 import openfl.display.Stage;
 import struct.Situation;
 import struct.Ply;
@@ -15,6 +17,9 @@ class AnalysisField extends Field
 {
     public var onMadeMove:Void->Void;
     private var stageRef:Stage;
+
+    private var editMode:Null<PosEditMode>;
+    private var lastApprovedSituationSIP:String;
     
     public function new() 
     {
@@ -47,11 +52,18 @@ class AnalysisField extends Field
 
     public function reset() 
     {
-        clearBoard();
+        removePiecesClearSelections();
         arrangeDefault();
     }
     
     public function clearBoard() 
+    {
+        removePiecesClearSelections();
+        figures = [for (j in 0...7) [for (i in 0...9) null]];
+        currentSituation = Situation.empty();
+    }
+
+    private function removePiecesClearSelections()
     {
         rmbSelectionBackToNormal();
         
@@ -59,7 +71,6 @@ class AnalysisField extends Field
             for (figure in row)
                 if (figure != null)
                     removeChild(figure);
-        figures = [for (j in 0...7) [for (i in 0...9) null]];
 
         for (hex in lastMoveSelectedHexes)
             hex.lastMoveDeselect();
@@ -73,6 +84,7 @@ class AnalysisField extends Field
     }
 
     //---------------------------------------------------------------------------------------------------------
+    //TODO: Change behaviour depending on edit mode (current is for 'move' mode)
 
     private override function onPress(e:MouseEvent) 
     {
@@ -135,5 +147,30 @@ class AnalysisField extends Field
         else
             return movingFigure == White;
     }
-    
+
+    public function changeEditMode(mode:PosEditMode) 
+    {
+        if (editMode == null)
+            lastApprovedSituationSIP = currentSituation.serialize();
+        editMode = mode;
+    }
+
+    public function constructFromSIP(sip:String) 
+    {
+        removePiecesClearSelections();
+        currentSituation = SituationDeserializer.deserialize(sip);
+        figures = Factory.produceFiguresFromSituation(currentSituation, true, this);
+    }
+
+    public function applyChanges() 
+    {
+        editMode = null;
+        lastApprovedSituationSIP = currentSituation.serialize();
+    }
+
+    public function discardChanges()
+    {
+        constructFromSIP(lastApprovedSituationSIP);
+        editMode = null;
+    }
 }

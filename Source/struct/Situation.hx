@@ -14,7 +14,7 @@ class Situation
     public var turnColor(default, null):PieceColor;
     public var zobristHash(default, null):Int64;
 
-    private var intellectorPos:Map<PieceColor, IntPoint>;
+    private var intellectorPos:Map<PieceColor, Null<IntPoint>>;
 
     public static function starting():Situation
     {
@@ -54,6 +54,16 @@ class Situation
         situation.setC(6, 5, Hex.occupied(Progressor, White));
         situation.setC(8, 5, Hex.occupied(Progressor, White));
 
+        return situation;
+    }
+
+    public static function empty():Situation
+    {
+        var situation = new Situation();
+        situation.turnColor = White;
+        situation.intellectorPos = [White => null, Black => null];
+        situation.zobristHash = ZobristHashing.emptyHash;
+        situation.figureArray = [for (t in 0...63) Hex.empty()];
         return situation;
     }
 
@@ -197,6 +207,13 @@ class Situation
         return arr;
     }
 
+    public function replaceNullsWithEmpty()
+    {
+        for (t in 0...63)
+            if (figureArray[t] == null)
+                figureArray[t] = Hex.empty();
+    }
+
     public function serialize():String
     {
         var s = PieceColor.letter(turnColor);
@@ -232,7 +249,11 @@ class Situation
         if (formerHex.type != null)
             zobristHash ^= ZobristHashing.getForPiece(coords.i, coords.j, formerHex.type, formerHex.color);
         if (hex.type != null)
+        {
             zobristHash ^= ZobristHashing.getForPiece(coords.i, coords.j, hex.type, hex.color);
+            if (hex.type == Intellector)
+                intellectorPos[hex.color] = coords.copy();
+        }
     }
 
     public function setTurnWithZobris(color:PieceColor) 
@@ -247,6 +268,8 @@ class Situation
     private inline function setC(i:Int, j:Int, hex:Hex)
     {
         figureArray[j * 9 + i] = hex;
+        if (hex.type == Intellector)
+            intellectorPos[hex.color] = new IntPoint(i, j);
     }
 
     public function copy():Situation 
