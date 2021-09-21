@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import gfx.components.gamefield.modules.Field;
+import gfx.components.gamefield.modules.Field.Markup;
 import haxe.ui.styles.Style;
 import js.Cookie;
 import haxe.ui.containers.HBox;
@@ -10,13 +12,12 @@ import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;
 import haxe.ui.components.OptionBox;
 import openfl.display.Sprite;
-import Field.Markup;
 
 class Settings extends Sprite
 {
     private var markupOptionBoxes:Map<Markup, OptionBox> = [];
 
-    public function new() 
+    public function new()
     {
 		super();
         var box:VBox = new VBox();

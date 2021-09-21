@@ -1,11 +1,11 @@
 package gfx.screens;
 
+import haxe.ui.components.Link;
 import js.Browser;
 import haxe.ui.containers.ScrollView;
 import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import haxe.ui.components.Button;
-import gfx.components.SpriteComponent;
 import url.URLEditor;
 import openfl.text.TextFormat;
 import openfl.text.TextField;
@@ -51,7 +51,6 @@ class PlayerProfile extends Sprite
             var winner = GameLogDeserializer.decodeColor(match[1].charAt(0));
             var outcome = GameLogDeserializer.decodeOutcome(match[1].substr(2, 3));
             var text =  match[0] + ". " + match[2].replace(":", " vs ") + " • " + Dictionary.getMatchlistResultText(winner, outcome);
-            //var url = URLEditor.getGameLink(match[0]);
             var id = Std.parseInt(match[0]);
 
             scrollview.addComponent(haxeuiLink(text, id));
@@ -73,26 +72,13 @@ class PlayerProfile extends Sprite
 	    addChild(returnBtn);
     }
 
-    //! Not guaranteed to work (reasons: SpriteComponent, color/underline, forces reload)
-    private function openflLink(text:String, url:String):Component
+    private function haxeuiLink(text:String, gameID:Int):Link
     {
-        var comp:SpriteComponent = new SpriteComponent();
-        var sprite:Sprite = new Sprite();
-        var tf:TextField = new TextField();
-        tf.text = text;
-        tf.setTextFormat(new TextFormat(null, 12, null, null, null, null, url));
-        sprite.addChild(tf);
-        comp.sprite = sprite;
-        return comp;
-    }
-
-    private function haxeuiLink(text:String, gameID:Int):Button
-    {
-        var btn:Button = new Button();
-        btn.text = text;
-        btn.onClick = (e) -> {Networker.getGame(gameID, (d)->{}, (d)->{}, ScreenManager.instance.toRevisit.bind(gameID), ()->{});};
-        btn.width = 500;
-        btn.horizontalAlign = 'center';
-        return btn;
+        var link:Link = new Link();
+        link.text = text;
+        link.onClick = (e) -> {Networker.getGame(gameID, (d)->{}, (d)->{}, ScreenManager.instance.toRevisit.bind(gameID), ()->{});};
+        link.width = 500;
+        link.horizontalAlign = 'center';
+        return link;
     }
 }

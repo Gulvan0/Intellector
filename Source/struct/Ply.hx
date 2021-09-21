@@ -1,5 +1,6 @@
 package struct;
 import Networker.MoveData;
+import utils.Notation;
 using StringTools;
 
 class Ply 

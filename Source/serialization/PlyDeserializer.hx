@@ -4,6 +4,7 @@ import struct.Situation;
 import struct.Ply;
 import struct.PieceType;
 import struct.ReversiblePly;
+import struct.IntPoint;
 
 class PlyDeserializer 
 {

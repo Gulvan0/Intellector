@@ -1,8 +1,10 @@
 package;
 
+import gfx.components.gamefield.modules.Field;
 import struct.Hex;
 import struct.PieceType;
 import struct.PieceColor;
+import struct.IntPoint;
 
 enum Direction
 {

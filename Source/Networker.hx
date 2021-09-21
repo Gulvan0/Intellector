@@ -1,5 +1,7 @@
 package;
 
+import gfx.components.Dialogs;
+import gfx.ScreenManager;
 import struct.PieceColor;
 import url.Utils;
 import dict.Dictionary;
@@ -8,6 +10,7 @@ import openfl.utils.Assets;
 import js.Browser;
 import haxe.Json;
 import hx.ws.WebSocket;
+import gfx.components.gamefield.GameCompound;
 
 typedef Event =
 {

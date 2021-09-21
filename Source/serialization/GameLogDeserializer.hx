@@ -1,7 +1,7 @@
 package serialization;
 
 import struct.PieceColor;
-import GameInfoBox.Outcome;
+import gfx.components.gamefield.modules.GameInfoBox.Outcome;
 import struct.Ply;
 import struct.Situation;
 import struct.PieceType;

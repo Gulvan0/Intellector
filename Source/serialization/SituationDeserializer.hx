@@ -4,6 +4,7 @@ import struct.PieceColor;
 import struct.Hex;
 import struct.PieceType;
 import struct.Situation;
+import struct.IntPoint;
 
 class SituationDeserializer 
 {

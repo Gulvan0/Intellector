@@ -6,6 +6,7 @@ import js.Browser;
 import dict.Dictionary;
 import haxe.ui.components.Button;
 import openfl.display.Sprite;
+import gfx.components.Dialogs;
 
 enum MainMenuButton
 {

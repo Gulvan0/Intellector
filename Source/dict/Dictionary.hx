@@ -1,7 +1,7 @@
 package dict;
 
-import GameInfoBox.Outcome;
-import Field.Markup;
+import gfx.components.gamefield.modules.GameInfoBox.Outcome;
+import gfx.components.gamefield.modules.Field.Markup;
 import gfx.screens.MainMenu.MainMenuButton;
 import struct.PieceColor;
 

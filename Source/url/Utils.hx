@@ -4,6 +4,7 @@ import dict.Dictionary;
 import js.Browser;
 import js.html.URLSearchParams;
 import js.Cookie;
+import gfx.components.gamefield.modules.Field;
 
 class Utils
 {

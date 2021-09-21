@@ -94,10 +94,10 @@ class SignIn extends Sprite
         var signinMenu = new VBox();
 		signinMenu.width = menuWidth;
 
-		loginField = Factory.makeInputField(menuWidth, Dictionary.getPhrase(LOGIN_FIELD_TITLE), "A-Za-z0-9");
+		loginField = makeInputField(menuWidth, Dictionary.getPhrase(LOGIN_FIELD_TITLE), "A-Za-z0-9");
 		signinMenu.addComponent(loginField);
 
-		passField = Factory.makeInputField(menuWidth, Dictionary.getPhrase(PASSWORD_FIELD_TITLE), "A-Za-z0-9", true);
+		passField = makeInputField(menuWidth, Dictionary.getPhrase(PASSWORD_FIELD_TITLE), "A-Za-z0-9", true);
 		signinMenu.addComponent(passField);
 
 		rememberMe = createRememberMe();
@@ -106,7 +106,7 @@ class SignIn extends Sprite
 		var btns:HBox = createButtonBox();
 		signinMenu.addComponent(btns);
 
-		errorLabel = Factory.makeLabel("", false, menuWidth, "center");
+		errorLabel = makeLabel("", false, menuWidth, "center");
 		errorLabel.alpha = 0;
 		signinMenu.addComponent(errorLabel);
 
@@ -151,4 +151,29 @@ class SignIn extends Sprite
 
 		return btn;
 	}
+
+	private static function makeLabel(text:String, ?isHTML:Bool = false, ?width:Float, ?textAlign:String = "left"):Label
+    {
+        var label:Label = new Label();
+        if (isHTML)
+            label.htmlText = text;
+        else
+            label.text = text;
+        if (width != null)
+            label.width = width;
+        label.textAlign = textAlign;
+        return label;
+    }
+
+    private static function makeInputField(width:Float, ?placeholder:String, ?restrictChars:String, ?password:Bool = false):TextField
+    {
+        var tf = new TextField();
+        tf.width = width;
+        if (placeholder != null)
+		    tf.placeholder = placeholder;
+        if (restrictChars != null)
+            tf.restrictChars = restrictChars;
+        tf.password = password;
+        return tf;
+    }
 }

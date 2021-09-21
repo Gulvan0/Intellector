@@ -1,6 +1,8 @@
 package;
 
-import gfx.components.analysis.VariantTree;
+import gfx.ScreenManager;
+import utils.AssetManager;
+import gfx.components.gamefield.analysis.VariantTree;
 import struct.Ply;
 import struct.Variant;
 import haxe.ui.components.Link;
