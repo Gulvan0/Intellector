@@ -27,6 +27,7 @@ class AnalysisField extends Field
     public function new() 
     {
         super();
+        orientationColor = White;
 
         hexes = Factory.produceHexes(this, true);
         disposeLetters();
@@ -69,19 +70,21 @@ class AnalysisField extends Field
     }
 
     //---------------------------------------------------------------------------------------------------------
-    //TODO: Fill for Move, replace isOwner() for null
 
-    /*private override function onPress(e:MouseEvent) 
+    private override function onPress(e:MouseEvent) 
     {
         var pressLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
         switch editMode 
         {
-            case null, Move:
-                if (selected != null)
+            case null:
+                //TODO: Rewrite
+                /*if (selected != null)
                     destinationPress(pressLocation);
                 else
-                    departurePress(pressLocation, c->true);
+                    departurePress(pressLocation, c->true);*/
+            case Move:
+                //TODO: Fill
             case Delete:
                 deleteFigure(pressLocation);
             case Set(type, color):
@@ -91,33 +94,13 @@ class AnalysisField extends Field
 
     private override function onMove(e:MouseEvent) 
     {
-        var shadowLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
-
-        if (shadowLocation != null && ableToMove(selected, shadowLocation))
-            hexes[shadowLocation.j][shadowLocation.i].select();
-
-        if (selectedDest != null && !selectedDest.equals(shadowLocation))
-            hexes[selectedDest.j][selectedDest.i].deselect();
-
-        selectedDest = shadowLocation;
+        //TODO: Fill
     }
 
     private override function onRelease(e:MouseEvent) 
     {
-        stageRef.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
-
-        var pressedAt = new IntPoint(selected.i, selected.j);
-        var releasedAt = posToIndexes(e.stageX - this.x, e.stageY - this.y);
-        figures[pressedAt.j][pressedAt.i].stopDrag();
-        if (releasedAt != null && ableToMove(pressedAt, releasedAt) && !releasedAt.equals(pressedAt))
-        {
-            stageRef.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
-            selectionBackToNormal();
-            attemptMove(pressedAt, releasedAt);
-        }
-        else
-            disposeFigure(figures[pressedAt.j][pressedAt.i], pressedAt);
-    }*/
+        //TODO: Fill
+    }
 
     private function deleteFigure(location:IntPoint) 
     {
@@ -142,18 +125,6 @@ class AnalysisField extends Field
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------
-
-    private override function makeMove(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
-    {
-        var ply:Ply = new Ply();
-        ply.from = from;
-        ply.to = to;
-        ply.morphInto = morphInto;
-
-        move(ply, true);
-        onMadeMove();
-        stageRef.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
-    }
 
     public function changeEditMode(mode:PosEditMode) 
     {

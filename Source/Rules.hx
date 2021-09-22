@@ -1,10 +1,13 @@
 package;
 
+import struct.Ply;
+import struct.Situation;
 import gfx.components.gamefield.modules.Field;
 import struct.Hex;
 import struct.PieceType;
 import struct.PieceColor;
 import struct.IntPoint;
+using Lambda;
 
 enum Direction
 {
@@ -24,6 +27,28 @@ enum Direction
 
 class Rules
 {
+
+    public static function possible(from:IntPoint, to:IntPoint, getHex:Null<IntPoint>->Hex):Bool 
+    {
+        return possibleFields(from, getHex).has(to);
+    }
+
+    public static function isCastle(ply:Ply, situation:Situation) 
+    {
+        var departure:Hex = situation.get(ply.from);
+        var destination:Hex = situation.get(ply.to);
+
+        if (departure.color != destination.color)
+            return false;
+        else if (!areNeighbours(ply.from, ply.to))
+            return false;
+        else if (departure.type == Defensor)
+            return destination.type == Intellector;
+        else if (departure.type == Intellector)
+            return destination.type == Defensor;
+        else 
+            return false;
+    }
 
     public static function possibleFields(from:IntPoint, getHex:Null<IntPoint>->Hex):Array<IntPoint> 
     {

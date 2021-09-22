@@ -189,6 +189,7 @@ class RightPanel extends Sprite
         applyChagesBtn.width = 150;
         applyChagesBtn.text = Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES);
         applyChagesBtn.onClick = e -> {
+            deprecateScore();
             showControlTabs();
             field.applyChanges();
         };  

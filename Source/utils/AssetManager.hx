@@ -1,5 +1,8 @@
 package utils;
 
+import struct.Ply;
+import struct.Situation;
+import struct.Hex;
 import gfx.components.gamefield.analysis.PosEditMode;
 import openfl.Assets;
 import openfl.display.BitmapData;
@@ -24,6 +27,17 @@ class AssetManager
             return 'assets/figicons/$filename.png';
         else
             return 'assets/figures/$filename.png';
+    }
+
+    public static function playPlySound(ply:Ply, situation:Situation)
+    {
+        var isCastle:Bool = Rules.isCastle(ply, situation);
+        var isNotCapture:Bool = situation.get(ply.to).isEmpty() || isCastle;
+
+        if (isNotCapture)
+            Assets.getSound("sounds/move.mp3").play();
+        else 
+            Assets.getSound("sounds/capture.mp3").play();
     }
 
     public static function getAnalysisPosEditorBtnIcon(mode:PosEditMode):BitmapData

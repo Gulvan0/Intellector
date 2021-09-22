@@ -16,6 +16,8 @@ class SpectatorsField extends Field
     public function new(watchedSide:PieceColor) 
     {
         super();
+        orientationColor = watchedSide;
+        
         var normalOrientation = watchedSide == White;
         hexes = Factory.produceHexes(this, normalOrientation);
         disposeLetters();

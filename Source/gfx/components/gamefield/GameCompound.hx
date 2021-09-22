@@ -1,5 +1,6 @@
 package gfx.components.gamefield;
 
+import gfx.components.gamefield.modules.Field.MoveType;
 import gfx.components.gamefield.analysis.RightPanel;
 import struct.IntPoint;
 import gfx.components.gamefield.modules.GameInfoBox.Outcome;
@@ -27,6 +28,7 @@ import openfl.display.Sprite;
 import gfx.components.gamefield.modules.*;
 import gfx.components.gamefield.modules.gameboards.*;
 using StringTools;
+using utils.CallbackTools;
 
 enum GameCompoundType
 {
@@ -59,7 +61,10 @@ class GameCompound extends Sprite
 
         var compound = new GameCompound(Active, field, sidebox, chatbox, infobox, onReturn);
         compound.playerColor = playerIsWhite? White : Black;
-        field.onPlayerMadeMove = compound.onMove;
+        field.onOwnMoveMade = (ply) -> {
+            compound.makeMove(ply, Own);
+            Networker.move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
+        };
         compound.bindComponentButtonCallbacks();
         return compound;
     }
@@ -78,7 +83,10 @@ class GameCompound extends Sprite
 
         var compound = new GameCompound(Active, field, sidebox, chatbox, infobox, onReturn);
         compound.playerColor = playerIsWhite? White : Black;
-        field.onPlayerMadeMove = compound.onMove;
+        field.onOwnMoveMade = (ply) -> {
+            compound.makeMove(ply, Own);
+            Networker.move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
+        };
         compound.bindComponentButtonCallbacks();
         return compound;
     }
@@ -107,8 +115,16 @@ class GameCompound extends Sprite
     public static function buildAnalysis(onReturn:Void->Void):GameCompound
     {
         var field:AnalysisField = new AnalysisField();
+        var compound:GameCompound = new GameCompound(Analysis, field, null, null, null, onReturn);
+        
+        var panel:RightPanel = new RightPanel(cast(field, AnalysisField));
+        panel.x = field.x + field.width + 10;
+        panel.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
+        compound.addChild(panel);
+    
+        field.onOwnMoveMade = panel.deprecateScore.expand();
 
-        return new GameCompound(Analysis, field, null, null, null, onReturn);
+        return compound;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -132,7 +148,7 @@ class GameCompound extends Sprite
         var ply = PlyDeserializer.deserialize(trimmedMove);
 
         sidebox.makeMove(ply, field.currentSituation);
-        field.move(ply, false, true);
+        field.move(ply, Actualization);
         infobox.makeMove(ply);
     }
 
@@ -196,22 +212,20 @@ class GameCompound extends Sprite
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public function onMove(data:MoveData)
+    public function makeMove(ply:Ply, type:MoveType) 
     {
-        var ply:Ply = new Ply();
-        ply.from = new IntPoint(data.fromI, data.fromJ);
-        ply.to = new IntPoint(data.toI, data.toJ);
-        ply.morphInto = data.morphInto == null? null : PieceType.createByName(data.morphInto);
-
         var situation:Situation = field.currentSituation.copy();
 
         sidebox.makeMove(ply, situation);
         if (infobox != null)
             infobox.makeMove(ply);
-        if (data.issuer_login != Networker.login)
-            field.move(ply);
-        else
-            Networker.move(data.fromI, data.fromJ, data.toI, data.toJ, data.morphInto == null? null : PieceType.createByName(data.morphInto));
+        if (type != Own)
+            field.move(ply, type);
+    }
+
+    public function onMove(data:MoveData)
+    {
+        makeMove(Ply.fromMoveData(data), ByOpponent);
     }
 
     public function onTimeCorrection(data:TimeData)
@@ -472,16 +486,6 @@ class GameCompound extends Sprite
             returnBtn.x = 10;
 		    returnBtn.y = 10;
 		    addChild(returnBtn);
-        }
-
-        if (type == Analysis)
-        {
-            var panel:RightPanel = new RightPanel(cast(field, AnalysisField));
-            panel.x = field.x + field.width + 10;
-            panel.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
-            addChild(panel);
-
-            cast(field, AnalysisField).onMadeMove = panel.deprecateScore;
         }
     }    
 }

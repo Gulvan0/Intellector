@@ -1,5 +1,6 @@
 package gfx.components.gamefield.modules;
 
+import utils.AssetManager;
 import gfx.utils.Colors;
 import utils.Notation;
 import gfx.components.gamefield.subsystems.TimeMachine;
@@ -44,6 +45,13 @@ enum FieldState
     Selected(selectedFigureLocation:IntPoint, shadowLocation:IntPoint);
 }
 
+enum MoveType
+{
+    Own;
+    ByOpponent;
+    Actualization;
+}
+
 class Field extends Sprite
 {
     public static var a:Float = 40;
@@ -55,6 +63,8 @@ class Field extends Sprite
     public var bottom(get, never):Float;
 
     public var terminated:Bool = false;
+
+    public var onOwnMoveMade:Ply->Void;
     
     private var stageRef:Stage;
 
@@ -66,6 +76,7 @@ class Field extends Sprite
     public var plyPointer:Int;
 
     private var state:FieldState = Neutral;
+    private var dialogShown:Bool = false;
     public var orientationColor(default, null):PieceColor; 
 
     private var lastMoveSelectedHexes:Array<Hexagon>;
@@ -152,11 +163,6 @@ class Field extends Sprite
         throw "To be overriden";
     }
 
-    private function makeMove(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
-    {
-        throw "To be overriden";
-    }
-
     //----------------------------------------------------------------------------------------------------------
 
     public function revertPlys(cnt:Int) 
@@ -222,49 +228,6 @@ class Field extends Sprite
 
     //----------------------------------------------------------------------------------------------------------
 
-    ////Deprecated
-    /*private function departurePress(pressLocation:IntPoint, isPlayerOwner:PieceColor->Bool) 
-    {
-        var figure = getFigure(pressLocation);
-        if (figure == null || !isPlayerOwner(figure.color))
-            return;
-
-        rmbSelectionBackToNormal();
-        selectDeparture(pressLocation);
-        drag(figure);
-
-        stage.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
-        stage.addEventListener(MouseEvent.MOUSE_UP, onRelease);
-    }
-
-    private function destinationPress(pressLocation:IntPoint) 
-    {
-        var from = new IntPoint(selected.i, selected.j);
-        var movingFig = getFigure(selected);
-        var moveOntoFig = getFigure(pressLocation);
-
-        rmbSelectionBackToNormal();
-        selectionBackToNormal();
-
-        if (pressLocation != null)
-        {
-            var otherOwnClicked = moveOntoFig != null && moveOntoFig.color == movingFig.color && !isCastle(from, pressLocation, movingFig, moveOntoFig);
-            if (otherOwnClicked)
-            {
-                stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
-                stage.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
-                departurePress(pressLocation, c->true);
-            }
-            else
-            {
-                stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
-                attemptMove(from, pressLocation);
-            }
-        }
-    }*/
-
-    //----------------------------------------------------------------------------------------------------------
-
     public function applyScrolling(type:PlyScrollType) 
     {
         switch type 
@@ -278,36 +241,44 @@ class Field extends Sprite
 
     //----------------------------------------------------------------------------------------------------------
 
-    private function attemptMove(from:IntPoint, to:IntPoint) 
+    private function initiateMove(from:IntPoint, to:IntPoint) 
     {
-        if (!ableToMove(from, to))
-            return;
-
         var figure = getFigure(from);
         var moveOntoFigure = getFigure(to);
-        var nearIntellector:Bool = nearOwnIntellector(from, figure.color);
+        var nearIntellector:Bool = Rules.areNeighbours(from, currentSituation.intellectorPos[figure.color]);
         
-        stage.removeEventListener(MouseEvent.MOUSE_DOWN, onPress); //To ignore clicking on dialogs (TODO: just check dialogShown:Bool)
+        dialogShown = true;
 
         var onCanceled:Void->Void = onMoveCanceled.bind(from, figure);
+        var simplePly:Ply = Ply.construct(from, to);
 
         if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type && figure.type != Progressor && moveOntoFigure.type != Intellector)
-            Dialogs.chameleonConfirm(makeMove.bind(from, to, moveOntoFigure.type), makeMove.bind(from, to), onCanceled);
+        {
+            var chameleonPly:Ply = Ply.construct(from, to, moveOntoFigure.type);
+            Dialogs.chameleonConfirm(move.bind(chameleonPly, Own), move.bind(simplePly, Own), onCanceled);
+        }
         else if (to.isFinalForColor(figure.color) && figure.type == Progressor && moveOntoFigure.type != Intellector)
-            Dialogs.promotionSelect(figure.color, makeMove.bind(from, to, _), onCanceled);
+        {
+            function onPromotionSelected(piece:PieceType)
+            {
+                var promotionPly:Ply = Ply.construct(from, to, piece);
+                move(promotionPly, Own);
+            }
+            Dialogs.promotionSelect(figure.color, onPromotionSelected, onCanceled);
+        }
         else 
-            makeMove(from, to);
+            move(simplePly, Own);
     }
 
     private function onMoveCanceled(departureCoords:IntPoint, movingPiece:Figure) 
     {
         disposeFigure(movingPiece, departureCoords);
-        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
+        dialogShown = false;
     }
 
-    public function move(ply:Ply, ?ignoreHistory:Bool = false, ?noSound:Bool = false) 
+    public function move(ply:Ply, type:MoveType) 
     {
-        if (!ignoreHistory)
+        if (type == Own || type == ByOpponent || type == Actualization)
         {
             TimeMachine.endPly(this);
 
@@ -315,38 +286,42 @@ class Field extends Sprite
             plyPointer++;
         }
 
-        currentSituation = currentSituation.makeMove(ply);
-        if (!noSound)
-            playSound(ply);
-        translateFigures(ply.from, ply.to, ply.morphInto);
+        if (type == Own)
+            onOwnMoveMade(ply);
+
+        if (type != Actualization)
+            AssetManager.playPlySound(ply, currentSituation);
+
+        translateFigures(ply);
         highlightMove([ply.from, ply.to]);
 
+        currentSituation = currentSituation.makeMove(ply);
         playersTurn = !playersTurn;
     }
 
-    public function translateFigures(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
+    public function translateFigures(ply:Ply) 
     {
-        var figure = getFigure(from);
-        var figMoveOnto = getFigure(to);
+        var figure = getFigure(ply.from);
+        var figMoveOnto = getFigure(ply.to);
         
-        if (morphInto != null)
+        if (ply.morphInto != null)
         {
             var color = figure.color;
             removeChild(figure);
-            figure = new Figure(morphInto, color);
-            Factory.addFigure(figure, to, orientationColor == White, this);
+            figure = new Figure(ply.morphInto, color);
+            Factory.addFigure(figure, ply.to, orientationColor == White, this);
         }
         else
-            disposeFigure(figure, to);
+            disposeFigure(figure, ply.to);
 
-        figures[to.j][to.i] = figure;
-        figures[from.j][from.i] = null;
+        figures[ply.to.j][ply.to.i] = figure;
+        figures[ply.from.j][ply.from.i] = null;
 
         if (figMoveOnto != null)
-            if (isCastle(from, to, figure, figMoveOnto))
+            if (Rules.isCastle(ply, currentSituation))
             {
-                disposeFigure(figMoveOnto, from);
-                figures[from.j][from.i] = figMoveOnto;
+                disposeFigure(figMoveOnto, ply.from);
+                figures[ply.from.j][ply.from.i] = figMoveOnto;
             }
             else 
                 removeChild(figMoveOnto);
@@ -361,33 +336,6 @@ class Field extends Sprite
 
         for (hex in lastMoveSelectedHexes)
             hex.lastMoveSelect();
-    }
-
-    public function playSound(ply:Ply)
-    {
-        var figure = getFigure(ply.from);
-        var figMoveOnto = getFigure(ply.to);
-
-        if (figMoveOnto == null || isCastle(ply.from, ply.to, figure, figMoveOnto))
-            Assets.getSound("sounds/move.mp3").play();
-        else 
-            Assets.getSound("sounds/capture.mp3").play();
-    }
-
-    private function isCastle(pos1:IntPoint, pos2:IntPoint, fig1:Figure, fig2:Figure)
-    {
-        return ((fig1.type == Intellector && fig2.type == Defensor) || (fig1.type == Defensor && fig2.type == Intellector)) && fig1.color == fig2.color;
-    }
-
-    private function nearOwnIntellector(loc:IntPoint, color:PieceColor):Bool
-    {
-        for (dir in [UL, UR, D, DR, DL, U])
-        {
-            var neighbour = getFigure(Rules.getOneStepCoords(loc.i, loc.j, dir));
-            if (neighbour != null && neighbour.color == color && neighbour.type == Intellector)
-                return true;
-        }
-        return false;
     }
 
     //----------------------------------------------------------------------------------------------------------------------------------------
@@ -410,18 +358,6 @@ class Field extends Sprite
                 }
             }
         return closest;
-    }
-    
-    private function ableToMove(from:IntPoint, to:IntPoint) 
-    {
-        var movingFigure = getFigure(from);
-        if (movingFigure == null)
-            return false;
-
-        for (dest in Rules.possibleFields(from, getHex))
-            if (to.equals(dest))
-                return true;
-        return false;    
     }
 
     //----------------------------------------------------------------------------------------------------------------------------------------
@@ -483,13 +419,6 @@ class Field extends Sprite
     
     //----------------------------------------------------------------------------------------------------------------------------------------------
 
-    private function drag(figure:Figure) 
-    {
-        removeChild(figure);
-        addChild(figure);
-        figure.startDrag(true);
-    }
-
     private function addMarkers(from:IntPoint) 
     {
         for (dest in Rules.possibleFields(from, getHex))
@@ -505,24 +434,46 @@ class Field extends Sprite
             hexes[dest.j][dest.i].removeMarkers();
     }
 
-    /*private function selectDeparture(dep:IntPoint) 
+    private function toNeutralState() 
     {
-        selected = dep;
-        hexes[dep.j][dep.i].select();
-        addMarkers(dep);
-    }*/
+        switch state 
+        {
+            case Neutral:
+                return;
+            case Dragging(draggedFigureLocation, shadowLocation):
+                var draggedFigure = getFigure(draggedFigureLocation);
+                if (draggedFigure != null)
+                    draggedFigure.stopDrag();
+                var shadowHexagon = hexes[shadowLocation.j][shadowLocation.i];
+                if (shadowHexagon != null)
+                    shadowHexagon.deselect();
+            case Selected(selectedFigureLocation, shadowLocation):
+                removeMarkers(selectedFigureLocation);
+                var selectedHexagon = hexes[selectedFigureLocation.j][selectedFigureLocation.i];
+                if (selectedHexagon != null)
+                    selectedHexagon.deselect();
+                var shadowHexagon = hexes[shadowLocation.j][shadowLocation.i];
+                if (shadowHexagon != null)
+                    shadowHexagon.deselect();
+        }
+        state = Neutral;
+    }
 
-    /*private function selectionBackToNormal() 
+    private function toDragState(draggedFigureLocation:IntPoint) 
     {
-        removeMarkers(selected);
+        var figure:Figure = getFigure(draggedFigureLocation);
+        state = Dragging(draggedFigureLocation, draggedFigureLocation);
+        removeChild(figure);
+        addChild(figure);
+        figure.startDrag(true);
+    }
 
-        hexes[selected.j][selected.i].deselect();
-        if (selectedDest != null)
-            hexes[selectedDest.j][selectedDest.i].deselect();
-
-        selected = null;
-        selectedDest = null;
-    }*/
+    private function toSelectedState(hexLocation:IntPoint) 
+    {
+        state = Selected(hexLocation, hexLocation);
+        hexes[hexLocation.j][hexLocation.i].select();
+        addMarkers(hexLocation);
+    }
 
     public function rmbSelectionBackToNormal() 
     {

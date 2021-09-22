@@ -9,6 +9,24 @@ class Ply
     public var to:IntPoint;
     public var morphInto:Null<PieceType>;
 
+    public static function construct(from:IntPoint, to:IntPoint, ?morphInto:PieceType) 
+    {
+        var ply:Ply = new Ply();
+        ply.from = from;
+        ply.to = to;
+        ply.morphInto = morphInto;
+        return ply;
+    }
+
+    public static function fromMoveData(data:MoveData) 
+    {
+        var ply:Ply = new Ply();
+        ply.from = new IntPoint(data.fromI, data.fromJ);
+        ply.to = new IntPoint(data.toI, data.toJ);
+        ply.morphInto = data.morphInto == null? null : PieceType.createByName(data.morphInto);
+        return ply;
+    }
+
     public static function fromNotation(plyStr:String, context:Situation):Ply
     {
         var ply:Ply = new Ply();

@@ -14,7 +14,7 @@ class Situation
     public var turnColor(default, null):PieceColor;
     public var zobristHash(default, null):Int64;
 
-    private var intellectorPos:Map<PieceColor, Null<IntPoint>>;
+    public var intellectorPos(default, null):Map<PieceColor, Null<IntPoint>>;
 
     public static function starting():Situation
     {
