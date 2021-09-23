@@ -13,6 +13,11 @@ class SpectatorsField extends Field
         rmbSelectionBackToNormal();
     }
 
+    private override function onMove(e:MouseEvent)
+    {
+        //pass
+    }
+
     public function new(watchedSide:PieceColor) 
     {
         super();

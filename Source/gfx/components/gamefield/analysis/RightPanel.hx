@@ -1,5 +1,6 @@
 package gfx.components.gamefield.analysis;
 
+import struct.Ply;
 import utils.AssetManager;
 import gfx.components.gamefield.common.MoveNavigator;
 import gfx.components.gamefield.modules.gameboards.AnalysisField;
@@ -43,6 +44,7 @@ class RightPanel extends Sprite
     private static var defaultScoreStyle:Style = {fontSize: 24};
     private var field:AnalysisField;
     private var scoreLabel:Label;
+    private var navigator:MoveNavigator;
 
     private function onAnalyzePressed(color:PieceColor) 
     {
@@ -104,9 +106,16 @@ class RightPanel extends Sprite
         Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), field.currentSituation.serialize());
     }
 
-    public function deprecateScore() 
+    private function deprecateScore() 
     {
         scoreLabel.customStyle = {fontSize: 24, color: 0xCCCCCC};
+    }
+
+    public function makeMove(ply:Ply) 
+    {
+        navigator.writePly(ply, field.currentSituation);
+        //TODO: Change variantTree    
+        deprecateScore();
     }
 
     public function new(field:AnalysisField) 
@@ -219,7 +228,7 @@ class RightPanel extends Sprite
     private function createControlTabs() 
     {
         //TODO: flip board btn, export as study & as puzzle btns
-        var navigator:MoveNavigator = new MoveNavigator(field.applyScrolling);
+        navigator = new MoveNavigator(field.applyScrolling);
         navigator.horizontalAlign = 'center';
 
         var exportSIPBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_SIP, 300, onExportSIP);

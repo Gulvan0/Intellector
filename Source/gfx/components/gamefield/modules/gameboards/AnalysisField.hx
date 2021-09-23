@@ -1,5 +1,6 @@
 package gfx.components.gamefield.modules.gameboards;
 
+import gfx.components.gamefield.subsystems.TimeMachine;
 import gfx.components.gamefield.common.Figure;
 import struct.IntPoint;
 import gfx.components.gamefield.subsystems.Factory;
@@ -73,18 +74,14 @@ class AnalysisField extends Field
 
     private override function onPress(e:MouseEvent) 
     {
+        rmbSelectionBackToNormal();
+
         var pressLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
         switch editMode 
         {
-            case null:
-                //TODO: Rewrite
-                /*if (selected != null)
-                    destinationPress(pressLocation);
-                else
-                    departurePress(pressLocation, c->true);*/
-            case Move:
-                //TODO: Fill
+            case null, Move:
+                pressHandler(pressLocation);
             case Delete:
                 deleteFigure(pressLocation);
             case Set(type, color):
@@ -92,14 +89,73 @@ class AnalysisField extends Field
         }
     }
 
-    private override function onMove(e:MouseEvent) 
-    {
-        //TODO: Fill
-    }
-
     private override function onRelease(e:MouseEvent) 
     {
-        //TODO: Fill
+        var pressLoc:IntPoint;
+        var releaseLoc = posToIndexes(e.stageX - this.x, e.stageY - this.y);
+
+        switch state
+        {
+            case Neutral, Selected(_, _):
+                return;
+            case Dragging(draggedFigureLocation, shadowLocation):
+                pressLoc = draggedFigureLocation;
+        }
+
+        if (releaseLoc == null)
+            disposeFigure(figures[pressLoc.j][pressLoc.i], pressLoc);
+        else if (pressLoc.equals(releaseLoc))
+        {
+            disposeFigure(figures[pressLoc.j][pressLoc.i], pressLoc);
+            toSelectedState(releaseLoc);
+        }
+        else if (Rules.possible(pressLoc, releaseLoc, getHex) || editMode == Move)
+            actionOnFigureMoved(pressLoc, releaseLoc);
+        else
+            disposeFigure(figures[pressLoc.j][pressLoc.i], pressLoc);
+    }
+
+    private function pressHandler(pressLocation:Null<IntPoint>) 
+    {
+        var pressedFigure:Null<Figure> = getFigure(pressLocation);
+
+        if (editMode == null)
+            if (pressLocation != null && plyPointer < plyHistory.length)
+                TimeMachine.endPly(this);
+
+        switch state 
+        {
+            case Neutral:
+                if (pressedFigure == null || pressedFigure.color != currentSituation.turnColor)
+                    return;
+
+                toSelectedState(pressLocation);
+                toDragState(pressLocation);
+            case Selected(selectedFigureLocation, shadowLocation):
+                toNeutralState();
+                var alreadySelectedFigure:Null<Figure> = getFigure(selectedFigureLocation);
+                if (pressLocation == null || pressLocation.equals(selectedFigureLocation))
+                    return;
+                else if (alreadySelectedFigure.color == pressedFigure.color)
+                    toSelectedState(pressLocation);
+                else if (Rules.possible(selectedFigureLocation, pressLocation, getHex) || editMode == Move)
+                    actionOnFigureMoved(selectedFigureLocation, pressLocation);
+                else 
+                    return;
+            default:
+        }
+    }
+
+    private function actionOnFigureMoved(from:IntPoint, to:IntPoint) 
+    {
+        var movingFigure:Null<Figure> = getFigure(from);
+        if (editMode == Move)
+        {
+            removeChild(movingFigure);
+            setFigure(to, movingFigure);
+        }
+        else if (editMode == null)
+            initiateMove(from, to);
     }
 
     private function deleteFigure(location:IntPoint) 

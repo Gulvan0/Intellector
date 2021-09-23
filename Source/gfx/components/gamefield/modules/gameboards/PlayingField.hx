@@ -69,46 +69,6 @@ class PlayingField extends Field
         }
     }
 
-    private override function onMove(e:MouseEvent) 
-    {
-        if (!playersTurn || terminated)
-            return;
-
-        var newShadowLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
-        var oldShadowLocation:IntPoint;
-        var selectedLocation:IntPoint;
-
-        switch state 
-        {
-            case Neutral:
-                return;
-            case Dragging(draggedFigureLocation, shadowLocation):
-                selectedLocation = draggedFigureLocation;
-                oldShadowLocation = shadowLocation;
-            case Selected(selectedFigureLocation, shadowLocation):
-                selectedLocation = selectedFigureLocation;
-                oldShadowLocation = shadowLocation;
-        }
-
-        if (newShadowLocation == oldShadowLocation)
-            return;
-        
-        if (newShadowLocation != null && Rules.possible(selectedLocation, newShadowLocation, getHex))
-            hexes[newShadowLocation.j][newShadowLocation.i].select();
-
-        if (oldShadowLocation != null && oldShadowLocation != selectedLocation)
-            hexes[oldShadowLocation.j][oldShadowLocation.i].deselect();
-
-        switch state 
-        {
-            case Neutral:
-            case Dragging(draggedFigureLocation, shadowLocation):
-                state = Dragging(draggedFigureLocation, newShadowLocation);
-            case Selected(selectedFigureLocation, shadowLocation):
-                state = Selected(selectedFigureLocation, newShadowLocation);
-        }
-    }
-
     private override function onRelease(e:MouseEvent) 
     {
         if (!playersTurn || terminated)

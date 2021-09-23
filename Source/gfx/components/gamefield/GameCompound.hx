@@ -122,7 +122,7 @@ class GameCompound extends Sprite
         panel.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
         compound.addChild(panel);
     
-        field.onOwnMoveMade = panel.deprecateScore.expand();
+        field.onOwnMoveMade = panel.makeMove;
 
         return compound;
     }
