@@ -112,21 +112,6 @@ class GameCompound extends Sprite
         return compound;
     }
 
-    public static function buildAnalysis(onReturn:Void->Void):GameCompound
-    {
-        var field:AnalysisField = new AnalysisField();
-        var compound:GameCompound = new GameCompound(Analysis, field, null, null, null, onReturn);
-        
-        var panel:RightPanel = new RightPanel(cast(field, AnalysisField));
-        panel.x = field.x + field.width + 10;
-        panel.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
-        compound.addChild(panel);
-    
-        field.onOwnMoveMade = panel.makeMove;
-
-        return compound;
-    }
-
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     private static function actualize(data:OngoingBattleData, field:Field, sidebox:Sidebox, infobox:GameInfoBox, chatbox:Chatbox)

@@ -37,103 +37,73 @@ class RightPanel extends Sprite
     private var controlTabs:TabView;
     private var pressedEditModeBtn:Button;
 
-    private var variant:Variant; 
     private var variantTree:VariantTree;
 
     private static var defaultScoreStyle:Style = {fontSize: 24};
-    private var field:AnalysisField;
     private var scoreLabel:Label;
     private var navigator:MoveNavigator;
 
-    private function onAnalyzePressed(color:PieceColor) 
+    public var onClearPressed:Void->Void;
+    public var onResetPressed:Void->Void;
+    public var onAnalyzePressed:PieceColor->Void;
+    public var onConstructFromSIPPressed:String->Void;
+    public var onExportSIPRequested:Void->Void;
+    public var onBranchClick:Array<Int>->Void;
+    public var onBranchCtrlClick:Array<Int>->Void;
+    public var onTurnColorChanged:PieceColor->Void;
+    public var onApplyChangesPressed:Void->Void;
+    public var onDiscardChangesPressed:Void->Void;
+    public var onEditModeChanged:PosEditMode->Void;
+    public var scrollingCallback:PlyScrollType->Void;
+
+    public function displayAnalysisResults(result:EvaluationResult) 
+    {
+        scoreLabel.text = result.score.toString();
+    }
+
+    public function displayLoadingOnScoreLabel()
     {
         scoreLabel.customStyle = defaultScoreStyle;
         scoreLabel.text = "...";
-
-        Timer.delay(() -> {
-            var situation:Situation = field.currentSituation.copy();
-            situation.setTurnWithZobris(color);
-            AlphaBeta.initMeasuredIndicators();
-            var result = AlphaBeta.findMate(situation, 10, situation.turnColor == White);//AlphaBeta.evaluate(situation, 6);
-            #if measure_time
-            trace("Prune count: " + AlphaBeta.prunedCount + "; Prune ratio: " + AlphaBeta.prunedCount / (AlphaBeta.prunedCount + AlphaBeta.evaluatedCount));
-            for (act in MeasuredProcess.createAll())
-            {
-                trace(act.getName());
-                trace("Calls: " + AlphaBeta.calls[act] + "; Avg: " + (AlphaBeta.totalTime[act] / AlphaBeta.calls[act]) + "; Total: " + AlphaBeta.totalTime[act]);
-            }
-            #end
-            var recommendedMove = result.optimalPly;
-                
-            scoreLabel.text = result.score.toString();
-            field.rmbSelectionBackToNormal();
-            field.drawArrow(recommendedMove.from, recommendedMove.to);
-        }, 20);
     }
 
-    private function showPositionEditor() 
+    public function showPositionEditor() 
     {
         controlTabs.visible = false;
         positionSetupBox.visible = true;
     }
 
-    private function showControlTabs() 
+    public function showControlTabs() 
     {
         positionSetupBox.visible = false;
         controlTabs.visible = true;
     }
 
-    public function initVariant(variant:Variant)
+    /*public function initVariant(variant:Variant)
     {
-        this.variant = variant;
         variantTree.init(variant);
-    }
+    }*/
 
-    private function onClear() 
+    public function clearAnalysisScore() 
     {
         scoreLabel.text = "";
-        field.clearBoard();
     }
 
-    private function onReset() 
-    {
-        scoreLabel.text = "";
-        field.reset();
-    }
-
-    private function onExportSIP() 
-    {
-        Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), field.currentSituation.serialize());
-    }
-
-    private function deprecateScore() 
+    public function deprecateScore() 
     {
         scoreLabel.customStyle = {fontSize: 24, color: 0xCCCCCC};
     }
 
-    private function onBranchSelected(code:String) 
+    public function makeMove(ply:Ply, contextSituation:Situation) 
     {
-        //TODO: Deselect former selected, store selected, highlight arrows, redraw field's figures, reinit navigator
-    }
-
-    private function onBranchRemoved(code:String)
-    {
-        //TODO: If belongs to a selected branch, select a new branch and redraw figures on a field, reinit navigator
-        variant.removeByCode(code);
-        variantTree.init(variant); //TODO: Remove and then add again TreeWrapper on TreeContainer. These components need to be stored in the properties
-    }
-
-    public function makeMove(ply:Ply) 
-    {
-        navigator.writePly(ply, field.currentSituation);
-        //TODO: Change variant & variantTree    
+        navigator.writePly(ply, contextSituation);
+        //TODO: Change variantTree    
         deprecateScore();
     }
 
-    public function new(field:AnalysisField) 
+    public function new() 
     {
         super();
-        this.field = field;
 
         createPositionEditor();
         createControlTabs();
@@ -156,13 +126,13 @@ class RightPanel extends Sprite
         clearButton.horizontalAlign = 'center';
         clearButton.width = 100;
         clearButton.text = Dictionary.getPhrase(ANALYSIS_CLEAR);
-        clearButton.onClick = onClear.expand();
+        clearButton.onClick = e -> {onClearPressed();};
 
         var resetButton:Button = new Button();
         resetButton.horizontalAlign = 'center';
         resetButton.width = 100;
         resetButton.text = Dictionary.getPhrase(ANALYSIS_RESET);
-        resetButton.onClick = onReset.expand();
+        resetButton.onClick = e -> {onResetPressed();};
 
         var turnColorSelectBox:HBox = new HBox();
         turnColorSelectBox.horizontalAlign = 'center';
@@ -174,7 +144,7 @@ class RightPanel extends Sprite
             optionBox.componentGroup = "analysis-editor-turncolor";
             optionBox.onChange = (e) -> {
                 if (optionBox.selected)
-                    field.currentSituation.setTurnWithZobris(color);
+                    onTurnColorChanged(color);
             };
             if (color == White)
                 optionBox.selected = true;
@@ -198,7 +168,7 @@ class RightPanel extends Sprite
         var fromSIPApplyBtn:Button = new Button();
         clearButton.width = 50;
         clearButton.text = Dictionary.getPhrase(ANALYSIS_APPLY);
-        clearButton.onClick = e -> {field.constructFromSIP(fromSIPInput.text);};
+        clearButton.onClick = e -> {onConstructFromSIPPressed(fromSIPInput.text);};
 
         var SIPInputBox:HBox = new HBox();
         clearButton.horizontalAlign = 'left';
@@ -209,20 +179,13 @@ class RightPanel extends Sprite
         applyChagesBtn.horizontalAlign = 'center';
         applyChagesBtn.width = 150;
         applyChagesBtn.text = Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES);
-        applyChagesBtn.onClick = e -> {
-            deprecateScore();
-            showControlTabs();
-            field.applyChanges();
-        };  
+        applyChagesBtn.onClick = e -> {onApplyChangesPressed();};  
 
         var discardChangesBtn:Button = new Button();
         discardChangesBtn.horizontalAlign = 'center';
         discardChangesBtn.width = 150;
         discardChangesBtn.text = Dictionary.getPhrase(ANALYSIS_DISCARD_CHANGES);
-        discardChangesBtn.onClick = e -> {
-            showControlTabs();
-            field.discardChanges();
-        };     
+        discardChangesBtn.onClick = e -> {onDiscardChangesPressed();}; 
 
         positionSetupBox = new VBox();
         positionSetupBox.visible = false;
@@ -240,15 +203,15 @@ class RightPanel extends Sprite
     private function createControlTabs() 
     {
         //TODO: flip board btn, export as study & as puzzle btns
-        navigator = new MoveNavigator(field.applyScrolling);
+        navigator = new MoveNavigator(m -> {scrollingCallback(m);});
         navigator.horizontalAlign = 'center';
 
-        var exportSIPBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_SIP, 300, onExportSIP);
+        var exportSIPBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_SIP, 300, () -> {onExportSIPRequested();});
         exportSIPBtn.horizontalAlign = 'center';
 
         var analysisBtns:HBox = new HBox();
-        analysisBtns.addComponent(createSimpleBtn(ANALYSIS_ANALYZE_WHITE, 150, onAnalyzePressed.bind(White)));
-        analysisBtns.addComponent(createSimpleBtn(ANALYSIS_ANALYZE_BLACK, 150, onAnalyzePressed.bind(Black)));
+        analysisBtns.addComponent(createSimpleBtn(ANALYSIS_ANALYZE_WHITE, 150, () -> {onAnalyzePressed(White);}));
+        analysisBtns.addComponent(createSimpleBtn(ANALYSIS_ANALYZE_BLACK, 150, () -> {onAnalyzePressed(Black);}));
         analysisBtns.horizontalAlign = 'center';
 
         scoreLabel = new Label();
@@ -271,7 +234,7 @@ class RightPanel extends Sprite
         overviewTab.text = Dictionary.getPhrase(ANALYSIS_OVERVIEW_TAB_NAME);
         overviewTab.addComponent(overviewVBox);
 
-        variantTree = new VariantTree(onBranchSelected, onBranchRemoved);
+        variantTree = new VariantTree(c -> {onBranchClick(c);}, c -> {onBranchCtrlClick(c);});
 
         var treeWrapper:SpriteWrapper = new SpriteWrapper();
         treeWrapper.sprite = variantTree;
@@ -309,7 +272,7 @@ class RightPanel extends Sprite
         btn.onClick = e -> {
             pressedEditModeBtn.selected = false;
             pressedEditModeBtn = btn;
-            field.changeEditMode(mode);
+            onEditModeChanged(mode);
         };
 
         if (mode == Move)
