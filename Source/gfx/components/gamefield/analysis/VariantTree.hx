@@ -9,46 +9,219 @@ class VariantTree extends Sprite
 {
     private static var BLOCK_INTERVAL_X:Float = 15;
     private static var BLOCK_INTERVAL_Y:Float = 30;
-    private static var ARROW_THICKNESS:Float = 2;
-    private static var ARROW_TRIANGLE_SIDE:Float = 12;
-    private static var STRAIGHT_ARROW_SEGMENT_SIZE:Float = 5;
 
-    private var onClick:(nodeCode:String)->Void;
+    private var arrows:Map<String, Arrow> = [];
+    private var nodes:Map<String, Link> = [];
+    private var familyWidths:Map<String, Float> = [];
 
-    private inline function rotatedPoint(p:Point, angle:Float):Point
+    private var selectedBranch:Array<Int> = [];
+
+    private var onClick:(nodeCode:Array<Int>)->Void;
+    private var onCtrlClick:(nodeCode:Array<Int>)->Void;
+
+    private function deselectAll() 
     {
-        return new Point(Math.cos(angle) * p.x - Math.sin(angle) * p.y, Math.cos(angle) * p.y + Math.sin(angle) * p.x);
+        var code:String = "";
+        for (childNum in selectedBranch)
+        {
+            code += childNum;
+            arrows[code].unhighlight();
+            code += ":";
+        }
+        selectedBranch = [];
     }
 
-    private function drawArrow(from:Point, to:Point) 
+    public function selectBranch(branch:Array<Int>)
     {
-        var vertex1:Point = rotatedPoint(new Point(0, -ARROW_TRIANGLE_SIDE), - Math.PI / 8).add(to);
-        var vertex2:Point = rotatedPoint(new Point(0, -ARROW_TRIANGLE_SIDE), Math.PI / 8).add(to);
-        var upperSideVector = vertex2.subtract(vertex1);
-        upperSideVector.normalize(upperSideVector.length / 2);
-        var inputVertex:Point = vertex1.add(upperSideVector);
-        var fracturePoint:Point = inputVertex.subtract(new Point(0, STRAIGHT_ARROW_SEGMENT_SIZE));
+        deselectAll();
 
-        var arrow:Sprite = new Sprite();
-        arrow.graphics.lineStyle(ARROW_THICKNESS, 0x333333);
-        arrow.graphics.moveTo(from.x, from.y);
-        arrow.graphics.lineTo(fracturePoint.x, fracturePoint.y);
-        arrow.graphics.lineTo(inputVertex.x, inputVertex.y);
+        var code:String = "";
+        for (childNum in branch)
+        {
+            code += childNum;
+            arrows[code].highlight();
+            code += ":";
+        }
+        selectedBranch = branch.copy();
+    }
 
-        var triangle:Sprite = new Sprite();
-        triangle.graphics.beginFill(0x333333);
-        triangle.graphics.moveTo(inputVertex.x, inputVertex.y);
-        triangle.graphics.lineTo(vertex1.x, vertex1.y);
-        triangle.graphics.lineTo(to.x, to.y);
-        triangle.graphics.lineTo(vertex2.x, vertex2.y);
-        triangle.graphics.lineTo(inputVertex.x, inputVertex.y);
-        triangle.graphics.endFill();
+    private function remapKeys(renames:Map<String, String>)
+    {
+        var newArrowMap:Map<String, Arrow> = arrows.copy();
+        var newNodeMap:Map<String, Link> = nodes.copy();
+        var newFamilyWidths:Map<String, Float> = familyWidths.copy();
 
-        arrow.addChild(triangle);
+        for (formerCode => newCode in renames.keyValueIterator())
+        {
+            if (!Lambda.has(renames, formerCode))
+            {
+                newArrowMap.remove(formerCode);
+                newNodeMap.remove(formerCode);
+                newFamilyWidths.remove(formerCode);
+            }
+            newArrowMap.set(newCode, arrows.get(formerCode));
+            newNodeMap.set(newCode, nodes.get(formerCode));
+            newFamilyWidths.set(newCode, familyWidths.get(formerCode));
+        }
+
+        arrows = newArrowMap;
+        nodes = newNodeMap;
+        familyWidths = newFamilyWidths;
+    }
+
+    /**Reference variant should be passed BEFORE any corrections to it**/
+    public function removeNode(path:Array<Int>, referenceVariant:Variant)
+    {
+        var parentPath:Array<Int> = path.slice(0, -1);
+        var renames:Map<String, String> = [];
+
+        var changedCodeNodes = [];
+        for (rsPath in referenceVariant.getRightSiblingsPaths(path, false))
+            changedCodeNodes = changedCodeNodes.concat(referenceVariant.getFamilyPaths(rsPath));
+
+        //Queue right siblings with their families for updating their codes
+        for (oldPath in changedCodeNodes)
+        {
+            var newSiblingNum = oldPath[path.length - 1] - 1;
+            var pathToChildResidue = oldPath.slice(path.length);
+            var newPath:Array<Int> = parentPath.concat([newSiblingNum]).concat(pathToChildResidue);
+            renames.set(oldPath.join(":"), newPath.join(":"));
+        }
+
+        //Remove nodes and arrows with children and also their mappings
+        for (familyMemberPath in referenceVariant.getFamilyPaths(path))
+        {
+            var code:String = familyMemberPath.join(":");
+            removeChild(arrows.get(code));
+            removeChild(nodes.get(code));
+            arrows.remove(code);
+            nodes.remove(code);
+            familyWidths.remove(code);
+        }
+
+        //Update upstream parents' family widths and store deltas for the next step
+        var childCode:String = path.join(":");
+        var parentPath:Array<Int> = Variant.parentPath(path);
+        var childDeltaWidth = familyWidths.get(childCode);
+        var deltaWidthsByDepth:Map<Int, Float> = [path.length => childDeltaWidth];
+        while (parentPath.length > 1)
+        {
+            var parentCode = parentPath.join(":");
+            var parentFamWidth = familyWidths.get(parentCode);
+            var parentOwnWidth = nodes.get(parentCode).width + BLOCK_INTERVAL_X;
+
+            if (parentOwnWidth == parentFamWidth)
+                break;
+
+            var newParentFamWidth = Math.max(parentOwnWidth, parentFamWidth - childDeltaWidth);
+            familyWidths.set(parentCode, newParentFamWidth);
+            childDeltaWidth = parentFamWidth - newParentFamWidth;
+            deltaWidthsByDepth.set(parentPath.length, childDeltaWidth);
+            parentPath.pop();
+        }
+        
+        //Move upstream parent right siblings with their families
+        var upstreamParents:Array<Array<Int>> = referenceVariant.upstreamParentsPaths(path, true);
+        var rightSiblings:Array<Array<Int>> = [];
+        for (parentPath in upstreamParents)
+            rightSiblings = rightSiblings.concat(referenceVariant.getRightSiblingsPaths(parentPath, false));
+
+        for (siblingPath in rightSiblings)
+        {
+            var siblingFamilyPaths:Array<Array<Int>> = referenceVariant.getFamilyPaths(siblingPath);
+
+            for (path in siblingFamilyPaths)
+            {
+                var code = path.join(":");
+                var deltaWidth = deltaWidthsByDepth[path.length];
+                nodes[code].x -= deltaWidth;
+                arrows[code].changeDestination(new Point(arrows[code].to.x - deltaWidth, arrows[code].to.y));
+            }
+        }
+
+        //Apply queued code remappings
+        remapKeys(renames);
+    }
+
+    /**Reference variant should be passed BEFORE any corrections to it**/
+    public function addChildNode(parentPath:Array<Int>, nodeText:String, highlighted:Bool, referenceVariant:Variant)
+    {
+        //Draw node and arrow and add their mappings
+        var nodeNum:Int = referenceVariant.childCount(parentPath);
+        var nodePath:Array<Int> = parentPath.concat([nodeNum]);
+        var nodeCode:String = nodePath.join(":");
+
+        var parentCode:String = parentPath.join(":");
+        var parentNode:Link = nodes.get(parentCode);
+        var parentCenterX:Float = parentNode.x + parentNode.width / 2;
+        var parentBottomY:Float = parentNode.y + parentNode.height + 5;
+
+        createNodeNaive(nodePath, nodeCode, nodeText, parentCenterX, parentBottomY, w -> parentCenterX-w/2);
+        familyWidths.set(nodeCode, nodes.get(nodeCode).width + BLOCK_INTERVAL_X);
+
+        //Update upstream parents' family widths and store deltas for the next step
+        var upParentPath = parentPath.copy();
+        var childDeltaWidth = familyWidths.get(nodeCode);
+        var deltaWidthsByDepth:Map<Int, Float> = [nodePath.length => childDeltaWidth];
+        while (upParentPath.length > 1)
+        {
+            var parentCode = upParentPath.join(":");
+            var parentFamWidth = familyWidths.get(parentCode);
+            var parentOwnWidth = nodes.get(parentCode).width + BLOCK_INTERVAL_X;
+
+            if (parentOwnWidth == parentFamWidth)
+                break;
+
+            var newParentFamWidth = Math.max(parentOwnWidth, parentFamWidth + childDeltaWidth);
+            familyWidths.set(parentCode, newParentFamWidth);
+            childDeltaWidth = newParentFamWidth - parentFamWidth;
+            deltaWidthsByDepth.set(upParentPath.length, childDeltaWidth);
+            upParentPath.pop();
+        }
+
+        //Move upstream parent right siblings with their families
+        var upstreamParents:Array<Array<Int>> = referenceVariant.upstreamParentsPaths(parentPath, true);
+        var rightSiblings:Array<Array<Int>> = [];
+        for (upParentPath in upstreamParents)
+            rightSiblings = rightSiblings.concat(referenceVariant.getRightSiblingsPaths(upParentPath, false));
+
+        for (siblingPath in rightSiblings)
+        {
+            var siblingFamilyPaths:Array<Array<Int>> = referenceVariant.getFamilyPaths(siblingPath);
+
+            for (path in siblingFamilyPaths)
+            {
+                var code = path.join(":");
+                var deltaWidth = deltaWidthsByDepth[path.length];
+                nodes[code].x += deltaWidth;
+                arrows[code].changeDestination(new Point(arrows[code].to.x + deltaWidth, arrows[code].to.y));
+            }
+        }
+    }
+
+    private function createNodeNaive(path:Array<Int>, code:String, nodeText:String, parentCenterX:Float, parentBottomY:Float, getChildLeftX:(childWidth:Float)->Float)
+    {
+        var link:Link = new Link();
+        link.text = nodeText;
+        link.onClick = (e) -> {
+            if (e.ctrlKey)
+                onCtrlClick(path);
+            else
+                onClick(path);
+        };
+        nodes.set(code, link);
+        addChild(link);
+        link.validateNow();
+
+        link.x = getChildLeftX(link.width);
+        link.y = parentBottomY + BLOCK_INTERVAL_Y;
+
+        var arrow:Arrow = new Arrow(new Point(parentCenterX, parentBottomY), new Point(link.x + link.width/2, link.y), false);
+        arrows.set(code, arrow);
         addChild(arrow);
     }
 
-    private function drawChildrenRecursive(parent:VariantNode, parentCode:String, parentCenterX:Float, parentBottomY:Float):Float
+    private function drawChildrenRecursive(parent:VariantNode, parentPath:Array<Int>, parentCenterX:Float, parentBottomY:Float, nodeTexts:Map<String, String>):Float
     {
         var accumulatedWidth:Float = 0;
         var childNum:Int = 0;
@@ -56,11 +229,18 @@ class VariantTree extends Sprite
 
         for (child in parent.children)
         {
-            var childCode:String = parentCode + childNum;
+            var childPath:Array<Int> = parentPath.concat([childNum]);
+            var childCode:String = childPath.join(":");
 
             var link:Link = new Link();
-            link.text = child.plyStr;
-            link.onClick = (e) -> {onClick(childCode);};
+            link.text = nodeTexts[childCode];
+            link.onClick = (e) -> {
+                if (e.ctrlKey)
+                    onCtrlClick(childPath);
+                else
+                    onClick(childPath);
+            };
+            nodes.set(childCode, link);
             addChild(link);
             link.validateNow();
 
@@ -73,26 +253,31 @@ class VariantTree extends Sprite
                 link.x = parentCenterX - firstChildWidth / 2 + accumulatedWidth;
             link.y = parentBottomY + BLOCK_INTERVAL_Y;
 
-            drawArrow(new Point(parentCenterX, parentBottomY), new Point(link.x + link.width/2, link.y));
+            var arrow:Arrow = new Arrow(new Point(parentCenterX, parentBottomY), new Point(link.x + link.width/2, link.y), false);
+            arrows.set(childCode, arrow);
+            addChild(arrow);
 
-            var descendantsWidth:Float = drawChildrenRecursive(child, childCode, link.x + link.width/2, link.y + link.height + 5);
+            var descendantsWidth:Float = drawChildrenRecursive(child, childPath, link.x + link.width/2, link.y + link.height + 5, nodeTexts);
 
-            accumulatedWidth += Math.max(link.width, descendantsWidth) + BLOCK_INTERVAL_X;
+            var familyWidth = Math.max(link.width, descendantsWidth) + BLOCK_INTERVAL_X;
+            familyWidths.set(childCode, familyWidth);
+            accumulatedWidth += familyWidth;
             childNum++;
         }
 
         return accumulatedWidth;
     }
 
-    public function init(variant:Variant) 
+    public function init(variant:Variant, nodeTexts:Map<String, String>) 
     {
         removeChildren();
-        drawChildrenRecursive(variant, "", 0, 0);
+        drawChildrenRecursive(variant, [], 0, 0, nodeTexts);
     }
 
-    public function new(onClick:(nodeCode:String)->Void) 
+    public function new(onClick:(nodeCode:Array<Int>)->Void, onCtrlClick:(nodeCode:Array<Int>)->Void) 
     {
         super();
         this.onClick = onClick;
+        this.onCtrlClick = onCtrlClick;
     }
 }

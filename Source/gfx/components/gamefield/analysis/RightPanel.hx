@@ -37,9 +37,8 @@ class RightPanel extends Sprite
     private var controlTabs:TabView;
     private var pressedEditModeBtn:Button;
 
+    private var variant:Variant; 
     private var variantTree:VariantTree;
-
-    private var onBranchSelected:String->Void; //TODO: Implement or replace + Implement variant processing + Highlight selected branch
 
     private static var defaultScoreStyle:Style = {fontSize: 24};
     private var field:AnalysisField;
@@ -86,6 +85,7 @@ class RightPanel extends Sprite
 
     public function initVariant(variant:Variant)
     {
+        this.variant = variant;
         variantTree.init(variant);
     }
 
@@ -111,10 +111,22 @@ class RightPanel extends Sprite
         scoreLabel.customStyle = {fontSize: 24, color: 0xCCCCCC};
     }
 
+    private function onBranchSelected(code:String) 
+    {
+        //TODO: Deselect former selected, store selected, highlight arrows, redraw field's figures, reinit navigator
+    }
+
+    private function onBranchRemoved(code:String)
+    {
+        //TODO: If belongs to a selected branch, select a new branch and redraw figures on a field, reinit navigator
+        variant.removeByCode(code);
+        variantTree.init(variant); //TODO: Remove and then add again TreeWrapper on TreeContainer. These components need to be stored in the properties
+    }
+
     public function makeMove(ply:Ply) 
     {
         navigator.writePly(ply, field.currentSituation);
-        //TODO: Change variantTree    
+        //TODO: Change variant & variantTree    
         deprecateScore();
     }
 
@@ -259,7 +271,7 @@ class RightPanel extends Sprite
         overviewTab.text = Dictionary.getPhrase(ANALYSIS_OVERVIEW_TAB_NAME);
         overviewTab.addComponent(overviewVBox);
 
-        variantTree = new VariantTree(onBranchSelected);
+        variantTree = new VariantTree(onBranchSelected, onBranchRemoved);
 
         var treeWrapper:SpriteWrapper = new SpriteWrapper();
         treeWrapper.sprite = variantTree;

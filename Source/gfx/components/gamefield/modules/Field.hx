@@ -310,13 +310,11 @@ class Field extends Sprite
 
     public function move(ply:Ply, type:MoveType) 
     {
-        if (type == Own || type == ByOpponent || type == Actualization)
-        {
+        if (type != Actualization)
             TimeMachine.endPly(this);
 
-            plyHistory.push(ply.toReversible(currentSituation));
-            plyPointer++;
-        }
+        plyHistory.push(ply.toReversible(currentSituation));
+        plyPointer++;
 
         if (type == Own)
             onOwnMoveMade(ply);

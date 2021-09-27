@@ -119,10 +119,6 @@ class AnalysisField extends Field
     {
         var pressedFigure:Null<Figure> = getFigure(pressLocation);
 
-        if (editMode == null)
-            if (pressLocation != null && plyPointer < plyHistory.length)
-                TimeMachine.endPly(this);
-
         switch state 
         {
             case Neutral:
@@ -182,6 +178,12 @@ class AnalysisField extends Field
 
     //------------------------------------------------------------------------------------------------------------------------------------
 
+    private function dropHistory() 
+    {
+        plyHistory = [];
+        plyPointer = 0;    
+    }
+
     public function changeEditMode(mode:PosEditMode) 
     {
         if (editMode == null)
@@ -192,14 +194,16 @@ class AnalysisField extends Field
     public function constructFromSIP(sip:String) 
     {
         removePiecesClearSelections();
+        dropHistory();
         currentSituation = SituationDeserializer.deserialize(sip);
         figures = Factory.produceFiguresFromSituation(currentSituation, true, this);
     }
 
     public function applyChanges() 
     {
-        editMode = null;
         lastApprovedSituationSIP = currentSituation.serialize();
+        dropHistory();
+        editMode = null;
     }
 
     public function discardChanges()

@@ -52,6 +52,8 @@ class MoveNavigator extends VBox
 
     public function revertPlys(cnt:Int) 
     {
+        plyNumber -= cnt;
+
         if (lastMovetableEntry.black_move == " ")
         {
             movetable.dataSource.removeAt(movetable.dataSource.size - 1);
@@ -70,6 +72,13 @@ class MoveNavigator extends VBox
             lastMovetableEntry.black_move = " ";
             movetable.dataSource.update(movetable.dataSource.size - 1, lastMovetableEntry);
         }
+    }
+
+    public function clear()
+    {
+        movetable.dataSource.clear();
+        lastMovetableEntry = null;
+        plyNumber = 1;
     }
 
     private function buildPlyScrollBtn(type:PlyScrollType, onClick:Void->Void):Button
