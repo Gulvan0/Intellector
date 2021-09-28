@@ -37,11 +37,10 @@ class RightPanel extends Sprite
     private var controlTabs:TabView;
     private var pressedEditModeBtn:Button;
 
-    private var variantTree:VariantTree;
-
     private static var defaultScoreStyle:Style = {fontSize: 24};
     private var scoreLabel:Label;
-    private var navigator:MoveNavigator;
+    public var navigator(default, null):MoveNavigator;
+    public var variantTree(default, null):VariantTree;
 
     public var onClearPressed:Void->Void;
     public var onResetPressed:Void->Void;
@@ -92,13 +91,6 @@ class RightPanel extends Sprite
     public function deprecateScore() 
     {
         scoreLabel.customStyle = {fontSize: 24, color: 0xCCCCCC};
-    }
-
-    public function makeMove(ply:Ply, contextSituation:Situation) 
-    {
-        navigator.writePly(ply, contextSituation);
-        //TODO: Change variantTree    
-        deprecateScore();
     }
 
     public function new() 

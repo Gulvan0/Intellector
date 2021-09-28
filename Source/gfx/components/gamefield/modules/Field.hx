@@ -74,6 +74,7 @@ class Field extends Sprite
     public var currentSituation:Situation;
     public var plyHistory:Array<ReversiblePly>;
     public var plyPointer:Int;
+    public var autoAppendHistory:Bool = true;
 
     private var state:FieldState = Neutral;
     private var dialogShown:Bool = false;
@@ -313,20 +314,26 @@ class Field extends Sprite
         if (type != Actualization)
             TimeMachine.endPly(this);
 
-        plyHistory.push(ply.toReversible(currentSituation));
-        plyPointer++;
-
-        if (type == Own)
-            onOwnMoveMade(ply);
-
         if (type != Actualization)
             AssetManager.playPlySound(ply, currentSituation);
+        
+        if (type == Own)
+            onOwnMoveMade(ply);
 
         translateFigures(ply);
         highlightMove([ply.from, ply.to]);
 
-        currentSituation = currentSituation.makeMove(ply);
+        if (autoAppendHistory)
+            appendToHistory(ply);
+
         playersTurn = !playersTurn;
+    }
+
+    public function appendToHistory(ply:Ply)
+    {
+        plyHistory.push(ply.toReversible(currentSituation));
+        plyPointer++;
+        currentSituation = currentSituation.makeMove(ply);
     }
 
     public function translateFigures(ply:Ply) 

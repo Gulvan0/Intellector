@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.components.gamefield.AnalysisCompound;
 import gfx.components.Dialogs;
 import gfx.components.gamefield.GameCompound;
 import gfx.screens.PlayerProfile;
@@ -117,7 +118,7 @@ class ScreenManager extends Sprite
         clear();
         URLEditor.clear();
         
-        current = GameCompound.buildAnalysis(() ->
+        current = new AnalysisCompound(() ->
         {
             Networker.currentGameCompound = null;
 		    toMain();

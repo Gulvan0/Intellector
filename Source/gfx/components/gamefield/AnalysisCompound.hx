@@ -20,20 +20,73 @@ class AnalysisCompound extends GameCompound
 
     private function onMoveMade(ply:Ply)
     {
-        //TODO: Rewrite (both for branching and for continuation cases; check equality if possible branching)
-        //panel.makeMove(ply);
+        if (field.plyPointer == field.plyHistory.length)
+            onContinuationMove(ply);
+        else if (field.plyHistory[field.plyPointer].equals(ply.toReversible(field.currentSituation)))
+            onSubsequentMove(ply);
+        else
+            onBranchingMove(ply);
+    }
+
+    private function onContinuationMove(ply:Ply)
+    {
+        var parentPath = panel.variantTree.selectedBranch;
+        panel.variantTree.addChildNode(parentPath, ply.toNotation(field.currentSituation), true, variant);
+        panel.navigator.writePly(ply, field.currentSituation);
+        field.appendToHistory(ply);
+        variant.addChildToNode(ply, parentPath);
+    }
+
+    private function onSubsequentMove(ply:Ply) 
+    {
+        panel.deprecateScore();
+        field.plyPointer++;
+        field.currentSituation.makeMove(ply);
+    }
+
+    private function onBranchingMove(ply:Ply) 
+    {
+        panel.deprecateScore();
+        var plyNum = field.plyPointer;
+        var plysToRevertCnt = field.plyHistory.length - plyNum;
+        var parentPath = panel.variantTree.selectedBranch.slice(0, plyNum);
+        panel.variantTree.addChildNode(parentPath, ply.toNotation(field.currentSituation), true, variant);
+        panel.navigator.revertPlys(plysToRevertCnt);
+        panel.navigator.writePly(ply, field.currentSituation);
+        field.plyHistory.splice(plyNum, plysToRevertCnt);
+        field.appendToHistory(ply);
+        variant.addChildToNode(ply, parentPath);
     }
 
     private function onBranchClick(path:Array<Int>) 
     {
-        //TODO: Deselect former selected, store selected, highlight arrows, redraw field's figures, reinit navigator
+        panel.variantTree.selectBranch(path);
+        panel.deprecateScore();
+        panel.navigator.clear();
+        cast(field, AnalysisField).reset();
+        var plys:Array<Ply> = variant.getBranchByPath(variant.extendPathLeftmost(path));
+        var situation = field.currentSituation.copy();
+        for (i in 0...plys.length)
+        {
+            var ply:Ply = plys[i];
+            if (i < path.length)
+                field.move(ply, Actualization);
+            panel.navigator.writePly(ply, situation);
+            situation = situation.makeMove(ply);
+        }
     }
 
     private function onBranchCtrlClick(path:Array<Int>)
     {
-        //TODO: If belongs to a selected branch, select a new branch and redraw figures on a field, reinit navigator
-        //variant.removeByCode(code);
-        //variantTree.init(variant); //TODO: Remove and then add again TreeWrapper on TreeContainer. These components need to be stored in the properties
+        if (Variant.belongs(path, panel.variantTree.selectedBranch))
+        {
+            var plysToRevertCnt:Int = panel.variantTree.selectedBranch.length - path.length + 1;
+            panel.variantTree.selectBranch(Variant.parentPath(path));
+            field.revertPlys(plysToRevertCnt);
+            panel.navigator.revertPlys(plysToRevertCnt);
+        }
+        panel.variantTree.removeNode(path, variant);
+        variant.removeNode(path);
     }
 
     private function onClearPressed() 
@@ -57,6 +110,9 @@ class AnalysisCompound extends GameCompound
     private function onConstructFromSIPPressed(sip:String)
     {
         cast(field, AnalysisField).constructFromSIP(sip);
+        variant = new Variant();
+        panel.variantTree.init(variant, []);
+        panel.navigator.clear();
     }
 
     private function onApplyChangesPressed()
@@ -133,5 +189,6 @@ class AnalysisCompound extends GameCompound
         addChild(panel);
 
         variant = new Variant();
+        panel.variantTree.init(variant, []);
     }
 }

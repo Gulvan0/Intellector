@@ -29,10 +29,11 @@ class AnalysisField extends Field
     {
         super();
         orientationColor = White;
+        autoAppendHistory = false;
 
         hexes = Factory.produceHexes(this, true);
         disposeLetters();
-        arrangeDefault();
+        arrangeStarting();
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -40,7 +41,7 @@ class AnalysisField extends Field
     public function reset() 
     {
         removePiecesClearSelections();
-        arrangeDefault();
+        constructFromSIP(lastApprovedSituationSIP);
     }
     
     public function clearBoard() 
@@ -64,10 +65,11 @@ class AnalysisField extends Field
         lastMoveSelectedHexes = [];
     }
 
-    private function arrangeDefault() 
+    private function arrangeStarting() 
     {
         figures = Factory.produceFiguresFromDefault(true, this);
         currentSituation = Situation.starting();
+        lastApprovedSituationSIP = currentSituation.serialize();
     }
 
     //---------------------------------------------------------------------------------------------------------

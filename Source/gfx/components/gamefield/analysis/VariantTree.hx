@@ -14,7 +14,7 @@ class VariantTree extends Sprite
     private var nodes:Map<String, Link> = [];
     private var familyWidths:Map<String, Float> = [];
 
-    private var selectedBranch:Array<Int> = [];
+    public var selectedBranch(default, null):Array<Int> = [];
 
     private var onClick:(nodeCode:Array<Int>)->Void;
     private var onCtrlClick:(nodeCode:Array<Int>)->Void;

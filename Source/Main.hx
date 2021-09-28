@@ -56,24 +56,7 @@ class Main extends Sprite
 		Changes.initChangelog();
 		addChild(new ScreenManager());
 		//Networker.connect(onConnected);
-		var emptyPly:Ply = new Ply();
-		var variantRoot:Variant = new Variant();
-		variantRoot.addChild(emptyPly, "1.Lh3");
-		variantRoot.c("1.Lh3").addChild(emptyPly, "2.Lh4");
-		variantRoot.c("1.Lh3").c("2.Lh4").addChild(emptyPly, "3.g3");
-		variantRoot.c("1.Lh3").c("2.Lh4").addChild(emptyPly, "3.i2~h2");
-		variantRoot.c("1.Lh3").c("2.Lh4").addChild(emptyPly, "3.Lb3");
-		variantRoot.c("1.Lh3").addChild(emptyPly, "2.Lh5");
-		variantRoot.c("1.Lh3").c("2.Lh5").addChild(emptyPly, "3.i2~h2");
-		variantRoot.c("1.Lh3").c("2.Lh5").c("3.i2~h2").addChild(emptyPly, "4.LXh3");
-		variantRoot.c("1.Lh3").addChild(emptyPly, "2.AXg1");
-
-		var tree = new VariantTree(s->{trace(s);});
-		tree.x = 50;
-		tree.y = 50;
-		addChild(tree);
-		tree.init(variantRoot);
-		//ScreenManager.instance.toAnalysisBoard();
+		ScreenManager.instance.toAnalysisBoard();
 	}
 
 	private function onConnected()

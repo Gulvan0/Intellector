@@ -111,7 +111,7 @@ class Variant extends VariantNode
         return branch;
     }
 
-    public function removeDescendant(path:Array<Int>) 
+    public function removeNode(path:Array<Int>) 
     {
         var parent = getByPath(parentPath(path));
         var childNum = path[path.length - 1];

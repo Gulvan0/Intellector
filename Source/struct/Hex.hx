@@ -17,6 +17,11 @@ class Hex
         return hex;
     }
 
+    public function equals(hex:Hex):Bool
+    {
+        return type == hex.type && color == hex.color;
+    }
+
     public function isEmpty():Bool 
     {
         return type == null;    

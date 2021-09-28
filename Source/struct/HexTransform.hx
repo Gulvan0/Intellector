@@ -11,6 +11,11 @@ package struct;
         return new HexTransform(coords, former.copy(), latter.copy());
     }
 
+    public function equals(ht:HexTransform):Bool
+    {
+        return this.former.equals(ht.former) && this.latter.equals(ht.latter) && this.coords.equals(ht.coords);
+    }
+
     public function new(coords, former, latter) 
     {
         this.coords = coords;
