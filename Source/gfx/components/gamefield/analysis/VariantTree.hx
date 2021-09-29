@@ -153,8 +153,8 @@ class VariantTree extends Sprite
 
         var parentCode:String = parentPath.join(":");
         var parentNode:Link = nodes.get(parentCode);
-        var parentCenterX:Float = parentNode.x + parentNode.width / 2;
-        var parentBottomY:Float = parentNode.y + parentNode.height + 5;
+        var parentCenterX:Float = parentNode == null? 0 : parentNode.x + parentNode.width / 2;
+        var parentBottomY:Float = parentNode == null? 0 : parentNode.y + parentNode.height + 5;
 
         createNodeNaive(nodePath, nodeCode, nodeText, parentCenterX, parentBottomY, w -> parentCenterX-w/2);
         familyWidths.set(nodeCode, nodes.get(nodeCode).width + BLOCK_INTERVAL_X);

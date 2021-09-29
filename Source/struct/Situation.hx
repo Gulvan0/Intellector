@@ -217,14 +217,13 @@ class Situation
     public function serialize():String
     {
         var s = PieceColor.letter(turnColor);
-        for (t in 0...63)
-        {
-            var fig = figureArray[t];
-            if (fig.type == null)
-                s += '0';
-            else
-                s += '${PieceType.letter(fig.type)}${PieceColor.letter(fig.color)}';
-        }
+        for (i in 0...9) 
+            for (j in 0...(7 - i % 2))
+            {
+                var fig = figureArray[j * 9 + i];
+                if (fig.type != null)
+                    s += '$i$j${PieceType.letter(fig.type)}${PieceColor.letter(fig.color)}';
+            }
         return s;
     }
 

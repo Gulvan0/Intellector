@@ -36,6 +36,9 @@ class PlayingField extends Field
 
     private override function onPress(e:MouseEvent) 
     {
+        if (dialogShown)
+            return;
+
         rmbSelectionBackToNormal();
         if (!playersTurn || terminated)
             return;
@@ -62,7 +65,7 @@ class PlayingField extends Field
                 else if (Rules.possible(selectedFigureLocation, pressLocation, getHex))
                     initiateMove(selectedFigureLocation, pressLocation);
                 else if (alreadySelectedFigure.color == pressedFigure.color)
-                    toSelectedState(pressLocation);
+                    toDragState(pressLocation);
                 else 
                     return;
             default:
@@ -84,6 +87,8 @@ class PlayingField extends Field
             case Dragging(draggedFigureLocation, shadowLocation):
                 pressLoc = draggedFigureLocation;
         }
+
+        toNeutralState();
 
         if (releaseLoc == null)
             disposeFigure(figures[pressLoc.j][pressLoc.i], pressLoc);

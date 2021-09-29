@@ -156,7 +156,6 @@ class Field extends Sprite
 
     private function onMove(e:MouseEvent) 
     {
-        var newShadowLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
         var oldShadowLocation:IntPoint;
         var selectedLocation:IntPoint;
 
@@ -172,13 +171,15 @@ class Field extends Sprite
                 oldShadowLocation = shadowLocation;
         }
 
-        if (newShadowLocation == oldShadowLocation)
+        var newShadowLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
+
+        if (newShadowLocation.equals(oldShadowLocation))
             return;
         
         if (newShadowLocation != null && Rules.possible(selectedLocation, newShadowLocation, getHex))
             hexes[newShadowLocation.j][newShadowLocation.i].select();
 
-        if (oldShadowLocation != null && oldShadowLocation != selectedLocation)
+        if (oldShadowLocation != null && !oldShadowLocation.equals(selectedLocation))
             hexes[oldShadowLocation.j][oldShadowLocation.i].deselect();
 
         switch state 
@@ -276,30 +277,44 @@ class Field extends Sprite
 
     private function initiateMove(from:IntPoint, to:IntPoint) 
     {
+        trace('initiate move called');
         var figure = getFigure(from);
         var moveOntoFigure = getFigure(to);
         var nearIntellector:Bool = Rules.areNeighbours(from, currentSituation.intellectorPos[figure.color]);
-        
-        dialogShown = true;
 
         var onCanceled:Void->Void = onMoveCanceled.bind(from, figure);
         var simplePly:Ply = Ply.construct(from, to);
 
         if (nearIntellector && moveOntoFigure != null && moveOntoFigure.color != figure.color && moveOntoFigure.type != figure.type && figure.type != Progressor && moveOntoFigure.type != Intellector)
         {
-            var chameleonPly:Ply = Ply.construct(from, to, moveOntoFigure.type);
-            Dialogs.chameleonConfirm(move.bind(chameleonPly, Own), move.bind(simplePly, Own), onCanceled);
+            function onChameleonDecisionMade(morph:Bool)
+            {
+                dialogShown = false;
+
+                if (morph)
+                {
+                    var chameleonPly:Ply = Ply.construct(from, to, moveOntoFigure.type);
+                    move(chameleonPly, Own);
+                }
+                else
+                    move(simplePly, Own);
+            }
+            dialogShown = true;
+            Dialogs.chameleonConfirm(onChameleonDecisionMade.bind(true), onChameleonDecisionMade.bind(false), onCanceled);
         }
         else if (to.isFinalForColor(figure.color) && figure.type == Progressor && moveOntoFigure.type != Intellector)
         {
             function onPromotionSelected(piece:PieceType)
             {
+                dialogShown = false;
+
                 var promotionPly:Ply = Ply.construct(from, to, piece);
                 move(promotionPly, Own);
             }
+            dialogShown = true;
             Dialogs.promotionSelect(figure.color, onPromotionSelected, onCanceled);
         }
-        else 
+        else
             move(simplePly, Own);
     }
 
@@ -311,6 +326,7 @@ class Field extends Sprite
 
     public function move(ply:Ply, type:MoveType) 
     {
+        trace('move called');
         if (type != Actualization)
             TimeMachine.endPly(this);
 
@@ -478,20 +494,27 @@ class Field extends Sprite
             case Neutral:
                 return;
             case Dragging(draggedFigureLocation, shadowLocation):
+                removeMarkers(draggedFigureLocation);
                 var draggedFigure = getFigure(draggedFigureLocation);
                 if (draggedFigure != null)
                     draggedFigure.stopDrag();
-                var shadowHexagon = hexes[shadowLocation.j][shadowLocation.i];
-                if (shadowHexagon != null)
-                    shadowHexagon.deselect();
+                if (shadowLocation != null)
+                {
+                    var shadowHexagon = hexes[shadowLocation.j][shadowLocation.i];
+                    if (shadowHexagon != null)
+                        shadowHexagon.deselect();
+                }
             case Selected(selectedFigureLocation, shadowLocation):
                 removeMarkers(selectedFigureLocation);
                 var selectedHexagon = hexes[selectedFigureLocation.j][selectedFigureLocation.i];
                 if (selectedHexagon != null)
                     selectedHexagon.deselect();
-                var shadowHexagon = hexes[shadowLocation.j][shadowLocation.i];
-                if (shadowHexagon != null)
-                    shadowHexagon.deselect();
+                if (shadowLocation != null)
+                {
+                    var shadowHexagon = hexes[shadowLocation.j][shadowLocation.i];
+                    if (shadowHexagon != null)
+                        shadowHexagon.deselect();
+                }
         }
         state = Neutral;
     }

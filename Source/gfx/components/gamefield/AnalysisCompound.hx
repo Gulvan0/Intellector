@@ -172,8 +172,8 @@ class AnalysisCompound extends GameCompound
         super(Analysis, field, null, null, null, onReturn);
 
         panel = new RightPanel();
-        panel.x = field.x + field.width + 10;
-        panel.y = field.y + (field.getHeight() - 40 - Math.sqrt(3) * Field.a) / 2;
+        panel.x = field.right + 10;
+        panel.y = field.top;
         panel.onClearPressed = onClearPressed;
         panel.onResetPressed = onResetPressed;
         panel.onAnalyzePressed = onAnalyzePressed;

@@ -76,6 +76,9 @@ class AnalysisField extends Field
 
     private override function onPress(e:MouseEvent) 
     {
+        if (dialogShown)
+            return;
+
         rmbSelectionBackToNormal();
 
         var pressLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
@@ -93,6 +96,7 @@ class AnalysisField extends Field
 
     private override function onRelease(e:MouseEvent) 
     {
+        trace('release handler triggered');
         var pressLoc:IntPoint;
         var releaseLoc = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
@@ -103,6 +107,8 @@ class AnalysisField extends Field
             case Dragging(draggedFigureLocation, shadowLocation):
                 pressLoc = draggedFigureLocation;
         }
+
+        toNeutralState();
 
         if (releaseLoc == null)
             disposeFigure(figures[pressLoc.j][pressLoc.i], pressLoc);
@@ -119,12 +125,14 @@ class AnalysisField extends Field
 
     private function pressHandler(pressLocation:Null<IntPoint>) 
     {
+        trace('press handler triggered');
         var pressedFigure:Null<Figure> = getFigure(pressLocation);
 
         switch state 
         {
             case Neutral:
-                if (pressedFigure == null || pressedFigure.color != currentSituation.turnColor)
+                var shownTurnColor = (plyHistory.length - plyPointer) % 2 == 0? currentSituation.turnColor : opposite(currentSituation.turnColor);
+                if (pressedFigure == null || pressedFigure.color != shownTurnColor)
                     return;
 
                 toSelectedState(pressLocation);
@@ -134,10 +142,13 @@ class AnalysisField extends Field
                 var alreadySelectedFigure:Null<Figure> = getFigure(selectedFigureLocation);
                 if (pressLocation == null || pressLocation.equals(selectedFigureLocation))
                     return;
-                else if (alreadySelectedFigure.color == pressedFigure.color)
-                    toSelectedState(pressLocation);
                 else if (Rules.possible(selectedFigureLocation, pressLocation, getHex) || editMode == Move)
                     actionOnFigureMoved(selectedFigureLocation, pressLocation);
+                else if (alreadySelectedFigure.color == pressedFigure.color)
+                {
+                    toSelectedState(pressLocation);
+                    toDragState(pressLocation);
+                }
                 else 
                     return;
             default:
@@ -146,6 +157,7 @@ class AnalysisField extends Field
 
     private function actionOnFigureMoved(from:IntPoint, to:IntPoint) 
     {
+        trace('action on figure moved called');
         var movingFigure:Null<Figure> = getFigure(from);
         if (editMode == Move)
         {

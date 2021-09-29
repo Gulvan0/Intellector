@@ -30,7 +30,7 @@ class Rules
 
     public static function possible(from:IntPoint, to:IntPoint, getHex:Null<IntPoint>->Hex):Bool 
     {
-        return possibleFields(from, getHex).has(to);
+        return possibleFields(from, getHex).find(to.equals) != null;
     }
 
     public static function isCastle(ply:Ply, situation:Situation) 

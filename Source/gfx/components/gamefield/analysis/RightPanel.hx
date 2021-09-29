@@ -1,5 +1,7 @@
 package gfx.components.gamefield.analysis;
 
+import openfl.events.Event;
+import haxe.ui.components.Image;
 import struct.Ply;
 import utils.AssetManager;
 import gfx.components.gamefield.common.MoveNavigator;
@@ -198,6 +200,9 @@ class RightPanel extends Sprite
         navigator = new MoveNavigator(m -> {scrollingCallback(m);});
         navigator.horizontalAlign = 'center';
 
+        var setPositionBtn:Button = createSimpleBtn(ANALYSIS_SET_POSITION, 300, showPositionEditor);
+        setPositionBtn.horizontalAlign = 'center';
+
         var exportSIPBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_SIP, 300, () -> {onExportSIPRequested();});
         exportSIPBtn.horizontalAlign = 'center';
 
@@ -212,18 +217,19 @@ class RightPanel extends Sprite
         scoreLabel.textAlign = "center";
         scoreLabel.horizontalAlign = 'center';
 
-        var setPositionBtn:Button = createSimpleBtn(ANALYSIS_SET_POSITION, 300, showPositionEditor);
-        setPositionBtn.horizontalAlign = 'center';
-
         var overviewVBox:VBox = new VBox();
+        overviewVBox.horizontalAlign = 'center';
+        overviewVBox.verticalAlign = 'center';
         overviewVBox.addComponent(navigator);
+        overviewVBox.addComponent(setPositionBtn);
         overviewVBox.addComponent(exportSIPBtn);
         overviewVBox.addComponent(analysisBtns);
         overviewVBox.addComponent(scoreLabel);
-        overviewVBox.addComponent(setPositionBtn);
 
         var overviewTab:Box = new Box();
         overviewTab.text = Dictionary.getPhrase(ANALYSIS_OVERVIEW_TAB_NAME);
+        overviewTab.width = PANEL_WIDTH - 10;
+        overviewTab.height = 360;
         overviewTab.addComponent(overviewVBox);
 
         variantTree = new VariantTree(c -> {onBranchClick(c);}, c -> {onBranchCtrlClick(c);});
@@ -232,11 +238,15 @@ class RightPanel extends Sprite
         treeWrapper.sprite = variantTree;
 
         var treeContainer:ScrollView = new ScrollView();
-        treeContainer.width = PANEL_WIDTH;
-        treeContainer.height = PANEL_HEIGHT;
+        treeContainer.horizontalAlign = 'center';
+        treeContainer.verticalAlign = 'center';
+        treeContainer.width = PANEL_WIDTH - 10;
+        treeContainer.height = 360;
         treeContainer.addComponent(treeWrapper);
 
         var branchingTab:Box = new Box();
+        branchingTab.width = PANEL_WIDTH - 10;
+        branchingTab.height = 360;
         branchingTab.text = Dictionary.getPhrase(ANALYSIS_BRANCHES_TAB_NAME);
         branchingTab.addComponent(treeContainer);
 
@@ -247,19 +257,37 @@ class RightPanel extends Sprite
 
         var openingTab:Box = new Box();
         openingTab.text = Dictionary.getPhrase(ANALYSIS_OPENINGS_TAB_NAME);
+        openingTab.width = PANEL_WIDTH - 10;
+        openingTab.height = 360;
         openingTab.addComponent(openingTeaserLabel);
 
         controlTabs = new TabView();
         controlTabs.width = PANEL_WIDTH;
         controlTabs.height = PANEL_HEIGHT;
+        controlTabs.addComponent(overviewTab);
+        controlTabs.addComponent(branchingTab);
+        controlTabs.addComponent(openingTab);
     }
 
     private function constructEditorButton(mode:PosEditMode):Button 
     {
         var btn:Button = new Button();
-        btn.icon = haxe.ui.util.Variant.fromImageData(AssetManager.getAnalysisPosEditorBtnIcon(mode));
+        var bmpData = AssetManager.getAnalysisPosEditorBtnIcon(mode);
+        var scaleMultiplier = 45 / Math.max(bmpData.width, bmpData.height);
+        btn.icon = haxe.ui.util.Variant.fromImageData(bmpData);
         btn.width = 50;
         btn.height = 50;
+
+        function resizeIcon(e:Event) 
+        {
+            btn.removeEventListener(Event.ADDED_TO_STAGE, resizeIcon);
+            var imgComponent = btn.findComponent(Image);
+            imgComponent.width *= scaleMultiplier;
+            imgComponent.height *= scaleMultiplier;
+        }
+
+        btn.addEventListener(Event.ADDED_TO_STAGE, resizeIcon);
+        
         btn.toggle = true;
         btn.onClick = e -> {
             pressedEditModeBtn.selected = false;

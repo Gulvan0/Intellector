@@ -53,6 +53,7 @@ class AssetManager
     public static function init() 
     {
         initPieces();
+        initOther();
     }
 
     private static function initPieces()
