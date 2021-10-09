@@ -72,6 +72,7 @@ class Field extends Sprite
     public var figures:Array<Array<Null<Figure>>>;
 
     public var currentSituation:Situation;
+    public var shownSituation:Situation;
     public var plyHistory:Array<ReversiblePly>;
     public var plyPointer:Int;
     public var autoAppendHistory:Bool = true;
@@ -86,7 +87,7 @@ class Field extends Sprite
 
     private var rmbStart:Null<IntPoint>;
 
-    public var playersTurn:Bool = true;
+    private var branchingAllowed:Bool = false;
 
     public function get_left():Float
     {
@@ -116,6 +117,7 @@ class Field extends Sprite
         drawnArrows = [];
 
         currentSituation = Situation.starting();
+        shownSituation = currentSituation.copy();
         plyHistory = [];
         plyPointer = 0;
 
@@ -173,7 +175,7 @@ class Field extends Sprite
 
         var newShadowLocation = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
-        if (newShadowLocation.equals(oldShadowLocation))
+        if (equal(newShadowLocation, oldShadowLocation))
             return;
         
         if (newShadowLocation != null && Rules.possible(selectedLocation, newShadowLocation, getHex))
@@ -206,13 +208,23 @@ class Field extends Sprite
         
         TimeMachine.endPly(this);
 
-        var toRevert:Array<ReversiblePly> = plyHistory.splice(plyPointer - cnt, cnt);
-        TimeMachine.undoSequence(this, toRevert, cnt < plyPointer? plyHistory[plyPointer - cnt - 1] : null);
-        currentSituation = currentSituation.unmakeMoves(toRevert);
-        plyPointer -= cnt;
+        var toRevert:Array<ReversiblePly> = plyHistory.splice(plyHistory.length - cnt, cnt);
 
-        if (cnt % 2 == 1)
-            playersTurn = !playersTurn;
+        TimeMachine.undoSequence(this, toRevert, cnt < plyPointer? plyHistory[plyPointer - cnt - 1] : null);
+        
+        currentSituation = currentSituation.unmakeMoves(toRevert);
+        shownSituation = currentSituation.copy();
+        plyPointer = Math.min(plyPointer, plyHistory.length);
+    }
+
+    public function revertToShown() 
+    {
+        var revertCnt:Int = plyHistory.length - plyPointer;
+        if (revertCnt < 1)
+            return;
+
+        plyHistory.splice(plyPointer, revertCnt);
+        currentSituation = shownSituation.copy();
     }
 
     //----------------------------------------------------------------------------------------------------------
@@ -277,10 +289,9 @@ class Field extends Sprite
 
     private function initiateMove(from:IntPoint, to:IntPoint) 
     {
-        trace('initiate move called');
         var figure = getFigure(from);
         var moveOntoFigure = getFigure(to);
-        var nearIntellector:Bool = Rules.areNeighbours(from, currentSituation.intellectorPos[figure.color]);
+        var nearIntellector:Bool = Rules.areNeighbours(from, shownSituation.intellectorPos[figure.color]);
 
         var onCanceled:Void->Void = onMoveCanceled.bind(from, figure);
         var simplePly:Ply = Ply.construct(from, to);
@@ -299,18 +310,20 @@ class Field extends Sprite
                 else
                     move(simplePly, Own);
             }
+
             dialogShown = true;
-            Dialogs.chameleonConfirm(onChameleonDecisionMade.bind(true), onChameleonDecisionMade.bind(false), onCanceled);
+            Dialogs.chameleonConfirm(onChameleonDecisionMade, onCanceled);
         }
         else if (to.isFinalForColor(figure.color) && figure.type == Progressor && moveOntoFigure.type != Intellector)
         {
             function onPromotionSelected(piece:PieceType)
             {
                 dialogShown = false;
-
+                
                 var promotionPly:Ply = Ply.construct(from, to, piece);
                 move(promotionPly, Own);
             }
+
             dialogShown = true;
             Dialogs.promotionSelect(figure.color, onPromotionSelected, onCanceled);
         }
@@ -326,12 +339,11 @@ class Field extends Sprite
 
     public function move(ply:Ply, type:MoveType) 
     {
-        trace('move called');
-        if (type != Actualization)
+        if (type != Actualization && !branchingAllowed)
             TimeMachine.endPly(this);
 
         if (type != Actualization)
-            AssetManager.playPlySound(ply, currentSituation);
+            AssetManager.playPlySound(ply, shownSituation);
         
         if (type == Own)
             onOwnMoveMade(ply);
@@ -341,15 +353,16 @@ class Field extends Sprite
 
         if (autoAppendHistory)
             appendToHistory(ply);
-
-        playersTurn = !playersTurn;
     }
 
     public function appendToHistory(ply:Ply)
     {
+        if (plyPointer != plyHistory.length)
+            throw "Field.appendToHistory() called with pointer not being at the end of a line";
         plyHistory.push(ply.toReversible(currentSituation));
         plyPointer++;
         currentSituation = currentSituation.makeMove(ply);
+        shownSituation = currentSituation.copy();
     }
 
     public function translateFigures(ply:Ply) 
@@ -371,7 +384,7 @@ class Field extends Sprite
         figures[ply.from.j][ply.from.i] = null;
 
         if (figMoveOnto != null)
-            if (Rules.isCastle(ply, currentSituation))
+            if (Rules.isCastle(ply, shownSituation))
             {
                 disposeFigure(figMoveOnto, ply.from);
                 figures[ply.from.j][ply.from.i] = figMoveOnto;
@@ -494,10 +507,16 @@ class Field extends Sprite
             case Neutral:
                 return;
             case Dragging(draggedFigureLocation, shadowLocation):
-                removeMarkers(draggedFigureLocation);
-                var draggedFigure = getFigure(draggedFigureLocation);
-                if (draggedFigure != null)
-                    draggedFigure.stopDrag();
+                if (draggedFigureLocation != null)
+                {
+                    removeMarkers(draggedFigureLocation);
+                    var departureHexagon = hexes[draggedFigureLocation.j][draggedFigureLocation.i];
+                    if (departureHexagon != null)
+                        departureHexagon.deselect();
+                    var draggedFigure = getFigure(draggedFigureLocation);
+                    if (draggedFigure != null)
+                        draggedFigure.stopDrag();
+                }
                 if (shadowLocation != null)
                 {
                     var shadowHexagon = hexes[shadowLocation.j][shadowLocation.i];
@@ -505,10 +524,13 @@ class Field extends Sprite
                         shadowHexagon.deselect();
                 }
             case Selected(selectedFigureLocation, shadowLocation):
-                removeMarkers(selectedFigureLocation);
-                var selectedHexagon = hexes[selectedFigureLocation.j][selectedFigureLocation.i];
-                if (selectedHexagon != null)
-                    selectedHexagon.deselect();
+                if (selectedFigureLocation != null)
+                {
+                    removeMarkers(selectedFigureLocation);
+                    var selectedHexagon = hexes[selectedFigureLocation.j][selectedFigureLocation.i];
+                    if (selectedHexagon != null)
+                        selectedHexagon.deselect();
+                }
                 if (shadowLocation != null)
                 {
                     var shadowHexagon = hexes[shadowLocation.j][shadowLocation.i];
@@ -528,11 +550,12 @@ class Field extends Sprite
         figure.startDrag(true);
     }
 
-    private function toSelectedState(hexLocation:IntPoint) 
+    private function toSelectedState(hexLocation:IntPoint, ?noMarkers:Bool = false) 
     {
         state = Selected(hexLocation, hexLocation);
         hexes[hexLocation.j][hexLocation.i].select();
-        addMarkers(hexLocation);
+        if (!noMarkers)
+            addMarkers(hexLocation);
     }
 
     public function rmbSelectionBackToNormal() 

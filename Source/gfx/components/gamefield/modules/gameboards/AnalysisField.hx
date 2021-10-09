@@ -22,7 +22,7 @@ class AnalysisField extends Field
 {
     public var onMadeMove:Void->Void;
 
-    private var editMode:Null<PosEditMode>;
+    public var editMode(default, null):Null<PosEditMode>;
     private var lastApprovedSituationSIP:String;
     
     public function new() 
@@ -30,6 +30,7 @@ class AnalysisField extends Field
         super();
         orientationColor = White;
         autoAppendHistory = false;
+        branchingAllowed = true;
 
         hexes = Factory.produceHexes(this, true);
         disposeLetters();
@@ -49,6 +50,7 @@ class AnalysisField extends Field
         removePiecesClearSelections();
         figures = [for (j in 0...7) [for (i in 0...9) null]];
         currentSituation = Situation.empty();
+        shownSituation = currentSituation.copy();
     }
 
     private function removePiecesClearSelections()
@@ -69,6 +71,7 @@ class AnalysisField extends Field
     {
         figures = Factory.produceFiguresFromDefault(true, this);
         currentSituation = Situation.starting();
+        shownSituation = currentSituation.copy();
         lastApprovedSituationSIP = currentSituation.serialize();
     }
 
@@ -94,9 +97,14 @@ class AnalysisField extends Field
         }
     }
 
+    private override function onMove(e:MouseEvent) 
+    {
+        if (editMode == null)
+            super.onMove(e);
+    }
+
     private override function onRelease(e:MouseEvent) 
     {
-        trace('release handler triggered');
         var pressLoc:IntPoint;
         var releaseLoc = posToIndexes(e.stageX - this.x, e.stageY - this.y);
 
@@ -115,7 +123,7 @@ class AnalysisField extends Field
         else if (pressLoc.equals(releaseLoc))
         {
             disposeFigure(figures[pressLoc.j][pressLoc.i], pressLoc);
-            toSelectedState(releaseLoc);
+            toSelectedState(releaseLoc, editMode != null);
         }
         else if (Rules.possible(pressLoc, releaseLoc, getHex) || editMode == Move)
             actionOnFigureMoved(pressLoc, releaseLoc);
@@ -125,17 +133,15 @@ class AnalysisField extends Field
 
     private function pressHandler(pressLocation:Null<IntPoint>) 
     {
-        trace('press handler triggered');
         var pressedFigure:Null<Figure> = getFigure(pressLocation);
 
         switch state 
         {
             case Neutral:
-                var shownTurnColor = (plyHistory.length - plyPointer) % 2 == 0? currentSituation.turnColor : opposite(currentSituation.turnColor);
-                if (pressedFigure == null || pressedFigure.color != shownTurnColor)
+                if (pressedFigure == null || pressedFigure.color != shownSituation.turnColor)
                     return;
 
-                toSelectedState(pressLocation);
+                toSelectedState(pressLocation, editMode != null);
                 toDragState(pressLocation);
             case Selected(selectedFigureLocation, shadowLocation):
                 toNeutralState();
@@ -146,7 +152,7 @@ class AnalysisField extends Field
                     actionOnFigureMoved(selectedFigureLocation, pressLocation);
                 else if (alreadySelectedFigure.color == pressedFigure.color)
                 {
-                    toSelectedState(pressLocation);
+                    toSelectedState(pressLocation, editMode != null);
                     toDragState(pressLocation);
                 }
                 else 
@@ -157,37 +163,54 @@ class AnalysisField extends Field
 
     private function actionOnFigureMoved(from:IntPoint, to:IntPoint) 
     {
-        trace('action on figure moved called');
         var movingFigure:Null<Figure> = getFigure(from);
         if (editMode == Move)
         {
-            removeChild(movingFigure);
-            setFigure(to, movingFigure);
+            if (movingFigure.type != Intellector) //Intellector will be removed anyway during setFigure()
+                deleteFigureUnsafe(from, movingFigure);
+            setFigure(to, new Figure(movingFigure.type, movingFigure.color));
         }
         else if (editMode == null)
             initiateMove(from, to);
     }
 
-    private function deleteFigure(location:IntPoint) 
+    private function deleteFigure(location:Null<IntPoint>) 
     {
+        var currentOccupier:Figure = getFigure(location);
+        if (currentOccupier != null)
+            deleteFigureUnsafe(location, currentOccupier);
+    }
+
+    private function deleteFigureUnsafe(location:Null<IntPoint>, figure:Figure) 
+    {
+        removeChild(figure);
+        figures[location.j][location.i] = null;
+        currentSituation.setWithZobris(location, Hex.empty(), figure.hex);
+    }
+
+    private function setFigure(location:Null<IntPoint>, figure:Figure) 
+    {
+        if (location == null)
+            return;
+
+        if (figure.type == Intellector)
+        {
+            var intPos = currentSituation.intellectorPos.get(figure.color);
+            if (intPos != null)
+                deleteFigure(intPos);
+        }  
+
         var currentOccupier:Figure = getFigure(location);
         if (currentOccupier != null)
         {
             removeChild(currentOccupier);
-            figures[location.j][location.i] = null;
-            currentSituation.setWithZobris(location, currentOccupier.hex, Hex.empty());
+            currentSituation.setWithZobris(location, figure.hex, currentOccupier.hex);
         }
-    }
-
-    private function setFigure(location:IntPoint, figure:Figure) 
-    {
-        var currentOccupier:Figure = getFigure(location);
-        if (currentOccupier != null)
-            removeChild(currentOccupier);
+        else
+            currentSituation.setWithZobris(location, figure.hex, Hex.empty());
         
         figures[location.j][location.i] = figure;
         Factory.addFigure(figure, location, orientationColor == White, this);
-        currentSituation.setWithZobris(location, currentOccupier.hex, figure.hex);
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------
@@ -201,7 +224,7 @@ class AnalysisField extends Field
     public function changeEditMode(mode:PosEditMode) 
     {
         if (editMode == null)
-            lastApprovedSituationSIP = currentSituation.serialize();
+            lastApprovedSituationSIP = shownSituation.serialize();
         editMode = mode;
     }
 
@@ -210,12 +233,14 @@ class AnalysisField extends Field
         removePiecesClearSelections();
         dropHistory();
         currentSituation = SituationDeserializer.deserialize(sip);
+        shownSituation = currentSituation.copy();
         figures = Factory.produceFiguresFromSituation(currentSituation, true, this);
     }
 
     public function applyChanges() 
     {
         lastApprovedSituationSIP = currentSituation.serialize();
+        shownSituation = currentSituation.copy();
         dropHistory();
         editMode = null;
     }

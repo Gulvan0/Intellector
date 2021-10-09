@@ -144,10 +144,19 @@ class VariantTree extends Sprite
     }
 
     /**Reference variant should be passed BEFORE any corrections to it**/
-    public function addChildNode(parentPath:Array<Int>, nodeText:String, highlighted:Bool, referenceVariant:Variant)
+    public function addChildNode(parentPath:Array<Int>, nodeText:String, selected:Bool, referenceVariant:Variant)
     {
-        //Draw node and arrow and add their mappings
+        trace('add child node: $nodeText');
         var nodeNum:Int = referenceVariant.childCount(parentPath);
+
+        if (selected)
+        {
+            if (parentPath.join(":") != selectedBranch.join(":"))
+                selectBranch(parentPath);
+            selectedBranch.push(nodeNum);
+        }
+
+        //Draw node and arrow and add their mappings
         var nodePath:Array<Int> = parentPath.concat([nodeNum]);
         var nodeCode:String = nodePath.join(":");
 
@@ -156,23 +165,28 @@ class VariantTree extends Sprite
         var parentCenterX:Float = parentNode == null? 0 : parentNode.x + parentNode.width / 2;
         var parentBottomY:Float = parentNode == null? 0 : parentNode.y + parentNode.height + 5;
 
-        createNodeNaive(nodePath, nodeCode, nodeText, parentCenterX, parentBottomY, w -> parentCenterX-w/2);
+        var offset:Float = 0;
+        for (i in 0...nodeNum)
+            offset += familyWidths[parentPath.concat([i]).join(":")];
+        var leftX:Float = offset + (parentNode == null? 0 : parentNode.x);
+
+        createNodeNaive(nodePath, nodeCode, nodeText, parentCenterX, parentBottomY, selected, leftX);
         familyWidths.set(nodeCode, nodes.get(nodeCode).width + BLOCK_INTERVAL_X);
 
         //Update upstream parents' family widths and store deltas for the next step
         var upParentPath = parentPath.copy();
-        var childDeltaWidth = familyWidths.get(nodeCode);
-        var deltaWidthsByDepth:Map<Int, Float> = [nodePath.length => childDeltaWidth];
-        while (upParentPath.length > 1)
+        var childDeltaWidth = Math.max(0, offset + familyWidths.get(nodeCode) - familyWidths.get(upParentPath.join(":")));
+        var deltaWidthsByDepth:Map<Int, Float> = [];
+        while (upParentPath.length > 0)
         {
             var parentCode = upParentPath.join(":");
             var parentFamWidth = familyWidths.get(parentCode);
             var parentOwnWidth = nodes.get(parentCode).width + BLOCK_INTERVAL_X;
+            var newParentFamWidth = Math.max(parentOwnWidth, parentFamWidth + childDeltaWidth);
 
-            if (parentOwnWidth == parentFamWidth)
+            if (newParentFamWidth == parentFamWidth)
                 break;
 
-            var newParentFamWidth = Math.max(parentOwnWidth, parentFamWidth + childDeltaWidth);
             familyWidths.set(parentCode, newParentFamWidth);
             childDeltaWidth = newParentFamWidth - parentFamWidth;
             deltaWidthsByDepth.set(upParentPath.length, childDeltaWidth);
@@ -191,15 +205,18 @@ class VariantTree extends Sprite
 
             for (path in siblingFamilyPaths)
             {
+                if (!deltaWidthsByDepth.exists(path.length))
+                    continue;
                 var code = path.join(":");
-                var deltaWidth = deltaWidthsByDepth[path.length];
+                var deltaWidth = deltaWidthsByDepth[siblingPath.length];
                 nodes[code].x += deltaWidth;
                 arrows[code].changeDestination(new Point(arrows[code].to.x + deltaWidth, arrows[code].to.y));
             }
         }
+        trace(familyWidths);
     }
 
-    private function createNodeNaive(path:Array<Int>, code:String, nodeText:String, parentCenterX:Float, parentBottomY:Float, getChildLeftX:(childWidth:Float)->Float)
+    private function createNodeNaive(path:Array<Int>, code:String, nodeText:String, parentCenterX:Float, parentBottomY:Float, selected:Bool, leftX:Float)
     {
         var link:Link = new Link();
         link.text = nodeText;
@@ -213,10 +230,12 @@ class VariantTree extends Sprite
         addChild(link);
         link.validateNow();
 
-        link.x = getChildLeftX(link.width);
+        link.x = leftX;
         link.y = parentBottomY + BLOCK_INTERVAL_Y;
 
-        var arrow:Arrow = new Arrow(new Point(parentCenterX, parentBottomY), new Point(link.x + link.width/2, link.y), false);
+        trace('new node added at (${link.x}, ${link.y})');
+
+        var arrow:Arrow = new Arrow(new Point(parentCenterX, parentBottomY), new Point(link.x + link.width/2, link.y), selected);
         arrows.set(code, arrow);
         addChild(arrow);
     }
@@ -271,6 +290,10 @@ class VariantTree extends Sprite
     public function init(variant:Variant, nodeTexts:Map<String, String>) 
     {
         removeChildren();
+        arrows = [];
+        nodes = [];
+        familyWidths = [];
+        selectedBranch = [];
         drawChildrenRecursive(variant, [], 0, 0, nodeTexts);
     }
 

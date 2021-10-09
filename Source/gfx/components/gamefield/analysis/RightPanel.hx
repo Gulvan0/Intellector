@@ -28,6 +28,7 @@ import haxe.ui.containers.TabView;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 import gfx.components.gamefield.analysis.PosEditMode;
+import haxe.ui.util.Variant as UIVariant;
 using utils.CallbackTools;
 
 class RightPanel extends Sprite
@@ -38,11 +39,17 @@ class RightPanel extends Sprite
     private var positionSetupBox:VBox;
     private var controlTabs:TabView;
     private var pressedEditModeBtn:Button;
+    private var defaultEditModeBtn:Button;
 
     private static var defaultScoreStyle:Style = {fontSize: 24};
     private var scoreLabel:Label;
+    private var turnColorSelectOptions:Map<PieceColor, OptionBox>;
     public var navigator(default, null):MoveNavigator;
     public var variantTree(default, null):VariantTree;
+    
+    private var variantTreeSprite:Sprite;
+    private var variantTreeVBox:VBox;
+    private var overviewTab:Box;
 
     public var onClearPressed:Void->Void;
     public var onResetPressed:Void->Void;
@@ -68,8 +75,24 @@ class RightPanel extends Sprite
         scoreLabel.text = "...";
     }
 
+    public function updateBranchingTabContentSize() 
+    {
+        variantTreeVBox.width = Math.max(390, 145 + variantTreeSprite.width);
+		variantTreeVBox.height = Math.max(360, 20 + variantTreeSprite.height);
+    }
+
+    public function changeEditorColorOptions(selectedColor:PieceColor) 
+    {
+        turnColorSelectOptions[selectedColor].selected = true;
+        turnColorSelectOptions[opposite(selectedColor)].selected = false;
+    }
+
     public function showPositionEditor() 
     {
+        pressedEditModeBtn.selected = false;
+        defaultEditModeBtn.selected = true;
+        pressedEditModeBtn = defaultEditModeBtn;
+
         controlTabs.visible = false;
         positionSetupBox.visible = true;
     }
@@ -87,7 +110,7 @@ class RightPanel extends Sprite
 
     public function clearAnalysisScore() 
     {
-        scoreLabel.text = "";
+        scoreLabel.text = "-";
     }
 
     public function deprecateScore() 
@@ -116,20 +139,10 @@ class RightPanel extends Sprite
         for (mode in [Move, Set(Progressor, White), Set(Aggressor, White), Set(Liberator, White), Set(Defensor, White), Set(Dominator, White), Set(Intellector, White), Delete, Set(Progressor, Black), Set(Aggressor, Black), Set(Liberator, Black), Set(Defensor, Black), Set(Dominator, Black), Set(Intellector, Black)])
             editModeButtons.addComponent(constructEditorButton(mode));
 
-        var clearButton:Button = new Button();
-        clearButton.horizontalAlign = 'center';
-        clearButton.width = 100;
-        clearButton.text = Dictionary.getPhrase(ANALYSIS_CLEAR);
-        clearButton.onClick = e -> {onClearPressed();};
-
-        var resetButton:Button = new Button();
-        resetButton.horizontalAlign = 'center';
-        resetButton.width = 100;
-        resetButton.text = Dictionary.getPhrase(ANALYSIS_RESET);
-        resetButton.onClick = e -> {onResetPressed();};
-
         var turnColorSelectBox:HBox = new HBox();
         turnColorSelectBox.horizontalAlign = 'center';
+
+        turnColorSelectOptions = [];
 
         for (color in PieceColor.createAll())
         {
@@ -142,27 +155,42 @@ class RightPanel extends Sprite
             };
             if (color == White)
                 optionBox.selected = true;
+            turnColorSelectOptions.set(color, optionBox);
             turnColorSelectBox.addComponent(optionBox);
         }    
 
+        var clearButton:Button = new Button();
+        clearButton.width = 150;
+        clearButton.text = Dictionary.getPhrase(ANALYSIS_CLEAR);
+        clearButton.onClick = e -> {onClearPressed();};
+
+        var resetButton:Button = new Button();
+        resetButton.width = 150;
+        resetButton.text = Dictionary.getPhrase(ANALYSIS_RESET);
+        resetButton.onClick = e -> {onResetPressed();};
+
         var specialEditButtons:HBox = new HBox();
         specialEditButtons.horizontalAlign = 'center';
-        specialEditButtons.width = 300;
         specialEditButtons.addComponent(clearButton);
+        specialEditButtons.addComponent(Shapes.hSpacer(30));
         specialEditButtons.addComponent(resetButton);
 
         var fromSIPLabel:Label = new Label();
         fromSIPLabel.horizontalAlign = 'left';
-        fromSIPLabel.text = "From SIP:";
+        fromSIPLabel.text = Dictionary.getPhrase(FROM_SIP_LABEL);
         fromSIPLabel.customStyle = {fontSize: 20, fontItalic: true};
 
         var fromSIPInput:TextField = new TextField();
-        fromSIPInput.width = 340;
+        fromSIPInput.width = 310;
 
         var fromSIPApplyBtn:Button = new Button();
-        clearButton.width = 50;
-        clearButton.text = Dictionary.getPhrase(ANALYSIS_APPLY);
-        clearButton.onClick = e -> {onConstructFromSIPPressed(fromSIPInput.text);};
+        fromSIPApplyBtn.width = 80;
+        fromSIPApplyBtn.text = Dictionary.getPhrase(ANALYSIS_APPLY);
+        fromSIPApplyBtn.onClick = e -> {
+            var sip = fromSIPInput.text;
+            fromSIPInput.text = "";
+            onConstructFromSIPPressed(sip);
+        };
 
         var SIPInputBox:HBox = new HBox();
         clearButton.horizontalAlign = 'left';
@@ -171,13 +199,13 @@ class RightPanel extends Sprite
 
         var applyChagesBtn:Button = new Button();
         applyChagesBtn.horizontalAlign = 'center';
-        applyChagesBtn.width = 150;
+        applyChagesBtn.width = 300;
         applyChagesBtn.text = Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES);
         applyChagesBtn.onClick = e -> {onApplyChangesPressed();};  
 
         var discardChangesBtn:Button = new Button();
         discardChangesBtn.horizontalAlign = 'center';
-        discardChangesBtn.width = 150;
+        discardChangesBtn.width = 300;
         discardChangesBtn.text = Dictionary.getPhrase(ANALYSIS_DISCARD_CHANGES);
         discardChangesBtn.onClick = e -> {onDiscardChangesPressed();}; 
 
@@ -186,10 +214,14 @@ class RightPanel extends Sprite
         positionSetupBox.width = PANEL_WIDTH;
         positionSetupBox.height = PANEL_HEIGHT;
         positionSetupBox.addComponent(editModeButtons);
-        positionSetupBox.addComponent(turnColorSelectBox);
+        positionSetupBox.addComponent(Shapes.vSpacer(10));
         positionSetupBox.addComponent(specialEditButtons);
+        positionSetupBox.addComponent(Shapes.vSpacer(10));
+        positionSetupBox.addComponent(turnColorSelectBox);
+        positionSetupBox.addComponent(Shapes.vSpacer(40));
         positionSetupBox.addComponent(fromSIPLabel);
         positionSetupBox.addComponent(SIPInputBox);
+        positionSetupBox.addComponent(Shapes.vSpacer(40));
         positionSetupBox.addComponent(applyChagesBtn);
         positionSetupBox.addComponent(discardChangesBtn);
     }
@@ -200,19 +232,28 @@ class RightPanel extends Sprite
         navigator = new MoveNavigator(m -> {scrollingCallback(m);});
         navigator.horizontalAlign = 'center';
 
-        var setPositionBtn:Button = createSimpleBtn(ANALYSIS_SET_POSITION, 300, showPositionEditor);
+        var setPositionBtn:Button = createSimpleBtn(ANALYSIS_SET_POSITION, 300, () -> {
+            onEditModeChanged(Move);
+            showPositionEditor();
+        });
         setPositionBtn.horizontalAlign = 'center';
 
         var exportSIPBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_SIP, 300, () -> {onExportSIPRequested();});
         exportSIPBtn.horizontalAlign = 'center';
 
+        var analyzeWhiteBtn = createSimpleBtn(ANALYSIS_ANALYZE_WHITE, 150, () -> {onAnalyzePressed(White);});
+        analyzeWhiteBtn.disabled = true;
+        var analyzeBlackBtn = createSimpleBtn(ANALYSIS_ANALYZE_BLACK, 150, () -> {onAnalyzePressed(Black);});
+        analyzeBlackBtn.disabled = true;
+
         var analysisBtns:HBox = new HBox();
-        analysisBtns.addComponent(createSimpleBtn(ANALYSIS_ANALYZE_WHITE, 150, () -> {onAnalyzePressed(White);}));
-        analysisBtns.addComponent(createSimpleBtn(ANALYSIS_ANALYZE_BLACK, 150, () -> {onAnalyzePressed(Black);}));
+        analysisBtns.addComponent(analyzeWhiteBtn);
+        analysisBtns.addComponent(analyzeBlackBtn);
         analysisBtns.horizontalAlign = 'center';
 
         scoreLabel = new Label();
         scoreLabel.customStyle = defaultScoreStyle;
+        scoreLabel.text = "-";
         scoreLabel.width = 200;
         scoreLabel.textAlign = "center";
         scoreLabel.horizontalAlign = 'center';
@@ -226,31 +267,42 @@ class RightPanel extends Sprite
         overviewVBox.addComponent(analysisBtns);
         overviewVBox.addComponent(scoreLabel);
 
-        var overviewTab:Box = new Box();
+        overviewTab = new Box();
         overviewTab.text = Dictionary.getPhrase(ANALYSIS_OVERVIEW_TAB_NAME);
         overviewTab.width = PANEL_WIDTH - 10;
         overviewTab.height = 360;
         overviewTab.addComponent(overviewVBox);
 
         variantTree = new VariantTree(c -> {onBranchClick(c);}, c -> {onBranchCtrlClick(c);});
+		variantTree.x = 20; 
+		variantTree.y = 20; 
+
+        variantTreeSprite = new Sprite();
+        variantTreeSprite.addChild(variantTree);
 
         var treeWrapper:SpriteWrapper = new SpriteWrapper();
-        treeWrapper.sprite = variantTree;
+        treeWrapper.sprite = variantTreeSprite;
+		
+		variantTreeVBox = new VBox();
+		variantTreeVBox.width = 390;
+		variantTreeVBox.height = 360;
+		variantTreeVBox.addComponent(treeWrapper);
 
         var treeContainer:ScrollView = new ScrollView();
         treeContainer.horizontalAlign = 'center';
         treeContainer.verticalAlign = 'center';
         treeContainer.width = PANEL_WIDTH - 10;
-        treeContainer.height = 360;
-        treeContainer.addComponent(treeWrapper);
+        treeContainer.height = 463;
+        treeContainer.addComponent(variantTreeVBox);
 
         var branchingTab:Box = new Box();
         branchingTab.width = PANEL_WIDTH - 10;
-        branchingTab.height = 360;
+        branchingTab.height = 463;
         branchingTab.text = Dictionary.getPhrase(ANALYSIS_BRANCHES_TAB_NAME);
         branchingTab.addComponent(treeContainer);
 
         var openingTeaserLabel:Label = new Label();
+        openingTeaserLabel.customStyle = {fontSize: 20};
         openingTeaserLabel.horizontalAlign = 'center';
         openingTeaserLabel.verticalAlign = 'center';
         openingTeaserLabel.text = Dictionary.getPhrase(ANALYSIS_OPENINGS_TEASER_TEXT);
@@ -267,6 +319,24 @@ class RightPanel extends Sprite
         controlTabs.addComponent(overviewTab);
         controlTabs.addComponent(branchingTab);
         controlTabs.addComponent(openingTab);
+
+        controlTabs.addEventListener(Event.ADDED_TO_STAGE, onControlTabsAdded);
+        /*var v:Variant = new Variant();
+		new Timer(5000).run = () -> {
+            var a = v.extendPathLeftmost([]);
+			variantTree.addChildNode(a, "Lol", false,v);
+			v.addChildToNode(new Ply(), a);
+			variantTreeVBox.width = Math.max(390, 145 + variantTreeSprite.width);
+			variantTreeVBox.height = Math.max(360, 20 + variantTreeSprite.height);
+		}*/
+    }
+
+    private function onControlTabsAdded(e) 
+    {
+        controlTabs.removeEventListener(Event.ADDED_TO_STAGE, onControlTabsAdded);
+        //controlTabs.addComponentAt(overviewTab, 0);
+        controlTabs.pageIndex = 1;
+        Timer.delay(() -> {controlTabs.pageIndex = 0;}, 20);
     }
 
     private function constructEditorButton(mode:PosEditMode):Button 
@@ -274,7 +344,16 @@ class RightPanel extends Sprite
         var btn:Button = new Button();
         var bmpData = AssetManager.getAnalysisPosEditorBtnIcon(mode);
         var scaleMultiplier = 45 / Math.max(bmpData.width, bmpData.height);
-        btn.icon = haxe.ui.util.Variant.fromImageData(bmpData);
+        switch mode 
+        {
+            case Set(type, color):
+                if (type == Progressor)
+                    scaleMultiplier *= 0.7;
+                else if (type == Liberator || type == Defensor)
+                    scaleMultiplier *= 0.9;
+            default:
+        }
+        btn.icon = bmpData;
         btn.width = 50;
         btn.height = 50;
 
@@ -286,7 +365,8 @@ class RightPanel extends Sprite
             imgComponent.height *= scaleMultiplier;
         }
 
-        btn.addEventListener(Event.ADDED_TO_STAGE, resizeIcon);
+        if (mode != Move && mode != Delete)
+            btn.addEventListener(Event.ADDED_TO_STAGE, resizeIcon);
         
         btn.toggle = true;
         btn.onClick = e -> {
@@ -299,6 +379,7 @@ class RightPanel extends Sprite
         {
             btn.selected = true;
             pressedEditModeBtn = btn;
+            defaultEditModeBtn = btn;
         }
 
         return btn;

@@ -1,5 +1,7 @@
 package;
 
+import haxe.ui.containers.Box;
+import gfx.components.SpriteWrapper;
 import gfx.ScreenManager;
 import utils.AssetManager;
 import gfx.components.gamefield.analysis.VariantTree;

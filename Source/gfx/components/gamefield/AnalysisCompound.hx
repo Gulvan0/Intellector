@@ -22,17 +22,18 @@ class AnalysisCompound extends GameCompound
     {
         if (field.plyPointer == field.plyHistory.length)
             onContinuationMove(ply);
-        else if (field.plyHistory[field.plyPointer].equals(ply.toReversible(field.currentSituation)))
+        else if (field.plyHistory[field.plyPointer].equals(ply.toReversible(field.shownSituation)))
             onSubsequentMove(ply);
         else
             onBranchingMove(ply);
+        panel.updateBranchingTabContentSize();
     }
 
     private function onContinuationMove(ply:Ply)
     {
-        var parentPath = panel.variantTree.selectedBranch;
-        panel.variantTree.addChildNode(parentPath, ply.toNotation(field.currentSituation), true, variant);
-        panel.navigator.writePly(ply, field.currentSituation);
+        var parentPath = panel.variantTree.selectedBranch.copy();
+        panel.variantTree.addChildNode(parentPath, ply.toNotation(field.shownSituation), true, variant);
+        panel.navigator.writePly(ply, field.shownSituation);
         field.appendToHistory(ply);
         variant.addChildToNode(ply, parentPath);
     }
@@ -41,7 +42,7 @@ class AnalysisCompound extends GameCompound
     {
         panel.deprecateScore();
         field.plyPointer++;
-        field.currentSituation.makeMove(ply);
+        field.shownSituation = field.shownSituation.makeMove(ply);
     }
 
     private function onBranchingMove(ply:Ply) 
@@ -50,10 +51,10 @@ class AnalysisCompound extends GameCompound
         var plyNum = field.plyPointer;
         var plysToRevertCnt = field.plyHistory.length - plyNum;
         var parentPath = panel.variantTree.selectedBranch.slice(0, plyNum);
-        panel.variantTree.addChildNode(parentPath, ply.toNotation(field.currentSituation), true, variant);
+        panel.variantTree.addChildNode(parentPath, ply.toNotation(field.shownSituation), true, variant);
+        field.revertToShown();
         panel.navigator.revertPlys(plysToRevertCnt);
-        panel.navigator.writePly(ply, field.currentSituation);
-        field.plyHistory.splice(plyNum, plysToRevertCnt);
+        panel.navigator.writePly(ply, field.shownSituation);
         field.appendToHistory(ply);
         variant.addChildToNode(ply, parentPath);
     }
@@ -70,7 +71,10 @@ class AnalysisCompound extends GameCompound
         {
             var ply:Ply = plys[i];
             if (i < path.length)
+            {
                 field.move(ply, Actualization);
+                field.appendToHistory(ply);
+            }
             panel.navigator.writePly(ply, situation);
             situation = situation.makeMove(ply);
         }
@@ -87,6 +91,7 @@ class AnalysisCompound extends GameCompound
         }
         panel.variantTree.removeNode(path, variant);
         variant.removeNode(path);
+        panel.updateBranchingTabContentSize();
     }
 
     private function onClearPressed() 
@@ -103,20 +108,22 @@ class AnalysisCompound extends GameCompound
 
     private function onExportSIPRequest() 
     {
-        var sip:String = field.currentSituation.serialize();
+        var sip:String = field.shownSituation.serialize();
         Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
     }
 
     private function onConstructFromSIPPressed(sip:String)
     {
         cast(field, AnalysisField).constructFromSIP(sip);
+        panel.changeEditorColorOptions(field.currentSituation.turnColor);
         variant = new Variant();
         panel.variantTree.init(variant, []);
-        panel.navigator.clear();
     }
 
     private function onApplyChangesPressed()
     {
+        panel.navigator.clear();
+        panel.variantTree.init(variant, []);
         panel.deprecateScore();
         panel.showControlTabs();
         cast(field, AnalysisField).applyChanges();
@@ -124,6 +131,8 @@ class AnalysisCompound extends GameCompound
 
     private function onDiscardChangesPressed()
     {
+        panel.navigator.clear();
+        panel.variantTree.init(variant, []);
         panel.showControlTabs();
         cast(field, AnalysisField).discardChanges();
     }
@@ -133,8 +142,10 @@ class AnalysisCompound extends GameCompound
         field.currentSituation.setTurnWithZobris(color);
     }
 
-    private function onEditModeChanged(mode:PosEditMode)
+    private function onEditModeChanged(mode:Null<PosEditMode>)
     {
+        if (cast(field, AnalysisField).editMode == null)
+            field.highlightMove([]);
         cast(field, AnalysisField).changeEditMode(mode);
     }
 
@@ -142,7 +153,7 @@ class AnalysisCompound extends GameCompound
     {
         panel.displayLoadingOnScoreLabel();
 
-        var situation:Situation = field.currentSituation.copy();
+        var situation:Situation = field.shownSituation.copy();
         situation.setTurnWithZobris(color);
         AlphaBeta.initMeasuredIndicators();
 

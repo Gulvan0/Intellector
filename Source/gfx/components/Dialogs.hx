@@ -70,13 +70,13 @@ class Dialogs
         dialog.showDialog(false);
     }
 
-    public static function chameleonConfirm(onConfirmed:Void->Void, onDeclined:Void->Void, onCancelled:Void->Void)
+    public static function chameleonConfirm(onDecided:Bool->Void, onCancelled:Void->Void)
     {
         DialogManager.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
             if (btn == DialogButton.YES)
-                onConfirmed();
+                onDecided(true);
             else if (btn == DialogButton.NO)
-                onDeclined();
+                onDecided(false);
             else 
                 onCancelled();
         });

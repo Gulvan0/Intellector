@@ -11,7 +11,9 @@ class TimeMachine
 {
     public static function homePly(field:Field) 
     {
-        undoSequence(field, field.plyHistory.slice(0, field.plyPointer), null);
+        var movesToUndo = field.plyHistory.slice(0, field.plyPointer);
+        undoSequence(field, movesToUndo, null);
+        field.shownSituation.unmakeMoves(movesToUndo);
         field.plyPointer = 0;
     }
 
@@ -19,7 +21,9 @@ class TimeMachine
     {
         if (field.plyPointer > 0)
         {
-            undoSequence(field, [field.plyHistory[field.plyPointer-1]], field.plyPointer > 1? field.plyHistory[field.plyPointer-2] : null);
+            var movesToUndo = [field.plyHistory[field.plyPointer-1]];
+            undoSequence(field, movesToUndo, field.plyPointer > 1? field.plyHistory[field.plyPointer-2] : null);
+            field.shownSituation.unmakeMoves(movesToUndo);
             field.plyPointer--;
         }
     }
@@ -28,7 +32,9 @@ class TimeMachine
     {
         if (field.plyPointer < field.plyHistory.length)
         {
-            redoSequence(field, [field.plyHistory[field.plyPointer]]);
+            var movesToRedo = [field.plyHistory[field.plyPointer]];
+            redoSequence(field, movesToRedo);
+            field.shownSituation.makeMoves(movesToRedo);
             field.plyPointer++;
         }
     }
@@ -37,6 +43,7 @@ class TimeMachine
     {
         redoSequence(field, field.plyHistory.slice(field.plyPointer));
         field.plyPointer = field.plyHistory.length;
+        field.shownSituation = field.currentSituation.copy();
     }
 
     //----------------------------------------------------------------------------------------------------------

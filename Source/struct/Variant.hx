@@ -48,13 +48,14 @@ class Variant extends VariantNode
 
     public function extendPathLeftmost(path:Array<Int>):Array<Int>
     {
-        var node:VariantNode = getByPath(path);
+        var extendedPath = path.copy();
+        var node:VariantNode = getByPath(extendedPath);
         while (!Lambda.empty(node.children))
         {
             node = node.children[0];
-            path.push(0);
+            extendedPath.push(0);
         }
-        return path;
+        return extendedPath;
     }
 
     public function getRightSiblingsPaths(nodePath:Array<Int>, includeSpecifiedNode:Bool):Array<Array<Int>>

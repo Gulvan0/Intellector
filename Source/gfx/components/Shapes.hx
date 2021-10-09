@@ -1,5 +1,6 @@
 package gfx.components;
 
+import haxe.ui.components.Spacer;
 import openfl.text.TextField;
 import openfl.display.DisplayObject;
 import openfl.display.GradientType;
@@ -24,6 +25,20 @@ enum LineStyle
 
 class Shapes
 {
+
+    public static function vSpacer(height:Float):Spacer
+    {
+        var s:Spacer = new Spacer();
+        s.height = height;
+        return s;
+    }
+
+    public static function hSpacer(width:Float):Spacer
+    {
+        var s:Spacer = new Spacer();
+        s.width = width;
+        return s;
+    }
 
     public static function gradRect(width:Float, height:Float, borderColor:Int, borderThickness:Int, borderStyle:LineStyle, fillColour1:Int, fillColour2:Int, dir:LinearGradientDirection):Sprite
     {

@@ -37,10 +37,16 @@ class MoveNavigator extends VBox
         var moveStr = ply.toNotation(contextSituation);
 
         if (contextSituation.turnColor == Black)
-        {
-            lastMovetableEntry.black_move = moveStr;
-            movetable.dataSource.update(movetable.dataSource.size - 1, lastMovetableEntry);
-        }
+            if (plyNumber == 1)
+            {
+                lastMovetableEntry = {"num": '1', "white_move": "", "black_move": moveStr};
+                movetable.dataSource.add(lastMovetableEntry);
+            }
+            else
+            {
+                lastMovetableEntry.black_move = moveStr;
+                movetable.dataSource.update(movetable.dataSource.size - 1, lastMovetableEntry);
+            }
         else 
         {
             lastMovetableEntry = {"num": '$plyNumber', "white_move": moveStr, "black_move": " "};
@@ -76,9 +82,12 @@ class MoveNavigator extends VBox
 
     public function clear()
     {
+        trace('clear start');
         movetable.dataSource.clear();
+        trace('cleared');
         lastMovetableEntry = null;
         plyNumber = 1;
+        trace('set plyNumber to 1, current value: $plyNumber');
     }
 
     private function buildPlyScrollBtn(type:PlyScrollType, onClick:Void->Void):Button

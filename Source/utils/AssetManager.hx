@@ -1,5 +1,6 @@
 package utils;
 
+import openfl.geom.Matrix;
 import struct.Ply;
 import struct.Situation;
 import struct.Hex;
@@ -42,11 +43,14 @@ class AssetManager
 
     public static function getAnalysisPosEditorBtnIcon(mode:PosEditMode):BitmapData
     {
-        return switch mode 
+        switch mode 
         {
-            case Move: otherBitmaps[AnalysisMove];
-            case Delete: otherBitmaps[AnalysisDelete];
-            case Set(type, color): pieceBitmaps[type][color];
+            case Move: 
+                return otherBitmaps[AnalysisMove];
+            case Delete: 
+                return otherBitmaps[AnalysisDelete];
+            case Set(type, color): 
+                return pieceBitmaps[type][color];
         }
     }
 
@@ -73,5 +77,18 @@ class AssetManager
             AnalysisMove => Assets.getBitmapData('assets/symbols/move.png'),
             AnalysisDelete => Assets.getBitmapData('assets/symbols/delete.png')
         ];    
+    }
+
+    private static function scaleBitmapData(bitmapData:BitmapData, scale:Float):BitmapData 
+    {
+        scale = Math.abs(scale);
+        var width:Int = Math.round(bitmapData.width * scale);
+        var height:Int = Math.round(bitmapData.height * scale);
+        var transparent:Bool = bitmapData.transparent;
+        var result:BitmapData = new BitmapData(width, height, transparent);
+        var matrix:Matrix = new Matrix();
+        matrix.scale(scale, scale);
+        result.draw(bitmapData, matrix);
+        return result;
     }
 }

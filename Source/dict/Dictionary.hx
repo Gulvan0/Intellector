@@ -135,7 +135,8 @@ class Dictionary
         ANALYSIS_BRANCHES_TAB_NAME => ["Branches", "Ветви"],
         ANALYSIS_OPENINGS_TAB_NAME => ["Openings", "Дебюты"],
         ANALYSIS_OPENINGS_TEASER_TEXT => ["Coming soon", "Скоро"],
-        ANALYSIS_EXPORTED_SIP_MESSAGE => ["SIP:", "SIP:"]
+        ANALYSIS_EXPORTED_SIP_MESSAGE => ["SIP:", "SIP:"],
+        FROM_SIP_LABEL => ["From SIP:", "Из SIP:"]
     ];
 
     public static function getPhrase(phrase:Phrase):String

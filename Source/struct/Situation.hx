@@ -92,6 +92,27 @@ class Situation
         return next;
     }
 
+    public function makeMoves(plys:Array<ReversiblePly>):Situation 
+    {
+        var nextSituation:Situation = this.copy();
+
+        for (ply in plys)
+            for (transform in ply)
+            {
+                nextSituation.setWithZobris(transform.coords, transform.latter, transform.former);
+                if (transform.latter.type == Intellector)
+                    nextSituation.intellectorPos[transform.latter.color] = transform.coords;
+            }
+
+        if (plys.length % 2 == 1)
+        {
+            nextSituation.turnColor = opposite(turnColor);
+            nextSituation.zobristHash ^= ZobristHashing.hashes[0];
+        }
+            
+        return nextSituation;
+    }
+
     public function unmakeMoves(plys:Array<ReversiblePly>):Situation 
     {
         var formerSituation:Situation = this.copy();
@@ -245,14 +266,16 @@ class Situation
     public inline function setWithZobris(coords:IntPoint, hex:Hex, formerHex:Hex) 
     {
         set(coords, hex);
-        if (formerHex.type != null)
+        if (!formerHex.isEmpty())
             zobristHash ^= ZobristHashing.getForPiece(coords.i, coords.j, formerHex.type, formerHex.color);
-        if (hex.type != null)
+        if (!hex.isEmpty())
         {
             zobristHash ^= ZobristHashing.getForPiece(coords.i, coords.j, hex.type, hex.color);
             if (hex.type == Intellector)
                 intellectorPos[hex.color] = coords.copy();
         }
+        else if (formerHex.type == Intellector)
+            intellectorPos[formerHex.color] = null;
     }
 
     public function setTurnWithZobris(color:PieceColor) 

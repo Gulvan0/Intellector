@@ -25,7 +25,6 @@ class PlayingField extends Field
 
         playerColor = playerIsWhite? White : Black;
         orientationColor = playerColor;
-        playersTurn = playerIsWhite;
 
         hexes = Factory.produceHexes(this, playerIsWhite);
         disposeLetters();
@@ -40,7 +39,7 @@ class PlayingField extends Field
             return;
 
         rmbSelectionBackToNormal();
-        if (!playersTurn || terminated)
+        if (currentSituation.turnColor != playerColor || terminated)
             return;
 
         var pressLocation:Null<IntPoint> = posToIndexes(e.stageX - this.x, e.stageY - this.y);
@@ -65,7 +64,10 @@ class PlayingField extends Field
                 else if (Rules.possible(selectedFigureLocation, pressLocation, getHex))
                     initiateMove(selectedFigureLocation, pressLocation);
                 else if (alreadySelectedFigure.color == pressedFigure.color)
+                {
+                    toSelectedState(pressLocation);
                     toDragState(pressLocation);
+                }
                 else 
                     return;
             default:
@@ -74,7 +76,7 @@ class PlayingField extends Field
 
     private override function onRelease(e:MouseEvent) 
     {
-        if (!playersTurn || terminated)
+        if (currentSituation.turnColor != playerColor || terminated)
             return;
 
         var pressLoc:IntPoint;

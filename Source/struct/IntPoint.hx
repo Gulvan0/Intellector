@@ -2,6 +2,16 @@ package struct;
 
 import struct.PieceColor;
 
+function equal(p1:Null<IntPoint>, p2:Null<IntPoint>):Bool
+{
+    if (p1 == null)
+        return p2 == null;
+    else if (p2 == null)
+        return false;
+    else 
+        return p1.i == p2.i && p1.j == p2.j;
+}
+
 class IntPoint 
 {
     public var i:Int;
@@ -9,7 +19,7 @@ class IntPoint
 
     public static var allHexCoords:Array<IntPoint> = [for (i in 0...9) for (j in 0...(7 - i % 2)) new IntPoint(i, j)];
 
-    public function equals(p:IntPoint):Bool
+    public function equals(p:Null<IntPoint>):Bool
     {
         if (p == null)
             return false;
