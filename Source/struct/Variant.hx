@@ -30,13 +30,24 @@ class Variant extends VariantNode
         return childPath.slice(0, -1);
     }
 
-    public static function belongs(nodePath:Array<Int>, branchPath:Array<Int>)
+    public static function belongs(nodePath:Array<Int>, branchPath:Array<Int>):Bool
     {
         if (nodePath.length > branchPath.length)
             return false;
 
         for (i in 0...nodePath.length)
             if (nodePath[i] != branchPath[i])
+                return false;
+        return true;
+    }
+
+    public static function equalPaths(path1:Array<Int>, path2:Array<Int>):Bool 
+    {
+        if (path1.length != path2.length)
+            return false;
+
+        for (i in 0...path1.length)
+            if (path1[i] != path2[i])
                 return false;
         return true;
     }
@@ -91,7 +102,7 @@ class Variant extends VariantNode
 
     private function getFamilyPathsRecursive(node:VariantNode, nodePath:Array<Int>):Array<Array<Int>>
     {
-        var paths:Array<Array<Int>> = [nodePath];
+        var paths:Array<Array<Int>> = [nodePath.copy()];
         for (i in 0...node.children.length)
         {
             var child = node.children[i];

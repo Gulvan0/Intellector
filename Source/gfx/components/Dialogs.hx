@@ -1,5 +1,7 @@
 package gfx.components;
 
+import haxe.ui.components.Image;
+import openfl.events.Event;
 import utils.AssetManager;
 import gfx.components.main.ChallengeParamsDialog;
 import dict.Phrase;
@@ -91,9 +93,28 @@ class Dialogs
     private static function figureBtn(type:PieceType, color:PieceColor, callback:Void->Void):Button
     {
         var btn:Button = new Button();
-        btn.icon = AssetManager.pathToImage(type, color, true);
+        var bmpData = AssetManager.pieceBitmaps[type][color];
+
+        var scaleMultiplier = 90 / Math.max(bmpData.width, bmpData.height);
+        if (type == Progressor)
+            scaleMultiplier *= 0.7;
+        else if (type == Liberator || type == Defensor)
+            scaleMultiplier *= 0.9;
+
+        btn.icon = bmpData;
         btn.width = 100;
         btn.height = 100;
+
+        function resizeIcon(e:Event) 
+        {
+            btn.removeEventListener(Event.ADDED_TO_STAGE, resizeIcon);
+            var imgComponent = btn.findComponent(Image);
+            imgComponent.width *= scaleMultiplier;
+            imgComponent.height *= scaleMultiplier;
+        }
+
+        btn.addEventListener(Event.ADDED_TO_STAGE, resizeIcon);
+
         btn.onClick = (e) -> {callback();};
         return btn;
     }

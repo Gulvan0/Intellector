@@ -21,13 +21,10 @@ class AssetManager
     public static var pieceBitmaps:Map<PieceType, Map<PieceColor, BitmapData>>;
     public static var otherBitmaps:Map<AssetName, BitmapData>;
 
-    public static inline function pathToImage(type:PieceType, color:PieceColor, ?icon:Bool = false):String
+    public static inline function pathToImage(type:PieceType, color:PieceColor):String
     {
         var filename:String = type.getName() + "_" + color.getName().toLowerCase();
-        if (icon)
-            return 'assets/figicons/$filename.png';
-        else
-            return 'assets/figures/$filename.png';
+        return 'assets/figures/$filename.png';
     }
 
     public static function playPlySound(ply:Ply, situation:Situation)

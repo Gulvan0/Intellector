@@ -13,7 +13,7 @@ class TimeMachine
     {
         var movesToUndo = field.plyHistory.slice(0, field.plyPointer);
         undoSequence(field, movesToUndo, null);
-        field.shownSituation.unmakeMoves(movesToUndo);
+        field.shownSituation = field.shownSituation.unmakeMoves(movesToUndo);
         field.plyPointer = 0;
     }
 
@@ -23,7 +23,7 @@ class TimeMachine
         {
             var movesToUndo = [field.plyHistory[field.plyPointer-1]];
             undoSequence(field, movesToUndo, field.plyPointer > 1? field.plyHistory[field.plyPointer-2] : null);
-            field.shownSituation.unmakeMoves(movesToUndo);
+            field.shownSituation = field.shownSituation.unmakeMoves(movesToUndo);
             field.plyPointer--;
         }
     }
@@ -34,7 +34,7 @@ class TimeMachine
         {
             var movesToRedo = [field.plyHistory[field.plyPointer]];
             redoSequence(field, movesToRedo);
-            field.shownSituation.makeMoves(movesToRedo);
+            field.shownSituation = field.shownSituation.makeMoves(movesToRedo);
             field.plyPointer++;
         }
     }

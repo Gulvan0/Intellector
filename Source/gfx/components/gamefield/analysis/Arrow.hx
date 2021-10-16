@@ -28,6 +28,13 @@ class Arrow extends Sprite
         drawArrow();
     }
 
+    public function changeDeparture(newDep:Point)
+    {
+        removeChild(arrow);
+        this.from = newDep;
+        drawArrow();
+    }
+
     public function changeDestination(newDest:Point)
     {
         removeChild(arrow);

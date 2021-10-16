@@ -138,7 +138,7 @@ class AnalysisField extends Field
         switch state 
         {
             case Neutral:
-                if (pressedFigure == null || pressedFigure.color != shownSituation.turnColor)
+                if (pressedFigure == null || (editMode == null && pressedFigure.color != shownSituation.turnColor))
                     return;
 
                 toSelectedState(pressLocation, editMode != null);

@@ -274,7 +274,7 @@ class Situation
             if (hex.type == Intellector)
                 intellectorPos[hex.color] = coords.copy();
         }
-        else if (formerHex.type == Intellector)
+        else if (formerHex.type == Intellector && intellectorPos[formerHex.color].equals(coords))
             intellectorPos[formerHex.color] = null;
     }
 
@@ -299,7 +299,10 @@ class Situation
         var s = new Situation();
         s.figureArray = [for (t in 0...this.figureArray.length) this.figureArray[t].copy()];
         s.turnColor = this.turnColor;
-        s.intellectorPos = [White => intellectorPos[PieceColor.White].copy(), Black => intellectorPos[PieceColor.Black].copy()];
+        s.intellectorPos = [
+            White => (intellectorPos.exists(White)? intellectorPos[PieceColor.White].copy() : null), 
+            Black => (intellectorPos.exists(Black)? intellectorPos[PieceColor.Black].copy() : null)
+        ];
         s.zobristHash = zobristHash.copy();
         return s;
     }

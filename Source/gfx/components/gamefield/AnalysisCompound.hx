@@ -61,11 +61,12 @@ class AnalysisCompound extends GameCompound
 
     private function onBranchClick(path:Array<Int>) 
     {
-        panel.variantTree.selectBranch(path);
+        var extendedPath:Array<Int> = variant.extendPathLeftmost(path);
+        panel.variantTree.selectBranch(extendedPath);
         panel.deprecateScore();
         panel.navigator.clear();
         cast(field, AnalysisField).reset();
-        var plys:Array<Ply> = variant.getBranchByPath(variant.extendPathLeftmost(path));
+        var plys:Array<Ply> = variant.getBranchByPath(extendedPath);
         var situation = field.currentSituation.copy();
         for (i in 0...plys.length)
         {
@@ -75,6 +76,8 @@ class AnalysisCompound extends GameCompound
                 field.move(ply, Actualization);
                 field.appendToHistory(ply);
             }
+            else
+                field.appendToHistory(ply, false);
             panel.navigator.writePly(ply, situation);
             situation = situation.makeMove(ply);
         }
@@ -123,7 +126,6 @@ class AnalysisCompound extends GameCompound
     private function onApplyChangesPressed()
     {
         panel.navigator.clear();
-        panel.variantTree.init(variant, []);
         panel.deprecateScore();
         panel.showControlTabs();
         cast(field, AnalysisField).applyChanges();
@@ -132,7 +134,6 @@ class AnalysisCompound extends GameCompound
     private function onDiscardChangesPressed()
     {
         panel.navigator.clear();
-        panel.variantTree.init(variant, []);
         panel.showControlTabs();
         cast(field, AnalysisField).discardChanges();
     }
@@ -145,7 +146,11 @@ class AnalysisCompound extends GameCompound
     private function onEditModeChanged(mode:Null<PosEditMode>)
     {
         if (cast(field, AnalysisField).editMode == null)
+        {
             field.highlightMove([]);
+            variant = new Variant();
+            panel.variantTree.init(variant, []);
+        }
         cast(field, AnalysisField).changeEditMode(mode);
     }
 

@@ -314,7 +314,7 @@ class Field extends Sprite
             dialogShown = true;
             Dialogs.chameleonConfirm(onChameleonDecisionMade, onCanceled);
         }
-        else if (to.isFinalForColor(figure.color) && figure.type == Progressor && moveOntoFigure.type != Intellector)
+        else if (to.isFinalForColor(figure.color) && figure.type == Progressor && (moveOntoFigure == null || moveOntoFigure.type != Intellector))
         {
             function onPromotionSelected(piece:PieceType)
             {
@@ -355,14 +355,17 @@ class Field extends Sprite
             appendToHistory(ply);
     }
 
-    public function appendToHistory(ply:Ply)
+    public function appendToHistory(ply:Ply, ?updateShownSituation:Bool = true)
     {
-        if (plyPointer != plyHistory.length)
+        if (plyPointer != plyHistory.length && updateShownSituation)
             throw "Field.appendToHistory() called with pointer not being at the end of a line";
         plyHistory.push(ply.toReversible(currentSituation));
-        plyPointer++;
         currentSituation = currentSituation.makeMove(ply);
-        shownSituation = currentSituation.copy();
+        if (updateShownSituation)
+        {
+            shownSituation = currentSituation.copy();
+            plyPointer++;
+        }
     }
 
     public function translateFigures(ply:Ply) 

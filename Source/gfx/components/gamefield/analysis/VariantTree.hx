@@ -88,16 +88,20 @@ class VariantTree extends Sprite
             renames.set(oldPath.join(":"), newPath.join(":"));
         }
 
+        var removedNodeCodes = [];
+
         //Remove nodes and arrows with children and also their mappings
         for (familyMemberPath in referenceVariant.getFamilyPaths(path))
         {
             var code:String = familyMemberPath.join(":");
+            removedNodeCodes.push(code);
             removeChild(arrows.get(code));
             removeChild(nodes.get(code));
             arrows.remove(code);
             nodes.remove(code);
-            familyWidths.remove(code);
         }
+
+        var overwrittenFamilyWidthNodeCodes = [];
 
         //Update upstream parents' family widths and store deltas for the next step
         var childCode:String = path.join(":");
@@ -115,6 +119,7 @@ class VariantTree extends Sprite
 
             var newParentFamWidth = Math.max(parentOwnWidth, parentFamWidth - childDeltaWidth);
             familyWidths.set(parentCode, newParentFamWidth);
+            overwrittenFamilyWidthNodeCodes.push(parentCode);
             childDeltaWidth = parentFamWidth - newParentFamWidth;
             deltaWidthsByDepth.set(parentPath.length, childDeltaWidth);
             parentPath.pop();
@@ -138,6 +143,10 @@ class VariantTree extends Sprite
                 arrows[code].changeDestination(new Point(arrows[code].to.x - deltaWidth, arrows[code].to.y));
             }
         }
+
+        for (code in removedNodeCodes)
+            if (!Lambda.has(overwrittenFamilyWidthNodeCodes, code))
+                familyWidths.remove(code);
 
         //Apply queued code remappings
         remapKeys(renames);
@@ -174,10 +183,10 @@ class VariantTree extends Sprite
         familyWidths.set(nodeCode, nodes.get(nodeCode).width + BLOCK_INTERVAL_X);
 
         //Update upstream parents' family widths and store deltas for the next step
-        var upParentPath = parentPath.copy();
-        var childDeltaWidth = Math.max(0, offset + familyWidths.get(nodeCode) - familyWidths.get(upParentPath.join(":")));
+        var upstreamParents:Array<Array<Int>> = Lambda.empty(parentPath)? [] : referenceVariant.upstreamParentsPaths(parentPath, true);
+        var childDeltaWidth = Math.max(0, offset + familyWidths.get(nodeCode) - familyWidths.get(parentPath.join(":")));
         var deltaWidthsByDepth:Map<Int, Float> = [];
-        while (upParentPath.length > 0)
+        for (upParentPath in upstreamParents)
         {
             var parentCode = upParentPath.join(":");
             var parentFamWidth = familyWidths.get(parentCode);
@@ -190,30 +199,30 @@ class VariantTree extends Sprite
             familyWidths.set(parentCode, newParentFamWidth);
             childDeltaWidth = newParentFamWidth - parentFamWidth;
             deltaWidthsByDepth.set(upParentPath.length, childDeltaWidth);
-            upParentPath.pop();
         }
 
         //Move upstream parent right siblings with their families
-        var upstreamParents:Array<Array<Int>> = referenceVariant.upstreamParentsPaths(parentPath, true);
         var rightSiblings:Array<Array<Int>> = [];
         for (upParentPath in upstreamParents)
             rightSiblings = rightSiblings.concat(referenceVariant.getRightSiblingsPaths(upParentPath, false));
 
         for (siblingPath in rightSiblings)
         {
+            if (!deltaWidthsByDepth.exists(siblingPath.length))
+                continue;
+
             var siblingFamilyPaths:Array<Array<Int>> = referenceVariant.getFamilyPaths(siblingPath);
 
             for (path in siblingFamilyPaths)
             {
-                if (!deltaWidthsByDepth.exists(path.length))
-                    continue;
                 var code = path.join(":");
                 var deltaWidth = deltaWidthsByDepth[siblingPath.length];
                 nodes[code].x += deltaWidth;
+                if (!Variant.equalPaths(path, siblingPath))
+                    arrows[code].changeDeparture(new Point(arrows[code].from.x + deltaWidth, arrows[code].from.y));
                 arrows[code].changeDestination(new Point(arrows[code].to.x + deltaWidth, arrows[code].to.y));
             }
         }
-        trace(familyWidths);
     }
 
     private function createNodeNaive(path:Array<Int>, code:String, nodeText:String, parentCenterX:Float, parentBottomY:Float, selected:Bool, leftX:Float)
