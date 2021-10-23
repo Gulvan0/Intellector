@@ -1,5 +1,7 @@
 package struct;
 
+import serialization.PlyDeserializer;
+import haxe.Json;
 import haxe.ui.util.Variant;
 import struct.Ply;
 
@@ -50,6 +52,16 @@ class Variant extends VariantNode
             if (path1[i] != path2[i])
                 return false;
         return true;
+    }
+
+    public static function deserialize(str:String):Variant 
+    {
+        //TODO: Fill
+    }
+
+    public function serialize():String 
+    {
+        return Json.stringify([for (path in getFamilyPaths([])) if (!Lambda.empty(path)) path.join(":") => PlyDeserializer.serialize(getByPath(path).ply)]);
     }
 
     public function addChildToNode(ply:Ply, parentPath:Array<Int>) 

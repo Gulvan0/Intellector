@@ -136,7 +136,15 @@ class Dictionary
         ANALYSIS_OPENINGS_TAB_NAME => ["Openings", "Дебюты"],
         ANALYSIS_OPENINGS_TEASER_TEXT => ["Coming soon", "Скоро"],
         ANALYSIS_EXPORTED_SIP_MESSAGE => ["SIP:", "SIP:"],
-        FROM_SIP_LABEL => ["From SIP:", "Из SIP:"]
+        FROM_SIP_LABEL => ["From SIP:", "Из SIP:"],
+        BRANCH_REMOVE_HINT => ["Ctrl+Click to remove a branch", "Ctrl+Click: удалить ветвь"],
+        PLAYER_NOT_FOUND => ["Player not found", "Игрок не найден"],
+        ANALYSIS_EXPORT_STUDY => ["Export as study", "Сохранить как студию"],
+        GAMES => ["Games", "Игры"],
+        STUDIES => ["Studies", "Студии"],
+        STUDY_OVERWRITE_CONFIRMATION_MESSAGE => ["Overwrite study ('no' - save as separate)?", "Перезаписать студию ('нет' - сохранить отдельную)?"],
+        STUDY_OVERWRITE_CONFIRMATION_TITLE => ["Overwrite study?", "Перезаписать студию?"],
+        STUDY_NAME_SELECTION_MESSAGE => ["Enter the name for your study", "Введите название студии"]
     ];
 
     public static function getPhrase(phrase:Phrase):String

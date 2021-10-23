@@ -176,13 +176,20 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
-    public function toProfile(login:String, gamesList:String) 
+    public function toProfile(login:String, onReturn:Void->Void, onNotExists:Void->Void) 
     {
-        clear();
-        URLEditor.assignProfileLogin(login);
+        Networker.checkPlayerExistance(login, exists -> {
+            if (exists)
+            {
+                clear();
+                URLEditor.assignProfileLogin(login);
 
-        current = new PlayerProfile(login, gamesList);
-        addChild(current);
+                current = new PlayerProfile(login, onReturn);
+                addChild(current);
+            }
+            else
+                onNotExists();
+        });
     }
 
     public function toSettings() 

@@ -67,7 +67,7 @@ class MainMenu extends Sprite
         var response = Browser.window.prompt(Dictionary.getPhrase(ENTER_PROFILE_OWNER));
 
         if (response != null)
-			Networker.getGames(response, ScreenManager.instance.toProfile.bind(response));
+            ScreenManager.instance.toProfile(response, ScreenManager.instance.toMain, Browser.window.alert.bind(Dictionary.getPhrase(PLAYER_NOT_FOUND)));
     }
 
     private function onLogOut(e) 

@@ -330,6 +330,13 @@ class GameCompound extends Sprite
         sidebox.onCancelTakebackPressed = onCancelTakebackPressed;
         sidebox.onAcceptTakebackPressed = onAcceptTakebackPressed;
         sidebox.onDeclineTakebackPressed = onDeclineTakebackPressed;
+        sidebox.onExportSIPRequested = onExportSIPRequested;
+    }
+
+    private function onExportSIPRequested() 
+    {
+        var sip:String = field.shownSituation.serialize();
+        Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
     }
 
     private function onOfferDrawPressed()

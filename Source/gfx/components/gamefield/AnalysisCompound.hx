@@ -1,5 +1,6 @@
 package gfx.components.gamefield;
 
+import gfx.screens.PlayerProfile.StudyOverview;
 import gfx.components.gamefield.analysis.PosEditMode;
 import struct.Situation;
 import haxe.Timer;
@@ -17,6 +18,7 @@ class AnalysisCompound extends GameCompound
 {
     private var panel:RightPanel;
     private var variant:Variant;
+    private var overwriteID:Null<Int>;
 
     private function onMoveMade(ply:Ply)
     {
@@ -27,6 +29,7 @@ class AnalysisCompound extends GameCompound
         else
             onBranchingMove(ply);
         panel.updateBranchingTabContentSize();
+        panel.changeEditorColorOptions(field.shownSituation.turnColor);
     }
 
     private function onContinuationMove(ply:Ply)
@@ -109,12 +112,6 @@ class AnalysisCompound extends GameCompound
         cast(field, AnalysisField).reset();
     }
 
-    private function onExportSIPRequest() 
-    {
-        var sip:String = field.shownSituation.serialize();
-        Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
-    }
-
     private function onConstructFromSIPPressed(sip:String)
     {
         cast(field, AnalysisField).constructFromSIP(sip);
@@ -141,6 +138,26 @@ class AnalysisCompound extends GameCompound
     private function onTurnColorChanged(color:PieceColor)
     {
         field.currentSituation.setTurnWithZobris(color);
+    }
+
+    private function onExportStudyRequested()
+    {
+        var decidedOverwriteID:Null<Int> = overwriteID;
+        if (overwriteID != null)
+            Dialogs.confirm(Dictionary.getPhrase(STUDY_OVERWRITE_CONFIRMATION_MESSAGE), Dictionary.getPhrase(STUDY_OVERWRITE_CONFIRMATION_TITLE), () -> {
+                decidedOverwriteID = null;
+            }, () -> {});
+        exportStudyAskName(decidedOverwriteID);
+    }
+
+    private function exportStudyAskName(decidedOverwriteID:Null<Int>) 
+    {
+        var response = Browser.window.prompt(Dictionary.getPhrase(STUDY_NAME_SELECTION_MESSAGE));
+        if (response != null)
+        {
+            Networker.setStudy(response.substr(0, 40), variant.serialize(), overwriteID);
+            ScreenManager.instance.toMain();
+        }
     }
 
     private function onEditModeChanged(mode:Null<PosEditMode>)
@@ -180,7 +197,7 @@ class AnalysisCompound extends GameCompound
         }, 20);
     }
 
-    public function new(onReturn:Void->Void)
+    public function new(onReturn:Void->Void, ?studyOverview:StudyOverview)
     {
         var field = new AnalysisField();
         field.onOwnMoveMade = onMoveMade;
@@ -194,7 +211,8 @@ class AnalysisCompound extends GameCompound
         panel.onResetPressed = onResetPressed;
         panel.onAnalyzePressed = onAnalyzePressed;
         panel.onConstructFromSIPPressed = onConstructFromSIPPressed;
-        panel.onExportSIPRequested = onExportSIPRequest;
+        panel.onExportSIPRequested = onExportSIPRequested;
+        panel.onExportStudyRequested = onExportStudyRequested;
         panel.onBranchClick = onBranchClick;
         panel.onBranchCtrlClick = onBranchCtrlClick;
         panel.onTurnColorChanged = onTurnColorChanged;
@@ -206,5 +224,8 @@ class AnalysisCompound extends GameCompound
 
         variant = new Variant();
         panel.variantTree.init(variant, []);
+
+        if (studyOverview != null)
+            //TODO: Fill
     }
 }

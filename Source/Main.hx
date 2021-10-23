@@ -104,7 +104,7 @@ class Main extends Sprite
 				case Game(id):
 					Networker.getGame(id, ScreenManager.instance.toSpectation, ScreenManager.instance.toGameReconnect, ScreenManager.instance.toRevisit.bind(id), ScreenManager.instance.toMain);
 				case Profile(login):
-					Networker.getGames(login, ScreenManager.instance.toProfile.bind(login));
+					ScreenManager.instance.toProfile(login, ScreenManager.instance.toMain, ScreenManager.instance.toMain);
 			}
 		}
 		else

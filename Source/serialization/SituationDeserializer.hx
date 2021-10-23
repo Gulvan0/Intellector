@@ -14,16 +14,24 @@ class SituationDeserializer
         var turnColor:PieceColor = sip.charAt(0) == "w"? White : Black;
         situation.setTurnWithZobris(turnColor);
 
+        var exclamationMarkPassed:Bool = false;
         var ci = 1;
         while (ci < sip.length)
         {
-            var i = Std.parseInt(sip.charAt(ci));
-            var j = Std.parseInt(sip.charAt(ci + 1));
-            var type = typeByCode(sip.charAt(ci + 2));
-            var color = sip.charAt(ci + 3) == "w"? White : Black;
+            if (sip.charCodeAt(ci) == "!".code)
+            {
+                exclamationMarkPassed = true;
+                ci++;
+                continue;
+            }
+            var t = sip.charCodeAt(ci) - 64;
+            var i = t % 9;
+            var j = cast((t - i) / 9, Int);
+            var type = typeByCode(sip.charAt(ci + 1));
+            var color = exclamationMarkPassed? Black : White;
 
             situation.setWithZobris(new IntPoint(i, j), Hex.occupied(type, color), Hex.empty());
-            ci += 4;
+            ci += 2;
         }
 
         return situation;

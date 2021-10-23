@@ -237,15 +237,17 @@ class Situation
 
     public function serialize():String
     {
-        var s = PieceColor.letter(turnColor);
-        for (i in 0...9) 
-            for (j in 0...(7 - i % 2))
-            {
-                var fig = figureArray[j * 9 + i];
-                if (fig.type != null)
-                    s += '$i$j${PieceType.letter(fig.type)}${PieceColor.letter(fig.color)}';
-            }
-        return s;
+        var whitePart = '';
+        var blackPart = '';
+        for (t in 0...63) 
+        {
+            var fig = figureArray[t];
+            if (fig.color == White)
+                whitePart += '${String.fromCharCode(t + 64)}${PieceType.letter(fig.type)}';
+            else if (fig.color == Black)
+                blackPart += '${String.fromCharCode(t + 64)}${PieceType.letter(fig.type)}';
+        }
+        return PieceColor.letter(turnColor) + whitePart + "!" + blackPart;
     }
 
     public inline function get(coords:IntPoint):Hex

@@ -1,5 +1,6 @@
 package gfx.components.gamefield.analysis;
 
+import openfl.text.TextFormat;
 import openfl.events.Event;
 import haxe.ui.components.Image;
 import struct.Ply;
@@ -48,6 +49,7 @@ class RightPanel extends Sprite
     public var variantTree(default, null):VariantTree;
     
     private var variantTreeSprite:Sprite;
+    private var variantTreeBG:Sprite;
     private var variantTreeVBox:VBox;
     private var overviewTab:Box;
 
@@ -56,6 +58,7 @@ class RightPanel extends Sprite
     public var onAnalyzePressed:PieceColor->Void;
     public var onConstructFromSIPPressed:String->Void;
     public var onExportSIPRequested:Void->Void;
+    public var onExportStudyRequested:Void->Void;
     public var onBranchClick:Array<Int>->Void;
     public var onBranchCtrlClick:Array<Int>->Void;
     public var onTurnColorChanged:PieceColor->Void;
@@ -77,8 +80,8 @@ class RightPanel extends Sprite
 
     public function updateBranchingTabContentSize() 
     {
-        variantTreeVBox.width = Math.max(390, 145 + variantTreeSprite.width);
-		variantTreeVBox.height = Math.max(360, 20 + variantTreeSprite.height);
+        variantTreeBG.width = variantTreeVBox.width = Math.max(390, 145 + variantTreeSprite.width);
+		variantTreeBG.height = variantTreeVBox.height = Math.max(360, 20 + variantTreeSprite.height);
     }
 
     public function changeEditorColorOptions(selectedColor:PieceColor) 
@@ -241,6 +244,9 @@ class RightPanel extends Sprite
         var exportSIPBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_SIP, 300, () -> {onExportSIPRequested();});
         exportSIPBtn.horizontalAlign = 'center';
 
+        var exportStudyBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_STUDY, 300, () -> {onExportStudyRequested();});
+        exportStudyBtn.horizontalAlign = 'center';
+
         var analyzeWhiteBtn = createSimpleBtn(ANALYSIS_ANALYZE_WHITE, 150, () -> {onAnalyzePressed(White);});
         analyzeWhiteBtn.disabled = true;
         var analyzeBlackBtn = createSimpleBtn(ANALYSIS_ANALYZE_BLACK, 150, () -> {onAnalyzePressed(Black);});
@@ -264,6 +270,7 @@ class RightPanel extends Sprite
         overviewVBox.addComponent(navigator);
         overviewVBox.addComponent(setPositionBtn);
         overviewVBox.addComponent(exportSIPBtn);
+        overviewVBox.addComponent(exportStudyBtn);
         overviewVBox.addComponent(analysisBtns);
         overviewVBox.addComponent(scoreLabel);
 
@@ -275,7 +282,9 @@ class RightPanel extends Sprite
 
         variantTree = new VariantTree(c -> {onBranchClick(c);}, c -> {onBranchCtrlClick(c);});
 		variantTree.x = 20; 
-		variantTree.y = 20; 
+        variantTree.y = 20; 
+        
+        variantTreeBG = Shapes.fillOnlyRect(390, 360, 0xffffff);
 
         variantTreeSprite = new Sprite();
         variantTreeSprite.addChild(variantTree);
@@ -336,7 +345,19 @@ class RightPanel extends Sprite
         controlTabs.removeEventListener(Event.ADDED_TO_STAGE, onControlTabsAdded);
         //controlTabs.addComponentAt(overviewTab, 0);
         controlTabs.pageIndex = 1;
-        Timer.delay(() -> {controlTabs.pageIndex = 0;}, 20);
+
+        var tf:openfl.text.TextField = new openfl.text.TextField();
+        tf.text = Dictionary.getPhrase(BRANCH_REMOVE_HINT);
+        tf.selectable = false;
+        tf.setTextFormat(new TextFormat(null, 16, null, null, true));
+        tf.y = -5;
+        tf.width = 300;
+
+        Timer.delay(() -> {
+            variantTreeSprite.addChildAt(variantTreeBG, 0);
+            variantTreeSprite.addChildAt(tf, 1);
+            controlTabs.pageIndex = 0;
+        }, 20);
     }
 
     private function constructEditorButton(mode:PosEditMode):Button 

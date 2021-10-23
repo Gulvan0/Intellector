@@ -46,6 +46,7 @@ class Sidebox extends Sprite
     public var onCancelTakebackPressed:Void->Void;
     public var onAcceptTakebackPressed:Void->Void;
     public var onDeclineTakebackPressed:Void->Void;
+    public var onExportSIPRequested:Void->Void;
 
     private var resignConfirmationMessage:String;
 
@@ -426,6 +427,13 @@ class Sidebox extends Sprite
 
         if (!simplified)
             buildSpecialBtns(box);
+
+        var exportSIPBtn:Button = new Button();
+        exportSIPBtn.width = 250;
+        exportSIPBtn.text = Dictionary.getPhrase(ANALYSIS_EXPORT_SIP);
+        exportSIPBtn.onClick = (e) -> {onExportSIPRequested();};
+        //exportSIPBtn.horizontalAlign = 'center';
+        box.addComponent(exportSIPBtn);
 
         bottomLogin = new Label();
         bottomLogin.text = playerLogin;

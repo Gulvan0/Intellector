@@ -171,10 +171,33 @@ class Networker
         emit('register', {login: login, password: password});
     }
 
-    public static function getGames(login:String, callback:String->Void) 
+    public static function getGames(login:String, after:Int, pageSize:Int, onPlayerExists:String->Void, onPlayerNotFound:Void->Void) 
     {
-        once('games_list', callback);
-        emit('get_player_games', {login: login});
+        onceOneOf([
+            'games_list' => onPlayerExists,
+            'player_not_found' => e -> {onPlayerNotFound();}
+        ]);
+        emit('get_player_games', {login: login, after: after, pageSize: pageSize});
+    }
+
+    public static function getStudies(login:String, after:Int, pageSize:Int, onPlayerExists:String->Void, onPlayerNotFound:Void->Void) 
+    {
+        onceOneOf([
+            'studies_list' => onPlayerExists,
+            'player_not_found' => e -> {onPlayerNotFound();}
+        ]);
+        emit('get_player_studies', {login: login, after: after, pageSize: pageSize});
+    }
+
+    public static function setStudy(name:String, variantStr:String, overwriteID:Null<Int>) 
+    {
+        emit('set_study', {name: name, variantStr: variantStr, overwriteID: overwriteID});
+    }
+
+    public static function checkPlayerExistance(login:String, callback:Bool->Void)
+    {
+        once('player_exists_answer', callback);
+        emit('player_exists', {login: login});
     }
 
     public static function getGame(id:Int, onNotOwnInProcess:OngoingBattleData->Void, onOwnInProcess:OngoingBattleData->Void, onFinished:(log:String)->Void, on404:Void->Void) 

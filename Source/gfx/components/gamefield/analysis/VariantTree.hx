@@ -59,14 +59,28 @@ class VariantTree extends Sprite
                 newNodeMap.remove(formerCode);
                 newFamilyWidths.remove(formerCode);
             }
+
+            var path = newCode.split(":").map(Std.parseInt);
+            var node = nodes.get(formerCode);
+            node.onClick = (e) -> {
+                if (e.ctrlKey)
+                    onCtrlClick(path);
+                else
+                    onClick(path);
+            }
+
             newArrowMap.set(newCode, arrows.get(formerCode));
-            newNodeMap.set(newCode, nodes.get(formerCode));
+            newNodeMap.set(newCode, node);
             newFamilyWidths.set(newCode, familyWidths.get(formerCode));
         }
 
         arrows = newArrowMap;
         nodes = newNodeMap;
         familyWidths = newFamilyWidths;
+
+        var newSelected = renames[selectedBranch.join(":")];
+        if (newSelected != null)
+            selectedBranch = newSelected.split(":").map(Std.parseInt);
     }
 
     /**Reference variant should be passed BEFORE any corrections to it**/
@@ -101,14 +115,14 @@ class VariantTree extends Sprite
             nodes.remove(code);
         }
 
-        var overwrittenFamilyWidthNodeCodes = [];
+        trace("famWidths before update: " + familyWidths);
 
         //Update upstream parents' family widths and store deltas for the next step
         var childCode:String = path.join(":");
         var parentPath:Array<Int> = Variant.parentPath(path);
         var childDeltaWidth = familyWidths.get(childCode);
         var deltaWidthsByDepth:Map<Int, Float> = [path.length => childDeltaWidth];
-        while (parentPath.length > 1)
+        while (parentPath.length >= 1)
         {
             var parentCode = parentPath.join(":");
             var parentFamWidth = familyWidths.get(parentCode);
@@ -119,11 +133,12 @@ class VariantTree extends Sprite
 
             var newParentFamWidth = Math.max(parentOwnWidth, parentFamWidth - childDeltaWidth);
             familyWidths.set(parentCode, newParentFamWidth);
-            overwrittenFamilyWidthNodeCodes.push(parentCode);
             childDeltaWidth = parentFamWidth - newParentFamWidth;
             deltaWidthsByDepth.set(parentPath.length, childDeltaWidth);
             parentPath.pop();
         }
+        trace("famWidths after update: " + familyWidths);
+        trace("deltas: " + deltaWidthsByDepth);
         
         //Move upstream parent right siblings with their families
         var upstreamParents:Array<Array<Int>> = referenceVariant.upstreamParentsPaths(path, true);
@@ -138,18 +153,22 @@ class VariantTree extends Sprite
             for (path in siblingFamilyPaths)
             {
                 var code = path.join(":");
-                var deltaWidth = deltaWidthsByDepth[path.length];
+                var deltaWidth = deltaWidthsByDepth[siblingPath.length];
                 nodes[code].x -= deltaWidth;
+                if (!Variant.equalPaths(path, siblingPath))
+                    arrows[code].changeDeparture(new Point(arrows[code].from.x - deltaWidth, arrows[code].from.y));
                 arrows[code].changeDestination(new Point(arrows[code].to.x - deltaWidth, arrows[code].to.y));
             }
         }
 
         for (code in removedNodeCodes)
-            if (!Lambda.has(overwrittenFamilyWidthNodeCodes, code))
+            if (!Lambda.has(renames, code))
                 familyWidths.remove(code);
 
         //Apply queued code remappings
         remapKeys(renames);
+
+        trace("famWidths after erasure and remapping: " + familyWidths);
     }
 
     /**Reference variant should be passed BEFORE any corrections to it**/
@@ -174,17 +193,27 @@ class VariantTree extends Sprite
         var parentCenterX:Float = parentNode == null? 0 : parentNode.x + parentNode.width / 2;
         var parentBottomY:Float = parentNode == null? 0 : parentNode.y + parentNode.height + 5;
 
-        var offset:Float = 0;
-        for (i in 0...nodeNum)
-            offset += familyWidths[parentPath.concat([i]).join(":")];
-        var leftX:Float = offset + (parentNode == null? 0 : parentNode.x);
+        var leftX:Float;
+        if (nodeNum > 0)
+        {
+            var leftSiblingCode = parentPath.concat([nodeNum - 1]).join(":");
+            leftX = familyWidths[leftSiblingCode] + nodes[leftSiblingCode].x;
+        }
+        else if (parentNode != null)
+            leftX = parentNode.x;
+        else
+            leftX = 0;
 
         createNodeNaive(nodePath, nodeCode, nodeText, parentCenterX, parentBottomY, selected, leftX);
         familyWidths.set(nodeCode, nodes.get(nodeCode).width + BLOCK_INTERVAL_X);
 
+        var totalChildrenWidth:Float = familyWidths.get(nodeCode);
+        for (i in 0...nodeNum)
+            totalChildrenWidth += familyWidths.get(parentPath.concat([i]).join(":"));
+
         //Update upstream parents' family widths and store deltas for the next step
         var upstreamParents:Array<Array<Int>> = Lambda.empty(parentPath)? [] : referenceVariant.upstreamParentsPaths(parentPath, true);
-        var childDeltaWidth = Math.max(0, offset + familyWidths.get(nodeCode) - familyWidths.get(parentPath.join(":")));
+        var childDeltaWidth = Math.max(0, totalChildrenWidth - familyWidths.get(parentPath.join(":")));
         var deltaWidthsByDepth:Map<Int, Float> = [];
         for (upParentPath in upstreamParents)
         {

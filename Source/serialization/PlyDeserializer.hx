@@ -17,5 +17,16 @@ class PlyDeserializer
         ply.morphInto = serialized.length == 4? null : PieceType.createByName(serialized.substr(4));
         return ply;
     }
+
+    public static function serialize(ply:Ply):String
+    {
+        var s:String = "";
+        s += ply.from.i;
+        s += ply.from.j;
+        s += ply.to.i;
+        s += ply.to.j;
+        s += ply.morphInto == null? "" : ply.morphInto.getName();
+        return s;
+    }
     
 }
