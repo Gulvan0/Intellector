@@ -102,7 +102,7 @@ class Main extends Sprite
 					Networker.once('game_started', ScreenManager.instance.toGameStart);
 					Networker.getOpenChallenge(issuer, ScreenManager.instance.toOpenChallengeJoiningRoom, ScreenManager.instance.toSpectation, ScreenManager.instance.toGameReconnect, ScreenManager.instance.toMain);
 				case Game(id):
-					Networker.getGame(id, ScreenManager.instance.toSpectation, ScreenManager.instance.toGameReconnect, ScreenManager.instance.toRevisit.bind(id), ScreenManager.instance.toMain);
+					Networker.getGame(id, ScreenManager.instance.toSpectation, ScreenManager.instance.toGameReconnect, ScreenManager.instance.toRevisit.bind(id, _, ScreenManager.instance.toMain), ScreenManager.instance.toMain);
 				case Profile(login):
 					ScreenManager.instance.toProfile(login, ScreenManager.instance.toMain, ScreenManager.instance.toMain);
 			}

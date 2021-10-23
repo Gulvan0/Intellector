@@ -113,7 +113,7 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
-    public function toAnalysisBoard() 
+    public function toAnalysisBoard(?study:StudyOverview) 
     {
         clear();
         URLEditor.clear();
@@ -122,7 +122,7 @@ class ScreenManager extends Sprite
         {
             Networker.currentGameCompound = null;
 		    toMain();
-        });
+        }, study);
         addChild(current);
     }
 
@@ -152,7 +152,7 @@ class ScreenManager extends Sprite
         addChild(current);
     }
     
-    public function toRevisit(id:Int, log:String) 
+    public function toRevisit(id:Int, log:String, onReturn:Void->Void) 
     {
         clear();
         URLEditor.assignID(id);
@@ -172,11 +172,11 @@ class ScreenManager extends Sprite
             currentLog: log
         };
 
-        current = GameCompound.buildSpectators(mockData, toMain, true);
+        current = GameCompound.buildSpectators(mockData, onReturn, true);
         addChild(current);
     }
 
-    public function toProfile(login:String, onReturn:Void->Void, onNotExists:Void->Void) 
+    public function toProfile(login:String, onReturn:Void->Void, onNotExists:Void->Void):Void
     {
         Networker.checkPlayerExistance(login, exists -> {
             if (exists)

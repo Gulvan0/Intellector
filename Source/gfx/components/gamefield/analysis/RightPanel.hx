@@ -66,6 +66,7 @@ class RightPanel extends Sprite
     public var onDiscardChangesPressed:Void->Void;
     public var onEditModeChanged:PosEditMode->Void;
     public var scrollingCallback:PlyScrollType->Void;
+    public var readyCallback:Void->Void;
 
     public function displayAnalysisResults(result:EvaluationResult) 
     {
@@ -231,7 +232,7 @@ class RightPanel extends Sprite
 
     private function createControlTabs() 
     {
-        //TODO: flip board btn, export as study & as puzzle btns
+        //TODO: flip board btn, export as puzzle btn
         navigator = new MoveNavigator(m -> {scrollingCallback(m);});
         navigator.horizontalAlign = 'center';
 
@@ -357,6 +358,7 @@ class RightPanel extends Sprite
             variantTreeSprite.addChildAt(variantTreeBG, 0);
             variantTreeSprite.addChildAt(tf, 1);
             controlTabs.pageIndex = 0;
+            readyCallback();
         }, 20);
     }
 

@@ -189,9 +189,9 @@ class Networker
         emit('get_player_studies', {login: login, after: after, pageSize: pageSize});
     }
 
-    public static function setStudy(name:String, variantStr:String, overwriteID:Null<Int>) 
+    public static function setStudy(name:String, variantStr:String, startingSIP:String, overwriteID:Null<Int>) 
     {
-        emit('set_study', {name: name, variantStr: variantStr, overwriteID: overwriteID});
+        emit('set_study', {name: name, variantStr: variantStr, startingSIP: startingSIP, overwriteID: overwriteID});
     }
 
     public static function checkPlayerExistance(login:String, callback:Bool->Void)

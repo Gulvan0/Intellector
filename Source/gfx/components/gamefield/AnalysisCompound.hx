@@ -1,5 +1,6 @@
 package gfx.components.gamefield;
 
+import serialization.PlyDeserializer;
 import gfx.screens.PlayerProfile.StudyOverview;
 import gfx.components.gamefield.analysis.PosEditMode;
 import struct.Situation;
@@ -18,7 +19,7 @@ class AnalysisCompound extends GameCompound
 {
     private var panel:RightPanel;
     private var variant:Variant;
-    private var overwriteID:Null<Int>;
+    private var overwriteID:Null<Int> = null;
 
     private function onMoveMade(ply:Ply)
     {
@@ -155,7 +156,7 @@ class AnalysisCompound extends GameCompound
         var response = Browser.window.prompt(Dictionary.getPhrase(STUDY_NAME_SELECTION_MESSAGE));
         if (response != null)
         {
-            Networker.setStudy(response.substr(0, 40), variant.serialize(), overwriteID);
+            Networker.setStudy(response.substr(0, 40), variant.serialize(), cast(field, AnalysisField).lastApprovedSituationSIP, overwriteID);
             ScreenManager.instance.toMain();
         }
     }
@@ -197,6 +198,38 @@ class AnalysisCompound extends GameCompound
         }, 20);
     }
 
+    private function onReady(studyOverview:StudyOverview)
+    {
+        if (studyOverview.data.author.toLowerCase() == Networker.login.toLowerCase())
+            overwriteID = studyOverview.id;
+        onConstructFromSIPPressed(studyOverview.data.startingSIP);
+
+        var nodesByPathLength:Map<Int, Array<{path:Array<Int>, plyStr:String}>> = [];
+        var maxPathLength:Int = 0;
+        for (line in studyOverview.data.variantStr.split(";"))
+        {
+            var lineParts = line.split("/");
+            var code = lineParts[0];
+            var path = code.split(":").map(Std.parseInt);
+            var plyStr = lineParts[1];
+            if (path.length > maxPathLength)
+                maxPathLength = path.length;
+
+            var nodes = nodesByPathLength.get(path.length);
+            if (nodes == null)
+                nodesByPathLength.set(path.length, [{path: path, plyStr: plyStr}]);
+            else
+                nodes.push({path: path, plyStr: plyStr});
+        }
+        for (i in 1...(maxPathLength+1))
+            for (node in nodesByPathLength.get(i))
+            {
+                onBranchClick(Variant.parentPath(node.path));
+                onContinuationMove(PlyDeserializer.deserialize(node.plyStr));
+            }
+        onBranchClick([]);
+    }
+
     public function new(onReturn:Void->Void, ?studyOverview:StudyOverview)
     {
         var field = new AnalysisField();
@@ -220,12 +253,15 @@ class AnalysisCompound extends GameCompound
         panel.onDiscardChangesPressed = onDiscardChangesPressed;
         panel.onEditModeChanged = onEditModeChanged;
         panel.scrollingCallback = field.applyScrolling;
+        
+        if (studyOverview != null)
+            panel.readyCallback = onReady.bind(studyOverview);
+        else
+            panel.readyCallback = () -> {};
+
         addChild(panel);
 
         variant = new Variant();
         panel.variantTree.init(variant, []);
-
-        if (studyOverview != null)
-            //TODO: Fill
     }
 }

@@ -23,7 +23,7 @@ class AnalysisField extends Field
     public var onMadeMove:Void->Void;
 
     public var editMode(default, null):Null<PosEditMode>;
-    private var lastApprovedSituationSIP:String;
+    public var lastApprovedSituationSIP(default, null):String;
     
     public function new() 
     {

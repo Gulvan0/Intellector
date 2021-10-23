@@ -40,6 +40,7 @@ typedef StudyData =
     var name:String;
     var author:String;
     var variantStr:String;
+    var startingSIP:String;
 }
 
 class PlayerProfile extends Sprite
@@ -135,7 +136,7 @@ class PlayerProfile extends Sprite
         for (overview in studylist)
         {
             var text:String = overview.id + ". " + overview.data.name;
-            var link:Link = studyLink(text, overview.data.variantStr);
+            var link:Link = studyLink(text, overview);
             gamesBox.addComponent(link);
             gamesBox.addComponent(Shapes.vSpacer(4));
         }
@@ -241,14 +242,14 @@ class PlayerProfile extends Sprite
     private function gameLink(text:String, gameID:Int):Link
     {
         var link:Link = haxeuiLink(text);
-        link.onClick = (e) -> {Networker.getGame(gameID, (d)->{}, (d)->{}, ScreenManager.instance.toRevisit.bind(gameID), ()->{});};
+        link.onClick = (e) -> {Networker.getGame(gameID, (d)->{}, (d)->{}, ScreenManager.instance.toRevisit.bind(gameID, _,  ScreenManager.instance.toProfile.bind(profileOwnerLogin, ScreenManager.instance.toMain, ScreenManager.instance.toMain)), ()->{});};
         return link;
     }
 
-    private function studyLink(text:String, variantStr:String):Link
+    private function studyLink(text:String, overview:StudyOverview):Link
     {
         var link:Link = haxeuiLink(text);
-        link.onClick = (e) -> {}; //TODO: Fill
+        link.onClick = (e) -> {ScreenManager.instance.toAnalysisBoard(overview);};
         return link;
     }
 

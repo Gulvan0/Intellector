@@ -54,14 +54,9 @@ class Variant extends VariantNode
         return true;
     }
 
-    public static function deserialize(str:String):Variant 
-    {
-        //TODO: Fill
-    }
-
     public function serialize():String 
     {
-        return Json.stringify([for (path in getFamilyPaths([])) if (!Lambda.empty(path)) path.join(":") => PlyDeserializer.serialize(getByPath(path).ply)]);
+        return [for (path in getFamilyPaths([])) if (!Lambda.empty(path)) path.join(":") + "/" + PlyDeserializer.serialize(getByPath(path).ply)].join(";");
     }
 
     public function addChildToNode(ply:Ply, parentPath:Array<Int>) 
