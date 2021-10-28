@@ -115,7 +115,12 @@ class AnalysisCompound extends GameCompound
 
     private function onConstructFromSIPPressed(sip:String)
     {
-        cast(field, AnalysisField).constructFromSIP(sip);
+        constructFromSIP(sip, false);
+    }
+
+    private function constructFromSIP(sip:String, overrideLastApprovedSIP:Bool) 
+    {
+        cast(field, AnalysisField).constructFromSIP(sip, overrideLastApprovedSIP);
         panel.changeEditorColorOptions(field.currentSituation.turnColor);
         variant = new Variant();
         panel.variantTree.init(variant, []);
@@ -143,12 +148,14 @@ class AnalysisCompound extends GameCompound
 
     private function onExportStudyRequested()
     {
-        var decidedOverwriteID:Null<Int> = overwriteID;
         if (overwriteID != null)
             Dialogs.confirm(Dictionary.getPhrase(STUDY_OVERWRITE_CONFIRMATION_MESSAGE), Dictionary.getPhrase(STUDY_OVERWRITE_CONFIRMATION_TITLE), () -> {
-                decidedOverwriteID = null;
-            }, () -> {});
-        exportStudyAskName(decidedOverwriteID);
+                Timer.delay(exportStudyAskName.bind(overwriteID), 20);
+            }, () -> {
+                Timer.delay(exportStudyAskName.bind(null), 20);
+            });
+        else
+            exportStudyAskName(null);
     }
 
     private function exportStudyAskName(decidedOverwriteID:Null<Int>) 
@@ -156,7 +163,8 @@ class AnalysisCompound extends GameCompound
         var response = Browser.window.prompt(Dictionary.getPhrase(STUDY_NAME_SELECTION_MESSAGE));
         if (response != null)
         {
-            Networker.setStudy(response.substr(0, 40), variant.serialize(), cast(field, AnalysisField).lastApprovedSituationSIP, overwriteID);
+            trace(cast(field, AnalysisField).lastApprovedSituationSIP);
+            Networker.setStudy(response.substr(0, 40), variant.serialize(), cast(field, AnalysisField).lastApprovedSituationSIP, decidedOverwriteID);
             ScreenManager.instance.toMain();
         }
     }
@@ -198,11 +206,14 @@ class AnalysisCompound extends GameCompound
         }, 20);
     }
 
-    private function onReady(studyOverview:StudyOverview)
+    private function onReadyStudy(studyOverview:StudyOverview)
     {
         if (studyOverview.data.author.toLowerCase() == Networker.login.toLowerCase())
             overwriteID = studyOverview.id;
-        onConstructFromSIPPressed(studyOverview.data.startingSIP);
+        constructFromSIP(studyOverview.data.startingSIP, true);
+
+        if (studyOverview.data.variantStr == "")
+            return;
 
         var nodesByPathLength:Map<Int, Array<{path:Array<Int>, plyStr:String}>> = [];
         var maxPathLength:Int = 0;
@@ -225,12 +236,17 @@ class AnalysisCompound extends GameCompound
             for (node in nodesByPathLength.get(i))
             {
                 onBranchClick(Variant.parentPath(node.path));
-                onContinuationMove(PlyDeserializer.deserialize(node.plyStr));
+                onBranchingMove(PlyDeserializer.deserialize(node.plyStr));
             }
         onBranchClick([]);
     }
 
-    public function new(onReturn:Void->Void, ?studyOverview:StudyOverview)
+    private function onReadyExplore(situationSIP:String)
+    {
+        constructFromSIP(situationSIP, true);
+    }
+
+    public function new(onReturn:Void->Void, ?studyOverview:StudyOverview, ?situationSIP:String)
     {
         var field = new AnalysisField();
         field.onOwnMoveMade = onMoveMade;
@@ -255,7 +271,13 @@ class AnalysisCompound extends GameCompound
         panel.scrollingCallback = field.applyScrolling;
         
         if (studyOverview != null)
-            panel.readyCallback = onReady.bind(studyOverview);
+        {
+            if (situationSIP != null)
+                throw "AnalysisCompound.new(): Either studyOverview or situationSIP should be omitted";
+            panel.readyCallback = onReadyStudy.bind(studyOverview);
+        }
+        else if (situationSIP != null)
+            panel.readyCallback = onReadyExplore.bind(situationSIP);
         else
             panel.readyCallback = () -> {};
 

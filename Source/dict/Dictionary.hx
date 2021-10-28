@@ -25,7 +25,7 @@ class Dictionary
         CHALLENGE_PARAMS_TITLE => ["Challenge parameters", "Параметры вызова"],
         RETURN => ["Return", "Назад"],
         ANALYSIS_CLEAR => ["Clear", "Очистить"],
-        ANALYSIS_RESET => ["Reset", "Сброс"],
+        ANALYSIS_RESET => ["Reset to starting", "Начальная расстановка"],
         LOGIN_FIELD_TITLE => ["Login", "Логин"],
         PASSWORD_FIELD_TITLE => ["Password", "Пароль"],
         REMEMBER_ME_CHECKBOX_TITLE => ["Remember me", "Запомнить"],
@@ -144,7 +144,10 @@ class Dictionary
         STUDIES => ["Studies", "Студии"],
         STUDY_OVERWRITE_CONFIRMATION_MESSAGE => ["Overwrite study ('no' - save as separate)?", "Перезаписать студию ('нет' - сохранить отдельную)?"],
         STUDY_OVERWRITE_CONFIRMATION_TITLE => ["Overwrite study?", "Перезаписать студию?"],
-        STUDY_NAME_SELECTION_MESSAGE => ["Enter the name for your study", "Введите название студии"]
+        STUDY_NAME_SELECTION_MESSAGE => ["Enter the name for your study", "Введите название студии"],
+        EXPLORE_IN_ANALYSIS_BTN_TEXT => ["Explore on analysis board", "На доску анализа"],
+        REMATCH => ["Rematch", "Реванш"],
+        ADD_TIME_BTN_TEXT => ["Add time", "Добавить время"]
     ];
 
     public static function getPhrase(phrase:Phrase):String

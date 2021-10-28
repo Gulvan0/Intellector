@@ -1,5 +1,7 @@
 package gfx;
 
+import struct.Situation;
+import struct.ReversiblePly;
 import gfx.components.gamefield.AnalysisCompound;
 import gfx.components.Dialogs;
 import gfx.components.gamefield.GameCompound;
@@ -113,7 +115,7 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
-    public function toAnalysisBoard(?study:StudyOverview) 
+    public function toAnalysisBoard(onReturn:Void->Void, ?study:StudyOverview, ?situationSIP:String) 
     {
         clear();
         URLEditor.clear();
@@ -121,8 +123,8 @@ class ScreenManager extends Sprite
         current = new AnalysisCompound(() ->
         {
             Networker.currentGameCompound = null;
-		    toMain();
-        }, study);
+		    onReturn();
+        }, study, situationSIP);
         addChild(current);
     }
 
@@ -131,12 +133,13 @@ class ScreenManager extends Sprite
 		clear();
         URLEditor.assignID(data.match_id);
 
+        var spectatedLogin:String = data.requestedColor == 'white'? data.whiteLogin : data.blackLogin;
         var game = GameCompound.buildSpectators(data, () -> 
         {
             Networker.stopSpectation(); 
             Networker.currentGameCompound = null;
 		    toMain();
-        });
+        }, Spectator(spectatedLogin));
         
 		current = game;
         Networker.currentGameCompound = game;
@@ -164,15 +167,13 @@ class ScreenManager extends Sprite
             requestedColor: 'white', 
             whiteLogin: ereg.matched(1), 
             blackLogin: ereg.matched(2), 
-            startSecs: null,
-            bonusSecs: null, 
             whiteSeconds: null, 
             blackSeconds: null, 
             position: null,
             currentLog: log
         };
 
-        current = GameCompound.buildSpectators(mockData, onReturn, true);
+        current = GameCompound.buildSpectators(mockData, onReturn, Revisit(id));
         addChild(current);
     }
 

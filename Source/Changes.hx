@@ -16,6 +16,9 @@ class Changes
     {
         if (Dictionary.lang == EN)
             changelog = [
+                {date: "29.10.2021", text:"Some QoL additions"},
+                {date: "26.10.2021", text:"Bugfixes"},
+                {date: "25.10.2021", text:"Analysis board 2.0, Studies, Explore position"},
                 {date: "11.09.2021", text:"Bugfixes"},
                 {date: "11.08.2021", text:"Player profile page"},
                 {date: "08.08.2021", text:"Revisiting games, Spectation enhancements, Chat history"},
@@ -44,6 +47,9 @@ class Changes
             ];
         else if (Dictionary.lang == RU)
             changelog = [
+                {date: "29.10.2021", text:"QoL-нововведения"},
+                {date: "26.10.2021", text:"Исправления багов"},
+                {date: "25.10.2021", text:"Доска анализа 2.0, Студии, Анализ в наблюдении"},
                 {date: "11.09.2021", text:"Исправления багов"},
                 {date: "11.08.2021", text:"Профиль игрока"},
                 {date: "08.08.2021", text:"Просмотр прошедших игр, история чата, улучшения наблюдения"},

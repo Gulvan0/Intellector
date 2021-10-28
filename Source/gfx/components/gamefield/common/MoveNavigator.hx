@@ -58,6 +58,9 @@ class MoveNavigator extends VBox
 
     public function revertPlys(cnt:Int) 
     {
+        if (cnt <= 0)
+            return;
+        
         plyNumber -= cnt;
 
         if (lastMovetableEntry.black_move == " ")

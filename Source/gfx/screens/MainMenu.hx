@@ -46,7 +46,7 @@ class MainMenu extends Sprite
 
     private function onAnalysisBoard(e) 
     {
-        ScreenManager.instance.toAnalysisBoard();
+        ScreenManager.instance.toAnalysisBoard(ScreenManager.instance.toMain);
     }
 
     private function onSpectate(e) 

@@ -137,8 +137,8 @@ class PlayerProfile extends Sprite
         {
             var text:String = overview.id + ". " + overview.data.name;
             var link:Link = studyLink(text, overview);
-            gamesBox.addComponent(link);
-            gamesBox.addComponent(Shapes.vSpacer(4));
+            studiesBox.addComponent(link);
+            studiesBox.addComponent(Shapes.vSpacer(4));
         }
     }
 
@@ -249,7 +249,7 @@ class PlayerProfile extends Sprite
     private function studyLink(text:String, overview:StudyOverview):Link
     {
         var link:Link = haxeuiLink(text);
-        link.onClick = (e) -> {ScreenManager.instance.toAnalysisBoard(overview);};
+        link.onClick = (e) -> {ScreenManager.instance.toAnalysisBoard(ScreenManager.instance.toProfile.bind(profileOwnerLogin, ScreenManager.instance.toMain, ScreenManager.instance.toMain), overview);};
         return link;
     }
 

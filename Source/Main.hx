@@ -57,8 +57,8 @@ class Main extends Sprite
 		AssetManager.init();
 		Changes.initChangelog();
 		addChild(new ScreenManager());
-		//Networker.connect(onConnected);
-		ScreenManager.instance.toAnalysisBoard();
+		Networker.connect(onConnected);
+		//ScreenManager.instance.toAnalysisBoard(()->{});
 	}
 
 	private function onConnected()

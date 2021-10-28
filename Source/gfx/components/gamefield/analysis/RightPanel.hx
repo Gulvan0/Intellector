@@ -267,7 +267,6 @@ class RightPanel extends Sprite
 
         var overviewVBox:VBox = new VBox();
         overviewVBox.horizontalAlign = 'center';
-        overviewVBox.verticalAlign = 'center';
         overviewVBox.addComponent(navigator);
         overviewVBox.addComponent(setPositionBtn);
         overviewVBox.addComponent(exportSIPBtn);

@@ -42,7 +42,7 @@ class AnalysisField extends Field
     public function reset() 
     {
         removePiecesClearSelections();
-        constructFromSIP(lastApprovedSituationSIP);
+        constructFromSIP(lastApprovedSituationSIP, false);
     }
     
     public function clearBoard() 
@@ -228,13 +228,15 @@ class AnalysisField extends Field
         editMode = mode;
     }
 
-    public function constructFromSIP(sip:String) 
+    public function constructFromSIP(sip:String, overrideLastApprovedSIP:Bool) 
     {
         removePiecesClearSelections();
         dropHistory();
         currentSituation = SituationDeserializer.deserialize(sip);
         shownSituation = currentSituation.copy();
         figures = Factory.produceFiguresFromSituation(currentSituation, true, this);
+        if (overrideLastApprovedSIP)
+            lastApprovedSituationSIP = sip;
     }
 
     public function applyChanges() 
@@ -247,7 +249,7 @@ class AnalysisField extends Field
 
     public function discardChanges()
     {
-        constructFromSIP(lastApprovedSituationSIP);
+        constructFromSIP(lastApprovedSituationSIP, false);
         editMode = null;
     }
 }

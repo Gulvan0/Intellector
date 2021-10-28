@@ -18,6 +18,11 @@ class SpectatorsField extends Field
         //pass
     }
 
+    private override function onRelease(e:MouseEvent)
+    {
+        //pass
+    }
+
     public function new(watchedSide:PieceColor) 
     {
         super();

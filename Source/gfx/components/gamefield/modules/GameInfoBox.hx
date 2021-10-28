@@ -35,11 +35,12 @@ class GameInfoBox extends Sprite
     private var openingTF:Label;
 
     private var timeControlText:String;
+    private var resolutionText:String;
     private var openingTree:OpeningTree;
 
     public function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
     {
-        var resolution = switch outcome 
+        resolutionText = switch outcome 
         {
             case Mate: Dictionary.getPhrase(RESOLUTION_MATE) + ' • ' + Dictionary.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
             case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH) + ' • ' + Dictionary.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
@@ -51,7 +52,23 @@ class GameInfoBox extends Sprite
             case NoProgress: Dictionary.getPhrase(RESOLUTION_HUNDRED);
             case Timeout: Dictionary.getPhrase(RESOLUTION_TIMEOUT) + ' • ' + Dictionary.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
         }
-        shortInfoTF.text = timeControlText + resolution;
+        reconstructShortInfo();
+    }
+
+    public function setTimeControl(startSecs:Int, bonusSecs:Int) 
+    {
+        timeControlText = Math.round(startSecs/60) + "+" + bonusSecs;
+        reconstructShortInfo();
+    }
+
+    private function reconstructShortInfo() 
+    {
+        if (timeControlText == "")
+            shortInfoTF.text = resolutionText;
+        else if (resolutionText == "")
+            shortInfoTF.text = timeControlText;
+        else
+            shortInfoTF.text = timeControlText + " • " +  resolutionText;
     }
 
     public function makeMove(ply:Ply)
@@ -87,15 +104,16 @@ class GameInfoBox extends Sprite
         vbox.y = 5;
 
         shortInfoTF = new Label();
-        if (tcStartSeconds != null && tcBonusSeconds != null)
-            timeControlText = '${tcStartSeconds/60}+$tcBonusSeconds • ';
-        else
-            timeControlText = "";
-        shortInfoTF.text = timeControlText + Dictionary.getPhrase(RESOLUTION_NONE);
         shortInfoTF.customStyle = shortInfoStyle;
         shortInfoTF.width = boxWidth;
         shortInfoTF.horizontalAlign = 'center';
         vbox.addComponent(shortInfoTF);
+
+        timeControlText = "";
+        if (tcStartSeconds != null && tcBonusSeconds != null)
+            setTimeControl(tcStartSeconds, tcBonusSeconds);
+        resolutionText = Dictionary.getPhrase(RESOLUTION_NONE);
+        reconstructShortInfo();
 
         opponentsTF = new Label();
         opponentsTF.text = '$whiteLogin vs $blackLogin';

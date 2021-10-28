@@ -69,8 +69,6 @@ typedef OngoingBattleData =
     var requestedColor:String;
     var whiteLogin:String;
     var blackLogin:String;
-    var startSecs:Int;
-    var bonusSecs:Int;
     var whiteSeconds:Int;
     var blackSeconds:Int;
     var position:String;
@@ -192,6 +190,11 @@ class Networker
     public static function setStudy(name:String, variantStr:String, startingSIP:String, overwriteID:Null<Int>) 
     {
         emit('set_study', {name: name, variantStr: variantStr, startingSIP: startingSIP, overwriteID: overwriteID});
+    }
+
+    public static function addTime() 
+    {
+        emit('add_time', {});
     }
 
     public static function checkPlayerExistance(login:String, callback:Bool->Void)

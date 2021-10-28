@@ -34,7 +34,8 @@ enum GameCompoundType
 {
     Active;
     Analysis;
-    Spectator;
+    Spectator(spectatedLogin:String);
+    Revisit(id:Int);
 }
 
 class GameCompound extends Sprite
@@ -75,9 +76,9 @@ class GameCompound extends Sprite
         var enemyLogin:String = playerIsWhite? data.blackLogin : data.whiteLogin;
 
         var field:PlayingField = new PlayingField(playerIsWhite);
-        var sidebox:Sidebox = new Sidebox(false, data.startSecs, data.bonusSecs, Networker.login, enemyLogin, playerIsWhite, field.applyScrolling);
+        var sidebox:Sidebox = new Sidebox(false, 0, 0, Networker.login, enemyLogin, playerIsWhite, field.applyScrolling);
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
-        var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin);
+        var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, 0, 0, data.whiteLogin, data.blackLogin);
 
         actualize(data, field, sidebox, infobox, chatbox);
 
@@ -91,7 +92,7 @@ class GameCompound extends Sprite
         return compound;
     }
 
-    public static function buildSpectators(data:OngoingBattleData, onReturn:Void->Void, ?disableChat:Bool = false):GameCompound
+    public static function buildSpectators(data:OngoingBattleData, onReturn:Void->Void, type:GameCompoundType):GameCompound
     {
         var whiteRequested:Bool = data.requestedColor == "white";
         var watchedColor:PieceColor = whiteRequested? White : Black;
@@ -99,15 +100,21 @@ class GameCompound extends Sprite
         var upperLogin:String = whiteRequested? data.blackLogin : data.whiteLogin;
 
         var field:SpectatorsField = new SpectatorsField(watchedColor);
-        var sidebox:Sidebox = new Sidebox(true, data.startSecs, data.bonusSecs, bottomLogin, upperLogin, whiteRequested, field.applyScrolling);
+        var sidebox:Sidebox = new Sidebox(true, 0, 0, bottomLogin, upperLogin, whiteRequested, field.applyScrolling);
         var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75, true);
-        var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, data.whiteLogin, data.blackLogin);
+        var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, 0, 0, data.whiteLogin, data.blackLogin);
         
         actualize(data, field, sidebox, infobox, chatbox);
-        if (disableChat)
-            chatbox.terminate();
+        switch type 
+        {
+            case Active, Analysis:
+                throw "GameCompound.buildSpectators(): Unsupported compound type: " + type.getName();
+            case Revisit(id):
+                chatbox.terminate();
+            default:
+        }
         
-        var compound = new GameCompound(Spectator, field, sidebox, chatbox, infobox, onReturn);
+        var compound = new GameCompound(type, field, sidebox, chatbox, infobox, onReturn);
         compound.bindComponentButtonCallbacks();
         return compound;
     }
@@ -144,6 +151,8 @@ class GameCompound extends Sprite
         {
             case "P":
                 return;
+            case "T":
+                infobox.setTimeControl(Std.parseInt(args[0]), Std.parseInt(args[1]));
             case "C":
                 var author:String = args[0] == "w"? data.whiteLogin : data.blackLogin;
                 chatbox.appendMessage(author, args[1]);
@@ -331,6 +340,22 @@ class GameCompound extends Sprite
         sidebox.onAcceptTakebackPressed = onAcceptTakebackPressed;
         sidebox.onDeclineTakebackPressed = onDeclineTakebackPressed;
         sidebox.onExportSIPRequested = onExportSIPRequested;
+        sidebox.onExploreInAnalysisRequest = onExploreInAnalysisRequest;
+    }
+
+    private function onExploreInAnalysisRequest() 
+    {
+        var onReturnCallback:Void->Void = () -> {};
+        switch type 
+        {
+            case Spectator(spectatedLogin):
+                Networker.stopSpectation();
+                onReturnCallback = Networker.spectate.bind(spectatedLogin, ScreenManager.instance.toSpectation);
+            case Revisit(id):
+                onReturnCallback = Networker.getGame.bind(id, (d)->{}, (d)->{}, ScreenManager.instance.toRevisit.bind(id, _,  ScreenManager.instance.toMain), ()->{});
+            default:
+        }
+        ScreenManager.instance.toAnalysisBoard(onReturnCallback, null, field.shownSituation.serialize());
     }
 
     private function onExportSIPRequested() 

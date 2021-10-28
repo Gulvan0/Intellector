@@ -37,6 +37,9 @@ class Sidebox extends Sprite
     private var cancelDrawBtn:Button;
     private var offerTakebackBtn:Button;
     private var cancelTakebackBtn:Button;
+    private var rematchBtn:Button;
+    private var exploreBtn:Button;
+    private var addTimeBtn:Button;
 
     public var onOfferDrawPressed:Void->Void;
     public var onCancelDrawPressed:Void->Void;
@@ -47,6 +50,7 @@ class Sidebox extends Sprite
     public var onAcceptTakebackPressed:Void->Void;
     public var onDeclineTakebackPressed:Void->Void;
     public var onExportSIPRequested:Void->Void;
+    public var onExploreInAnalysisRequest:Void->Void;
 
     private var resignConfirmationMessage:String;
 
@@ -200,11 +204,14 @@ class Sidebox extends Sprite
 
         if (!simplified)
         {
-            resignBtn.disabled = true;
-            offerDrawBtn.disabled = true;
-            cancelDrawBtn.disabled = true;
-            offerTakebackBtn.disabled = true;
-            cancelTakebackBtn.disabled = true;
+            resignBtn.visible = false;
+            offerDrawBtn.visible = false;
+            cancelDrawBtn.visible = false;
+            offerTakebackBtn.visible = false;
+            cancelTakebackBtn.visible = false;
+            addTimeBtn.visible = false;
+            rematchBtn.visible = true;
+            exploreBtn.visible = true;
         }
     }
 
@@ -322,7 +329,7 @@ class Sidebox extends Sprite
         container.addComponent(takebackRequestBox);
     }
 
-    private function buildSpecialBtns(container:VBox)
+    private function buildSpecialBtns(container:VBox, opponentLogin:String, startSecs:Null<Int>, secsPerTurn:Null<Int>)
     {
         var resignAndDraw:HBox = new HBox();
 
@@ -359,6 +366,15 @@ class Sidebox extends Sprite
         
         container.addComponent(resignAndDraw);
 
+        addTimeBtn = new Button();
+		addTimeBtn.width = 250;
+		addTimeBtn.text = Dictionary.getPhrase(ADD_TIME_BTN_TEXT);
+		container.addComponent(addTimeBtn);
+
+		addTimeBtn.onClick = (e) -> {
+            Networker.addTime();
+        }
+
         offerTakebackBtn = new Button();
 		offerTakebackBtn.width = 250;
 		offerTakebackBtn.text = Dictionary.getPhrase(TAKEBACK_BTN_TEXT);
@@ -378,6 +394,16 @@ class Sidebox extends Sprite
             onCancelTakebackPressed();
         }
 
+        rematchBtn = new Button();
+		rematchBtn.width = 250;
+		rematchBtn.text = Dictionary.getPhrase(REMATCH);
+        rematchBtn.visible = false;
+		container.addComponent(rematchBtn);
+
+		rematchBtn.onClick = (e) -> {
+            Networker.sendChallenge(opponentLogin, startSecs, secsPerTurn, null);
+        }
+
         offerDrawBtn.disabled = true;
         cancelDrawBtn.disabled = true;
         offerTakebackBtn.disabled = true;
@@ -388,10 +414,10 @@ class Sidebox extends Sprite
 
     //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public function new(simplified:Bool, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerLogin:String, opponentLogin:String, playerIsWhite:Bool, onClickCallback:PlyScrollType->Void) 
+    public function new(spectators:Bool, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerLogin:String, opponentLogin:String, playerIsWhite:Bool, onClickCallback:PlyScrollType->Void) 
     {
         super();
-        this.simplified = simplified;
+        this.simplified = spectators;
         this.secsPerTurn = secsPerTurn;
         move = 1;
         playerColor = playerIsWhite? White : Black;
@@ -416,7 +442,7 @@ class Sidebox extends Sprite
         upperLogin.customStyle = loginStyle;
         box.addComponent(upperLogin);
 
-        if (!simplified)
+        if (!spectators)
         {
             buildTakebackRequestBox(box);
             buildDrawRequestBox(box);
@@ -425,8 +451,20 @@ class Sidebox extends Sprite
         navigator = new MoveNavigator(onClickCallback);
         box.addComponent(navigator);
 
-        if (!simplified)
-            buildSpecialBtns(box);
+        exploreBtn = new Button();
+        exploreBtn.width = 250;
+        exploreBtn.text = Dictionary.getPhrase(EXPLORE_IN_ANALYSIS_BTN_TEXT);
+        box.addComponent(exploreBtn);
+
+        exploreBtn.onClick = (e) -> {
+            onExploreInAnalysisRequest();
+        }
+
+        if (!spectators)
+        {
+            exploreBtn.visible = false;
+            buildSpecialBtns(box, opponentLogin, startSecs, secsPerTurn);
+        }
 
         var exportSIPBtn:Button = new Button();
         exportSIPBtn.width = 250;
