@@ -1,5 +1,7 @@
 package gfx.components.gamefield.modules;
 
+import gfx.components.gamefield.common.TimeLeftLabel;
+import dict.Phrase;
 import gfx.utils.PlyScrollType;
 import gfx.components.gamefield.common.MoveNavigator;
 import haxe.ui.components.Button;
@@ -23,12 +25,25 @@ import openfl.display.Sprite;
 
 class Sidebox extends Sprite
 {
+    private static var loginStyle:Style = {fontSize: 24};
+
+    private static var BUTTON_BOX_WIDTH:Float = 250;
+    private static var BUTTON_HORIZONTAL_INTERVAL:Float = 5.3;
+
+    private static var FULL_BUTTON_WIDTH:Float = BUTTON_BOX_WIDTH;
+    private static var HALVED_BUTTON_WIDTH:Float = (BUTTON_BOX_WIDTH - BUTTON_HORIZONTAL_INTERVAL) / 2;
+
+    private static var ACCEPT_DECLINE_BTN_WIDTH:Float = 40;
+    private static var REQUEST_ELEMENTS_INTERVAL:Float = 10;
+    private static var REQUEST_LABEL_WIDTH:Float = BUTTON_BOX_WIDTH - ACCEPT_DECLINE_BTN_WIDTH * 2 - REQUEST_ELEMENTS_INTERVAL;
+
     public var simplified:Bool;
+
+    private var bottomTime:TimeLeftLabel;
+    private var upperTime:TimeLeftLabel;
 
     private var takebackRequestBox:HBox;
     private var drawRequestBox:HBox;
-    private var bottomTime:Label;
-    private var upperTime:Label;
     private var navigator:MoveNavigator;
     private var bottomLogin:Label;
     private var upperLogin:Label;
@@ -54,90 +69,76 @@ class Sidebox extends Sprite
 
     private var resignConfirmationMessage:String;
 
-    private var timer:Timer;
-    private var secsPerTurn:Int;
+    private var playerTurn:Bool;
     private var move:Int;
 
     private var playerColor:PieceColor;
-    private var playerTurn:Bool;
+    private var secsPerTurn:Int;
 
-    private inline function numRep(v:Int)
-    {
-        return v < 10? '0$v' : '$v';
-    }
-
-    private function secsToString(secs:Int) 
-    {
-        var secsLeft:Int = secs % 60;
-        var minsLeft:Int = cast (secs - secsLeft)/60;
-        var minRepresentation = numRep(minsLeft);
-        var secRepresentation = numRep(secsLeft);
-        return '$minRepresentation:$secRepresentation';    
-    }
-
-    private function timerRun() 
-    {
-        var timeLabel = playerTurn? bottomTime : upperTime;
-        var timeNumbers = timeLabel.text.split(":");
-        if (timeNumbers[1] == "00")
-        {
-            if (timeNumbers[0] == "00")
-            {
-                terminate();
-                Networker.reqTimeoutCheck();
-                return;
-            }
-            timeLabel.text = '${numRep(Std.parseInt(timeNumbers[0])-1)}:59';
-        }
-        else
-            timeLabel.text = '${timeNumbers[0]}:${numRep(Std.parseInt(timeNumbers[1])-1)}';
-    }
-
-    private function addBonus(text:String) 
-    {
-        var timeNumbers = text.split(":").map(Std.parseInt);
-        timeNumbers[0] += Math.floor((timeNumbers[1] + secsPerTurn) / 60);
-        timeNumbers[1] = (timeNumbers[1] + secsPerTurn) % 60;
-        return '${numRep(timeNumbers[0])}:${numRep(timeNumbers[1])}';
-    }
-
-    public function hasIncomingTakebackRequest():Bool
-    {
-        return takebackRequestBox.visible;
-    }
-
-    public function correctTime(correctedSecsWhite:Int, correctedSecsBlack:Int) 
+    public function correctTime(correctedSecsWhite:Float, correctedSecsBlack:Float) 
     {
         if (playerColor == White)
         {
-            bottomTime.text = secsToString(correctedSecsWhite);
-            upperTime.text = secsToString(correctedSecsBlack);
+            bottomTime.correctTime(correctedSecsWhite);
+            upperTime.correctTime(correctedSecsBlack);
         }
         else
         {
-            upperTime.text = secsToString(correctedSecsWhite);
-            bottomTime.text = secsToString(correctedSecsBlack);
+            upperTime.correctTime(correctedSecsWhite);
+            bottomTime.correctTime(correctedSecsBlack);
         }
     }
 
+    public function terminate() 
+    {
+        upperTime.stopTimer();
+        bottomTime.stopTimer();
+
+        if (!simplified)
+        {
+            resignBtn.visible = false;
+            offerDrawBtn.visible = false;
+            cancelDrawBtn.visible = false;
+            offerTakebackBtn.visible = false;
+            cancelTakebackBtn.visible = false;
+            addTimeBtn.visible = false;
+            rematchBtn.visible = true;
+            exploreBtn.visible = true;
+        }
+    }
+
+    //========================================================================================================================================================================
+
     public function makeMove(ply:Ply, situation:Situation) 
     {
-        if (timer != null)
-            timer.stop();
+        if (!situation.isMating(ply) && move >= 2 && secsPerTurn != null)
+        {
+            if (playerTurn)
+            {
+                bottomTime.addTime(secsPerTurn);
+                bottomTime.stopTimer();
+                upperTime.launchTimer();
+            }
+            else
+            {
+                //Does not add bonus because corrections have already been applied if it is the opponent's turn ("correct, then move" server rule)
+                upperTime.stopTimer();
+                bottomTime.launchTimer();
+            }
+        }
 
         navigator.writePly(ply, situation);
         navigator.scrollAfterDelay();
 
-        move++;
         if (!simplified)
         {
-            if (move == 2 && playerColor == White || move == 3 && playerColor == Black)
+            if (move == 1 && playerColor == White || move == 2 && playerColor == Black)
             {
                 offerTakebackBtn.disabled = false;
                 cancelTakebackBtn.disabled = false;
             }
 
-            if (move == 3)
+            if (move == 2)
             {
                 offerDrawBtn.disabled = false;
                 cancelDrawBtn.disabled = false;
@@ -145,14 +146,8 @@ class Sidebox extends Sprite
                 resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
             }
         }
-
-        if (!situation.isMating(ply) && move > 2 && secsPerTurn != null)
-        {
-            if (playerTurn) //Because corrections have already been applied if it is the opponent's turn ("correct, then move" server rule)
-                bottomTime.text = addBonus(bottomTime.text);
-            launchTimer();
-        }
         
+        move++;
         playerTurn = situation.turnColor != playerColor;
     }
 
@@ -162,6 +157,20 @@ class Sidebox extends Sprite
             return;
         
         move -= cnt;
+        if (cnt % 2 == 1)
+        {
+            playerTurn = !playerTurn;
+            if (playerTurn)
+            {
+                upperTime.stopTimer();
+                bottomTime.launchTimer();
+            }
+            else
+            {
+                bottomTime.stopTimer();
+                upperTime.launchTimer();
+            }
+        }
 
         if (!simplified)
         {
@@ -182,37 +191,15 @@ class Sidebox extends Sprite
                 resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
             }
         }
-        
-        if (cnt % 2 == 1)
-            playerTurn = !playerTurn;
 
         navigator.revertPlys(cnt);
     }
 
-    public function launchTimer()
-    {
-        if (timer != null)
-            timer.stop();
-        timer = new Timer(1000);
-        timer.run = timerRun;
-    }
+    //===========================================================================================================================================================
 
-    public function terminate() 
+    public function hasIncomingTakebackRequest():Bool
     {
-        if (timer != null)
-            timer.stop();
-
-        if (!simplified)
-        {
-            resignBtn.visible = false;
-            offerDrawBtn.visible = false;
-            cancelDrawBtn.visible = false;
-            offerTakebackBtn.visible = false;
-            cancelTakebackBtn.visible = false;
-            addTimeBtn.visible = false;
-            rematchBtn.visible = true;
-            exploreBtn.visible = true;
-        }
+        return takebackRequestBox.visible;
     }
 
     public function showDrawRequestBox() 
@@ -259,160 +246,44 @@ class Sidebox extends Sprite
         cancelTakebackBtn.visible = false;
     }
 
-    //--------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    private function buildDrawRequestBox(container:VBox)
+    private function onResignPressed() 
     {
-        drawRequestBox = new HBox();
+        var confirmed = Browser.window.confirm(resignConfirmationMessage);
 
-        var declineBtn2 = new haxe.ui.components.Button();
-		declineBtn2.width = 40;
-        declineBtn2.text = "✘";
-        declineBtn2.color = Color.fromString("red");
-		drawRequestBox.addComponent(declineBtn2);
-
-		declineBtn2.onClick = (e) -> {
-			onDeclineDrawPressed();
-        }
-
-        var requestLabel2:Label = new Label();
-        requestLabel2.text = Dictionary.getPhrase(DRAW_QUESTION_TEXT);
-        requestLabel2.width = 250 - 40 * 2 - 10;
-        requestLabel2.textAlign = "center";
-        drawRequestBox.addComponent(requestLabel2);
-
-        var acceptBtn2 = new haxe.ui.components.Button();
-		acceptBtn2.width = 40;
-        acceptBtn2.text = "✔";
-        acceptBtn2.color = Color.fromString("green");
-		drawRequestBox.addComponent(acceptBtn2);
-
-		acceptBtn2.onClick = (e) -> {
-			onAcceptDrawPressed();
-        }
-
-        drawRequestBox.visible = false;
-        container.addComponent(drawRequestBox);
+		if (confirmed)
+			Networker.emit("resign", {});
     }
 
-    private function buildTakebackRequestBox(container:VBox)
+    //===========================================================================================================================================================
+
+    private function buildSpecialBtns(container:VBox, opponentLogin:String, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerIsWhite:Bool)
     {
-        takebackRequestBox = new HBox();
-
-        var declineBtn = new haxe.ui.components.Button();
-		declineBtn.width = 40;
-        declineBtn.text = "✘";
-        declineBtn.color = Color.fromString("red");
-		takebackRequestBox.addComponent(declineBtn);
-
-		declineBtn.onClick = (e) -> {
-            onDeclineTakebackPressed();
-        }
-
-        var requestLabel:Label = new Label();
-        requestLabel.text = Dictionary.getPhrase(TAKEBACK_QUESTION_TEXT);
-        requestLabel.width = 250 - 40 * 2 - 10;
-        requestLabel.textAlign = "center";
-        takebackRequestBox.addComponent(requestLabel);
-
-        var acceptBtn = new haxe.ui.components.Button();
-		acceptBtn.width = 40;
-        acceptBtn.text = "✔";
-        acceptBtn.color = Color.fromString("green");
-		takebackRequestBox.addComponent(acceptBtn);
-
-		acceptBtn.onClick = (e) -> {
-			onAcceptTakebackPressed();
-        }
-
-        takebackRequestBox.visible = false;
-        container.addComponent(takebackRequestBox);
-    }
-
-    private function buildSpecialBtns(container:VBox, opponentLogin:String, startSecs:Null<Int>, secsPerTurn:Null<Int>)
-    {
+        resignBtn = constructBtn(HALVED_BUTTON_WIDTH, RESIGN_BTN_ABORT_TEXT,  (e) -> {onResignPressed();});
+        offerDrawBtn = constructBtn(HALVED_BUTTON_WIDTH, OFFER_DRAW_BTN_TEXT, (e) -> {onOfferDrawPressed();});
+        cancelDrawBtn = constructBtn(HALVED_BUTTON_WIDTH, CANCEL_DRAW_BTN_TEXT, (e) -> {onCancelDrawPressed();}, false);
+        
         var resignAndDraw:HBox = new HBox();
-
-        resignBtn = new Button();
-		resignBtn.width = (250 - 5.3) / 2;
-		resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_TEXT);
-		resignAndDraw.addComponent(resignBtn);
-
-		resignBtn.onClick = (e) -> {
-			var confirmed = Browser.window.confirm(resignConfirmationMessage);
-
-			if (confirmed)
-				Networker.emit("resign", {});
-        }
+        resignAndDraw.addComponent(resignBtn);
+        resignAndDraw.addComponent(offerDrawBtn);
+        resignAndDraw.addComponent(cancelDrawBtn);
         
-        offerDrawBtn = new Button();
-		offerDrawBtn.width = (250 - 5.3) / 2;
-		offerDrawBtn.text = Dictionary.getPhrase(OFFER_DRAW_BTN_TEXT);
-		resignAndDraw.addComponent(offerDrawBtn);
-
-		offerDrawBtn.onClick = (e) -> {
-            onOfferDrawPressed();
-        }
-        
-        cancelDrawBtn = new Button();
-		cancelDrawBtn.width = (250 - 5.3) / 2;
-        cancelDrawBtn.text = Dictionary.getPhrase(CANCEL_DRAW_BTN_TEXT);
-        cancelDrawBtn.visible = false;
-		resignAndDraw.addComponent(cancelDrawBtn);
-
-		cancelDrawBtn.onClick = (e) -> {
-            onCancelDrawPressed();
-        }
+        addTimeBtn = constructBtn(FULL_BUTTON_WIDTH, ADD_TIME_BTN_TEXT,  (e) -> {Networker.addTime();});
+        offerTakebackBtn = constructBtn(FULL_BUTTON_WIDTH, TAKEBACK_BTN_TEXT, (e) -> {onOfferTakebackPressed();});
+        cancelTakebackBtn = constructBtn(FULL_BUTTON_WIDTH, CANCEL_TAKEBACK_BTN_TEXT, (e) -> {onCancelTakebackPressed();}, false);
+        rematchBtn = constructBtn(FULL_BUTTON_WIDTH, REMATCH,  (e) -> {Networker.sendChallenge(opponentLogin, startSecs, secsPerTurn, playerIsWhite? Black : White);}, false);
         
         container.addComponent(resignAndDraw);
-
-        addTimeBtn = new Button();
-		addTimeBtn.width = 250;
-		addTimeBtn.text = Dictionary.getPhrase(ADD_TIME_BTN_TEXT);
 		container.addComponent(addTimeBtn);
-
-		addTimeBtn.onClick = (e) -> {
-            Networker.addTime();
-        }
-
-        offerTakebackBtn = new Button();
-		offerTakebackBtn.width = 250;
-		offerTakebackBtn.text = Dictionary.getPhrase(TAKEBACK_BTN_TEXT);
 		container.addComponent(offerTakebackBtn);
-
-		offerTakebackBtn.onClick = (e) -> {
-            onOfferTakebackPressed();
-        }
-
-        cancelTakebackBtn = new Button();
-		cancelTakebackBtn.width = 250;
-		cancelTakebackBtn.text = Dictionary.getPhrase(CANCEL_TAKEBACK_BTN_TEXT);
-        cancelTakebackBtn.visible = false;
-		container.addComponent(cancelTakebackBtn);
-
-		cancelTakebackBtn.onClick = (e) -> {
-            onCancelTakebackPressed();
-        }
-
-        rematchBtn = new Button();
-		rematchBtn.width = 250;
-		rematchBtn.text = Dictionary.getPhrase(REMATCH);
-        rematchBtn.visible = false;
+        container.addComponent(cancelTakebackBtn);
 		container.addComponent(rematchBtn);
-
-		rematchBtn.onClick = (e) -> {
-            Networker.sendChallenge(opponentLogin, startSecs, secsPerTurn, null);
-        }
 
         offerDrawBtn.disabled = true;
         cancelDrawBtn.disabled = true;
         offerTakebackBtn.disabled = true;
         cancelTakebackBtn.disabled = true;
-        resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_ABORT_TEXT);
         resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
     }
-
-    //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public function new(spectators:Bool, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerLogin:String, opponentLogin:String, playerIsWhite:Bool, onClickCallback:PlyScrollType->Void) 
     {
@@ -422,70 +293,84 @@ class Sidebox extends Sprite
         move = 1;
         playerColor = playerIsWhite? White : Black;
         playerTurn = playerIsWhite;
+        var hasTime:Bool = startSecs != null && secsPerTurn != null;
 
-        var strStart = startSecs == null? null : secsToString(startSecs);
-        var timeStyle:Style = {fontSize: 40};
-        var loginStyle:Style = {fontSize: 24};
+        if (hasTime)
+        {
+            upperTime = new TimeLeftLabel(startSecs, startSecs >= 90);
+            bottomTime = new TimeLeftLabel(startSecs, startSecs >= 90);
+        }
+
+        upperLogin = buildLabel(opponentLogin, loginStyle);
+        navigator = new MoveNavigator(onClickCallback);
+        exploreBtn = constructBtn(250, EXPLORE_IN_ANALYSIS_BTN_TEXT, (e) -> {onExploreInAnalysisRequest();}, spectators);
+        bottomLogin = buildLabel(playerLogin, loginStyle);
 
         var box:VBox = new VBox();
+        box.addComponent(upperTime);
 
-        if (startSecs != null && secsPerTurn != null)
-        {
-            upperTime = new Label();
-            upperTime.text = strStart;
-            upperTime.customStyle = timeStyle;
-            box.addComponent(upperTime);
-        }
-
-        upperLogin = new Label();
-        upperLogin.text = opponentLogin;
-        upperLogin.customStyle = loginStyle;
-        box.addComponent(upperLogin);
+        if (hasTime)
+            box.addComponent(upperLogin);
 
         if (!spectators)
         {
-            buildTakebackRequestBox(box);
-            buildDrawRequestBox(box);
+            takebackRequestBox = buildRequestBox(box, TAKEBACK_QUESTION_TEXT, (e) -> {onAcceptTakebackPressed();}, (e) -> {onDeclineTakebackPressed();});
+            drawRequestBox = buildRequestBox(box, DRAW_QUESTION_TEXT, (e) -> {onAcceptDrawPressed();}, (e) -> {onDeclineDrawPressed();});
         }
 
-        navigator = new MoveNavigator(onClickCallback);
         box.addComponent(navigator);
-
-        exploreBtn = new Button();
-        exploreBtn.width = 250;
-        exploreBtn.text = Dictionary.getPhrase(EXPLORE_IN_ANALYSIS_BTN_TEXT);
         box.addComponent(exploreBtn);
 
-        exploreBtn.onClick = (e) -> {
-            onExploreInAnalysisRequest();
-        }
-
         if (!spectators)
-        {
-            exploreBtn.visible = false;
-            buildSpecialBtns(box, opponentLogin, startSecs, secsPerTurn);
-        }
+            buildSpecialBtns(box, opponentLogin, startSecs, secsPerTurn, playerIsWhite);
 
-        var exportSIPBtn:Button = new Button();
-        exportSIPBtn.width = 250;
-        exportSIPBtn.text = Dictionary.getPhrase(ANALYSIS_EXPORT_SIP);
-        exportSIPBtn.onClick = (e) -> {onExportSIPRequested();};
-        //exportSIPBtn.horizontalAlign = 'center';
-        box.addComponent(exportSIPBtn);
-
-        bottomLogin = new Label();
-        bottomLogin.text = playerLogin;
-        bottomLogin.customStyle = loginStyle;
+        box.addComponent(constructBtn(250, ANALYSIS_EXPORT_SIP,  (e) -> {onExportSIPRequested();}));
         box.addComponent(bottomLogin);
 
-        if (startSecs != null && secsPerTurn != null)
-        {
-            bottomTime = new Label();
-            bottomTime.text = strStart;
-            bottomTime.customStyle = timeStyle;
+        if (hasTime)
             box.addComponent(bottomTime);
-        }
 
         addChild(box);
+    }
+
+    private function constructBtn(width:Float, phrase:Phrase, onClick:Dynamic->Void, ?visible:Bool = true, ?color:Color):Button
+    {
+        return constructBtnStr(width, Dictionary.getPhrase(phrase), onClick, visible, color);
+    }
+
+    private function constructBtnStr(width:Float, text:String, onClick:Dynamic->Void, ?visible:Bool = true, ?color:Color):Button 
+    {
+        var btn:Button = new Button();
+        btn.width = width;
+        btn.text = text;
+        btn.color = color;
+        btn.onClick = onClick;
+        btn.visible = visible;
+        return btn;
+    }
+
+    private function buildLabel(text:String, style:Style, ?textAlign:String):Label
+    {
+        var label:Label = new Label();
+        label.text = text;
+        label.customStyle = style;
+        label.textAlign = textAlign;
+        return label;
+    }
+
+    private function buildRequestBox(container:VBox, questionPhrase:Phrase, onAccept:Dynamic->Void, onDecline:Dynamic->Void)
+    {
+        var declineBtn = constructBtnStr(ACCEPT_DECLINE_BTN_WIDTH, "✘", onDecline, Color.fromString("red"));
+        var requestLabel:Label = buildLabel(Dictionary.getPhrase(questionPhrase), {}, "center");
+        var acceptBtn = constructBtnStr(ACCEPT_DECLINE_BTN_WIDTH, "✔", onAccept, Color.fromString("green"));
+
+        var requestBox:HBox = new HBox();
+        requestBox.visible = false;
+		requestBox.addComponent(declineBtn);
+        requestBox.addComponent(requestLabel);
+        requestBox.addComponent(acceptBtn);
+        
+        container.addComponent(requestBox);
+        return requestBox;
     }
 }

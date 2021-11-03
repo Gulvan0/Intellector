@@ -45,8 +45,8 @@ typedef GameOverData =
 
 typedef TimeData =
 {
-    var whiteSeconds:Int;
-    var blackSeconds:Int;
+    var whiteSeconds:Float;
+    var blackSeconds:Float;
 }
 
 typedef OpenChallengeData = 
@@ -69,8 +69,8 @@ typedef OngoingBattleData =
     var requestedColor:String;
     var whiteLogin:String;
     var blackLogin:String;
-    var whiteSeconds:Int;
-    var blackSeconds:Int;
+    var whiteSeconds:Float;
+    var blackSeconds:Float;
     var position:String;
     var currentLog:String;
 }
