@@ -297,8 +297,8 @@ class Sidebox extends Sprite
 
         if (hasTime)
         {
-            upperTime = new TimeLeftLabel(startSecs, startSecs >= 90);
-            bottomTime = new TimeLeftLabel(startSecs, startSecs >= 90);
+            upperTime = new TimeLeftLabel(startSecs, false, startSecs >= 90);
+            bottomTime = new TimeLeftLabel(startSecs, true, startSecs >= 90);
         }
 
         upperLogin = buildLabel(opponentLogin, loginStyle);

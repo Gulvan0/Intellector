@@ -16,6 +16,7 @@ class Changes
     {
         if (Dictionary.lang == EN)
             changelog = [
+                {date: "04.11.2021", text:"Low-on-time alerts"},
                 {date: "29.10.2021", text:"Some QoL additions"},
                 {date: "26.10.2021", text:"Bugfixes"},
                 {date: "25.10.2021", text:"Analysis board 2.0, Studies, Explore position"},
@@ -47,6 +48,7 @@ class Changes
             ];
         else if (Dictionary.lang == RU)
             changelog = [
+                {date: "04.11.2021", text:"Предупреждение при цейтноте"},
                 {date: "29.10.2021", text:"QoL-нововведения"},
                 {date: "26.10.2021", text:"Исправления багов"},
                 {date: "25.10.2021", text:"Доска анализа 2.0, Студии, Анализ в наблюдении"},

@@ -13,6 +13,7 @@ class TimeLeftLabel extends Label
 
     public var secondsLeft(default, null):Float;
     public var notifyOnOneMinuteLeft:Bool;
+    public var alertsEnabled:Bool;
 
     private var timer:Timer;
     private var timerPrecise:Bool;
@@ -25,22 +26,33 @@ class TimeLeftLabel extends Label
 
     private function onTimeUpdated() 
     {
+        if (secondsLeft <= 0)
+        {
+            stopTimer();
+            secondsLeft = 0;
+            text = TimeControl.secsToString(0);
+            Networker.reqTimeoutCheck();
+            return;
+        }
+
         text = TimeControl.secsToString(secondsLeft);
 
-        if (secondsLeft < 60)
+        if (alertsEnabled)
         {
-            customStyle = hurryStyle;
-
-            if (notifyOnOneMinuteLeft)
+            if (secondsLeft < 60)
             {
-                Assets.getSound("sounds/lowtime.mp3").play();
-                notifyOnOneMinuteLeft = false;
-            }
-        }
-        else
-            customStyle = defaultStyle;
+                customStyle = hurryStyle;
 
-        
+                if (notifyOnOneMinuteLeft)
+                {
+                    Assets.getSound("sounds/lowtime.mp3").play();
+                    notifyOnOneMinuteLeft = false;
+                }
+            }
+            else
+                customStyle = defaultStyle;
+        }
+
         if (timer != null && (secondsLeft <= 10 && !timerPrecise || secondsLeft > 10 && timerPrecise))
             launchTimer();
     }
@@ -75,11 +87,12 @@ class TimeLeftLabel extends Label
         onTimeUpdated();
     }
 
-    public function new(initialSeconds:Float, ?notifyOnOneMinuteLeft:Bool = true) 
+    public function new(initialSeconds:Float, alertsEnabled:Bool, ?notifyOnOneMinuteLeft:Bool = true) 
     {
         super();
 
         this.notifyOnOneMinuteLeft = notifyOnOneMinuteLeft;
+        this.alertsEnabled = alertsEnabled;
         this.timerPrecise = initialSeconds <= 10;
 
         text = TimeControl.secsToString(initialSeconds);

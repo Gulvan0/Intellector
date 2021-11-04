@@ -9,7 +9,7 @@ class TimeControl
 
     public static function secsToString(secs:Float) 
     {
-        var secsRounded:Int = Math.round(secs);
+        var secsRounded:Int = Math.floor(secs);
         var secsLeft:Int = secsRounded % 60;
         var minsLeft:Int = cast (secsRounded - secsLeft)/60;
         var minRepresentation = numRep(minsLeft);
@@ -17,7 +17,12 @@ class TimeControl
 
         var str:String = '$minRepresentation:$secRepresentation';
         if (secs < 10)
-            str += '${secs - secsRounded}'.substr(1, 3);
+        {
+            var hundredths:String = '${Math.floor((secs - secsRounded) * 100)}';
+            while (hundredths.length < 2)
+                hundredths += '0';
+            str += "." + hundredths;
+        }
         return str;    
     }
 }
