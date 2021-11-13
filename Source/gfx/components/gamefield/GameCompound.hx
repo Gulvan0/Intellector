@@ -132,7 +132,17 @@ class GameCompound extends Sprite
                 processNormalEntry(trimmedMove, field, sidebox, infobox);
         }
         if (data.whiteSeconds != null && data.blackSeconds != null)
-            sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
+        {
+            var currentTimestamp:Float = Date.now().getTime();
+            var halfPing:Float = currentTimestamp - data.timestamp;
+
+            if (data.pingSubtractionSide == "w")
+                data.whiteSeconds -= halfPing / 1000;
+            else if (data.pingSubtractionSide == "b")
+                data.blackSeconds -= halfPing / 1000;
+
+            sidebox.correctTime(data.whiteSeconds, data.blackSeconds, currentTimestamp);
+        }
     }
 
     private static function processNormalEntry(trimmedMove:String, field:Field, sidebox:Sidebox, infobox:GameInfoBox)
@@ -224,7 +234,15 @@ class GameCompound extends Sprite
 
     public function onTimeCorrection(data:TimeData)
     {
-        sidebox.correctTime(data.whiteSeconds, data.blackSeconds);
+        var currentTimestamp:Float = Date.now().getTime();
+        var halfPing:Float = currentTimestamp - data.timestamp;
+
+        if (data.pingSubtractionSide == "w")
+            data.whiteSeconds -= halfPing / 1000;
+        else if (data.pingSubtractionSide == "b")
+            data.blackSeconds -= halfPing / 1000;
+
+        sidebox.correctTime(data.whiteSeconds, data.blackSeconds, currentTimestamp);
     }
 
     public function onMessage(data:MessageData)

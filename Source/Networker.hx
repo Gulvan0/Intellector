@@ -47,6 +47,8 @@ typedef TimeData =
 {
     var whiteSeconds:Float;
     var blackSeconds:Float;
+    var timestamp:Float;
+    var pingSubtractionSide:String;
 }
 
 typedef OpenChallengeData = 
@@ -71,6 +73,8 @@ typedef OngoingBattleData =
     var blackLogin:String;
     var whiteSeconds:Float;
     var blackSeconds:Float;
+    var timestamp:Float;
+    var pingSubtractionSide:String;
     var position:String;
     var currentLog:String;
 }
@@ -506,22 +510,22 @@ class Networker
 
     //Other
 
-    private static function onMove(data) 
+    private static function onMove(data:MoveData) 
     {
         currentGameCompound.onMove(data);
     }
 
-    private static function onTimeCorrection(data) 
+    private static function onTimeCorrection(data:TimeData) 
     {
         currentGameCompound.onTimeCorrection(data);
     }
 
-    private static function onMessage(data) 
+    private static function onMessage(data:MessageData) 
     {
         currentGameCompound.onMessage(data);
     }
 
-    private static function onSpectatorMessage(data) 
+    private static function onSpectatorMessage(data:MessageData) 
     {
         currentGameCompound.onSpectatorMessage(data);
     }

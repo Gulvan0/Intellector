@@ -75,17 +75,17 @@ class Sidebox extends Sprite
     private var playerColor:PieceColor;
     private var secsPerTurn:Int;
 
-    public function correctTime(correctedSecsWhite:Float, correctedSecsBlack:Float) 
+    public function correctTime(correctedSecsWhite:Float, correctedSecsBlack:Float, actualTimestamp:Float) 
     {
         if (playerColor == White)
         {
-            bottomTime.correctTime(correctedSecsWhite);
-            upperTime.correctTime(correctedSecsBlack);
+            bottomTime.correctTime(correctedSecsWhite, actualTimestamp);
+            upperTime.correctTime(correctedSecsBlack, actualTimestamp);
         }
         else
         {
-            upperTime.correctTime(correctedSecsWhite);
-            bottomTime.correctTime(correctedSecsBlack);
+            upperTime.correctTime(correctedSecsWhite, actualTimestamp);
+            bottomTime.correctTime(correctedSecsBlack, actualTimestamp);
         }
     }
 
@@ -298,7 +298,7 @@ class Sidebox extends Sprite
         if (hasTime)
         {
             upperTime = new TimeLeftLabel(startSecs, false, startSecs >= 90);
-            bottomTime = new TimeLeftLabel(startSecs, true, startSecs >= 90);
+            bottomTime = new TimeLeftLabel(startSecs, !spectators, startSecs >= 90);
         }
 
         upperLogin = buildLabel(opponentLogin, loginStyle);

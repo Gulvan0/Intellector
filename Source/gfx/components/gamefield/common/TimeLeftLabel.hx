@@ -17,11 +17,14 @@ class TimeLeftLabel extends Label
 
     private var timer:Timer;
     private var timerPrecise:Bool;
+    private var lastUpdate:Float;
 
     private function timerRun() 
     {
-        secondsLeft -= timerPrecise? 0.01 : 1;
+        var timestamp:Float = Date.now().getTime();
+        secondsLeft -= (timestamp - lastUpdate) / 1000;
         onTimeUpdated();
+        lastUpdate = timestamp;
     }
 
     private function onTimeUpdated() 
@@ -54,7 +57,12 @@ class TimeLeftLabel extends Label
         }
 
         if (timer != null && (secondsLeft <= 10 && !timerPrecise || secondsLeft > 10 && timerPrecise))
-            launchTimer();
+        {
+            timer.stop();
+            timerPrecise = secondsLeft <= 10;
+            timer = new Timer(timerPrecise? 10 : 1000);
+            timer.run = timerRun;
+        }
     }
 
     public function launchTimer()
@@ -64,6 +72,7 @@ class TimeLeftLabel extends Label
 
         timerPrecise = secondsLeft <= 10;
 
+        lastUpdate = Date.now().getTime();
         timer = new Timer(timerPrecise? 10 : 1000);
         timer.run = timerRun;
     }
@@ -75,9 +84,10 @@ class TimeLeftLabel extends Label
         timer = null;
     }
 
-    public function correctTime(secsLeft:Float) 
+    public function correctTime(secsLeft:Float, actualTimestamp:Float) 
     {
         secondsLeft = secsLeft;
+        lastUpdate = actualTimestamp;
         onTimeUpdated();
     }
 

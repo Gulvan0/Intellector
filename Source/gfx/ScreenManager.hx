@@ -169,6 +169,8 @@ class ScreenManager extends Sprite
             blackLogin: ereg.matched(2), 
             whiteSeconds: null, 
             blackSeconds: null, 
+            timestamp: 0,
+            pingSubtractionSide: "",
             position: null,
             currentLog: log
         };
