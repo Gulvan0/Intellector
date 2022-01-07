@@ -9,6 +9,7 @@ import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.Sprite;
 
+//TODO: Delete class
 class Figure extends Sprite 
 {
     public var hex:Hex;

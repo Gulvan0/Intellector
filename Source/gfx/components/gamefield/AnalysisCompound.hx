@@ -11,7 +11,6 @@ import dict.Dictionary;
 import js.Browser;
 import struct.Variant;
 import struct.Ply;
-import gfx.components.gamefield.modules.Field;
 import gfx.components.gamefield.analysis.RightPanel;
 import gfx.components.gamefield.modules.gameboards.AnalysisField;
 

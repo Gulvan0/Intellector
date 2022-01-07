@@ -1,7 +1,7 @@
 package gfx.screens;
 
-import gfx.components.gamefield.modules.Field;
-import gfx.components.gamefield.modules.Field.Markup;
+import Preferences.Markup;
+import dict.Language;
 import haxe.ui.styles.Style;
 import js.Cookie;
 import haxe.ui.containers.HBox;
@@ -61,7 +61,7 @@ class Settings extends Sprite
             optionBox.onChange = (e) -> {
                 if (optionBox.selected)
                 {
-                    Field.markup = type;
+                    Preferences.markup = type;
                     Cookie.set("markup", type.getName(), 60 * 60 * 24 * 365 * 5);
                 }
             };
@@ -69,49 +69,35 @@ class Settings extends Sprite
             markup.addComponent(optionBox);
         }
 
-        markupOptionBoxes[Field.markup].selected = true;
+        markupOptionBoxes[Preferences.markup].selected = true;
         return markup;
     }
 
     private function buildLangRow():HBox
     {
-        var lang:HBox = new HBox();
+        var languageSelector:HBox = new HBox();
 
 		var langLabel:Label = new Label();
 		langLabel.text = Dictionary.getPhrase(SETTINGS_LANGUAGE_TITLE);
-		lang.addComponent(langLabel);
+		languageSelector.addComponent(langLabel);
 
-		var langEN:OptionBox = new OptionBox();
-		langEN.text = "English";
-		langEN.componentGroup = "settings-lang";
-		lang.addComponent(langEN);
+		for (language in Language.createAll())
+			languageSelector.addComponent(createLangOptionBox(language));
 
-		var langRU:OptionBox = new OptionBox();
-		langRU.text = "Русский";
-		langRU.componentGroup = "settings-lang";
-		lang.addComponent(langRU);
-
-		switch Dictionary.lang
-		{
-			case EN: langEN.selected = true;
-			case RU: langRU.selected = true;
-		}
-		
-		langEN.onChange = (e) -> {
-			if (langEN.selected)
-			{
-				Dictionary.lang = EN;
-				Cookie.set("lang", "EN", 60 * 60 * 24 * 365 * 5);
-			}
+        return languageSelector;
+	}
+	
+	private function createLangOptionBox(lang:Language):OptionBox
+	{
+		var option:OptionBox = new OptionBox();
+		option.text = Dictionary.getLanguageName(lang);
+		option.componentGroup = "settings-lang";
+		option.onChange = (e) -> {
+			if (option.selected)
+				Preferences.instance.language = lang;
 		};
-		langRU.onChange = (e) -> {
-			if (langRU.selected)
-			{
-				Dictionary.lang = RU;
-				Cookie.set("lang", "RU", 60 * 60 * 24 * 365 * 5);
-			}
-        };
-
-        return lang;
-    }
+		if (Preferences.language == lang)
+			option.selected = true;
+		return option;
+	}
 }

@@ -12,6 +12,7 @@ import haxe.ui.components.CheckBox;
 import dict.Dictionary;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
+import url.Utils;
 
 enum ServerEntranceType
 {
@@ -66,8 +67,7 @@ class SignIn extends Sprite
 	{
 		if (result == 'success')
 		{
-			if (remember)
-				url.Utils.saveLoginDetails(login, password);
+			Utils.saveLoginDetails(login, password, !remember);
 			ScreenManager.instance.toMain();
 		}
 		else

@@ -26,6 +26,23 @@ class IntPoint
         return i == p.i && j == p.j;
     }
 
+    public function toScalar():Int
+    {
+        if (i % 2 == 1)
+            return 9 * j + (i - 1) / 2 + 5;
+        else
+            return 9 * j + i / 2;
+    }
+
+    public static function fromScalar(s:Int):IntPoint
+    {
+        var res = s % 9;
+        if (res < 5)
+            return new IntPoint(2 * res, (s - res) / 9);
+        else
+            return new IntPoint(2 * res - 9, (s - res) / 9);
+    }
+
     public function toRelative(color:PieceColor):IntPoint 
     {
         return color == White? copy() : invert();

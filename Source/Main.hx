@@ -1,8 +1,8 @@
 package;
 
+import gameboard.Board;
 import haxe.ui.containers.Box;
 import gfx.components.SpriteWrapper;
-import gfx.ScreenManager;
 import utils.AssetManager;
 import gfx.components.gamefield.analysis.VariantTree;
 import struct.Ply;
@@ -16,22 +16,15 @@ import openings.OpeningTree;
 import dict.Dictionary;
 import haxe.ui.events.UIEvent;
 import haxe.ui.components.OptionBox;
-import Networker.OngoingBattleData;
 import haxe.ui.components.Button;
 import haxe.ui.components.CheckBox;
 import haxe.ui.components.TextField;
-import Networker.OpenChallengeData;
-import Networker.MessageData;
 import haxe.ui.containers.ScrollView;
 import struct.PieceColor;
-import Networker.TimeData;
 import js.html.URLSearchParams;
 import js.Cookie;
 import struct.PieceType;
 import openfl.Assets;
-import Networker.GameOverData;
-import Networker.MoveData;
-import Networker.BattleData;
 import haxe.Timer;
 import haxe.ui.components.Label;
 import haxe.ui.containers.HBox;
@@ -56,12 +49,13 @@ class Main extends Sprite
 		ZobristHashing.init();
 		AssetManager.init();
 		Changes.initChangelog();
-		addChild(new ScreenManager());
-		Networker.connect(onConnected);
+		addChild(new Board(Situation.starting()));
+		//addChild(new ScreenManager());
+		//Networker.connect(onConnected);
 		//ScreenManager.instance.toAnalysisBoard(()->{});
 	}
 
-	private function onConnected()
+	/*private function onConnected()
 	{
 		if (Cookie.exists("saved_login") && Cookie.exists("saved_password"))
 			Networker.signin(Cookie.get("saved_login"), Cookie.get("saved_password"), onAutoLogin, onOngoingGame);
@@ -113,5 +107,5 @@ class Main extends Sprite
 			Networker.login = null;
 			onNoLogin();
 		}
-	}
+	}*/
 }

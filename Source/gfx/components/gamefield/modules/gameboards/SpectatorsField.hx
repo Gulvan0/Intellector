@@ -1,6 +1,5 @@
 package gfx.components.gamefield.modules.gameboards;
 
-import gfx.components.gamefield.subsystems.Factory;
 import openfl.display.Stage;
 import openfl.events.Event;
 import openfl.events.MouseEvent;

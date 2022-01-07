@@ -1,6 +1,5 @@
 package gfx.components.gamefield;
 
-import gfx.components.gamefield.modules.Field.MoveType;
 import gfx.components.gamefield.analysis.RightPanel;
 import struct.IntPoint;
 import gfx.components.gamefield.modules.GameInfoBox.Outcome;
@@ -216,7 +215,7 @@ class GameCompound extends Sprite
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public function makeMove(ply:Ply, type:MoveType) 
+    public function makeMove(ply:Ply, type) 
     {
         var situation:Situation = field.currentSituation.copy();
 

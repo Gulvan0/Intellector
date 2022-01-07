@@ -1,10 +1,6 @@
-package gfx.components.gamefield.modules;
-
 import utils.AssetManager;
 import gfx.utils.Colors;
 import utils.Notation;
-import gfx.components.gamefield.subsystems.TimeMachine;
-import gfx.components.gamefield.subsystems.Factory;
 import gfx.utils.PlyScrollType;
 import struct.Situation;
 import struct.HexTransform;
@@ -27,16 +23,8 @@ import openfl.geom.Point;
 import openfl.display.Sprite;
 import struct.IntPoint;
 import gfx.components.gamefield.common.Figure;
-import gfx.components.gamefield.common.Hexagon;
 import openfl.display.Stage;
 using Lambda;
-
-enum Markup 
-{
-    None;
-    Side;
-    Over;
-}
 
 enum FieldState
 {
@@ -54,60 +42,6 @@ enum MoveType
 
 class Field extends Sprite
 {
-    public static var a:Float = 40;
-    public static var markup:Markup = Over;
-
-    public var left(get, never):Float;
-    public var top(get, never):Float;
-    public var right(get, never):Float;
-    public var bottom(get, never):Float;
-
-    public var terminated:Bool = false;
-
-    public var onOwnMoveMade:Ply->Void;
-    
-    private var stageRef:Stage;
-
-    public var hexes:Array<Array<Hexagon>>;
-    public var figures:Array<Array<Null<Figure>>>;
-
-    public var currentSituation:Situation;
-    public var shownSituation:Situation;
-    public var plyHistory:Array<ReversiblePly>;
-    public var plyPointer:Int;
-    public var autoAppendHistory:Bool = true;
-
-    private var state:FieldState = Neutral;
-    private var dialogShown:Bool = false;
-    public var orientationColor(default, null):PieceColor; 
-
-    private var lastMoveSelectedHexes:Array<Hexagon>;
-    private var redSelectedHexes:Array<Hexagon>;
-    private var drawnArrows:Map<String, Sprite>;
-
-    private var rmbStart:Null<IntPoint>;
-
-    private var branchingAllowed:Bool = false;
-
-    public function get_left():Float
-    {
-        return x - a;
-    }
-
-    public function get_top():Float
-    {
-        return y - a * Math.sqrt(3) / 2;
-    }
-
-    public function get_right():Float
-    {
-        return left + width;
-    }
-
-    public function get_bottom():Float
-    {
-        return top + height;
-    }
 
     public function new() 
     {
@@ -122,26 +56,6 @@ class Field extends Sprite
         plyPointer = 0;
 
         addEventListener(Event.ADDED_TO_STAGE, init);
-    }
-
-    private function init(e) 
-    {
-        removeEventListener(Event.ADDED_TO_STAGE, init);
-        stageRef = stage;
-        stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRMBPress);
-        stage.addEventListener(MouseEvent.MOUSE_DOWN, onPress);
-        stage.addEventListener(MouseEvent.MOUSE_UP, onRelease);
-        stage.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
-        addEventListener(Event.REMOVED_FROM_STAGE, terminate);
-    }
-
-    private function terminate(e) 
-    {
-        stageRef.removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRMBPress);
-        stageRef.removeEventListener(MouseEvent.MOUSE_DOWN, onPress);
-        stageRef.removeEventListener(MouseEvent.MOUSE_UP, onRelease);
-        stageRef.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
-        removeEventListener(Event.REMOVED_FROM_STAGE, terminate);
     }
 
     public function getHeight():Float
@@ -225,64 +139,6 @@ class Field extends Sprite
 
         plyHistory.splice(plyPointer, revertCnt);
         currentSituation = shownSituation.copy();
-    }
-
-    //----------------------------------------------------------------------------------------------------------
-
-    private function onRMBPress(e:MouseEvent) 
-    {
-        rmbStart = posToIndexes(e.stageX - x, e.stageY - y);
-        if (rmbStart != null)
-            stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onRMBRelease);
-    }
-
-    private function onRMBRelease(e) 
-    {
-        stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onRMBRelease);
-
-        var rmbEnd = posToIndexes(e.stageX - x, e.stageY - y);
-        if (rmbStart != null && rmbEnd != null)
-            if (rmbStart.equals(rmbEnd))
-            {
-                var hexToSelect = hexes[rmbStart.j][rmbStart.i];
-                if (hexToSelect.redSelected)
-                {
-                    hexToSelect.redDeselect();
-                    redSelectedHexes.remove(hexToSelect);
-                }
-                else 
-                {
-                    hexToSelect.redSelect();
-                    redSelectedHexes.push(hexToSelect);
-
-                }
-            }
-            else
-            {
-                var code = '${rmbStart.i}${rmbStart.j}${rmbEnd.i}${rmbEnd.j}';
-                if (drawnArrows.exists(code))
-                {
-                    removeChild(drawnArrows[code]);
-                    drawnArrows.remove(code);
-                }
-                else 
-                    drawArrow(rmbStart, rmbEnd);
-            }
-
-        rmbStart = null;
-    }
-
-    //----------------------------------------------------------------------------------------------------------
-
-    public function applyScrolling(type:PlyScrollType) 
-    {
-        switch type 
-        {
-            case Home: TimeMachine.homePly(this);
-            case Prev: TimeMachine.prevPly(this);
-            case Next: TimeMachine.nextPly(this);
-            case End: TimeMachine.endPly(this);
-        }
     }
 
     //----------------------------------------------------------------------------------------------------------
@@ -395,113 +251,8 @@ class Field extends Sprite
             else 
                 removeChild(figMoveOnto);
     }
-
-    public function highlightMove(hexesCoords:Array<IntPoint>) 
-    {
-        for (hex in lastMoveSelectedHexes)
-            hex.lastMoveDeselect();
-
-        lastMoveSelectedHexes = [for (coords in hexesCoords) hexes[coords.j][coords.i]];
-
-        for (hex in lastMoveSelectedHexes)
-            hex.lastMoveSelect();
-    }
-
-    //----------------------------------------------------------------------------------------------------------------------------------------
-
-    private function posToIndexes(x:Float, y:Float):Null<IntPoint>
-    {
-        var closest:IntPoint = null;
-        var distanceSqr:Float = a * a;
-        for (j in 0...7)
-            for (i in 0...9)
-            {
-                if (!Field.hexExists(i, j))
-                    continue;
-                var coords:Point = hexCoords(i, j);
-                var currDistSqr = (coords.x - x) * (coords.x - x) + (coords.y - y) * (coords.y - y);
-                if (distanceSqr > currDistSqr)
-                {
-                    closest = new IntPoint(i, j);
-                    distanceSqr = currDistSqr;
-                }
-            }
-        return closest;
-    }
-
-    //----------------------------------------------------------------------------------------------------------------------------------------
-
-    private function disposeFigure(figure:Figure, loc:IntPoint) 
-    {
-        var coords = hexCoords(loc.i, loc.j);
-        figure.x = coords.x;
-        figure.y = coords.y;
-    }
-
-    //----------------------------------------------------------------------------------------------------------------------------------------
-
-    public function getHex(coords:Null<IntPoint>):Null<Hex>
-    {
-        if (coords == null || !hexExists(coords.i, coords.j))
-            return null;
-        else
-        {
-            var occupier:Null<Figure> = figures[coords.j][coords.i];
-            if (occupier == null)
-                return Hex.empty();
-            else 
-                return occupier.hex;
-        }
-    }
-    
-    public function getFigure(coords:Null<IntPoint>):Null<Figure>
-    {
-        return (coords == null || !hexExists(coords.i, coords.j))? null : figures[coords.j][coords.i];
-    }
-
-    public static function hexExists(i:Int, j:Int):Bool
-    {
-        return i >= 0 && i < 9 && j >= 0 && j < 7 - i % 2;
-    }
-
-    public function hexCoords(i:Int, j:Int):Point
-    {
-        return absHexCoords(i, j, orientationColor == White);
-    }
-
-    public static function absHexCoords(i:Int, j:Int, isOrientationNormal:Bool):Point
-    {
-        if (!isOrientationNormal)
-        {
-            j = 6 - j - i % 2;
-            i = 8 - i;
-        }
-            
-
-        var p:Point = new Point(0, 0);
-        p.x = 3 * a * i / 2;
-        p.y = Math.sqrt(3) * a * j;
-        if (i % 2 == 1)
-            p.y += Math.sqrt(3) * a / 2;
-        return p;
-    }
     
     //----------------------------------------------------------------------------------------------------------------------------------------------
-
-    private function addMarkers(from:IntPoint) 
-    {
-        for (dest in Rules.possibleFields(from, getHex))
-            if (getFigure(dest) != null)
-                hexes[dest.j][dest.i].addRound();
-            else
-                hexes[dest.j][dest.i].addDot();
-    }
-
-    private function removeMarkers(from:IntPoint) 
-    {
-        for (dest in Rules.possibleFields(from, getHex))
-            hexes[dest.j][dest.i].removeMarkers();
-    }
 
     private function toNeutralState() 
     {
@@ -598,31 +349,5 @@ class Field extends Sprite
         var code = '${from.i}${from.j}${to.i}${to.j}';
         drawnArrows.set(code, arrow);
         addChild(arrow);
-    }
-    
-    //----------------------------------------------------------------------------------------------------------------------------------------------
-
-    private function disposeLetters() 
-    {
-        if (Field.markup == None)
-            return;
-
-        var bottomLocations = [for (i in 0...9) new IntPoint(i, orientationColor == White? 6 - i % 2 : 0)];
-        for (loc in bottomLocations)
-        {
-            var letter = createLetter(Notation.getColumn(loc.i));
-            letter.x = hexes[loc.j][loc.i].x - letter.textWidth/2 - 5;
-            letter.y = hexes[loc.j][loc.i].y + Field.a * Math.sqrt(3) / 2;
-            addChild(letter); 
-        }
-    }
-
-    private function createLetter(letter:String):TextField 
-    {
-        var tf = new TextField();
-        tf.text = letter;
-        tf.setTextFormat(new TextFormat(null, 28, Colors.border, true));
-        tf.selectable = false;
-        return tf;
     }
 }

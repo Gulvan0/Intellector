@@ -4,14 +4,14 @@ import dict.Dictionary;
 import js.Browser;
 import js.html.URLSearchParams;
 import js.Cookie;
-import gfx.components.gamefield.modules.Field;
 
 class Utils
 {
-    public static function saveLoginDetails(login:String, password:String) 
+    public static function saveLoginDetails(login:String, password:String, expirable:Bool = false) 
     {
-        Cookie.set("saved_login", login, 60 * 60 * 24 * 365 * 5, "/");
-		Cookie.set("saved_password", password, 60 * 60 * 24 * 365 * 5, "/");
+        var duration:Null<Int> = expirable? null : 60 * 60 * 24 * 365 * 5;
+        Cookie.set("saved_login", login, duration, "/");
+		Cookie.set("saved_password", password, duration, "/");
     }
 
     public static function removeLoginDetails() 
@@ -40,13 +40,5 @@ class Utils
             return Profile(searcher.get("p"))
         else
 			return Main;
-    }
-
-    public static function initSettings() 
-    {
-        if (Cookie.exists("markup"))
-            Field.markup = Markup.createByName(Cookie.get("markup"));
-        if (Cookie.exists("lang"))
-            Dictionary.lang = Language.createByName(Cookie.get("lang"));
     }
 }

@@ -2,7 +2,6 @@ package;
 
 import struct.Ply;
 import struct.Situation;
-import gfx.components.gamefield.modules.Field;
 import struct.Hex;
 import struct.PieceType;
 import struct.PieceColor;

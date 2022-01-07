@@ -12,7 +12,7 @@ import haxe.Json;
 import hx.ws.WebSocket;
 import gfx.components.gamefield.GameCompound;
 
-typedef Event =
+typedef NetEvent =
 {
     var name:String;
     var data:Dynamic;
@@ -107,7 +107,7 @@ class Networker
         };
         _ws.onmessage = function(msg) {
             var str:String = msg.toString();
-            var event:Event = Json.parse(str.substring(11, str.length - 1));
+            var event:NetEvent = Json.parse(str.substring(11, str.length - 1));
             var callback = eventMap.get(event.name);
             if (callback != null)
                 callback(event.data);
@@ -587,7 +587,7 @@ class Networker
 
     public static function emit(eventName:String, data:Dynamic) 
     {
-        var event:Event = {name: eventName, data: data};
+        var event:NetEvent = {name: eventName, data: data};
         _ws.send(Json.stringify(event));
     }
 

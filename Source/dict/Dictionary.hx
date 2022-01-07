@@ -1,13 +1,12 @@
 package dict;
 
+import Preferences.Markup;
 import gfx.components.gamefield.modules.GameInfoBox.Outcome;
-import gfx.components.gamefield.modules.Field.Markup;
 import gfx.screens.MainMenu.MainMenuButton;
 import struct.PieceColor;
 
 class Dictionary 
 {
-    public static var lang:Language = Language.EN;
     private static var order:Array<Language> = [EN, RU];
 
     private static var dict:Map<Phrase, Array<String>> = 
@@ -152,7 +151,15 @@ class Dictionary
 
     public static function getPhrase(phrase:Phrase):String
     {
-        return dict.get(phrase)[order.indexOf(lang)];
+        return dict.get(phrase)[order.indexOf(Preferences.instance.language)];
+    }
+
+    public static function getLanguageName(lang:Language):String
+    {
+        return switch lang {
+            case EN: "English";
+            case RU: "Русский";
+        }
     }
 
     public static function getIncomingChallengeText(data):String
@@ -160,7 +167,7 @@ class Dictionary
         var timeControlStr = '${data.startSecs/60}+${data.bonusSecs/1}';
         var colorSuffix:String = data.color == null? "" : ", " + getColorName(PieceColor.createByName(data.color));
         var detailsStr = timeControlStr + colorSuffix;
-        return switch lang 
+        return switch Preferences.instance.language 
         {
             case EN: '${data.caller} wants to play with you ($detailsStr). Accept the challenge?';
             case RU: '${data.caller} хочет с вами сыграть ($detailsStr). Принять вызов?';
@@ -219,13 +226,13 @@ class Dictionary
     private static function getMatchlistWinnerText(color:Null<PieceColor>) 
     {
         if (color == null)
-            return switch lang 
+            return switch Preferences.instance.language 
             {
                 case EN: "Draw";
                 case RU: "Ничья";
             }
         else
-            return getColorName(color) + switch lang 
+            return getColorName(color) + switch Preferences.instance.language 
             {
                 case EN: " won";
                 case RU: " победили";
@@ -234,7 +241,7 @@ class Dictionary
 
     private static function getMatchlistOutcomeText(outcome:Null<Outcome>) 
     {
-        switch lang 
+        switch Preferences.instance.language 
         {
             case EN: 
                 return switch outcome 
@@ -269,7 +276,7 @@ class Dictionary
 
     public static function getColorName(color:PieceColor) 
     {
-        return switch lang 
+        return switch Preferences.instance.language 
         {
             case EN: color.getName();
             case RU: color == White? "Белые" : "Черные";
@@ -294,7 +301,7 @@ class Dictionary
     {
         var timeControlStr = '${start/60}+$bonus';
         var colorStr:String = color == null? getPhrase(COLOR_RANDOM) : getColorName(color);
-        return switch lang {
+        return switch Preferences.instance.language {
             case EN: 'Challenge by $login\n$timeControlStr ($login plays as $colorStr)\nShare the link to invite your opponent:';
             case RU: 'Вызов $login\n$timeControlStr (Цвет $login: $colorStr)\nОтправьте эту ссылку-приглашение противнику:';
         }
@@ -305,7 +312,7 @@ class Dictionary
         var timeControlStr = '${data.startSecs/60}+${data.bonusSecs/1}';
         var colorSuffix:String = data.color == null? "" : ", " + getColorName(PieceColor.createByName(data.color));
         var detailsStr = timeControlStr + colorSuffix;
-        return switch lang {
+        return switch Preferences.instance.language {
             case EN: '${data.challenger} is hosting a challenge ($detailsStr). First one to accept it will become an opponent\n';
             case RU: '${data.challenger} вызывает на бой ($detailsStr). Первый, кто примет вызов, станет противником\n';
         }
@@ -313,7 +320,7 @@ class Dictionary
 
     public static function getAnalysisTurnColorSelectLabel(color:PieceColor):String 
     {
-		return switch lang {
+		return switch Preferences.instance.language {
             case EN: color == White? "White to move" : "Black to move";
             case RU: color == White? "Ход белых" : "Ход черных";
         }

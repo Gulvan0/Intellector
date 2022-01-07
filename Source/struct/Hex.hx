@@ -10,7 +10,7 @@ class Hex
         return new Hex();
     }
 
-    public static function occupied(type:PieceType, color:PieceColor) :Hex
+    public static function occupied(type:PieceType, color:PieceColor):Hex
     {
         var hex = new Hex();
         hex.setPiece(type, color);

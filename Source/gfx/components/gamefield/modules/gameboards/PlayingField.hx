@@ -1,8 +1,6 @@
 package gfx.components.gamefield.modules.gameboards;
 
 import gfx.components.gamefield.common.Figure;
-import gfx.components.gamefield.subsystems.TimeMachine;
-import gfx.components.gamefield.subsystems.Factory;
 import openfl.display.Stage;
 import serialization.PlyDeserializer;
 import struct.Ply;

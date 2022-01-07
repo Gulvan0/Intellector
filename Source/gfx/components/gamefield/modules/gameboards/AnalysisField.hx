@@ -1,9 +1,7 @@
 package gfx.components.gamefield.modules.gameboards;
 
-import gfx.components.gamefield.subsystems.TimeMachine;
 import gfx.components.gamefield.common.Figure;
 import struct.IntPoint;
-import gfx.components.gamefield.subsystems.Factory;
 import struct.Hex;
 import serialization.SituationDeserializer;
 import gfx.components.gamefield.analysis.PosEditMode;

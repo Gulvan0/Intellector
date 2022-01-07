@@ -1,0 +1,81 @@
+package gameboard;
+
+import struct.Ply;
+import struct.ReversiblePly;
+
+class PlyHistory
+{
+    private var revPlys:Array<ReversiblePly> = [];
+    private var pointer:Int = 0;
+
+    public function isAtBeginning():Bool
+    {
+        return pointer == 0;
+    }
+
+    public function isAtEnd():Bool
+    {
+        return pointer == revPlys.length;
+    }
+
+    public function getLastMove():Null<ReversiblePly>
+    {
+        return isAtBeginning()? null : revPlys[pointer-1];
+    }
+
+    public function home():Array<ReversiblePly>
+    {
+        var oldPointer:Int = pointer;
+        pointer = 0;
+        return revPlys.slice(0, oldPointer);
+    }
+
+    public function prev():Null<ReversiblePly>
+    {
+        if (pointer > 0)
+        {
+            pointer--;
+            return revPlys[pointer];
+        }
+        else 
+            return null;
+    }
+
+    public function next():Null<ReversiblePly>
+    {
+        if (pointer < revPlys.length)
+        {
+            pointer++;
+            return revPlys[pointer-1];
+        }
+        else 
+            return null;
+    }
+
+    public function end():Array<ReversiblePly>
+    {
+        var oldPointer:Int = pointer;
+        pointer = revPlys.length;
+        return revPlys.slice(oldPointer);
+    }
+
+    public function dropLast(cnt:Int):Array<ReversiblePly>
+    {
+        var newLength = revPlys.length - cnt;
+        if (pointer > newLength)
+            pointer = newLength;
+        return revPlys.splice(newLength, cnt);
+    }
+
+    public function append(ply:ReversiblePly) 
+    {
+        if (isAtEnd())
+            pointer++;
+        revPlys.push(ply);
+    }
+
+    public function new()
+    {
+
+    }
+}

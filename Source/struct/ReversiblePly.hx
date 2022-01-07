@@ -1,6 +1,7 @@
 package struct;
 
 import struct.HexTransform;
+using Lambda;
 
 abstract ReversiblePly(Array<HexTransform>) from Array<HexTransform> to Array<HexTransform>
 {
@@ -14,7 +15,12 @@ abstract ReversiblePly(Array<HexTransform>) from Array<HexTransform> to Array<He
                     unmatchedTransforms.splice(i, 1);
                     break;
                 }
-        return Lambda.empty(unmatchedTransforms);
+        return unmatchedTransforms.empty();
+    }
+
+    public function affectedCoords():Array<IntPoint>
+    {
+        return this.map(t -> t.coords);
     }
 
     public function push(ht:HexTransform)

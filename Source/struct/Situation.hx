@@ -10,7 +10,7 @@ import struct.PieceColor.opposite;
 
 class Situation 
 {
-    private var figureArray:Array<Hex>;
+    private var hexArray:Array<Hex>;
     public var turnColor(default, null):PieceColor;
     public var zobristHash(default, null):Int64;
 
@@ -22,7 +22,7 @@ class Situation
         situation.turnColor = White;
         situation.intellectorPos = [White => new IntPoint(4, 6), Black => new IntPoint(4, 0)];
         situation.zobristHash = ZobristHashing.startPosHash.copy();
-        situation.figureArray = [for (t in 0...63) Hex.empty()];
+        situation.hexArray = [for (t in 0...63) Hex.empty()];
 
         situation.setC(0, 0, Hex.occupied(Dominator, Black));
         situation.setC(1, 0, Hex.occupied(Liberator, Black));
@@ -63,7 +63,7 @@ class Situation
         situation.turnColor = White;
         situation.intellectorPos = [White => null, Black => null];
         situation.zobristHash = ZobristHashing.emptyHash;
-        situation.figureArray = [for (t in 0...63) Hex.empty()];
+        situation.hexArray = [for (t in 0...63) Hex.empty()];
         return situation;
     }
 
@@ -231,8 +231,8 @@ class Situation
     public function replaceNullsWithEmpty()
     {
         for (t in 0...63)
-            if (figureArray[t] == null)
-                figureArray[t] = Hex.empty();
+            if (hexArray[t] == null)
+                hexArray[t] = Hex.empty();
     }
 
     public function serialize():String
@@ -241,7 +241,7 @@ class Situation
         var blackPart = '';
         for (t in 0...63) 
         {
-            var fig = figureArray[t];
+            var fig = hexArray[t];
             if (fig.color == White)
                 whitePart += '${String.fromCharCode(t + 64)}${PieceType.letter(fig.type)}';
             else if (fig.color == Black)
@@ -257,7 +257,7 @@ class Situation
 
     private inline function getC(i:Int, j:Int):Hex
     {
-        return figureArray[j * 9 + i];
+        return hexArray[j * 9 + i];
     }
 
     public inline function set(coords:IntPoint, hex:Hex) 
@@ -291,7 +291,7 @@ class Situation
 
     private inline function setC(i:Int, j:Int, hex:Hex)
     {
-        figureArray[j * 9 + i] = hex;
+        hexArray[j * 9 + i] = hex;
         if (hex.type == Intellector)
             intellectorPos[hex.color] = new IntPoint(i, j);
     }
@@ -299,7 +299,7 @@ class Situation
     public function copy():Situation 
     {
         var s = new Situation();
-        s.figureArray = [for (t in 0...this.figureArray.length) this.figureArray[t].copy()];
+        s.hexArray = [for (t in 0...this.hexArray.length) this.hexArray[t].copy()];
         s.turnColor = this.turnColor;
         s.intellectorPos = [
             White => (intellectorPos.exists(White)? intellectorPos[PieceColor.White].copy() : null), 
