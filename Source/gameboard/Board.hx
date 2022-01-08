@@ -12,6 +12,9 @@ import struct.IntPoint;
 import struct.PieceColor;
 import gfx.components.OffsettedSprite;
 
+/**
+    A simplest board with a very basic functionality
+**/
 class Board extends OffsettedSprite
 {
     //?Maybe a setter will be added later for dynamic resizing

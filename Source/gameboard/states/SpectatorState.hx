@@ -2,10 +2,8 @@ package gameboard.states;
 
 import Networker.IncomingEvent;
 
-class EnemyMoveState extends BaseState
+class SpectatorState extends BaseState
 {
-    private final playerColor:PieceColor;
-
     public override function onLMBPressed(location:Null<IntPoint>)
     {
         //* Do nothing
@@ -26,9 +24,8 @@ class EnemyMoveState extends BaseState
         //TODO: Fill
     }
 
-    public function new(board:GameBoard, playerColor:PieceColor, ?cursorLocation:IntPoint)
+    public function new(board:GameBoard, ?cursorLocation:IntPoint)
     {
         super(board, cursorLocation);
-        this.playerColor = playerColor;
     }
 }

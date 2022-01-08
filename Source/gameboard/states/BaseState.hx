@@ -1,6 +1,7 @@
 package gameboard.states;
 
 import struct.IntPoint;
+import Networker.IncomingEvent;
 
 class BaseState
 {
@@ -38,7 +39,7 @@ class BaseState
         throw "Should be overriden";
     }
 
-    public function handleNetEvent(event:NetEvent)
+    public function handleNetEvent(event:IncomingEvent)
     {
         throw "Should be overriden";
     }

@@ -3,9 +3,9 @@ package gameboard.states;
 import struct.IntPoint;
 import Networker.IncomingEvent;
 
-class PlayerMoveSelectedState extends BaseSelectedState
+class AnalysisSelectedState extends BaseSelectedState
 {
-    private final playerColor:PieceColor;
+    private var colorToMove:PieceColor;
 
     private override function getStateAfterSuccessfulMove():BaseState
     {
@@ -14,12 +14,12 @@ class PlayerMoveSelectedState extends BaseSelectedState
 
     private override function getStateAfterInvalidMove():BaseNeutralState
     {
-        return new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
+        //TODO: Change | return new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
     }
 
     private override function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
     {
-        return new PlayerMoveDraggingState(boardInstance, location, playerColor, cursorLocation);
+        //TODO: Change | return new PlayerMoveDraggingState(boardInstance, location, playerColor, cursorLocation);
     }
 
     public override function reactsToHover(location:IntPoint):Bool
@@ -29,12 +29,12 @@ class PlayerMoveSelectedState extends BaseSelectedState
 
     public override function handleNetEvent(event:IncomingEvent)
     {
-        //TODO: Fill
+        //* Do nothing
     }
 
-    public function new(board:GameBoard, selectedDepartureLocation:IntPoint, playerColor:PieceColor, ?cursorLocation:IntPoint)
+    public function new(board:GameBoard, selectedDepartureLocation:IntPoint, colorToMove:PieceColor, ?cursorLocation:IntPoint)
     {
         super(board, selectedDepartureLocation, cursorLocation);
-        this.playerColor = playerColor;
+        this.colorToMove = colorToMove;
     }
 }

@@ -1,5 +1,6 @@
 package gameboard;
 
+import Networker.IncomingEvent;
 import gameboard.states.PlayerMoveNeutralState;
 import struct.PieceColor;
 import gfx.utils.PlyScrollType;
@@ -17,13 +18,16 @@ interface IGameBoardObserver
     public function handleGameBoardEvent(e:GameBoardEvent):Void;
 }
 
+/**
+    SelectableBoard that allows scrolling through the game and emits various events
+
+    Changes behaviour based on the current state
+**/
 class GameBoard extends SelectableBoard
 {
     public var plyHistory:PlyHistory;
     public var currentSituation:Situation;
     public var state:BaseState;
-
-    public var playerColor(default, null):PieceColor;
 
     private var suppressLMBHandler:Bool = false;
 
@@ -114,7 +118,7 @@ class GameBoard extends SelectableBoard
         state.onLMBReleased(posToIndexes(e.stageX - x, e.stageY - y));
     }
 
-    public function handleNetEvent(event:NetEvent)
+    public function handleNetEvent(event:IncomingEvent)
     {
         state.handleNetEvent(event);
     }
@@ -153,8 +157,7 @@ class GameBoard extends SelectableBoard
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();
-        this.playerColor = playerColor;
-        //TODO: set state to Normal or Analysis
+        //TODO: set state to Normal or Analysis or Spectator or EnemyMove
 
         addEventListener(Event.ADDED_TO_STAGE, initLMB);
     }    

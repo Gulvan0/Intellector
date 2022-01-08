@@ -1,21 +1,21 @@
 package gameboard.states;
 
+import Networker.IncomingEvent;
 import openfl.geom.Point;
 import struct.IntPoint;
-import Networker.IncomingEvent;
 
-class PlayerMoveDraggingState extends BaseDraggingState
+class AnalysisDraggingState extends BaseDraggingState
 {
-    private final playerColor:PieceColor;
+    private var colorToMove:PieceColor;
 
     private override function getNeutralState():BaseNeutralState
     {
-        return new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
+        //TODO: Change | return new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
     }
 
     private override function getSelectedState(selectedHexLocation:IntPoint):BaseSelectedState
     {
-        return new PlayerMoveSelectedState(boardInstance, selectedHexLocation, playerColor, cursorLocation);
+        //TODO: Change | return new PlayerMoveSelectedState(boardInstance, selectedHexLocation, playerColor, cursorLocation);
     }
 
     public override function reactsToHover(location:IntPoint):Bool
@@ -25,12 +25,12 @@ class PlayerMoveDraggingState extends BaseDraggingState
 
     public override function handleNetEvent(event:IncomingEvent)
     {
-        //TODO: Fill
+        //* Do nothing
     }
 
-    public function new(board:GameBoard, dragStartPosition:IntPoint, playerColor:PieceColor, ?cursorLocation:IntPoint)
+    public function new(board:GameBoard, dragStartPosition:IntPoint, colorToMove:PieceColor, ?cursorLocation:IntPoint)
     {
         super(board, dragStartPosition, cursorLocation);
-        this.playerColor = playerColor;
+        this.colorToMove = colorToMove;
     }
 }

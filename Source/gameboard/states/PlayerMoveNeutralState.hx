@@ -1,39 +1,29 @@
 package gameboard.states;
 
-class PlayerMoveNeutralState extends BaseState
+import Networker.IncomingEvent;
+
+class PlayerMoveNeutralState extends BaseNeutralState
 {
-    public override function onLMBPressed(location:Null<IntPoint>)
+    private final playerColor:PieceColor;
+
+    private override function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
     {
-        var pressedPiece:Null<Piece> = boardInstance.getFigure(location);
-
-        boardInstance.applyScrolling(End);
-
-        if (pressedPiece == null || pressedPiece.color != playerColor)
-            return;
-
-        boardInstance.getHex(location).showLayer(LMB);
-        boardInstance.addMarkers(location);
-        boardInstance.startPieceDragging(location);
-        boardInstance.state = new PlayerMoveDraggingState(boardInstance, location);
+        return new PlayerMoveDraggingState(boardInstance, dragDepartureLocation, playerColor, cursorLocation);
     }
 
     public override function reactsToHover(location:IntPoint):Bool
     {
-        return boardInstance.shownSituation.get(location).color == boardInstance.playerColor;
+        return boardInstance.shownSituation.get(location).color == playerColor;
     }
 
-    public override function onLMBReleased(location:Null<IntPoint>)
-    {
-        //* Do nothing
-    }
-
-    public override function handleNetEvent(event:NetEvent)
+    public override function handleNetEvent(event:IncomingEvent)
     {
         //TODO: Fill
     }
 
-    public function new(board:GameBoard, ?cursorLocation:IntPoint)
+    public function new(board:GameBoard, playerColor:PieceColor, ?cursorLocation:IntPoint)
     {
         super(board, cursorLocation);
+        this.playerColor = playerColor;
     }
 }
