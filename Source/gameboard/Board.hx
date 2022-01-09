@@ -26,6 +26,11 @@ class Board extends OffsettedSprite
     public var orientationColor(default, null):PieceColor;
     public var shownSituation(default, null):Situation;
 
+    public function getFieldHeight():Float
+    {
+        return Hexagon.sideToHeight(hexSideLength) * 7;
+    }
+
     public function setOrientation(val:PieceColor):PieceColor 
     {
         if (val != orientationColor)
@@ -56,7 +61,7 @@ class Board extends OffsettedSprite
         producePieces();
     }
 
-    public function applyMove(ply:ReversiblePly, backInTime:Bool = false)
+    public function applyMoveTransposition(ply:ReversiblePly, backInTime:Bool = false)
     {
         for (transform in ply)
         {
@@ -201,7 +206,7 @@ class Board extends OffsettedSprite
 
     public function new(situation:Situation, orientationColor:PieceColor = White, hexSideLength:Float = 40, suppressMarkup:Bool = false) 
     {
-        super(-hexSideLength, -hexSideLength * Math.sqrt(3) / 2);
+        super(-hexSideLength, -Hexagon.sideToHeight(hexSideLength) / 2);
         this.hexSideLength = hexSideLength;
         this.orientationColor = orientationColor;
         this.shownSituation = situation.copy();

@@ -10,17 +10,17 @@ class AnalysisDraggingState extends BaseDraggingState
 
     private override function getNeutralState():BaseNeutralState
     {
-        //TODO: Change | return new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
+        return new AnalysisNeutralState(boardInstance, colorToMove, cursorLocation);
+    }
+
+    private override function onMoveChosen(ply:Ply)
+    {
+        //TODO: Fill
     }
 
     private override function getSelectedState(selectedHexLocation:IntPoint):BaseSelectedState
     {
         //TODO: Change | return new PlayerMoveSelectedState(boardInstance, selectedHexLocation, playerColor, cursorLocation);
-    }
-
-    public override function reactsToHover(location:IntPoint):Bool
-    {
-        return Rules.possible(dragStartLocation, location, boardInstance.shownSituation.get);
     }
 
     public override function handleNetEvent(event:IncomingEvent)

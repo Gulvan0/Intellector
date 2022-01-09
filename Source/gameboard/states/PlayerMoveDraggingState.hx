@@ -13,14 +13,14 @@ class PlayerMoveDraggingState extends BaseDraggingState
         return new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
     }
 
+    private override function onMoveChosen(ply:Ply)
+    {
+        //TODO: Fill
+    }
+
     private override function getSelectedState(selectedHexLocation:IntPoint):BaseSelectedState
     {
         return new PlayerMoveSelectedState(boardInstance, selectedHexLocation, playerColor, cursorLocation);
-    }
-
-    public override function reactsToHover(location:IntPoint):Bool
-    {
-        return Rules.possible(dragStartLocation, location, boardInstance.shownSituation.get);
     }
 
     public override function handleNetEvent(event:IncomingEvent)

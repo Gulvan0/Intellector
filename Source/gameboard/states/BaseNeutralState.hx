@@ -1,6 +1,6 @@
 package gameboard.states;
 
-class BaseNeutralState extends BaseState
+class BaseNeutralState extends BasePlayableState
 {
     private function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
     {

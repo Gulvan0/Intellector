@@ -59,6 +59,11 @@ class PlyHistory
         return revPlys.slice(oldPointer);
     }
 
+    public function dropSinceShown():Array<ReversiblePly>
+    {
+        return revPlys.splice(pointer);
+    }
+
     public function dropLast(cnt:Int):Array<ReversiblePly>
     {
         var newLength = revPlys.length - cnt;

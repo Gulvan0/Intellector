@@ -22,9 +22,19 @@ import haxe.ui.core.Screen;
 
 class Dialogs
 {
+    private static var dialogCount:Int = 0;
+    private static var activeDialogs:Array<Int> = [];
+
+    public static function hasActive():Bool
+    {
+        return Lambda.empty(activeDialogs);
+    }
+
     public static function confirm(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)
     {
+        var dialogNum = activeDialogs.push(++dialogCount);
         DialogManager.messageBox(message, title, MessageBoxType.TYPE_QUESTION, true, (btn:DialogButton) -> {
+            activeDialogs.remove(dialogNum);
             if (btn == DialogButton.YES)
                 onConfirmed();
             else
@@ -34,18 +44,23 @@ class Dialogs
 
     public static function alert(message:String, title:String)
     {
-        DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true);
+        var dialogNum = activeDialogs.push(++dialogCount);
+        DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true, b -> {activeDialogs.remove(dialogNum);});
     }
 
     public static function info(message:String, title:String)
     {
-        DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true);
+        var dialogNum = activeDialogs.push(++dialogCount);
+        DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true, b -> {activeDialogs.remove(dialogNum);});
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void, onCancel:Void->Void)
     {
+        var dialogNum = activeDialogs.push(++dialogCount);
+
         function cb(dialog:Dialog, type:PieceType) 
         {
+            activeDialogs.remove(dialogNum);
             dialog.hideDialog(DialogButton.OK);
             callback(type);
         }
@@ -62,19 +77,25 @@ class Dialogs
 
         var btns:HBox = new HBox();
         for (type in [Aggressor, Liberator, Defensor, Dominator])
-            btns.addComponent(figureBtn(type, color, cb.bind(dialog, type)));
+            btns.addComponent(pieceBtn(type, color, cb.bind(dialog, type)));
         body.addComponent(btns);
 
         dialog.addComponent(body);
         dialog.title = Dictionary.getPhrase(PROMOTION_DIALOG_TITLE);
         dialog.buttons = DialogButton.CANCEL;
-        dialog.onDialogClosed = (e) -> {onCancel();};
+        dialog.onDialogClosed = (e) -> {
+            activeDialogs.remove(dialogNum);
+            onCancel();
+        };
         dialog.showDialog(false);
     }
 
     public static function chameleonConfirm(onDecided:Bool->Void, onCancelled:Void->Void)
     {
+        var dialogNum = activeDialogs.push(++dialogCount);
         DialogManager.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
+            activeDialogs.remove(dialogNum);
+
             if (btn == DialogButton.YES)
                 onDecided(true);
             else if (btn == DialogButton.NO)
@@ -90,7 +111,7 @@ class Dialogs
         dialog.showDialog(true);
     }
 
-    private static function figureBtn(type:PieceType, color:PieceColor, callback:Void->Void):Button
+    private static function pieceBtn(type:PieceType, color:PieceColor, callback:Void->Void):Button
     {
         var btn:Button = new Button();
         var bmpData = AssetManager.pieceBitmaps[type][color];

@@ -3,7 +3,7 @@ package gameboard.states;
 import openfl.geom.Point;
 import struct.IntPoint;
 
-class BaseDraggingState extends BaseState
+class BaseDraggingState extends BasePlayableState
 {
     private var dragStartLocation:IntPoint;
 
@@ -17,9 +17,20 @@ class BaseDraggingState extends BaseState
         throw "To be overriden";
     }
 
+    private override function onMoveCanceled(departureCoords:IntPoint) 
+    {
+        boardInstance.returnPieceToOriginalPosition(departureCoords);
+        boardInstance.state = getNeutralState();
+    }
+
     public override function onLMBPressed(location:Null<IntPoint>)
     {
         //* Do nothing
+    }
+
+    public override function reactsToHover(location:IntPoint):Bool
+    {
+        return Rules.possible(dragStartLocation, location, boardInstance.shownSituation.get);
     }
 
     public override function onLMBReleased(location:Null<IntPoint>)
@@ -44,8 +55,7 @@ class BaseDraggingState extends BaseState
         else if (location != null && Rules.possible(dragStartLocation, location, boardInstance.shownSituation.get))
         {
             boardInstance.removeMarkers(dragStartLocation);
-            //TODO: initiateMove(pressLoc, releaseLoc);
-            //TODO: To ??? (enemymove?)
+            askMoveDetails(dragStartLocation, location);
         }
         else
         {

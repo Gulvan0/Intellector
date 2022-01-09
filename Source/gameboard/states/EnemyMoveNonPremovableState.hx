@@ -1,8 +1,9 @@
 package gameboard.states;
 
+import struct.Ply;
 import Networker.IncomingEvent;
 
-class EnemyMoveState extends BaseState
+class EnemyMoveNonPremovableState extends BaseState
 {
     private final playerColor:PieceColor;
 
@@ -24,6 +25,10 @@ class EnemyMoveState extends BaseState
     public override function handleNetEvent(event:IncomingEvent)
     {
         //TODO: Fill
+        //* For enemy move somthing like:
+        //AssetManager.playPlySound(ply, shownSituation);
+        //boardInstance.makeMove(ply);
+        //state = ...
     }
 
     public function new(board:GameBoard, playerColor:PieceColor, ?cursorLocation:IntPoint)

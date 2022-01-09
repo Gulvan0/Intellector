@@ -7,24 +7,19 @@ class PlayerMoveSelectedState extends BaseSelectedState
 {
     private final playerColor:PieceColor;
 
-    private override function getStateAfterSuccessfulMove():BaseState
-    {
-        //TODO: Fill
-    }
-
-    private override function getStateAfterInvalidMove():BaseNeutralState
+    private override function getNeutralState():BaseNeutralState
     {
         return new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
     }
 
-    private override function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
+    private override function onMoveChosen(ply:Ply)
     {
-        return new PlayerMoveDraggingState(boardInstance, location, playerColor, cursorLocation);
+        //TODO: Fill
     }
 
-    public override function reactsToHover(location:IntPoint):Bool
+    private override function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
     {
-        return Rules.possible(dragStartLocation, location, boardInstance.shownSituation.get);
+        return new PlayerMoveDraggingState(boardInstance, dragDepartureLocation, playerColor, cursorLocation);
     }
 
     public override function handleNetEvent(event:IncomingEvent)

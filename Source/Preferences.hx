@@ -1,5 +1,6 @@
 package;
 
+import js.Cookie;
 import dict.Language;
 
 enum Markup 
@@ -18,13 +19,16 @@ class Preferences
     {
         instance = new Preferences(); 
         if (Cookie.exists("markup"))
-            markup = Markup.createByName(Cookie.get("markup"));
+            instance.markup = Markup.createByName(Cookie.get("markup"));
         if (Cookie.exists("lang"))
-            lang = Language.createByName(Cookie.get("lang"));
+            instance.language = Language.createByName(Cookie.get("lang"));
+        if (Cookie.exists("premoveEnabled"))
+            instance.premoveEnabled = Cookie.get("premoveEnabled") == "true";
     }
 
     public var markup(default, set):Markup = Over;
     public var language(default, set):Language = EN;
+    public var premoveEnabled(default, set):Bool = false;
 
     public function set_markup(v:Markup):Markup
     {
@@ -35,6 +39,17 @@ class Preferences
     public function set_language(v:Language):Language
     {
         Cookie.set("lang", v.getName(), FIVE_YEARS);
-        return lang = v;
+        return language = v;
+    }
+
+    public function set_premoveEnabled(v:Bool):Bool
+    {
+        Cookie.set("premoveEnabled", v? "true" : "false", FIVE_YEARS);
+        return premoveEnabled = v;
+    }
+
+    public function new()
+    {
+
     }
 }

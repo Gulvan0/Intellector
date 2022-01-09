@@ -1,5 +1,6 @@
 package gameboard.states;
 
+import struct.Hex;
 import struct.IntPoint;
 import Networker.IncomingEvent;
 

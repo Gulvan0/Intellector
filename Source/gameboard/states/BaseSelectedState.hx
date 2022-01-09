@@ -2,16 +2,11 @@ package gameboard.states;
 
 import struct.IntPoint;
 
-class BaseSelectedState extends BaseState
+class BaseSelectedState extends BasePlayableState
 {
     public var selectedDepartureLocation:IntPoint;
 
-    private function getStateAfterSuccessfulMove():BaseState
-    {
-        throw "To be overriden";
-    }
-
-    private function getStateAfterInvalidMove():BaseNeutralState
+    private function getNeutralState():BaseNeutralState
     {
         throw "To be overriden";
     }
@@ -21,6 +16,16 @@ class BaseSelectedState extends BaseState
         throw "To be overriden";
     }
 
+    private override function onMoveCanceled(departureCoords:IntPoint) 
+    {
+        boardInstance.state = getNeutralState();
+    }
+
+    public override function reactsToHover(location:IntPoint):Bool
+    {
+        return Rules.possible(selectedDepartureLocation, location, boardInstance.shownSituation.get);
+    }
+
     public override function onLMBPressed(location:Null<IntPoint>)
     {
         var pressedDestinationPiece:Null<Piece> = boardInstance.getPiece(location);
@@ -28,15 +33,16 @@ class BaseSelectedState extends BaseState
         removeMarkers(selectedDepartureLocation);
         boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
 
-        var selectedDeparturePiece:Null<Piece> = boardInstance.getFigure(selectedDepartureLocation);
+        var selectedDeparturePiece:Null<Piece> = boardInstance.getPiece(selectedDepartureLocation);
         if (location == null || location.equals(selectedDepartureLocation))
-            return;
+        {
+            state = getNeutralState();
+        }
         else if (Rules.possible(selectedDepartureLocation, location, getHex))
         {
             if (cursorLocation != null)
                 boardInstance.getHex(cursorLocation).hideLayer(Hover);
-            //TODO: initiateMove(selectedDepartureLocation, location);
-            //TODO: change state
+            askMoveDetails(dragStartLocation, location);
         }
         else if (alreadySelectedFigure.color == pressedFigure.color)
         {

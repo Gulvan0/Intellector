@@ -1,5 +1,7 @@
 package gameboard;
 
+import struct.IntPoint;
+import struct.Ply;
 import Networker.IncomingEvent;
 import gameboard.states.PlayerMoveNeutralState;
 import struct.PieceColor;
@@ -63,6 +65,53 @@ class GameBoard extends SelectableBoard
         }
     }
 
+    public function revertPlys(cnt:Int) 
+    {
+        if (cnt < 1)
+            return;
+        
+        end();
+
+        var toRevert:Array<ReversiblePly> = plyHistory.dropLast(cnt);
+        currentSituation = currentSituation.unmakeMoves(toRevert);
+        setSituation(currentSituation);
+    }
+
+    public function revertToShown() 
+    {
+        if (plyHistory.isAtEnd())
+            return;
+
+        plyHistory.dropSinceShown();
+        currentSituation = shownSituation.copy();
+    }
+
+    public function returnPieceToOriginalPosition(pieceOriginalLocation:IntPoint)
+    {
+        var piece = getPiece(pieceOriginalLocation);
+        var origPosition = hexCoords(pieceOriginalLocation);
+        piece.x = origPosition.x;
+        piece.y = origPosition.y;
+    }
+
+    /**
+        Writes to history, updates currentSituation, highlights a move if a player hasn't browsed away.
+        
+        Except for premoves, transposes pieces accordingly
+    **/
+    public function makeMove(ply:Ply, ?triggeredByPremove:Bool = false)
+    {
+        var revPly:ReversiblePly = ply.toReversible();
+        plyHistory.append(revPly);
+        currentSituation = currentSituation.makeMove(ply);
+        if (plyHistory.isAtEnd())
+        {
+            if (!triggeredByPremove)
+                applyMoveTransposition(revPly);
+            highlightMove([ply.from, ply.to]);
+        }
+    }
+
     private function home()
     {
         var initalSituation:Situation = shownSituation.copy();
@@ -84,14 +133,14 @@ class GameBoard extends SelectableBoard
     private function prev() 
     {
         var ply = plyHistory.prev(); 
-        applyMove(ply, true);
+        applyMoveTransposition(ply, true);
         highlightMove(ply.affectedCoords());
     }
 
     private function next()
     {
         var ply = plyHistory.next(); 
-        applyMove(ply);
+        applyMoveTransposition(ply);
         highlightMove(ply.affectedCoords());
     }
 
@@ -157,6 +206,7 @@ class GameBoard extends SelectableBoard
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();
+
         //TODO: set state to Normal or Analysis or Spectator or EnemyMove
 
         addEventListener(Event.ADDED_TO_STAGE, initLMB);
