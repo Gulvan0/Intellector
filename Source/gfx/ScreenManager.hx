@@ -13,10 +13,6 @@ import dict.Dictionary;
 import gfx.screens.OpenChallengeHosting;
 import openfl.Assets;
 import gfx.screens.OpenChallengeJoining;
-import Networker.BattleData;
-import Networker.OpenChallengeData;
-import Networker.OngoingBattleData;
-import Networker.GameOverData;
 import url.URLEditor;
 import haxe.ui.components.Label;
 import gfx.screens.SignIn;
@@ -69,20 +65,23 @@ class ScreenManager extends Sprite
         addChild(changes);
     }
 
-    public function toGameStart(data:BattleData) 
+    //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
+    public function toGameStart(data:Dynamic) 
     {
         var isGuest = Networker.login.startsWith("guest_");
         var onReturnPressed = isGuest? Networker.dropConnection : toMain;
         toGameGeneric(data.match_id, GameCompound.buildActive(data, onReturnPressed));
     }
 
-    public function toGameReconnect(data:OngoingBattleData) 
+    //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
+    public function toGameReconnect(data:Dynamic) 
     {
         var isGuest = Networker.login.startsWith("guest_");
         var onReturnPressed = isGuest? Networker.dropConnection : toMain;
         toGameGeneric(data.match_id, GameCompound.buildActiveReconnect(data, onReturnPressed));
     }
 
+    //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
     private function toGameGeneric(id:Int, game:GameCompound) 
     {
         clear();
@@ -106,7 +105,8 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
-    public function toOpenChallengeJoiningRoom(data:OpenChallengeData) 
+    //TODO: Rewrite. Pass ServerEvent constructor parameters
+    public function toOpenChallengeJoiningRoom(data:Dynamic) 
     {
         clear();
         URLEditor.clear();
@@ -115,6 +115,7 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
+    //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
     public function toAnalysisBoard(onReturn:Void->Void, ?study:StudyOverview, ?situationSIP:String) 
     {
         clear();
@@ -128,7 +129,8 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
-    public function toSpectation(data:OngoingBattleData) 
+    //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
+    public function toSpectation(data:Dynamic) 
 	{
 		clear();
         URLEditor.assignID(data.match_id);
@@ -155,6 +157,7 @@ class ScreenManager extends Sprite
         addChild(current);
     }
     
+    //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
     public function toRevisit(id:Int, log:String, onReturn:Void->Void) 
     {
         clear();
@@ -204,7 +207,8 @@ class ScreenManager extends Sprite
         addChild(current);
     }
     
-    private function onGameEnded(data:GameOverData) 
+    //TODO: Rewrite. Pass ServerEvent constructor parameters
+    private function onGameEnded(data:Dynamic) 
 	{
         var playerColor:PieceColor = Networker.currentGameCompound.playerColor;
         var playerIsWinner:Bool = data.winner_color == letter(playerColor);
@@ -239,6 +243,7 @@ class ScreenManager extends Sprite
         drawChanges();
     }
 
+    //TODO: The approach to changelog should be reconsidered during the UI update
     private function drawChanges() 
     {
         changes = new Label();

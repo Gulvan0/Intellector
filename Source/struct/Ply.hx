@@ -1,5 +1,4 @@
 package struct;
-import Networker.MoveData;
 import utils.Notation;
 using StringTools;
 
@@ -15,15 +14,6 @@ class Ply
         ply.from = from;
         ply.to = to;
         ply.morphInto = morphInto;
-        return ply;
-    }
-
-    public static function fromMoveData(data:MoveData) 
-    {
-        var ply:Ply = new Ply();
-        ply.from = new IntPoint(data.fromI, data.fromJ);
-        ply.to = new IntPoint(data.toI, data.toJ);
-        ply.morphInto = data.morphInto == null? null : PieceType.createByName(data.morphInto);
         return ply;
     }
 
@@ -131,11 +121,6 @@ class Ply
     public function modifiedHexes():Array<IntPoint>
     {
         return [from.copy(), to.copy()];
-    }
-
-    public function toMoveData():MoveData
-    {
-        return {issuer_login: Networker.login, fromI: from.i, toI: to.i, fromJ: from.j, toJ: to.j, morphInto: morphInto == null? null : morphInto.getName()};
     }
 
     public function copy():Ply

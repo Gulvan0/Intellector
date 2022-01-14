@@ -12,7 +12,8 @@ class OpenChallengeJoining extends Sprite
 {
     private static var boxWidth:Float = 800;
 
-    public function new(data:OpenChallengeData)
+	//TODO: Rewrite
+    public function new(data:Dynamic)
     {
 		super();
         var joinMenu = new VBox();
@@ -21,10 +22,10 @@ class OpenChallengeJoining extends Sprite
 		var label = new haxe.ui.components.Label();
 		label.width = boxWidth;
 		label.text = Dictionary.isHostingAChallengeText(data);
-		if (Networker.login == null)
+		if (LoginManager.login == null)
 			label.text += Dictionary.getPhrase(WILL_BE_GUEST);
 		else
-			label.text += Dictionary.getPhrase(JOINING_AS) + Networker.login;
+			label.text += Dictionary.getPhrase(JOINING_AS) + LoginManager.login;
 		label.customStyle = {fontSize: 16};
 		label.textAlign = 'center';
 		joinMenu.addComponent(label);
@@ -36,7 +37,7 @@ class OpenChallengeJoining extends Sprite
 		joinMenu.addComponent(joinButton);
 
 		joinButton.onClick = (e) -> {
-			Networker.acceptOpen(data.challenger);
+			Networker.emitEvent(AcceptOpenChallenge(data.challenger));
 		}
 
 		joinMenu.x = (Browser.window.innerWidth - boxWidth) / 2;
@@ -47,7 +48,7 @@ class OpenChallengeJoining extends Sprite
 		returnBtn.width = 100;
 		returnBtn.text = Dictionary.getPhrase(RETURN);
 		returnBtn.onClick = (e) -> {
-			if (Networker.login != null)
+			if (LoginManager.login != null)
 				ScreenManager.instance.toMain();
 			else
 				Networker.dropConnection();

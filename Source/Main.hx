@@ -43,7 +43,7 @@ class Main extends Sprite
 		super();
 		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
 		Toolkit.init();
-		Utils.initSettings();
+		Preferences.initSettings();
 		OpeningTree.init();
 		PieceValues.initValues();
 		ZobristHashing.init();

@@ -1,5 +1,6 @@
 package;
 
+import gameboard.Board;
 import struct.Ply;
 import struct.Situation;
 import struct.Hex;
@@ -189,7 +190,7 @@ class Rules
             case A_R: new IntPoint(fromI + 2, fromJ);
             case A_L: new IntPoint(fromI - 2, fromJ);
         }
-        return Field.hexExists(coords.i, coords.j)? coords : null;
+        return Board.hexExists(coords)? coords : null;
     }
 
     public static function areNeighbours(coords1:IntPoint, coords2:IntPoint):Bool

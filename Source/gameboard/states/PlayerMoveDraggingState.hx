@@ -2,7 +2,7 @@ package gameboard.states;
 
 import openfl.geom.Point;
 import struct.IntPoint;
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class PlayerMoveDraggingState extends BaseDraggingState
 {
@@ -23,7 +23,7 @@ class PlayerMoveDraggingState extends BaseDraggingState
         return new PlayerMoveSelectedState(boardInstance, selectedHexLocation, playerColor, cursorLocation);
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
         //TODO: Fill
     }

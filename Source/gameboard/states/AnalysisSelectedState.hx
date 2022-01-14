@@ -1,7 +1,7 @@
 package gameboard.states;
 
 import struct.IntPoint;
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class AnalysisSelectedState extends BaseSelectedState
 {
@@ -22,7 +22,7 @@ class AnalysisSelectedState extends BaseSelectedState
         //TODO: Change | return new PlayerMoveDraggingState(boardInstance, dragDepartureLocation, playerColor, cursorLocation);
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
         //* Do nothing
     }

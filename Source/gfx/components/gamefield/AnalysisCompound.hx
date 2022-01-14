@@ -1,22 +1,8 @@
 package gfx.components.gamefield;
 
-import serialization.PlyDeserializer;
-import gfx.screens.PlayerProfile.StudyOverview;
-import gfx.components.gamefield.analysis.PosEditMode;
-import struct.Situation;
-import haxe.Timer;
-import struct.PieceColor;
-import analysis.AlphaBeta;
-import dict.Dictionary;
-import js.Browser;
-import struct.Variant;
-import struct.Ply;
-import gfx.components.gamefield.analysis.RightPanel;
-import gfx.components.gamefield.modules.gameboards.AnalysisField;
-
 class AnalysisCompound extends GameCompound 
 {
-    private var panel:RightPanel;
+    /*private var panel:RightPanel;
     private var variant:Variant;
     private var overwriteID:Null<Int> = null;
 
@@ -284,5 +270,5 @@ class AnalysisCompound extends GameCompound
 
         variant = new Variant();
         panel.variantTree.init(variant, []);
-    }
+    }*/
 }

@@ -1,0 +1,33 @@
+enum ClientEvent
+{
+	CreateOpenChallenge(startSecs:Int, bonusSecs:Int, color:Null<String>);
+}
+
+enum ClientEvent2
+{
+	CreateOpenChallenge(startSecs:Int, bonusSecs:Int, color:Null<String>);
+}
+
+class Test {
+  static function serialize(event:ClientEvent)
+  {
+    return haxe.Json.stringify({"name": event.getName(), "params": event.getParameters()});
+  }
+  
+  static function main() {
+    var ev1 = ClientEvent.CreateOpenChallenge(3, 6, "white");
+    var ev2 = ClientEvent.CreateOpenChallenge(3, 6, null);
+    var conv1 = haxe.Json.parse(serialize(ev1));
+    var conv2 = haxe.Json.parse(serialize(ev2));
+    var recev1 = ClientEvent2.createByName(conv1.name, conv1.params);
+    var recev2 = ClientEvent2.createByName(conv2.name, conv2.params);
+    switch recev1
+    {
+			case ClientEvent2.CreateOpenChallenge(v1, v2, v3): trace(v1, v2, v3);
+    }
+    switch recev2
+    {
+			case ClientEvent2.CreateOpenChallenge(v1, v2, v3): trace(v1, v2, v3);
+    }
+  }
+}

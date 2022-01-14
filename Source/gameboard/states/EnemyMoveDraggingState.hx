@@ -2,7 +2,7 @@ package gameboard.states;
 
 import openfl.geom.Point;
 import struct.IntPoint;
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class EnemyMoveDraggingState extends BaseDraggingState
 {
@@ -24,7 +24,7 @@ class EnemyMoveDraggingState extends BaseDraggingState
         return new EnemyMoveSelectedState(boardInstance, selectedHexLocation, playerColor, premoves, cursorLocation);
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
         //TODO: Fill
         //* For enemy move somthing like:

@@ -1,5 +1,8 @@
 package;
 
+import net.ClientEvent;
+import net.ServerEvent;
+import net.EventProcessingQueue;
 import gfx.components.Dialogs;
 import gfx.ScreenManager;
 import struct.PieceColor;
@@ -16,144 +19,25 @@ using utils.CallbackTools;
 using StringTools;
 using Lambda;
 
-enum OutgoingEvent
-{
-    //TODO: Fill
-}
-
-enum IncomingEvent
-{
-    //TODO: Fill
-    Message(text:String);
-}
-
 typedef RawNetEvent =
 {
     var name:String;
     var data:Dynamic;
 }
 
-typedef BattleData =
-{
-    var match_id:Int;
-    var enemy:String;
-    var colour:String;
-    var startSecs:Int;
-    var bonusSecs:Int;
-}
-
-typedef MoveData =
-{
-    var issuer_login:String;
-    var fromI:Int;
-    var toI:Int;
-    var fromJ:Int;
-    var toJ:Int;
-    var morphInto:Null<String>;
-}
-
-typedef GameOverData =
-{
-    var winner_color:String;
-    var reason:String;
-}
-
-typedef TimeData =
-{
-    var whiteSeconds:Float;
-    var blackSeconds:Float;
-    var timestamp:Float;
-    var pingSubtractionSide:String;
-}
-
-typedef OpenChallengeData = 
-{
-    var challenger:String;
-    var startSecs:Int;
-    var bonusSecs:Int;
-    var color:Null<String>;
-}
-
-typedef MessageData =
-{
-    var issuer_login:String;
-    var message:String;
-}
-
-typedef OngoingBattleData =
-{
-    var match_id:Int;
-    var requestedColor:String;
-    var whiteLogin:String;
-    var blackLogin:String;
-    var whiteSeconds:Float;
-    var blackSeconds:Float;
-    var timestamp:Float;
-    var pingSubtractionSide:String;
-    var position:String;
-    var currentLog:String;
-}
-
-interface INetObserver 
-{
-    public function handleNetEvent(event:IncomingEvent):Void;
-}
-
 class Networker
 {
-    private static var allIncomingEventNames:Array<String>;
-
     private static var _ws:WebSocket;
-    public static var login:String;
 
-    private static var eventMap:Map<String, Dynamic->Void> = [];
-    private static var observers:Array<INetObserver> = [];
+    public static var eventQueue:EventProcessingQueue;
+    public static var onConnectionEstabilished:Void->Void; //TODO: Init this property from outside
 
     public static var suppressAlert:Bool;
     public static var doNotReconnect:Bool = false;
 
-    private static function eventConstructorByName(name:String):String
+    public static function connect() 
     {
-        var constr:String = name.charAt(0).toUpperCase();
-        var i:Int = 1;
-        while (i < name.length)
-        {
-            var char = name.charAt(i);
-            if (char == "_")
-            {
-                i++;
-                constr += name.charAt(i).toUpperCase();
-            }
-            else
-                constr += name.charAt(i);
-
-            i++;
-        }
-
-        return constr;
-    }
-
-    private static function eventNameByConstructor(constr:String):String
-    {
-        var name:String = constr.charAt(0).toLowerCase();
-        var i:Int = 1;
-        while (i < constr.length)
-        {
-            var char = constr.charAt(i);
-            if (char.toLowerCase() != char)
-                name += "_" + char.toLowerCase();
-            else
-                name += char;
-
-            i++;
-        }
-
-        return name;
-    }
-
-    public static function connect(onConnected:Void->Void) 
-    {
-        allIncomingEventNames = IncomingEvent.getConstructors().map(eventNameByConstructor);
+        eventQueue = new EventProcessingQueue();
 
         #if prod
         _ws = new WebSocket("wss://play-intellector.ru:5000");
@@ -179,26 +63,21 @@ class Networker
     private static function onConnectionOpen()
     {
         suppressAlert = false;
-        on("dont_reconnect", onReconnectionForbidden);
-        onConnected();
+        /*on("dont_reconnect", onReconnectionForbidden);*/ //TODO: Rewrite
+        onConnectionEstabilished();
     }
 
     private static function onMessageRecieved(msg)
     {
         var str:String = msg.toString();
         var rawEvent:RawNetEvent = Json.parse(str.substring(11, str.length - 1));
-        var callback = eventMap.get(rawEvent.name);
 
-        if (callback != null)
-            callback(rawEvent.data);
-
-        if (allIncomingEventNames.has(rawEvent.name))
+        if (ServerEvent.getConstructors().has(rawEvent.name))
         {
-            var event:IncomingEvent = IncomingEvent.createByName(eventConstructorByName(rawEvent.name), rawEvent.data);
-            for (obs in observers)
-                obs.handleNetEvent(event);
+            var event:ServerEvent = ServerEvent.createByName(rawEvent.name, rawEvent.data);
+            eventQueue.processEvent(event);
         }
-        else if (callback == null)
+        else
             trace("Unexpected event: " + rawEvent.name);
     }
 
@@ -214,7 +93,7 @@ class Networker
             suppressAlert = true;
         }
         if (!doNotReconnect)
-            connect(onConnected);
+            connect();
     }
 
     private static function onConnectionError(err:js.html.Event)
@@ -236,26 +115,9 @@ class Networker
 
     //------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    //TODO: Remove remaining
+    //TODO: Move to ChallengeManager (or smth like that)
 
-    public static function signin(login:String, password:String, onPlainAnswer:String->Void, onOngoingGame:OngoingBattleData->Void) 
-    {
-        Networker.login = login;
-        onceOneOf([
-            'login_result' => onPlainAnswer,
-            'ongoing_game' => onOngoingGame
-        ]);
-        emit('login', {login: login, password: password});
-    }
-
-    public static function register(login:String, password:String, onAnswer:String->Void) 
-    {
-        Networker.login = login;
-        once('register_result', onAnswer);
-        emit('register', {login: login, password: password});
-    }
-
-    public static function acceptOpen(caller:String) 
+    /*public static function acceptOpen(caller:String) 
     {
         if (Networker.login == null)
             Networker.login = "guest_" + Math.ceil(Math.random() * 100000);
@@ -290,41 +152,13 @@ class Networker
         once('challenge_declined', onDeclined);
         onceOneOf(['callee_same' => onSame, 'callout_success' => onSuccess, 'repeated_callout' => onRepeated, 'callee_unavailable' => onOffline, 'callee_ingame' => onIngame]);
         emit('callout', {caller_login: Networker.login, callee_login: callee, secsStart: secsStart, secsBonus: secsBonus, color: color == null? null : color.getName()});
-    }
+    }*/
 
-    /*********************************************************************************************************************************************
-        Basic underlying methods
-    **********************************************************************************************************************************************/
+    //=======================================================================================================================
 
-    public static function on(eventName:String, callback:Dynamic->Void) 
+    public static function emitEvent(event:ClientEvent)
     {
-        eventMap[eventName] = callback;
-    }
-
-    public static function once(eventName:String, callback:Dynamic->Void) 
-    {
-        eventMap[eventName] = off.bind(eventName).combineSecond(callback);
-    }
-
-    public static function onceOneOf(callbacks:Map<String, Dynamic->Void>) 
-    {
-        var disableAll:Void->Void = () -> {
-            for (eventName in callbacks.keys())
-                off(eventName);
-        };
-        
-        for (eventName => callback in callbacks.keyValueIterator())
-            on(eventName, disableAll.combineSecond(callback));
-    }
-
-    public static function off(eventName:String) 
-    {
-        eventMap.remove(eventName);
-    }
-
-    public static function emitEvent(event:OutgoingEvent)
-    {
-        emit(eventNameByConstructor(event.getName()), event.getParameters()[0]);
+        emit(event.getName(), event.getParameters()[0]);
     }
 
     private static function emit(eventName:String, data:Dynamic) 

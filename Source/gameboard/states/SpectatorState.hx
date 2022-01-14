@@ -1,6 +1,6 @@
 package gameboard.states;
 
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class SpectatorState extends BaseState
 {
@@ -19,7 +19,7 @@ class SpectatorState extends BaseState
         //* Do nothing
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
         //TODO: Fill
     }

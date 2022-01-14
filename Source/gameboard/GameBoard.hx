@@ -2,7 +2,7 @@ package gameboard;
 
 import struct.IntPoint;
 import struct.Ply;
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 import gameboard.states.PlayerMoveNeutralState;
 import struct.PieceColor;
 import gfx.utils.PlyScrollType;
@@ -167,7 +167,7 @@ class GameBoard extends SelectableBoard
         state.onLMBReleased(posToIndexes(e.stageX - x, e.stageY - y));
     }
 
-    public function handleNetEvent(event:IncomingEvent)
+    public function handleNetEvent(event:ServerEvent)
     {
         state.handleNetEvent(event);
     }

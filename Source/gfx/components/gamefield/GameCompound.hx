@@ -4,7 +4,6 @@ import gfx.components.gamefield.analysis.RightPanel;
 import struct.IntPoint;
 import gfx.components.gamefield.modules.GameInfoBox.Outcome;
 import serialization.GameLogDeserializer;
-import Networker.GameOverData;
 import analysis.AlphaBeta;
 import haxe.ui.components.Label;
 import haxe.ui.containers.HBox;
@@ -13,19 +12,13 @@ import struct.Hex;
 import struct.Situation;
 import struct.Ply;
 import dict.Dictionary;
-import Networker.OngoingBattleData;
 import struct.PieceType;
 import struct.PieceColor;
 import haxe.ui.containers.VBox;
 import haxe.ui.components.Button;
-import Networker.BattleData;
-import Networker.MessageData;
-import Networker.TimeData;
-import Networker.MoveData;
 import js.Browser;
 import openfl.display.Sprite;
 import gfx.components.gamefield.modules.*;
-import gfx.components.gamefield.modules.gameboards.*;
 using StringTools;
 using utils.CallbackTools;
 
@@ -39,7 +32,7 @@ enum GameCompoundType
 
 class GameCompound extends Sprite
 {
-    private var returnBtn:Button;
+    /*private var returnBtn:Button;
     private var field:Field;
     private var sidebox:Null<Sidebox>;
     private var chatbox:Null<Chatbox>;
@@ -521,5 +514,5 @@ class GameCompound extends Sprite
 		    returnBtn.y = 10;
 		    addChild(returnBtn);
         }
-    }    
+    }*/
 }

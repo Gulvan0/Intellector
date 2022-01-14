@@ -1,6 +1,6 @@
 package gameboard.states;
 
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class PlayerMoveNeutralState extends BaseNeutralState
 {
@@ -16,7 +16,7 @@ class PlayerMoveNeutralState extends BaseNeutralState
         return boardInstance.shownSituation.get(location).color == playerColor;
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
         //TODO: Fill
     }

@@ -1,7 +1,7 @@
 package gameboard.states;
 
 import struct.Ply;
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class EnemyMoveNonPremovableState extends BaseState
 {
@@ -22,7 +22,7 @@ class EnemyMoveNonPremovableState extends BaseState
         //* Do nothing
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
         //TODO: Fill
         //* For enemy move somthing like:

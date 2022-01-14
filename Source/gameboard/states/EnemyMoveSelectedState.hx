@@ -1,7 +1,7 @@
 package gameboard.states;
 
 import struct.IntPoint;
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class EnemyMoveSelectedState extends BaseSelectedState
 {
@@ -23,7 +23,7 @@ class EnemyMoveSelectedState extends BaseSelectedState
         return new EnemyMoveDraggingState(boardInstance, dragDepartureLocation, playerColor, premoves, cursorLocation);
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
         //TODO: Fill
         //* For enemy move somthing like:

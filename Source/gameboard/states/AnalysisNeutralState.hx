@@ -1,7 +1,7 @@
 package gameboard.states;
 
 import struct.PieceColor;
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class AnalysisNeutralState extends BaseNeutralState
 {
@@ -17,7 +17,7 @@ class AnalysisNeutralState extends BaseNeutralState
         return boardInstance.shownSituation.get(location).color == colorToMove;
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
         //* Do nothing
     }

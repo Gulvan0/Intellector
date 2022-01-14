@@ -1,7 +1,7 @@
 package gameboard.states;
 
 import struct.Ply;
-import Networker.IncomingEvent;
+import Networker.ServerEvent;
 
 class EnemyMoveNeutralState extends BaseNeutralState
 {
@@ -18,9 +18,9 @@ class EnemyMoveNeutralState extends BaseNeutralState
         return boardInstance.shownSituation.get(location).color == playerColor;
     }
 
-    public override function handleNetEvent(event:IncomingEvent)
+    public override function handleNetEvent(event:ServerEvent)
     {
-        //TODO: Fill
+        
         //* For enemy move somthing like:
         //AssetManager.playPlySound(ply, shownSituation);
         //boardInstance.makeMove(ply);

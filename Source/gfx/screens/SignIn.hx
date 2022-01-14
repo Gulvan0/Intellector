@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import net.LoginManager;
 import Networker.OngoingBattleData;
 import js.Cookie;
 import js.Browser;
@@ -54,13 +55,13 @@ class SignIn extends Sprite
 	private function onSignInPressed()
 	{
 		var onResults:String->Void = onEntranceResults.bind(LogIn, loginField.text, passField.text, rememberMe.selected);
-		Networker.signin(loginField.text, passField.text, onResults, onOngoingGame);
+		LoginManager.signin(loginField.text, passField.text, onResults, onOngoingGame);
 	}
 
 	private function onRegisterPressed()
 	{
 		var onResults:String->Void = onEntranceResults.bind(Register, loginField.text, passField.text, rememberMe.selected);
-		Networker.register(loginField.text, passField.text, onResults);
+		LoginManager.register(loginField.text, passField.text, onResults);
 	}
 
 	private function onEntranceResults(type:ServerEntranceType, login:String, password:String, remember:Bool, result:String)
@@ -79,12 +80,13 @@ class SignIn extends Sprite
 		}
 	}
 
-	private function onOngoingGame(data:OngoingBattleData) 
+	//TODO: Rewrite
+	private function onOngoingGame(data:Dynamic) 
 	{
-		if (data.whiteLogin.toLowerCase() == Networker.login.toLowerCase())
-			data.whiteLogin = Networker.login;
-		else if (data.blackLogin.toLowerCase() == Networker.login.toLowerCase())
-			data.blackLogin = Networker.login;
+		if (data.whiteLogin.toLowerCase() == LoginManager.login.toLowerCase())
+			data.whiteLogin = LoginManager.login;
+		else if (data.blackLogin.toLowerCase() == LoginManager.login.toLowerCase())
+			data.blackLogin = LoginManager.login;
 		ScreenManager.instance.toGameReconnect(data);
 	}
 
