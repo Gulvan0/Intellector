@@ -1,6 +1,7 @@
 package gameboard.states;
 
-import Networker.ServerEvent;
+import net.ServerEvent;
+import struct.Hex;
 import openfl.geom.Point;
 import struct.IntPoint;
 
@@ -13,14 +14,21 @@ class AnalysisDraggingState extends BaseDraggingState
         return new AnalysisNeutralState(boardInstance, colorToMove, cursorLocation);
     }
 
+    public override function movePossible(from:IntPoint, to:IntPoint):Bool
+    {
+        return Rules.possible(from, to, boardInstance.shownSituation.get);
+    }
+
     private override function onMoveChosen(ply:Ply)
     {
-        //TODO: Fill
+        AssetManager.playPlySound(ply, boardInstance.shownSituation);
+        boardInstance.makeMove(ply);
+        boardInstance.state = new AnalysisNeutralState(boardInstance, colorToMove, cursorLocation);
     }
 
     private override function getSelectedState(selectedHexLocation:IntPoint):BaseSelectedState
     {
-        //TODO: Change | return new PlayerMoveSelectedState(boardInstance, selectedHexLocation, playerColor, cursorLocation);
+        return new AnalysisSelectedState(boardInstance, selectedHexLocation, colorToMove, cursorLocation);
     }
 
     public override function handleNetEvent(event:ServerEvent)

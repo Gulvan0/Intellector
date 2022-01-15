@@ -28,11 +28,6 @@ class BaseDraggingState extends BasePlayableState
         //* Do nothing
     }
 
-    public override function reactsToHover(location:IntPoint):Bool
-    {
-        return Rules.possible(dragStartLocation, location, boardInstance.shownSituation.get);
-    }
-
     public override function onLMBReleased(location:Null<IntPoint>)
     {
         if (boardInstance.currentSituation.turnColor != playerColor)
@@ -60,10 +55,7 @@ class BaseDraggingState extends BasePlayableState
         else
         {
             boardInstance.removeMarkers(dragStartLocation);
-            var originalPosition:Point = boardInstance.hexCoords(dragStartLocation);
-            draggedPiece.x = originalPosition.x;
-            draggedPiece.y = originalPosition.y;
-            boardInstance.state = getNeutralState();
+            onMoveCanceled();
         }
     }
 

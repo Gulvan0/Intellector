@@ -2,7 +2,7 @@ package gameboard.states;
 
 import struct.Hex;
 import struct.IntPoint;
-import Networker.ServerEvent;
+import net.ServerEvent;
 
 class BaseState
 {
@@ -28,6 +28,11 @@ class BaseState
             boardInstance.getHex(cursorLocation).hideLayer(Hover);
 
         cursorLocation = newCursorLocation;
+    }
+
+    public function movePossible(from:IntPoint, to:IntPoint):Bool
+    {
+        throw "Should be overriden";
     }
 
     public function reactsToHover(location:IntPoint):Bool

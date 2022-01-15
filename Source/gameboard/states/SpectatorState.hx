@@ -1,6 +1,6 @@
 package gameboard.states;
 
-import Networker.ServerEvent;
+import net.ServerEvent;
 
 class SpectatorState extends BaseState
 {
@@ -21,7 +21,16 @@ class SpectatorState extends BaseState
 
     public override function handleNetEvent(event:ServerEvent)
     {
-        //TODO: Fill
+        switch event 
+        {
+            case Rollback(plysToUndo):
+                boardInstance.revertPlys(plysToUndo);
+
+            case Move(fromI, toI, fromJ, toJ, morphInto):
+                var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
+                AssetManager.playPlySound(ply, boardInstance.currentSituation);
+                boardInstance.makeMove(ply);
+        }
     }
 
     public function new(board:GameBoard, ?cursorLocation:IntPoint)

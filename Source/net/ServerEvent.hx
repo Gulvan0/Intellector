@@ -12,7 +12,7 @@ enum ServerEvent
     GameNotFound; //Answer to GetGame: no such game exists
 
     DirectChallengeCalleeIsCaller(callee:String); //Answer to CreateDirectChallenge: a player has tried to challenge themselves
-    DirectChallengeCalleeOffline(callee:String); //Answer to CreateDirectChallenge: recipient is offline //! new event, add logic to both server & client
+    DirectChallengeCalleeOffline(callee:String); //Answer to CreateDirectChallenge: recipient is offline //! TODO: new event, add logic to both server & client
     DirectChallengeCalleeNotFound(callee:String); //Answer to CreateDirectChallenge: there is no such player as recipient
     DirectChallengeCalleeInGame(callee:String); //Answer to CreateDirectChallenge: recipient is offline
     DirectChallengeRepeated(callee:String); //Answer to CreateDirectChallenge: the challenge to this recipient has already been sent

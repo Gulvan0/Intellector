@@ -2,7 +2,7 @@ package gameboard.states;
 
 import struct.Hex;
 import struct.IntPoint;
-import Networker.ServerEvent;
+import net.ServerEvent;
 
 class BasePlayableState extends BaseState
 {
@@ -14,6 +14,11 @@ class BasePlayableState extends BaseState
     private function onMoveChosen(ply:Ply)
     {
         throw "Should be overriden";
+    }
+
+    public override function reactsToHover(location:IntPoint):Bool
+    {
+        return movePossible(selectedDepartureLocation, location);
     }
 
     private function askMoveDetails(from:IntPoint, to:IntPoint) 
@@ -38,15 +43,6 @@ class BasePlayableState extends BaseState
             Dialogs.chameleonConfirm(onChameleonDecisionMade, onCanceled);
         else
             onMoveChosen(simplePly);
-    }
-
-    //TODO: Move to onMoveChosen overrides
-    private function onOwnMove(ply:Ply)
-    {
-        AssetManager.playPlySound(ply, shownSituation);
-        //TODO: Emit Event
-        boardInstance.makeMove(ply); //! TODO: For premoves applyMove should be called instead (+ add to queue)!!
-        state = getStateAfterSuccessfulMove();
     }
 
     public function new(board:GameBoard, ?cursorLocation:IntPoint)

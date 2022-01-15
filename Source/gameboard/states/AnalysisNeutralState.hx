@@ -1,7 +1,7 @@
 package gameboard.states;
 
 import struct.PieceColor;
-import Networker.ServerEvent;
+import net.ServerEvent;
 
 class AnalysisNeutralState extends BaseNeutralState
 {
@@ -9,7 +9,7 @@ class AnalysisNeutralState extends BaseNeutralState
 
     private override function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
     {
-        //TODO: Change to AnalysisDragging | return new PlayerMoveDraggingState(boardInstance, dragDepartureLocation, playerColor, cursorLocation);
+        return new AnalysisDraggingState(boardInstance, dragDepartureLocation, colorToMove, cursorLocation);
     }
 
     public override function reactsToHover(location:IntPoint):Bool

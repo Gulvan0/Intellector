@@ -200,14 +200,13 @@ class GameBoard extends SelectableBoard
             obs.handleGameBoardEvent(e);
     }
 
-    public function new(situation:Situation, playerColor:PieceColor, ?orientationColor:PieceColor, hexSideLength:Float = 40) 
+    public function new(situation:Situation, playerColor:PieceColor, startState:BaseState, ?orientationColor:PieceColor, hexSideLength:Float = 40) 
     {
         super(situation, orientationColor == null? playerColor : orientationColor, hexSideLength, false);
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();
-
-        //TODO: set state to Normal or Analysis or Spectator or EnemyMove
+        this.state = startState;
 
         addEventListener(Event.ADDED_TO_STAGE, initLMB);
     }    

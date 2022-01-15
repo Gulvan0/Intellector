@@ -1,6 +1,6 @@
 package gameboard.states;
 
-import Networker.ServerEvent;
+import net.ServerEvent;
 
 class PlayerMoveNeutralState extends BaseNeutralState
 {
@@ -18,7 +18,14 @@ class PlayerMoveNeutralState extends BaseNeutralState
 
     public override function handleNetEvent(event:ServerEvent)
     {
-        //TODO: Fill
+        switch event 
+        {
+            case Rollback(plysToUndo):
+                boardInstance.revertPlys(plysToUndo);
+                
+            case GameEnded(winner_color, reason):
+                boardInstance.state = new SpectatorState(boardInstance, cursorLocation);
+        }
     }
 
     public function new(board:GameBoard, playerColor:PieceColor, ?cursorLocation:IntPoint)

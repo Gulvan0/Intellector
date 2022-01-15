@@ -21,11 +21,6 @@ class BaseSelectedState extends BasePlayableState
         boardInstance.state = getNeutralState();
     }
 
-    public override function reactsToHover(location:IntPoint):Bool
-    {
-        return Rules.possible(selectedDepartureLocation, location, boardInstance.shownSituation.get);
-    }
-
     public override function onLMBPressed(location:Null<IntPoint>)
     {
         var pressedDestinationPiece:Null<Piece> = boardInstance.getPiece(location);

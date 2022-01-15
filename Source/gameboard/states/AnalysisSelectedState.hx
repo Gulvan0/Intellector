@@ -1,7 +1,8 @@
 package gameboard.states;
 
 import struct.IntPoint;
-import Networker.ServerEvent;
+import struct.Hex;
+import net.ServerEvent;
 
 class AnalysisSelectedState extends BaseSelectedState
 {
@@ -12,14 +13,21 @@ class AnalysisSelectedState extends BaseSelectedState
         return new AnalysisNeutralState(boardInstance, colorToMove, cursorLocation);
     }
 
+    public override function movePossible(from:IntPoint, to:IntPoint):Bool
+    {
+        return Rules.possible(from, to, boardInstance.shownSituation.get);
+    }
+
     private override function onMoveChosen(ply:Ply)
     {
-        //TODO: Fill
+        AssetManager.playPlySound(ply, boardInstance.shownSituation);
+        boardInstance.makeMove(ply);
+        boardInstance.state = new AnalysisNeutralState(boardInstance, colorToMove, cursorLocation);
     }
 
     private override function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
     {
-        //TODO: Change | return new PlayerMoveDraggingState(boardInstance, dragDepartureLocation, playerColor, cursorLocation);
+        return new AnalysisDraggingState(boardInstance, dragDepartureLocation, colorToMove, cursorLocation);
     }
 
     public override function handleNetEvent(event:ServerEvent)
