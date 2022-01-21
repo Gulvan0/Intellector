@@ -1,4 +1,4 @@
-package gfx.components.gamefield.modules;
+package gfx.game;
 
 import haxe.ui.containers.VBox;
 import gfx.components.Shapes;

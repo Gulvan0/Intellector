@@ -20,9 +20,30 @@ class AnalysisSelectedState extends BaseSelectedState
 
     private override function onMoveChosen(ply:Ply)
     {
+        var plyStr:String = ply.toNotation(boardInstance.shownSituation);
+        var performedBy:PieceColor = boardInstance.shownSituation.turnColor;
+        var revPly:ReversiblePly = ply.toReversible(boardInstance.shownSituation);
+
         AssetManager.playPlySound(ply, boardInstance.shownSituation);
-        boardInstance.makeMove(ply);
-        boardInstance.state = new AnalysisNeutralState(boardInstance, colorToMove, cursorLocation);
+
+        if (boardInstance.plyHistory.isAtEnd())
+        {
+            boardInstance.makeMove(ply);
+            boardInstance.emit(ContinuationMove(plyStr, performedBy));
+        }
+        else if (boardInstance.plyHistory.equalsNextMove(revPly))
+        {
+            boardInstance.highlightMove(revPly.affectedCoords());
+            boardInstance.emit(SubsequentMove(plyStr, performedBy));
+        }
+        else
+        {
+            boardInstance.revertToShown();
+            boardInstance.makeMove(ply);
+            boardInstance.emit(BranchingMove(plyStr, performedBy));
+        }
+
+        boardInstance.state = getNeutralState();
     }
 
     private override function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState

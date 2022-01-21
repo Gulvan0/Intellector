@@ -1,4 +1,4 @@
-package gfx.components.gamefield.modules;
+package gfx.game;
 
 import struct.PieceColor;
 import dict.Dictionary;

@@ -11,9 +11,9 @@ class BaseNeutralState extends BasePlayableState
     {
         var pressedPiece:Null<Piece> = boardInstance.getFigure(location);
 
-        boardInstance.applyScrolling(End);
-
-        if (pressedPiece == null || pressedPiece.color != playerColor)
+        boardInstance.applyScrolling(End); //TODO: Shouldn't activate in AnalysisNeutralState
+        //TODO: will analysis board react to a branching move properly? + what will signal it to disregard plys after shownSituation?
+        if (pressedPiece == null || pressedPiece.color != playerColor) //TODO: Second condition as an overridable function; will differ for AnalysisNeutralState
             return;
 
         boardInstance.getHex(location).showLayer(LMB);

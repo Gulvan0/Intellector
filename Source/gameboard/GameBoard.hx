@@ -2,7 +2,7 @@ package gameboard;
 
 import struct.IntPoint;
 import struct.Ply;
-import Networker.ServerEvent;
+import net.ServerEvent;
 import gameboard.states.PlayerMoveNeutralState;
 import struct.PieceColor;
 import gfx.utils.PlyScrollType;
@@ -10,9 +10,12 @@ import openfl.events.MouseEvent;
 import gameboard.states.BaseState;
 import struct.Situation;
 
-enum GameBoardEvent
+enum GameBoardEvent //TODO: Emit in all states
 {
-    MoveMade;
+    ContinuationMove(plyStr:String, performedBy:PieceColor);
+    SubsequentMove(plyStr:String, performedBy:PieceColor);
+    BranchingMove(plyStr:String, performedBy:PieceColor);
+    //TODO: add events for edit-type states
 }
 
 interface IGameBoardObserver
@@ -194,7 +197,7 @@ class GameBoard extends SelectableBoard
         observers.push(obs);
     }
 
-    private function notifyObservers(e:GameBoardEvent)
+    public function emit(e:GameBoardEvent)
     {
         for (obs in observers)
             obs.handleGameBoardEvent(e);

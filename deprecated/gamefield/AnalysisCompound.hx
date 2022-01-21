@@ -2,7 +2,7 @@ package gfx.components.gamefield;
 
 class AnalysisCompound extends GameCompound 
 {
-    /*private var panel:RightPanel;
+    private var panel:RightPanel;
     private var variant:Variant;
     private var overwriteID:Null<Int> = null;
 
@@ -270,5 +270,5 @@ class AnalysisCompound extends GameCompound
 
         variant = new Variant();
         panel.variantTree.init(variant, []);
-    }*/
+    }
 }

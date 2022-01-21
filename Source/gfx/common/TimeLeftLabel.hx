@@ -1,4 +1,4 @@
-package gfx.components.gamefield.common;
+package gfx.common;
 
 import haxe.Timer;
 import openfl.Assets;

@@ -1,4 +1,4 @@
-package gfx.components.gamefield.modules;
+package gfx.game;
 
 import gfx.components.gamefield.common.TimeLeftLabel;
 import dict.Phrase;

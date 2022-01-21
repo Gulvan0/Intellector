@@ -1,5 +1,6 @@
-package gfx.components.gamefield.common;
+package gfx.common;
 
+import struct.PieceColor;
 import gfx.utils.PlyScrollType;
 import struct.Situation;
 import struct.Ply;
@@ -32,28 +33,33 @@ class MoveNavigator extends VBox
             vscroll.pos = vscroll.max;
     }
 
-    public function writePly(ply:Ply, contextSituation:Situation) 
+    public function writePlyStr(plyStr:String, performedBy:PieceColor)
     {
-        var moveStr = ply.toNotation(contextSituation);
-
-        if (contextSituation.turnColor == Black)
+        if (performedBy == Black)
             if (plyNumber == 1)
             {
-                lastMovetableEntry = {"num": '1', "white_move": "", "black_move": moveStr};
+                lastMovetableEntry = {"num": '1', "white_move": "", "black_move": plyStr};
                 movetable.dataSource.add(lastMovetableEntry);
             }
             else
             {
-                lastMovetableEntry.black_move = moveStr;
+                lastMovetableEntry.black_move = plyStr;
                 movetable.dataSource.update(movetable.dataSource.size - 1, lastMovetableEntry);
             }
         else 
         {
-            lastMovetableEntry = {"num": '$plyNumber', "white_move": moveStr, "black_move": " "};
+            lastMovetableEntry = {"num": '$plyNumber', "white_move": plyStr, "black_move": " "};
             movetable.dataSource.add(lastMovetableEntry);
         }
 
         plyNumber++;
+    }
+
+    public function writePly(ply:Ply, contextSituation:Situation) 
+    {
+        var plyStr = ply.toNotation(contextSituation);
+        var performedBy = contextSituation.turnColor;
+        writePlyStr(plyStr, performedBy);
     }
 
     public function revertPlys(cnt:Int) 

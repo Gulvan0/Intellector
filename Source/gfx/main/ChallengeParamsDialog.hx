@@ -1,4 +1,4 @@
-package gfx.components.main;
+package gfx.main;
 
 import haxe.ui.components.Label;
 import haxe.ui.components.OptionBox;

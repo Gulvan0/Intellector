@@ -1,4 +1,4 @@
-package gfx.components.gamefield.analysis;
+package gfx.analysis;
 
 import struct.PieceType;
 import struct.PieceColor;

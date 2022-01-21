@@ -10,6 +10,13 @@ enum Markup
     Over;
 }
 
+enum BranchingTabType
+{
+    Tree;
+    Outline;
+    PlainText;
+}
+
 class Preferences
 {
     public static var instance:Preferences;
@@ -24,11 +31,14 @@ class Preferences
             instance.language = Language.createByName(Cookie.get("lang"));
         if (Cookie.exists("premoveEnabled"))
             instance.premoveEnabled = Cookie.get("premoveEnabled") == "true";
+        if (Cookie.exists("branchingTabType"))
+            instance.branchingTabType = BranchingTabType.createByName(Cookie.get("branchingTabType"));
     }
 
     public var markup(default, set):Markup = Over;
     public var language(default, set):Language = EN;
     public var premoveEnabled(default, set):Bool = false;
+    public var branchingTabType(default, set):BranchingTabType = Tree; //TODO: Add new options to settings screen
 
     public function set_markup(v:Markup):Markup
     {
@@ -46,6 +56,12 @@ class Preferences
     {
         Cookie.set("premoveEnabled", v? "true" : "false", FIVE_YEARS);
         return premoveEnabled = v;
+    }
+
+    public function set_branchingTabType(v:BranchingTabType):BranchingTabType
+    {
+        Cookie.set("branchingTabType", v.getName(), FIVE_YEARS);
+        return branchingTabType = v;
     }
 
     public function new()

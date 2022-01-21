@@ -18,6 +18,11 @@ class PlyHistory
         return pointer == revPlys.length;
     }
 
+    public function equalsNextMove(ply:ReversiblePly):Bool
+    {
+        return !isAtEnd() && revPlys[pointer].equals(ply);
+    }
+
     public function getLastMove():Null<ReversiblePly>
     {
         return isAtBeginning()? null : revPlys[pointer-1];

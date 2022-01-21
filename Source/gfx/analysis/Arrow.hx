@@ -1,4 +1,4 @@
-package gfx.components.gamefield.analysis;
+package gfx.analysis;
 
 import openfl.display.Sprite;
 import openfl.geom.Point;

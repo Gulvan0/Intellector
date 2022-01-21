@@ -1,4 +1,4 @@
-package gfx.components.gamefield.analysis;
+package gfx.analysis;
 
 import haxe.ui.components.Link;
 import openfl.geom.Point;
@@ -7,14 +7,14 @@ import openfl.display.Sprite;
 
 class VariantTree extends Sprite 
 {
+    //TODO: Rewrite according to IVariantView
+    
     private static var BLOCK_INTERVAL_X:Float = 15;
     private static var BLOCK_INTERVAL_Y:Float = 30;
 
     private var arrows:Map<String, Arrow> = [];
     private var nodes:Map<String, Link> = [];
     private var familyWidths:Map<String, Float> = [];
-
-    public var selectedBranch(default, null):Array<Int> = [];
 
     private var onClick:(nodeCode:Array<Int>)->Void;
     private var onCtrlClick:(nodeCode:Array<Int>)->Void;
@@ -28,7 +28,6 @@ class VariantTree extends Sprite
             arrows[code].unhighlight();
             code += ":";
         }
-        selectedBranch = [];
     }
 
     public function selectBranch(branch:Array<Int>)
@@ -42,7 +41,6 @@ class VariantTree extends Sprite
             arrows[code].highlight();
             code += ":";
         }
-        selectedBranch = branch.copy();
     }
 
     private function remapKeys(renames:Map<String, String>)
