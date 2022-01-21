@@ -148,9 +148,7 @@ class AnalysisCompound extends GameCompound
         var response = Browser.window.prompt(Dictionary.getPhrase(STUDY_NAME_SELECTION_MESSAGE));
         if (response != null)
         {
-            trace(cast(field, AnalysisField).lastApprovedSituationSIP);
-            Networker.setStudy(response.substr(0, 40), variant.serialize(), cast(field, AnalysisField).lastApprovedSituationSIP, decidedOverwriteID);
-            ScreenManager.instance.toMain();
+            Networker.emitEvent(SetStudy(response.substr(0, 40), variant.serialize(), decidedOverwriteID));
         }
     }
 
@@ -195,14 +193,18 @@ class AnalysisCompound extends GameCompound
     {
         if (studyOverview.data.author.toLowerCase() == Networker.login.toLowerCase())
             overwriteID = studyOverview.id;
-        constructFromSIP(studyOverview.data.startingSIP, true);
 
-        if (studyOverview.data.variantStr == "")
+        var variantStrParts:Array<String> = studyOverview.data.variantStr.split(";");
+        var startingSIP = variantStrParts.pop();
+
+        constructFromSIP(startingSIP, true);
+
+        if (Lambda.empty(variantStrParts))
             return;
 
         var nodesByPathLength:Map<Int, Array<{path:Array<Int>, plyStr:String}>> = [];
         var maxPathLength:Int = 0;
-        for (line in studyOverview.data.variantStr.split(";"))
+        for (line in variantStrParts)
         {
             var lineParts = line.split("/");
             var code = lineParts[0];

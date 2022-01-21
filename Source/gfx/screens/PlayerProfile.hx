@@ -40,7 +40,6 @@ typedef StudyData =
     var name:String;
     var author:String;
     var variantStr:String;
-    var startingSIP:String;
 }
 
 class PlayerProfile extends Sprite

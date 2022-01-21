@@ -17,6 +17,20 @@ class Ply
         return ply;
     }
 
+    public static function plySequenceToNotation(plys:Array<Ply>, startingSituation:Situation):Array<String>
+    {
+        var plyStrSeq = [];
+        var situation = startingSituation.copy();
+
+        for (ply in plys)
+        {
+            plyStrSeq.push(ply.toNotation(situation));
+            situation = situation.makeMove(ply);
+        }
+
+        return plyStrSeq;
+    }
+
     public static function fromNotation(plyStr:String, context:Situation):Ply
     {
         var ply:Ply = new Ply();

@@ -30,7 +30,7 @@ enum ClientEvent
     TakebackDecline; //! eliminated $data
     GetPlayerGames(login:String, after:Int, pageSize:Int);
     GetPlayerStudies(login:String, after:Int, pageSize:Int);
-    SetStudy(name:String, variantStr:String, startingSIP:String, overwriteID:Null<Int>);
+    SetStudy(name:String, variantStr:String, overwriteID:Null<Int>);
     DoesPlayerExist(login:String); //! forwarded login
     AddTime; //! eliminated $data
 }

@@ -7,8 +7,6 @@ import openfl.display.Sprite;
 
 class VariantTree extends Sprite 
 {
-    //TODO: Rewrite according to IVariantView
-    
     private static var BLOCK_INTERVAL_X:Float = 15;
     private static var BLOCK_INTERVAL_Y:Float = 30;
 
@@ -16,8 +14,8 @@ class VariantTree extends Sprite
     private var nodes:Map<String, Link> = [];
     private var familyWidths:Map<String, Float> = [];
 
-    private var onClick:(nodeCode:Array<Int>)->Void;
-    private var onCtrlClick:(nodeCode:Array<Int>)->Void;
+    private var onBranchSelect:(nodeCode:Array<Int>)->Void;
+    private var onBranchRemove:(nodeCode:Array<Int>)->Void;
 
     private function deselectAll() 
     {
@@ -62,9 +60,9 @@ class VariantTree extends Sprite
             var node = nodes.get(formerCode);
             node.onClick = (e) -> {
                 if (e.ctrlKey)
-                    onCtrlClick(path);
+                    onBranchRemove(path);
                 else
-                    onClick(path);
+                    onBranchSelect(path);
             }
 
             newArrowMap.set(newCode, arrows.get(formerCode));
@@ -258,9 +256,9 @@ class VariantTree extends Sprite
         link.text = nodeText;
         link.onClick = (e) -> {
             if (e.ctrlKey)
-                onCtrlClick(path);
+                onBranchRemove(path);
             else
-                onClick(path);
+                onBranchSelect(path);
         };
         nodes.set(code, link);
         addChild(link);
@@ -291,9 +289,9 @@ class VariantTree extends Sprite
             link.text = nodeTexts[childCode];
             link.onClick = (e) -> {
                 if (e.ctrlKey)
-                    onCtrlClick(childPath);
+                    onBranchRemove(childPath);
                 else
-                    onClick(childPath);
+                    onBranchSelect(childPath);
             };
             nodes.set(childCode, link);
             addChild(link);
@@ -323,20 +321,14 @@ class VariantTree extends Sprite
         return accumulatedWidth;
     }
 
-    public function init(variant:Variant, nodeTexts:Map<String, String>) 
+    public function init(onBranchSelect:Array<Int>->Void, onBranchRemove:Array<Int>->Void) 
     {
-        removeChildren();
-        arrows = [];
-        nodes = [];
-        familyWidths = [];
-        selectedBranch = [];
-        drawChildrenRecursive(variant, [], 0, 0, nodeTexts);
+        this.onBranchSelect = onBranchSelect;
+        this.onBranchRemove = onBranchRemove;
     }
 
-    public function new(onClick:(nodeCode:Array<Int>)->Void, onCtrlClick:(nodeCode:Array<Int>)->Void) 
+    public function new() 
     {
         super();
-        this.onClick = onClick;
-        this.onCtrlClick = onCtrlClick;
     }
 }

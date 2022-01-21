@@ -27,6 +27,8 @@ class VariantNode
 
 class Variant extends VariantNode 
 {
+    public var startingSituation(default, null):Situation;
+
     public static function parentPath(childPath:Array<Int>):Array<Int>
     {
         return childPath.slice(0, -1);
@@ -54,9 +56,22 @@ class Variant extends VariantNode
         return true;
     }
 
+    //TODO: Rewrite existing study data
     public function serialize():String 
     {
-        return [for (path in getFamilyPaths([])) if (!Lambda.empty(path)) path.join(":") + "/" + PlyDeserializer.serialize(getByPath(path).ply)].join(";");
+        var serialized:String = "";
+
+        for (path in getFamilyPaths([]))
+            if (!Lambda.empty(path))
+            {
+                var code = path.join(":");
+                var ply = PlyDeserializer.serialize(getByPath(path).ply);
+                serialized += code + "/" + ply + ";";
+            }
+
+        serialized += startingSituation.serialize();
+                
+        return serialized;
     }
 
     public function addChildToNode(ply:Ply, parentPath:Array<Int>) 
@@ -145,8 +160,9 @@ class Variant extends VariantNode
         return node;
     }
 
-    public function new() 
+    public function new(startingSituation:Situation) 
     {
-        super(new Ply(), null);    
+        super(new Ply(), null);
+        this.startingSituation = startingSituation;
     }
 }

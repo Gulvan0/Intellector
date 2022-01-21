@@ -34,7 +34,7 @@ class PositionEditor extends VBox
         pressedEditModeBtn = defaultEditModeBtn;
     }
 
-    public function changeEditorColorOptions(selectedColor:PieceColor) 
+    public function changeColorOptions(selectedColor:PieceColor) 
     {
         turnColorSelectOptions[selectedColor].selected = true;
         turnColorSelectOptions[opposite(selectedColor)].selected = false;

@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import serialization.SituationDeserializer;
 import haxe.ui.core.Component;
 import gfx.analysis.BranchingTab.BranchingTabEvent;
 import gfx.analysis.PositionEditor.PositionEditorEvent;
@@ -41,7 +42,7 @@ enum RightPanelEvent
     RevertNeeded(plyCnt:Int);
     ClearRequested;
     ResetRequested;
-    ConstructFromSIPRequested(sip:String);
+    ConstructSituationRequested(situation:Situation);
     TurnColorChanged(newTurnColor:PieceColor);
     ApplyChangesRequested;
     DiscardChangesRequested;
@@ -49,7 +50,7 @@ enum RightPanelEvent
     ScrollBtnPressed(type:PlyScrollType);
     AnalyzePressed(color:PieceColor);
     ExportSIPRequested;
-    ExportStudyRequested;
+    ExportStudyRequested(variant:Variant);
     InitializationFinished;
 }
 
@@ -89,18 +90,31 @@ class RightPanel extends Sprite
 
     private function handleOverviewTabEvent(event:OverviewTabEvent)
     {
-        //TODO: Fill
-        //! SetPositionPressed: unlike events above, instead of just propagating as a corresponding RightPanelEvent, transforms to EditModeChanged(Move) and also requests drawing the position editor
+        switch event 
+        {
+            case AnalyzePressed(color):
+                overviewTab.displayLoadingOnScoreLabel();
+                emit(AnalyzePressed(color));
+            case ExportSIPRequested:
+                emit(ExportSIPRequested);
+            case ExportStudyRequested:
+                emit(ExportStudyRequested(branchingTab.variant));
+            case ScrollBtnPressed(type):
+                emit(ScrollBtnPressed(type));
+            case SetPositionPressed:
+                showPositionEditor();
+                emit(EditModeChanged(Move)); //TODO: Fire a different event instead. It should call GameBoard.highlightMove([]) & set EditMoveState to gameboard with a fallback situation
+        }
     }
 
     private function handleBranchingTabEvent(event:BranchingTabEvent)
     {
         switch event 
         {
-            case BranchSelected(branch, plyStrArray):
+            case BranchSelected(branch, plyStrArray, firstColorToMove):
                 overviewTab.deprecateScore();
                 overviewTab.navigator.clear();
-                var color:PieceColor = White; //TODO: Detect starting color automatically
+                var color:PieceColor = firstColorToMove;
                 for (plyStr in plyStrArray)
                 {
                     overviewTab.navigator.writePlyStr(plyStr, color);
@@ -115,7 +129,29 @@ class RightPanel extends Sprite
 
     private function handlePositionEditorEvent(event:PositionEditorEvent)
     {
-        //TODO: Fill
+        switch event 
+        {
+            case ClearPressed:
+                overviewTab.clearAnalysisScore();
+                emit(ClearRequested);
+            case ResetPressed:
+                overviewTab.clearAnalysisScore();
+                emit(ResetRequested);
+            case ConstructFromSIPPressed(sip):
+                var situation:Situation = SituationDeserializer.deserialize(sip);
+                positionEditor.changeColorOptions(situation.turnColor);
+                emit(ConstructSituationRequested(situation));
+            case TurnColorChanged(newTurnColor):
+                emit(TurnColorChanged(newTurnColor));
+            case ApplyChangesPressed:
+                //TODO: Fill (Think!). Do not forget to reset the variant and the variantView (correctly update it somehow)
+                emit(ApplyChangesPressed);
+            case DiscardChangesPressed:
+                //TODO: Fill (Think!). We need to preserve the former variant and just move pieces on the gameboard
+                emit(DiscardChangesPressed);
+            case EditModeChanged(newEditMode):
+                
+        }
         //TODO: Add five more states to GameBoard: three FreeMove, Delete & Set
     }
 

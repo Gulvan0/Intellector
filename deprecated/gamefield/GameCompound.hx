@@ -32,7 +32,7 @@ enum GameCompoundType
 
 class GameCompound extends Sprite
 {
-    /*private var returnBtn:Button;
+    private var returnBtn:Button;
     private var field:Field;
     private var sidebox:Null<Sidebox>;
     private var chatbox:Null<Chatbox>;
@@ -514,5 +514,5 @@ class GameCompound extends Sprite
 		    returnBtn.y = 10;
 		    addChild(returnBtn);
         }
-    }*/
+    }
 }

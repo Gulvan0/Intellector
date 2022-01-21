@@ -11,7 +11,7 @@ import openfl.display.Sprite;
 
 enum BranchingTabEvent
 {
-    BranchSelected(branch:Array<Ply>, plyStrArray:Array<String>);
+    BranchSelected(branch:Array<Ply>, plyStrArray:Array<String>, firstColorToMove:PieceColor);
     RevertNeeded(plyCnt:Int);
 }
 
@@ -20,7 +20,7 @@ class BranchingTab extends ScrollView
     private var innerContentWidth:Float;
     private var innerContentHeight:Float;
 
-    private var variant:Variant;
+    public var variant(default, null):Variant;
     public var selectedBranch(default, null):Array<Int> = [];
 
     private var variantView:IVariantView;
@@ -44,23 +44,25 @@ class BranchingTab extends ScrollView
 
     private function onBranchSelect(path:Array<Int>)
     {
-        //TODO: Rewrite (requires startingPosition - How to get it? Where was it originally stored? Maybe store it in the Variant instance?)
         var extendedPath:Array<Int> = variant.extendPathLeftmost(path);
-        panel.variantTree.selectBranch(extendedPath);
+        selectBranch(extendedPath);
+
+        var plys:Array<Ply> = variant.getBranchByPath(path);
+        var plyStrs:Array<Ply> = Ply.plySequenceToNotation(plys, variant.startingSituation);
+        eventHandler(BranchSelected(plys, plyStrs, variant.startingSituation.turnColor));
     }
 
     private function onBranchRemove(path:Array<Int>)
     {
-        //TODO: Rewrite
-        if (Variant.belongs(path, panel.variantTree.selectedBranch))
+        if (Variant.belongs(path, selectedBranch))
         {
-            var plysToRevertCnt:Int = panel.variantTree.selectedBranch.length - path.length + 1;
-            panel.variantTree.selectBranch(Variant.parentPath(path));
-            field.revertPlys(plysToRevertCnt);
+            var plysToRevertCnt:Int = selectedBranch.length - path.length + 1;
+            selectBranch(Variant.parentPath(path));
+            eventHandler(RevertNeeded(plysToRevertCnt));
         }
-        panel.variantTree.removeNode(path, variant);
+        variantView.removeNode(path, variant);
         variant.removeNode(path);
-        panel.updateBranchingTabContentSize();
+        updateContentSize();
     }
 
     public function init(eventHandler:BranchingTabEvent->Void)
