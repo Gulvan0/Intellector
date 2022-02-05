@@ -1,29 +1,39 @@
-package gameboard.states;
+package gameboard.behaviors;
 
-import struct.Ply;
+import net.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;
-import net.ServerEvent;
-import struct.Hex;
-import openfl.geom.Point;
-import struct.IntPoint;
+import utils.AssetManager;
+import gameboard.states.DraggingState;
+import gameboard.states.NeutralState;
 
-class AnalysisDraggingState extends BaseDraggingState
+class AnalysisBehavior implements IBehavior 
 {
+    private var boardInstance:GameBoard;
     private var colorToMove:PieceColor;
 
-    private override function getNeutralState():BaseNeutralState
-    {
-        return new AnalysisNeutralState(boardInstance, colorToMove, cursorLocation);
-    }
-
-    public override function movePossible(from:IntPoint, to:IntPoint):Bool
-    {
+    public function handleNetEvent(event:ServerEvent):Void
+	{
+        //* Do nothing
+	}
+    
+    public function movePossible(from:IntPoint, to:IntPoint):Bool
+	{
         return Rules.possible(from, to, boardInstance.shownSituation.get);
     }
-
-    private override function onMoveChosen(ply:Ply)
-    {
+    
+    public function allowedToMove(piece:Piece):Bool
+	{
+        return piece.color == colorToMove;
+    }
+    
+    public function returnToCurrentOnLMB():Bool
+	{
+        return false;
+    }
+    
+    public function onMoveChosen(ply:Ply):Void
+	{
         var plyStr:String = ply.toNotation(boardInstance.shownSituation);
         var performedBy:PieceColor = boardInstance.shownSituation.turnColor;
         var revPly:ReversiblePly = ply.toReversible(boardInstance.shownSituation);
@@ -47,22 +57,23 @@ class AnalysisDraggingState extends BaseDraggingState
             boardInstance.emit(BranchingMove(plyStr, performedBy));
         }
 
-        boardInstance.state = getNeutralState();
+        colorToMove = opposite(colorToMove);
+        boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
+    }
+    
+    public function markersDisabled():Bool
+    {
+        return false;
     }
 
-    private override function getSelectedState(selectedHexLocation:IntPoint):BaseSelectedState
+    public function hoverDisabled():Bool
     {
-        return new AnalysisSelectedState(boardInstance, selectedHexLocation, colorToMove, cursorLocation);
+        return false;
     }
-
-    public override function handleNetEvent(event:ServerEvent)
+    
+    public function new(board:GameBoard, colorToMove:PieceColor)
     {
-        //* Do nothing
-    }
-
-    public function new(board:GameBoard, dragStartPosition:IntPoint, colorToMove:PieceColor, ?cursorLocation:IntPoint)
-    {
-        super(board, dragStartPosition, cursorLocation);
+        this.boardInstance = board;
         this.colorToMove = colorToMove;
     }
 }

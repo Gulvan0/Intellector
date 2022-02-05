@@ -14,8 +14,8 @@ function equal(p1:Null<IntPoint>, p2:Null<IntPoint>):Bool
 
 class IntPoint 
 {
-    public var i:Int;
-    public var j:Int;
+    public var i(default, null):Int;
+    public var j(default, null):Int;
 
     public static var allHexCoords:Array<IntPoint> = [for (i in 0...9) for (j in 0...(7 - i % 2)) new IntPoint(i, j)];
 

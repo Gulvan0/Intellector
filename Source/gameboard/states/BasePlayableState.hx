@@ -6,21 +6,6 @@ import net.ServerEvent;
 
 class BasePlayableState extends BaseState
 {
-    private function onMoveCanceled(departureCoords:IntPoint) 
-    {
-        throw "Should be overriden";
-    }
-
-    private function onMoveChosen(ply:Ply)
-    {
-        throw "Should be overriden";
-    }
-
-    public override function reactsToHover(location:IntPoint):Bool
-    {
-        return movePossible(selectedDepartureLocation, location);
-    }
-
     private function askMoveDetails(from:IntPoint, to:IntPoint) 
     {
         var departureHex:Hex = boardInstance.shownSituation.get(from);
@@ -33,16 +18,15 @@ class BasePlayableState extends BaseState
         var simplePly:Ply = Ply.construct(from, to);
         var chameleonPly:Ply = Ply.construct(from, to, destinationHex.type);
 
-        var onCanceled:Void->Void = onMoveCanceled.bind(from);
-        var onChameleonDecisionMade = (morph:Bool) -> {onMoveChosen(morph? chameleonPly : simplePly);};
-        var onPromotionSelected = (piece:PieceType) -> {onMoveChosen(Ply.construct(from, to, piece));};
+        var onChameleonDecisionMade = (morph:Bool) -> {boardInstance.behavior.onMoveChosen(morph? chameleonPly : simplePly);};
+        var onPromotionSelected = (piece:PieceType) -> {boardInstance.behavior.onMoveChosen(Ply.construct(from, to, piece));};
 
         if (promotionPossible)
-            Dialogs.promotionSelect(departureHex.color, onPromotionSelected, onCanceled);
+            Dialogs.promotionSelect(departureHex.color, onPromotionSelected, abortMove);
         else if (chameleonPossible)
-            Dialogs.chameleonConfirm(onChameleonDecisionMade, onCanceled);
+            Dialogs.chameleonConfirm(onChameleonDecisionMade, abortMove);
         else
-            onMoveChosen(simplePly);
+            boardInstance.behavior.onMoveChosen(simplePly);
     }
 
     public function new(board:GameBoard, ?cursorLocation:IntPoint)

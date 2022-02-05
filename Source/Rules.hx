@@ -33,6 +33,56 @@ class Rules
         return possibleFields(from, getHex).find(to.equals) != null;
     }
 
+    public static function premovePossible(from:IntPoint, to:IntPoint, departureHex:Hex):Bool
+    {
+        switch departureHex.type 
+        {
+            case Progressor:
+                var forwardDirections:Array<Direction> = departureHex.color == White? [U, UL, UR] : [D, DL, DR];
+                for (dir in forwardDirections)
+                    if (to.equals(getOneStepCoords(from.i, from.j, dir)))
+                        return true;
+                return false;
+
+            case Aggressor:
+                if (from.j == to.j)
+                    return (from.i - to.i) % 2 == 0 && from.i != to.i;
+                else if ((to.j - from.j) % 3 == 0)
+                    return Math.abs(to.j - from.j) / 3 == Math.abs(from.i - to.i) / 2;
+                else
+                    return Math.abs(to.j - from.j) % 3 == 1 + from.i % 2 && Math.floor(Math.abs(to.j - from.j) / 3) == (Math.abs(from.i - to.i) - 1) / 2;
+
+            case Dominator:
+                if (from.i == to.i)
+                    return true;
+                else if ((from.i - to.i) % 2 == 0)
+                    if (to.j - from.j <= 0)
+                        return to.j - from.j == -Math.floor(Math.abs(from.i - to.i) / 2);
+                    else
+                        return to.j - from.j == Math.ceil(Math.abs(from.i - to.i) / 2);
+                else
+                    if (to.j - from.j >= 0)
+                        return to.j - from.j == Math.floor(Math.abs(from.i - to.i) / 2);
+                    else
+                        return to.j - from.j == -Math.ceil(Math.abs(from.i - to.i) / 2);
+
+
+            case Liberator:
+                var lateralDirections:Array<Direction> = [U, UL, UR, D, DL, DR];
+                for (dir in lateralDirections)
+                    if (to.equals(getCoordsInDirection(from.i, from.j, dir, 2)))
+                        return true;
+                return false;
+
+            case Defensor, Intellector:
+                var lateralDirections:Array<Direction> = [U, UL, UR, D, DL, DR];
+                for (dir in lateralDirections)
+                    if (to.equals(getOneStepCoords(from.i, from.j, dir)))
+                        return true;
+                return false;
+        }
+    }
+
     public static function isCastle(ply:Ply, situation:Situation) 
     {
         var departure:Hex = situation.get(ply.from);

@@ -7,7 +7,12 @@ import net.ServerEvent;
 class BaseState
 {
     private var boardInstance:GameBoard;
-    private var cursorLocation:Null<IntPoint>;
+    public var cursorLocation(default, null):Null<IntPoint>;
+    
+    private function abortMove()
+    {
+        throw "Should be overriden";
+    }
 
     public function onLMBPressed(location:Null<IntPoint>)
     {
@@ -18,10 +23,10 @@ class BaseState
     {
         var newCursorLocation = boardInstance.posToIndexes(location);
 
-        if (equal(newCursorLocation, cursorLocation) || !boardInstance.plyHistory.isAtEnd())
+        if (equal(newCursorLocation, cursorLocation))
             return;
         
-        if (newCursorLocation != null && reactsToHover(newCursorLocation))
+        if (newCursorLocation != null && boardInstance.plyHistory.isAtEnd() && !boardInstance.behavior.hoverDisabled() && reactsToHover(newCursorLocation))
             boardInstance.getHex(newCursorLocation).showLayer(Hover);
 
         if (cursorLocation != null)
@@ -30,22 +35,12 @@ class BaseState
         cursorLocation = newCursorLocation;
     }
 
-    public function movePossible(from:IntPoint, to:IntPoint):Bool
-    {
-        throw "Should be overriden";
-    }
-
     public function reactsToHover(location:IntPoint):Bool
     {
         throw "Should be overriden";
     }
 
     public function onLMBReleased(location:Null<IntPoint>)
-    {
-        throw "Should be overriden";
-    }
-
-    public function handleNetEvent(event:ServerEvent)
     {
         throw "Should be overriden";
     }

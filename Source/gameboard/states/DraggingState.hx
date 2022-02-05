@@ -3,24 +3,21 @@ package gameboard.states;
 import openfl.geom.Point;
 import struct.IntPoint;
 
-class BaseDraggingState extends BasePlayableState
+class DraggingState extends BasePlayableState
 {
     private var dragStartLocation:IntPoint;
 
-    private function getNeutralState():BaseNeutralState
+    private override function abortMove()
     {
-        throw "To be overriden";
-    }
+        boardInstance.getPiece(dragStartLocation).stopDrag();
+        boardInstance.returnPieceToOriginalPosition(dragStartLocation);
 
-    private function getSelectedState(selectedHexLocation:IntPoint):BaseSelectedState
-    {
-        throw "To be overriden";
-    }
+        boardInstance.getHex(dragStartLocation).hideLayer(LMB);
+        if (cursorLocation != null)
+            boardInstance.getHex(cursorLocation).hideLayer(Hover);
 
-    private override function onMoveCanceled(departureCoords:IntPoint) 
-    {
-        boardInstance.returnPieceToOriginalPosition(departureCoords);
-        boardInstance.state = getNeutralState();
+        boardInstance.removeMarkers(dragStartLocation);
+        boardInstance.state = new NeutralState(boardInstance, cursorLocation);
     }
 
     public override function onLMBPressed(location:Null<IntPoint>)
@@ -30,9 +27,6 @@ class BaseDraggingState extends BasePlayableState
 
     public override function onLMBReleased(location:Null<IntPoint>)
     {
-        if (boardInstance.currentSituation.turnColor != playerColor)
-            return;
-
         var draggedPiece:Piece = boardInstance.getPiece(dragStartLocation);
         draggedPiece.stopDrag();
         boardInstance.getHex(dragStartLocation).hideLayer(LMB);
@@ -45,7 +39,7 @@ class BaseDraggingState extends BasePlayableState
             draggedPiece.x = newPosition.x;
             draggedPiece.y = newPosition.y;
             boardInstance.getHex(location).showLayer(LMB);
-            boardInstance.state = getSelectedState(location);
+            boardInstance.state = new SelectedState(boardInstance, location, cursorLocation);
         }
         else if (location != null && Rules.possible(dragStartLocation, location, boardInstance.shownSituation.get))
         {
@@ -55,8 +49,13 @@ class BaseDraggingState extends BasePlayableState
         else
         {
             boardInstance.removeMarkers(dragStartLocation);
-            onMoveCanceled();
+            abortMove();
         }
+    }
+
+    public override function reactsToHover(location:IntPoint):Bool
+    {
+        return boardInstance.behavior.movePossible(dragStartLocation, location);
     }
 
     public function new(board:GameBoard, dragStartPosition:IntPoint, ?cursorLocation:IntPoint)

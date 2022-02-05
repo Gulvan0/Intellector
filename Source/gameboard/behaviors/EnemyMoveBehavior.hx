@@ -1,22 +1,17 @@
-package gameboard.states;
+package gameboard.behaviors;
 
 import net.ServerEvent;
-import struct.Ply;
+import struct.ReversiblePly;
+import struct.PieceColor;
+import utils.AssetManager;
+import gameboard.states.DraggingState;
+import gameboard.states.NeutralState;
 
-class EnemyMoveNeutralState extends BaseNeutralState
+class EnemyMoveBehavior implements IBehavior 
 {
-    private final playerColor:PieceColor;
+    private var boardInstance:GameBoard;
+    private var playerColor:PieceColor;
     private var premoves:Array<Ply>;
-
-    private override function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
-    {
-        return new EnemyMoveDraggingState(boardInstance, dragDepartureLocation, playerColor, premoves, cursorLocation);
-    }
-
-    public override function reactsToHover(location:IntPoint):Bool
-    {
-        return boardInstance.shownSituation.get(location).color == playerColor;
-    }
 
     private function resetPremoves()
     {
@@ -36,12 +31,12 @@ class EnemyMoveNeutralState extends BaseNeutralState
 
         if (Lambda.empty(premoves))
         {
-            boardInstance.state = new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
+            boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
         }
         else if (!Rules.possible(premoves[0].from, premoves[0].to, boardInstance.currentSituation.get))
         {
             resetPremoves();
-            boardInstance.state = new PlayerMoveNeutralState(boardInstance, playerColor, cursorLocation);
+            boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
         }
         else
         {
@@ -63,26 +58,64 @@ class EnemyMoveNeutralState extends BaseNeutralState
         }
     }
 
-    public override function handleNetEvent(event:ServerEvent)
-    {
+    public function handleNetEvent(event:ServerEvent):Void
+	{
         switch event 
         {
             case Rollback(plysToUndo):
+                boardInstance.state.abortMove();
                 boardInstance.revertPlys(plysToUndo);
                 
             case GameEnded(winner_color, reason):
-                boardInstance.state = new SpectatorState(boardInstance, cursorLocation);
+                boardInstance.state.abortMove();
+                boardInstance.state = new StubState(boardInstance, boardInstance.state.cursorLocation);
 
             case Move(fromI, toI, fromJ, toJ, morphInto):
+                boardInstance.state.abortMove();
                 var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
                 handleOpponentMove(ply);
         }
+	}
+    
+    public function movePossible(from:IntPoint, to:IntPoint):Bool
+	{
+        return Rules.premovePossible(from, to, boardInstance.shownSituation.get(from));
+    }
+    
+    public function allowedToMove(piece:Piece):Bool
+	{
+        return piece.color == playerColor;
+    }
+    
+    public function returnToCurrentOnLMB():Bool
+	{
+        return true;
+    }
+    
+    public function onMoveChosen(ply:Ply):Void
+	{
+        //No premoveEnabled check because it is impossible to get here from the StubState
+        boardInstance.applyMoveTransposition(ply.toReversible());
+        boardInstance.getHex(ply.from).showLayer(Premove);
+        boardInstance.getHex(ply.to).showLayer(Premove);
+        premoves.push(ply);
+        boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
+    }
+    
+    public function markersDisabled():Bool
+    {
+        return false;
     }
 
-    public function new(board:GameBoard, playerColor:PieceColor, premoves:Array<Ply> = [], ?cursorLocation:IntPoint)
+    public function hoverDisabled():Bool
     {
-        super(board, cursorLocation);
+        return !Preferences.instance.premoveEnabled;
+    }
+    
+    public function new(board:GameBoard, playerColor:PieceColor)
+    {
+        this.boardInstance = board;
         this.playerColor = playerColor;
-        this.premoves = premoves;
+        this.premoves = [];
     }
 }

@@ -2,36 +2,28 @@ package gameboard.states;
 
 import struct.IntPoint;
 
-class BaseSelectedState extends BasePlayableState
+class SelectedState extends BasePlayableState
 {
     public var selectedDepartureLocation:IntPoint;
 
-    private function getNeutralState():BaseNeutralState
+    private override function abortMove()
     {
-        throw "To be overriden";
-    }
-
-    private function getDraggingState(dragDepartureLocation:IntPoint):BaseDraggingState
-    {
-        throw "To be overriden";
-    }
-
-    private override function onMoveCanceled(departureCoords:IntPoint) 
-    {
-        boardInstance.state = getNeutralState();
+        boardInstance.removeMarkers(selectedDepartureLocation);
+        boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
+        boardInstance.state = new NeutralState(boardInstance, cursorLocation);
     }
 
     public override function onLMBPressed(location:Null<IntPoint>)
     {
         var pressedDestinationPiece:Null<Piece> = boardInstance.getPiece(location);
 
-        removeMarkers(selectedDepartureLocation);
+        boardInstance.removeMarkers(selectedDepartureLocation);
         boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
 
         var selectedDeparturePiece:Null<Piece> = boardInstance.getPiece(selectedDepartureLocation);
         if (location == null || location.equals(selectedDepartureLocation))
         {
-            state = getNeutralState();
+            state = new NeutralState(boardInstance, cursorLocation);
         }
         else if (Rules.possible(selectedDepartureLocation, location, getHex))
         {
@@ -42,10 +34,16 @@ class BaseSelectedState extends BasePlayableState
         else if (alreadySelectedFigure.color == pressedFigure.color)
         {
             boardInstance.getHex(location).showLayer(LMB);
-            boardInstance.addMarkers(location);
+            if (!boardInstance.behavior.markersDisabled())
+                boardInstance.addMarkers(location);
             boardInstance.startPieceDragging(location);
-            boardInstance.state = getDraggingState(location);
+            boardInstance.state = new DraggingState(boardInstance, location, cursorLocation);
         }
+    }
+
+    public override function reactsToHover(location:IntPoint):Bool
+    {
+        return boardInstance.behavior.movePossible(selectedDepartureLocation, location);
     }
 
     public override function onLMBReleased(location:Null<IntPoint>)

@@ -1,18 +1,18 @@
 package gameboard;
 
+import gameboard.behaviors.IBehavior;
 import struct.IntPoint;
 import struct.Ply;
 import net.ServerEvent;
-import gameboard.states.PlayerMoveNeutralState;
 import struct.PieceColor;
 import gfx.utils.PlyScrollType;
 import openfl.events.MouseEvent;
 import gameboard.states.BaseState;
 import struct.Situation;
 
-enum GameBoardEvent //TODO: Emit in all states
+enum GameBoardEvent
 {
-    ContinuationMove(plyStr:String, performedBy:PieceColor);
+    ContinuationMove(plyStr:String, performedBy:PieceColor); //TODO: Emit ContinuationMove in all states
     SubsequentMove(plyStr:String, performedBy:PieceColor);
     BranchingMove(plyStr:String, performedBy:PieceColor);
     //TODO: add events for edit-type states
@@ -32,7 +32,9 @@ class GameBoard extends SelectableBoard
 {
     public var plyHistory:PlyHistory;
     public var currentSituation:Situation;
+
     public var state:BaseState;
+    public var behavior:IBehavior;
 
     private var suppressLMBHandler:Bool = false;
 
@@ -203,13 +205,14 @@ class GameBoard extends SelectableBoard
             obs.handleGameBoardEvent(e);
     }
 
-    public function new(situation:Situation, playerColor:PieceColor, startState:BaseState, ?orientationColor:PieceColor, hexSideLength:Float = 40) 
+    public function new(situation:Situation, playerColor:PieceColor, startState:BaseState, behavior:IBehavior, ?orientationColor:PieceColor, hexSideLength:Float = 40) 
     {
         super(situation, orientationColor == null? playerColor : orientationColor, hexSideLength, false);
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();
         this.state = startState;
+        this.behavior = behavior;
 
         addEventListener(Event.ADDED_TO_STAGE, initLMB);
     }    
