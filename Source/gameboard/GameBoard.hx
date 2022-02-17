@@ -1,5 +1,6 @@
 package gameboard;
 
+import struct.Hex;
 import gameboard.behaviors.IBehavior;
 import struct.IntPoint;
 import struct.Ply;
@@ -95,8 +96,7 @@ class GameBoard extends SelectableBoard
     {
         var piece = getPiece(pieceOriginalLocation);
         var origPosition = hexCoords(pieceOriginalLocation);
-        piece.x = origPosition.x;
-        piece.y = origPosition.y;
+        piece.dispose(origPosition);
     }
 
     /**
@@ -115,6 +115,17 @@ class GameBoard extends SelectableBoard
                 applyMoveTransposition(revPly);
             highlightMove([ply.from, ply.to]);
         }
+    }
+
+    /**For editor usage only**/
+    public function teleportPiece(from:IntPoint, to:IntPoint)
+    {
+        if (!shownSituation.get(to).isEmpty())
+            removeChild(getPiece(to));
+                
+        getPiece(from).dispose(hexCoords(to));
+        shownSituation.set(to, shownSituation.get(from));
+        shownSituation.set(from, Hex.empty());
     }
 
     private function home()
@@ -174,7 +185,7 @@ class GameBoard extends SelectableBoard
 
     public function handleNetEvent(event:ServerEvent)
     {
-        state.handleNetEvent(event);
+        behavior.handleNetEvent(event);
     }
 
     private function initLMB(e)

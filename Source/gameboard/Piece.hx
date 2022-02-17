@@ -1,5 +1,6 @@
 package gameboard;
 
+import openfl.geom.Point;
 import utils.AssetManager;
 import openfl.display.Bitmap;
 import struct.Hex;
@@ -14,6 +15,12 @@ class Piece extends Sprite
     public static function fromHex(hex:Hex):Piece
     {
         return new Piece(hex.type, hex.color);
+    }
+
+    public function dispose(pos:Point) 
+    {
+        x = pos.x;
+        y = pos.y;    
     }
 
     public function rescale(hexSideLength:Float) 

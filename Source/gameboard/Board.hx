@@ -61,6 +61,19 @@ class Board extends OffsettedSprite
         producePieces();
     }
 
+    public function setHexDirectly(location:IntPoint, hex:Hex)
+    {
+        if (hex.type == Intellector)
+        {
+            var oldIntellectorPosition:Null<IntPoint> = shownSituation.intellectorPos[hex.color];
+            removeChild(getPiece(oldIntellectorPosition));
+            pieces[oldIntellectorPosition.toScalar()] = null;
+            shownSituation.set(oldIntellectorPosition, Hex.empty());
+        }
+        producePiece(location, hex);
+        shownSituation.set(location, hex.copy());
+    }
+
     public function applyMoveTransposition(ply:ReversiblePly, backInTime:Bool = false)
     {
         for (transform in ply)
