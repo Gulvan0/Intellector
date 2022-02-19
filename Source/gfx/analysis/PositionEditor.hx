@@ -167,9 +167,12 @@ class PositionEditor extends VBox
         
         btn.toggle = true;
         btn.onClick = e -> {
-            pressedEditModeBtn.selected = false;
-            pressedEditModeBtn = btn;
-            eventHandler(EditModeChanged(mode));
+            if (!btn.selected)
+            {
+                pressedEditModeBtn.selected = false;
+                pressedEditModeBtn = btn;
+                eventHandler(EditModeChanged(mode));
+            }
         };
 
         if (mode == Move)

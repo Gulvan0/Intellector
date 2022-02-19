@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import dict.Phrase;
+import net.ServerEvent;
 import net.LoginManager;
 import Networker.OngoingBattleData;
 import js.Cookie;
@@ -14,12 +16,6 @@ import dict.Dictionary;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 import url.Utils;
-
-enum ServerEntranceType
-{
-	LogIn;
-	Register;
-}
 
 class SignIn extends Sprite
 {
@@ -54,40 +50,36 @@ class SignIn extends Sprite
 
 	private function onSignInPressed()
 	{
-		var onResults:String->Void = onEntranceResults.bind(LogIn, loginField.text, passField.text, rememberMe.selected);
-		LoginManager.signin(loginField.text, passField.text, onResults, onOngoingGame);
+		LoginManager.signin(loginField.text, passField.text);
 	}
 
 	private function onRegisterPressed()
 	{
-		var onResults:String->Void = onEntranceResults.bind(Register, loginField.text, passField.text, rememberMe.selected);
-		LoginManager.register(loginField.text, passField.text, onResults);
+		LoginManager.register(loginField.text, passField.text);
 	}
 
-	private function onEntranceResults(type:ServerEntranceType, login:String, password:String, remember:Bool, result:String)
+	private function onEntranceResults(success:Bool, failMessage:Phrase)
 	{
-		if (result == 'success')
+		if (success)
 		{
-			Utils.saveLoginDetails(login, password, !remember);
+			Utils.saveLoginDetails(!rememberMe.selected);
 			ScreenManager.instance.toMain();
 		}
 		else
-		{
-			if (type == LogIn)
-				displayLoginError(Dictionary.getPhrase(INVALID_PASSWORD));
-			else
-				displayLoginError(Dictionary.getPhrase(ALREADY_REGISTERED));
-		}
+			displayLoginError(Dictionary.getPhrase(failMessage));
 	}
 
-	//TODO: Rewrite
-	private function onOngoingGame(data:Dynamic) 
+	public function handleNetEvent(event:ServerEvent)
 	{
-		if (data.whiteLogin.toLowerCase() == LoginManager.login.toLowerCase())
-			data.whiteLogin = LoginManager.login;
-		else if (data.blackLogin.toLowerCase() == LoginManager.login.toLowerCase())
-			data.blackLogin = LoginManager.login;
-		ScreenManager.instance.toGameReconnect(data);
+		switch event 
+		{
+			case LoginResult(success):
+				onEntranceResults(success, INVALID_PASSWORD);
+			case RegisterResult(success):
+				onEntranceResults(success, ALREADY_REGISTERED);
+			case ReconnectionNeeded(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
+				ScreenManager.instance.toGameReconnect(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog);
+		}
 	}
 
     public function new() 

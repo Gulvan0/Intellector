@@ -1,5 +1,6 @@
 package gfx;
 
+import net.LoginManager;
 import struct.Situation;
 import struct.ReversiblePly;
 import gfx.components.gamefield.AnalysisCompound;
@@ -65,6 +66,18 @@ class ScreenManager extends Sprite
         addChild(changes);
     }
 
+    //TODO: Connect to Networker on startup
+    public function handleNetEvent(event:ServerEvent)
+    {
+        switch event 
+        {
+            case GameStarted(match_id, enemy, colour, startSecs, bonusSecs):
+                //TODO: Fill
+            case SpectationData(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
+                toSpectation(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog);
+        }
+    }
+
     //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
     public function toGameStart(data:Dynamic) 
     {
@@ -74,9 +87,9 @@ class ScreenManager extends Sprite
     }
 
     //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
-    public function toGameReconnect(data:Dynamic) 
+    public function toGameReconnect(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String) 
     {
-        var isGuest = Networker.login.startsWith("guest_");
+        var isGuest = Networker.login.startsWith("guest_"); //? Is it going to stay like this?
         var onReturnPressed = isGuest? Networker.dropConnection : toMain;
         toGameGeneric(data.match_id, GameCompound.buildActiveReconnect(data, onReturnPressed));
     }
@@ -129,14 +142,16 @@ class ScreenManager extends Sprite
         addChild(current);
     }
 
-    //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
-    public function toSpectation(data:Dynamic) 
+    public function toSpectation(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String) 
 	{
 		clear();
-        URLEditor.assignID(data.match_id);
+        URLEditor.assignID(match_id);
 
-        var spectatedLogin:String = data.requestedColor == 'white'? data.whiteLogin : data.blackLogin;
-        var game = GameCompound.buildSpectators(data, () -> 
+        var playerIsWhite:Bool = LoginManager.isPlayer(whiteLogin);
+        var spectatedLogin:String = playerIsWhite? whiteLogin : blackLogin;
+
+        //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
+        /*var game = GameCompound.buildSpectators(data, () -> 
         {
             Networker.stopSpectation(); 
             Networker.currentGameCompound = null;
@@ -154,7 +169,7 @@ class ScreenManager extends Sprite
             Networker.disableSpectationEvents();
             Networker.currentGameCompound.terminate(data);
         });
-        addChild(current);
+        addChild(current);*/
     }
     
     //TODO: Rewrite. Create and use corresponding screen instead of GameCompound

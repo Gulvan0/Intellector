@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import gameboard.states.NeutralState;
+import gameboard.behaviors.AnalysisBehavior;
 import js.Browser;
 import dict.Dictionary;
 import struct.PieceColor;
@@ -14,16 +16,11 @@ class Analysis extends Sprite
 
     private var exploredStudyID:Int;
 
-    //TODO: Add the same handler to board
     //TODO: Connect observers with observed
     public function handleRightPanelEvent(event:RightPanelEvent)
     {
         switch event 
         {
-            case ApplyChangesRequested:
-                //TODO: Fill (Think!). Do not forget to reset the variant and the variantView (correctly update it somehow)
-            case DiscardChangesRequested:
-                //TODO: Fill (Think!). We need to preserve the former variant and just move pieces on the gameboard
             case AnalyzePressed(color):
                 onAnalyzeRequested(color);
             case ExportSIPRequested:

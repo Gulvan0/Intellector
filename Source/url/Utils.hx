@@ -1,5 +1,6 @@
 package url;
 
+import net.LoginManager;
 import dict.Dictionary;
 import js.Browser;
 import js.html.URLSearchParams;
@@ -7,11 +8,12 @@ import js.Cookie;
 
 class Utils
 {
-    public static function saveLoginDetails(login:String, password:String, expirable:Bool = false) 
+
+    public static function saveLoginDetails(?login:String, ?password:String, expirable:Bool = false) 
     {
         var duration:Null<Int> = expirable? null : 60 * 60 * 24 * 365 * 5;
-        Cookie.set("saved_login", login, duration, "/");
-		Cookie.set("saved_password", password, duration, "/");
+        Cookie.set("saved_login", login == null? LoginManager.login : login, duration, "/");
+		Cookie.set("saved_password", password == null? LoginManager.password : password, duration, "/");
     }
 
     public static function removeLoginDetails() 

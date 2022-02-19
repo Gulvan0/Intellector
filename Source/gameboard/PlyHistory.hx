@@ -8,6 +8,12 @@ class PlyHistory
     private var revPlys:Array<ReversiblePly> = [];
     private var pointer:Int = 0;
 
+    public function clear()
+    {
+        revPlys = [];
+        pointer = 0;
+    }
+
     public function isAtBeginning():Bool
     {
         return pointer == 0;

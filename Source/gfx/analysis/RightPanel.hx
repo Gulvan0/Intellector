@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import gameboard.GameBoard.GameBoardEvent;
 import serialization.SituationDeserializer;
 import haxe.ui.core.Component;
 import gfx.analysis.BranchingTab.BranchingTabEvent;
@@ -15,6 +16,7 @@ import js.Browser;
 import dict.Phrase;
 import haxe.Timer;
 import struct.Situation;
+import struct.Variant;
 import analysis.AlphaBeta;
 import haxe.ui.styles.Style;
 import gfx.utils.PlyScrollType;
@@ -38,7 +40,7 @@ using utils.CallbackTools;
 
 enum RightPanelEvent
 {
-    BranchSelected(branch:Array<Ply>);
+    BranchSelected(branch:Array<Ply>, startingSituation:Situation);
     RevertNeeded(plyCnt:Int);
     ClearRequested;
     ResetRequested;
@@ -47,6 +49,7 @@ enum RightPanelEvent
     ApplyChangesRequested;
     DiscardChangesRequested;
     EditModeChanged(newEditMode:PosEditMode);
+    EditorEntered;
     ScrollBtnPressed(type:PlyScrollType);
     AnalyzePressed(color:PieceColor);
     ExportSIPRequested;
@@ -103,7 +106,7 @@ class RightPanel extends Sprite
                 emit(ScrollBtnPressed(type));
             case SetPositionPressed:
                 showPositionEditor();
-                emit(EditModeChanged(Move)); //TODO: Fire a different event instead. It should call GameBoard.highlightMove([]) & set EditMoveState to gameboard with a fallback situation
+                emit(EditorEntered);
         }
     }
 
@@ -111,16 +114,16 @@ class RightPanel extends Sprite
     {
         switch event 
         {
-            case BranchSelected(branch, plyStrArray, firstColorToMove):
+            case BranchSelected(branch, plyStrArray, startingSituation):
                 overviewTab.deprecateScore();
                 overviewTab.navigator.clear();
-                var color:PieceColor = firstColorToMove;
+                var color:PieceColor = startingSituation.turnColor;
                 for (plyStr in plyStrArray)
                 {
                     overviewTab.navigator.writePlyStr(plyStr, color);
                     color = opposite(color);
                 }
-                emit(BranchSelected(branch));
+                emit(BranchSelected(branch, startingSituation));
             case RevertNeeded(plyCnt):
                 overviewTab.navigator.revertPlys(plyCnt);
                 emit(RevertNeeded(plyCnt));
@@ -144,15 +147,26 @@ class RightPanel extends Sprite
             case TurnColorChanged(newTurnColor):
                 emit(TurnColorChanged(newTurnColor));
             case ApplyChangesPressed:
-                //TODO: Fill (Think!). Do not forget to reset the variant and the variantView (correctly update it somehow)
+                overviewTab.navigator.clear();
+                overviewTab.deprecateScore();
+                showControlTabs();
                 emit(ApplyChangesPressed);
             case DiscardChangesPressed:
-                //TODO: Fill (Think!). We need to preserve the former variant and just move pieces on the gameboard
+                showControlTabs();
                 emit(DiscardChangesPressed);
             case EditModeChanged(newEditMode):
-                
+                emit(EditModeChanged(newEditMode));
         }
-        //TODO: Add five more states to GameBoard: three FreeMove, Delete & Set
+    }
+
+    private function handleGameboardEvent(event:GameBoardEvent)
+    {
+        switch event
+        {
+            case SituationEdited(newSituation):
+                branchingTab.variant = new Variant(newSituation.copy());
+                branchingTab.variantView.clear();
+        }
     }
 
     public function showPositionEditor() 
@@ -168,12 +182,12 @@ class RightPanel extends Sprite
         controlTabs.visible = true;
     }
 
-    public function new() 
+    public function new(startingSituation:Situation) 
     {
         super();
 
         positionEditor = new PositionEditor();
-        controlTabs = createControlTabs();
+        controlTabs = createControlTabs(startingSituation);
         
         var fullBox:HBox = new HBox();
         fullBox.addComponent(positionEditor);
@@ -195,10 +209,10 @@ class RightPanel extends Sprite
         }, 20);
     }
 
-    private function createControlTabs():TabView
+    private function createControlTabs(startingSituation:Situation):TabView
     {
         overviewTab = new OverviewTab();
-        branchingTab = new BranchingTab(Preferences.instance.branchingTabType, 390, 360);
+        branchingTab = new BranchingTab(Preferences.instance.branchingTabType, startingSituation, 390, 360);
 
         var openingTeaserLabel:Label = new Label();
         openingTeaserLabel.customStyle = {fontSize: 20};

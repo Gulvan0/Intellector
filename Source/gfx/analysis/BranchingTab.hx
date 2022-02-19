@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import struct.Situation;
 import struct.Ply;
 import struct.Variant;
 import dict.Dictionary;
@@ -11,7 +12,7 @@ import openfl.display.Sprite;
 
 enum BranchingTabEvent
 {
-    BranchSelected(branch:Array<Ply>, plyStrArray:Array<String>, firstColorToMove:PieceColor);
+    BranchSelected(branch:Array<Ply>, plyStrArray:Array<String>, startingSituation:Situation);
     RevertNeeded(plyCnt:Int);
 }
 
@@ -49,7 +50,7 @@ class BranchingTab extends ScrollView
 
         var plys:Array<Ply> = variant.getBranchByPath(path);
         var plyStrs:Array<Ply> = Ply.plySequenceToNotation(plys, variant.startingSituation);
-        eventHandler(BranchSelected(plys, plyStrs, variant.startingSituation.turnColor));
+        eventHandler(BranchSelected(plys, plyStrs, variant.startingSituation));
     }
 
     private function onBranchRemove(path:Array<Int>)
@@ -82,12 +83,12 @@ class BranchingTab extends ScrollView
     }
 
     //390*360; 390 = PANEL_WIDTH - 10; 360 = ???, but self height = 463?! TODO: Experiment with sizes
-    public function new(type:BranchingTabType, innerContentWidth:Float, innerContentHeight:Float)
+    public function new(type:BranchingTabType, startingSituation:Situation, innerContentWidth:Float, innerContentHeight:Float)
     {
         super();
         this.innerContentWidth = innerContentWidth;
         this.innerContentHeight = innerContentHeight;
-        this.variant = new Variant();
+        this.variant = new Variant(startingSituation);
 
         backgroundSprite = Shapes.fillOnlyRect(innerContentWidth, innerContentHeight, 0xffffff);
         variantSprite = new Sprite();

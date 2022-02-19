@@ -2,7 +2,7 @@ package gameboard.behaviors;
 
 import net.ServerEvent;
 
-interface IBehavior //TODO: Add EditorFreeMoveBehavior
+interface IBehavior
 {
     public function handleNetEvent(event:ServerEvent):Void;
     public function movePossible(from:IntPoint, to:IntPoint):Bool;

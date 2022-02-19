@@ -1,25 +1,26 @@
 package net;
 
-import Networker.OngoingBattleData;
-
 class LoginManager
 {
     public static var login:String;
+    public static var password:String;
 
-    public static function signin(login:String, password:String, onPlainAnswer:String->Void, onOngoingGame:OngoingBattleData->Void) 
+    public static function signin(login:String, password:String) 
     {
         LoginManager.login = login;
-        Networker.onceOneOf([
-            'login_result' => onPlainAnswer,
-            'ongoing_game' => onOngoingGame
-        ]);
-        Networker.emitEvent('login', {login: login, password: password});
+        LoginManager.password = password;
+        Networker.emitEvent(Login(login, password));
     }
 
-    public static function register(login:String, password:String, onAnswer:String->Void) 
+    public static function register(login:String, password:String) 
     {
         LoginManager.login = login;
-        Networker.once('register_result', onAnswer);
-        Networker.emit('register', {login: login, password: password});
+        LoginManager.password = password;
+        Networker.emitEvent(Register(login, password));
+    }
+
+    public static function isPlayer(suspectedLogin:String)
+    {
+        return login.toLowerCase() == suspectedLogin.toLowerCase();
     }
 }

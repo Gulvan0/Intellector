@@ -1,6 +1,6 @@
 package net;
 
-//TODO: Don't forget to enable permanent direct challenge handler (also game_started?)
+//TODO: Change the implementation on the server
 enum ServerEvent
 {
     GameStarted(match_id:Int, enemy:String, colour:String, startSecs:Int, bonusSecs:Int); //Called when the game featuring player starts. Signals to draw the gameboard. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
@@ -28,6 +28,7 @@ enum ServerEvent
     
     LoginResult(success:Bool); //Answer to Login. Was the login successful
     RegisterResult(success:Bool); //Answer to Register. Was the registration successful
+    ReconnectionNeeded(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished live game
 
     Message(message:String); //New in-game player message
     SpectatorMessage(message:String); //New in-game spectator message

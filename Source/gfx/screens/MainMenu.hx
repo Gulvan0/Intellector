@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import net.ServerEvent;
 import struct.PieceColor;
 import haxe.ui.containers.VBox;
 import js.Browser;
@@ -37,7 +38,7 @@ class MainMenu extends Sprite
     private function onOpenChallenge(e) 
     {
         var onSpecified = (startSecs:Int, bonusSecs:Int, color:Null<PieceColor>) -> {
-            //Networker.sendOpenChallenge(startSecs, bonusSecs, color); //TODO: Replace
+            Networker.emitEvent(CreateOpenChallenge(startSecs, bonusSecs, color));
             ScreenManager.instance.toOpenChallengeHostingRoom(startSecs, bonusSecs, color);
         }
 
@@ -53,8 +54,8 @@ class MainMenu extends Sprite
     {
         var response = Browser.window.prompt(Dictionary.getPhrase(ENTER_SPECTATED));
 
-		//if (response != null)
-			//Networker.emitEvent(Spectate(response)), ScreenManager.instance.toSpectation); //TODO: Rewrite
+        if (response != null)
+            Networker.emitEvent(Spectate(response));
     }
 
     private function onSettings(e) 

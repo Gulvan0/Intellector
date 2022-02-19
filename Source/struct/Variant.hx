@@ -56,7 +56,7 @@ class Variant extends VariantNode
         return true;
     }
 
-    //TODO: Rewrite existing study data
+    //TODO: Rewrite existing study data files on the server to match new format
     public function serialize():String 
     {
         var serialized:String = "";

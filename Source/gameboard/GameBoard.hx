@@ -1,5 +1,12 @@
 package gameboard;
 
+import gameboard.behaviors.AnalysisBehavior;
+import gameboard.states.DirectSetState;
+import gameboard.behaviors.EditorFreeMoveBehavior;
+import gfx.analysis.PosEditMode;
+import gameboard.states.NeutralState;
+import gameboard.states.BasePlayableState;
+import gfx.analysis.RightPanel.RightPanelEvent;
 import struct.Hex;
 import gameboard.behaviors.IBehavior;
 import struct.IntPoint;
@@ -16,7 +23,8 @@ enum GameBoardEvent
     ContinuationMove(plyStr:String, performedBy:PieceColor); //TODO: Emit ContinuationMove in all states
     SubsequentMove(plyStr:String, performedBy:PieceColor);
     BranchingMove(plyStr:String, performedBy:PieceColor);
-    //TODO: add events for edit-type states
+    SituationEdited(newSituation:Situation);
+    //TODO: add events for edit-type states - are they needed?
 }
 
 interface IGameBoardObserver
@@ -56,10 +64,11 @@ class GameBoard extends SelectableBoard
 
         if (state.cursorLocation != null)
             getHex(state.cursorLocation).hideLayer(Hover);
-        if (Std.isOfType(state, PlayerMoveSelectedState))
+
+        if (Std.isOfType(state, BasePlayableState))
         {
-            getHex(cast(state, PlayerMoveSelectedState).selectedDepartureLocation).hideLayer(LMB);
-            state = new PlayerMoveNeutralState(this, state.cursorLocation);
+            state.abortMove();
+            state = new NeutralState(this, state.cursorLocation);
         }
 
         switch type 
@@ -167,6 +176,24 @@ class GameBoard extends SelectableBoard
         highlightMove(plyHistory.getLastMove().affectedCoords());
     } 
 
+    private function onEditModeChanged(newEditMode:PosEditMode)
+    {
+        state.abortMove();
+
+        switch newEditMode 
+        {
+            case Move:
+                state = new NeutralState(this, state.cursorLocation);
+                behavior = new EditorFreeMoveBehavior(this);
+            case Delete:
+                state = new DirectSetState(this, Hex.empty(), state.cursorLocation);
+                behavior = new AnalysisBehavior(this, shownSituation.turnColor);
+            case Set(type, color):
+                state = new DirectSetState(this, Hex.occupied(type, color), state.cursorLocation);
+                behavior = new AnalysisBehavior(this, shownSituation.turnColor);
+        }
+    }
+
     private function onLMBPressed(e:MouseEvent)
     {
         if (!suppressLMBHandler)
@@ -183,9 +210,58 @@ class GameBoard extends SelectableBoard
         state.onLMBReleased(posToIndexes(e.stageX - x, e.stageY - y));
     }
 
+    //TODO: Connect to Networker on creation (somewhere in OnlineGame screen)
     public function handleNetEvent(event:ServerEvent)
     {
         behavior.handleNetEvent(event);
+    }
+
+    private function rearrangeToSituation(situation:Situation)
+    {
+        removeArrowsAndSelections();
+        highlightMove([]);
+        setSituation(situation.copy());
+    }
+
+    //TODO: Connect observers with observed
+    public function handleRightPanelEvent(event:RightPanelEvent)
+    {
+        switch event 
+        {
+            case BranchSelected(branch, startingSituation):
+                var finalSituation = startingSituation.copy();
+                for (ply in branch)
+                    finalSituation = finalSituation.makeMove(ply);
+                rearrangeToSituation(finalSituation);
+            case RevertNeeded(plyCnt):
+                revertPlys(plyCnt);
+            case ClearRequested:
+                rearrangeToSituation(Situation.empty());
+            case ResetRequested:
+                rearrangeToSituation(currentSituation);
+            case ConstructSituationRequested(situation):
+                rearrangeToSituation(situation);
+            case TurnColorChanged(newTurnColor):
+                shownSituation.turnColor = newTurnColor;
+            case ApplyChangesRequested:
+                currentSituation = shownSituation.copy();
+                plyHistory.clear();
+                state = new NeutralState(this, state.cursorLocation);
+                behavior = new AnalysisBehavior(this, currentSituation.turnColor);
+                emit(SituationEdited(currentSituation));
+            case DiscardChangesRequested:
+                setSituation(currentSituation);
+                state = new NeutralState(this, state.cursorLocation);
+                behavior = new AnalysisBehavior(this, currentSituation.turnColor);
+            case EditModeChanged(newEditMode):
+                onEditModeChanged(newEditMode);
+            case EditorEntered:
+                removeArrowsAndSelections();
+                highlightMove([]);
+                onEditModeChanged(Move);
+            case ScrollBtnPressed(type):
+                applyScrolling(type);
+        }
     }
 
     private function initLMB(e)

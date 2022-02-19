@@ -13,7 +13,6 @@ import openfl.utils.Assets;
 import js.Browser;
 import haxe.Json;
 import hx.ws.WebSocket;
-import gfx.components.gamefield.GameCompound;
 
 using utils.CallbackTools;
 using StringTools;

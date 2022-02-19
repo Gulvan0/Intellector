@@ -38,7 +38,7 @@ class SelectableBoard extends Board
             getHex(destination).removeMarkers();
     }
 
-    private function onClick(e)
+    public function removeArrowsAndSelections()
     {
         for (index in redSelectedHexIndices)
             hexagons[index].hideLayer(RMB);
@@ -47,6 +47,11 @@ class SelectableBoard extends Board
 
         drawnArrows = [];
         redSelectedHexIndices = [];
+    }
+
+    private function onClick(e)
+    {
+        removeArrowsAndSelections();
     }
 
     private function onRightPress(e)

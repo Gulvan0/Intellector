@@ -61,6 +61,11 @@ class Board extends OffsettedSprite
         producePieces();
     }
 
+    public function clearPieces()
+    {
+        setSituation(Situation.empty());
+    }
+
     public function setHexDirectly(location:IntPoint, hex:Hex)
     {
         if (hex.type == Intellector)

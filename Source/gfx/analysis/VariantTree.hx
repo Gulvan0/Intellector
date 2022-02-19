@@ -28,6 +28,17 @@ class VariantTree extends Sprite
         }
     }
 
+    public function clear()
+    {
+        for (arrow in arrows)
+            removeChild(arrow);
+        for (node in nodes)
+            removeChild(node);
+        arrows = [];
+        nodes = [];
+        familyWidths = [];
+    }
+
     public function selectBranch(branch:Array<Int>)
     {
         deselectAll();
