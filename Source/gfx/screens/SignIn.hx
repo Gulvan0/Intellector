@@ -50,7 +50,7 @@ class SignIn extends Sprite
 
 	private function onSignInPressed()
 	{
-		LoginManager.signin(loginField.text, passField.text);
+		LoginManager.signin(loginField.text, passField.text, false);
 	}
 
 	private function onRegisterPressed()
@@ -61,10 +61,7 @@ class SignIn extends Sprite
 	private function onEntranceResults(success:Bool, failMessage:Phrase)
 	{
 		if (success)
-		{
 			Utils.saveLoginDetails(!rememberMe.selected);
-			ScreenManager.instance.toMain();
-		}
 		else
 			displayLoginError(Dictionary.getPhrase(failMessage));
 	}

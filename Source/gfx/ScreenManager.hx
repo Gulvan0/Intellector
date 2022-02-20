@@ -1,11 +1,10 @@
 package gfx;
 
+import gfx.screens.Screen;
 import net.LoginManager;
 import struct.Situation;
 import struct.ReversiblePly;
-import gfx.components.gamefield.AnalysisCompound;
 import gfx.components.Dialogs;
-import gfx.components.gamefield.GameCompound;
 import gfx.screens.PlayerProfile;
 import struct.PieceColor;
 import gfx.screens.MainMenu;
@@ -15,6 +14,7 @@ import gfx.screens.OpenChallengeHosting;
 import openfl.Assets;
 import gfx.screens.OpenChallengeJoining;
 import url.URLEditor;
+import url.Utils as URLUtils;
 import haxe.ui.components.Label;
 import gfx.screens.SignIn;
 import openfl.display.Sprite;
@@ -25,45 +25,38 @@ using StringTools;
 **/
 class ScreenManager extends Sprite
 {
-    public static var instance:ScreenManager;
+    private static var instance:ScreenManager;
 
-    public var current:Null<Sprite>;
-    private var changes:Label;
+    public var current:Null<Screen>;
 
-    private function clear() 
+    public function removeCurrentScreen()
     {
         if (current != null)
+        {
+            current.onClosed();
             removeChild(current);
-        removeChild(changes);
+        }
     }
 
-    public function toEmpty()
+    public static function toScreen(screen:Screen)
     {
-        clear();
+        instance.removeCurrentScreen();
+
+        URLEditor.setPath(screen.getURLPath());
+        instance.current = screen;
+        addChild(instance.current);
+        instance.current.onEntered();
+    }
+
+    public static function clearScreen()
+    {
+        instance.removeCurrentScreen();
         URLEditor.clear();
     }
 
-    public function toSignIn()
+    public static function navigateByURL(searchParams:String)
     {
-        clear();
-        URLEditor.clear();
-
-        current = new SignIn();
-        addChild(current);
-        addChild(changes);
-    }
-
-    public function toMain() 
-    {
-        clear();
-        URLEditor.clear();
-        Networker.disableIngameEvents();
-        Networker.disableSpectationEvents();
-        Networker.enableMainMenuEvents(toGameStart);
-        
-        current = new MainMenu();
-        addChild(current);
-        addChild(changes);
+        //TODO: Fill (you call it after logging in)
     }
 
     //TODO: Connect to Networker on startup
@@ -75,71 +68,54 @@ class ScreenManager extends Sprite
                 //TODO: Fill
             case SpectationData(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 toSpectation(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog);
+            case LoginResult(success):
+                if (success)
+                    if (LoginManager.wasLastSignInAuto())
+                        navigateByURL(Browser.location.search);
+                    else
+                        toScreen(new MainMenu());
         }
+    }
+    /*public function toMain() 
+    {
+        //TODO: To MainMenu init + rewrite
+        Networker.disableIngameEvents();
+        Networker.disableSpectationEvents();
+        Networker.enableMainMenuEvents(toGameStart);
     }
 
     //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
     public function toGameStart(data:Dynamic) 
     {
-        var isGuest = Networker.login.startsWith("guest_");
-        var onReturnPressed = isGuest? Networker.dropConnection : toMain;
         toGameGeneric(data.match_id, GameCompound.buildActive(data, onReturnPressed));
     }
 
     //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
     public function toGameReconnect(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String) 
     {
-        var isGuest = Networker.login.startsWith("guest_"); //? Is it going to stay like this?
-        var onReturnPressed = isGuest? Networker.dropConnection : toMain;
         toGameGeneric(data.match_id, GameCompound.buildActiveReconnect(data, onReturnPressed));
     }
 
     //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
     private function toGameGeneric(id:Int, game:GameCompound) 
     {
-        clear();
-        URLEditor.assignID(id);
-
+        //TODO: To OnlineGame init + rewrite
         current = game;
         Networker.currentGameCompound = game;
         Networker.disableMainMenuEvents();
 		Networker.enableIngameEvents(onGameEnded);
 
 		Assets.getSound("sounds/notify.mp3").play();
-        addChild(current);
-    }
-
-    public function toOpenChallengeHostingRoom(startSecs:Int, bonusSecs:Int, color:Null<PieceColor>) 
-    {
-        clear();
-        URLEditor.clear();
-        
-        current = new OpenChallengeHosting(startSecs, bonusSecs, color);
-        addChild(current);
-    }
-
-    //TODO: Rewrite. Pass ServerEvent constructor parameters
-    public function toOpenChallengeJoiningRoom(data:Dynamic) 
-    {
-        clear();
-        URLEditor.clear();
-        
-        current = new OpenChallengeJoining(data);
-        addChild(current);
     }
 
     //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
     public function toAnalysisBoard(onReturn:Void->Void, ?study:StudyOverview, ?situationSIP:String) 
     {
-        clear();
-        URLEditor.clear();
-        
         current = new AnalysisCompound(() ->
         {
             Networker.currentGameCompound = null;
 		    onReturn();
         }, study, situationSIP);
-        addChild(current);
     }
 
     public function toSpectation(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String) 
@@ -151,7 +127,7 @@ class ScreenManager extends Sprite
         var spectatedLogin:String = playerIsWhite? whiteLogin : blackLogin;
 
         //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
-        /*var game = GameCompound.buildSpectators(data, () -> 
+        var game = GameCompound.buildSpectators(data, () -> 
         {
             Networker.stopSpectation(); 
             Networker.currentGameCompound = null;
@@ -169,7 +145,7 @@ class ScreenManager extends Sprite
             Networker.disableSpectationEvents();
             Networker.currentGameCompound.terminate(data);
         });
-        addChild(current);*/
+        addChild(current);
     }
     
     //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
@@ -249,22 +225,10 @@ class ScreenManager extends Sprite
         else
 		    Dialogs.info(Dictionary.getPhrase(GAME_OVER) + resultMessage + explanation, Dictionary.getPhrase(GAME_ENDED));
 	}
-
+    */
     public function new() 
     {
         super();
         instance = this;
-
-        drawChanges();
-    }
-
-    //TODO: The approach to changelog should be reconsidered during the UI update
-    private function drawChanges() 
-    {
-        changes = new Label();
-		changes.htmlText = Changes.getFormatted();
-		changes.width = 300;
-		changes.x = 15;
-		changes.y = 10;
     }
 }

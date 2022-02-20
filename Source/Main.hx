@@ -4,14 +4,13 @@ import gameboard.Board;
 import haxe.ui.containers.Box;
 import gfx.components.SpriteWrapper;
 import utils.AssetManager;
-import gfx.components.gamefield.analysis.VariantTree;
 import struct.Ply;
 import struct.Variant;
 import haxe.ui.components.Link;
 import struct.Situation;
 import analysis.ZobristHashing;
 import analysis.PieceValues;
-import url.Utils;
+import url.Utils as URLUtils;
 import openings.OpeningTree;
 import dict.Dictionary;
 import haxe.ui.events.UIEvent;
@@ -55,15 +54,15 @@ class Main extends Sprite
 		//ScreenManager.instance.toAnalysisBoard(()->{});
 	}
 
-	/*private function onConnected()
+	private function onConnected()
 	{
-		if (Cookie.exists("saved_login") && Cookie.exists("saved_password"))
-			Networker.signin(Cookie.get("saved_login"), Cookie.get("saved_password"), onAutoLogin, onOngoingGame);
-		else 
-			onNoLogin();
+		if (URLUtils.hasLoginDetails())
+            LoginManager.signin(URLUtils.getLogin(), URLUtils.getPassword(), true);
+        else
+            throw "Unexpected situation for temporary code";
 	}
 
-	private function onNoLogin()
+	/*private function onNoLogin()
 	{
 		switch Utils.getShallowSection() 
 		{
