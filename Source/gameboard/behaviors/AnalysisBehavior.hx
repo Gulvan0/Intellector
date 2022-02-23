@@ -1,5 +1,7 @@
 package gameboard.behaviors;
 
+import struct.IntPoint;
+import struct.Ply;
 import net.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;

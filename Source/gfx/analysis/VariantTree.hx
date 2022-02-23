@@ -5,7 +5,7 @@ import openfl.geom.Point;
 import struct.Variant;
 import openfl.display.Sprite;
 
-class VariantTree extends Sprite 
+class VariantTree extends Sprite implements IVariantView
 {
     private static var BLOCK_INTERVAL_X:Float = 15;
     private static var BLOCK_INTERVAL_Y:Float = 30;
@@ -17,6 +17,8 @@ class VariantTree extends Sprite
     private var onBranchSelect:(nodeCode:Array<Int>)->Void;
     private var onBranchRemove:(nodeCode:Array<Int>)->Void;
 
+    private var selectedBranch:Array<Int> = [];
+
     private function deselectAll() 
     {
         var code:String = "";
@@ -26,6 +28,7 @@ class VariantTree extends Sprite
             arrows[code].unhighlight();
             code += ":";
         }
+        selectedBranch = [];
     }
 
     public function clear()
@@ -39,17 +42,18 @@ class VariantTree extends Sprite
         familyWidths = [];
     }
 
-    public function selectBranch(branch:Array<Int>)
+    public function selectBranch(branchToSelect:Array<Int>)
     {
         deselectAll();
 
         var code:String = "";
-        for (childNum in branch)
+        for (childNum in branchToSelect)
         {
             code += childNum;
             arrows[code].highlight();
             code += ":";
         }
+        selectedBranch = branchToSelect.copy();
     }
 
     private function remapKeys(renames:Map<String, String>)

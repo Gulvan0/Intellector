@@ -1,12 +1,13 @@
 package gameboard.states;
 
+import struct.IntPoint;
 import struct.Hex;
 
 class DirectSetState extends BaseState
 {
     private var prototypeHex:Hex;
 
-    private override function abortMove()
+    public override function abortMove()
     {
         //* Do nothing
     }

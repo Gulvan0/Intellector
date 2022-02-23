@@ -1,10 +1,10 @@
 package utils;
 
+import gfx.analysis.PosEditMode;
 import openfl.geom.Matrix;
 import struct.Ply;
 import struct.Situation;
 import struct.Hex;
-import gfx.components.gamefield.analysis.PosEditMode;
 import openfl.Assets;
 import openfl.display.BitmapData;
 import struct.PieceType;

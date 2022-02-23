@@ -9,7 +9,7 @@ class BaseState
     private var boardInstance:GameBoard;
     public var cursorLocation(default, null):Null<IntPoint>;
     
-    private function abortMove()
+    public function abortMove()
     {
         throw "Should be overriden";
     }
@@ -19,10 +19,8 @@ class BaseState
         throw "Should be overriden";
     }
 
-    public final function onMouseMoved(location:Null<IntPoint>)
+    public final function onMouseMoved(newCursorLocation:Null<IntPoint>)
     {
-        var newCursorLocation = boardInstance.posToIndexes(location);
-
         if (equal(newCursorLocation, cursorLocation))
             return;
         

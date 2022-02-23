@@ -3,7 +3,6 @@ package gfx.screens;
 import dict.Phrase;
 import net.ServerEvent;
 import net.LoginManager;
-import Networker.OngoingBattleData;
 import js.Cookie;
 import js.Browser;
 import haxe.Timer;
@@ -75,7 +74,9 @@ class SignIn extends Sprite
 			case RegisterResult(success):
 				onEntranceResults(success, ALREADY_REGISTERED);
 			case ReconnectionNeeded(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-				ScreenManager.instance.toGameReconnect(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog);
+				//TODO: Uncomment
+				//ScreenManager.toScreen(new OnlineGame(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog));
+			default:
 		}
 	}
 
@@ -119,25 +120,23 @@ class SignIn extends Sprite
 	{
 		var btns:HBox = new HBox();
 		btns.horizontalAlign = "center";
-		btns.addComponent(createBtn(LogIn));
-		btns.addComponent(createBtn(Register));
+		btns.addComponent(createBtn(SIGN_IN_BTN, onSignInPressed));
+		btns.addComponent(createBtn(REGISTER_BTN, onRegisterPressed));
 		return btns;
 	}
 	
-	private function createBtn(type:ServerEntranceType):Button
+	private function createBtn(phrase:Phrase, callback:Void->Void):Button
 	{
 		var btn = new Button();
-		btn.text = Dictionary.getPhrase(type == LogIn? SIGN_IN_BTN : REGISTER_BTN);
+		btn.text = Dictionary.getPhrase(phrase);
 		btn.width = menuWidth / 2 - 5;
 
 		btn.onClick = (e) -> 
 		{
 			if (loginField.text == "" || passField.text == "" || loginField.text == null || passField.text == null)
 				displayLoginError(Dictionary.getPhrase(SPECIFY_BOTH_REG_ERROR));
-			else if (type == LogIn)
-				onSignInPressed();
 			else
-				onRegisterPressed();
+				callback();
 		}
 
 		return btn;

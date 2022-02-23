@@ -6,7 +6,7 @@ class SelectedState extends BasePlayableState
 {
     public var selectedDepartureLocation:IntPoint;
 
-    private override function abortMove()
+    public override function abortMove()
     {
         boardInstance.removeMarkers(selectedDepartureLocation);
         boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
@@ -16,22 +16,22 @@ class SelectedState extends BasePlayableState
     public override function onLMBPressed(location:Null<IntPoint>)
     {
         var pressedDestinationPiece:Null<Piece> = boardInstance.getPiece(location);
+        var selectedDeparturePiece:Null<Piece> = boardInstance.getPiece(selectedDepartureLocation);
 
         boardInstance.removeMarkers(selectedDepartureLocation);
         boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
 
-        var selectedDeparturePiece:Null<Piece> = boardInstance.getPiece(selectedDepartureLocation);
         if (location == null || location.equals(selectedDepartureLocation))
         {
-            state = new NeutralState(boardInstance, cursorLocation);
+            boardInstance.state = new NeutralState(boardInstance, cursorLocation);
         }
-        else if (Rules.possible(selectedDepartureLocation, location, getHex))
+        else if (Rules.possible(selectedDepartureLocation, location, boardInstance.shownSituation.get))
         {
             if (cursorLocation != null)
                 boardInstance.getHex(cursorLocation).hideLayer(Hover);
-            askMoveDetails(dragStartLocation, location);
+            askMoveDetails(selectedDepartureLocation, location);
         }
-        else if (alreadySelectedFigure.color == pressedFigure.color)
+        else if (pressedDestinationPiece.color == selectedDeparturePiece.color)
         {
             boardInstance.getHex(location).showLayer(LMB);
             if (!boardInstance.behavior.markersDisabled())

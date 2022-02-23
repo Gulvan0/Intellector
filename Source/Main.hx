@@ -1,5 +1,6 @@
 package;
 
+import net.LoginManager;
 import gameboard.Board;
 import haxe.ui.containers.Box;
 import gfx.components.SpriteWrapper;
@@ -32,6 +33,7 @@ import openfl.system.Capabilities;
 import haxe.ui.Toolkit;
 import openfl.display.SimpleButton;
 import js.Browser;
+import tests.*;
 import openfl.display.Sprite;
 using StringTools;
 
@@ -48,9 +50,12 @@ class Main extends Sprite
 		ZobristHashing.init();
 		AssetManager.init();
 		Changes.initChangelog();
-		addChild(new Board(Situation.starting()));
+		var tests = new BoardTests();
+		addChild(tests);
+		tests.simple();
 		//addChild(new ScreenManager());
-		//Networker.connect(onConnected);
+		//Networker.onConnectionEstabilished = onConnected;
+		//Networker.connect();
 		//ScreenManager.instance.toAnalysisBoard(()->{});
 	}
 

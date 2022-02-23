@@ -1,8 +1,10 @@
 package gameboard.states;
 
+import struct.IntPoint;
+
 class NeutralState extends BasePlayableState
 {
-    private override function abortMove()
+    public override function abortMove()
     {
         //* Do nothing
     }
@@ -12,7 +14,10 @@ class NeutralState extends BasePlayableState
         var pressedPiece:Null<Piece> = boardInstance.getPiece(location);
 
         if (boardInstance.behavior.returnToCurrentOnLMB())
+        {
             boardInstance.applyScrolling(End);
+            return;
+        }
         
         if (pressedPiece == null || !boardInstance.behavior.allowedToMove(pressedPiece))
             return;

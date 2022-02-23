@@ -72,7 +72,7 @@ class PlyHistory
 
     public function dropSinceShown():Array<ReversiblePly>
     {
-        return revPlys.splice(pointer);
+        return revPlys = revPlys.slice(pointer);
     }
 
     public function dropLast(cnt:Int):Array<ReversiblePly>

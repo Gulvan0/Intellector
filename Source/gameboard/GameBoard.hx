@@ -1,5 +1,7 @@
 package gameboard;
 
+import openfl.events.Event;
+import struct.ReversiblePly;
 import gameboard.behaviors.AnalysisBehavior;
 import gameboard.states.DirectSetState;
 import gameboard.behaviors.EditorFreeMoveBehavior;
@@ -17,6 +19,7 @@ import gfx.utils.PlyScrollType;
 import openfl.events.MouseEvent;
 import gameboard.states.BaseState;
 import struct.Situation;
+using Lambda;
 
 enum GameBoardEvent
 {
@@ -115,7 +118,7 @@ class GameBoard extends SelectableBoard
     **/
     public function makeMove(ply:Ply, ?triggeredByPremove:Bool = false)
     {
-        var revPly:ReversiblePly = ply.toReversible();
+        var revPly:ReversiblePly = ply.toReversible(currentSituation);
         plyHistory.append(revPly);
         currentSituation = currentSituation.makeMove(ply);
         if (plyHistory.isAtEnd())
@@ -139,13 +142,13 @@ class GameBoard extends SelectableBoard
 
     private function home()
     {
-        var initalSituation:Situation = shownSituation.copy();
+        var initialSituation:Situation = shownSituation.copy();
         var modifiedHexes:Array<IntPoint> = [];
         var seq:Array<ReversiblePly> = plyHistory.home(); 
 
         for (ply in seq)
             for (transform in ply)
-                if (!modifiedHexes.has(transform.coords.equals))
+                if (!modifiedHexes.exists(transform.coords.equals))
                 {
                     initialSituation.set(transform.coords, transform.former.copy());
                     modifiedHexes.push(transform.coords);
@@ -242,7 +245,7 @@ class GameBoard extends SelectableBoard
             case ConstructSituationRequested(situation):
                 rearrangeToSituation(situation);
             case TurnColorChanged(newTurnColor):
-                shownSituation.turnColor = newTurnColor;
+                shownSituation.setTurnWithZobris(newTurnColor);
             case ApplyChangesRequested:
                 currentSituation = shownSituation.copy();
                 plyHistory.clear();
@@ -261,6 +264,7 @@ class GameBoard extends SelectableBoard
                 onEditModeChanged(Move);
             case ScrollBtnPressed(type):
                 applyScrolling(type);
+            default:
         }
     }
 

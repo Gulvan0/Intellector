@@ -1,19 +1,34 @@
 package gfx.screens;
 
+import net.LoginManager;
 import haxe.ui.components.Button;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.VBox;
 import dict.Dictionary;
 import js.Browser;
-import Networker.OpenChallengeData;
+import dict.Utils;
 import openfl.display.Sprite;
 
-class OpenChallengeJoining extends Sprite 
+class OpenChallengeJoining extends Screen 
 {
-    private static var boxWidth:Float = 800;
+	private static var boxWidth:Float = 800;
 
-	//TODO: Rewrite
-    public function new(data:Dynamic)
+	public override function onEntered()
+    {
+        //* Do nothing
+    }
+
+    public override function onClosed()
+    {
+        //* Do nothing
+    }
+
+    public override function getURLPath():String
+    {
+        return 'challenge';
+    }
+
+    public function new(challengeOwner:String, startSecs:Int, bonusSecs:Int, color:Null<String>)
     {
 		super();
         var joinMenu = new VBox();
@@ -21,7 +36,7 @@ class OpenChallengeJoining extends Sprite
 
 		var label = new haxe.ui.components.Label();
 		label.width = boxWidth;
-		label.text = Dictionary.isHostingAChallengeText(data);
+		label.text = Utils.isHostingAChallengeText(challengeOwner, startSecs, bonusSecs, color);
 		if (LoginManager.login == null)
 			label.text += Dictionary.getPhrase(WILL_BE_GUEST);
 		else
@@ -37,25 +52,11 @@ class OpenChallengeJoining extends Sprite
 		joinMenu.addComponent(joinButton);
 
 		joinButton.onClick = (e) -> {
-			Networker.emitEvent(AcceptOpenChallenge(data.challenger));
+			Networker.emitEvent(AcceptOpenChallenge(challengeOwner));
 		}
 
 		joinMenu.x = (Browser.window.innerWidth - boxWidth) / 2;
 		joinMenu.y = 100;
-		addChild(joinMenu);
-
-		var returnBtn = new Button();
-		returnBtn.width = 100;
-		returnBtn.text = Dictionary.getPhrase(RETURN);
-		returnBtn.onClick = (e) -> {
-			if (LoginManager.login != null)
-				ScreenManager.instance.toMain();
-			else
-				Networker.dropConnection();
-		};
-            
-        returnBtn.x = 10;
-	    returnBtn.y = 10;
-	    addChild(returnBtn);
+		content.addComponent(joinMenu);
     }
 }

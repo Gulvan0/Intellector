@@ -1,5 +1,6 @@
 package gfx.game;
 
+import net.LoginManager;
 import struct.PieceColor;
 import dict.Dictionary;
 import haxe.ui.components.HorizontalScroll;
@@ -42,12 +43,12 @@ class Chatbox extends Sprite
 
     public function onDisconnected(disconnectedColor:PieceColor) 
     {
-        appendLog(Dictionary.getColorName(disconnectedColor) + Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE));
+        appendLog(dict.Utils.getColorName(disconnectedColor) + Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE));
     }
 
     public function onReconnected(reconnectedColor:PieceColor) 
     {
-        appendLog(Dictionary.getColorName(reconnectedColor) + Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE));
+        appendLog(dict.Utils.getColorName(reconnectedColor) + Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE));
     }
 
     private function waitAndScroll() 
@@ -87,11 +88,11 @@ class Chatbox extends Sprite
 
                 if (text != "")
                 {
-                    Networker.sendMessage(text);
+                    Networker.emitEvent(Message(text));
                     if (isOwnerSpectator)
-                        appendSpectatorMessage(Networker.login, text);
+                        appendSpectatorMessage(LoginManager.login, text);
                     else 
-                        appendMessage(Networker.login, text);
+                        appendMessage(LoginManager.login, text);
                 }
             }
         }

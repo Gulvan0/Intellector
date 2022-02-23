@@ -1,7 +1,7 @@
 package dict;
 
+import gfx.game.GameInfoBox.Outcome;
 import Preferences.Markup;
-import gfx.components.gamefield.modules.GameInfoBox.Outcome;
 import gfx.screens.MainMenu.MainMenuButton;
 import struct.PieceColor;
 
@@ -146,183 +146,24 @@ class Dictionary
         STUDY_NAME_SELECTION_MESSAGE => ["Enter the name for your study", "Введите название студии"],
         EXPLORE_IN_ANALYSIS_BTN_TEXT => ["Explore on analysis board", "На доску анализа"],
         REMATCH => ["Rematch", "Реванш"],
-        ADD_TIME_BTN_TEXT => ["Add time", "Добавить время"]
+        ADD_TIME_BTN_TEXT => ["Add time", "Добавить время"],
+        INCOMING_CHALLENGE_TEXT => ["$0 wants to play with you ($1). Accept the challenge?", "$0 хочет с вами сыграть ($1). Принять вызов?"],
+        LANGUAGE_NAME => ["English", "Русский"]
     ];
 
-    public static function getPhrase(phrase:Phrase):String
+    public static function getPhrase(phrase:Phrase, ?substitutions:Array<String>):String
     {
-        return dict.get(phrase)[order.indexOf(Preferences.instance.language)];
+        var translations = dict.get(phrase);
+        var index = order.indexOf(Preferences.instance.language);
+        var translation = translations[index];
+        if (substitutions != null)
+            for (i in 0...substitutions.length)
+                StringTools.replace(translation, '$' + i, substitutions[i]);
+        return translation;
     }
 
-    public static function getLanguageName(lang:Language):String
+    public static function getLanguageName(lang:Language)
     {
-        return switch lang {
-            case EN: "English";
-            case RU: "Русский";
-        }
+        return dict.get(LANGUAGE_NAME)[order.indexOf(lang)];
     }
-
-    public static function getIncomingChallengeText(data):String
-    {
-        var timeControlStr = '${data.startSecs/60}+${data.bonusSecs/1}';
-        var colorSuffix:String = data.color == null? "" : ", " + getColorName(PieceColor.createByName(data.color));
-        var detailsStr = timeControlStr + colorSuffix;
-        return switch Preferences.instance.language 
-        {
-            case EN: '${data.caller} wants to play with you ($detailsStr). Accept the challenge?';
-            case RU: '${data.caller} хочет с вами сыграть ($detailsStr). Принять вызов?';
-        }
-    }
-
-    public static function getMainMenuBtnText(type:MainMenuButton):String
-    {
-        var phrase:Phrase = switch type 
-        {
-            case SendChallenge: SEND_CHALLENGE;
-            case OpenChallenge: OPEN_CHALLENGE_BTN;
-            case AnalysisBoard: ANALYSIS_BTN;
-            case Spectate: SPECTATE_BTN;
-            case Profile: PROFILE_BTN;
-            case Settings: SETTINGS_BTN;
-            case LogOut: LOG_OUT_BTN;
-        }
-        return Dictionary.getPhrase(phrase);
-    }
-
-    public static function getMarkupOptionText(type:Markup):String
-    {
-        var phrase:Phrase = switch type 
-        {
-            case None: SETTINGS_MARKUP_TYPE_NONE;
-            case Side: SETTINGS_MARKUP_TYPE_SIDE;
-            case Over: SETTINGS_MARKUP_TYPE_OVER;
-        }
-        return Dictionary.getPhrase(phrase);
-    }
-
-    public static function getGameOverExplanation(reason:String):String
-    {
-        var phrase:Phrase = switch reason
-		{
-			case 'mate': GAME_OVER_REASON_MATE;
-			case 'breakthrough': GAME_OVER_REASON_BREAKTHROUGH;
-			case 'timeout': GAME_OVER_REASON_TIMEOUT;
-			case 'resignation': GAME_OVER_REASON_RESIGN;
-			case 'abandon': GAME_OVER_REASON_DISCONNECT;
-			case 'threefoldrepetition': GAME_OVER_REASON_THREEFOLD;
-			case 'hundredmoverule': GAME_OVER_REASON_HUNDRED;
-            case 'drawagreement': GAME_OVER_REASON_AGREEMENT;
-            case 'abort': GAME_OVER_REASON_ABORT;
-			default: GAME_OVER_REASON_MATE;
-		};
-        return Dictionary.getPhrase(phrase);
-    }
-
-    public static function getMatchlistResultText(winner:Null<PieceColor>, outcome:Null<Outcome>) 
-    {
-        return getMatchlistWinnerText(winner) + " (" + getMatchlistOutcomeText(outcome) + ")";
-    }
-
-    private static function getMatchlistWinnerText(color:Null<PieceColor>) 
-    {
-        if (color == null)
-            return switch Preferences.instance.language 
-            {
-                case EN: "Draw";
-                case RU: "Ничья";
-            }
-        else
-            return getColorName(color) + switch Preferences.instance.language 
-            {
-                case EN: " won";
-                case RU: " победили";
-            }
-    }
-
-    private static function getMatchlistOutcomeText(outcome:Null<Outcome>) 
-    {
-        switch Preferences.instance.language 
-        {
-            case EN: 
-                return switch outcome 
-                {
-                    case Mate: "Mate";
-                    case Breakthrough: "Breakthrough";
-                    case Resign: "Resignation";
-                    case Abandon: "Abandon";
-                    case DrawAgreement: "Agreement";
-                    case Repetition: "Threefold repetition";
-                    case NoProgress: "100-move rule";
-                    case Timeout: "Time out";
-                    case Abort: "Aborted";
-                    case null: "Unknown reason";
-                };
-            case RU: 
-                return switch outcome 
-                {
-                    case Mate: "Мат";
-                    case Breakthrough: "Добегание";
-                    case Resign: "Оппонент сдался";
-                    case Abandon: "Оппонент покинул игру";
-                    case DrawAgreement: "По согласию";
-                    case Repetition: "По троекратному повторению";
-                    case NoProgress: "По правилу 100 ходов";
-                    case Timeout: "Вышло время";
-                    case Abort: "Игра прервана";
-                    case null: "Неизвестная причина";
-                };
-        }
-    }
-
-    public static function getColorName(color:PieceColor) 
-    {
-        return switch Preferences.instance.language 
-        {
-            case EN: color.getName();
-            case RU: color == White? "Белые" : "Черные";
-        }
-    }
-
-    public static function getGameOverChatMessage(winnerColor:Null<PieceColor>, reason:String):String
-    {
-        return switch reason
-		{
-			case 'mate': getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
-			case 'breakthrough': getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
-			case 'timeout': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_TIMEOUT);
-			case 'resignation': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_RESIGN);
-            case 'abandon': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_DISCONNECT);
-            case 'abort': Dictionary.getPhrase(GAME_OVER_MESSAGE_ABORT);
-			default: Dictionary.getPhrase(GAME_OVER_MESSAGE_DRAW);
-        };
-    }
-
-    public static function challengeByText(login:String, start:Int, bonus:Int, color:Null<PieceColor>):String
-    {
-        var timeControlStr = '${start/60}+$bonus';
-        var colorStr:String = color == null? getPhrase(COLOR_RANDOM) : getColorName(color);
-        return switch Preferences.instance.language {
-            case EN: 'Challenge by $login\n$timeControlStr ($login plays as $colorStr)\nShare the link to invite your opponent:';
-            case RU: 'Вызов $login\n$timeControlStr (Цвет $login: $colorStr)\nОтправьте эту ссылку-приглашение противнику:';
-        }
-    }
-
-    public static function isHostingAChallengeText(data):String
-    {
-        var timeControlStr = '${data.startSecs/60}+${data.bonusSecs/1}';
-        var colorSuffix:String = data.color == null? "" : ", " + getColorName(PieceColor.createByName(data.color));
-        var detailsStr = timeControlStr + colorSuffix;
-        return switch Preferences.instance.language {
-            case EN: '${data.challenger} is hosting a challenge ($detailsStr). First one to accept it will become an opponent\n';
-            case RU: '${data.challenger} вызывает на бой ($detailsStr). Первый, кто примет вызов, станет противником\n';
-        }
-    }
-
-    public static function getAnalysisTurnColorSelectLabel(color:PieceColor):String 
-    {
-		return switch Preferences.instance.language {
-            case EN: color == White? "White to move" : "Black to move";
-            case RU: color == White? "Ход белых" : "Ход черных";
-        }
-	}
 }

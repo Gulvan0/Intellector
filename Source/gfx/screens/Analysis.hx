@@ -1,5 +1,8 @@
 package gfx.screens;
 
+import haxe.Timer;
+import gfx.components.Dialogs;
+import struct.Variant;
 import gameboard.states.NeutralState;
 import gameboard.behaviors.AnalysisBehavior;
 import js.Browser;
@@ -9,12 +12,27 @@ import gfx.analysis.RightPanel;
 import gameboard.GameBoard;
 import openfl.display.Sprite;
 
-class Analysis extends Sprite
+class Analysis extends Screen
 {
     private var board:GameBoard;
     private var rightPanel:RightPanel;
 
     private var exploredStudyID:Int;
+
+    public override function onEntered()
+    {
+        //* Do nothing
+    }
+
+    public override function onClosed()
+    {
+        //* Do nothing
+    }
+
+    public override function getURLPath():String
+    {
+        return "analysis";
+    }
 
     //TODO: Connect observers with observed
     public function handleRightPanelEvent(event:RightPanelEvent)
@@ -29,6 +47,7 @@ class Analysis extends Sprite
                 onExportStudyRequested(variant);
             case InitializationFinished:
                 //TODO: Rewrite onReadyStudy & onReadyExplore and place it there
+            default:
         }
     }
 
@@ -84,6 +103,6 @@ class Analysis extends Sprite
 
     public function new()
     {
-
+        super();
     }
 }

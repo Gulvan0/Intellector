@@ -1,9 +1,9 @@
 package gfx.components;
 
+import gfx.main.ChallengeParamsDialog;
 import haxe.ui.components.Image;
 import openfl.events.Event;
 import utils.AssetManager;
-import gfx.components.main.ChallengeParamsDialog;
 import dict.Phrase;
 import haxe.ui.components.OptionBox;
 import dict.Dictionary;

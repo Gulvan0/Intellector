@@ -42,15 +42,15 @@ class GameInfoBox extends Sprite
     {
         resolutionText = switch outcome 
         {
-            case Mate: Dictionary.getPhrase(RESOLUTION_MATE) + ' • ' + Dictionary.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
-            case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH) + ' • ' + Dictionary.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
-            case Resign: Dictionary.getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_RESIGN);
+            case Mate: Dictionary.getPhrase(RESOLUTION_MATE) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
+            case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
+            case Resign: dict.Utils.getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_RESIGN);
             case Abort: Dictionary.getPhrase(RESOLUTION_ABORT);
-            case Abandon: Dictionary.getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_DISCONNECT);
+            case Abandon: dict.Utils.getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_DISCONNECT);
             case DrawAgreement: Dictionary.getPhrase(RESOLUTION_AGREEMENT);
             case Repetition: Dictionary.getPhrase(RESOLUTION_REPETITON);
             case NoProgress: Dictionary.getPhrase(RESOLUTION_HUNDRED);
-            case Timeout: Dictionary.getPhrase(RESOLUTION_TIMEOUT) + ' • ' + Dictionary.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
+            case Timeout: Dictionary.getPhrase(RESOLUTION_TIMEOUT) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
         }
         reconstructShortInfo();
     }

@@ -2,25 +2,25 @@ package net;
 
 class Handler 
 {
-    private var eventHandlers:Map<String, Dynamic->Void>;
+    private var eventHandlers:Map<ServerEvent, Array<Dynamic>->Void>;
     public var disposable(default, null):Bool;
 
     public function processEvent(event:ServerEvent):Bool
     {
-        var handler = eventHandlers.get(event.getName());
+        var handler = eventHandlers.get(event);
         if (handler != null)
-            handler(event.getParameters()[0]);
+            handler(event.getParameters());
         return handler != null;
     }
 
-    public function assignHandler(event:ServerEvent, handler:Dynamic->Void) 
+    public function assignHandler(event:ServerEvent, handler:Array<Dynamic>->Void) 
     {
-        eventHandlers.set(event.getName(), handler);
+        eventHandlers.set(event, handler);
     }
 
-    public function new(disposable:Bool, ?handlers:Map<ServerEvent, Dynamic->Void> = []) 
+    public function new(disposable:Bool, ?handlers:Map<ServerEvent, Array<Dynamic>->Void>) 
     {
         this.disposable = disposable;
-        this.eventHandlers = handlers;
+        this.eventHandlers = handlers == null? [] : handlers;
     }    
 }

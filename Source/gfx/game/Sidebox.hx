@@ -1,9 +1,9 @@
 package gfx.game;
 
-import gfx.components.gamefield.common.TimeLeftLabel;
+import gfx.common.TimeLeftLabel;
 import dict.Phrase;
 import gfx.utils.PlyScrollType;
-import gfx.components.gamefield.common.MoveNavigator;
+import gfx.common.MoveNavigator;
 import haxe.ui.components.Button;
 import haxe.ui.util.Color;
 import dict.Dictionary;
@@ -251,7 +251,7 @@ class Sidebox extends Sprite
         var confirmed = Browser.window.confirm(resignConfirmationMessage);
 
 		if (confirmed)
-			Networker.emit("resign", {});
+			Networker.emitEvent(Resign);
     }
 
     //===========================================================================================================================================================
@@ -267,10 +267,10 @@ class Sidebox extends Sprite
         resignAndDraw.addComponent(offerDrawBtn);
         resignAndDraw.addComponent(cancelDrawBtn);
         
-        addTimeBtn = constructBtn(FULL_BUTTON_WIDTH, ADD_TIME_BTN_TEXT,  (e) -> {Networker.addTime();});
+        addTimeBtn = constructBtn(FULL_BUTTON_WIDTH, ADD_TIME_BTN_TEXT,  (e) -> {Networker.emitEvent(AddTime);});
         offerTakebackBtn = constructBtn(FULL_BUTTON_WIDTH, TAKEBACK_BTN_TEXT, (e) -> {onOfferTakebackPressed();});
         cancelTakebackBtn = constructBtn(FULL_BUTTON_WIDTH, CANCEL_TAKEBACK_BTN_TEXT, (e) -> {onCancelTakebackPressed();}, false);
-        rematchBtn = constructBtn(FULL_BUTTON_WIDTH, REMATCH,  (e) -> {Networker.sendChallenge(opponentLogin, startSecs, secsPerTurn, playerIsWhite? Black : White);}, false);
+        rematchBtn = constructBtn(FULL_BUTTON_WIDTH, REMATCH,  (e) -> {Networker.emitEvent(CreateDirectChallenge(opponentLogin, startSecs, secsPerTurn, playerIsWhite? "b" : "w"));}, false); //TODO: Check whether these values are expected
         
         container.addComponent(resignAndDraw);
 		container.addComponent(addTimeBtn);

@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import net.EventProcessingQueue.INetObserver;
+import net.ServerEvent;
 import utils.CallbackTools;
 import haxe.ui.containers.HBox;
 import gfx.components.Shapes;
@@ -7,7 +9,6 @@ import haxe.Json;
 import haxe.ui.components.Link;
 import js.Browser;
 import haxe.ui.containers.ScrollView;
-import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import haxe.ui.components.Button;
 import url.URLEditor;
@@ -42,102 +43,139 @@ typedef StudyData =
     var variantStr:String;
 }
 
-class PlayerProfile extends Sprite
+class PlayerProfile extends Screen implements INetObserver
 {
     private var profileOwnerLogin:String;
 
     private var gamesBox:VBox;
     private var studiesBox:VBox;
 
+    private var gamesPrevBtn:Button;
+    private var gamesNextBtn:Button;
+    private var studiesPrevBtn:Button;
+    private var studieNextBtn:Button;
+
+    private var gamelistComponents:Array<Component> = [];
+    private var studylistComponents:Array<Component> = [];
+
+    private var requestedGameID:Int;
+
     private var gamePaginationAfter:Int = 0;
     private var gamePaginationPageSize:Int = 20;
     private var studyPaginationAfter:Int = 0;
     private var studyPaginationPageSize:Int = 20;
 
+    public function handleNetEvent(event:ServerEvent)
+    {
+        switch event 
+        {
+            case GameIsOver(log):
+                //TODO: ScreenManager.toRevisit(requestedGameID, log) 
+            case GamesList(listStr, hasNext, hasPrev):
+                populateGames(listStr);
+                gamesPrevBtn.disabled = !hasPrev;
+                gamesNextBtn.disabled = !hasNext;
+            case StudiesList(listStr, hasNext, hasPrev):
+                populateStudies(listStr);
+                studiesPrevBtn.disabled = !hasPrev;
+                studieNextBtn.disabled = !hasNext;
+            case PlayerNotFound:
+                ScreenManager.toScreen(new MainMenu());
+                Browser.window.alert(Dictionary.getPhrase(PLAYER_NOT_FOUND));
+            default:
+        }
+    }
+
+    public override function onEntered()
+    {
+        Networker.eventQueue.addObserver(this);
+        Networker.emitEvent(GetPlayerGames(profileOwnerLogin, gamePaginationAfter, gamePaginationPageSize));
+        Networker.emitEvent(GetPlayerStudies(profileOwnerLogin, studyPaginationAfter, studyPaginationPageSize));
+    }
+
+    public override function onClosed()
+    {
+        Networker.eventQueue.removeObserser(this);
+    }
+
+    public override function getURLPath():String
+    {
+        return 'player/$profileOwnerLogin';
+    }
+
     private function onGamesPrev(e) 
     {
-        if (gamePaginationAfter < gamePaginationPageSize)
-            return;
-        
-        var nextAfter:Int = gamePaginationAfter - gamePaginationPageSize;
-        Networker.getGames(profileOwnerLogin, nextAfter, gamePaginationPageSize, listStr -> {
-            if (listStr.length > 2)
-            {
-                populateGames(listStr);
-                gamePaginationAfter = nextAfter;
-            }
-        }, () -> {});
+        gamePaginationAfter -= gamePaginationPageSize;
+        Networker.emitEvent(GetPlayerGames(profileOwnerLogin, gamePaginationAfter, gamePaginationPageSize));
     }
 
     private function onGamesNext(e) 
     {
-        var nextAfter:Int = gamePaginationAfter + gamePaginationPageSize;
-        Networker.getGames(profileOwnerLogin, nextAfter, gamePaginationPageSize, listStr -> {
-            if (listStr.length > 2)
-            {
-                populateGames(listStr);
-                gamePaginationAfter = nextAfter;
-            }
-        }, () -> {});
+        gamePaginationAfter += gamePaginationPageSize;
+        Networker.emitEvent(GetPlayerGames(profileOwnerLogin, gamePaginationAfter, gamePaginationPageSize));
     }
 
     private function onStudiesPrev(e) 
     {
-        if (studyPaginationAfter < studyPaginationPageSize)
-            return;
-        
-        var nextAfter:Int = studyPaginationAfter - studyPaginationPageSize;
-        Networker.getGames(profileOwnerLogin, nextAfter, studyPaginationPageSize, listStr -> {
-            if (listStr.length > 2)
-            {
-                populateStudies(listStr);
-                studyPaginationAfter = nextAfter;
-            }
-        }, () -> {});
+        studyPaginationAfter -= studyPaginationPageSize;
+        Networker.emitEvent(GetPlayerStudies(profileOwnerLogin, studyPaginationAfter, studyPaginationPageSize));
     }
 
     private function onStudiesNext(e) 
     {
-        var nextAfter:Int = studyPaginationAfter + studyPaginationPageSize;
-        Networker.getGames(profileOwnerLogin, nextAfter, studyPaginationPageSize, listStr -> {
-            if (listStr.length > 2)
-            {
-                populateStudies(listStr);
-                studyPaginationAfter = nextAfter;
-            }
-        }, () -> {});
+        studyPaginationAfter += studyPaginationPageSize;
+        Networker.emitEvent(GetPlayerStudies(profileOwnerLogin, studyPaginationAfter, studyPaginationPageSize));
     }
 
     public function populateGames(gamelistStr:String) 
     {
-        gamesBox.removeAllComponents();
-        createGamesHeader();
-
         var gamelist:Array<GameOverview> = Json.parse(gamelistStr);
+
+        if (Lambda.empty(gamelist))
+            return;
+
+        for (comp in gamelistComponents)
+            gamesBox.removeComponent(comp);
+        gamelistComponents = [];
+
         for (overview in gamelist)
         {
             var winner = GameLogDeserializer.decodeColor(overview.winnerColorLetter);
             var outcome = GameLogDeserializer.decodeOutcome(overview.outcomeCode);
-            var text = overview.id + '. ${overview.whiteLogin} vs ${overview.blackLogin} • ' + Dictionary.getMatchlistResultText(winner, outcome);
+            var text = overview.id + '. ${overview.whiteLogin} vs ${overview.blackLogin} • ' + dict.Utils.getMatchlistResultText(winner, outcome);
 
             var link:Link = gameLink(text, overview.id);
             gamesBox.addComponent(link);
-            gamesBox.addComponent(Shapes.vSpacer(4));
+            gamelistComponents.push(link);
+
+            var spacer = Shapes.vSpacer(4);
+            gamesBox.addComponent(spacer);
+            gamelistComponents.push(spacer);
         }
     }
 
     public function populateStudies(studylistStr:String) 
     {
-        studiesBox.removeAllComponents();
-        createStudiesHeader();
-
         var studylist:Array<StudyOverview> = Json.parse(studylistStr);
+
+        if (Lambda.empty(studylist))
+            return;
+
+        for (comp in studylistComponents)
+            studiesBox.removeComponent(comp);
+        studylistComponents = [];
+
         for (overview in studylist)
         {
             var text:String = overview.id + ". " + overview.data.name;
+
             var link:Link = studyLink(text, overview);
             studiesBox.addComponent(link);
-            studiesBox.addComponent(Shapes.vSpacer(4));
+            studylistComponents.push(link);
+
+            var spacer = Shapes.vSpacer(4);
+            studiesBox.addComponent(spacer);
+            studylistComponents.push(spacer);
         }
     }
 
@@ -148,20 +186,20 @@ class PlayerProfile extends Sprite
         gamesHeader.customStyle = {fontSize: 18, fontItalic: true};
         gamesHeader.horizontalAlign = 'center';
 
-        var lBtn:Button = new Button();
-        lBtn.text = "◄";
-        lBtn.width = 100;
-        lBtn.onClick = onGamesPrev;
+        gamesPrevBtn = new Button();
+        gamesPrevBtn.text = "◄";
+        gamesPrevBtn.width = 100;
+        gamesPrevBtn.onClick = onGamesPrev;
 
-        var rBtn:Button = new Button();
-        rBtn.text = "►";
-        rBtn.width = 100;
-        rBtn.onClick = onGamesNext;
+        gamesNextBtn = new Button();
+        gamesNextBtn.text = "►";
+        gamesNextBtn.width = 100;
+        gamesNextBtn.onClick = onGamesNext;
 
         var gamesControls:HBox = new HBox();
         gamesControls.horizontalAlign = 'center';
-        gamesControls.addComponent(lBtn);
-        gamesControls.addComponent(rBtn);
+        gamesControls.addComponent(gamesPrevBtn);
+        gamesControls.addComponent(gamesNextBtn);
 
         gamesBox.addComponent(gamesHeader);
         gamesBox.addComponent(gamesControls);
@@ -174,26 +212,26 @@ class PlayerProfile extends Sprite
         studiesHeader.customStyle = {fontSize: 18, fontItalic: true};
         studiesHeader.horizontalAlign = 'center';
 
-        var lBtn2:Button = new Button();
-        lBtn2.text = "◄";
-        lBtn2.width = 100;
-        lBtn2.onClick = onStudiesPrev;
+        studiesPrevBtn = new Button();
+        studiesPrevBtn.text = "◄";
+        studiesPrevBtn.width = 100;
+        studiesPrevBtn.onClick = onStudiesPrev;
 
-        var rBtn2:Button = new Button();
-        rBtn2.text = "►";
-        rBtn2.width = 100;
-        rBtn2.onClick = onStudiesNext;
+        studieNextBtn = new Button();
+        studieNextBtn.text = "►";
+        studieNextBtn.width = 100;
+        studieNextBtn.onClick = onStudiesNext;
 
         var studiesControls:HBox = new HBox();
         studiesControls.horizontalAlign = 'center';
-        studiesControls.addComponent(lBtn2);
-        studiesControls.addComponent(rBtn2);
+        studiesControls.addComponent(studiesPrevBtn);
+        studiesControls.addComponent(studieNextBtn);
 
         studiesBox.addComponent(studiesHeader);
         studiesBox.addComponent(studiesControls);
     }
 
-    public function new(playerLogin:String, onReturn:Void->Void) 
+    public function new(playerLogin:String) 
     {
         super();
         profileOwnerLogin = playerLogin;
@@ -223,32 +261,23 @@ class PlayerProfile extends Sprite
         mainBox.addComponent(loginLabel);
         mainBox.addComponent(Shapes.vSpacer(60));
         mainBox.addComponent(contentHBox);
-        addChild(mainBox);
-
-        var returnBtn = new Button();
-		returnBtn.width = 100;
-		returnBtn.text = Dictionary.getPhrase(RETURN);
-		returnBtn.onClick = CallbackTools.expand(onReturn);
-            
-        returnBtn.x = 10;
-	    returnBtn.y = 10;
-        addChild(returnBtn);
-        
-        Networker.getGames(playerLogin, gamePaginationAfter, gamePaginationPageSize, populateGames, onReturn);
-        Networker.getStudies(playerLogin, studyPaginationAfter, studyPaginationPageSize, populateStudies, onReturn);
+        content.addComponent(mainBox);
     }
 
     private function gameLink(text:String, gameID:Int):Link
     {
         var link:Link = haxeuiLink(text);
-        link.onClick = (e) -> {Networker.getGame(gameID, (d)->{}, (d)->{}, ScreenManager.instance.toRevisit.bind(gameID, _,  ScreenManager.instance.toProfile.bind(profileOwnerLogin, ScreenManager.instance.toMain, ScreenManager.instance.toMain)), ()->{});};
+        link.onClick = (e) -> {
+            requestedGameID = gameID;
+            Networker.emitEvent(GetGame(gameID));
+        };
         return link;
     }
 
     private function studyLink(text:String, overview:StudyOverview):Link
     {
         var link:Link = haxeuiLink(text);
-        link.onClick = (e) -> {ScreenManager.instance.toAnalysisBoard(ScreenManager.instance.toProfile.bind(profileOwnerLogin, ScreenManager.instance.toMain, ScreenManager.instance.toMain), overview);};
+        link.onClick = (e) -> {ScreenManager.toScreen(new Analysis());}; //TODO: Pass overview
         return link;
     }
 

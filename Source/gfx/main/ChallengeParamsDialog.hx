@@ -108,7 +108,7 @@ class ChallengeParamsDialog extends Dialog
     private function challengeColorOptionbox(color:Null<PieceColor>, preselected:Bool):OptionBox
     {
         var option:OptionBox = new OptionBox();
-		option.text = color == null? Dictionary.getPhrase(COLOR_RANDOM) : Dictionary.getColorName(color);
+		option.text = color == null? Dictionary.getPhrase(COLOR_RANDOM) : dict.Utils.getColorName(color);
         option.horizontalAlign = 'center';
         option.componentGroup = "challenge-color";
         option.selected = preselected;

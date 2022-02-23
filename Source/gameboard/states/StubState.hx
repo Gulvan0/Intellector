@@ -4,7 +4,7 @@ import struct.IntPoint;
 
 class StubState extends BaseState
 {
-    private override function abortMove()
+    public override function abortMove()
     {
         //* Do nothing
     }

@@ -1,5 +1,14 @@
 package gfx.analysis;
 
+import dict.Phrase;
+import dict.Dictionary;
+import haxe.ui.containers.HBox;
+import haxe.ui.components.Button;
+import analysis.AlphaBeta.EvaluationResult;
+import haxe.ui.components.Label;
+import haxe.ui.styles.Style;
+import gfx.utils.PlyScrollType;
+import struct.PieceColor;
 import gfx.common.MoveNavigator;
 import gfx.analysis.RightPanel.RightPanelEvent;
 import haxe.ui.containers.VBox;

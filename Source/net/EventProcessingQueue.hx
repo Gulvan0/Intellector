@@ -15,6 +15,7 @@ class EventProcessingQueue
         var i:Int = 0;
         while (i < handlers.length)
         {
+            var handler = handlers[i];
             var wasProcessed:Bool = handler.processEvent(event);
             if (handler.disposable && wasProcessed)
                 handlers.splice(i, 1);

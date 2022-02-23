@@ -25,12 +25,13 @@ class URLEditor
     public static function assignProfileLogin(login:String) 
     {
         Browser.window.history.pushState({}, "Intellector", pathname() + "?p=" + login);
-    }
+    }*/
 
+    //TODO: Update
     public static function getChallengeLink(login:String):String
     {
         return '${Browser.location.host}${Browser.location.pathname}?ch=${login}';
-    }*/
+    }
 
     //TODO: Update
     public static function getGameLink(id:String):String

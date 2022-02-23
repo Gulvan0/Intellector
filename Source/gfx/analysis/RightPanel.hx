@@ -64,8 +64,8 @@ interface RightPanelObserver
 
 class RightPanel extends Sprite
 {
-    private static var PANEL_WIDTH = 400;
-    private static var PANEL_HEIGHT = 500;
+    public static var PANEL_WIDTH = 400;
+    public static var PANEL_HEIGHT = 500;
 
     private var positionEditor:PositionEditor;
     private var controlTabs:TabView;
@@ -150,10 +150,10 @@ class RightPanel extends Sprite
                 overviewTab.navigator.clear();
                 overviewTab.deprecateScore();
                 showControlTabs();
-                emit(ApplyChangesPressed);
+                emit(ApplyChangesRequested);
             case DiscardChangesPressed:
                 showControlTabs();
-                emit(DiscardChangesPressed);
+                emit(DiscardChangesRequested);
             case EditModeChanged(newEditMode):
                 emit(EditModeChanged(newEditMode));
         }
@@ -164,8 +164,8 @@ class RightPanel extends Sprite
         switch event
         {
             case SituationEdited(newSituation):
-                branchingTab.variant = new Variant(newSituation.copy());
-                branchingTab.variantView.clear();
+                branchingTab.clearVariant(newSituation);
+            default:
         }
     }
 
@@ -238,7 +238,7 @@ class RightPanel extends Sprite
         tab.text = Dictionary.getPhrase(ANALYSIS_OVERVIEW_TAB_NAME);
         tab.width = PANEL_WIDTH - 10;
         tab.height = height;
-        tab.addComponent(overviewVBox);
+        tab.addComponent(component);
         return tab;
     }
 }

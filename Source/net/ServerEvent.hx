@@ -17,7 +17,7 @@ enum ServerEvent
     DirectChallengeCalleeInGame(callee:String); //Answer to CreateDirectChallenge: recipient is offline
     DirectChallengeRepeated(callee:String); //Answer to CreateDirectChallenge: the challenge to this recipient has already been sent
     DirectChallengeSent(callee:String); //Answer to CreateDirectChallenge: direct challenge is sent successfully
-    IncomingDirectChallenge(match_id:Int, enemy:String, colour:String, startSecs:Int, bonusSecs:Int); //Invoked on recipient side by CreateDirectChallenge
+    IncomingDirectChallenge(enemy:String, colour:String, startSecs:Int, bonusSecs:Int); //Invoked on recipient side by CreateDirectChallenge
     DirectChallengeDeclined(callee:String); //Answer to CreateDirectChallenge: recipient has declined the challenge
     DirectChallengeWasCancelled(callee:String); //Answer to accepting/declining direct challenge: it was cancelled before the recipient answered
     DirectChallengeCallerOffline(caller:String); //Answer to accepting/declining direct challenge: caller went offline before the recipient answered
@@ -44,8 +44,8 @@ enum ServerEvent
     NewSpectator(login:String); //Sent both to players and to all of the spectators when a new user starts spectating
     SpectatorLeft(login:String); //Sent both to players and to all of the spectators when a user stops spectating
 
-    GamesList(listStr:String); //Answer to GetPlayerGames
-    StudiesList(listStr:String); //Answer to GetPlayerStudies
+    GamesList(listStr:String, hasNext:Bool, hasPrev:Bool); //Answer to GetPlayerGames
+    StudiesList(listStr:String, hasNext:Bool, hasPrev:Bool); //Answer to GetPlayerStudies
     PlayerNotFound; //Answer to Spectate, GetPlayerGames and GetPlayerStudies: no such player exists
     PlayerNotInGame; //Answer to Spectate: no game to spectate with a requested player
 

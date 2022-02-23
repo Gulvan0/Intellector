@@ -1,5 +1,13 @@
 package gameboard;
 
+import gfx.utils.Colors;
+import openfl.display.JointStyle;
+import openfl.display.CapsStyle;
+import openfl.geom.Point;
+import openfl.events.Event;
+import struct.PieceColor;
+import struct.Situation;
+import openfl.display.Sprite;
 import struct.IntPoint;
 import openfl.events.MouseEvent;
 using Lambda;
@@ -17,7 +25,7 @@ class SelectableBoard extends Board
         for (hex in lastMoveSelectedHexes)
             hex.hideLayer(LastMove);
 
-        lastMoveSelectedHexes = [for (coords in hexesCoords) getHex(hexesCoords)];
+        lastMoveSelectedHexes = [for (coords in hexesCoords) getHex(coords)];
 
         for (hex in lastMoveSelectedHexes)
             hex.showLayer(LastMove);
@@ -49,17 +57,17 @@ class SelectableBoard extends Board
         redSelectedHexIndices = [];
     }
 
-    private function onClick(e)
+    private function onClick(e:MouseEvent)
     {
         removeArrowsAndSelections();
     }
 
-    private function onRightPress(e)
+    private function onRightPress(e:MouseEvent)
     {
         arrowStartLocation = posToIndexes(e.stageX - x, e.stageY - y);
     }
 
-    private function onRightRelease(e)
+    private function onRightRelease(e:MouseEvent)
     {
         var arrowEndLocation = posToIndexes(e.stageX - x, e.stageY - y);
         if (arrowStartLocation != null && arrowEndLocation != null)
@@ -113,8 +121,8 @@ class SelectableBoard extends Board
 
     public function drawArrow(from:IntPoint, to:IntPoint)
     {
-        var fromPos:Point = hexCoords(from.i, from.j);
-        var toPos:Point = hexCoords(to.i, to.j);
+        var fromPos:Point = hexCoords(from);
+        var toPos:Point = hexCoords(to);
 
         var thickness:Float = hexSideLength / 6;
         var lrLength:Float = hexSideLength / 2;

@@ -1,5 +1,9 @@
 package gfx.analysis;
 
+import gfx.components.SpriteWrapper;
+import gfx.components.Shapes;
+import openfl.text.TextFormat;
+import haxe.ui.containers.VBox;
 import struct.Situation;
 import struct.Ply;
 import struct.Variant;
@@ -43,13 +47,19 @@ class BranchingTab extends ScrollView
 		backgroundSprite.height = vbox.height = Math.max(innerContentHeight, 20 + variantSprite.height); //TODO: Magic value?
     }
 
+    public function clearVariant(newStartingSituation:Situation)
+    {
+        variant = new Variant(newStartingSituation.copy());
+        variantView.clear();
+    }
+
     private function onBranchSelect(path:Array<Int>)
     {
         var extendedPath:Array<Int> = variant.extendPathLeftmost(path);
         selectBranch(extendedPath);
 
         var plys:Array<Ply> = variant.getBranchByPath(path);
-        var plyStrs:Array<Ply> = Ply.plySequenceToNotation(plys, variant.startingSituation);
+        var plyStrs:Array<String> = Ply.plySequenceToNotation(plys, variant.startingSituation);
         eventHandler(BranchSelected(plys, plyStrs, variant.startingSituation));
     }
 

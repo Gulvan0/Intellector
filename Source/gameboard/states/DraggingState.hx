@@ -7,7 +7,7 @@ class DraggingState extends BasePlayableState
 {
     private var dragStartLocation:IntPoint;
 
-    private override function abortMove()
+    public override function abortMove()
     {
         boardInstance.getPiece(dragStartLocation).stopDrag();
         boardInstance.returnPieceToOriginalPosition(dragStartLocation);
@@ -58,9 +58,9 @@ class DraggingState extends BasePlayableState
         return boardInstance.behavior.movePossible(dragStartLocation, location);
     }
 
-    public function new(board:GameBoard, dragStartPosition:IntPoint, ?cursorLocation:IntPoint)
+    public function new(board:GameBoard, dragStartLocation:IntPoint, ?cursorLocation:IntPoint)
     {
         super(board, cursorLocation);
-        this.dragStartPosition = dragStartPosition;
+        this.dragStartLocation = dragStartLocation;
     }
 }

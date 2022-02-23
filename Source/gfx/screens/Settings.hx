@@ -13,10 +13,26 @@ import haxe.ui.containers.VBox;
 import haxe.ui.components.OptionBox;
 import openfl.display.Sprite;
 
-class Settings extends Sprite
+class Settings extends Screen
 {
     private var markupOptionBoxes:Map<Markup, OptionBox> = [];
 
+	public override function onEntered()
+    {
+        //* Do nothing
+    }
+
+    public override function onClosed()
+    {
+        //* Do nothing
+    }
+
+    public override function getURLPath():String
+    {
+        return 'settings';
+    }
+
+	//TODO: Rewrite using more suitable haxeui components
     public function new()
     {
 		super();
@@ -38,7 +54,7 @@ class Settings extends Sprite
 		var returnBtn = new Button();
 		returnBtn.width = 100;
 		returnBtn.text = Dictionary.getPhrase(RETURN);
-		returnBtn.onClick = (e) -> {ScreenManager.instance.toMain();};
+		returnBtn.onClick = (e) -> {ScreenManager.toScreen(new MainMenu());};
             
         returnBtn.x = 10;
 	    returnBtn.y = 10;
@@ -56,12 +72,12 @@ class Settings extends Sprite
         for (type in Markup.createAll())
         {
             var optionBox:OptionBox = new OptionBox();
-            optionBox.text = Dictionary.getMarkupOptionText(type);
+            optionBox.text = dict.Utils.getMarkupOptionText(type);
             optionBox.componentGroup = "settings-markup";
             optionBox.onChange = (e) -> {
                 if (optionBox.selected)
                 {
-                    Preferences.markup = type;
+                    Preferences.setMarkup(type);
                     Cookie.set("markup", type.getName(), 60 * 60 * 24 * 365 * 5);
                 }
             };
@@ -69,7 +85,7 @@ class Settings extends Sprite
             markup.addComponent(optionBox);
         }
 
-        markupOptionBoxes[Preferences.markup].selected = true;
+        markupOptionBoxes[Preferences.instance.markup].selected = true;
         return markup;
     }
 
@@ -94,9 +110,9 @@ class Settings extends Sprite
 		option.componentGroup = "settings-lang";
 		option.onChange = (e) -> {
 			if (option.selected)
-				Preferences.instance.language = lang;
+				Preferences.setLanguage(lang);
 		};
-		if (Preferences.language == lang)
+		if (Preferences.instance.language == lang)
 			option.selected = true;
 		return option;
 	}

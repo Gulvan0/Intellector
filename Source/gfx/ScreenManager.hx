@@ -1,5 +1,7 @@
 package gfx;
 
+import js.Browser;
+import net.ServerEvent;
 import gfx.screens.Screen;
 import net.LoginManager;
 import struct.Situation;
@@ -10,6 +12,7 @@ import struct.PieceColor;
 import gfx.screens.MainMenu;
 import gfx.screens.Settings;
 import dict.Dictionary;
+import dict.Utils;
 import gfx.screens.OpenChallengeHosting;
 import openfl.Assets;
 import gfx.screens.OpenChallengeJoining;
@@ -44,7 +47,7 @@ class ScreenManager extends Sprite
 
         URLEditor.setPath(screen.getURLPath());
         instance.current = screen;
-        addChild(instance.current);
+        instance.addChild(instance.current);
         instance.current.onEntered();
     }
 
@@ -67,23 +70,18 @@ class ScreenManager extends Sprite
             case GameStarted(match_id, enemy, colour, startSecs, bonusSecs):
                 //TODO: Fill
             case SpectationData(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-                toSpectation(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog);
+                //TODO: Uncomment
+                //toScreen(new Spectation(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog));
             case LoginResult(success):
                 if (success)
                     if (LoginManager.wasLastSignInAuto())
                         navigateByURL(Browser.location.search);
                     else
                         toScreen(new MainMenu());
+            default:
         }
     }
-    /*public function toMain() 
-    {
-        //TODO: To MainMenu init + rewrite
-        Networker.disableIngameEvents();
-        Networker.disableSpectationEvents();
-        Networker.enableMainMenuEvents(toGameStart);
-    }
-
+    /* 
     //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
     public function toGameStart(data:Dynamic) 
     {
@@ -109,14 +107,6 @@ class ScreenManager extends Sprite
     }
 
     //TODO: Rewrite. Create and use corresponding screen instead of GameCompound
-    public function toAnalysisBoard(onReturn:Void->Void, ?study:StudyOverview, ?situationSIP:String) 
-    {
-        current = new AnalysisCompound(() ->
-        {
-            Networker.currentGameCompound = null;
-		    onReturn();
-        }, study, situationSIP);
-    }
 
     public function toSpectation(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String) 
 	{
@@ -172,31 +162,6 @@ class ScreenManager extends Sprite
         current = GameCompound.buildSpectators(mockData, onReturn, Revisit(id));
         addChild(current);
     }
-
-    public function toProfile(login:String, onReturn:Void->Void, onNotExists:Void->Void):Void
-    {
-        Networker.checkPlayerExistance(login, exists -> {
-            if (exists)
-            {
-                clear();
-                URLEditor.assignProfileLogin(login);
-
-                current = new PlayerProfile(login, onReturn);
-                addChild(current);
-            }
-            else
-                onNotExists();
-        });
-    }
-
-    public function toSettings() 
-    {
-        clear();
-        URLEditor.clear();
-        
-        current = new Settings();
-        addChild(current);
-    }
     
     //TODO: Rewrite. Pass ServerEvent constructor parameters
     private function onGameEnded(data:Dynamic) 
@@ -214,7 +179,7 @@ class ScreenManager extends Sprite
 		else 
 			resultMessage = Dictionary.getPhrase(LOSS_MESSAGE_PREAMBLE);
 
-        var explanation = Dictionary.getGameOverExplanation(data.reason);
+        var explanation = Utils.getGameOverExplanation(data.reason);
         
         Networker.disableIngameEvents();
         Networker.enableMainMenuEvents(toGameStart);

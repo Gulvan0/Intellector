@@ -34,7 +34,7 @@ class TimeLeftLabel extends Label
             stopTimer();
             secondsLeft = 0;
             text = TimeControl.secsToString(0);
-            Networker.reqTimeoutCheck();
+            Networker.emitEvent(RequestTimeoutCheck);
             return;
         }
 

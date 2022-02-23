@@ -72,10 +72,12 @@ class Hexagon extends Sprite
         dot.graphics.beginFill(0x333333);
         dot.graphics.drawCircle(0, 0, 8);
         dot.graphics.endFill();
+        dot.visible = false;
 
         round = new Sprite();
         round.graphics.lineStyle(4, 0x333333);
         round.graphics.drawCircle(0, 0, 0.8 * hexSideLength);
+        round.visible = false;
 
         addChild(number);
         addChild(dot);

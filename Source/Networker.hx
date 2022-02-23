@@ -1,5 +1,7 @@
 package;
 
+import net.GeneralObserver;
+import net.Handler;
 import net.ClientEvent;
 import net.ServerEvent;
 import net.EventProcessingQueue;
@@ -29,14 +31,16 @@ class Networker
     private static var _ws:WebSocket;
 
     public static var eventQueue:EventProcessingQueue;
-    public static var onConnectionEstabilished:Void->Void; //TODO: Init this property from outside
+    public static var onConnectionEstabilished:Void->Void;
 
     public static var suppressAlert:Bool;
     public static var doNotReconnect:Bool = false;
 
     public static function connect() 
     {
+        var generalObserver:GeneralObserver = new GeneralObserver();
         eventQueue = new EventProcessingQueue();
+        eventQueue.addObserver(generalObserver);
 
         #if prod
         _ws = new WebSocket("wss://play-intellector.ru:5000");
@@ -62,7 +66,6 @@ class Networker
     private static function onConnectionOpen()
     {
         suppressAlert = false;
-        /*on("dont_reconnect", onReconnectionForbidden);*/ //TODO: Rewrite
         onConnectionEstabilished();
     }
 
@@ -83,7 +86,7 @@ class Networker
     private static function onConnectionClosed()
     {
         _ws = null;
-        ScreenManager.instance.toEmpty();
+        ScreenManager.clearScreen();
         if (suppressAlert)
             trace("Connection closed");
         else
@@ -106,12 +109,6 @@ class Networker
         }
     }
 
-    private static function onReconnectionForbidden(e) 
-    {
-        doNotReconnect = true;
-        Dialogs.alert("Session closed", "Alert");
-    }
-
     //------------------------------------------------------------------------------------------------------------------------------------------------------
 
     //TODO: Move to ChallengeManager (or smth like that)
@@ -125,15 +122,6 @@ class Networker
             Utils.saveLoginDetails(login, data.password);
         });
         emit('accept_open_challenge', {caller_login: caller, callee_login: Networker.login});
-    }
-
-    private static function challengeReceiver(data:{caller:String, startSecs:Int, bonusSecs:Int, color:String}) 
-    {
-        var onConfirmed = () -> {emit('accept_challenge', {caller_login: data.caller, callee_login: Networker.login});};
-        var onDeclined = () -> {emit('decline_challenge', {caller_login: data.caller, callee_login: Networker.login});};
-
-        Assets.getSound("sounds/social.mp3").play();
-        Dialogs.confirm(Dictionary.getIncomingChallengeText(data), Dictionary.getPhrase(INCOMING_CHALLENGE_TITLE), onConfirmed, onDeclined);
     }
 
     public static function sendChallenge(callee:String, secsStart:Int, secsBonus:Int, color:Null<PieceColor>) 

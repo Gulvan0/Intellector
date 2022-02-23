@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import struct.Variant;
 import gfx.analysis.RightPanel.RightPanelEvent;
 
 interface IVariantView 

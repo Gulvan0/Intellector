@@ -10,7 +10,8 @@ import openfl.display.Sprite;
 
 class Piece extends Sprite 
 {
-    private var type:PieceType;
+    public var type(default, null):PieceType;
+    public var color(default, null):PieceColor;
     
     public static function fromHex(hex:Hex):Piece
     {
@@ -38,6 +39,7 @@ class Piece extends Sprite
     {
         super();
         this.type = type;
+        this.color = color;
 
         var bitmap = new Bitmap(AssetManager.pieceBitmaps[type][color]);
         bitmap.x = -bitmap.width / 2;

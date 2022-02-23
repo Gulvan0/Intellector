@@ -460,7 +460,7 @@ class GameCompound extends Sprite
             infobox.changeResolution(outcome, winnerColor);
         if (chatbox != null)
         {
-            chatbox.appendLog(Dictionary.getGameOverChatMessage(winnerColor, data.reason));
+            chatbox.appendLog(dict.Utils.getColorName(winnerColor, data.reason));
             chatbox.terminate();
         }
         returnBtn.visible = true;

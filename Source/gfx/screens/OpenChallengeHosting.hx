@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import net.LoginManager;
 import js.html.Clipboard;
 import haxe.ui.containers.HBox;
 import haxe.ui.components.Button;
@@ -13,10 +14,25 @@ import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 
-class OpenChallengeHosting extends Sprite
+class OpenChallengeHosting extends Screen
 {
 	private static var hostingBoxWidth:Float = 800;
 	private static var selectAllBtnWidth:Float = 30;
+
+	public override function onEntered()
+    {
+        //* Do nothing
+    }
+
+    public override function onClosed()
+    {
+        //* Do nothing
+    }
+
+    public override function getURLPath():String
+    {
+        return 'challenge';
+    }
 
     public function new(startSecs:Int, bonusSecs:Int, color:Null<PieceColor>)
     {
@@ -25,13 +41,13 @@ class OpenChallengeHosting extends Sprite
 		hostingMenu.width = hostingBoxWidth;
 
 		var firstLabel:Label = drawLabel();
-		firstLabel.text = Dictionary.challengeByText(Networker.login, startSecs, bonusSecs, color);
+		firstLabel.text = dict.Utils.challengeByText(LoginManager.login, startSecs, bonusSecs, color);
 		hostingMenu.addComponent(firstLabel);
 
 		var linkBox:HBox = new HBox();
 
 		var linkText:TextField = new TextField();
-		linkText.text = URLEditor.getChallengeLink(Networker.login);
+		linkText.text = URLEditor.getChallengeLink(LoginManager.login);
 		linkText.width = hostingBoxWidth /*- copyBtnWidth - 5*/;
 		linkBox.addComponent(linkText);
 
@@ -52,8 +68,9 @@ class OpenChallengeHosting extends Sprite
 
 		hostingMenu.x = (Browser.window.innerWidth - hostingBoxWidth) / 2;
 		hostingMenu.y = 100;
-		addChild(hostingMenu);
+		content.addComponent(hostingMenu);
 
+		//TODO: Rework this part of UI (as well as others)
 		var returnBtn = new Button();
 		returnBtn.width = 100;
 		returnBtn.text = Dictionary.getPhrase(RETURN);
@@ -62,13 +79,13 @@ class OpenChallengeHosting extends Sprite
 			if (!confirmed)
 				return;
 
-			Networker.cancelOpenChallenge();
-			ScreenManager.instance.toMain();
+			Networker.emitEvent(CancelOpenChallenge);
+			ScreenManager.toScreen(new MainMenu());
 		};
             
         returnBtn.x = 10;
 	    returnBtn.y = 10;
-	    addChild(returnBtn);
+	    content.addComponent(returnBtn);
     }
 
     private function drawLabel():Label

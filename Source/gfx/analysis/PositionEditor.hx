@@ -1,6 +1,19 @@
 package gfx.analysis;
 
+import haxe.ui.components.Image;
+import openfl.events.Event;
+import utils.AssetManager;
+import haxe.ui.components.TextField;
+import haxe.ui.components.Label;
+import gfx.components.Shapes;
+import dict.Dictionary;
+import haxe.ui.containers.HBox;
+import haxe.ui.containers.Grid;
+import haxe.ui.components.OptionBox;
+import haxe.ui.components.Button;
+import struct.PieceColor;
 import haxe.ui.containers.VBox;
+import gfx.analysis.PosEditMode;
 
 enum PositionEditorEvent
 {
@@ -58,7 +71,7 @@ class PositionEditor extends VBox
         for (color in PieceColor.createAll())
         {
             var optionBox:OptionBox = new OptionBox();
-            optionBox.text = Dictionary.getAnalysisTurnColorSelectLabel(color);
+            optionBox.text = dict.Utils.getColorName(color);
             optionBox.componentGroup = "analysis-editor-turncolor";
             optionBox.onChange = (e) -> {
                 if (optionBox.selected)
@@ -121,8 +134,8 @@ class PositionEditor extends VBox
         discardChangesBtn.onClick = e -> {eventHandler(DiscardChangesPressed);};
 
         this.visible = false;
-        this.width = PANEL_WIDTH;
-        this.height = PANEL_HEIGHT;
+        this.width = RightPanel.PANEL_WIDTH;
+        this.height = RightPanel.PANEL_HEIGHT;
         this.addComponent(editModeButtons);
         this.addComponent(Shapes.vSpacer(10));
         this.addComponent(specialEditButtons);
