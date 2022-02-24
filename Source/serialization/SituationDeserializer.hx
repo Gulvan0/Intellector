@@ -12,7 +12,7 @@ class SituationDeserializer
     {
         var situation:Situation = Situation.empty();
         var turnColor:PieceColor = sip.charAt(0) == "w"? White : Black;
-        situation.setTurnWithZobris(turnColor);
+        situation.turnColor = turnColor;
 
         var exclamationMarkPassed:Bool = false;
         var ci = 1;
@@ -30,7 +30,7 @@ class SituationDeserializer
             var type = typeByCode(sip.charAt(ci + 1));
             var color = exclamationMarkPassed? Black : White;
 
-            situation.setWithZobris(new IntPoint(i, j), Hex.occupied(type, color), Hex.empty());
+            situation.set(new IntPoint(i, j), Hex.occupied(type, color));
             ci += 2;
         }
 

@@ -18,7 +18,7 @@ class BoardTests extends Sprite
         board.x = 200;
         board.y = 200;
         addChild(board);
-        var i = 0;
+        var i = 2;
         var timer = new Timer(1000);
         var revPly:ReversiblePly;
         timer.run = () -> {
@@ -35,9 +35,9 @@ class BoardTests extends Sprite
                     revPly = Ply.construct(new IntPoint(5, 5), new IntPoint(5, 4)).toReversible(board.shownSituation);
                     board.applyMoveTransposition(revPly);
                 case 12: board.applyMoveTransposition(revPly, true);
-                case 13: board.applyMoveTransposition(Ply.construct(new IntPoint(5, 5), new IntPoint(5, 6)).toReversible(board.shownSituation));
+                case 13: board.applyMoveTransposition(Ply.construct(new IntPoint(5, 5), new IntPoint(4, 5)).toReversible(board.shownSituation));
                 case 14: board.setOrientation(Black);
-                case 15: board.applyMoveTransposition(Ply.construct(new IntPoint(5, 6), new IntPoint(6, 6)).toReversible(board.shownSituation));
+                case 15: board.applyMoveTransposition(Ply.construct(new IntPoint(4, 5), new IntPoint(4, 4)).toReversible(board.shownSituation));
                 case 16: board.setOrientation(White);
             }
         }

@@ -4,7 +4,6 @@ import dict.Phrase;
 import dict.Dictionary;
 import haxe.ui.containers.HBox;
 import haxe.ui.components.Button;
-import analysis.AlphaBeta.EvaluationResult;
 import haxe.ui.components.Label;
 import haxe.ui.styles.Style;
 import gfx.utils.PlyScrollType;
@@ -38,10 +37,10 @@ class OverviewTab extends VBox
         this.eventHandler = eventHandler;
     }
 
-    public function displayAnalysisResults(result:EvaluationResult) 
+    /*public function displayAnalysisResults(result:EvaluationResult) 
     {
         scoreLabel.text = result.score.toString();
-    }
+    }*/
 
     public function displayLoadingOnScoreLabel()
     {

@@ -26,6 +26,8 @@ class Board extends OffsettedSprite
     public var orientationColor(default, null):PieceColor;
     public var shownSituation(default, null):Situation;
 
+    private var letters:Array<TextField> = [];
+
     public function getFieldHeight():Float
     {
         return Hexagon.sideToHeight(hexSideLength) * 7;
@@ -47,6 +49,9 @@ class Board extends OffsettedSprite
                     piece.y = coords.y;
                 }
             }
+
+            if (!Lambda.empty(letters))
+                swapLetters();
         }
 
         return orientationColor;    
@@ -71,10 +76,16 @@ class Board extends OffsettedSprite
         if (hex.type == Intellector)
         {
             var oldIntellectorPosition:Null<IntPoint> = shownSituation.intellectorPos[hex.color];
-            removeChild(getPiece(oldIntellectorPosition));
-            pieces[oldIntellectorPosition.toScalar()] = null;
-            shownSituation.set(oldIntellectorPosition, Hex.empty());
+            if (oldIntellectorPosition != null)
+            {
+                removeChild(getPiece(oldIntellectorPosition));
+                pieces[oldIntellectorPosition.toScalar()] = null;
+                shownSituation.set(oldIntellectorPosition, Hex.empty());
+            }
         }
+        var formerPiece = getPiece(location);
+        if (formerPiece != null)
+            removeChild(formerPiece);
         producePiece(location, hex);
         shownSituation.set(location, hex.copy());
     }
@@ -83,10 +94,13 @@ class Board extends OffsettedSprite
     {
         for (transform in ply)
         {
-            if (!transform.former.isEmpty())
+            var currentHex = backInTime? transform.latter : transform.former;
+            var goalHex = backInTime? transform.former : transform.latter;
+
+            if (!currentHex.isEmpty())
                 removeChild(getPiece(transform.coords));
-            producePiece(transform.coords, backInTime? transform.former : transform.latter);
-            shownSituation.set(transform.coords, backInTime? transform.former : transform.latter);
+            producePiece(transform.coords, goalHex);
+            shownSituation.set(transform.coords, goalHex, false);
         }
     }
 
@@ -201,6 +215,16 @@ class Board extends OffsettedSprite
         }
     }
 
+    private function swapLetters() 
+    {
+        for (i in 0...4)
+        {
+            var t = letters[i].text;
+            letters[i].text = letters[8-i].text;
+            letters[8-i].text = t;
+        }
+    }
+
     private function disposeLetters() 
     {
         for (i in 0...9)
@@ -209,6 +233,7 @@ class Board extends OffsettedSprite
             var letter = createLetter(Notation.getColumn(i));
             letter.x = bottomHexCoords.x - letter.textWidth / 2 - 5;
             letter.y = bottomHexCoords.y + Hexagon.sideToHeight(hexSideLength) / 2;
+            letters.push(letter);
             addChild(letter); 
         }
     }

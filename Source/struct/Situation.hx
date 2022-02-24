@@ -1,19 +1,11 @@
 package struct;
 
-import analysis.ZobristHashing;
-import haxe.Int64;
-import analysis.ConcreteHex;
-import struct.PieceColor.letter;
-import js.html.Window;
-import analysis.PieceValues;
 import struct.PieceColor.opposite;
 
 class Situation 
 {
     private var hexArray:Array<Hex>;
-    public var turnColor(default, null):PieceColor;
-    public var zobristHash(default, null):Int64;
-
+    public var turnColor:PieceColor;
     public var intellectorPos(default, null):Map<PieceColor, Null<IntPoint>>;
 
     public static function starting():Situation
@@ -21,8 +13,7 @@ class Situation
         var situation = new Situation();
         situation.turnColor = White;
         situation.intellectorPos = [White => new IntPoint(4, 6), Black => new IntPoint(4, 0)];
-        situation.zobristHash = ZobristHashing.startPosHash.copy();
-        situation.hexArray = [for (t in 0...63) Hex.empty()];
+        situation.hexArray = [for (t in 0...IntPoint.hexCount) Hex.empty()];
 
         situation.setC(0, 0, Hex.occupied(Dominator, Black));
         situation.setC(1, 0, Hex.occupied(Liberator, Black));
@@ -62,8 +53,7 @@ class Situation
         var situation = new Situation();
         situation.turnColor = White;
         situation.intellectorPos = [White => null, Black => null];
-        situation.zobristHash = ZobristHashing.emptyHash;
-        situation.hexArray = [for (t in 0...63) Hex.empty()];
+        situation.hexArray = [for (t in 0...IntPoint.hexCount) Hex.empty()];
         return situation;
     }
 
@@ -71,20 +61,19 @@ class Situation
     {
         var next:Situation = this.copy();
         next.turnColor = opposite(turnColor);
-        next.zobristHash ^= ZobristHashing.hashes[0];
 
         var fromHex = get(ply.from);
         var toHex = get(ply.to);
 
         if (ply.morphInto == null)
-            next.setWithZobris(ply.to, fromHex.copy(), toHex);
+            next.set(ply.to, fromHex.copy());
         else
-            next.setWithZobris(ply.to, Hex.occupied(ply.morphInto, fromHex.color), toHex); //Promotion or chameleon
+            next.set(ply.to, Hex.occupied(ply.morphInto, fromHex.color)); //Promotion or chameleon
 
         if (toHex.color == fromHex.color)
-            next.setWithZobris(ply.from, toHex.copy(), fromHex); //Castle               
+            next.set(ply.from, toHex.copy()); //Castle               
         else 
-            next.setWithZobris(ply.from, Hex.empty(), fromHex);
+            next.set(ply.from, Hex.empty());
 
         if (fromHex.type == Intellector)
             next.intellectorPos[fromHex.color] = ply.to.copy();
@@ -99,16 +88,13 @@ class Situation
         for (ply in plys)
             for (transform in ply)
             {
-                nextSituation.setWithZobris(transform.coords, transform.latter, transform.former);
+                nextSituation.set(transform.coords, transform.latter);
                 if (transform.latter.type == Intellector)
                     nextSituation.intellectorPos[transform.latter.color] = transform.coords;
             }
 
         if (plys.length % 2 == 1)
-        {
             nextSituation.turnColor = opposite(turnColor);
-            nextSituation.zobristHash ^= ZobristHashing.hashes[0];
-        }
             
         return nextSituation;
     }
@@ -122,16 +108,13 @@ class Situation
         for (ply in reversedPlys)
             for (transform in ply)
             {
-                formerSituation.setWithZobris(transform.coords, transform.former, transform.latter);
+                formerSituation.set(transform.coords, transform.former);
                 if (transform.former.type == Intellector)
                     formerSituation.intellectorPos[transform.former.color] = transform.coords;
             }
 
         if (plys.length % 2 == 1)
-        {
             formerSituation.turnColor = opposite(turnColor);
-            formerSituation.zobristHash ^= ZobristHashing.hashes[0];
-        }
             
         return formerSituation;
     }
@@ -203,109 +186,66 @@ class Situation
     public function collectOccupiedHexes():Map<IntPoint, Hex>
     {
         var map:Map<IntPoint, Hex> = [];
-        for (i in 0...9) 
-            for (j in 0...(7 - i % 2))
-            {
-                var hex = getC(i, j);
-                if (hex.type != null)
-                    map.set(new IntPoint(i, j), hex);
-            }
+
+        for (t in 0...IntPoint.hexCount)
+        {
+            var hex = hexArray[t];
+            if (!hex.isEmpty())
+                map.set(IntPoint.fromScalar(t), hex);
+        }
             
         return map;
-    }
-
-    public function collectOccupiedFast():Array<ConcreteHex>
-    {
-        var arr = [];
-        for (i in 0...9) 
-            for (j in 0...(7 - i % 2))
-            {
-                var hex = getC(i, j);
-                if (hex.type != null)
-                    arr.push(new ConcreteHex(i, j, hex.type, hex.color));
-            }
-            
-        return arr;
-    }
-
-    public function replaceNullsWithEmpty()
-    {
-        for (t in 0...63)
-            if (hexArray[t] == null)
-                hexArray[t] = Hex.empty();
     }
 
     public function serialize():String
     {
         var whitePart = '';
         var blackPart = '';
-        for (t in 0...63) 
+        for (t in 0...IntPoint.hexCount) 
         {
-            var fig = hexArray[t];
-            if (fig.color == White)
-                whitePart += '${String.fromCharCode(t + 64)}${PieceType.letter(fig.type)}';
-            else if (fig.color == Black)
-                blackPart += '${String.fromCharCode(t + 64)}${PieceType.letter(fig.type)}';
+            var piece = hexArray[t];
+            if (piece.color == White)
+                whitePart += '${String.fromCharCode(t + 64)}${PieceType.letter(piece.type)}';
+            else if (piece.color == Black)
+                blackPart += '${String.fromCharCode(t + 64)}${PieceType.letter(piece.type)}';
         }
         return PieceColor.letter(turnColor) + whitePart + "!" + blackPart;
     }
 
     public inline function get(coords:IntPoint):Hex
     {
-        return getC(coords.i, coords.j);
+        return hexArray[coords.toScalar()];
     }
 
     private inline function getC(i:Int, j:Int):Hex
     {
-        return hexArray[j * 9 + i];
+        return get(new IntPoint(i, j));
     }
 
-    public inline function set(coords:IntPoint, hex:Hex) 
+    public inline function set(coords:IntPoint, hex:Hex, ?adjustToConsistency:Bool = true) 
     {
-        setC(coords.i, coords.j, hex);
-    }
-
-    public inline function setWithZobris(coords:IntPoint, hex:Hex, formerHex:Hex) 
-    {
-        set(coords, hex);
-        if (!formerHex.isEmpty())
-            zobristHash ^= ZobristHashing.getForPiece(coords.i, coords.j, formerHex.type, formerHex.color);
-        if (!hex.isEmpty())
-        {
-            zobristHash ^= ZobristHashing.getForPiece(coords.i, coords.j, hex.type, hex.color);
+        hexArray[coords.toScalar()] = hex;
+        if (adjustToConsistency)
             if (hex.type == Intellector)
-                intellectorPos[hex.color] = coords.copy();
-        }
-        else if (formerHex.type == Intellector && intellectorPos[formerHex.color].equals(coords))
-            intellectorPos[formerHex.color] = null;
-    }
-
-    public function setTurnWithZobris(color:PieceColor) 
-    {
-        if (turnColor == null && color == Black)
-            zobristHash ^= ZobristHashing.hashes[0];
-        else if (turnColor != color)
-            zobristHash ^= ZobristHashing.hashes[0];
-        turnColor = color;
+                intellectorPos[hex.color] = coords;
+            else if (hex.isEmpty() && get(coords).type == Intellector)
+                intellectorPos[get(coords).color] = null;
     }
 
     private inline function setC(i:Int, j:Int, hex:Hex)
     {
-        hexArray[j * 9 + i] = hex;
-        if (hex.type == Intellector)
-            intellectorPos[hex.color] = new IntPoint(i, j);
+        set(new IntPoint(i, j), hex);
     }
 
     public function copy():Situation 
     {
         var s = new Situation();
-        s.hexArray = [for (t in 0...this.hexArray.length) this.hexArray[t].copy()];
+        s.hexArray = [for (t in 0...IntPoint.hexCount) this.hexArray[t].copy()];
         s.turnColor = this.turnColor;
         s.intellectorPos = [
             White => (intellectorPos.exists(White)? intellectorPos[PieceColor.White].copy() : null), 
             Black => (intellectorPos.exists(Black)? intellectorPos[PieceColor.Black].copy() : null)
         ];
-        s.zobristHash = zobristHash.copy();
         return s;
     }
 

@@ -18,6 +18,7 @@ class IntPoint
     public var j(default, null):Int;
 
     public static var allHexCoords:Array<IntPoint> = [for (i in 0...9) for (j in 0...(7 - i % 2)) new IntPoint(i, j)];
+    public static var hexCount:Int = allHexCoords.length;
 
     public function equals(p:Null<IntPoint>):Bool
     {

@@ -17,7 +17,6 @@ import dict.Phrase;
 import haxe.Timer;
 import struct.Situation;
 import struct.Variant;
-import analysis.AlphaBeta;
 import haxe.ui.styles.Style;
 import gfx.utils.PlyScrollType;
 import struct.Variant;

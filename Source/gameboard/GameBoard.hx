@@ -245,7 +245,7 @@ class GameBoard extends SelectableBoard
             case ConstructSituationRequested(situation):
                 rearrangeToSituation(situation);
             case TurnColorChanged(newTurnColor):
-                shownSituation.setTurnWithZobris(newTurnColor);
+                shownSituation.turnColor = newTurnColor;
             case ApplyChangesRequested:
                 currentSituation = shownSituation.copy();
                 plyHistory.clear();

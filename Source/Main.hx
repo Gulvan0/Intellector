@@ -9,8 +9,6 @@ import struct.Ply;
 import struct.Variant;
 import haxe.ui.components.Link;
 import struct.Situation;
-import analysis.ZobristHashing;
-import analysis.PieceValues;
 import url.Utils as URLUtils;
 import openings.OpeningTree;
 import dict.Dictionary;
@@ -46,8 +44,6 @@ class Main extends Sprite
 		Toolkit.init();
 		Preferences.initSettings();
 		OpeningTree.init();
-		PieceValues.initValues();
-		ZobristHashing.init();
 		AssetManager.init();
 		Changes.initChangelog();
 		var tests = new BoardTests();
