@@ -1,5 +1,8 @@
 package tests;
 
+import gameboard.behaviors.EnemyMoveBehavior;
+import gameboard.states.NeutralState;
+import gameboard.GameBoard;
 import gameboard.SelectableBoard;
 import struct.Ply;
 import struct.ReversiblePly;
@@ -13,6 +16,24 @@ import openfl.display.Sprite;
 
 class BoardTests extends Sprite
 {
+    public function gameboard()
+    {
+        var board:GameBoard = new GameBoard(Situation.starting(), Black);
+        board.init(new NeutralState(board), new EnemyMoveBehavior(board, Black));
+        board.x = 200;
+        board.y = 200;
+        addChild(board);
+        var i = 0;
+        var timer = new Timer(1000);
+        timer.run = () -> {
+            i++;
+            switch i
+            {
+
+            }
+        }
+    }
+
     public function selectable()
     {
         var board:SelectableBoard = new SelectableBoard(Situation.starting());

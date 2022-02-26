@@ -16,7 +16,7 @@ import openfl.display.Sprite;
 
 enum BranchingTabEvent
 {
-    BranchSelected(branch:Array<Ply>, plyStrArray:Array<String>, startingSituation:Situation);
+    BranchSelected(fullBranch:Array<Ply>, plyStrArray:Array<String>, startingSituation:Situation, pointer:Int);
     RevertNeeded(plyCnt:Int);
 }
 
@@ -28,7 +28,7 @@ class BranchingTab extends ScrollView
     public var variant(default, null):Variant;
     public var selectedBranch(default, null):Array<Int> = [];
 
-    private var variantView:IVariantView;
+    public var variantView:IVariantView;
     private var backgroundSprite:Sprite;
     private var variantSprite:Sprite;
     private var vbox:VBox;
@@ -58,9 +58,9 @@ class BranchingTab extends ScrollView
         var extendedPath:Array<Int> = variant.extendPathLeftmost(path);
         selectBranch(extendedPath);
 
-        var plys:Array<Ply> = variant.getBranchByPath(path);
+        var plys:Array<Ply> = variant.getBranchByPath(extendedPath);
         var plyStrs:Array<String> = Ply.plySequenceToNotation(plys, variant.startingSituation);
-        eventHandler(BranchSelected(plys, plyStrs, variant.startingSituation));
+        eventHandler(BranchSelected(plys, plyStrs, variant.startingSituation, path.length));
     }
 
     private function onBranchRemove(path:Array<Int>)

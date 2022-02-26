@@ -39,7 +39,7 @@ using utils.CallbackTools;
 
 enum RightPanelEvent
 {
-    BranchSelected(branch:Array<Ply>, startingSituation:Situation);
+    BranchSelected(branch:Array<Ply>, startingSituation:Situation, pointer:Int);
     RevertNeeded(plyCnt:Int);
     ClearRequested;
     ResetRequested;
@@ -113,7 +113,7 @@ class RightPanel extends Sprite
     {
         switch event 
         {
-            case BranchSelected(branch, plyStrArray, startingSituation):
+            case BranchSelected(branch, plyStrArray, startingSituation, pointer):
                 overviewTab.deprecateScore();
                 overviewTab.navigator.clear();
                 var color:PieceColor = startingSituation.turnColor;
@@ -122,7 +122,7 @@ class RightPanel extends Sprite
                     overviewTab.navigator.writePlyStr(plyStr, color);
                     color = opposite(color);
                 }
-                emit(BranchSelected(branch, startingSituation));
+                emit(BranchSelected(branch, startingSituation, pointer));
             case RevertNeeded(plyCnt):
                 overviewTab.navigator.revertPlys(plyCnt);
                 emit(RevertNeeded(plyCnt));
@@ -158,10 +158,32 @@ class RightPanel extends Sprite
         }
     }
 
+    //TODO: Connect observers with observed
     private function handleGameboardEvent(event:GameBoardEvent)
     {
         switch event
         {
+            case ContinuationMove(ply, plyStr, performedBy):
+                var parentPath = branchingTab.selectedBranch.copy();
+                branchingTab.variantView.addChildNode(parentPath, plyStr, true, branchingTab.variant);
+                overviewTab.navigator.writePlyStr(plyStr, performedBy);
+                branchingTab.variant.addChildToNode(ply, parentPath);
+                branchingTab.updateContentSize();
+                positionEditor.changeColorOptions(opposite(performedBy));
+            case SubsequentMove(plyStr, performedBy):
+                overviewTab.deprecateScore();
+                branchingTab.updateContentSize();
+                positionEditor.changeColorOptions(opposite(performedBy));
+            case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
+                overviewTab.deprecateScore();
+                var plysToRevertCnt = branchLength - plyPointer;
+                var parentPath = branchingTab.selectedBranch.slice(0, plyPointer);
+                branchingTab.variantView.addChildNode(parentPath, plyStr, true, branchingTab.variant);
+                overviewTab.navigator.revertPlys(plysToRevertCnt);
+                overviewTab.navigator.writePlyStr(plyStr, performedBy);
+                branchingTab.variant.addChildToNode(ply, parentPath);
+                branchingTab.updateContentSize();
+                positionEditor.changeColorOptions(opposite(performedBy));
             case SituationEdited(newSituation):
                 branchingTab.clearVariant(newSituation);
             default:

@@ -23,11 +23,10 @@ using Lambda;
 
 enum GameBoardEvent
 {
-    ContinuationMove(plyStr:String, performedBy:PieceColor); //TODO: Emit ContinuationMove in all states
+    ContinuationMove(ply:Ply, plyStr:String, performedBy:PieceColor);
     SubsequentMove(plyStr:String, performedBy:PieceColor);
-    BranchingMove(plyStr:String, performedBy:PieceColor);
+    BranchingMove(ply:Ply, plyStr:String, performedBy:PieceColor, plyPointer:Int, branchLength:Int);
     SituationEdited(newSituation:Situation);
-    //TODO: add events for edit-type states - are they needed?
 }
 
 interface IGameBoardObserver
@@ -165,7 +164,7 @@ class GameBoard extends SelectableBoard
         highlightMove(ply.affectedCoords());
     }
 
-    private function next()
+    public function next()
     {
         var ply = plyHistory.next(); 
         applyMoveTransposition(ply);
@@ -231,11 +230,18 @@ class GameBoard extends SelectableBoard
     {
         switch event 
         {
-            case BranchSelected(branch, startingSituation):
-                var finalSituation = startingSituation.copy();
+            case BranchSelected(branch, startingSituation, pointer):
+                var situation = startingSituation.copy();
+                var i = 0;
+                plyHistory.clear();
                 for (ply in branch)
-                    finalSituation = finalSituation.makeMove(ply);
-                rearrangeToSituation(finalSituation);
+                {
+                    plyHistory.append(ply.toReversible(situation));
+                    situation = situation.makeMove(ply);
+                    if (i == pointer)
+                        rearrangeToSituation(situation);
+                    i++;
+                }
             case RevertNeeded(plyCnt):
                 revertPlys(plyCnt);
             case ClearRequested:
@@ -296,15 +302,19 @@ class GameBoard extends SelectableBoard
             obs.handleGameBoardEvent(e);
     }
 
-    public function new(situation:Situation, playerColor:PieceColor, startState:BaseState, behavior:IBehavior, ?orientationColor:PieceColor, hexSideLength:Float = 40) 
+    public function init(startState:BaseState, startBehavior:IBehavior)
+    {
+        this.state = startState;
+        this.behavior = startBehavior;
+    }
+
+    public function new(situation:Situation, playerColor:PieceColor, ?orientationColor:PieceColor, hexSideLength:Float = 40) 
     {
         super(situation, orientationColor == null? playerColor : orientationColor, hexSideLength, false);
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();
-        this.state = startState;
-        this.behavior = behavior;
 
         addEventListener(Event.ADDED_TO_STAGE, initLMB);
-    }    
+    }
 }

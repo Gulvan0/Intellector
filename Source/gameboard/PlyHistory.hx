@@ -6,12 +6,17 @@ import struct.ReversiblePly;
 class PlyHistory
 {
     private var revPlys:Array<ReversiblePly> = [];
-    private var pointer:Int = 0;
+    public var pointer(default, null):Int = 0;
 
     public function clear()
     {
         revPlys = [];
         pointer = 0;
+    }
+
+    public function length():Int
+    {
+        return revPlys.length;
     }
 
     public function isAtBeginning():Bool

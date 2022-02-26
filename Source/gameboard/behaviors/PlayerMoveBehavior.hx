@@ -1,5 +1,7 @@
 package gameboard.behaviors;
 
+import struct.IntPoint;
+import struct.Ply;
 import net.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;
@@ -23,6 +25,8 @@ class PlayerMoveBehavior implements IBehavior
             case GameEnded(winner_color, reason):
                 boardInstance.state.abortMove();
                 boardInstance.state = new StubState(boardInstance, boardInstance.state.cursorLocation);
+            
+            default:
         }
 	}
     
@@ -44,7 +48,8 @@ class PlayerMoveBehavior implements IBehavior
     public function onMoveChosen(ply:Ply):Void
 	{
         AssetManager.playPlySound(ply, boardInstance.shownSituation);
-        Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto));
+        boardInstance.emit(ContinuationMove(ply.toNotation(boardInstance.shownSituation), playerColor));
+        Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
         boardInstance.makeMove(ply);
         if (Preferences.instance.premoveEnabled)
             boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);

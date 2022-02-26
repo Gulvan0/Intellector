@@ -104,5 +104,6 @@ class Analysis extends Screen
     public function new()
     {
         super();
+        //TODO: Fill (create components, dispose components, make links for UI and Network events)
     }
 }

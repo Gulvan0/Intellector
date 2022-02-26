@@ -6,7 +6,7 @@ class AnalysisCompound extends GameCompound
     private var variant:Variant;
     private var overwriteID:Null<Int> = null;
 
-    private function onMoveMade(ply:Ply)
+    private function onMoveMade(ply:Ply)//
     {
         if (field.plyPointer == field.plyHistory.length)
             onContinuationMove(ply);
@@ -18,7 +18,7 @@ class AnalysisCompound extends GameCompound
         panel.changeEditorColorOptions(field.shownSituation.turnColor);
     }
 
-    private function onContinuationMove(ply:Ply)
+    private function onContinuationMove(ply:Ply)//
     {
         var parentPath = panel.variantTree.selectedBranch.copy();
         panel.variantTree.addChildNode(parentPath, ply.toNotation(field.shownSituation), true, variant);
@@ -27,14 +27,14 @@ class AnalysisCompound extends GameCompound
         variant.addChildToNode(ply, parentPath);
     }
 
-    private function onSubsequentMove(ply:Ply) 
+    private function onSubsequentMove(ply:Ply) //
     {
         panel.deprecateScore();
         field.plyPointer++;
         field.shownSituation = field.shownSituation.makeMove(ply);
     }
 
-    private function onBranchingMove(ply:Ply) 
+    private function onBranchingMove(ply:Ply) //
     {
         panel.deprecateScore();
         var plyNum = field.plyPointer;
@@ -48,7 +48,7 @@ class AnalysisCompound extends GameCompound
         variant.addChildToNode(ply, parentPath);
     }
 
-    private function onBranchClick(path:Array<Int>) 
+    private function onBranchClick(path:Array<Int>) //
     {
         var extendedPath:Array<Int> = variant.extendPathLeftmost(path);
         panel.variantTree.selectBranch(extendedPath);
@@ -72,7 +72,7 @@ class AnalysisCompound extends GameCompound
         }
     }
 
-    private function onBranchCtrlClick(path:Array<Int>)
+    private function onBranchCtrlClick(path:Array<Int>) //
     {
         if (Variant.belongs(path, panel.variantTree.selectedBranch))
         {
@@ -86,24 +86,24 @@ class AnalysisCompound extends GameCompound
         panel.updateBranchingTabContentSize();
     }
 
-    private function onClearPressed() 
+    private function onClearPressed() //
     {
         panel.clearAnalysisScore();
         cast(field, AnalysisField).clearBoard();
     }
 
-    private function onResetPressed() 
+    private function onResetPressed() //
     {
         panel.clearAnalysisScore();
         cast(field, AnalysisField).reset();
     }
 
-    private function onConstructFromSIPPressed(sip:String)
+    private function onConstructFromSIPPressed(sip:String) //
     {
         constructFromSIP(sip, false);
     }
 
-    private function constructFromSIP(sip:String, overrideLastApprovedSIP:Bool) 
+    private function constructFromSIP(sip:String, overrideLastApprovedSIP:Bool) //
     {
         cast(field, AnalysisField).constructFromSIP(sip, overrideLastApprovedSIP);
         panel.changeEditorColorOptions(field.currentSituation.turnColor);
@@ -111,7 +111,7 @@ class AnalysisCompound extends GameCompound
         panel.variantTree.init(variant, []);
     }
 
-    private function onApplyChangesPressed()
+    private function onApplyChangesPressed() //
     {
         panel.navigator.clear();
         panel.deprecateScore();
@@ -119,19 +119,19 @@ class AnalysisCompound extends GameCompound
         cast(field, AnalysisField).applyChanges();
     }
 
-    private function onDiscardChangesPressed()
+    private function onDiscardChangesPressed() //
     {
         panel.navigator.clear();
         panel.showControlTabs();
         cast(field, AnalysisField).discardChanges();
     }
 
-    private function onTurnColorChanged(color:PieceColor)
+    private function onTurnColorChanged(color:PieceColor) //
     {
         field.currentSituation.setTurnWithZobris(color);
     }
 
-    private function onExportStudyRequested()
+    private function onExportStudyRequested() //
     {
         if (overwriteID != null)
             Dialogs.confirm(Dictionary.getPhrase(STUDY_OVERWRITE_CONFIRMATION_MESSAGE), Dictionary.getPhrase(STUDY_OVERWRITE_CONFIRMATION_TITLE), () -> {
@@ -143,7 +143,7 @@ class AnalysisCompound extends GameCompound
             exportStudyAskName(null);
     }
 
-    private function exportStudyAskName(decidedOverwriteID:Null<Int>) 
+    private function exportStudyAskName(decidedOverwriteID:Null<Int>) //
     {
         var response = Browser.window.prompt(Dictionary.getPhrase(STUDY_NAME_SELECTION_MESSAGE));
         if (response != null)
@@ -152,7 +152,7 @@ class AnalysisCompound extends GameCompound
         }
     }
 
-    private function onEditModeChanged(mode:Null<PosEditMode>)
+    private function onEditModeChanged(mode:Null<PosEditMode>) //
     {
         if (cast(field, AnalysisField).editMode == null)
         {
@@ -163,7 +163,7 @@ class AnalysisCompound extends GameCompound
         cast(field, AnalysisField).changeEditMode(mode);
     }
 
-    private function onAnalyzePressed(color:PieceColor) 
+    private function onAnalyzePressed(color:PieceColor) //
     {
         panel.displayLoadingOnScoreLabel();
 

@@ -1,5 +1,8 @@
 package gameboard.behaviors;
 
+import struct.Ply;
+import struct.IntPoint;
+import gameboard.states.StubState;
 import net.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;
@@ -41,7 +44,8 @@ class EnemyMoveBehavior implements IBehavior
         else
         {
             AssetManager.playPlySound(ply, boardInstance.currentSituation);
-            Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto));
+            boardInstance.emit(ContinuationMove(ply.toNotation(boardInstance.shownSituation), playerColor));
+            Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
             boardInstance.makeMove(ply, true);
 
             boardInstance.getHex(ply.from).hideLayer(Premove);
@@ -72,8 +76,10 @@ class EnemyMoveBehavior implements IBehavior
 
             case Move(fromI, toI, fromJ, toJ, morphInto):
                 boardInstance.state.abortMove();
-                var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
+                var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), PieceType.createByName(morphInto));
                 handleOpponentMove(ply);
+
+            default:
         }
 	}
     
@@ -95,7 +101,7 @@ class EnemyMoveBehavior implements IBehavior
     public function onMoveChosen(ply:Ply):Void
 	{
         //No premoveEnabled check because it is impossible to get here from the StubState
-        boardInstance.applyMoveTransposition(ply.toReversible());
+        boardInstance.applyMoveTransposition(ply.toReversible(boardInstance.shownSituation));
         boardInstance.getHex(ply.from).showLayer(Premove);
         boardInstance.getHex(ply.to).showLayer(Premove);
         premoves.push(ply);

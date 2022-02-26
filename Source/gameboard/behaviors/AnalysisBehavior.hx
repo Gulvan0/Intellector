@@ -45,18 +45,18 @@ class AnalysisBehavior implements IBehavior
         if (boardInstance.plyHistory.isAtEnd())
         {
             boardInstance.makeMove(ply);
-            boardInstance.emit(ContinuationMove(plyStr, performedBy));
+            boardInstance.emit(ContinuationMove(ply, plyStr, performedBy));
         }
         else if (boardInstance.plyHistory.equalsNextMove(revPly))
         {
-            boardInstance.highlightMove(revPly.affectedCoords());
+            boardInstance.next();
             boardInstance.emit(SubsequentMove(plyStr, performedBy));
         }
         else
         {
             boardInstance.revertToShown();
             boardInstance.makeMove(ply);
-            boardInstance.emit(BranchingMove(plyStr, performedBy));
+            boardInstance.emit(BranchingMove(ply, plyStr, performedBy, boardInstance.plyHistory.pointer, boardInstance.plyHistory.length()));
         }
 
         colorToMove = opposite(colorToMove);
