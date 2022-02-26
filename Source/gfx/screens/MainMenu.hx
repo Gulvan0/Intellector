@@ -23,7 +23,6 @@ enum MainMenuButton
 
 class MainMenu extends Screen
 {
-    //TODO: Rewrite
     private static var standardBtnWidth:Float = 200;
 
     public override function onEntered()

@@ -16,27 +16,14 @@ class URLEditor
         Browser.window.history.pushState({}, "Intellector", ingameToUrlPath(path));
     }
 
-    //TODO: Move to screens
-    /*public static function assignID(id:Int) 
-    {
-        Browser.window.history.pushState({}, "Intellector", pathname() + "?id=" + id);
-    }
-
-    public static function assignProfileLogin(login:String) 
-    {
-        Browser.window.history.pushState({}, "Intellector", pathname() + "?p=" + login);
-    }*/
-
-    //TODO: Update
     public static function getChallengeLink(login:String):String
     {
-        return '${Browser.location.host}${Browser.location.pathname}?ch=${login}';
+        return Browser.location.host + ingameToUrlPath('challenge/$login');
     }
 
-    //TODO: Update
     public static function getGameLink(id:String):String
     {
-        return '${Browser.location.host}${Browser.location.pathname}?id=${id}';
+        return Browser.location.host + ingameToUrlPath('live/$id');
     }
 
     private static function ingameToUrlPath(ingamePath:String)

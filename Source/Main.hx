@@ -49,10 +49,11 @@ class Main extends Sprite
 		var tests = new BoardTests();
 		addChild(tests);
 		tests.selectable();
-		//addChild(new ScreenManager());
+		//screenManager = new ScreenManager()
+		//Networker.eventQueue.addObserver(screenManager);
+		//addChild(screenManager);
 		//Networker.onConnectionEstabilished = onConnected;
 		//Networker.connect();
-		//ScreenManager.instance.toAnalysisBoard(()->{});
 	}
 
 	private function onConnected()

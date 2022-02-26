@@ -1,5 +1,6 @@
 package gfx;
 
+import net.EventProcessingQueue.INetObserver;
 import js.Browser;
 import net.ServerEvent;
 import gfx.screens.Screen;
@@ -26,7 +27,7 @@ using StringTools;
 /**
     Manages state transition correctness (both for url and for displayed objects)
 **/
-class ScreenManager extends Sprite
+class ScreenManager extends Sprite implements INetObserver
 {
     private static var instance:ScreenManager;
 
@@ -62,7 +63,18 @@ class ScreenManager extends Sprite
         //TODO: Fill (you call it after logging in)
     }
 
-    //TODO: Connect to Networker on startup
+    //For the navigateByURL method (rewrite)
+    /*public static function getShallowSection()
+    {
+        var searcher = new URLSearchParams(Browser.location.search);
+        if (searcher.has("id"))
+			return Game(Std.parseInt(searcher.get("id")));
+        else if (searcher.has("ch"))
+            return OpenChallengeInvitation(searcher.get("ch"));
+        else
+			return Main;
+    }*/
+
     public function handleNetEvent(event:ServerEvent)
     {
         switch event 

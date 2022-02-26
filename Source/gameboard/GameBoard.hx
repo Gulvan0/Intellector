@@ -1,5 +1,7 @@
 package gameboard;
 
+import net.EventProcessingQueue.INetObserver;
+import gfx.analysis.RightPanel.RightPanelObserver;
 import openfl.events.Event;
 import struct.ReversiblePly;
 import gameboard.behaviors.AnalysisBehavior;
@@ -39,7 +41,7 @@ interface IGameBoardObserver
 
     Changes behaviour based on the current state
 **/
-class GameBoard extends SelectableBoard
+class GameBoard extends SelectableBoard implements RightPanelObserver implements INetObserver
 {
     public var plyHistory:PlyHistory;
     public var currentSituation:Situation;
@@ -224,8 +226,7 @@ class GameBoard extends SelectableBoard
         highlightMove([]);
         setSituation(situation.copy());
     }
-
-    //TODO: Connect observers with observed
+    
     public function handleRightPanelEvent(event:RightPanelEvent)
     {
         switch event 
@@ -291,7 +292,7 @@ class GameBoard extends SelectableBoard
         stage.removeEventListener(MouseEvent.MOUSE_UP, onLMBReleased);
     }
 
-    private function addObserver(obs:IGameBoardObserver)
+    public function addObserver(obs:IGameBoardObserver)
     {
         observers.push(obs);
     }
@@ -308,9 +309,9 @@ class GameBoard extends SelectableBoard
         this.behavior = startBehavior;
     }
 
-    public function new(situation:Situation, playerColor:PieceColor, ?orientationColor:PieceColor, hexSideLength:Float = 40) 
+    public function new(situation:Situation, orientationColor:PieceColor, hexSideLength:Float = 40) 
     {
-        super(situation, orientationColor == null? playerColor : orientationColor, hexSideLength, false);
+        super(situation, orientationColor, hexSideLength, false);
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();

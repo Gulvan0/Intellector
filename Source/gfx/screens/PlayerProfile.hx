@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import net.LoginManager;
 import net.EventProcessingQueue.INetObserver;
 import net.ServerEvent;
 import utils.CallbackTools;
@@ -276,8 +277,12 @@ class PlayerProfile extends Screen implements INetObserver
 
     private function studyLink(text:String, overview:StudyOverview):Link
     {
+        var exploredStudyID:Null<Int> = null;
+        if (LoginManager.isPlayer(overview.data.author))
+            exploredStudyID = overview.id;
+
         var link:Link = haxeuiLink(text);
-        link.onClick = (e) -> {ScreenManager.toScreen(new Analysis());}; //TODO: Pass overview
+        link.onClick = (e) -> {ScreenManager.toScreen(new Analysis(overview.data.variantStr, exploredStudyID));};
         return link;
     }
 

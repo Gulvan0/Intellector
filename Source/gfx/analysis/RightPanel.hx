@@ -1,5 +1,8 @@
 package gfx.analysis;
 
+import gameboard.GameBoard.IGameBoardObserver;
+import serialization.PlyDeserializer;
+import gfx.screens.Analysis.NodeInfo;
 import gameboard.GameBoard.GameBoardEvent;
 import serialization.SituationDeserializer;
 import haxe.ui.core.Component;
@@ -61,7 +64,7 @@ interface RightPanelObserver
     public function handleRightPanelEvent(event:RightPanelEvent):Void;    
 }
 
-class RightPanel extends Sprite
+class RightPanel extends Sprite implements IGameBoardObserver
 {
     public static var PANEL_WIDTH = 400;
     public static var PANEL_HEIGHT = 500;
@@ -158,8 +161,7 @@ class RightPanel extends Sprite
         }
     }
 
-    //TODO: Connect observers with observed
-    private function handleGameboardEvent(event:GameBoardEvent)
+    public function handleGameBoardEvent(event:GameBoardEvent)
     {
         switch event
         {
@@ -203,12 +205,33 @@ class RightPanel extends Sprite
         controlTabs.visible = true;
     }
 
+    public function drawVariant(nodesByPathLength:Map<Int, Array<NodeInfo>>)
+    {
+        var maxPathLength:Int = 0;
+        for (k in nodesByPathLength.keys())
+            if (k > maxPathLength)
+                maxPathLength = k;
+
+        for (len in 1...maxPathLength)
+            for (node in nodesByPathLength.get(len))
+            {
+                var parentPath = Variant.parentPath(node.path);
+                branchingTab.variantView.addChildNode(parentPath, node.plyStr, false, branchingTab.variant);
+                branchingTab.variant.addChildToNode(PlyDeserializer.deserialize(node.plyStr), parentPath);
+            }
+    }
+
     public function new(startingSituation:Situation) 
     {
         super();
 
         positionEditor = new PositionEditor();
+        positionEditor.changeColorOptions(startingSituation.turnColor);
         controlTabs = createControlTabs(startingSituation);
+
+        positionEditor.init(handlePositionEditorEvent);
+        overviewTab.init(handleOverviewTabEvent);
+        branchingTab.init(handleBranchingTabEvent);
         
         var fullBox:HBox = new HBox();
         fullBox.addComponent(positionEditor);

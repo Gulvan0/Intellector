@@ -19,8 +19,9 @@ enum ServerEvent
     DirectChallengeSent(callee:String); //Answer to CreateDirectChallenge: direct challenge is sent successfully
     IncomingDirectChallenge(enemy:String, colour:String, startSecs:Int, bonusSecs:Int); //Invoked on recipient side by CreateDirectChallenge
     DirectChallengeDeclined(callee:String); //Answer to CreateDirectChallenge: recipient has declined the challenge
-    DirectChallengeWasCancelled(callee:String); //Answer to accepting/declining direct challenge: it was cancelled before the recipient answered
-    DirectChallengeCallerOffline(caller:String); //Answer to accepting/declining direct challenge: caller went offline before the recipient answered
+    DirectChallengeWasCancelled(callee:String); //Answer to accepting direct challenge: it was cancelled before the recipient answered //! TODO: new event, add logic to both server & client
+    DirectChallengeCallerOffline(caller:String); //Answer to accepting direct challenge: caller went offline before the recipient answered //! TODO: new event, add logic to both server & client
+    DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered //! TODO: new event, add logic to both server & client
     
     OpenChallengeInfo(hostLogin:String, secsStart:Int, secsBonus:Int, color:Null<String>); //Answer to GetOpenChallenge when it exists with challenge details
     OpenchallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist

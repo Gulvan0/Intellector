@@ -148,7 +148,11 @@ class Dictionary
         REMATCH => ["Rematch", "Реванш"],
         ADD_TIME_BTN_TEXT => ["Add time", "Добавить время"],
         INCOMING_CHALLENGE_TEXT => ["$0 wants to play with you ($1). Accept the challenge?", "$0 хочет с вами сыграть ($1). Принять вызов?"],
-        LANGUAGE_NAME => ["English", "Русский"]
+        LANGUAGE_NAME => ["English", "Русский"],
+        SEND_CHALLENGE_RESULT_NOTFOUND => ["Callee not found", "Вызываемый игрок не найден"],
+        ACCEPT_CHALLENGE_RESULT_CANCELLED => ["A challenge has been cancelled", "Оппонент отменил вызов"],
+        ACCEPT_CHALLENGE_RESULT_OFFLINE => ["Caller is offline", "Оппонент не в сети"],
+        ACCEPT_CHALLENGE_RESULT_BUSY => ["Caller is currently playing", "Оппонент в игре"]
     ];
 
     public static function getPhrase(phrase:Phrase, ?substitutions:Array<String>):String

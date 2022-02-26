@@ -30,8 +30,6 @@ class OverviewTab extends VBox
 
     private var eventHandler:OverviewTabEvent->Void;
 
-    //TODO: Event handlers
-
     public function init(eventHandler:OverviewTabEvent->Void)
     {
         this.eventHandler = eventHandler;

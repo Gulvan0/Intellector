@@ -47,18 +47,4 @@ class Utils
             Cookie.remove(PASSWORD_COOKIE, "/");
         }
     }
-
-    //TODO: Move and update
-    public static function getShallowSection():Section
-    {
-        var searcher = new URLSearchParams(Browser.location.search);
-        if (searcher.has("id"))
-			return Game(Std.parseInt(searcher.get("id")));
-        else if (searcher.has("ch"))
-            return OpenChallengeInvitation(searcher.get("ch"));
-        else if (searcher.has("p"))
-            return Profile(searcher.get("p"))
-        else
-			return Main;
-    }
 }

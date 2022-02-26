@@ -8,8 +8,6 @@ import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import openfl.display.Sprite;
 
-//TODO: Make all the screens extend this class
-//TODO: Make sure all the screens use the conventional way of adding components instead of addChild()
 //TODO: Create the section history and the "Back"/"Forward" buttons, which will make use of it
 class Screen extends Sprite
 {

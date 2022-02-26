@@ -44,7 +44,7 @@ class EnemyMoveBehavior implements IBehavior
         else
         {
             AssetManager.playPlySound(ply, boardInstance.currentSituation);
-            boardInstance.emit(ContinuationMove(ply.toNotation(boardInstance.shownSituation), playerColor));
+            boardInstance.emit(ContinuationMove(ply, ply.toNotation(boardInstance.shownSituation), playerColor));
             Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
             boardInstance.makeMove(ply, true);
 
