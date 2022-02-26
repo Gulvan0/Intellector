@@ -1,5 +1,6 @@
 package gameboard;
 
+import openfl.display.Graphics;
 import gfx.utils.Colors;
 import openfl.display.JointStyle;
 import openfl.display.CapsStyle;
@@ -19,6 +20,19 @@ class SelectableBoard extends Board
     private var arrowStartLocation:Null<IntPoint>;
     private var redSelectedHexIndices:Array<Int> = [];
     private var lastMoveSelectedHexes:Array<Hexagon> = [];
+
+    public override function setOrientation(val:PieceColor) 
+    {
+        super.setOrientation(val);
+        for (code => arrow in drawnArrows.keyValueIterator()) //TODO: Think about making a separate class Arrow. BranchingTab's arrows should also be instances of this class
+        {
+            var from:IntPoint = new IntPoint(Std.parseInt(code.charAt(0)), Std.parseInt(code.charAt(1)));
+            var to:IntPoint = new IntPoint(Std.parseInt(code.charAt(2)), Std.parseInt(code.charAt(3)));
+            var fromPos:Point = hexCoords(from);
+            var toPos:Point = hexCoords(to);
+            redrawArrow(arrow.graphics, fromPos, toPos);
+        }
+    }
 
     public function highlightMove(hexesCoords:Array<IntPoint>) 
     {
@@ -40,6 +54,7 @@ class SelectableBoard extends Board
                 getHex(destination).addRound();
     }
 
+    //* Doesn't check whether a marker belongs to a different departure IntPoint since there is normally no more than 1 departure present
     public function removeMarkers(from:IntPoint) 
     {
         for (destination in Rules.possibleFields(from, shownSituation.get))
@@ -124,6 +139,16 @@ class SelectableBoard extends Board
         var fromPos:Point = hexCoords(from);
         var toPos:Point = hexCoords(to);
 
+        var arrow:Sprite = new Sprite();
+        redrawArrow(arrow.graphics, fromPos, toPos);
+        
+        var code = '${from.i}${from.j}${to.i}${to.j}';
+        drawnArrows.set(code, arrow);
+        addChild(arrow);
+    }
+
+    private function redrawArrow(graphics:Graphics, fromPos:Point, toPos:Point) 
+    {
         var thickness:Float = hexSideLength / 6;
         var lrLength:Float = hexSideLength / 2;
         var dr = fromPos.subtract(toPos);
@@ -134,17 +159,13 @@ class SelectableBoard extends Board
         var branch1 = toPos.add(rotated1);
         var branch2 = toPos.add(rotated2);
 
-        var arrow:Sprite = new Sprite();
-        arrow.graphics.lineStyle(thickness, Colors.arrow, 0.7, null, null, CapsStyle.SQUARE, JointStyle.MITER);
-        arrow.graphics.moveTo(fromPos.x, fromPos.y);
-        arrow.graphics.lineTo(toPos.x, toPos.y);
-        arrow.graphics.lineTo(branch1.x, branch1.y);
-        arrow.graphics.moveTo(toPos.x, toPos.y);
-        arrow.graphics.lineTo(branch2.x, branch2.y);
-        
-        var code = '${from.i}${from.j}${to.i}${to.j}';
-        drawnArrows.set(code, arrow);
-        addChild(arrow);
+        graphics.clear();
+        graphics.lineStyle(thickness, Colors.arrow, 0.7, null, null, CapsStyle.SQUARE, JointStyle.MITER);
+        graphics.moveTo(fromPos.x, fromPos.y);
+        graphics.lineTo(toPos.x, toPos.y);
+        graphics.lineTo(branch1.x, branch1.y);
+        graphics.moveTo(toPos.x, toPos.y);
+        graphics.lineTo(branch2.x, branch2.y);
     }
 
     public function new(situation:Situation, orientationColor:PieceColor = White, hexSideLength:Float = 40, suppressMarkup:Bool = false) 

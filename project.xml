@@ -3,7 +3,7 @@
 	<icon path="Assets/favicon.png" />
 	
 	<meta title="Intellector" package="com.sample.intellector" version="1.0.0" company="Company Name" />
-	<app main="Main" path="Export" file="1645747191" />
+	<app main="Main" path="Export" file="1645876908" />
 	<window background="#EEEEEE" />
 	
 	<source path="Source" />

@@ -48,7 +48,7 @@ class Main extends Sprite
 		Changes.initChangelog();
 		var tests = new BoardTests();
 		addChild(tests);
-		tests.simple();
+		tests.selectable();
 		//addChild(new ScreenManager());
 		//Networker.onConnectionEstabilished = onConnected;
 		//Networker.connect();

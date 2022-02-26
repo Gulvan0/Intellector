@@ -33,28 +33,29 @@ class Board extends OffsettedSprite
         return Hexagon.sideToHeight(hexSideLength) * 7;
     }
 
-    public function setOrientation(val:PieceColor):PieceColor 
+    public function setOrientation(val:PieceColor) 
     {
         if (val != orientationColor)
         {
             orientationColor = val;
 
-            for (s in 0...pieces.length)
+            for (s in 0...IntPoint.hexCount)
             {
+                var coords = hexCoords(IntPoint.fromScalar(s));
+
+                var hexagon = hexagons[s];
                 var piece = pieces[s];
+
+                hexagon.x = coords.x;
+                hexagon.y = coords.y;
+
                 if (piece != null)
-                {
-                    var coords = hexCoords(IntPoint.fromScalar(s));
-                    piece.x = coords.x;
-                    piece.y = coords.y;
-                }
+                    piece.dispose(coords);
             }
 
             if (!Lambda.empty(letters))
                 swapLetters();
-        }
-
-        return orientationColor;    
+        } 
     }
 
     public function setSituation(val:Situation)
@@ -132,6 +133,7 @@ class Board extends OffsettedSprite
     {
         var closest:Null<IntPoint> = null;
         var distanceSqr:Float = hexSideLength * hexSideLength;
+
         for (j in 0...7)
             for (i in 0...9)
             {
@@ -146,6 +148,7 @@ class Board extends OffsettedSprite
                     distanceSqr = currDistSqr;
                 }
             }
+
         return closest;
     }
 
