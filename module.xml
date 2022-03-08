@@ -1,0 +1,9 @@
+<module>
+    <components>
+        <component class="gfx.common.Clock" alias="clock" />
+        <component class="gfx.common.MoveNavigator" alias="plynavigator" />
+    </components>
+    <scriptlets>
+        <import package="dict" keep="true" static="true" />
+    </scriptlets>
+</module>

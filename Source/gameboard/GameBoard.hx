@@ -33,7 +33,7 @@ enum GameBoardEvent
 
 interface IGameBoardObserver
 {
-    public function handleGameBoardEvent(e:GameBoardEvent):Void;
+    public function handleGameBoardEvent(event:GameBoardEvent):Void;
 }
 
 /**

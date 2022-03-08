@@ -1,12 +1,13 @@
 package gfx.common;
 
+import haxe.ui.containers.Box;
 import haxe.Timer;
 import openfl.Assets;
 import haxe.ui.styles.Style;
 import utils.TimeControl;
 import haxe.ui.components.Label;
 
-class TimeLeftLabel extends Label
+class TimeLeftLabel extends Box
 {
     private static var defaultStyle:Style = {fontSize: 40};
     private static var hurryStyle:Style = {fontSize: 40, color: 0xCC0000};

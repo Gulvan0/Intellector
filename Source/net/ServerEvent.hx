@@ -38,10 +38,8 @@ enum ServerEvent
     Rollback(plysToUndo:Int); //Signal to undo a number of plys in a current game. Sent to both spectators and players
     GameEnded(winner_color:String, reason:String); //Game over. Sent both to players and to all of the spectators
 
-    OpponentDisconnected; //Sent to a player when his opponent has disconnected from the ongoing game
-    PlayerDisconnected(color:String); //Sent to a spectator when one of the players has disconnected from the spectated game
-    OpponentReconnected; //Sent to a player when his opponent has reconnected to the ongoing game
-    PlayerReconnected(color:String); //Sent to a spectator when one of the players has reconnected to the spectated game
+    PlayerDisconnected(color:String); //Sent to the players and the spectators when one of the players disconnects
+    PlayerReconnected(color:String); //Sent to the players and the spectators when one of the players reconnects
     NewSpectator(login:String); //Sent both to players and to all of the spectators when a new user starts spectating
     SpectatorLeft(login:String); //Sent both to players and to all of the spectators when a user stops spectating
 

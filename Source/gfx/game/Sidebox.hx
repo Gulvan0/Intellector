@@ -1,6 +1,6 @@
 package gfx.game;
 
-import gfx.common.TimeLeftLabel;
+import gfx.common.Clock;
 import dict.Phrase;
 import gfx.utils.PlyScrollType;
 import gfx.common.MoveNavigator;
@@ -23,88 +23,142 @@ import haxe.ui.containers.TableView;
 import haxe.ui.components.Label;
 import openfl.display.Sprite;
 
-class Sidebox extends Sprite
+enum SideboxEvent
 {
-    private static var loginStyle:Style = {fontSize: 24};
+    ChangeOrientationPressed;
+    ResignPressed;
+    OfferDrawPressed;
+    CancelDrawPressed;
+    AcceptDrawPressed;
+    DeclineDrawPressed;
+    OfferTakebackPressed;
+    CancelTakebackPressed;
+    AcceptTakebackPressed;
+    DeclineTakebackPressed;
+    RematchRequested;
+    ExportSIPRequested;
+    ExploreInAnalysisRequest;
+    PlyScrollRequest(type:PlyScrollType);
+}
 
-    private static var BUTTON_BOX_WIDTH:Float = 250;
-    private static var BUTTON_HORIZONTAL_INTERVAL:Float = 5.3;
+interface ISideboxObserver 
+{
+    public function handleSideboxEvent(event:SideboxEvent):Void;    
+}
 
-    private static var FULL_BUTTON_WIDTH:Float = BUTTON_BOX_WIDTH;
-    private static var HALVED_BUTTON_WIDTH:Float = (BUTTON_BOX_WIDTH - BUTTON_HORIZONTAL_INTERVAL) / 2;
-
-    private static var ACCEPT_DECLINE_BTN_WIDTH:Float = 40;
-    private static var REQUEST_ELEMENTS_INTERVAL:Float = 10;
-    private static var REQUEST_LABEL_WIDTH:Float = BUTTON_BOX_WIDTH - ACCEPT_DECLINE_BTN_WIDTH * 2 - REQUEST_ELEMENTS_INTERVAL;
-
-    public var simplified:Bool;
-
-    private var bottomTime:TimeLeftLabel;
-    private var upperTime:TimeLeftLabel;
-
-    private var takebackRequestBox:HBox;
-    private var drawRequestBox:HBox;
-    private var navigator:MoveNavigator;
-    private var bottomLogin:Label;
-    private var upperLogin:Label;
-    private var resignBtn:Button;
-    private var offerDrawBtn:Button;
-    private var cancelDrawBtn:Button;
-    private var offerTakebackBtn:Button;
-    private var cancelTakebackBtn:Button;
-    private var rematchBtn:Button;
-    private var exploreBtn:Button;
-    private var addTimeBtn:Button;
-
-    public var onOfferDrawPressed:Void->Void;
-    public var onCancelDrawPressed:Void->Void;
-    public var onAcceptDrawPressed:Void->Void;
-    public var onDeclineDrawPressed:Void->Void;
-    public var onOfferTakebackPressed:Void->Void;
-    public var onCancelTakebackPressed:Void->Void;
-    public var onAcceptTakebackPressed:Void->Void;
-    public var onDeclineTakebackPressed:Void->Void;
-    public var onExportSIPRequested:Void->Void;
-    public var onExploreInAnalysisRequest:Void->Void;
-
-    private var resignConfirmationMessage:String;
-
-    private var playerTurn:Bool;
+@:build(haxe.ui.macros.ComponentMacros.build("layouts/sidebox.xml"))
+class Sidebox extends VBox
+{
+    private var belongsToSpectator:Bool;
+    private var orientationColor:PieceColor;
     private var move:Int;
 
-    private var playerColor:PieceColor;
     private var secsPerTurn:Int;
+    private var lastMovetableEntry:Dynamic;
 
-    public function correctTime(correctedSecsWhite:Float, correctedSecsBlack:Float, actualTimestamp:Float) 
+    private var observers:Array<ISideboxObserver> = [];
+
+    public function addObserver(obs:ISideboxObserver) 
     {
-        if (playerColor == White)
+        observers.push(obs);
+    }
+
+    public function removeObserver(obs:ISideboxObserver) 
+    {
+        observers.remove(obs);
+    }
+
+    public function emit(event:SideboxEvent) 
+    {
+        for (obs in observers)
+            obs.handleSideboxEvent(event);
+    }
+
+    private function changeActionButtons(shownButtons:Array<Button>)
+    {
+        actionBar.walkComponents(c -> {c.hidden = true;});
+
+        var widthStyle:Style = {percentWidth: 100 / shownButtons.length};
+        for (btn in shownButtons)
         {
-            bottomTime.correctTime(correctedSecsWhite, actualTimestamp);
-            upperTime.correctTime(correctedSecsBlack, actualTimestamp);
-        }
-        else
-        {
-            upperTime.correctTime(correctedSecsWhite, actualTimestamp);
-            bottomTime.correctTime(correctedSecsBlack, actualTimestamp);
+            btn.applyStyle(widthStyle);
+            btn.hidden = false;
         }
     }
 
-    public function terminate() 
+    public function correctTime(correctedSecsWhite:Float, correctedSecsBlack:Float, actualTimestamp:Float) 
+    {
+        whiteClock.correctTime(correctedSecsWhite, actualTimestamp);
+        blackClock.correctTime(correctedSecsBlack, actualTimestamp);
+    }
+
+    private function revertOrientation()
+    {
+        removeComponent(whiteClock);
+        removeComponent(blackClock);
+
+        orientationColor = opposite(orientationColor);
+
+        var upperClock:Clock = orientationColor == White? blackClock : whiteClock;
+        var bottomClock:Clock = orientationColor == White? whiteClock : blackClock;
+
+        addComponentAt(upperClock, 0);
+        addComponent(bottomClock);
+
+        emit(ChangeOrientationPressed);
+    }
+
+    public function onGameEnded() 
     {
         upperTime.stopTimer();
         bottomTime.stopTimer();
 
-        if (!simplified)
+        if (!belongsToSpectator)
+            changeActionButtons([changeOrientationBtn, analyzeBtn, exportSIPBtn, rematchBtn]);
+    }
+
+    //=====================================================================================================================
+    //TODO: Rewrite this section + makeMove + revertPlys
+
+    public function scrollAfterDelay() 
+    {
+        Timer.delay(scrollToEnd, 100);
+    }
+
+    public function scrollToEnd() 
+    {
+        var vscroll = movetable.findComponent(VerticalScroll, false);
+        if (vscroll != null)
+            vscroll.pos = vscroll.max;
+    }
+
+    public function writePlyStr(plyStr:String, performedBy:PieceColor)
+    {
+        if (performedBy == Black)
+            if (plyNumber == 1)
+            {
+                lastMovetableEntry = {"num": '1', "white_move": "", "black_move": plyStr};
+                movetable.dataSource.add(lastMovetableEntry);
+            }
+            else
+            {
+                lastMovetableEntry.black_move = plyStr;
+                movetable.dataSource.update(movetable.dataSource.size - 1, lastMovetableEntry);
+            }
+        else 
         {
-            resignBtn.visible = false;
-            offerDrawBtn.visible = false;
-            cancelDrawBtn.visible = false;
-            offerTakebackBtn.visible = false;
-            cancelTakebackBtn.visible = false;
-            addTimeBtn.visible = false;
-            rematchBtn.visible = true;
-            exploreBtn.visible = true;
+            lastMovetableEntry = {"num": '$plyNumber', "white_move": plyStr, "black_move": " "};
+            movetable.dataSource.add(lastMovetableEntry);
         }
+
+        plyNumber++;
+    }
+
+    public function writePly(ply:Ply, contextSituation:Situation) 
+    {
+        var plyStr = ply.toNotation(contextSituation);
+        var performedBy = contextSituation.turnColor;
+        writePlyStr(plyStr, performedBy);
     }
 
     //========================================================================================================================================================================
@@ -195,182 +249,47 @@ class Sidebox extends Sprite
         navigator.revertPlys(cnt);
     }
 
-    //===========================================================================================================================================================
-
-    public function hasIncomingTakebackRequest():Bool
+    public function init(belongsToSpectator:Bool, startSecs:Int, secsPerTurn:Int, whiteLogin:String, blackLogin:String, orientationColor:PieceColor) 
     {
-        return takebackRequestBox.visible;
-    }
-
-    public function showDrawRequestBox() 
-    {
-        drawRequestBox.visible = true;
-    }
-
-    public function hideDrawRequestBox() 
-    {
-        drawRequestBox.visible = false;
-    }
-
-    public function showTakebackRequestBox() 
-    {
-        takebackRequestBox.visible = true;
-    }
-
-    public function hideTakebackRequestBox() 
-    {
-        takebackRequestBox.visible = false;
-    }
-
-    public function drawOfferHideCancelShow() 
-    {
-        offerDrawBtn.visible = false;
-        cancelDrawBtn.visible = true;
-    }
-
-    public function drawOfferShowCancelHide() 
-    {
-        offerDrawBtn.visible = true;
-        cancelDrawBtn.visible = false;
-    }
-
-    public function takebackOfferHideCancelShow() 
-    {
-        offerTakebackBtn.visible = false;
-        cancelTakebackBtn.visible = true;
-    }
-
-    public function takebackOfferShowCancelHide() 
-    {
-        offerTakebackBtn.visible = true;
-        cancelTakebackBtn.visible = false;
-    }
-
-    private function onResignPressed() 
-    {
-        var confirmed = Browser.window.confirm(resignConfirmationMessage);
-
-		if (confirmed)
-			Networker.emitEvent(Resign);
-    }
-
-    //===========================================================================================================================================================
-
-    private function buildSpecialBtns(container:VBox, opponentLogin:String, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerIsWhite:Bool)
-    {
-        resignBtn = constructBtn(HALVED_BUTTON_WIDTH, RESIGN_BTN_ABORT_TEXT,  (e) -> {onResignPressed();});
-        offerDrawBtn = constructBtn(HALVED_BUTTON_WIDTH, OFFER_DRAW_BTN_TEXT, (e) -> {onOfferDrawPressed();});
-        cancelDrawBtn = constructBtn(HALVED_BUTTON_WIDTH, CANCEL_DRAW_BTN_TEXT, (e) -> {onCancelDrawPressed();}, false);
+        this.belongsToSpectator = belongsToSpectator;
+        this.secsPerTurn = secsPerTurn;
+        this.orientationColor = orientationColor;
+        this.move = 1; //TODO: Change to zero?
         
-        var resignAndDraw:HBox = new HBox();
-        resignAndDraw.addComponent(resignBtn);
-        resignAndDraw.addComponent(offerDrawBtn);
-        resignAndDraw.addComponent(cancelDrawBtn);
-        
-        addTimeBtn = constructBtn(FULL_BUTTON_WIDTH, ADD_TIME_BTN_TEXT,  (e) -> {Networker.emitEvent(AddTime);});
-        offerTakebackBtn = constructBtn(FULL_BUTTON_WIDTH, TAKEBACK_BTN_TEXT, (e) -> {onOfferTakebackPressed();});
-        cancelTakebackBtn = constructBtn(FULL_BUTTON_WIDTH, CANCEL_TAKEBACK_BTN_TEXT, (e) -> {onCancelTakebackPressed();}, false);
-        rematchBtn = constructBtn(FULL_BUTTON_WIDTH, REMATCH,  (e) -> {Networker.emitEvent(CreateDirectChallenge(opponentLogin, startSecs, secsPerTurn, playerIsWhite? "b" : "w"));}, false); //TODO: Check whether these values are expected
-        
-        container.addComponent(resignAndDraw);
-		container.addComponent(addTimeBtn);
-		container.addComponent(offerTakebackBtn);
-        container.addComponent(cancelTakebackBtn);
-		container.addComponent(rematchBtn);
+        whiteClock.init(startSecs, false, startSecs >= 90);
+        bottomTime.init(startSecs, !belongsToSpectator, startSecs >= 90);
 
-        offerDrawBtn.disabled = true;
-        cancelDrawBtn.disabled = true;
-        offerTakebackBtn.disabled = true;
-        cancelTakebackBtn.disabled = true;
-        resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
+        whiteLoginLabel.text = whiteLogin;
+        blackLoginLabel.text = blackLogin;
+
+        changeOrientationBtn.onClick = revertOrientation.expand();
+        resignBtn.onClick = emit.bind(ResignPressed).expand();
+        offerDrawBtn.onClick = emit.bind(OfferDrawPressed).expand();
+        cancelDrawBtn.onClick = emit.bind(CancelDrawPressed).expand();
+        addTimeBtn.onClick = Networker.emitEvent.bind(AddTime).expand();
+        offerTakebackBtn.onClick = emit.bind(OfferDrawPressed).expand();
+        cancelTakebackBtn.onClick = emit.bind(CancelDrawPressed).expand();
+        rematchBtn.onClick = emit.bind(CancelDrawPressed).expand();
+        exportSIPBtn.onClick = emit.bind(ExportSIPRequested).expand();
+        analyzeBtn.onClick = emit.bind(ExploreInAnalysisRequest).expand();
+        declineDrawBtn.onClick = emit.bind(DeclineDrawPressed).expand();
+        acceptDrawBtn.onClick = emit.bind(AcceptDrawPressed).expand();
+        declineTakebackBtn.onClick = emit.bind(DeclineTakebackPressed).expand();
+        acceptTakebackBtn.onClick = emit.bind(AcceptTakebackPressed).expand();
+        
+        navigator.init(type -> {emit(PlyScrollRequest(type));});
+
+        if (belongsToSpectator)
+            changeActionButtons([changeOrientationBtn, analyzeBtn, exportSIPBtn]);
+        else
+            changeActionButtons([changeOrientationBtn, offerDrawBtn, offerTakebackBtn, resignBtn, addTimeBtn]);
+
+        if (orientationColor == Black)
+            revertOrientation(null);
     }
-
-    public function new(spectators:Bool, startSecs:Null<Int>, secsPerTurn:Null<Int>, playerLogin:String, opponentLogin:String, playerIsWhite:Bool, onClickCallback:PlyScrollType->Void) 
+    
+    public function new()
     {
         super();
-        this.simplified = spectators;
-        this.secsPerTurn = secsPerTurn;
-        move = 1;
-        playerColor = playerIsWhite? White : Black;
-        playerTurn = playerIsWhite;
-        var hasTime:Bool = startSecs != null && secsPerTurn != null;
-
-        if (hasTime)
-        {
-            upperTime = new TimeLeftLabel(startSecs, false, startSecs >= 90);
-            bottomTime = new TimeLeftLabel(startSecs, !spectators, startSecs >= 90);
-        }
-
-        upperLogin = buildLabel(opponentLogin, loginStyle);
-        navigator = new MoveNavigator(onClickCallback);
-        exploreBtn = constructBtn(250, EXPLORE_IN_ANALYSIS_BTN_TEXT, (e) -> {onExploreInAnalysisRequest();}, spectators);
-        bottomLogin = buildLabel(playerLogin, loginStyle);
-
-        var box:VBox = new VBox();
-        box.addComponent(upperTime);
-
-        if (hasTime)
-            box.addComponent(upperLogin);
-
-        if (!spectators)
-        {
-            takebackRequestBox = buildRequestBox(box, TAKEBACK_QUESTION_TEXT, (e) -> {onAcceptTakebackPressed();}, (e) -> {onDeclineTakebackPressed();});
-            drawRequestBox = buildRequestBox(box, DRAW_QUESTION_TEXT, (e) -> {onAcceptDrawPressed();}, (e) -> {onDeclineDrawPressed();});
-        }
-
-        box.addComponent(navigator);
-        box.addComponent(exploreBtn);
-
-        if (!spectators)
-            buildSpecialBtns(box, opponentLogin, startSecs, secsPerTurn, playerIsWhite);
-
-        box.addComponent(constructBtn(250, ANALYSIS_EXPORT_SIP,  (e) -> {onExportSIPRequested();}));
-        box.addComponent(bottomLogin);
-
-        if (hasTime)
-            box.addComponent(bottomTime);
-
-        addChild(box);
-    }
-
-    private function constructBtn(width:Float, phrase:Phrase, onClick:Dynamic->Void, ?visible:Bool = true, ?color:Color):Button
-    {
-        return constructBtnStr(width, Dictionary.getPhrase(phrase), onClick, visible, color);
-    }
-
-    private function constructBtnStr(width:Float, text:String, onClick:Dynamic->Void, ?visible:Bool = true, ?color:Color):Button 
-    {
-        var btn:Button = new Button();
-        btn.width = width;
-        btn.text = text;
-        btn.color = color;
-        btn.onClick = onClick;
-        btn.visible = visible;
-        return btn;
-    }
-
-    private function buildLabel(text:String, style:Style, ?textAlign:String):Label
-    {
-        var label:Label = new Label();
-        label.text = text;
-        label.customStyle = style;
-        label.textAlign = textAlign;
-        return label;
-    }
-
-    private function buildRequestBox(container:VBox, questionPhrase:Phrase, onAccept:Dynamic->Void, onDecline:Dynamic->Void)
-    {
-        var declineBtn = constructBtnStr(ACCEPT_DECLINE_BTN_WIDTH, "✘", onDecline, Color.fromString("red"));
-        var requestLabel:Label = buildLabel(Dictionary.getPhrase(questionPhrase), {}, "center");
-        var acceptBtn = constructBtnStr(ACCEPT_DECLINE_BTN_WIDTH, "✔", onAccept, Color.fromString("green"));
-
-        var requestBox:HBox = new HBox();
-        requestBox.visible = false;
-		requestBox.addComponent(declineBtn);
-        requestBox.addComponent(requestLabel);
-        requestBox.addComponent(acceptBtn);
-        
-        container.addComponent(requestBox);
-        return requestBox;
     }
 }

@@ -9,14 +9,16 @@ import haxe.ui.components.VerticalScroll;
 import haxe.ui.components.Button;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.TableView;
+import haxe.ui.macros.ComponentMacros;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 using utils.CallbackTools;
 
-@:build(haxe.ui.macros.ComponentMacros.buildComponent("Assets/layouts/plynavigator.xml"))
 class MoveNavigator extends VBox
 {
-    private var plyNumber:Int = 1;
+    private var movetable:TableView;
+
+    private var plyNumber:Int;
     private var lastMovetableEntry:Dynamic;
 
     public function scrollAfterDelay() 
@@ -94,16 +96,46 @@ class MoveNavigator extends VBox
         plyNumber = 1;
     }
 
-    public function init(onClickCallback:PlyScrollType->Void) 
+    private function buildPlyScrollBtn(type:PlyScrollType, onClick:Void->Void):Button
     {
-        homeBtn.onClick = onClickCallback.bind(Home).expand();
-        prevBtn.onClick = onClickCallback.bind(Prev).expand();
-        nextBtn.onClick = onClickCallback.bind(Next).expand();
-        endBtn.onClick = onClickCallback.bind(End).expand();
-    } 
-    
-    public function new()
+        var btnText:String = switch type 
+        {
+            case Home: "❙◄◄";
+            case Prev: "◄";
+            case Next: "►";
+            case End: "►►❙";
+        };
+
+        var btn:Button = new Button();
+		btn.width = (250 - 5.3 * 3) / 4;
+		btn.text = btnText;
+        btn.onClick = onClick.expand();
+        return btn;
+    }
+
+    private function constructControls(onClickCallback:PlyScrollType->Void):HBox
+    {
+        var matchViewControls:HBox = new HBox();
+
+        for (type in PlyScrollType.createAll())
+        {
+            var callback:Void->Void = onClickCallback.bind(type);
+            var btn:Button = buildPlyScrollBtn(type, callback);
+            matchViewControls.addComponent(btn);
+        }
+
+        return matchViewControls;
+    }
+
+    public function new(onClickCallback:PlyScrollType->Void) 
     {
         super();
-    }   
+        plyNumber = 1;
+
+        var matchViewControls = constructControls(onClickCallback);
+        addComponent(matchViewControls);
+
+        movetable = ComponentMacros.buildComponent("assets/layouts/movetable.xml");
+        addComponent(movetable);
+    }    
 }

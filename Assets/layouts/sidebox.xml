@@ -1,0 +1,35 @@
+<vbox width="300px">
+    <clock id="blackClock" />
+    <card style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px" width="100%">
+        <label id="blackLoginLabel" text="player2" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
+    </card>
+    <plynavigator id="navigator"/>
+    <vbox width="100%" style="padding: 1 1 1 1">
+        <button-bar id="actionBar" toggle="false" width="100%">
+            <button id="changeOrientationBtn" text="⇵" tooltip="${Dictionary.getPhrase(CHANGE_ORIENTATION_BTN_TOOLTIP)}" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="offerDrawBtn" text="½" tooltip="${Dictionary.getPhrase(OFFER_DRAW_BTN_TOOLTIP)}" width="20%" height="35px" disabled="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="cancelDrawBtn" text="✖" tooltip="${Dictionary.getPhrase(CANCEL_DRAW_BTN_TOOLTIP)}" width="20%" height="35px" hidden="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="offerTakebackBtn" text="⮪" tooltip="${Dictionary.getPhrase(TAKEBACK_BTN_TOOLTIP)}" width="20%" height="35px" disabled="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="cancelTakebackBtn" text="✖" tooltip="${Dictionary.getPhrase(CANCEL_TAKEBACK_BTN_TOOLTIP)}" width="20%" height="35px" hidden="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="resignBtn" text="⚐" tooltip="${Dictionary.getPhrase(RESIGN_BTN_TOOLTIP)}" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="addTimeBtn" text="+⧖" tooltip="${Dictionary.getPhrase(ADD_TIME_BTN_TOOLTIP)}" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="analyzeBtn" text="🔬&#xFE0E;" tooltip="${Dictionary.getPhrase(EXPLORE_IN_ANALYSIS_BTN_TOOLTIP)}" hidden="true" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="exportSIPBtn" text="SIP" tooltip="${Dictionary.getPhrase(EXPORT_SIP_BTN_TOOLTIP)}" hidden="true" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+            <button id="rematchBtn" text="⚔" tooltip="${Dictionary.getPhrase(REMATCH_BTN_TOOLTIP)}" hidden="true" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+        </button-bar>
+        <hbox width="100%" height="35px" style="background-color: #f7f7f7;border-bottom: 1;border-color: #dddddd;padding: 0 0 0 1;">
+            <button id="declineDrawBtn" width="13.5%" height="100%" text="✘" style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:0px;text-align:center;font-size:24px;color: #c80316" horizontalAlign="left"/>
+            <label id="drawRequestLabel" width="73%" text="${DRAW_QUESTION_TEXT}" style="font-style: italic;text-align:center;font-size:22px;color: #444444" horizontalAlign="center" verticalAlign="center"/>
+            <button id="acceptDrawBtn" width="13.5%" height="100%" text="✓" style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:0px;text-align:center;font-size:24px;color: #1ace03" horizontalAlign="right"/>
+        </hbox>  
+        <hbox width="100%" height="35px" style="background-color: #f7f7f7;border-bottom: 1;border-color: #dddddd;padding: 0 0 0 1;">
+            <button id="declineTakebackBtn" width="13.5%" height="100%" text="✘" style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:0px;text-align:center;font-size:24px;color: #c80316" horizontalAlign="left"/>
+            <label id="takebackRequestLabel" width="73%" text="${TAKEBACK_QUESTION_TEXT}" style="font-style: italic;text-align:center;font-size:22px;color: #444444" horizontalAlign="center" verticalAlign="center"/>
+            <button id="acceptTakebackBtn" width="13.5%" height="100%" text="✓" style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:0px;text-align:center;font-size:24px;color: #1ace03" horizontalAlign="right"/>
+        </hbox>  
+    </vbox>
+    <card style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px" width="100%">
+        <label id="whiteLoginLabel" text="player1" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
+    </card>
+    <clock id="whiteClock" />
+</vbox>
