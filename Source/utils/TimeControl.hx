@@ -25,4 +25,24 @@ class TimeControl
         }
         return str;    
     }
+
+    public var startSecs:Int;
+    public var bonusSecs:Int;
+
+    public function toString() 
+    {
+        if (startSecs % 60 == 0)
+        {
+            var startMins:Int = Math.round(startSecs / 60);
+            return '$startMins+$bonusSecs';
+        }
+        else 
+            return '$startSecs' + 's+$bonusSecs';
+    }
+
+    public function new(startSecs:Int, bonusSecs:Int)
+    {
+        this.startSecs = startSecs;
+        this.bonusSecs = bonusSecs;
+    }
 }

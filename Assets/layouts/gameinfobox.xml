@@ -1,0 +1,5 @@
+<card>
+    <label id="shortInfoTF" horizontalAlign="center" style="font-size:14px" />
+    <label id="opponentsTF" horizontalAlign="center" style="font-size:16px" />
+    <label id="openingTF" width="100%" horizontalAlign="center" style="font-size:14px;font-style: italic;text-align:left" />
+</card>

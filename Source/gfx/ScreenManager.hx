@@ -100,6 +100,16 @@ class ScreenManager extends Sprite implements INetObserver
         toGameGeneric(data.match_id, GameCompound.buildActive(data, onReturnPressed));
     }
 
+    /*
+        var playerColor:PieceColor;
+        if (LoginManager.isPlayer(whiteLogin))
+            playerColor = White;
+        else if (LoginManager.isPlayer(blackLogin))
+            playerColor = Black;
+        else
+            throw "initPlayable() called, but player not found among the participants";
+    *//*
+
     //TODO: Rewrite. Pass ServerEvent constructor parameters. Create and use corresponding screen instead of GameCompound
     public function toGameReconnect(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String) 
     {

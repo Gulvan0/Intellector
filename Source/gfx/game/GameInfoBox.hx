@@ -1,5 +1,14 @@
 package gfx.game;
 
+import net.EventProcessingQueue.INetObserver;
+import gameboard.GameBoard.IGameBoardObserver;
+import struct.IntPoint;
+import serialization.GameLogParser;
+import serialization.GameLogParser.GameLogParserOutput;
+import gameboard.GameBoard.GameBoardEvent;
+import net.ServerEvent;
+import utils.TimeControl;
+import haxe.ui.containers.Card;
 import haxe.ui.containers.VBox;
 import gfx.components.Shapes;
 import struct.Ply;
@@ -13,6 +22,7 @@ import haxe.ui.containers.Box;
 import openfl.text.TextField;
 import openfl.display.Sprite;
 
+//TODO: Move to struct
 enum Outcome
 {
     Mate;
@@ -26,19 +36,57 @@ enum Outcome
     Abort;
 }
 
-class GameInfoBox extends Sprite
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/gameinfobox.xml'))
+class GameInfoBox extends Card implements IGameBoardObserver implements INetObserver
 {
-    private var box:Box;
-
-    private var shortInfoTF:Label;
-    private var opponentsTF:Label;
-    private var openingTF:Label;
-
     private var timeControlText:String;
     private var resolutionText:String;
+
     private var openingTree:OpeningTree;
 
-    public function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
+    public function handleNetEvent(event:ServerEvent)
+    {
+        switch event 
+        {
+            case Move(fromI, toI, fromJ, toJ, morphInto):
+                var ply:Ply = new Ply();
+                ply.from = new IntPoint(fromI, fromJ);
+                ply.to = new IntPoint(toI, toJ);
+                ply.morphInto = morphInto == null? null : PieceType.createByName(morphInto);
+                accountMove(ply);
+            case Rollback(plysToUndo):
+                revertPlys(plysToUndo);
+            case GameEnded(winner_color, reason):
+                changeResolution(GameLogParser.decodeOutcome(reason), PieceColor.createByName(winner_color));
+            default:
+        }
+    }
+
+    public function handleGameBoardEvent(event:GameBoardEvent)
+    {
+        switch event 
+        {
+            case ContinuationMove(ply, plyStr, performedBy):
+                accountMove(ply);
+            default:
+        }
+    }
+
+    private function actualize(parsedData:GameLogParserOutput)
+    {
+        if (parsedData.timeControl != null)
+            setTimeControl(parsedData.timeControl);
+
+        if (parsedData.outcome != null)
+            changeResolution(parsedData.outcome, parsedData.winnerColor);
+
+        for (ply in parsedData.movesPlayed)
+            accountMove(ply);
+
+        refreshShortInfo();
+    }
+
+    private function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
     {
         resolutionText = switch outcome 
         {
@@ -52,16 +100,31 @@ class GameInfoBox extends Sprite
             case NoProgress: Dictionary.getPhrase(RESOLUTION_HUNDRED);
             case Timeout: Dictionary.getPhrase(RESOLUTION_TIMEOUT) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
         }
-        reconstructShortInfo();
+        refreshShortInfo();
     }
 
-    public function setTimeControl(startSecs:Int, bonusSecs:Int) 
+    private function setTimeControl(timeControl:TimeControl) 
     {
-        timeControlText = Math.round(startSecs/60) + "+" + bonusSecs;
-        reconstructShortInfo();
+        timeControlText = timeControl.toString();
+        refreshShortInfo();
     }
 
-    private function reconstructShortInfo() 
+    private function accountMove(ply:Ply)
+    {
+        if (!openingTree.currentNode.terminal)
+        {
+            openingTree.makeMove(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
+            openingTF.text = openingTree.currentNode.name;
+        }
+    }
+
+    private function revertPlys(cnt:Int) 
+    {
+        openingTree.revertMoves(cnt);
+        openingTF.text = openingTree.currentNode.name;
+    }
+
+    private function refreshShortInfo() 
     {
         if (timeControlText == "")
             shortInfoTF.text = resolutionText;
@@ -71,65 +134,25 @@ class GameInfoBox extends Sprite
             shortInfoTF.text = timeControlText + " • " +  resolutionText;
     }
 
-    public function makeMove(ply:Ply)
-    {
-        if (!openingTree.currentNode.terminal)
-        {
-            openingTree.makeMove(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
-            openingTF.text = openingTree.currentNode.name;
-        }
-    }
-
-    public function revertPlys(cnt:Int) 
-    {
-        openingTree.revertMoves(cnt);
-        openingTF.text = openingTree.currentNode.name;
-    }
-
-    public function new(width:Float, height:Float, tcStartSeconds:Null<Int>, tcBonusSeconds:Null<Int>, whiteLogin:String, blackLogin:String) 
+    public function new(width:Float, height:Float, timeControl:Null<TimeControl>, whiteLogin:String, blackLogin:String, ?actualizationData:GameLogParserOutput) 
     {
         super();
+        this.width = width;
+        this.height = height;
+
         openingTree = new OpeningTree();
 
-        addChild(Shapes.rect(width, height, 0x999999, 1, LineStyle.Square, 0xFFFFFF));
-        
-        var shortInfoStyle:Style = {fontSize: 14};
-        var opponentsStyle:Style = {fontSize: 16};
-        var openingStyle:Style = {fontSize: 14, fontItalic: true};
-
-        var boxWidth = width - 10;
-
-        var vbox:VBox = new VBox();
-        vbox.width = boxWidth;
-        vbox.y = 5;
-
-        shortInfoTF = new Label();
-        shortInfoTF.customStyle = shortInfoStyle;
-        shortInfoTF.width = boxWidth;
-        shortInfoTF.horizontalAlign = 'center';
-        vbox.addComponent(shortInfoTF);
-
-        timeControlText = "";
-        if (tcStartSeconds != null && tcBonusSeconds != null)
-            setTimeControl(tcStartSeconds, tcBonusSeconds);
-        resolutionText = Dictionary.getPhrase(RESOLUTION_NONE);
-        reconstructShortInfo();
-
-        opponentsTF = new Label();
         opponentsTF.text = '$whiteLogin vs $blackLogin';
-        opponentsTF.customStyle = opponentsStyle;
-        opponentsTF.textAlign = 'center';
-        opponentsTF.width = boxWidth;
-        opponentsTF.horizontalAlign = 'center';
-        vbox.addComponent(opponentsTF);
-
-        openingTF = new Label();
         openingTF.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
-        openingTF.customStyle = openingStyle;
-        openingTF.width = boxWidth;
-        openingTF.horizontalAlign = 'center';
-        vbox.addComponent(openingTF);
 
-        addChild(vbox);
+        resolutionText = Dictionary.getPhrase(RESOLUTION_NONE);
+        timeControlText = "";
+        if (timeControl != null)
+            setTimeControl(timeControl);
+        
+        if (actualizationData != null)
+            actualize(actualizationData);
+        else
+            refreshShortInfo();
     }
 }

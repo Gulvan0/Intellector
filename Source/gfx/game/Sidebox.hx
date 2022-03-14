@@ -1,6 +1,9 @@
 package gfx.game;
 
+import net.EventProcessingQueue.INetObserver;
+import net.ServerEvent;
 import gfx.common.Clock;
+import haxe.ui.containers.Card;
 import dict.Phrase;
 import gfx.utils.PlyScrollType;
 import gfx.common.MoveNavigator;
@@ -16,12 +19,12 @@ import openfl.display.StageAlign;
 import haxe.Timer;
 import struct.PieceType;
 import struct.PieceColor;
-import haxe.ui.macros.ComponentMacros;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.VBox;
 import haxe.ui.containers.TableView;
 import haxe.ui.components.Label;
 import openfl.display.Sprite;
+using utils.CallbackTools;
 
 enum SideboxEvent
 {
@@ -46,9 +49,10 @@ interface ISideboxObserver
     public function handleSideboxEvent(event:SideboxEvent):Void;    
 }
 
-@:build(haxe.ui.macros.ComponentMacros.build("layouts/sidebox.xml"))
-class Sidebox extends VBox
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/sidebox.xml'))
+class Sidebox extends VBox implements INetObserver
 {
+    private var enableTakebackAfterMove:Int;
     private var belongsToSpectator:Bool;
     private var orientationColor:PieceColor;
     private var move:Int;
@@ -74,15 +78,25 @@ class Sidebox extends VBox
             obs.handleSideboxEvent(event);
     }
 
+    public function handleNetEvent(event:ServerEvent)
+    {
+        //TODO: Fill
+    }
+
+    //TODO: Maybe implement handleGameboardEvent()
+
+    //TODO: Also make most of the currently public methods private as the references become weak thanks to observer pattern
+
     private function changeActionButtons(shownButtons:Array<Button>)
     {
-        actionBar.walkComponents(c -> {c.hidden = true;});
+        for (i in 0...actionBar.numComponents)
+            actionBar.getComponentAt(i).hidden = true;
 
-        var widthStyle:Style = {percentWidth: 100 / shownButtons.length};
+        var btnWidth:Float = 100 / shownButtons.length;
         for (btn in shownButtons)
         {
-            btn.applyStyle(widthStyle);
             btn.hidden = false;
+            btn.percentWidth = btnWidth;
         }
     }
 
@@ -94,15 +108,22 @@ class Sidebox extends VBox
 
     private function revertOrientation()
     {
-        removeComponent(whiteClock);
-        removeComponent(blackClock);
+        removeComponent(whiteClock, false);
+        removeComponent(blackClock, false);
+        removeComponent(whiteLoginCard, false);
+        removeComponent(blackLoginCard, false);
 
         orientationColor = opposite(orientationColor);
 
         var upperClock:Clock = orientationColor == White? blackClock : whiteClock;
         var bottomClock:Clock = orientationColor == White? whiteClock : blackClock;
+        var upperLogin:Card = orientationColor == White? blackLoginCard : whiteLoginCard;
+        var bottomLogin:Card = orientationColor == White? whiteLoginCard : blackLoginCard;
 
+        addComponentAt(upperLogin, 0);
         addComponentAt(upperClock, 0);
+
+        addComponent(bottomLogin);
         addComponent(bottomClock);
 
         emit(ChangeOrientationPressed);
@@ -110,99 +131,43 @@ class Sidebox extends VBox
 
     public function onGameEnded() 
     {
-        upperTime.stopTimer();
-        bottomTime.stopTimer();
+        whiteClock.stopTimer();
+        blackClock.stopTimer();
 
         if (!belongsToSpectator)
             changeActionButtons([changeOrientationBtn, analyzeBtn, exportSIPBtn, rematchBtn]);
     }
 
-    //=====================================================================================================================
-    //TODO: Rewrite this section + makeMove + revertPlys
-
-    public function scrollAfterDelay() 
-    {
-        Timer.delay(scrollToEnd, 100);
-    }
-
-    public function scrollToEnd() 
-    {
-        var vscroll = movetable.findComponent(VerticalScroll, false);
-        if (vscroll != null)
-            vscroll.pos = vscroll.max;
-    }
-
-    public function writePlyStr(plyStr:String, performedBy:PieceColor)
-    {
-        if (performedBy == Black)
-            if (plyNumber == 1)
-            {
-                lastMovetableEntry = {"num": '1', "white_move": "", "black_move": plyStr};
-                movetable.dataSource.add(lastMovetableEntry);
-            }
-            else
-            {
-                lastMovetableEntry.black_move = plyStr;
-                movetable.dataSource.update(movetable.dataSource.size - 1, lastMovetableEntry);
-            }
-        else 
-        {
-            lastMovetableEntry = {"num": '$plyNumber', "white_move": plyStr, "black_move": " "};
-            movetable.dataSource.add(lastMovetableEntry);
-        }
-
-        plyNumber++;
-    }
-
-    public function writePly(ply:Ply, contextSituation:Situation) 
-    {
-        var plyStr = ply.toNotation(contextSituation);
-        var performedBy = contextSituation.turnColor;
-        writePlyStr(plyStr, performedBy);
-    }
-
     //========================================================================================================================================================================
 
-    public function makeMove(ply:Ply, situation:Situation) 
+    public function makeMove(plyStr:String, isFinal:Bool) 
     {
-        if (!situation.isMating(ply) && move >= 2 && secsPerTurn != null)
-        {
-            if (playerTurn)
-            {
-                bottomTime.addTime(secsPerTurn);
-                bottomTime.stopTimer();
-                upperTime.launchTimer();
-            }
-            else
-            {
-                //Does not add bonus because corrections have already been applied if it is the opponent's turn ("correct, then move" server rule)
-                upperTime.stopTimer();
-                bottomTime.launchTimer();
-            }
-        }
+        move++;
 
-        navigator.writePly(ply, situation);
+        var justMovedColor:PieceColor = move % 2 == 1? White : Black;
+        var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
+        var playerToMoveClock:Clock = justMovedColor == Black? blackClock : whiteClock;
+
+        justMovedPlayerClock.stopTimer();
+
+        if (!isFinal && move >= 2)
+            playerToMoveClock.launchTimer();
+
+        if (!isFinal && move >= 3)
+            justMovedPlayerClock.addTime(secsPerTurn);
+
+        navigator.writePlyStr(plyStr, justMovedColor);
         navigator.scrollAfterDelay();
 
-        if (!simplified)
-        {
-            if (move == 1 && playerColor == White || move == 2 && playerColor == Black)
-            {
-                offerTakebackBtn.disabled = false;
-                cancelTakebackBtn.disabled = false;
-            }
+        if (move == enableTakebackAfterMove)
+            offerTakebackBtn.disabled = false;
 
-            if (move == 2)
-            {
-                offerDrawBtn.disabled = false;
-                cancelDrawBtn.disabled = false;
-                resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_TEXT);
-                resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
-            }
+        if (move == 2)
+        {
+            offerDrawBtn.disabled = false;
+            resignBtn.text = "⚐";
+            resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_TOOLTIP);
         }
-        
-        move++;
-        playerTurn = situation.turnColor != playerColor;
     }
 
     public function revertPlys(cnt:Int) 
@@ -211,53 +176,50 @@ class Sidebox extends VBox
             return;
         
         move -= cnt;
+
+        var justMovedColor:PieceColor = move % 2 == 1? White : Black;
+        var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
+        var playerToMoveClock:Clock = justMovedColor == Black? blackClock : whiteClock;
+
         if (cnt % 2 == 1)
         {
-            playerTurn = !playerTurn;
-            if (playerTurn)
-            {
-                upperTime.stopTimer();
-                bottomTime.launchTimer();
-            }
-            else
-            {
-                bottomTime.stopTimer();
-                upperTime.launchTimer();
-            }
+            justMovedPlayerClock.stopTimer();
+            playerToMoveClock.launchTimer();
         }
 
-        if (!simplified)
+        if (!belongsToSpectator)
         {
-            hideTakebackRequestBox();
-            takebackOfferShowCancelHide();
+            takebackRequestBox.hidden = true;
+            cancelTakebackBtn.hidden = true;
+            offerTakebackBtn.hidden = false;
 
-            if (move < 2 && playerColor == White || move < 3 && playerColor == Black)
-            {
+            if (move < enableTakebackAfterMove)
                 offerTakebackBtn.disabled = true;
-                cancelTakebackBtn.disabled = true;
-            }
 
-            if (move < 3)
+            if (move < 2)
             {
                 offerDrawBtn.disabled = true;
-                cancelDrawBtn.disabled = true;
-                resignBtn.text = Dictionary.getPhrase(RESIGN_BTN_ABORT_TEXT);
-                resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
+                resignBtn.text = "✖";
+                resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_ABORT_TOOLTIP);
             }
         }
 
         navigator.revertPlys(cnt);
     }
 
-    public function init(belongsToSpectator:Bool, startSecs:Int, secsPerTurn:Int, whiteLogin:String, blackLogin:String, orientationColor:PieceColor) 
+    public function new(playingAs:Null<PieceColor>, startSecs:Int, secsPerTurn:Int, whiteLogin:String, blackLogin:String, orientationColor:PieceColor) 
     {
-        this.belongsToSpectator = belongsToSpectator;
+        super();
+        this.belongsToSpectator = playingAs == null;
         this.secsPerTurn = secsPerTurn;
-        this.orientationColor = orientationColor;
-        this.move = 1; //TODO: Change to zero?
+        this.orientationColor = White;
+        this.move = 0;
+
+        if (playingAs != null)
+            enableTakebackAfterMove = playingAs == White? 1 : 2;
         
         whiteClock.init(startSecs, false, startSecs >= 90);
-        bottomTime.init(startSecs, !belongsToSpectator, startSecs >= 90);
+        blackClock.init(startSecs, !belongsToSpectator, startSecs >= 90);
 
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;
@@ -285,11 +247,6 @@ class Sidebox extends VBox
             changeActionButtons([changeOrientationBtn, offerDrawBtn, offerTakebackBtn, resignBtn, addTimeBtn]);
 
         if (orientationColor == Black)
-            revertOrientation(null);
-    }
-    
-    public function new()
-    {
-        super();
+            revertOrientation();
     }
 }

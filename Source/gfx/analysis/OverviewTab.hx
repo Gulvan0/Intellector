@@ -61,13 +61,14 @@ class OverviewTab extends VBox
         super();
 
         //TODO: flip board btn, export as puzzle btn
-        navigator = new MoveNavigator(m -> {eventHandler(ScrollBtnPressed(m));});
+        navigator = new MoveNavigator();
+        navigator.init(m -> {eventHandler(ScrollBtnPressed(m));});
         navigator.horizontalAlign = 'center';
 
         var setPositionBtn:Button = createSimpleBtn(ANALYSIS_SET_POSITION, 300, SetPositionPressed);
         setPositionBtn.horizontalAlign = 'center';
 
-        var exportSIPBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_SIP, 300, ExportSIPRequested);
+        var exportSIPBtn:Button = createSimpleBtn(EXPORT_SIP_BTN_TOOLTIP, 300, ExportSIPRequested);
         exportSIPBtn.horizontalAlign = 'center';
 
         var exportStudyBtn:Button = createSimpleBtn(ANALYSIS_EXPORT_STUDY, 300, ExportStudyRequested);

@@ -13,7 +13,7 @@ import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 using utils.CallbackTools;
 
-@:build(haxe.ui.macros.ComponentMacros.buildComponent("Assets/layouts/plynavigator.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/plynavigator.xml"))
 class MoveNavigator extends VBox
 {
     private var plyNumber:Int = 1;

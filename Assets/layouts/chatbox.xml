@@ -1,0 +1,6 @@
+<vbox spacing="5px">
+    <scrollview id="history" width="100%" height="93.5%">
+        <label id="historyText" width="95%" htmlText="" />
+    </scrollview>
+    <textfield id="messageInput" width="100%" height="5%" placeholder="${Dictionary.getPhrase(CHATBOX_MESSAGE_PLACEHOLDER)}" />
+</vbox>

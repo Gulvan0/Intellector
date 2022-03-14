@@ -72,6 +72,16 @@ class Utils
         return getMatchlistWinnerText(winner) + " (" + getMatchlistOutcomeText(outcome) + ")";
     }
 
+    public static function getPlayerDisconnectedMessage(playerColor:PieceColor)
+    {
+        return Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE, [getColorName(playerColor)]);
+    }
+
+    public static function getPlayerReconnectedMessage(playerColor:PieceColor)
+    {
+        return Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE, [getColorName(playerColor)]);
+    }
+
     //TODO: Rewrite functions below this comment
 
     private static function getMatchlistWinnerText(color:Null<PieceColor>) 

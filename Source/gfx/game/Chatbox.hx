@@ -1,8 +1,10 @@
 package gfx.game;
 
+import haxe.ui.containers.VBox;
 import net.LoginManager;
 import struct.PieceColor;
 import dict.Dictionary;
+import dict.Utils;
 import haxe.ui.components.HorizontalScroll;
 import haxe.Timer;
 import haxe.ui.components.VerticalScroll;
@@ -15,13 +17,12 @@ import haxe.ui.containers.ScrollView;
 import openfl.display.Sprite;
 using StringTools;
 
-class Chatbox extends Sprite
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/chatbox.xml'))
+class Chatbox extends VBox
 {
-    public static var WIDTH:Float = 260;
-    private var history:ScrollView;
-    private var historyText:Label;
-    private var messageInput:TextField;
     private var isOwnerSpectator:Bool;
+
+    //TODO: handleNetEvent(); actualize(); actualizationData as optional constructor parameter; implements INetObserver; make unused from outside methods private
 
     public function appendMessage(author:String, text:String) 
     {
@@ -43,12 +44,12 @@ class Chatbox extends Sprite
 
     public function onDisconnected(disconnectedColor:PieceColor) 
     {
-        appendLog(dict.Utils.getColorName(disconnectedColor) + Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE));
+        appendLog(Utils.getPlayerDisconnectedMessage(disconnectedColor));
     }
 
     public function onReconnected(reconnectedColor:PieceColor) 
     {
-        appendLog(dict.Utils.getColorName(reconnectedColor) + Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE));
+        appendLog(Utils.getPlayerReconnectedMessage(reconnectedColor));
     }
 
     private function waitAndScroll() 
@@ -110,7 +111,7 @@ class Chatbox extends Sprite
             return true;
     }
 
-    public function terminate() 
+    public function deactivate() 
     {
         messageInput.disabled = true;
         removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
@@ -122,29 +123,16 @@ class Chatbox extends Sprite
         addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
     }
 
-    public function new(totalHeight:Float, isOwnerSpectator:Bool = false) 
+    public function new(width:Float, height:Float, isOwnerSpectator:Bool = false) 
     {
         super();
         this.isOwnerSpectator = isOwnerSpectator;
-
-        history = new ScrollView();
-        history.width = WIDTH;
-        history.height = totalHeight - 5 - 25;
-
-        historyText = new Label();
-        historyText.htmlText = "";
-        historyText.width = WIDTH - 20;
-
-        history.addComponent(historyText);
-        addChild(history);
+        this.width = width;
+        this.height = height;
         
-        messageInput = new TextField();
-        messageInput.placeholder = Dictionary.getPhrase(CHATBOX_MESSAGE_PLACEHOLDER);
-        messageInput.width = WIDTH;
-        messageInput.height = 25;
-        messageInput.y = history.height + 5;
-        addChild(messageInput);
-        
-        addEventListener(Event.ADDED_TO_STAGE, init);
+        if (isOwnerSpectator)
+            messageInput.disabled = true;
+        else
+            addEventListener(Event.ADDED_TO_STAGE, init);
     }
 }

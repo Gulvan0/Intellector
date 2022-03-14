@@ -1,10 +1,5 @@
 package dict;
 
-import gfx.game.GameInfoBox.Outcome;
-import Preferences.Markup;
-import gfx.screens.MainMenu.MainMenuButton;
-import struct.PieceColor;
-
 class Dictionary 
 {
     private static var order:Array<Language> = [EN, RU];
@@ -117,8 +112,8 @@ class Dictionary
         TAKEBACK_CANCELLED_MESSAGE => ["Takeback cancelled", "Запрос тейкбека отменен"],
         TAKEBACK_ACCEPTED_MESSAGE => ["Takeback accepted", "Тейкбек принят"],
         TAKEBACK_DECLINED_MESSAGE => ["Takeback declined", "Тейкбек отклонен"],
-        OPPONENT_DISCONNECTED_MESSAGE => [" disconnected", " отключились"],
-        OPPONENT_RECONNECTED_MESSAGE => [" reconnected", " переподключились"],
+        OPPONENT_DISCONNECTED_MESSAGE => ["$0 disconnected", "$0 отключились"],
+        OPPONENT_RECONNECTED_MESSAGE => ["$0 reconnected", "$0 переподключились"],
         ANALYSIS_ANALYZE_WHITE => ["Analyze as white", "Анализ за белых"],
         ANALYSIS_ANALYZE_BLACK => ["Analyze as black", "Анализ за черных"],
         GAME_OVER_MESSAGE_SUFFIX_WIN => [" won", " победили"],

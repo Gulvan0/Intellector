@@ -16,7 +16,7 @@ import url.URLEditor;
 import openfl.text.TextFormat;
 import openfl.text.TextField;
 import dict.Dictionary;
-import serialization.GameLogDeserializer;
+import serialization.GameLogParser;
 import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
@@ -141,8 +141,8 @@ class PlayerProfile extends Screen implements INetObserver
 
         for (overview in gamelist)
         {
-            var winner = GameLogDeserializer.decodeColor(overview.winnerColorLetter);
-            var outcome = GameLogDeserializer.decodeOutcome(overview.outcomeCode);
+            var winner = GameLogParser.decodeColor(overview.winnerColorLetter);
+            var outcome = GameLogParser.decodeOutcome(overview.outcomeCode);
             var text = overview.id + '. ${overview.whiteLogin} vs ${overview.blackLogin} • ' + dict.Utils.getMatchlistResultText(winner, outcome);
 
             var link:Link = gameLink(text, overview.id);

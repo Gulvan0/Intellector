@@ -1,5 +1,15 @@
 package gfx.screens;
 
+import gfx.components.SpriteWrapper;
+import haxe.ui.containers.VBox;
+import haxe.ui.containers.HBox;
+import utils.TimeControl;
+import gameboard.behaviors.PlayerMoveBehavior;
+import gameboard.behaviors.EnemyMoveBehavior;
+import gameboard.states.NeutralState;
+import gameboard.states.StubState;
+import net.LoginManager;
+import struct.Situation;
 import struct.PieceColor;
 import openfl.Assets;
 import net.GeneralObserver;
@@ -78,20 +88,48 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         //TODO: Also check "color" param correctness for the above emitter ^
     }
 
-    public function new(id:Int, enemy:String, colour:PieceColor, startSecs:Int, bonusSecs:Int)
+    public function actualize(log:String, ?secondsLeftWhite:Int, ?secondsLeftBlack:Int)
+    {
+        //TODO: Fill
+        //TODO: Set actual time for reconnect, spectation, revisit
+        //TODO: Make sure either this is called with non-null optional arguments or correctTime() called right after actualize()
+        //TODO: Maybe correctTime() should be forwarded to LiveGame interface
+    }
+
+    public function new(id:Int, whiteLogin:String, blackLogin:String, orientationColour:PieceColor, startSecs:Int, bonusSecs:Int, ?playerColor:PieceColor, ?turnColor:PieceColor = White)
     {
         super();
-        var playerIsWhite:Bool = data.colour == 'white';
-        var whiteLogin = playerIsWhite? Networker.login : data.enemy;
-        var blackLogin = playerIsWhite? data.enemy : Networker.login;
-        
-        board = new GameBoard(); //startingSituation, orientation
-        board.state = //Depends on type
-        sidebox = new Sidebox(false, data.startSecs, data.bonusSecs, Networker.login, data.enemy, data.colour == 'white');
-        var chatbox:Chatbox = new Chatbox(field.getHeight() * 0.75);
-        var infobox:GameInfoBox = new GameInfoBox(Chatbox.WIDTH, field.getHeight() * 0.23, data.startSecs, data.bonusSecs, whiteLogin, blackLogin);
+        this.id = id;
 
-        compound.playerColor = playerIsWhite? White : Black;
+        board = new GameBoard(Situation.starting(), orientationColour);
+        board.state = playerColor == null? new StubState(board) : new NeutralState(board);
+
+        if (playerColor == null)
+            board.behavior = new EnemyMoveBehavior(board, orientationColour); //Behavior doesn't matter at all, that's just a placeholder
+        else if (turnColor == playerColor)
+            board.behavior = new PlayerMoveBehavior(board, playerColor);
+        else
+            board.behavior = new EnemyMoveBehavior(board, playerColor);
+
+        sidebox = new Sidebox(playerColor, startSecs, bonusSecs, whiteLogin, blackLogin, orientationColour);
+        chatbox = new Chatbox(board.width * 0.45, board.height * 0.75, playerColor == null);
+        gameinfobox = new GameInfoBox(board.width * 0.45, board.height * 0.23, new TimeControl(startSecs, bonusSecs), whiteLogin, blackLogin);
+
+        var vbox:VBox = new VBox();
+        vbox.addComponent(gameinfobox);
+        vbox.addComponent(chatbox);
+
+        var boardWrapper:SpriteWrapper = new SpriteWrapper();
+        boardWrapper.sprite = board;
+
+        var hbox:HBox = new HBox();
+        hbox.addComponent(vbox);
+        hbox.addComponent(boardWrapper);
+        hbox.addComponent(vbox);
+
+        addChild(hbox);
+        
+        //TODO: Connect children observers to corresponding observables
         sidebox.addObserver(this);
     }
 }

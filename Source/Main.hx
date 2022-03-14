@@ -48,7 +48,6 @@ class Main extends Sprite
 		Changes.initChangelog();
 		var tests = new BoardTests();
 		addChild(tests);
-		tests.selectable();
 		//screenManager = new ScreenManager()
 		//Networker.eventQueue.addObserver(screenManager);
 		//addChild(screenManager);
