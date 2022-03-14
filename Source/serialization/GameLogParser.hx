@@ -27,10 +27,11 @@ class GameLogParserOutput
     public var winnerColor:Null<PieceColor>;
     public var movesPlayed:Array<Ply> = [];
     public var chatEntries:Array<ChatEntry> = [];
+    public var currentSituation:Situation;
 
     public function new()
     {
-        
+        currentSituation = Situation.starting();
     }
 }
 
@@ -45,7 +46,11 @@ class GameLogParser
             if (trimmedEntry.charAt(0) == "#")
                 processSpecialEntry(trimmedEntry.charAt(1), trimmedEntry.substr(3), parserOutput);
             else if (trimmedEntry.length >= 4)
-                parserOutput.movesPlayed.push(PlyDeserializer.deserialize(trimmedEntry));
+            {
+                var ply:Ply = PlyDeserializer.deserialize(trimmedEntry);
+                parserOutput.movesPlayed.push(ply);
+                parserOutput.currentSituation = parserOutput.currentSituation.makeMove(ply);
+            }
         }
         return parserOutput;
     }

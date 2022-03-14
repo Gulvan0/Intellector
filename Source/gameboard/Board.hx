@@ -33,6 +33,11 @@ class Board extends OffsettedSprite
         return Hexagon.sideToHeight(hexSideLength) * 7;
     }
 
+    public function revertOrientation()
+    {
+        setOrientation(opposite(orientationColor));
+    }
+
     public function setOrientation(val:PieceColor) 
     {
         if (val != orientationColor)

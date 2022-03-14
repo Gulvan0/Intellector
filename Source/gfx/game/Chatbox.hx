@@ -1,7 +1,12 @@
 package gfx.game;
 
+import gfx.game.Sidebox.SideboxEvent;
+import gfx.game.Sidebox.ISideboxObserver;
+import serialization.GameLogParser;
+import net.EventProcessingQueue.INetObserver;
 import haxe.ui.containers.VBox;
 import net.LoginManager;
+import net.ServerEvent;
 import struct.PieceColor;
 import dict.Dictionary;
 import dict.Utils;
@@ -18,38 +23,102 @@ import openfl.display.Sprite;
 using StringTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/chatbox.xml'))
-class Chatbox extends VBox
+class Chatbox extends VBox implements INetObserver implements ISideboxObserver
 {
     private var isOwnerSpectator:Bool;
 
-    //TODO: handleNetEvent(); actualize(); actualizationData as optional constructor parameter; implements INetObserver; make unused from outside methods private
-
-    public function appendMessage(author:String, text:String) 
+    public function handleNetEvent(event:ServerEvent)
     {
-        historyText.htmlText += '<p><b>$author:</b> $text</p>';
+        switch event
+        {
+            case Message(author, message):
+                appendMessage(author, message, true);
+            case SpectatorMessage(author, message):
+                if (isOwnerSpectator)
+                    appendMessage(author, message, false);
+            case GameEnded(winner_color, reason): 
+                appendLog(Utils.getGameOverChatMessage(GameLogParser.decodeColor(winner_color), GameLogParser.decodeOutcome(reason)));
+                deactivate();
+            case PlayerDisconnected(color): 
+                appendLog(Utils.getPlayerDisconnectedMessage(PieceColor.createByName(color)));
+            case PlayerReconnected(color): 
+                appendLog(Utils.getPlayerReconnectedMessage(PieceColor.createByName(color)));
+            case NewSpectator(login): 
+                appendLog(Dictionary.getPhrase(SPECTATOR_JOINED_MESSAGE, [login]));
+            case SpectatorLeft(login): 
+                appendLog(Dictionary.getPhrase(SPECTATOR_LEFT_MESSAGE, [login]));
+            case DrawOffered:
+                appendLog(Dictionary.getPhrase(DRAW_OFFERED_MESSAGE));
+            case DrawCancelled:
+                appendLog(Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE));
+            case DrawAccepted:
+                appendLog(Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE));
+            case DrawDeclined:
+                appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE));
+            case TakebackOffered:
+                appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE));
+            case TakebackCancelled:
+                appendLog(Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE));
+            case TakebackAccepted:
+                appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE));
+            case TakebackDeclined:
+                appendLog(Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE));
+            default:
+        }
+    }
+
+    public function handleSideboxEvent(event:SideboxEvent)
+    {
+        switch event 
+        {
+            case OfferDrawPressed:
+                appendLog(Dictionary.getPhrase(DRAW_OFFERED_MESSAGE));
+            case CancelDrawPressed:
+                appendLog(Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE));
+            case AcceptDrawPressed:
+                appendLog(Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE));
+            case DeclineDrawPressed:
+                appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE));
+            case OfferTakebackPressed:
+                appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE));
+            case CancelTakebackPressed:
+                appendLog(Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE));
+            case AcceptTakebackPressed:
+                appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE));
+            case DeclineTakebackPressed:
+                appendLog(Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE));
+            default:
+        }
+    }
+
+    private function actualize(parsedData:GameLogParserOutput)
+    {
+        for (entry in parsedData.chatEntries)
+        {
+            switch entry
+            {
+                case PlayerMessage(authorColor, text):
+                    var author:String = authorColor == White? parsedData.whiteLogin : parsedData.blackLogin;
+                    appendMessage(author, text, true);
+                case Log(text):
+                    appendLog(text);
+            }
+        }
+    }
+
+    private function appendMessage(author:String, text:String, isAuthorPlayer:Bool) 
+    {
+        if (isAuthorPlayer)
+            historyText.htmlText += '<p><b>$author:</b> $text</p>';
+        else
+            historyText.htmlText += '<p><i><b>$author:</b> $text</i></p>';
         waitAndScroll();
     }
 
-    public function appendSpectatorMessage(author:String, text:String) 
-    {
-        historyText.htmlText += '<p><i><b>$author:</b> $text</i></p>';
-        waitAndScroll();
-    }
-
-    public function appendLog(text:String) 
+    private function appendLog(text:String) 
     {
         historyText.htmlText += '<p><i>$text</i></p>';
         waitAndScroll();
-    }
-
-    public function onDisconnected(disconnectedColor:PieceColor) 
-    {
-        appendLog(Utils.getPlayerDisconnectedMessage(disconnectedColor));
-    }
-
-    public function onReconnected(reconnectedColor:PieceColor) 
-    {
-        appendLog(Utils.getPlayerReconnectedMessage(reconnectedColor));
     }
 
     private function waitAndScroll() 
@@ -91,9 +160,9 @@ class Chatbox extends VBox
                 {
                     Networker.emitEvent(Message(text));
                     if (isOwnerSpectator)
-                        appendSpectatorMessage(LoginManager.login, text);
+                        appendMessage(LoginManager.login, text, false);
                     else 
-                        appendMessage(LoginManager.login, text);
+                        appendMessage(LoginManager.login, text, true);
                 }
             }
         }
@@ -123,13 +192,16 @@ class Chatbox extends VBox
         addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
     }
 
-    public function new(width:Float, height:Float, isOwnerSpectator:Bool = false) 
+    public function new(width:Float, height:Float, isOwnerSpectator:Bool, ?actualizationData:GameLogParserOutput) 
     {
         super();
         this.isOwnerSpectator = isOwnerSpectator;
         this.width = width;
         this.height = height;
         
+        if (actualizationData != null)
+            actualize(actualizationData);
+
         if (isOwnerSpectator)
             messageInput.disabled = true;
         else

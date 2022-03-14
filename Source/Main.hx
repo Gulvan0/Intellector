@@ -1,5 +1,6 @@
 package;
 
+import gfx.game.Sidebox;
 import net.LoginManager;
 import gameboard.Board;
 import haxe.ui.containers.Box;
@@ -46,7 +47,7 @@ class Main extends Sprite
 		OpeningTree.init();
 		AssetManager.init();
 		Changes.initChangelog();
-		var tests = new BoardTests();
+		var tests = new Sidebox(White, 100, 2, "go", "gg", Black);
 		addChild(tests);
 		//screenManager = new ScreenManager()
 		//Networker.eventQueue.addObserver(screenManager);

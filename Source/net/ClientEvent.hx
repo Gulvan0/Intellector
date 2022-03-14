@@ -19,15 +19,16 @@ enum ClientEvent
     CancelOpenChallenge; //! CancelOpenCallout -> CancelOpenChallenge; removed caller_login; eliminated $data
     Spectate(watchedLogin:String); //! forwarded watched_login
     StopSpectate; //! eliminated $data
+    Rematch; //TODO: new event, process accordingly
     Resign; //! eliminated $data
-    DrawOffer; //! eliminated $data
-    DrawCancel; //! eliminated $data
-    DrawAccept; //! eliminated $data
-    DrawDecline; //! eliminated $data
-    TakebackOffer; //! eliminated $data
-    TakebackCancel; //! eliminated $data
-    TakebackAccept; //! eliminated $data
-    TakebackDecline; //! eliminated $data
+    OfferDraw; //! eliminated $data
+    CancelDraw; //! eliminated $data
+    AcceptDraw; //! eliminated $data
+    DeclineDraw; //! eliminated $data
+    OfferTakeback; //! eliminated $data
+    CancelTakeback; //! eliminated $data
+    AcceptTakeback; //! eliminated $data
+    DeclineTakeback; //! eliminated $data
     GetPlayerGames(login:String, after:Int, pageSize:Int);
     GetPlayerStudies(login:String, after:Int, pageSize:Int);
     SetStudy(name:String, variantStr:String, overwriteID:Null<Int>);

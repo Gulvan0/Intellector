@@ -135,16 +135,16 @@ class Utils
         }
     }
 
-    public static function getGameOverChatMessage(winnerColor:Null<PieceColor>, reason:String):String
+    public static function getGameOverChatMessage(winnerColor:Null<PieceColor>, reason:Outcome):String
     {
         return switch reason
 		{
-			case 'mate': getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
-			case 'breakthrough': getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
-			case 'timeout': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_TIMEOUT);
-			case 'resignation': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_RESIGN);
-            case 'abandon': getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_DISCONNECT);
-            case 'abort': Dictionary.getPhrase(GAME_OVER_MESSAGE_ABORT);
+			case Mate: getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
+			case Breakthrough: getColorName(winnerColor) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_WIN);
+			case Timeout: getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_TIMEOUT);
+			case Resign: getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_RESIGN);
+            case Abandon: getColorName(opposite(winnerColor)) + Dictionary.getPhrase(GAME_OVER_MESSAGE_SUFFIX_DISCONNECT);
+            case Abort: Dictionary.getPhrase(GAME_OVER_MESSAGE_ABORT);
 			default: Dictionary.getPhrase(GAME_OVER_MESSAGE_DRAW);
         };
     }

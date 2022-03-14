@@ -20,6 +20,7 @@ class Clock extends Card
     private var timerRunning:Bool = false;
     private var lastUpdate:Float;
 
+    //TODO: Apply coloring every time turnColor changes
     private function applyColoring(playerMove:Bool, lowTime:Bool)
     {
         var backgroundColor:Int = -1;

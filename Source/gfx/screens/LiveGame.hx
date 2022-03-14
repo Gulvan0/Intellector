@@ -1,5 +1,10 @@
 package gfx.screens;
 
+import dict.Dictionary;
+import js.Browser;
+import struct.IntPoint;
+import struct.Ply;
+import serialization.GameLogParser;
 import gfx.components.SpriteWrapper;
 import haxe.ui.containers.VBox;
 import haxe.ui.containers.HBox;
@@ -24,6 +29,7 @@ import net.EventProcessingQueue.INetObserver;
 class LiveGame extends Screen implements INetObserver implements IGameBoardObserver implements ISideboxObserver
 {
     private var id:Int;
+    private var viewingAsParticipatingPlayer:Bool;
 
     private var board:GameBoard;
     private var sidebox:Sidebox;
@@ -33,13 +39,17 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     public override function onEntered()
     {
         GeneralObserver.acceptsDirectChallenges = false;
-        //TODO: Fill
+        Networker.eventQueue.addObserver(gameinfobox);
+        Networker.eventQueue.addObserver(chatbox);
+        Networker.eventQueue.addObserver(sidebox);
 		Assets.getSound("sounds/notify.mp3").play();
     }
 
     public override function onClosed()
     {
-        //TODO: Fill
+        Networker.eventQueue.removeObserser(gameinfobox);
+        Networker.eventQueue.removeObserser(chatbox);
+        Networker.eventQueue.removeObserser(sidebox);
         GeneralObserver.acceptsDirectChallenges = true;
     }
 
@@ -50,70 +60,69 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function handleNetEvent(event:ServerEvent)
     {
-        //TODO: Fill
+        switch event 
+        {
+            case Move(fromI, toI, fromJ, toJ, morphInto):
+                var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), PieceType.createByName(morphInto));
+                var plyStr:String = ply.toNotation(board.currentSituation);
+                sidebox.makeMove(plyStr);
+            default:
+        }
     }
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
-        //TODO: Fill
-
-        //TODO: Rewrite and insert
-        /*
-        field.onOwnMoveMade = (ply) -> {
-            compound.makeMove(ply, Own);
-            Networker.move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
-        };
-        */
+        switch event 
+        {
+            case ContinuationMove(ply, plyStr, performedBy):
+                Networker.emitEvent(Move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto.getName()));
+            default:
+        }
     }
 
     public function handleSideboxEvent(event:SideboxEvent)
     {
-        //TODO: Fill
-
-        //TODO: Rewrite and insert
-        /*
-        function onResignPressed():
-
-        var confirmed = Browser.window.confirm(resignConfirmationMessage);
-
-		if (confirmed)
-			Networker.emitEvent(Resign);
-        */
-        /*
-        on RematchRequested:
-
-        Networker.emitEvent(CreateDirectChallenge(opponentLogin, startSecs, secsPerTurn, playerIsWhite? "b" : "w"));
-        */
-
-        //TODO: Also check "color" param correctness for the above emitter ^
+        switch event {
+            case ChangeOrientationPressed:
+                board.revertOrientation();
+            case RematchRequested:
+                Networker.emitEvent(Rematch);
+            case ExportSIPRequested:
+                var sip:String = board.shownSituation.serialize();
+                Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
+            case ExploreInAnalysisRequest:
+                if (!viewingAsParticipatingPlayer)
+                    Networker.emitEvent(StopSpectate);
+                ScreenManager.toScreen(new Analysis(board.asVariant().serialize(), null));
+            case PlyScrollRequest(type):
+                board.applyScrolling(type);
+            default:
+        }
     }
 
-    public function actualize(log:String, ?secondsLeftWhite:Int, ?secondsLeftBlack:Int)
-    {
-        //TODO: Fill
-        //TODO: Set actual time for reconnect, spectation, revisit
-        //TODO: Make sure either this is called with non-null optional arguments or correctTime() called right after actualize()
-        //TODO: Maybe correctTime() should be forwarded to LiveGame interface
-    }
-
-    public function new(id:Int, whiteLogin:String, blackLogin:String, orientationColour:PieceColor, startSecs:Int, bonusSecs:Int, ?playerColor:PieceColor, ?turnColor:PieceColor = White)
+    //TODO: Set actual time for reconnect, spectation, revisit after calling constructor
+    public function new(id:Int, whiteLogin:String, blackLogin:String, orientationColour:PieceColor, startSecs:Int, bonusSecs:Int, ?playerColor:PieceColor, ?logForActualization:String)
     {
         super();
         this.id = id;
+        this.viewingAsParticipatingPlayer = playerColor != null;
 
-        board = new GameBoard(Situation.starting(), orientationColour);
-        board.state = playerColor == null? new StubState(board) : new NeutralState(board);
+        var parsedData = logForActualization != null? GameLogParser.parse(logForActualization) : null;
+        var currentSituation = parsedData != null? parsedData.currentSituation : Situation.starting();
 
-        if (playerColor == null)
+        board = new GameBoard(currentSituation, orientationColour);
+        board.state = viewingAsParticipatingPlayer? new NeutralState(board) : new StubState(board);
+
+        if (!viewingAsParticipatingPlayer)
             board.behavior = new EnemyMoveBehavior(board, orientationColour); //Behavior doesn't matter at all, that's just a placeholder
-        else if (turnColor == playerColor)
+        else if (currentSituation.turnColor == playerColor)
             board.behavior = new PlayerMoveBehavior(board, playerColor);
         else
             board.behavior = new EnemyMoveBehavior(board, playerColor);
 
-        sidebox = new Sidebox(playerColor, startSecs, bonusSecs, whiteLogin, blackLogin, orientationColour);
-        chatbox = new Chatbox(board.width * 0.45, board.height * 0.75, playerColor == null);
-        gameinfobox = new GameInfoBox(board.width * 0.45, board.height * 0.23, new TimeControl(startSecs, bonusSecs), whiteLogin, blackLogin);
+        sidebox = new Sidebox(playerColor, startSecs, bonusSecs, whiteLogin, blackLogin, orientationColour, parsedData);
+        chatbox = new Chatbox(board.width * 0.45, board.height * 0.75, !viewingAsParticipatingPlayer, parsedData);
+        gameinfobox = new GameInfoBox(board.width * 0.45, board.height * 0.23, new TimeControl(startSecs, bonusSecs), whiteLogin, blackLogin, parsedData);
 
         var vbox:VBox = new VBox();
         vbox.addComponent(gameinfobox);
@@ -128,8 +137,10 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         hbox.addComponent(vbox);
 
         addChild(hbox);
-        
-        //TODO: Connect children observers to corresponding observables
+
+        board.addObserver(gameinfobox);
+        board.addObserver(sidebox);
         sidebox.addObserver(this);
+        sidebox.addObserver(chatbox);
     }
 }

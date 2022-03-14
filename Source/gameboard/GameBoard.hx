@@ -1,5 +1,6 @@
 package gameboard;
 
+import struct.Variant;
 import net.EventProcessingQueue.INetObserver;
 import gfx.analysis.RightPanel.RightPanelObserver;
 import openfl.events.Event;
@@ -308,6 +309,21 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
         this.state = startState;
         this.behavior = startBehavior;
     }
+
+    public function asVariant():Null<Variant> 
+    {
+        var situation:Situation = Situation.starting();
+        var variant:Variant = new Variant(situation);
+
+        var path:Array<Int> = [];
+        for (ply in plyHistory.getPlySequence())
+        {
+            variant.addChildToNode(ply, path);
+            path.push(0);
+        }
+
+        return variant;
+	}
 
     public function new(situation:Situation, orientationColor:PieceColor, hexSideLength:Float = 40) 
     {

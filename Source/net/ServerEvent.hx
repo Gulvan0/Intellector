@@ -31,8 +31,8 @@ enum ServerEvent
     RegisterResult(success:Bool); //Answer to Register. Was the registration successful
     ReconnectionNeeded(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished live game
 
-    Message(message:String); //New in-game player message
-    SpectatorMessage(message:String); //New in-game spectator message
+    Message(author:String, message:String); //New in-game player message
+    SpectatorMessage(author:String, message:String); //New in-game spectator message
     TimeCorrection(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String); //Signals to update the in-game timers
     Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<String>); //A move has been played. Sent both to opponent and to all of the spectators
     Rollback(plysToUndo:Int); //Signal to undo a number of plys in a current game. Sent to both spectators and players
@@ -42,6 +42,15 @@ enum ServerEvent
     PlayerReconnected(color:String); //Sent to the players and the spectators when one of the players reconnects
     NewSpectator(login:String); //Sent both to players and to all of the spectators when a new user starts spectating
     SpectatorLeft(login:String); //Sent both to players and to all of the spectators when a user stops spectating
+
+    DrawOffered;
+    DrawCancelled;
+    DrawAccepted;
+    DrawDeclined;
+    TakebackOffered;
+    TakebackCancelled;
+    TakebackAccepted;
+    TakebackDeclined;
 
     GamesList(listStr:String, hasNext:Bool, hasPrev:Bool); //Answer to GetPlayerGames
     StudiesList(listStr:String, hasNext:Bool, hasPrev:Bool); //Answer to GetPlayerStudies
