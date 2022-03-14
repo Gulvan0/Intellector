@@ -1,5 +1,6 @@
 package gameboard;
 
+import haxe.exceptions.NotImplementedException;
 import struct.Ply;
 import struct.ReversiblePly;
 
@@ -7,6 +8,12 @@ class PlyHistory
 {
     private var revPlys:Array<ReversiblePly> = [];
     public var pointer(default, null):Int = 0;
+
+    public function getPlySequence():Array<Ply> 
+    {
+        //TODO: Implement
+        throw new NotImplementedException();
+    }
 
     public function clear()
     {
