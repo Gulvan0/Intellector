@@ -48,6 +48,7 @@ class Main extends Sprite
 		OpeningTree.init();
 		AssetManager.init();
 		Changes.initChangelog();
+		addChild(new UITest(new TBoard()));
 		//screenManager = new ScreenManager()
 		//Networker.eventQueue.addObserver(screenManager);
 		//addChild(screenManager);

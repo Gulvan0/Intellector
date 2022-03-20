@@ -24,7 +24,7 @@ class TBoard extends Sprite
         if (i == 0)
             board.clearPieces();
         else
-            board.setHexDirectly(IntPoint.fromScalar(i), Hex.occupied(Intellector, White));
+            board.setHexDirectly(IntPoint.fromScalar(i-1), Hex.occupied(Intellector, White));
     }
 
     private var _checks_runningInt:Array<String> = [

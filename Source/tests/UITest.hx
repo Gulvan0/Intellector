@@ -1,5 +1,6 @@
 package tests;
 
+import js.Browser;
 import haxe.ui.components.Label;
 import haxe.rtti.Meta;
 import haxe.Timer;
@@ -21,10 +22,12 @@ enum EndpointType
     Sequence;
 }
 
-class UITest<T> extends HBox
+class UITest extends HBox
 {
     private var component:Sprite;
-    private var componentClass:Class<T>;
+
+    private var actionBar:VerticalButtonBar;
+    private var checksVBox:VBox;
 
     private var exploredFieldNamesSet:Map<String, Bool> = [];
     private var checkFieldNamesSet:Map<String, Bool> = [];
@@ -65,13 +68,17 @@ class UITest<T> extends HBox
 
     private function autoCallback(field:Void->Void, interval:Int, iterations:Int, e)
     {
+        actionBar.disabled = true;
         var timer:Timer = new Timer(interval);
         var i:Int = 0;
         timer.run = () -> {
             Reflect.callMethod(component, field, [i]);
             i++;
             if (i == iterations)
+            {
                 timer.stop();
+                actionBar.disabled = false;
+            }
         };
     }
 
@@ -83,30 +90,32 @@ class UITest<T> extends HBox
         seqButtons[pureName].text = getSequenceButtonText(pureName);
     }
 
-    private function autoCheckboxes(checkName:String):Array<Checkbox>
+    private function autoCheckBoxes(checkName:String):Array<CheckBox>
     {
-        var checkboxes:Array<Checkbox> = [];
+        var checkboxes:Array<CheckBox> = [];
 
         var checks:Array<String> = Reflect.field(component, checkName);
         for (check in checks)
         {
             var checkBox:CheckBox = new CheckBox();
             checkBox.text = check;
+            checkBox.percentWidth = 100;
             checkboxes.push(checkBox);
         }
 
         return checkboxes;
     }
 
-    private function sequenceCheckboxes(checkName:String):Array<Checkbox>
+    private function sequenceCheckBoxes(checkName:String):Array<CheckBox>
     {
-        var checkboxes:Array<Checkbox> = [];
+        var checkboxes:Array<CheckBox> = [];
 
-        var checkMap:Map<Int, String> = Reflect.field(component, checkName);
+        var checkMap:Map<Int, Array<String>> = Reflect.field(component, checkName);
         for (step => stepChecks in checkMap.keyValueIterator())
             for (check in stepChecks)
             {
                 var checkBox:CheckBox = new CheckBox();
+                checkBox.percentWidth = 100;
                 if (step == -1)
                     checkBox.text = check;
                 else
@@ -121,7 +130,7 @@ class UITest<T> extends HBox
     {
         var values:Map<String, Dynamic> = [];
 
-        var classMetas = Meta.getFields(componentClass);
+        var classMetas = Meta.getFields(Type.getClass(component));
         var methodMetas = Reflect.field(classMetas, fieldName);
         if (methodMetas == null)
             throw 'No metatags: $fieldName';
@@ -143,7 +152,7 @@ class UITest<T> extends HBox
         var requiredMetatags:Array<String> = getRequiredMetatags(type);
         var namePrefix:String = getFieldNamePrefix(type);
 
-        for (fieldName in actionFieldNames)
+        for (fieldName in fieldNames)
         {
             var pureName:String = fieldName.replace(namePrefix, '');
             if (exploredFieldNamesSet.exists(pureName))
@@ -153,23 +162,26 @@ class UITest<T> extends HBox
             if (!Reflect.isFunction(field))
                 throw 'Not a function field: $fieldName';
 
-            var metavalues = retrieveMetaValues(fieldName, requiredMetatags);
+            var metavalues:Map<String, Dynamic> = type == Action? [] : retrieveMetaValues(fieldName, requiredMetatags);
 
             var btn = new Button();
             btn.percentWidth = 100;
-            btn.text = pureName;
             actionBar.addComponent(btn);
-
-            var checkboxes:Array<CheckBox> = [];
 
             switch type
             {
                 case Action: 
                     btn.onClick = actionCallback.bind(field);
+                    btn.text = pureName;
                 case Auto: 
                     btn.onClick = autoCallback.bind(field, metavalues["interval"], metavalues["iterations"]);
+                    btn.text = '$pureName / auto';
                 case Sequence: 
+                    seqIterators.set(pureName, 0);
+                    seqIteratorLimits.set(pureName, metavalues["steps"]);
+                    seqButtons.set(pureName, btn);
                     btn.onClick = sequenceCallback.bind(field, pureName);
+                    btn.text = getSequenceButtonText(pureName);
             }
 
             var checkName:String = '_checks_' + pureName;
@@ -177,14 +189,15 @@ class UITest<T> extends HBox
             {
                 var header:Label = new Label();
                 header.text = pureName;
-                header.applyStyle({fontBold: true});
+                header.percentWidth = 100;
+                header.customStyle.fontBold = true;
                 checksVBox.addComponent(header);
     
                 var checkboxes:Array<CheckBox> = switch type
                 {
                     case Action: [];
-                    case Auto: autoCheckboxes(checkName);
-                    case Sequence: sequenceCheckboxes(checkName);
+                    case Auto: autoCheckBoxes(checkName);
+                    case Sequence: sequenceCheckBoxes(checkName);
                 }
 
                 for (checkbox in checkboxes)
@@ -199,7 +212,9 @@ class UITest<T> extends HBox
     {
         super();
         this.component = component;
-        this.componentClass = Type.getClass(component);
+        this.width = Browser.window.innerWidth;
+        this.height = Browser.window.innerHeight;
+        this.customStyle.padding = 5;
 
         var componentWrapper:SpriteWrapper = new SpriteWrapper();
         componentWrapper.sprite = component;
@@ -211,23 +226,24 @@ class UITest<T> extends HBox
         componentBox.percentHeight = 100;
         componentBox.addComponent(componentWrapper);
 
-        var actionBar:VerticalButtonBar = new VerticalButtonBar();
+        actionBar = new VerticalButtonBar();
+        actionBar.toggle = false;
         actionBar.percentWidth = 100;
-        actionBar.percentHeight = 100;
 
         var actionsSV:ScrollView = new ScrollView();
         actionsSV.percentWidth = (100 - contentWidthPercent) / 2;
         actionsSV.percentHeight = 100;
+        actionsSV.percentContentWidth = 100;
         actionsSV.addComponent(actionBar);
 
-        var checksBox:VBox = new VBox();
-        checksBox.percentWidth = 100;
-        checksBox.percentHeight = 100;
+        checksVBox = new VBox();
+        checksVBox.percentWidth = 100;
 
         var checksSV:ScrollView = new ScrollView();
         checksSV.percentWidth = (100 - contentWidthPercent) / 2;
         checksSV.percentHeight = 100;
-        checksSV.addComponent(checksBox);
+        checksSV.percentContentWidth = 100;
+        checksSV.addComponent(checksVBox);
 
         addComponent(componentBox);
         addComponent(actionsSV);
@@ -235,7 +251,7 @@ class UITest<T> extends HBox
 
         var endpointFieldNames:Map<EndpointType, Array<String>> = [for (type in EndpointType.createAll()) type => []];
 
-        var allFields = Type.getInstanceFields(componentClass);
+        var allFields = Type.getInstanceFields(Type.getClass(component));
         var commonFields = Type.getInstanceFields(Sprite);
         
         var sMap:Map<String, Bool> = [];
@@ -248,7 +264,7 @@ class UITest<T> extends HBox
                     checkFieldNamesSet.set(fieldName, true);
                 else
                     for (type in EndpointType.createAll())
-                        if (fieldName.startsWith(getNamePrefix(type)))
+                        if (fieldName.startsWith(getFieldNamePrefix(type)))
                             endpointFieldNames[type].push(fieldName);
 
         for (endpointType in [Action, Auto, Sequence])
