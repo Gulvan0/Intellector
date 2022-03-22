@@ -202,17 +202,17 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     private function onLMBPressed(e:MouseEvent)
     {
         if (!suppressLMBHandler)
-            state.onLMBPressed(posToIndexes(e.stageX - x, e.stageY - y));
+            state.onLMBPressed(posToIndexes(e.stageX, e.stageY));
     }
 
     private function onMouseMoved(e:MouseEvent)
     {
-        state.onMouseMoved(posToIndexes(e.stageX - x, e.stageY - y));
+        state.onMouseMoved(posToIndexes(e.stageX, e.stageY));
     }
 
     private function onLMBReleased(e:MouseEvent)
     {
-        state.onLMBReleased(posToIndexes(e.stageX - x, e.stageY - y));
+        state.onLMBReleased(posToIndexes(e.stageX, e.stageY));
     }
 
     //TODO: Connect to Networker on creation (somewhere in OnlineGame screen)

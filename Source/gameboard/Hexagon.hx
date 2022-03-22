@@ -29,6 +29,11 @@ class Hexagon extends Sprite
         return hexSideLength * Math.sqrt(3);
     }
 
+    public static function sideToWidth(hexSideLength:Float):Float
+    {
+        return hexSideLength * 2;
+    }
+
     public function showLayer(state:HexagonSelectionState)
     {
         sprites[state].visible = true;

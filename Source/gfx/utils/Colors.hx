@@ -5,7 +5,7 @@ import gameboard.Hexagon.HexagonSelectionState;
 class Colors
 {
     public static var border:Int = 0x664126;
-    public static var arrow:Int = 0x108D99;
+    public static var arrow:Int = 0xFF0000;
 
     public static function hexFill(selectionState:HexagonSelectionState, isDark:Bool):Int
     {

@@ -1,5 +1,6 @@
 package;
 
+import tests.ui.board.TSelectableBoard;
 import tests.ui.board.TBoard;
 import gfx.game.Sidebox;
 import net.LoginManager;
@@ -33,7 +34,7 @@ import openfl.system.Capabilities;
 import haxe.ui.Toolkit;
 import openfl.display.SimpleButton;
 import js.Browser;
-import tests.*;
+import tests.UITest;
 import openfl.display.Sprite;
 using StringTools;
 
@@ -48,7 +49,7 @@ class Main extends Sprite
 		OpeningTree.init();
 		AssetManager.init();
 		Changes.initChangelog();
-		addChild(new UITest(new TBoard()));
+		addChild(new UITest(new TSelectableBoard()));
 		//screenManager = new ScreenManager()
 		//Networker.eventQueue.addObserver(screenManager);
 		//addChild(screenManager);

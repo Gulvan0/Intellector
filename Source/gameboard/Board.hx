@@ -1,5 +1,6 @@
 package gameboard;
 
+import openfl.display.Sprite;
 import gfx.utils.Colors;
 import utils.Notation;
 import openfl.text.TextFormat;
@@ -27,6 +28,9 @@ class Board extends OffsettedSprite
     public var shownSituation(default, null):Situation;
 
     private var letters:Array<TextField> = [];
+
+    private var hexagonLayer:Sprite;
+    private var pieceLayer:Sprite;
 
     public function getFieldHeight():Float
     {
@@ -66,7 +70,7 @@ class Board extends OffsettedSprite
     public function setSituation(val:Situation)
     {
         for (piece in pieces)
-            removeChild(piece);
+            pieceLayer.removeChild(piece);
         pieces = [];
         shownSituation = val;
         producePieces();
@@ -84,14 +88,14 @@ class Board extends OffsettedSprite
             var oldIntellectorPosition:Null<IntPoint> = shownSituation.intellectorPos[hex.color];
             if (oldIntellectorPosition != null)
             {
-                removeChild(getPiece(oldIntellectorPosition));
+                pieceLayer.removeChild(getPiece(oldIntellectorPosition));
                 pieces[oldIntellectorPosition.toScalar()] = null;
                 shownSituation.set(oldIntellectorPosition, Hex.empty());
             }
         }
         var formerPiece = getPiece(location);
         if (formerPiece != null)
-            removeChild(formerPiece);
+            pieceLayer.removeChild(formerPiece);
         producePiece(location, hex);
         shownSituation.set(location, hex.copy());
     }
@@ -104,7 +108,7 @@ class Board extends OffsettedSprite
             var goalHex = backInTime? transform.former : transform.latter;
 
             if (!currentHex.isEmpty())
-                removeChild(getPiece(transform.coords));
+                pieceLayer.removeChild(getPiece(transform.coords));
             producePiece(transform.coords, goalHex);
             shownSituation.set(transform.coords, goalHex, false);
         }
@@ -134,8 +138,9 @@ class Board extends OffsettedSprite
             return null;
     }
     
-    private function posToIndexes(x:Float, y:Float):Null<IntPoint>
+    private function posToIndexes(stageX:Float, stageY:Float):Null<IntPoint>
     {
+        var localEventCoords:Point = globalToLocal(new Point(stageX, stageY));
         var closest:Null<IntPoint> = null;
         var distanceSqr:Float = hexSideLength * hexSideLength;
 
@@ -146,7 +151,7 @@ class Board extends OffsettedSprite
                 if (!hexExists(loc))
                     continue;
                 var coords:Point = hexCoords(loc);
-                var currDistSqr = (coords.x - x) * (coords.x - x) + (coords.y - y) * (coords.y - y);
+                var currDistSqr = (coords.x - localEventCoords.x) * (coords.x - localEventCoords.x) + (coords.y - localEventCoords.y) * (coords.y - localEventCoords.y);
                 if (distanceSqr > currDistSqr)
                 {
                     closest = loc;
@@ -170,12 +175,16 @@ class Board extends OffsettedSprite
             i = 8 - i;
         }
 
+        var hexWidth:Float = Hexagon.sideToWidth(hexSideLength);
         var hexHeight:Float = Hexagon.sideToHeight(hexSideLength);
+
         var p:Point = new Point(0, 0);
         p.x = 3 * hexSideLength * i / 2;
         p.y = hexHeight * j;
+
         if (i % 2 == 1)
             p.y += hexHeight / 2;
+
         return p;
     }
 
@@ -183,14 +192,14 @@ class Board extends OffsettedSprite
     {
         hexagons = [];
 
-        for (s in 0...59)
+        for (s in 0...IntPoint.hexCount)
         {
             var p:IntPoint = IntPoint.fromScalar(s);
             var hexagon:Hexagon = new Hexagon(hexSideLength, p.i, p.j, displayRowNumbers);
             var coords = hexCoords(p);
             hexagon.x = coords.x;
             hexagon.y = coords.y;
-            addChild(hexagon);
+            hexagonLayer.addChild(hexagon);
             hexagons.push(hexagon);
         }
     }
@@ -218,7 +227,7 @@ class Board extends OffsettedSprite
             piece.rescale(hexSideLength);
             piece.x = coords.x;
             piece.y = coords.y;
-            addChild(piece);
+            pieceLayer.addChild(piece);
             pieces[scalarCoord] = piece;
         }
     }
@@ -242,7 +251,7 @@ class Board extends OffsettedSprite
             letter.x = bottomHexCoords.x - letter.textWidth / 2 - 5;
             letter.y = bottomHexCoords.y + Hexagon.sideToHeight(hexSideLength) / 2;
             letters.push(letter);
-            addChild(letter); 
+            hexagonLayer.addChild(letter); 
         }
     }
 
@@ -261,6 +270,11 @@ class Board extends OffsettedSprite
         this.hexSideLength = hexSideLength;
         this.orientationColor = orientationColor;
         this.shownSituation = situation.copy();
+        this.hexagonLayer = new Sprite();
+        this.pieceLayer = new Sprite();
+
+        addChild(hexagonLayer);
+        addChild(pieceLayer);
 
         produceHexagons(!suppressMarkup && Preferences.instance.markup == Over);
         producePieces();

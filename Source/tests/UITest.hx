@@ -90,7 +90,7 @@ class UITest extends HBox
         seqButtons[pureName].text = getSequenceButtonText(pureName);
     }
 
-    private function autoCheckBoxes(checkName:String):Array<CheckBox>
+    private function arrayCheckBoxes(checkName:String):Array<CheckBox>
     {
         var checkboxes:Array<CheckBox> = [];
 
@@ -106,7 +106,7 @@ class UITest extends HBox
         return checkboxes;
     }
 
-    private function sequenceCheckBoxes(checkName:String):Array<CheckBox>
+    private function mapCheckBoxes(checkName:String):Array<CheckBox>
     {
         var checkboxes:Array<CheckBox> = [];
 
@@ -195,9 +195,8 @@ class UITest extends HBox
     
                 var checkboxes:Array<CheckBox> = switch type
                 {
-                    case Action: [];
-                    case Auto: autoCheckBoxes(checkName);
-                    case Sequence: sequenceCheckBoxes(checkName);
+                    case Action, Auto: arrayCheckBoxes(checkName);
+                    case Sequence: mapCheckBoxes(checkName);
                 }
 
                 for (checkbox in checkboxes)
