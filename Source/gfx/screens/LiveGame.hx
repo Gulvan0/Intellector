@@ -63,7 +63,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         switch event 
         {
             case Move(fromI, toI, fromJ, toJ, morphInto):
-                var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), PieceType.createByName(morphInto));
+                var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
                 var plyStr:String = ply.toNotation(board.currentSituation);
                 sidebox.makeMove(plyStr);
             default:

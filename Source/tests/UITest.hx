@@ -209,6 +209,8 @@ class UITest extends HBox
 
     public function new(component:Sprite, ?contentWidthPercent:Float = 72) 
     {
+        Networker.ignoreEmitCalls = true;
+        
         super();
         this.component = component;
         this.width = Browser.window.innerWidth;

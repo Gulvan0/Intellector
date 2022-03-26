@@ -13,14 +13,17 @@ class NeutralState extends BasePlayableState
     {
         var pressedPiece:Null<Piece> = boardInstance.getPiece(location);
 
-        if (boardInstance.behavior.returnToCurrentOnLMB())
+        if (boardInstance.behavior.returnToCurrentOnLMB() && !boardInstance.plyHistory.isAtEnd())
         {
             boardInstance.applyScrolling(End);
             return;
         }
         
         if (pressedPiece == null || !boardInstance.behavior.allowedToMove(pressedPiece))
+        {
+            boardInstance.behavior.onVoidClick();
             return;
+        }
 
         boardInstance.getHex(location).showLayer(LMB);
         if (!boardInstance.behavior.markersDisabled())
@@ -31,7 +34,11 @@ class NeutralState extends BasePlayableState
 
     public override function reactsToHover(location:IntPoint):Bool
     {
-        return boardInstance.behavior.allowedToMove(boardInstance.getPiece(location));
+        var piece = boardInstance.getPiece(location);
+        if (piece == null)
+            return false;
+        else
+            return boardInstance.behavior.allowedToMove(piece);
     }
 
     public override function onLMBReleased(location:Null<IntPoint>)

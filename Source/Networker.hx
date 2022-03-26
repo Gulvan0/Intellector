@@ -35,6 +35,7 @@ class Networker
 
     public static var suppressAlert:Bool;
     public static var doNotReconnect:Bool = false;
+    public static var ignoreEmitCalls:Bool = false; 
 
     public static function connect() 
     {
@@ -128,7 +129,10 @@ class Networker
 
     public static function emitEvent(event:ClientEvent)
     {
-        emit(event.getName(), event.getParameters()[0]);
+        if (ignoreEmitCalls)
+            trace(event.getName(), event.getParameters());
+        else
+            emit(event.getName(), event.getParameters());
     }
 
     private static function emit(eventName:String, data:Dynamic) 

@@ -45,6 +45,11 @@ class PlayerMoveBehavior implements IBehavior
         return true;
     }
     
+    public function onVoidClick()
+	{
+        //* Do nothing
+    }
+    
     public function onMoveChosen(ply:Ply):Void
 	{
         AssetManager.playPlySound(ply, boardInstance.shownSituation);
@@ -55,6 +60,7 @@ class PlayerMoveBehavior implements IBehavior
             boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
         else
             boardInstance.state = new StubState(boardInstance, boardInstance.state.cursorLocation);
+        boardInstance.behavior = new EnemyMoveBehavior(boardInstance, playerColor);
     }
     
     public function markersDisabled():Bool

@@ -33,6 +33,11 @@ class EditorFreeMoveBehavior implements IBehavior
         return false;
     }
     
+    public function onVoidClick()
+	{
+        //* Do nothing
+    }
+    
     public function onMoveChosen(ply:Ply):Void
 	{
         boardInstance.teleportPiece(ply.from, ply.to);

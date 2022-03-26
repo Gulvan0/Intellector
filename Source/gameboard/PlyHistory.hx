@@ -6,17 +6,18 @@ import struct.ReversiblePly;
 
 class PlyHistory
 {
+    private var plys:Array<Ply> = [];
     private var revPlys:Array<ReversiblePly> = [];
     public var pointer(default, null):Int = 0;
 
     public function getPlySequence():Array<Ply> 
     {
-        //TODO: Implement
-        throw new NotImplementedException();
+        return plys.copy();
     }
 
     public function clear()
     {
+        plys = [];
         revPlys = [];
         pointer = 0;
     }
@@ -84,6 +85,7 @@ class PlyHistory
 
     public function dropSinceShown():Array<ReversiblePly>
     {
+        plys = plys.slice(pointer);
         return revPlys = revPlys.slice(pointer);
     }
 
@@ -92,14 +94,16 @@ class PlyHistory
         var newLength = revPlys.length - cnt;
         if (pointer > newLength)
             pointer = newLength;
+        plys.splice(newLength, cnt);
         return revPlys.splice(newLength, cnt);
     }
 
-    public function append(ply:ReversiblePly) 
+    public function append(ply:Ply, reversible:ReversiblePly) 
     {
         if (isAtEnd())
             pointer++;
-        revPlys.push(ply);
+        plys.push(ply);
+        revPlys.push(reversible);
     }
 
     public function new()

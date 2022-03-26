@@ -107,7 +107,6 @@ class Board extends OffsettedSprite
         {
             var currentHex = backInTime? transform.latter : transform.former;
             var goalHex = backInTime? transform.former : transform.latter;
-
             if (!currentHex.isEmpty())
                 pieceLayer.removeChild(getPiece(transform.coords));
             producePiece(transform.coords, goalHex);

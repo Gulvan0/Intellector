@@ -34,6 +34,11 @@ class AnalysisBehavior implements IBehavior
         return false;
     }
     
+    public function onVoidClick()
+	{
+        //* Do nothing
+    }
+    
     public function onMoveChosen(ply:Ply):Void
 	{
         var plyStr:String = ply.toNotation(boardInstance.shownSituation);

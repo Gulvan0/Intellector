@@ -1,5 +1,6 @@
 package gameboard;
 
+import openfl.geom.Point;
 import struct.Variant;
 import net.EventProcessingQueue.INetObserver;
 import gfx.analysis.RightPanel.RightPanelObserver;
@@ -57,8 +58,8 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     public function startPieceDragging(location:IntPoint)
     {
         var piece:Piece = getPiece(location);
-        removeChild(piece);
-        addChild(piece);
+        pieceLayer.removeChild(piece);
+        pieceLayer.addChild(piece);
         piece.startDrag(true);
     }
 
@@ -95,6 +96,7 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
         var toRevert:Array<ReversiblePly> = plyHistory.dropLast(cnt);
         currentSituation = currentSituation.unmakeMoves(toRevert);
         setSituation(currentSituation);
+        highlightMove(plyHistory.getLastMove().affectedCoords());
     }
 
     public function revertToShown() 
@@ -121,7 +123,7 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     public function makeMove(ply:Ply, ?triggeredByPremove:Bool = false)
     {
         var revPly:ReversiblePly = ply.toReversible(currentSituation);
-        plyHistory.append(revPly);
+        plyHistory.append(ply, revPly);
         currentSituation = currentSituation.makeMove(ply);
         if (plyHistory.isAtEnd())
         {
@@ -164,7 +166,10 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     {
         var ply = plyHistory.prev(); 
         applyMoveTransposition(ply, true);
-        highlightMove(ply.affectedCoords());
+        if (plyHistory.isAtBeginning())
+            highlightMove([]);
+        else
+            highlightMove(plyHistory.getLastMove().affectedCoords());
     }
 
     public function next()
@@ -202,7 +207,8 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     private function onLMBPressed(e:MouseEvent)
     {
         if (!suppressLMBHandler)
-            state.onLMBPressed(posToIndexes(e.stageX, e.stageY));
+            if (getBounds(stage).contains(e.stageX, e.stageY))
+                state.onLMBPressed(posToIndexes(e.stageX, e.stageY));
     }
 
     private function onMouseMoved(e:MouseEvent)
@@ -238,7 +244,7 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
                 plyHistory.clear();
                 for (ply in branch)
                 {
-                    plyHistory.append(ply.toReversible(situation));
+                    plyHistory.append(ply, ply.toReversible(situation));
                     situation = situation.makeMove(ply);
                     if (i == pointer)
                         rearrangeToSituation(situation);

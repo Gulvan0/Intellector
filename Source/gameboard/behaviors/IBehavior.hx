@@ -13,4 +13,5 @@ interface IBehavior
     public function onMoveChosen(ply:Ply):Void;
     public function markersDisabled():Bool;
     public function hoverDisabled():Bool;
+    public function onVoidClick():Void;
 }
