@@ -31,7 +31,7 @@ class TSelectableBoard extends Sprite
 
     private var _checks_basics:Map<Int, Array<String>> = [
         -1 => ['Everything works the same with RMB hints'],
-        0 => ['Starting pos, normal orientation, no highlighted moves'],
+        0 => ['Starting pos, normal orientation, no highlighted moves, no markers'],
         1 => ['Upper left corner liberator jump highlighted'],
         2 => ['Markers added for the leftmost black progressor'],
         3 => ['The follow-up jump in the same direction highlighted instead of the former move'],
@@ -50,6 +50,8 @@ class TSelectableBoard extends Sprite
             board.setOrientation(White);
             board.setSituation(Situation.starting());
             board.highlightMove([]);
+            for (coords in IntPoint.allHexCoords)
+                board.removeMarkers(coords);
         }
         else if (i == 1)
             board.addMarkers(IntPoint.fromScalar(0));

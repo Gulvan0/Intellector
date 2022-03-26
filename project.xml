@@ -9,6 +9,7 @@
 	<source path="Source" />
 	
 	<haxelib name="openfl" />
+	<haxelib name="svg" />
 	<haxelib name="hxWebSockets" />
 	<haxelib name="haxeui-core" />
 	<haxelib name="haxeui-openfl" />

@@ -1,5 +1,6 @@
 package utils;
 
+import format.SVG;
 import gfx.analysis.PosEditMode;
 import openfl.geom.Matrix;
 import struct.Ply;
@@ -18,13 +19,16 @@ enum AssetName
 
 class AssetManager 
 {
-    public static var pieceBitmaps:Map<PieceType, Map<PieceColor, BitmapData>>;
+    public static var pieces:Map<PieceType, Map<PieceColor, SVG>>; //new
+    public static var pieceBitmaps:Map<PieceType, Map<PieceColor, BitmapData>>; //deprecated
     public static var otherBitmaps:Map<AssetName, BitmapData>;
 
-    public static inline function pathToImage(type:PieceType, color:PieceColor):String
+    private static inline function pathToImage(type:PieceType, color:PieceColor, ?svg:Bool = false):String
     {
-        var filename:String = type.getName() + "_" + color.getName().toLowerCase();
-        return 'assets/figures/$filename.png';
+        if (svg)
+            return "assets/pieces/" + type.getName() + "_" + color.getName() + ".svg";
+        else
+            return "assets/figures/" + type.getName() + "_" + color.getName().toLowerCase() + ".png";
     }
 
     public static function playPlySound(ply:Ply, situation:Situation)
@@ -59,12 +63,17 @@ class AssetManager
 
     private static function initPieces()
     {
+        pieces = [];
         pieceBitmaps = [];
         for (fig in PieceType.createAll())
         {
+            pieces[fig] = new Map<PieceColor, SVG>();
             pieceBitmaps[fig] = new Map<PieceColor, BitmapData>();
             for (col in PieceColor.createAll())
+            {
                 pieceBitmaps[fig][col] = Assets.getBitmapData(pathToImage(fig, col));
+                pieces[fig][col] = new SVG(Assets.getText(pathToImage(fig, col, true)));
+            }
         }
     }
 

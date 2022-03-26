@@ -1,5 +1,7 @@
 package gameboard;
 
+import openfl.display.Shape;
+import format.SVG;
 import openfl.geom.Point;
 import utils.AssetManager;
 import openfl.display.Bitmap;
@@ -13,9 +15,9 @@ class Piece extends Sprite
     public var type(default, null):PieceType;
     public var color(default, null):PieceColor;
     
-    public static function fromHex(hex:Hex):Piece
+    public static function fromHex(hex:Hex, hexSideLength:Float):Piece
     {
-        return new Piece(hex.type, hex.color);
+        return new Piece(hex.type, hex.color, hexSideLength);
     }
 
     public function dispose(pos:Point) 
@@ -24,26 +26,29 @@ class Piece extends Sprite
         y = pos.y;    
     }
 
-    public function rescale(hexSideLength:Float) 
+    public function redraw(hexSideLength:Float) 
     {
-        var scale = Hexagon.sideToHeight(hexSideLength) * 0.85 / height;
+        graphics.clear();
+        var svg:SVG = AssetManager.pieces[type][color];
+
+        var scale = Hexagon.sideToHeight(hexSideLength) * 0.85 / svg.data.height;
         if (type == Progressor)
             scale *= 0.7;
         else if (type == Liberator || type == Defensor)
             scale *= 0.9;
-        scaleX = scale;
-        scaleY = scale;
+
+        var targetWidth = Math.round(svg.data.width * scale);
+        var targetHeight = Math.round(svg.data.height * scale);
+        
+        svg.render(graphics, -targetWidth/2, -targetHeight/2, targetWidth, targetHeight);
     }
 
-    public function new(type:PieceType, color:PieceColor) 
+    public function new(type:PieceType, color:PieceColor, hexSideLength:Float) 
     {
         super();
         this.type = type;
         this.color = color;
 
-        var bitmap = new Bitmap(AssetManager.pieceBitmaps[type][color]);
-        bitmap.x = -bitmap.width / 2;
-        bitmap.y = -bitmap.height / 2;
-        addChild(bitmap);   
+        redraw(hexSideLength);
     } 
 }

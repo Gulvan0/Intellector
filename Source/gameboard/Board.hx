@@ -222,11 +222,8 @@ class Board extends OffsettedSprite
             pieces[scalarCoord] = null;
         else
         {
-            var piece:Piece = Piece.fromHex(hex);
-            var coords = hexCoords(location);
-            piece.rescale(hexSideLength);
-            piece.x = coords.x;
-            piece.y = coords.y;
+            var piece:Piece = Piece.fromHex(hex, hexSideLength);
+            piece.dispose(hexCoords(location));
             pieceLayer.addChild(piece);
             pieces[scalarCoord] = piece;
         }
