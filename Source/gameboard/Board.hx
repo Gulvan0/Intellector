@@ -1,5 +1,6 @@
 package gameboard;
 
+import utils.MathUtils;
 import openfl.display.Sprite;
 import gfx.utils.Colors;
 import utils.Notation;
@@ -244,7 +245,7 @@ class Board extends OffsettedSprite
         for (i in 0...9)
         {
             var bottomHexCoords:Point = absHexCoords(i, 6 - i % 2, true);
-            var letter = createLetter(Notation.getColumn(i));
+            var letter = createLetter(Notation.getColumn(i), hexSideLength);
             letter.x = bottomHexCoords.x - letter.textWidth / 2 - 5;
             letter.y = bottomHexCoords.y + Hexagon.sideToHeight(hexSideLength) / 2;
             letters.push(letter);
@@ -252,11 +253,11 @@ class Board extends OffsettedSprite
         }
     }
 
-    private function createLetter(letter:String):TextField 
+    private function createLetter(letter:String, hexSideLength:Float):TextField 
     {
         var tf = new TextField();
         tf.text = letter;
-        tf.setTextFormat(new TextFormat(null, 28, Colors.border, true));
+        tf.setTextFormat(new TextFormat(null, MathUtils.intScaleLike(28, 40, hexSideLength), Colors.border, true));
         tf.selectable = false;
         return tf;
     }

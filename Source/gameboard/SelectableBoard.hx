@@ -59,8 +59,16 @@ class SelectableBoard extends Board
     //* Doesn't check whether a marker belongs to a different departure IntPoint since there is normally no more than 1 departure present
     public function removeMarkers(from:IntPoint) 
     {
+        if (shownSituation.get(from).isEmpty())
+            throw "Only non-empty hex may be passed as a removeMarkers() argument";
+
         for (destination in Rules.possibleFields(from, shownSituation.get))
             getHex(destination).removeMarkers();
+    }
+
+    public function removeSingleMarker(location:IntPoint)
+    {
+        getHex(location).removeMarkers();
     }
 
     public function removeArrowsAndSelections()

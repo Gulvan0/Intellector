@@ -103,28 +103,28 @@ class Rules
     public static function possibleFields(from:IntPoint, getHex:Null<IntPoint>->Hex):Array<IntPoint> 
     {
         var fields:Array<IntPoint> = [];
-        var figure:Hex = getHex(from);
+        var piece:Hex = getHex(from);
 
-        switch figure.type 
+        switch piece.type 
         {
             case Progressor:
-                var directions:Array<Direction> = figure.color == White? [U, UL, UR] : [D, DL, DR];
+                var directions:Array<Direction> = piece.color == White? [U, UL, UR] : [D, DL, DR];
                 for (dir in directions)
                 {
                     var destination = getOneStepCoords(from.i, from.j, dir);
                     if (destination != null)
                     {
                         var hex = getHex(destination);
-                        if (hex != null && (hex.isEmpty() || hex.color != figure.color))
+                        if (hex != null && (hex.isEmpty() || hex.color != piece.color))
                             fields.push(destination);
                     }
                 }
             case Aggressor:
                 for (dir in [A_UL, A_UR, A_R, A_DR, A_DL, A_L])
-                    fields = fields.concat(avalanche(from, dir, figure.color, getHex));
+                    fields = fields.concat(avalanche(from, dir, piece.color, getHex));
             case Dominator:
                 for (dir in [UL, UR, D, DR, DL, U])
-                    fields = fields.concat(avalanche(from, dir, figure.color, getHex));
+                    fields = fields.concat(avalanche(from, dir, piece.color, getHex));
             case Liberator:
                 for (dir in [UL, UR, D, DR, DL, U])
                 {
@@ -140,7 +140,7 @@ class Rules
                     if (destination != null)
                     {
                         var hex2 = getHex(destination);
-                        if (hex2 != null && (hex2.isEmpty() || hex2.color != figure.color))
+                        if (hex2 != null && (hex2.isEmpty() || hex2.color != piece.color))
                             fields.push(destination);
                     }
                 }
@@ -151,7 +151,7 @@ class Rules
                     if (destination != null)
                     {
                         var hex = getHex(destination);
-                        if (hex != null && (hex.isEmpty() || hex.color != figure.color || hex.type == Intellector))
+                        if (hex != null && (hex.isEmpty() || hex.color != piece.color || hex.type == Intellector))
                             fields.push(destination);
                     }
                 }
@@ -162,7 +162,7 @@ class Rules
                     if (destination != null)
                     {
                         var hex = getHex(destination);
-                        if (hex != null && (hex.isEmpty() || (hex.color == figure.color && hex.type == Defensor)))
+                        if (hex != null && (hex.isEmpty() || (hex.color == piece.color && hex.type == Defensor)))
                             fields.push(destination);
                     }
                 }

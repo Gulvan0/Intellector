@@ -1,5 +1,6 @@
 package gameboard;
 
+import utils.MathUtils;
 import utils.Notation;
 import gfx.utils.Colors;
 import openfl.text.TextFormat;
@@ -65,7 +66,7 @@ class Hexagon extends Sprite
 
         number = new TextField();
         number.text = Notation.getRow(i, j);
-        number.setTextFormat(new TextFormat(null, 14, Colors.hexRowNumber(dark), true));
+        number.setTextFormat(new TextFormat(null, MathUtils.intScaleLike(14, 40, hexSideLength), Colors.hexRowNumber(dark), true));
         number.selectable = false;
         number.x = -hexSideLength * 0.85;
         number.y = -number.textHeight * 0.75;
@@ -75,7 +76,7 @@ class Hexagon extends Sprite
 
         dot = new Sprite();
         dot.graphics.beginFill(0x333333);
-        dot.graphics.drawCircle(0, 0, 8);
+        dot.graphics.drawCircle(0, 0, MathUtils.scaleLike(8, 40, hexSideLength));
         dot.graphics.endFill();
         dot.visible = false;
 
@@ -113,7 +114,7 @@ class Hexagon extends Sprite
         var rationalStep = hexSideLength/2;
         var irrationalStep = rationalStep * Math.sqrt(3);
 
-        sprite.graphics.lineStyle(3, Colors.border);
+        sprite.graphics.lineStyle(MathUtils.scaleLike(3, 40, hexSideLength), Colors.border);
         sprite.graphics.beginFill(color);
         sprite.graphics.moveTo(-rationalStep, -irrationalStep);
         sprite.graphics.lineTo(rationalStep, -irrationalStep);

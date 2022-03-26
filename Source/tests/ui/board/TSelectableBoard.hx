@@ -19,6 +19,8 @@ class TSelectableBoard extends Sprite
                 board.setOrientation(White);
                 board.setSituation(Situation.starting());
                 board.highlightMove([]);
+                for (coords in IntPoint.allHexCoords)
+                    board.removeSingleMarker(coords);
             case 1: board.highlightMove([new IntPoint(0, 0), new IntPoint(2, 1)]);
             case 2: board.addMarkers(new IntPoint(0, 1));
             case 3: board.highlightMove([new IntPoint(2, 1), new IntPoint(4, 2)]);
@@ -51,7 +53,7 @@ class TSelectableBoard extends Sprite
             board.setSituation(Situation.starting());
             board.highlightMove([]);
             for (coords in IntPoint.allHexCoords)
-                board.removeMarkers(coords);
+                board.removeSingleMarker(coords);
         }
         else if (i == 1)
             board.addMarkers(IntPoint.fromScalar(0));
@@ -101,7 +103,7 @@ class TSelectableBoard extends Sprite
     {
         super();
 
-        board = new SelectableBoard(Situation.starting());
+        board = new SelectableBoard(Situation.starting(), White, 50);
         addChild(board);
     }    
 }
