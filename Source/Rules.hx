@@ -28,8 +28,13 @@ enum Direction
 class Rules
 {
 
-    public static function possible(from:IntPoint, to:IntPoint, getHex:Null<IntPoint>->Hex):Bool 
+    public static function possible(from:IntPoint, to:IntPoint, getHex:Null<IntPoint>->Hex, ?falseOnEmptyDeparture:Bool = false):Bool 
     {
+        if (getHex(from).isEmpty())
+            if (falseOnEmptyDeparture)
+                return false;
+            else
+                throw "Trying to get a list of possible moves when there's no piece to be moved at a departure hex";
         return possibleFields(from, getHex).find(to.equals) != null;
     }
 

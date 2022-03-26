@@ -11,6 +11,7 @@ interface IBehavior
     public function allowedToMove(piece:Piece):Bool;
     public function returnToCurrentOnLMB():Bool;
     public function onMoveChosen(ply:Ply):Void;
+    public function onAboutToScrollAway():Void;
     public function markersDisabled():Bool;
     public function hoverDisabled():Bool;
     public function onVoidClick():Void;

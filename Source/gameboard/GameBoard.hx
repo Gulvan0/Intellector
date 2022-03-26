@@ -72,10 +72,10 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
             getHex(state.cursorLocation).hideLayer(Hover);
 
         if (Std.isOfType(state, BasePlayableState))
-        {
             state.abortMove();
-            state = new NeutralState(this, state.cursorLocation);
-        }
+
+        if (plyHistory.isAtEnd() && (type == Prev || type == Home))
+            behavior.onAboutToScrollAway();
 
         switch type 
         {

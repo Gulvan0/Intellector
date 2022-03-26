@@ -25,44 +25,45 @@ class EnemyMoveBehavior implements IBehavior
         }
 
         boardInstance.setSituation(boardInstance.currentSituation); //Resetting the shownSituation    
+        premoves = [];
     }
 
     private function handleOpponentMove(ply:Ply)
     {
-        AssetManager.playPlySound(ply, boardInstance.currentSituation);
-        boardInstance.makeMove(ply);
-
         if (Lambda.empty(premoves))
         {
+            AssetManager.playPlySound(ply, boardInstance.currentSituation);
+            boardInstance.makeMove(ply);
+
             boardInstance.state.abortMove();
-            boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
-            boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
-        }
-        else if (!Rules.possible(premoves[0].from, premoves[0].to, boardInstance.currentSituation.get))
-        {
-            resetPremoves();
-            boardInstance.state.abortMove();
-            boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
             boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
         }
         else
         {
-            var premove:Ply = premoves[0];
-            AssetManager.playPlySound(premove, boardInstance.currentSituation);
-            boardInstance.emit(ContinuationMove(premove, premove.toNotation(boardInstance.currentSituation), playerColor));
-            Networker.emitEvent(Move(premove.from.i, premove.to.i, premove.from.j, premove.to.j, premove.morphInto == null? null : premove.morphInto.getName()));
-            boardInstance.makeMove(premove, true);
-
-            boardInstance.getHex(premove.from).hideLayer(Premove);
-            boardInstance.getHex(premove.to).hideLayer(Premove);
-
-            premoves.splice(0, 1);
-
-            for (premovePly in premoves)
+            var activatedPremove:Ply = premoves[0];
+            var followingPremoves:Array<Ply> = premoves.slice(1);
+    
+            resetPremoves();
+    
+            AssetManager.playPlySound(ply, boardInstance.currentSituation);
+            boardInstance.makeMove(ply);
+    
+            if (!Rules.possible(activatedPremove.from, activatedPremove.to, boardInstance.currentSituation.get, true))
             {
-                //We reapply layers to the remaining premoves because they can also affect the same hexes that the just activated premove affects
-                boardInstance.getHex(premovePly.from).showLayer(Premove);
-                boardInstance.getHex(premovePly.to).showLayer(Premove);
+                boardInstance.state.abortMove();
+                boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
+            }
+            else
+            {
+                AssetManager.playPlySound(activatedPremove, boardInstance.currentSituation);
+                boardInstance.emit(ContinuationMove(activatedPremove, activatedPremove.toNotation(boardInstance.currentSituation), playerColor));
+                boardInstance.makeMove(activatedPremove, true);
+    
+                for (premove in followingPremoves)
+                    displayPlannedPremove(premove);
+                premoves = followingPremoves;
+    
+                Networker.emitEvent(Move(activatedPremove.from.i, activatedPremove.to.i, activatedPremove.from.j, activatedPremove.to.j, activatedPremove.morphInto == null? null : activatedPremove.morphInto.getName()));
             }
         }
     }
@@ -109,20 +110,30 @@ class EnemyMoveBehavior implements IBehavior
 	{
         resetPremoves();
     }
+
+    public function onAboutToScrollAway()
+    {
+        resetPremoves();
+    }
     
     public function onMoveChosen(ply:Ply):Void
 	{
         //No premoveEnabled check because it is impossible to get here from the StubState
+        displayPlannedPremove(ply);
+        premoves.push(ply);
+        boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
+    }
+
+    private function displayPlannedPremove(ply:Ply)
+    {
         boardInstance.applyMoveTransposition(ply.toReversible(boardInstance.shownSituation));
         boardInstance.getHex(ply.from).showLayer(Premove);
         boardInstance.getHex(ply.to).showLayer(Premove);
-        premoves.push(ply);
-        boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
     }
     
     public function markersDisabled():Bool
     {
-        return false;
+        return true;
     }
 
     public function hoverDisabled():Bool

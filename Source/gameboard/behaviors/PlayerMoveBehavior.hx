@@ -49,6 +49,11 @@ class PlayerMoveBehavior implements IBehavior
 	{
         //* Do nothing
     }
+
+    public function onAboutToScrollAway()
+    {
+        //* Do nothing
+    }
     
     public function onMoveChosen(ply:Ply):Void
 	{

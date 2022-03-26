@@ -41,7 +41,7 @@ class DraggingState extends BasePlayableState
             boardInstance.getHex(location).showLayer(LMB);
             boardInstance.state = new SelectedState(boardInstance, location, cursorLocation);
         }
-        else if (location != null && Rules.possible(dragStartLocation, location, boardInstance.shownSituation.get))
+        else if (location != null && boardInstance.behavior.movePossible(dragStartLocation, location))
         {
             boardInstance.removeMarkers(dragStartLocation);
             askMoveDetails(dragStartLocation, location);

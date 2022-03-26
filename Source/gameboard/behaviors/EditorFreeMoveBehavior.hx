@@ -37,6 +37,11 @@ class EditorFreeMoveBehavior implements IBehavior
 	{
         //* Do nothing
     }
+
+    public function onAboutToScrollAway()
+    {
+        trace("Warning: scroll callback called while board.behavior is EditorFreeMoveBehavior");
+    }
     
     public function onMoveChosen(ply:Ply):Void
 	{

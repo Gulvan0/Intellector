@@ -25,7 +25,7 @@ class SelectedState extends BasePlayableState
         {
             boardInstance.state = new NeutralState(boardInstance, cursorLocation);
         }
-        else if (Rules.possible(selectedDepartureLocation, location, boardInstance.shownSituation.get))
+        else if (boardInstance.behavior.movePossible(selectedDepartureLocation, location))
         {
             if (cursorLocation != null)
                 boardInstance.getHex(cursorLocation).hideLayer(Hover);

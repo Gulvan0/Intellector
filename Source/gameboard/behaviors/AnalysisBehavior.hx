@@ -77,6 +77,11 @@ class AnalysisBehavior implements IBehavior
     {
         return false;
     }
+
+    public function onAboutToScrollAway()
+    {
+        //* Do nothing
+    }
     
     public function new(board:GameBoard, colorToMove:PieceColor)
     {
