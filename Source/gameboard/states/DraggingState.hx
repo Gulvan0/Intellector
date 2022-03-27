@@ -20,12 +20,12 @@ class DraggingState extends BasePlayableState
         boardInstance.state = new NeutralState(boardInstance, cursorLocation);
     }
 
-    public override function onLMBPressed(location:Null<IntPoint>)
+    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool)
     {
         //* Do nothing
     }
 
-    public override function onLMBReleased(location:Null<IntPoint>)
+    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool)
     {
         var draggedPiece:Piece = boardInstance.getPiece(dragStartLocation);
         draggedPiece.stopDrag();
@@ -44,7 +44,7 @@ class DraggingState extends BasePlayableState
         else if (location != null && boardInstance.behavior.movePossible(dragStartLocation, location))
         {
             boardInstance.removeMarkers(dragStartLocation);
-            askMoveDetails(dragStartLocation, location);
+            askMoveDetails(dragStartLocation, location, shiftPressed);
         }
         else
         {

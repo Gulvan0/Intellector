@@ -55,7 +55,7 @@ class Rules
                 else if ((to.j - from.j) % 3 == 0)
                     return Math.abs(to.j - from.j) / 3 == Math.abs(from.i - to.i) / 2;
                 else
-                    return Math.abs(to.j - from.j) % 3 == 1 + from.i % 2 && Math.floor(Math.abs(to.j - from.j) / 3) == (Math.abs(from.i - to.i) - 1) / 2;
+                    return Math.abs(to.j - from.j) % 3 == 2 - from.i % 2 && Math.floor(Math.abs(to.j - from.j) / 3) == (Math.abs(from.i - to.i) - 1) / 2;
 
             case Dominator:
                 if (from.i == to.i)
@@ -75,7 +75,7 @@ class Rules
             case Liberator:
                 var lateralDirections:Array<Direction> = [U, UL, UR, D, DL, DR];
                 for (dir in lateralDirections)
-                    if (to.equals(getCoordsInDirection(from.i, from.j, dir, 2)))
+                    if (to.equals(getCoordsInDirection(from.i, from.j, dir, 2)) || to.equals(getCoordsInDirection(from.i, from.j, dir, 1)))
                         return true;
                 return false;
 

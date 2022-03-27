@@ -120,15 +120,14 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
         
         Except for premoves, transposes pieces accordingly
     **/
-    public function makeMove(ply:Ply, ?triggeredByPremove:Bool = false)
+    public function makeMove(ply:Ply)
     {
         var revPly:ReversiblePly = ply.toReversible(currentSituation);
         plyHistory.append(ply, revPly);
         currentSituation = currentSituation.makeMove(ply);
         if (plyHistory.isAtEnd())
         {
-            if (!triggeredByPremove)
-                applyMoveTransposition(revPly);
+            applyMoveTransposition(revPly);
             highlightMove([ply.from, ply.to]);
         }
     }
@@ -208,7 +207,7 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     {
         if (!suppressLMBHandler)
             if (getBounds(stage).contains(e.stageX, e.stageY))
-                state.onLMBPressed(posToIndexes(e.stageX, e.stageY));
+                state.onLMBPressed(posToIndexes(e.stageX, e.stageY), e.shiftKey);
     }
 
     private function onMouseMoved(e:MouseEvent)
@@ -218,7 +217,7 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
 
     private function onLMBReleased(e:MouseEvent)
     {
-        state.onLMBReleased(posToIndexes(e.stageX, e.stageY));
+        state.onLMBReleased(posToIndexes(e.stageX, e.stageY), e.shiftKey);
     }
 
     //TODO: Connect to Networker on creation (somewhere in OnlineGame screen)

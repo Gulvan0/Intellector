@@ -21,6 +21,8 @@ class PlayerMoveBehavior implements IBehavior
             case Rollback(plysToUndo):
                 boardInstance.state.abortMove();
                 boardInstance.revertPlys(plysToUndo);
+                if (plysToUndo % 2 == 1)
+                    boardInstance.behavior = new EnemyMoveBehavior(boardInstance, playerColor);
                 
             case GameEnded(winner_color, reason):
                 boardInstance.state.abortMove();

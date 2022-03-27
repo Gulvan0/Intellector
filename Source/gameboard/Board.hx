@@ -1,5 +1,6 @@
 package gameboard;
 
+import struct.Ply;
 import utils.MathUtils;
 import openfl.display.Sprite;
 import gfx.utils.Colors;
@@ -73,7 +74,7 @@ class Board extends OffsettedSprite
         for (piece in pieces)
             pieceLayer.removeChild(piece);
         pieces = [];
-        shownSituation = val;
+        shownSituation = val.copy();
         producePieces();
     }
 
@@ -101,6 +102,48 @@ class Board extends OffsettedSprite
         shownSituation.set(location, hex.copy());
     }
 
+    public function applyPremoveTransposition(ply:Ply) 
+    {
+        var departurePiece = getPiece(ply.from);
+        var destinationPiece = getPiece(ply.to);
+
+        if (ply.morphInto != null)
+        {
+            pieceLayer.removeChild(departurePiece);
+            pieces[ply.from.toScalar()] = null;
+            shownSituation.set(ply.from, Hex.empty());
+
+            if (destinationPiece != null)
+                pieceLayer.removeChild(destinationPiece);
+            producePiece(ply.to, Hex.occupied(ply.morphInto, departurePiece.color));
+            shownSituation.set(ply.to, Hex.occupied(ply.morphInto, departurePiece.color));
+        }
+        else
+        {
+            departurePiece.dispose(hexCoords(ply.to));
+            pieces[ply.to.toScalar()] = departurePiece;
+            shownSituation.set(ply.to, Hex.occupied(departurePiece.type, departurePiece.color));
+
+            if (destinationPiece == null)
+            {
+                pieces[ply.from.toScalar()] = null;
+                shownSituation.set(ply.from, Hex.empty());
+            }
+            else if (departurePiece.color == destinationPiece.color && (departurePiece.type == Intellector && destinationPiece.type == Defensor || departurePiece.type == Defensor && destinationPiece.type == Intellector))
+            {
+                destinationPiece.dispose(hexCoords(ply.from));
+                pieces[ply.from.toScalar()] = destinationPiece;
+                shownSituation.set(ply.from, Hex.occupied(destinationPiece.type, destinationPiece.color));
+            }
+            else
+            {
+                pieceLayer.removeChild(destinationPiece);
+                pieces[ply.from.toScalar()] = null;
+                shownSituation.set(ply.from, Hex.empty());
+            }
+        }
+    }
+
     public function applyMoveTransposition(ply:ReversiblePly, backInTime:Bool = false)
     {
         for (transform in ply)
@@ -110,7 +153,7 @@ class Board extends OffsettedSprite
             if (!currentHex.isEmpty())
                 pieceLayer.removeChild(getPiece(transform.coords));
             producePiece(transform.coords, goalHex);
-            shownSituation.set(transform.coords, goalHex, false);
+            shownSituation.set(transform.coords, goalHex);
         }
     }
 

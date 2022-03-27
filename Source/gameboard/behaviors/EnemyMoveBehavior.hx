@@ -1,5 +1,6 @@
 package gameboard.behaviors;
 
+import struct.Hex;
 import struct.Ply;
 import struct.IntPoint;
 import gameboard.states.StubState;
@@ -47,17 +48,22 @@ class EnemyMoveBehavior implements IBehavior
     
             AssetManager.playPlySound(ply, boardInstance.currentSituation);
             boardInstance.makeMove(ply);
+
+            var premoveDeparture:Hex = boardInstance.currentSituation.get(activatedPremove.from);
     
-            if (!Rules.possible(activatedPremove.from, activatedPremove.to, boardInstance.currentSituation.get, true))
+            if (premoveDeparture.color != playerColor || !Rules.possible(activatedPremove.from, activatedPremove.to, boardInstance.currentSituation.get))
             {
                 boardInstance.state.abortMove();
                 boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
             }
             else
             {
+                if (premoveDeparture.type != Progressor && premoveDeparture.type != Intellector && activatedPremove.morphInto != null)
+                    activatedPremove.morphInto = boardInstance.currentSituation.get(activatedPremove.to).type;
+
                 AssetManager.playPlySound(activatedPremove, boardInstance.currentSituation);
                 boardInstance.emit(ContinuationMove(activatedPremove, activatedPremove.toNotation(boardInstance.currentSituation), playerColor));
-                boardInstance.makeMove(activatedPremove, true);
+                boardInstance.makeMove(activatedPremove);
     
                 for (premove in followingPremoves)
                     displayPlannedPremove(premove);
@@ -76,6 +82,8 @@ class EnemyMoveBehavior implements IBehavior
                 boardInstance.state.abortMove();
                 resetPremoves();
                 boardInstance.revertPlys(plysToUndo);
+                if (plysToUndo % 2 == 1)
+                    boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
                 
             case GameEnded(winner_color, reason):
                 boardInstance.state.abortMove();
@@ -126,7 +134,7 @@ class EnemyMoveBehavior implements IBehavior
 
     private function displayPlannedPremove(ply:Ply)
     {
-        boardInstance.applyMoveTransposition(ply.toReversible(boardInstance.shownSituation));
+        boardInstance.applyPremoveTransposition(ply);
         boardInstance.getHex(ply.from).showLayer(Premove);
         boardInstance.getHex(ply.to).showLayer(Premove);
     }

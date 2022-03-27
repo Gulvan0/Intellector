@@ -12,7 +12,7 @@ class DirectSetState extends BaseState
         //* Do nothing
     }
 
-    public override function onLMBPressed(location:Null<IntPoint>)
+    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool)
     {
         if (location != null)
             boardInstance.setHexDirectly(location, prototypeHex);
@@ -23,7 +23,7 @@ class DirectSetState extends BaseState
         return false;
     }
 
-    public override function onLMBReleased(location:Null<IntPoint>)
+    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool)
     {
         //* Do nothing
     }

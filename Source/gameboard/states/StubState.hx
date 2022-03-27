@@ -9,12 +9,12 @@ class StubState extends BaseState
         //* Do nothing
     }
     
-    public override function onLMBPressed(location:Null<IntPoint>)
+    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool)
     {
         //* Do nothing
     }
 
-    public override function onLMBReleased(location:Null<IntPoint>)
+    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool)
     {
         //* Do nothing
     }
