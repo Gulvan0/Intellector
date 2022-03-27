@@ -14,7 +14,7 @@ class BaseState
         throw "Should be overriden";
     }
 
-    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool)
+    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         throw "Should be overriden";
     }
@@ -38,7 +38,7 @@ class BaseState
         throw "Should be overriden";
     }
 
-    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool)
+    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         throw "Should be overriden";
     }

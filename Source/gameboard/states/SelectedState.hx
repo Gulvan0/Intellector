@@ -13,7 +13,7 @@ class SelectedState extends BasePlayableState
         boardInstance.state = new NeutralState(boardInstance, cursorLocation);
     }
 
-    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool)
+    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         var pressedDestinationPiece:Null<Piece> = boardInstance.getPiece(location);
         var selectedDeparturePiece:Null<Piece> = boardInstance.getPiece(selectedDepartureLocation);
@@ -29,7 +29,7 @@ class SelectedState extends BasePlayableState
         {
             if (cursorLocation != null)
                 boardInstance.getHex(cursorLocation).hideLayer(Hover);
-            askMoveDetails(selectedDepartureLocation, location, shiftPressed);
+            askMoveDetails(selectedDepartureLocation, location, shiftPressed, ctrlPressed);
         }
         else if (pressedDestinationPiece.color == selectedDeparturePiece.color)
         {
@@ -46,7 +46,7 @@ class SelectedState extends BasePlayableState
         return boardInstance.behavior.movePossible(selectedDepartureLocation, location);
     }
 
-    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool)
+    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }

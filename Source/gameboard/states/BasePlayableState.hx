@@ -9,7 +9,7 @@ import net.ServerEvent;
 
 class BasePlayableState extends BaseState
 {
-    private function askMoveDetails(from:IntPoint, to:IntPoint, shiftPressed:Bool) 
+    private function askMoveDetails(from:IntPoint, to:IntPoint, shiftPressed:Bool, ctrlPressed:Bool) 
     {
         var departureHex:Hex = boardInstance.shownSituation.get(from);
         var destinationHex:Hex = boardInstance.shownSituation.get(to);
@@ -31,7 +31,9 @@ class BasePlayableState extends BaseState
             else
                 Dialogs.promotionSelect(departureHex.color, onPromotionSelected, abortMove);
         else if (chameleonPossible)
-            if (shiftPressed)
+            if (ctrlPressed)
+                boardInstance.behavior.onMoveChosen(simplePly);
+            else if (shiftPressed)
                 boardInstance.behavior.onMoveChosen(chameleonPly);
             else
                 Dialogs.chameleonConfirm(onChameleonDecisionMade, abortMove);

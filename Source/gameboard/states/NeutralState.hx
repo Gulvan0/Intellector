@@ -9,7 +9,7 @@ class NeutralState extends BasePlayableState
         //* Do nothing
     }
 
-    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool)
+    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         var pressedPiece:Null<Piece> = boardInstance.getPiece(location);
 
@@ -41,7 +41,7 @@ class NeutralState extends BasePlayableState
             return boardInstance.behavior.allowedToMove(piece);
     }
 
-    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool)
+    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }
