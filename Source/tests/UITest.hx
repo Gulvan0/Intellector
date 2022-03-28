@@ -30,7 +30,6 @@ class UITest extends HBox
     private var checksVBox:VBox;
 
     private var exploredFieldNamesSet:Map<String, Bool> = [];
-    private var checkFieldNamesSet:Map<String, Bool> = [];
 
     private var seqIterators:Map<String, Int> = [];
     private var seqIteratorLimits:Map<String, Int> = [];
@@ -90,11 +89,10 @@ class UITest extends HBox
         seqButtons[pureName].text = getSequenceButtonText(pureName);
     }
 
-    private function arrayCheckBoxes(checkName:String):Array<CheckBox>
+    private function arrayCheckBoxes(checks:Array<String>):Array<CheckBox>
     {
         var checkboxes:Array<CheckBox> = [];
 
-        var checks:Array<String> = Reflect.field(component, checkName);
         for (check in checks)
         {
             var checkBox:CheckBox = new CheckBox();
@@ -106,11 +104,10 @@ class UITest extends HBox
         return checkboxes;
     }
 
-    private function mapCheckBoxes(checkName:String):Array<CheckBox>
+    private function mapCheckBoxes(checkMap:Map<Int, Array<String>>):Array<CheckBox>
     {
         var checkboxes:Array<CheckBox> = [];
 
-        var checkMap:Map<Int, Array<String>> = Reflect.field(component, checkName);
         for (step => stepChecks in checkMap.keyValueIterator())
             for (check in stepChecks)
             {
@@ -184,32 +181,45 @@ class UITest extends HBox
                     btn.text = getSequenceButtonText(pureName);
             }
 
-            var checkName:String = '_checks_' + pureName;
-            if (checkFieldNamesSet.exists(checkName))
+            createCheckboxes('_checks_' + pureName, pureName);
+
+            exploredFieldNamesSet.set(pureName, true);
+        }
+    }
+
+    private function createCheckboxes(fieldName:String, ?headerText:String)
+    {
+        var checks:Dynamic = Reflect.field(component, fieldName);
+
+        if (checks != null)
+        {
+            if (headerText != null)
             {
                 var header:Label = new Label();
-                header.text = pureName;
+                header.text = headerText;
                 header.percentWidth = 100;
                 header.customStyle.fontBold = true;
                 checksVBox.addComponent(header);
-    
-                var checkboxes:Array<CheckBox> = switch type
-                {
-                    case Action, Auto: arrayCheckBoxes(checkName);
-                    case Sequence: mapCheckBoxes(checkName);
-                }
-
-                for (checkbox in checkboxes)
-                    checksVBox.addComponent(checkbox);
             }
 
-            exploredFieldNamesSet.set(pureName, true);
+            var checkboxes:Array<CheckBox> = [];
+            
+            if (Std.isOfType(checks, Array))
+                checkboxes = arrayCheckBoxes(checks);
+            else if (Std.isOfType(checks, Map))
+                checkboxes = mapCheckBoxes(checks);
+            else
+                throw 'Invalid checklist type $fieldName (expected either Array<String> or Map<Int, Array<String>>)';
+
+            for (checkbox in checkboxes)
+                checksVBox.addComponent(checkbox);
         }
     }
 
     public function new(component:Sprite, ?contentWidthPercent:Float = 72) 
     {
         Networker.ignoreEmitCalls = true;
+        //TODO: Full screen testing: actions and checks as pop-ups, check results autosave, clear cookies option
         
         super();
         this.component = component;
@@ -261,12 +271,11 @@ class UITest extends HBox
         
         for (fieldName in allFields) 
             if (fieldName.startsWith('_') && !sMap.exists(fieldName))
-                if (fieldName.startsWith('_checks_'))
-                    checkFieldNamesSet.set(fieldName, true);
-                else
-                    for (type in EndpointType.createAll())
-                        if (fieldName.startsWith(getFieldNamePrefix(type)))
-                            endpointFieldNames[type].push(fieldName);
+                for (type in EndpointType.createAll())
+                    if (fieldName.startsWith(getFieldNamePrefix(type)))
+                        endpointFieldNames[type].push(fieldName);
+
+        createCheckboxes('_checks_');
 
         for (endpointType in [Action, Auto, Sequence])
             processFields(endpointType, endpointFieldNames[endpointType]);
