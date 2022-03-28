@@ -1,5 +1,6 @@
 package;
 
+import tests.ui.game.TSidebox;
 import tests.ui.board.TGameBoard;
 import tests.ui.board.TSelectableBoard;
 import tests.ui.board.TBoard;
@@ -50,7 +51,7 @@ class Main extends Sprite
 		OpeningTree.init();
 		AssetManager.init();
 		Changes.initChangelog();
-		addChild(new UITest(new TGameBoard()));
+		addChild(new UITest(new TSidebox()));
 		//screenManager = new ScreenManager()
 		//Networker.eventQueue.addObserver(screenManager);
 		//addChild(screenManager);

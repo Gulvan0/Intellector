@@ -77,7 +77,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         observers.remove(obs);
     }
 
-    public function emit(event:SideboxEvent) 
+    private function emit(event:SideboxEvent) 
     {
         for (obs in observers)
             obs.handleSideboxEvent(event);
@@ -121,17 +121,17 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         }
     }
 
-    private function actualize(parsedData:GameLogParserOutput)
+    private function actualize(movesPlayed:Array<Ply>)
     {
         var situation:Situation = Situation.starting();
-        for (ply in parsedData.movesPlayed)
+        for (ply in movesPlayed)
         {
             makeMove(ply.toNotation(situation));
             situation = situation.makeMove(ply);
         }
     }
 
-    public function correctTime(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String)
+    private function correctTime(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String)
     {
         var currentTimestamp:Float = Date.now().getTime();
         var halfPing:Float = currentTimestamp - timestamp;
@@ -385,6 +385,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
             revertOrientation();
 
         if (actualizationData != null)
-            actualize(actualizationData);
+            actualize(actualizationData.movesPlayed);
     }
 }
