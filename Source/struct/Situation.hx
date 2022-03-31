@@ -1,5 +1,6 @@
 package struct;
 
+import utils.MathUtils;
 import struct.PieceColor.opposite;
 
 class Situation 
@@ -57,9 +58,20 @@ class Situation
         return situation;
     }
 
-    public function makeMove(ply:Ply):Situation 
+    public static function randomPlay(plyCount:Int):Situation 
     {
-        var next:Situation = this.copy();
+        var sit:Situation = Situation.starting();
+        for (i in 0...plyCount)
+        {
+            var allPlys = sit.availablePlys();
+            sit.makeMove(MathUtils.randomElement(allPlys), true);
+        }
+        return sit;
+    }
+
+    public function makeMove(ply:Ply, inPlace:Bool = false):Situation 
+    {
+        var next:Situation = inPlace? this : this.copy();
         next.turnColor = opposite(turnColor);
 
         var fromHex = get(ply.from);

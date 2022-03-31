@@ -353,8 +353,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         if (playingAs != null)
             enableTakebackAfterMove = playingAs == White? 1 : 2;
         
-        whiteClock.init(startSecs, false, startSecs >= 90);
-        blackClock.init(startSecs, !belongsToSpectator, startSecs >= 90);
+        whiteClock.init(startSecs, playingAs == White, startSecs >= 90);
+        blackClock.init(startSecs, playingAs == Black, startSecs >= 90);
 
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;

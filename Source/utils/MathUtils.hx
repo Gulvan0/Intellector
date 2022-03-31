@@ -11,4 +11,15 @@ class MathUtils
     {
         return Math.round(defaultValue * scaledMeasure / defaultMeasure);
     }
+
+    /**Inclusive interval (x in [from; to])**/
+    public static function randomInt(from:Int, to:Int) 
+    {
+        return Math.floor(Math.random() * (to - from + 1)) + from;
+    }
+
+    public static function randomElement<T>(a:Array<T>):T
+    {
+        return a[randomInt(0, a.length - 1)];
+    }
 }

@@ -1,5 +1,6 @@
 package tests;
 
+import haxe.ds.IntMap;
 import js.Browser;
 import haxe.ui.components.Label;
 import haxe.rtti.Meta;
@@ -206,7 +207,7 @@ class UITest extends HBox
             
             if (Std.isOfType(checks, Array))
                 checkboxes = arrayCheckBoxes(checks);
-            else if (Std.isOfType(checks, Map))
+            else if (Std.isOfType(checks, IntMap))
                 checkboxes = mapCheckBoxes(checks);
             else
                 throw 'Invalid checklist type $fieldName (expected either Array<String> or Map<Int, Array<String>>)';
