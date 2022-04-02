@@ -14,16 +14,26 @@ import haxe.ui.macros.ComponentMacros;
 class Clock extends Card
 {
     public var secondsLeft(default, null):Float;
-    public var notifyOnOneMinuteLeft:Bool;
+    public var playSoundOnOneMinuteLeft:Bool;
     public var alertsEnabled:Bool;
 
     private var timerRunning:Bool = false;
     private var lastUpdate:Float;
+    private var playerMove:Bool;
 
-    private function applyColoring(playerMove:Bool, lowTime:Bool)
+    public function setPlayerMove(v:Bool) 
+    {
+        var changed:Bool = playerMove != v;
+        playerMove = v;
+        if (changed)
+            refreshColoring();
+    }
+
+    private function refreshColoring()
     {
         var backgroundColor:Int = -1;
         var textColor:Int = -1;
+        var lowTime:Bool = alertsEnabled && secondsLeft < 60;
 
         if (playerMove && lowTime)
         {
@@ -46,8 +56,8 @@ class Clock extends Card
             textColor = 0x666666;
         }
 
-        label.applyStyle({color: textColor});
-        this.applyStyle({backgroundColor: backgroundColor});
+        label.customStyle = {color: textColor};
+        this.customStyle = {backgroundColor: backgroundColor};
     }
 
     private function onEnterFrame(e)
@@ -73,13 +83,12 @@ class Clock extends Card
 
         if (alertsEnabled)
         {
-            var lowTime:Bool = secondsLeft < 60;
-            applyColoring(timerRunning, lowTime);
+            refreshColoring();
 
-            if (lowTime && notifyOnOneMinuteLeft)
+            if (secondsLeft < 60 && playSoundOnOneMinuteLeft)
             {
                 Assets.getSound("sounds/lowtime.mp3").play();
-                notifyOnOneMinuteLeft = false;
+                playSoundOnOneMinuteLeft = false;
             }
         }
     }
@@ -89,9 +98,7 @@ class Clock extends Card
         lastUpdate = Date.now().getTime();
         timerRunning = true;
         addEventListener(Event.ENTER_FRAME, onEnterFrame);
-
-        var lowTime:Bool = secondsLeft < 60;
-        applyColoring(timerRunning, lowTime);
+        refreshColoring();
     }
 
     public function stopTimer() 
@@ -99,8 +106,7 @@ class Clock extends Card
         timerRunning = false;
         removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 
-        var lowTime:Bool = secondsLeft < 60;
-        applyColoring(timerRunning, lowTime);
+        refreshColoring();
     }
 
     public function correctTime(secsLeft:Float, actualTimestamp:Float) 
@@ -114,13 +120,12 @@ class Clock extends Card
     {
         secondsLeft += secs;
         text = TimeControl.secsToString(secondsLeft);
-        if (secondsLeft >= 60)
-            applyColoring(timerRunning, false);
+        refreshColoring();
     }
 
-    public function init(initialSeconds:Float, alertsEnabled:Bool, notifyOnOneMinuteLeft:Bool) 
+    public function init(initialSeconds:Float, alertsEnabled:Bool, playSoundOnOneMinuteLeft:Bool) 
     {
-        this.notifyOnOneMinuteLeft = notifyOnOneMinuteLeft;
+        this.playSoundOnOneMinuteLeft = playSoundOnOneMinuteLeft;
         this.alertsEnabled = alertsEnabled;
 
         label.text = TimeControl.secsToString(initialSeconds);

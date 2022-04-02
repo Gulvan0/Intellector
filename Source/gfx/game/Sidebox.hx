@@ -149,6 +149,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
     {
         whiteClock.stopTimer();
         blackClock.stopTimer();
+        whiteClock.setPlayerMove(false);
+        blackClock.setPlayerMove(false);
 
         if (!belongsToSpectator)
             changeActionButtons([changeOrientationBtn, analyzeBtn, exportSIPBtn, rematchBtn]);
@@ -203,6 +205,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         var playerToMoveClock:Clock = justMovedColor == Black? blackClock : whiteClock;
 
         justMovedPlayerClock.stopTimer();
+        justMovedPlayerClock.setPlayerMove(false);
+        playerToMoveClock.setPlayerMove(true);
 
         if (move >= 2)
             playerToMoveClock.launchTimer();
@@ -239,6 +243,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         if (cnt % 2 == 1)
         {
             justMovedPlayerClock.stopTimer();
+            justMovedPlayerClock.setPlayerMove(false);
+            playerToMoveClock.setPlayerMove(true);
             playerToMoveClock.launchTimer();
         }
 

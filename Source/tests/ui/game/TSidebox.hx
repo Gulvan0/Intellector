@@ -108,7 +108,7 @@ class TSidebox extends Sprite
         9 => ["3 moves", "White's timer is stopped", "Black's timer starts running", "Black's card styled as MOVE"],
     ];
 
-    @steps(9)
+    @steps(10)
     private function _seq_alerts(i:Int)
     {
         var parsed2 = GameLogParser.parse("6620;\n3020Aggressor;\n");
@@ -130,8 +130,10 @@ class TSidebox extends Sprite
             case 6:
                 sidebox.makeMove("1514");
             case 7:
-                replaceSidebox(new Sidebox(null, 600, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
+                sidebox.makeMove("1011");
             case 8:
+                replaceSidebox(new Sidebox(null, 600, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
+            case 9:
                 sidebox.makeMove("1514");
         }
     }
@@ -144,8 +146,9 @@ class TSidebox extends Sprite
         4 => ["Sound alert", "Timer becomes generic on >10sec"],
         5 => ["Sound alert"],
         6 => ["No sound alert (not own)"],
-        7 => ["No styling", "No sound alert"],
-        8 => ["No styling", "No sound alert"]
+        7 => ["No sound alert (fire-once)"],
+        8 => ["No styling", "No sound alert"],
+        9 => ["No styling", "No sound alert"]
     ];
 
     private function _act_ContinuationMove() 
@@ -265,6 +268,7 @@ class TSidebox extends Sprite
     private var _checks_RollbackThree:Array<String> = [
         "History cut correctly",
         "ContinuationMove processed correctly after a rollback",
+        "Current timer stops, Another timer starts running, WAIT/MOVE styles are reverted",
         "Draw disabled if rolled too far",
         "Takeback disabled if rolled too far",
         "Draw reenabled after rolled too far + moved",
