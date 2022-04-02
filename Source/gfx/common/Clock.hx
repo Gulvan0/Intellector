@@ -20,7 +20,6 @@ class Clock extends Card
     private var timerRunning:Bool = false;
     private var lastUpdate:Float;
 
-    //TODO: Apply coloring every time turnColor changes
     private function applyColoring(playerMove:Bool, lowTime:Bool)
     {
         var backgroundColor:Int = -1;
@@ -90,12 +89,18 @@ class Clock extends Card
         lastUpdate = Date.now().getTime();
         timerRunning = true;
         addEventListener(Event.ENTER_FRAME, onEnterFrame);
+
+        var lowTime:Bool = secondsLeft < 60;
+        applyColoring(timerRunning, lowTime);
     }
 
     public function stopTimer() 
     {
         timerRunning = false;
         removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+
+        var lowTime:Bool = secondsLeft < 60;
+        applyColoring(timerRunning, lowTime);
     }
 
     public function correctTime(secsLeft:Float, actualTimestamp:Float) 
