@@ -1,5 +1,6 @@
 package tests;
 
+import js.Cookie;
 import haxe.ds.IntMap;
 import js.Browser;
 import haxe.ui.components.Label;
@@ -26,6 +27,7 @@ enum EndpointType
 class UITest extends HBox
 {
     private var component:Sprite;
+    private var cookiePrefix:String;
 
     private var actionBar:VerticalButtonBar;
     private var checksVBox:VBox;
@@ -90,36 +92,61 @@ class UITest extends HBox
         seqButtons[pureName].text = getSequenceButtonText(pureName);
     }
 
-    private function arrayCheckBoxes(checks:Array<String>):Array<CheckBox>
+    private function arrayCheckBoxes(checks:Array<String>, fieldName:String):Array<CheckBox>
     {
         var checkboxes:Array<CheckBox> = [];
+        var i:Int = 0;
 
         for (check in checks)
         {
+            var cookieName:String = '$cookiePrefix||$fieldName||$i';
+            var cookie:Null<String> = Cookie.get(cookieName);
+
             var checkBox:CheckBox = new CheckBox();
             checkBox.text = check;
             checkBox.percentWidth = 100;
+            checkBox.onChange = e -> {Cookie.set(cookieName, checkBox.selected? 'T' : 'F');};
+
+            if (cookie == 'T')
+                checkBox.selected = true;
+
             checkboxes.push(checkBox);
+            i++;
         }
 
         return checkboxes;
     }
 
-    private function mapCheckBoxes(checkMap:Map<Int, Array<String>>):Array<CheckBox>
+    private function mapCheckBoxes(checkMap:Map<Int, Array<String>>, fieldName:String):Array<CheckBox>
     {
         var checkboxes:Array<CheckBox> = [];
 
         for (step => stepChecks in checkMap.keyValueIterator())
+        {
+            var i:Int = 0;
+
             for (check in stepChecks)
             {
+                var cookieName:String = '$cookiePrefix||$fieldName||$step||$i';
+                var cookie:Null<String> = Cookie.get(cookieName);
+
                 var checkBox:CheckBox = new CheckBox();
                 checkBox.percentWidth = 100;
+                checkBox.onChange = e -> {Cookie.set(cookieName, checkBox.selected? 'T' : 'F');};
+    
+                if (cookie == 'T')
+                    checkBox.selected = true;
+
                 if (step == -1)
                     checkBox.text = check;
                 else
                     checkBox.text = 'Step $step: $check';
+
                 checkboxes.push(checkBox);
+                i++;
             }
+        }
+            
 
         return checkboxes;
     }
@@ -206,9 +233,9 @@ class UITest extends HBox
             var checkboxes:Array<CheckBox> = [];
             
             if (Std.isOfType(checks, Array))
-                checkboxes = arrayCheckBoxes(checks);
+                checkboxes = arrayCheckBoxes(checks, fieldName);
             else if (Std.isOfType(checks, IntMap))
-                checkboxes = mapCheckBoxes(checks);
+                checkboxes = mapCheckBoxes(checks, fieldName);
             else
                 throw 'Invalid checklist type $fieldName (expected either Array<String> or Map<Int, Array<String>>)';
 
@@ -220,10 +247,12 @@ class UITest extends HBox
     public function new(component:Sprite, ?contentWidthPercent:Float = 72) 
     {
         Networker.ignoreEmitCalls = true;
-        //TODO: Full screen testing: actions and checks as pop-ups, check results autosave, clear cookies option
+        //TODO: Full screen testing: actions and checks as pop-ups
         
         super();
         this.component = component;
+        this.cookiePrefix = Type.getClassName(Type.getClass(component));
+        
         this.width = Browser.window.innerWidth;
         this.height = Browser.window.innerHeight;
         this.customStyle.padding = 5;
