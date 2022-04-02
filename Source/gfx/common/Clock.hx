@@ -17,7 +17,6 @@ class Clock extends Card
     public var playSoundOnOneMinuteLeft:Bool;
     public var alertsEnabled:Bool;
 
-    private var timerRunning:Bool = false;
     private var lastUpdate:Float;
     private var playerMove:Bool;
 
@@ -55,9 +54,11 @@ class Clock extends Card
             backgroundColor = 0xffffff;
             textColor = 0x666666;
         }
+        else
+            throw "Impossible situation at Clock::refreshColoring()";
 
-        label.customStyle = {color: textColor};
-        this.customStyle = {backgroundColor: backgroundColor};
+        label.customStyle = {color: textColor, fontSize: 48};
+        this.customStyle =  {backgroundColor: backgroundColor, horizontalAlign: 'center', paddingTop: 5, paddingBottom: 5, paddingLeft: 20, paddingRight: 20};
     }
 
     private function onEnterFrame(e)
@@ -79,7 +80,7 @@ class Clock extends Card
             return;
         }
 
-        text = TimeControl.secsToString(secondsLeft);
+        label.text = TimeControl.secsToString(secondsLeft);
 
         if (alertsEnabled)
         {
@@ -96,14 +97,12 @@ class Clock extends Card
     public function launchTimer()
     {
         lastUpdate = Date.now().getTime();
-        timerRunning = true;
         addEventListener(Event.ENTER_FRAME, onEnterFrame);
         refreshColoring();
     }
 
     public function stopTimer() 
     {
-        timerRunning = false;
         removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 
         refreshColoring();
@@ -119,15 +118,17 @@ class Clock extends Card
     public function addTime(secs:Float) 
     {
         secondsLeft += secs;
-        text = TimeControl.secsToString(secondsLeft);
+        label.text = TimeControl.secsToString(secondsLeft);
         refreshColoring();
     }
 
-    public function init(initialSeconds:Float, alertsEnabled:Bool, playSoundOnOneMinuteLeft:Bool) 
+    public function init(initialSeconds:Float, alertsEnabled:Bool, playSoundOnOneMinuteLeft:Bool, isOwnerToMove:Bool) 
     {
         this.playSoundOnOneMinuteLeft = playSoundOnOneMinuteLeft;
         this.alertsEnabled = alertsEnabled;
+        this.secondsLeft = initialSeconds;
 
+        setPlayerMove(isOwnerToMove);
         label.text = TimeControl.secsToString(initialSeconds);
     }
     

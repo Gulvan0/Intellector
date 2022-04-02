@@ -282,9 +282,9 @@ class TSidebox extends Sprite
     }
 
     private var _checks_correctTime:Array<String> = [
-        "Time set to 2:04 white / 0:09.800 black",
-        "0/3/4/6/9/10: black timer critical + no sound",
-        "1/7: black timer critical + no sound",
+        "Time set to 2:04 white / 0:08.800 black",
+        "4/10: black timer critical + no sound",
+        "1/7: black timer critical + sound",
         "others: both timers not critical + no sound"
     ];
 
