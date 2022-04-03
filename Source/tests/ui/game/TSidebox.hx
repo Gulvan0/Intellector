@@ -104,7 +104,7 @@ class TSidebox extends Sprite
         5 => ["White's timer starts running", "Black's timer is stopped", "Styles are inverted again"],
         6 => ["White's timer stops", "Black's timer starts running", "Styles are inverted again"],
         7 => ["2 moves", "White's timer starts running", "Black's timer is stopped", "White's card styled as MOVE"],
-        8 => ["Playing as spectator, 10:00 starting time, Watching black's POV"],
+        8 => ["White's timer stops", "Black's timer starts running", "Styles are inverted again"],
         9 => ["3 moves", "White's timer is stopped", "Black's timer starts running", "Black's card styled as MOVE"],
     ];
 
@@ -116,39 +116,39 @@ class TSidebox extends Sprite
         switch i
         {
             case 0:
-                replaceSidebox(new Sidebox(Black, 80, 15, "PlayerWhite", "PlayerBlack", White, parsed2));
+                replaceSidebox(new Sidebox(White, 80, 15, "PlayerWhite", "PlayerBlack", White, parsed2));
             case 1:
                 sidebox.makeMove("1514");
             case 2:
                 sidebox.makeMove("1011");
             case 3:
-                replaceSidebox(new Sidebox(Black, 600, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
+                replaceSidebox(new Sidebox(Black, 100, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
             case 4:
                 sidebox.makeMove("1514");
             case 5:
-                replaceSidebox(new Sidebox(White, 600, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
+                replaceSidebox(new Sidebox(White, 100, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
             case 6:
                 sidebox.makeMove("1514");
             case 7:
                 sidebox.makeMove("1011");
             case 8:
-                replaceSidebox(new Sidebox(null, 600, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
+                replaceSidebox(new Sidebox(null, 100, 0, "PlayerWhite", "PlayerBlack", White, parsed2));
             case 9:
                 sidebox.makeMove("1514");
         }
     }
 
     private var _checks_alerts:Map<Int, Array<String>> = [
-        0 => ["Decay styling works correctly (step right after)", "No sound alert (too fast control)"],
-        1 => ["Replenish un-styling works correctly", "15 secs added", "Critical MOVE->WAIT works correctly", "Decay styling works correctly", "No sound alert (too fast control)"],
-        2 => ["Critical WAIT->MOVE works correctly", "Timer becomes precise at 10sec", "Timer stops at zero"],
-        3 => ["Decay styling works correctly (step right after)", "No sound alert (not own)"],
-        4 => ["Sound alert", "Timer becomes generic on >10sec"],
-        5 => ["Sound alert"],
+        0 => ["Decay normal->crit styling applied correctly (step right after)", "No sound alert (too fast control)"],
+        1 => ["Replenish un-styling works correctly", "15 secs added", "(if stepped too late) Critical MOVE->WAIT works correctly", "Decay normal->crit not applied (not own)", "No sound alert (not own & too fast control)"],
+        2 => ["(if stepped 0->1 too late) Critical WAIT->MOVE works correctly", "Timer becomes precise at 10sec", "Timer stops at zero"],
+        3 => ["No style change due to decay (Next step when timer reaches 00:09)", "No sound alert (not own)"],
+        4 => ["Timer becomes less precise on >10sec", "Sound alert on decayed"],
+        5 => ["Sound alert (step right after)"],
         6 => ["No sound alert (not own)"],
         7 => ["No sound alert (fire-once)"],
-        8 => ["No styling", "No sound alert"],
-        9 => ["No styling", "No sound alert"]
+        8 => ["No styling (spectator)", "No sound alert (spectator)"],
+        9 => ["No time added", "No styling (spectator)", "No sound alert (spectator)"]
     ];
 
     private function _act_ContinuationMove() 
@@ -165,9 +165,24 @@ class TSidebox extends Sprite
     }
 
     private var _checks_ContinuationMove:Array<String> = [
-        "First n moves are added correctly considering situation is always starting",
+        "First n moves are added correctly considering situation is always starting"
+    ];
+
+    private function _act_FillGame() 
+    {
+        var situation:Situation = Situation.starting();
+        var turnColor:PieceColor = situation.turnColor;
+        for (plyInfo in situation.randomContinuation(25))
+        {
+            sidebox.handleGameBoardEvent(ContinuationMove(plyInfo.ply, plyInfo.plyStr, turnColor));
+            turnColor = opposite(turnColor);
+        }
+    }
+
+    private var _checks_FillGame:Array<String> = [
         "Overflow is handled correctly"
     ];
+
 
     //TODO: To be used in RightPanel tests, not there
     /*private function _act_SubsequentMove() 
@@ -241,13 +256,11 @@ class TSidebox extends Sprite
         "DrawOffered => DrawCancelled",
         "DrawOffered => click 'offer draw'",
         "TakebackOffered => TakebackCancelled",
-        "TakebackOffered => click 'offer takeback'",
         "click 'offer draw' => DrawAccepted",
         "click 'offer draw' => DrawDeclined",
         "click 'offer takeback' => TakebackAccepted",
         "click 'offer takeback' => TakebackDeclined",
-        "TakebackOffered => TakebackCancelled",
-        "TakebackOffered => click 'offer takeback'"
+        "DrawOffered => TakebackOffered"
     ];
 
     private function _act_GameEnded() 

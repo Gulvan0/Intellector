@@ -69,6 +69,20 @@ class Situation
         return sit;
     }
 
+    public function randomContinuation(plyCount:Int):Array<{ply:Ply, plyStr:String}> 
+    {
+        var result:Array<{ply:Ply, plyStr:String}> = [];
+        var sit:Situation = this.copy();
+        for (i in 0...plyCount)
+        {
+            var allPlys = sit.availablePlys();
+            var ply:Ply = MathUtils.randomElement(allPlys);
+            result.push({ply: ply, plyStr: ply.toNotation(sit)});
+            sit.makeMove(ply, true);
+        }
+        return result;
+    }
+
     public function makeMove(ply:Ply, inPlace:Bool = false):Situation 
     {
         var next:Situation = inPlace? this : this.copy();

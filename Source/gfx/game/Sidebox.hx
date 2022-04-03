@@ -101,9 +101,11 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
                 cancelDrawBtn.hidden = true;
                 offerDrawBtn.hidden = false;
             case TakebackOffered:
+                offerTakebackBtn.disabled = true;
                 takebackRequestBox.hidden = false;
             case TakebackCancelled:
                 takebackRequestBox.hidden = true;
+                offerTakebackBtn.disabled = false;
             case TakebackAccepted, TakebackDeclined:
                 cancelTakebackBtn.hidden = true;
                 offerTakebackBtn.hidden = false;
@@ -202,7 +204,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
         var justMovedColor:PieceColor = move % 2 == 1? White : Black;
         var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
-        var playerToMoveClock:Clock = justMovedColor == Black? blackClock : whiteClock;
+        var playerToMoveClock:Clock = justMovedColor == Black? whiteClock : blackClock;
 
         justMovedPlayerClock.stopTimer();
         justMovedPlayerClock.setPlayerMove(false);
@@ -238,7 +240,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
         var justMovedColor:PieceColor = move % 2 == 1? White : Black;
         var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
-        var playerToMoveClock:Clock = justMovedColor == Black? blackClock : whiteClock;
+        var playerToMoveClock:Clock = justMovedColor == Black? whiteClock : blackClock;
 
         if (cnt % 2 == 1)
         {
@@ -267,6 +269,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         }
 
         navigator.revertPlys(cnt);
+        navigator.scrollAfterDelay();
     }
 
     //==================================================================================================================================================
@@ -280,10 +283,15 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     private function onOfferDrawPressed()
     {
-        offerDrawBtn.hidden = true;
-        cancelDrawBtn.hidden = false;
-        Networker.emitEvent(OfferDraw);
-        emit(OfferDrawPressed);
+        if (drawRequestBox.hidden)
+        {
+            offerDrawBtn.hidden = true;
+            cancelDrawBtn.hidden = false;
+            Networker.emitEvent(OfferDraw);
+            emit(OfferDrawPressed);
+        }
+        else
+            onAcceptDrawPressed();
     }
 
     private function onCancelDrawPressed()
@@ -336,6 +344,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
     private function onAcceptTakebackPressed()
     {
         takebackRequestBox.hidden = true;
+        offerTakebackBtn.disabled = false;
         Networker.emitEvent(AcceptTakeback);
         emit(AcceptTakebackPressed);
     }
@@ -343,6 +352,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
     private function onDeclineTakebackPressed()
     {
         takebackRequestBox.hidden = true;
+        offerTakebackBtn.disabled = false;
         Networker.emitEvent(DeclineTakeback);
         emit(DeclineTakebackPressed);
     }

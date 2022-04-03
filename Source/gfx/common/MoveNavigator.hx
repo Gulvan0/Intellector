@@ -16,7 +16,7 @@ using utils.CallbackTools;
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/plynavigator.xml"))
 class MoveNavigator extends VBox
 {
-    private var plyNumber:Int = 1;
+    private var plyNumber:Int = 0;
     private var lastMovetableEntry:Dynamic;
 
     public function scrollAfterDelay() 
@@ -33,6 +33,8 @@ class MoveNavigator extends VBox
 
     public function writePlyStr(plyStr:String, performedBy:PieceColor)
     {
+        plyNumber++;
+
         if (performedBy == Black)
             if (plyNumber == 1)
             {
@@ -49,8 +51,6 @@ class MoveNavigator extends VBox
             lastMovetableEntry = {"num": '$plyNumber', "white_move": plyStr, "black_move": " "};
             movetable.dataSource.add(lastMovetableEntry);
         }
-
-        plyNumber++;
     }
 
     public function writePly(ply:Ply, contextSituation:Situation) 
@@ -91,7 +91,7 @@ class MoveNavigator extends VBox
     {
         movetable.dataSource.clear();
         lastMovetableEntry = null;
-        plyNumber = 1;
+        plyNumber = 0;
     }
 
     public function init(onClickCallback:PlyScrollType->Void) 
