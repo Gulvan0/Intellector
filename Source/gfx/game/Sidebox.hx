@@ -357,7 +357,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         emit(DeclineTakebackPressed);
     }
 
-    public function new(playingAs:Null<PieceColor>, startSecs:Int, secsPerTurn:Int, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, ?actualizationData:GameLogParserOutput) 
+    public function new(playingAs:Null<PieceColor>, startSecs:Int, secsPerTurn:Int, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, ?actualizationData:GameLogParserOutput, ?width:Float, ?height:Float) 
     {
         super();
         this.belongsToSpectator = playingAs == null;
@@ -390,7 +390,12 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         declineTakebackBtn.onClick = onDeclineTakebackPressed.expand();
         acceptTakebackBtn.onClick = onAcceptTakebackPressed.expand();
         
-        navigator.init(type -> {emit(PlyScrollRequest(type));});
+        var explicitNavigatorHeight:Null<Float> = null;
+        if (height != null)
+            explicitNavigatorHeight = height - blackClock.height - blackLoginCard.height - specialBox.height - whiteLoginCard.height - whiteClock.height;
+        if (width != null)
+            this.width = width;
+        navigator.init(type -> {emit(PlyScrollRequest(type));}, width, explicitNavigatorHeight);
 
         if (belongsToSpectator)
             changeActionButtons([changeOrientationBtn, analyzeBtn, exportSIPBtn]);

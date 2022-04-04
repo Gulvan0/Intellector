@@ -94,8 +94,13 @@ class MoveNavigator extends VBox
         plyNumber = 0;
     }
 
-    public function init(onClickCallback:PlyScrollType->Void) 
+    public function init(onClickCallback:PlyScrollType->Void, ?width:Float, ?height:Float) 
     {
+        if (width != null)
+            this.width = width;
+        if (height != null)
+            movetable.height = height - scrollBtnBar.height;
+
         homeBtn.onClick = onClickCallback.bind(Home).expand();
         prevBtn.onClick = onClickCallback.bind(Prev).expand();
         nextBtn.onClick = onClickCallback.bind(Next).expand();

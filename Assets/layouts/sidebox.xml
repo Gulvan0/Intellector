@@ -4,7 +4,7 @@
         <label id="blackLoginLabel" text="player2" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
     </card>
     <movenavigator id="navigator"/>
-    <vbox width="100%" style="padding: 1 1 1 1">
+    <vbox id="specialBox" width="100%" style="padding: 1 1 1 1">
         <button-bar id="actionBar" toggle="false" width="100%">
             <button id="changeOrientationBtn" text="⇵" tooltip="${Dictionary.getPhrase(CHANGE_ORIENTATION_BTN_TOOLTIP)}" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
             <button id="offerDrawBtn" text="½" tooltip="${Dictionary.getPhrase(OFFER_DRAW_BTN_TOOLTIP)}" width="20%" height="35px" disabled="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>

@@ -1,5 +1,5 @@
 <vbox width="300px" style="border-top: 0; border-left: 1; border-right: 1; border-bottom: 1;border-color: #dddddd;padding: 1 1 1 1;spacing:0px">
-    <button-bar toggle="false" width="100%">
+    <button-bar id="scrollBtnBar" toggle="false" width="100%">
         <button id="homeBtn" text="«" width="25%"  style="padding-top:0px;padding-bottom:0px;font-size:28px"/>
         <button id="prevBtn" text="‹" width="25%"  style="padding-top:0px;padding-bottom:0px;font-size:28px"/>
         <button id="nextBtn" text="›" width="25%"  style="padding-top:0px;padding-bottom:0px;font-size:28px"/>

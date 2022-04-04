@@ -25,6 +25,11 @@ class TSidebox extends Sprite
         addChild(sidebox);
     }
 
+    private function _act_scaled(i:Int) 
+    {
+        replaceSidebox(new Sidebox(White, 600, 5, "PlayerWhite", "PlayerBlack", White, null, 400, 600));
+    }
+
     @steps(12)
     private function _seq_initialStates(i:Int) 
     {
