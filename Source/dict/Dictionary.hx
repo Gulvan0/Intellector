@@ -103,7 +103,7 @@ class Dictionary
         CHANGE_ORIENTATION_BTN_TOOLTIP => ["Flip board", "Перевернуть доску"],
         RESIGN_CONFIRMATION_MESSAGE => ["Are you sure you want to resign?", "Вы уверены, что хотите сдаться?"],
         DRAW_QUESTION_TEXT => ["Accept draw?", "Принять ничью?"],
-        TAKEBACK_QUESTION_TEXT => ["Accept takeback?", "Разрешить переходить?"],
+        TAKEBACK_QUESTION_TEXT => ["Accept takeback?", "Дать переходить?"],
         DRAW_OFFERED_MESSAGE => ["Draw offered", "Ничья предложена"],
         DRAW_CANCELLED_MESSAGE => ["Draw cancelled", "Предложение ничьи отменено"],
         DRAW_ACCEPTED_MESSAGE => ["Draw accepted", "Ничья принята"],
