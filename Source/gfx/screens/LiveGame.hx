@@ -122,7 +122,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         sidebox = new Sidebox(playerColor, startSecs, bonusSecs, whiteLogin, blackLogin, orientationColour, parsedData);
         chatbox = new Chatbox(board.width * 0.45, board.height * 0.75, !viewingAsParticipatingPlayer, parsedData);
-        gameinfobox = new GameInfoBox(board.width * 0.45, board.height * 0.23, new TimeControl(startSecs, bonusSecs), whiteLogin, blackLogin, parsedData);
+        gameinfobox = new GameInfoBox(new TimeControl(startSecs, bonusSecs), whiteLogin, blackLogin, parsedData);
 
         var vbox:VBox = new VBox();
         vbox.addComponent(gameinfobox);

@@ -1,5 +1,15 @@
 package utils;
 
+enum TimeControlType
+{
+    Hyperbullet;
+    Bullet;
+    Blitz;
+    Rapid;
+    Classic;
+    Correspondence;
+}
+
 class TimeControl
 {
     public static inline function numRep(v:Int)
@@ -38,6 +48,23 @@ class TimeControl
         }
         else 
             return '$startSecs' + 's+$bonusSecs';
+    }
+
+    public function getType():TimeControlType
+    {
+        var determinant:Int = startSecs + 40 * bonusSecs;
+        if (determinant == 0)
+            return Correspondence;
+        else if (determinant < 1 * 60)
+            return Hyperbullet;
+        else if (determinant < 3 * 60)
+            return Bullet;
+        else if (determinant < 10 * 60)
+            return Blitz;
+        else if (determinant < 60 * 60)
+            return Rapid;
+        else 
+            return Classic;
     }
 
     public function new(startSecs:Int, bonusSecs:Int)

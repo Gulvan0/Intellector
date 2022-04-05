@@ -1,5 +1,7 @@
 package gfx.game;
 
+import openfl.display.Shape;
+import utils.AssetManager;
 import net.EventProcessingQueue.INetObserver;
 import gameboard.GameBoard.IGameBoardObserver;
 import struct.IntPoint;
@@ -39,9 +41,6 @@ enum Outcome
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/gameinfobox.xml'))
 class GameInfoBox extends Card implements IGameBoardObserver implements INetObserver
 {
-    private var timeControlText:String;
-    private var resolutionText:String;
-
     private var openingTree:OpeningTree;
 
     public function handleNetEvent(event:ServerEvent)
@@ -74,21 +73,16 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     private function actualize(parsedData:GameLogParserOutput)
     {
-        if (parsedData.timeControl != null)
-            setTimeControl(parsedData.timeControl);
-
         if (parsedData.outcome != null)
             changeResolution(parsedData.outcome, parsedData.winnerColor);
 
         for (ply in parsedData.movesPlayed)
             accountMove(ply);
-
-        refreshShortInfo();
     }
 
     private function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
     {
-        resolutionText = switch outcome 
+        this.text = switch outcome 
         {
             case Mate: Dictionary.getPhrase(RESOLUTION_MATE) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
             case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
@@ -100,13 +94,6 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
             case NoProgress: Dictionary.getPhrase(RESOLUTION_HUNDRED);
             case Timeout: Dictionary.getPhrase(RESOLUTION_TIMEOUT) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
         }
-        refreshShortInfo();
-    }
-
-    private function setTimeControl(timeControl:TimeControl) 
-    {
-        timeControlText = timeControl.toString();
-        refreshShortInfo();
     }
 
     private function accountMove(ply:Ply)
@@ -114,45 +101,34 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         if (!openingTree.currentNode.terminal)
         {
             openingTree.makeMove(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
-            openingTF.text = openingTree.currentNode.name;
+            opening.text = openingTree.currentNode.name;
         }
     }
 
     private function revertPlys(cnt:Int) 
     {
         openingTree.revertMoves(cnt);
-        openingTF.text = openingTree.currentNode.name;
+        opening.text = openingTree.currentNode.name;
     }
 
-    private function refreshShortInfo() 
-    {
-        if (timeControlText == "")
-            shortInfoTF.text = resolutionText;
-        else if (resolutionText == "")
-            shortInfoTF.text = timeControlText;
-        else
-            shortInfoTF.text = timeControlText + " • " +  resolutionText;
-    }
-
-    public function new(width:Float, height:Float, timeControl:Null<TimeControl>, whiteLogin:String, blackLogin:String, ?actualizationData:GameLogParserOutput) 
+    public function new(timeControl:Null<TimeControl>, whiteLogin:String, blackLogin:String, ?actualizationData:GameLogParserOutput) 
     {
         super();
-        this.width = width;
-        this.height = height;
+        this.openingTree = new OpeningTree();
 
-        openingTree = new OpeningTree();
+        if (timeControl == null)
+            timeControl = actualizationData.timeControl;
 
-        opponentsTF.text = '$whiteLogin vs $blackLogin';
-        openingTF.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+        var tcType:TimeControlType = timeControl.getType();
 
-        resolutionText = Dictionary.getPhrase(RESOLUTION_NONE);
-        timeControlText = "";
-        if (timeControl != null)
-            setTimeControl(timeControl);
+        this.text = Dictionary.getPhrase(RESOLUTION_NONE);
+        matchParameters.text = timeControl.toString() + " • " + tcType.getName();
+        opponents.text = '$whiteLogin\n✖\n$blackLogin';
+        opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+
+        imagebox.addComponent(AssetManager.getSVGComponent(AssetManager.timeControlIcons[tcType], 0, 0, 70, 70));
         
         if (actualizationData != null)
             actualize(actualizationData);
-        else
-            refreshShortInfo();
     }
 }

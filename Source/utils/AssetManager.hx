@@ -1,5 +1,8 @@
 package utils;
 
+import openfl.display.Sprite;
+import gfx.components.SpriteWrapper;
+import utils.TimeControl.TimeControlType;
 import format.SVG;
 import gfx.analysis.PosEditMode;
 import openfl.geom.Matrix;
@@ -22,13 +25,29 @@ class AssetManager
     public static var pieces:Map<PieceType, Map<PieceColor, SVG>>; //new
     public static var pieceBitmaps:Map<PieceType, Map<PieceColor, BitmapData>>; //deprecated
     public static var otherBitmaps:Map<AssetName, BitmapData>;
+    public static var timeControlIcons:Map<TimeControlType, SVG>;
 
-    private static inline function pathToImage(type:PieceType, color:PieceColor, ?svg:Bool = false):String
+    private static inline function piecePath(type:PieceType, color:PieceColor, ?svg:Bool = false):String
     {
         if (svg)
             return "assets/pieces/" + type.getName() + "_" + color.getName() + ".svg";
         else
             return "assets/figures/" + type.getName() + "_" + color.getName().toLowerCase() + ".png";
+    }
+
+    private static inline function timeControlPath(type:TimeControlType):String
+    {
+        var filename = switch type 
+        {
+            case Hyperbullet: 'bullet';
+            case Bullet: 'bullet';
+            case Blitz: 'blitz';
+            case Rapid: 'rapid';
+            case Classic: 'classic';
+            case Correspondence: 'correspondence';
+        };
+
+        return 'assets/symbols/time_controls/$filename.svg';
     }
 
     public static function playPlySound(ply:Ply, situation:Situation)
@@ -55,6 +74,17 @@ class AssetManager
         }
     }
 
+    public static function getSVGComponent(svg:SVG, x:Float = 0, y:Float = 0, width:Int = -1, height:Int = -1):SpriteWrapper
+    {
+        var sprite:Sprite = new Sprite();
+        svg.render(sprite.graphics, x, y, width, height);
+
+        var wrapper:SpriteWrapper = new SpriteWrapper();
+        wrapper.sprite = sprite;
+
+        return wrapper;
+    }
+
     public static function init() 
     {
         initPieces();
@@ -71,8 +101,8 @@ class AssetManager
             pieceBitmaps[fig] = new Map<PieceColor, BitmapData>();
             for (col in PieceColor.createAll())
             {
-                pieceBitmaps[fig][col] = Assets.getBitmapData(pathToImage(fig, col));
-                pieces[fig][col] = new SVG(Assets.getText(pathToImage(fig, col, true)));
+                pieceBitmaps[fig][col] = Assets.getBitmapData(piecePath(fig, col));
+                pieces[fig][col] = new SVG(Assets.getText(piecePath(fig, col, true)));
             }
         }
     }
@@ -82,7 +112,8 @@ class AssetManager
         otherBitmaps = [
             AnalysisMove => Assets.getBitmapData('assets/symbols/move.png'),
             AnalysisDelete => Assets.getBitmapData('assets/symbols/delete.png')
-        ];    
+        ];
+        timeControlIcons = [for (type in TimeControlType.createAll()) type => new SVG(Assets.getText(timeControlPath(type)))];
     }
 
     private static function scaleBitmapData(bitmapData:BitmapData, scale:Float):BitmapData 

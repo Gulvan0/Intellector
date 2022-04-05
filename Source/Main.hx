@@ -1,5 +1,6 @@
 package;
 
+import tests.ui.game.TGameInfoBox;
 import tests.ui.game.TSidebox;
 import tests.ui.board.TGameBoard;
 import tests.ui.board.TSelectableBoard;
@@ -46,12 +47,16 @@ class Main extends Sprite
 	{
 		super();
 		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
+		var element = Browser.document.getElementById("openfl-content");
+		element.style.width = '${Browser.window.innerWidth}px';
+		element.style.height = '${Browser.window.innerHeight}px';
+
 		Toolkit.init();
 		Preferences.initSettings();
 		OpeningTree.init();
 		AssetManager.init();
 		Changes.initChangelog();
-		addChild(new UITest(new TSidebox()));
+		addChild(new UITest(new TGameInfoBox()));
 		//screenManager = new ScreenManager()
 		//Networker.eventQueue.addObserver(screenManager);
 		//addChild(screenManager);

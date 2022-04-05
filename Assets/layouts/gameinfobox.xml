@@ -1,5 +1,8 @@
-<card>
-    <label id="shortInfoTF" horizontalAlign="center" style="font-size:14px" />
-    <label id="opponentsTF" horizontalAlign="center" style="font-size:16px" />
-    <label id="openingTF" width="100%" horizontalAlign="center" style="font-size:14px;font-style: italic;text-align:left" />
+<card width="350">
+    <label id="matchParameters" style="font-size:14px;text-align:left" />
+    <hbox width="100%" horizontalAlign="center" style="margin-top:5px">
+        <box id="imagebox" width="70px" height="70px" style="padding:0 0 0 0" verticalAlign="center" />
+        <label id="opponents" width="100%" verticalAlign="center" style="font-size:18px;margin-left:5px" />
+    </hbox>
+    <label id="opening" width="100%" horizontalAlign="center" style="font-size:14px;margin-top:10px;font-style: italic;text-align:left" />
 </card>
