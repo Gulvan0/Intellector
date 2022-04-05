@@ -1,5 +1,7 @@
 package tests;
 
+import openfl.ui.Keyboard;
+import openfl.events.KeyboardEvent;
 import js.Cookie;
 import haxe.ds.IntMap;
 import js.Browser;
@@ -247,7 +249,6 @@ class UITest extends HBox
     public function new(component:Sprite, ?contentWidthPercent:Float = 72) 
     {
         Networker.ignoreEmitCalls = true;
-        //TODO: Full screen testing: actions and checks as pop-ups
         
         super();
         this.component = component;
@@ -272,7 +273,7 @@ class UITest extends HBox
         actionBar.percentWidth = 100;
 
         var actionsSV:ScrollView = new ScrollView();
-        actionsSV.percentWidth = (100 - contentWidthPercent) / 2;
+        actionsSV.percentWidth = contentWidthPercent == 100? 40 : (100 - contentWidthPercent) / 2;
         actionsSV.percentHeight = 100;
         actionsSV.percentContentWidth = 100;
         actionsSV.addComponent(actionBar);
@@ -281,14 +282,34 @@ class UITest extends HBox
         checksVBox.percentWidth = 100;
 
         var checksSV:ScrollView = new ScrollView();
-        checksSV.percentWidth = (100 - contentWidthPercent) / 2;
+        checksSV.percentWidth = contentWidthPercent == 100? 40 : (100 - contentWidthPercent) / 2;
         checksSV.percentHeight = 100;
         checksSV.percentContentWidth = 100;
         checksSV.addComponent(checksVBox);
 
         addComponent(componentBox);
-        addComponent(actionsSV);
-        addComponent(checksSV);
+        if (contentWidthPercent == 100)
+        {
+            var hbox:HBox = new HBox();
+            hbox.percentWidth = 100;
+            hbox.percentHeight = 100;
+            hbox.addComponent(actionsSV);
+            hbox.addComponent(checksSV);
+            hbox.visible = false;
+            addChild(hbox);
+            addEventListener(KeyboardEvent.KEY_DOWN, e -> {
+                if (e.keyCode == Keyboard.BACKQUOTE)
+                {
+                    hbox.visible = !hbox.visible;
+                    componentBox.mouseEnabled = !hbox.visible;
+                }
+            });
+        }
+        else 
+        {
+            addComponent(actionsSV);
+            addComponent(checksSV);
+        }
 
         var endpointFieldNames:Map<EndpointType, Array<String>> = [for (type in EndpointType.createAll()) type => []];
 
