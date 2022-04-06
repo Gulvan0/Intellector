@@ -1,5 +1,6 @@
 package gfx.components;
 
+import haxe.Timer;
 import openfl.display.Sprite;
 import haxe.ui.core.Component;
 
@@ -20,7 +21,11 @@ class SpriteWrapper extends Component
         if (_sprite.width > 0) this.width = _sprite.width;
         if (_sprite.height> 0) this.height= _sprite.height;
         addChild(_sprite);
-        invalidateComponentLayout();
+        Timer.delay(() -> {
+            if (_sprite.width > 0) this.width = _sprite.width;
+            if (_sprite.height> 0) this.height= _sprite.height;
+            invalidateComponentLayout();
+        }, 100);
         return value;
     }
     

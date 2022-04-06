@@ -1,4 +1,4 @@
-<card width="350">
+<card width="350px">
     <label id="matchParameters" style="font-size:14px;text-align:left" />
     <hbox width="100%" horizontalAlign="center" style="margin-top:5px">
         <box id="imagebox" width="70px" height="70px" style="padding:0 0 0 0" verticalAlign="center" />
