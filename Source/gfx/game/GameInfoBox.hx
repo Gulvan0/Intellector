@@ -76,13 +76,18 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         if (parsedData.outcome != null)
             changeResolution(parsedData.outcome, parsedData.winnerColor);
 
+        if (parsedData.datetime != null)
+        {
+            datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+        }
+
         for (ply in parsedData.movesPlayed)
             accountMove(ply);
     }
 
     private function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
     {
-        this.text = switch outcome 
+        var outcomeStr:String = switch outcome 
         {
             case Mate: Dictionary.getPhrase(RESOLUTION_MATE) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
             case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
@@ -94,6 +99,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
             case NoProgress: Dictionary.getPhrase(RESOLUTION_HUNDRED);
             case Timeout: Dictionary.getPhrase(RESOLUTION_TIMEOUT) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
         }
+        resolution.text = outcomeStr;
     }
 
     private function accountMove(ply:Ply)
@@ -121,12 +127,15 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         var tcType:TimeControlType = timeControl.getType();
 
-        this.text = Dictionary.getPhrase(RESOLUTION_NONE);
+        resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
         matchParameters.text = timeControl.toString() + " • " + tcType.getName();
         opponents.text = '$whiteLogin\n✖\n$blackLogin';
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
 
-        imagebox.addComponent(AssetManager.getSVGComponent(AssetManager.timeControlIcons[tcType], 0, 0, 70, 70));
+        var tcIcon = AssetManager.getSVGComponent(AssetManager.timeControlIcons[tcType], 0, 0, 70, 70);
+        tcIcon.horizontalAlign = 'center';
+        tcIcon.verticalAlign = 'center';
+        imagebox.addComponent(tcIcon);
         
         if (actualizationData != null)
             actualize(actualizationData);

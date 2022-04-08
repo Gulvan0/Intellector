@@ -106,6 +106,7 @@ class TGameInfoBox extends Sprite
         var actualizationData:GameLogParserOutput = new GameLogParserOutput();
         actualizationData.whiteLogin = "Gulvan";
         actualizationData.blackLogin = "kartoved";
+        actualizationData.datetime = Date.now();
         actualizationData.timeControl = new TimeControl(360, 2);
         actualizationData.movesPlayed = [Ply.construct(new IntPoint(1, 5), new IntPoint(1, 3)), Ply.construct(new IntPoint(1, 0), new IntPoint(1, 2))];
         actualizationData.outcome = Resign;
@@ -116,7 +117,9 @@ class TGameInfoBox extends Sprite
     private var _checks_testActualization:Array<String> = [
         "Pillar opening",
         "3+2 Time control",
-        "White resigned"
+        "White resigned",
+        "DateTime displayed correctly",
+        "Test resolutions after this"
     ];
 
     public function new() 

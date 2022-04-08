@@ -27,6 +27,7 @@ class GameLogParserOutput
     public var winnerColor:Null<PieceColor>;
     public var movesPlayed:Array<Ply> = [];
     public var chatEntries:Array<ChatEntry> = [];
+    public var datetime:Null<Date>;
     public var currentSituation:Situation;
 
     public function new()
@@ -64,6 +65,8 @@ class GameLogParser
                 var playerLogins:Array<String> = args[0].split(":");
                 parserOutput.whiteLogin = playerLogins[0];
                 parserOutput.blackLogin = playerLogins[1];
+            case "D":
+                parserOutput.datetime = Date.fromTime(Std.parseFloat(args[0]));
             case "T":
                 parserOutput.timeControl = new TimeControl(Std.parseInt(args[0]), Std.parseInt(args[1]));
             case "C":

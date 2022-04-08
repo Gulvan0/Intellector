@@ -74,7 +74,7 @@ class AssetManager
         }
     }
 
-    public static function getSVGComponent(svg:SVG, x:Float = 0, y:Float = 0, width:Int = -1, height:Int = -1):SpriteWrapper
+    public static function getSVGComponent(svg:SVG, x:Float = 0, y:Float = 0, ?width:Int = -1, ?height:Int = -1):SpriteWrapper
     {
         var sprite:Sprite = new Sprite();
         svg.render(sprite.graphics, x, y, width, height);
