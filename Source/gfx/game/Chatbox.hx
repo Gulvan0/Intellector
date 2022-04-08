@@ -180,7 +180,7 @@ class Chatbox extends VBox implements INetObserver implements ISideboxObserver
             return true;
     }
 
-    public function deactivate() 
+    private function deactivate() 
     {
         messageInput.disabled = true;
         removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
@@ -192,17 +192,15 @@ class Chatbox extends VBox implements INetObserver implements ISideboxObserver
         addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
     }
 
-    public function new(width:Float, height:Float, isOwnerSpectator:Bool, ?actualizationData:GameLogParserOutput) 
+    public function new(isOwnerSpectator:Bool, chatDisabled:Bool, ?actualizationData:GameLogParserOutput) 
     {
         super();
         this.isOwnerSpectator = isOwnerSpectator;
-        this.width = width;
-        this.height = height;
         
         if (actualizationData != null)
             actualize(actualizationData);
 
-        if (isOwnerSpectator)
+        if (chatDisabled)
             messageInput.disabled = true;
         else
             addEventListener(Event.ADDED_TO_STAGE, init);
