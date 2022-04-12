@@ -1,0 +1,32 @@
+<vbox width="100%" height="100%">
+    <style>
+        .menubar-button {
+            font-size: 18;
+            font-weight: 300;
+        }
+        .menubar-button:hover {
+            background-color: $solid-background-color;
+        }
+        .menubar-button:active {
+            background-color: $solid-background-color;
+            color: $normal-text-color;
+        }
+        #site-name {
+            pointer-events: true;
+            padding-left: 10;
+            padding-right: 10;
+            white-space: nowrap;
+            color: #333333;
+            font-size: 25;
+            font-weight: 600;
+        }
+
+        #site-name:hover {
+            color: #428fd8;
+        }
+    </style>
+    <menubar width="100%" height="50px">
+        <label id="site-name" text="intellector.info" verticalAlign="center" />
+    </menubar>
+    <box id="content" width="100%" height="100%"/>
+</vbox>

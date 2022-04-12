@@ -1,6 +1,7 @@
 package gfx.game;
 
 import gfx.game.Sidebox.SideboxEvent;
+import gfx.game.GameInfoBox.Outcome;
 import gfx.game.Sidebox.ISideboxObserver;
 import serialization.GameLogParser;
 import net.EventProcessingQueue.INetObserver;
@@ -26,6 +27,7 @@ using StringTools;
 class Chatbox extends VBox implements INetObserver implements ISideboxObserver
 {
     private var isOwnerSpectator:Bool;
+    private var actualizationData:GameLogParserOutput;
 
     public function handleNetEvent(event:ServerEvent)
     {
@@ -37,8 +39,7 @@ class Chatbox extends VBox implements INetObserver implements ISideboxObserver
                 if (isOwnerSpectator)
                     appendMessage(author, message, false);
             case GameEnded(winner_color, reason): 
-                appendLog(Utils.getGameOverChatMessage(GameLogParser.decodeColor(winner_color), GameLogParser.decodeOutcome(reason)));
-                deactivate();
+                onGameEnded(GameLogParser.decodeColor(winner_color), GameLogParser.decodeOutcome(reason));
             case PlayerDisconnected(color): 
                 appendLog(Utils.getPlayerDisconnectedMessage(PieceColor.createByName(color)));
             case PlayerReconnected(color): 
@@ -104,20 +105,29 @@ class Chatbox extends VBox implements INetObserver implements ISideboxObserver
                     appendLog(text);
             }
         }
+        if (parsedData.outcome != null)
+            onGameEnded(parsedData.winnerColor, parsedData.outcome);
     }
 
-    private function appendMessage(author:String, text:String, isAuthorPlayer:Bool) 
+    private function appendMessage(author:String, text:String, isNotFromSpectator:Bool) 
     {
-        if (isAuthorPlayer)
-            historyText.htmlText += '<p><b>$author:</b> $text</p>';
+        if (isNotFromSpectator)
+            appendTextGeneric('<p><b>$author:</b> $text</p>');
         else
-            historyText.htmlText += '<p><i><b>$author:</b> $text</i></p>';
-        waitAndScroll();
+            appendTextGeneric('<p><i><b>$author:</b> $text</i></p>');
     }
 
     private function appendLog(text:String) 
     {
-        historyText.htmlText += '<p><i>$text</i></p>';
+        appendTextGeneric('<p><i>$text</i></p>');
+    }
+
+    private function appendTextGeneric(htmlString:String)
+    {
+        if (historyText.htmlText == null || historyText.htmlText == "null")
+            historyText.htmlText = htmlString;
+        else
+            historyText.htmlText += htmlString;
         waitAndScroll();
     }
 
@@ -180,29 +190,27 @@ class Chatbox extends VBox implements INetObserver implements ISideboxObserver
             return true;
     }
 
-    private function deactivate() 
+    private function onGameEnded(winnerColor:Null<PieceColor>, outcome:Outcome) 
     {
         messageInput.disabled = true;
         removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+        appendLog(Utils.getGameOverChatMessage(winnerColor, outcome));
     }
 
     private function init(e) 
     {
         removeEventListener(Event.ADDED_TO_STAGE, init);
         addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+        if (actualizationData != null)
+            actualize(actualizationData);
     }
 
-    public function new(isOwnerSpectator:Bool, chatDisabled:Bool, ?actualizationData:GameLogParserOutput) 
+    public function new(isOwnerSpectator:Bool, ?actualizationData:GameLogParserOutput) 
     {
         super();
         this.isOwnerSpectator = isOwnerSpectator;
-        
-        if (actualizationData != null)
-            actualize(actualizationData);
+        this.actualizationData = actualizationData;
 
-        if (chatDisabled)
-            messageInput.disabled = true;
-        else
-            addEventListener(Event.ADDED_TO_STAGE, init);
+        addEventListener(Event.ADDED_TO_STAGE, init);
     }
 }

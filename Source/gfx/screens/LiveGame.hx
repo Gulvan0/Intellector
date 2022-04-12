@@ -28,7 +28,7 @@ import net.EventProcessingQueue.INetObserver;
 
 class LiveGame extends Screen implements INetObserver implements IGameBoardObserver implements ISideboxObserver
 {
-    private var id:Int;
+    private var gameID:Int;
     private var viewingAsParticipatingPlayer:Bool;
 
     private var board:GameBoard;
@@ -55,7 +55,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public override function getURLPath():String
     {
-        return 'live/$id';
+        return 'live/$gameID';
     }
 
     public function handleNetEvent(event:ServerEvent)
@@ -101,10 +101,10 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     }
 
     //TODO: Set actual time for reconnect, spectation, revisit after calling constructor
-    public function new(id:Int, isRevisit:Bool, whiteLogin:String, blackLogin:String, orientationColour:PieceColor, startSecs:Int, bonusSecs:Int, ?playerColor:PieceColor, ?logForActualization:String)
+    public function new(gameID:Int, whiteLogin:String, blackLogin:String, orientationColour:PieceColor, startSecs:Int, bonusSecs:Int, ?playerColor:PieceColor, ?logForActualization:String)
     {
         super();
-        this.id = id;
+        this.gameID = gameID;
         this.viewingAsParticipatingPlayer = playerColor != null;
 
         var parsedData = logForActualization != null? GameLogParser.parse(logForActualization) : null;
@@ -121,7 +121,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             board.behavior = new EnemyMoveBehavior(board, playerColor);
 
         sidebox = new Sidebox(playerColor, startSecs, bonusSecs, whiteLogin, blackLogin, orientationColour, parsedData);
-        chatbox = new Chatbox(!viewingAsParticipatingPlayer, isRevisit, parsedData);
+        chatbox = new Chatbox(!viewingAsParticipatingPlayer, parsedData);
         gameinfobox = new GameInfoBox(new TimeControl(startSecs, bonusSecs), whiteLogin, blackLogin, parsedData);
 
         var vbox:VBox = new VBox();

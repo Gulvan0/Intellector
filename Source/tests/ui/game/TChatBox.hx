@@ -24,17 +24,22 @@ class TChatBox extends Sprite
         switch i
         {
             case 0:
-                setBox(new Chatbox(false, false));
+                setBox(new Chatbox(false));
             case 1:
-                setBox(new Chatbox(true, false));
+                setBox(new Chatbox(true));
             case 2:
-                setBox(new Chatbox(true, true));
+                var data:GameLogParserOutput = new GameLogParserOutput();
+                data.whiteLogin = 'authorW';
+                data.blackLogin = 'AuthorB';
+                data.outcome = Breakthrough;
+                data.winnerColor = White;
+                setBox(new Chatbox(true, data));
             case 3:
                 var data:GameLogParserOutput = new GameLogParserOutput();
                 data.whiteLogin = 'authorW';
                 data.blackLogin = 'AuthorB';
                 data.chatEntries = [PlayerMessage(White, 'text1'), Log('Some random log'), PlayerMessage(Black, 'Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery long text2')];
-                setBox(new Chatbox(false, false, data));
+                setBox(new Chatbox(false, data));
         }
     }
 
@@ -46,7 +51,7 @@ class TChatBox extends Sprite
         3 => ['Actualized (try typing)']
     ];
 
-    private var netEvents:Array<ServerEvent> = [Message('player', 'insult'), SpectatorMessage('spec', 'opinion'), GameEnded('w', 'bre'), PlayerDisconnected('b'), PlayerReconnected('b'), NewSpectator('spec2'), SpectatorLeft('spec2'), DrawOffered, DrawCancelled, DrawAccepted, DrawDeclined, TakebackOffered, TakebackCancelled, TakebackAccepted, TakebackDeclined];
+    private var netEvents:Array<ServerEvent> = [Message('player', 'insult'), SpectatorMessage('spec', 'opinion'), GameEnded('w', 'bre'), PlayerDisconnected('Black'), PlayerReconnected('Black'), NewSpectator('spec2'), SpectatorLeft('spec2'), DrawOffered, DrawCancelled, DrawAccepted, DrawDeclined, TakebackOffered, TakebackCancelled, TakebackAccepted, TakebackDeclined];
 
     @interval(200)
     @iterations(15)
@@ -63,7 +68,7 @@ class TChatBox extends Sprite
     @iterations(8)
     private function _auto_sideEvents(i:Int) 
     {
-        chatbox.handleNetEvent(netEvents[i]);
+        chatbox.handleSideboxEvent(sideEvents[i]);
     }
 
     private var _checks_sideEvents:Array<String> = ['Offer/Cancel/Accept/Decline X Draw/Takeback'];

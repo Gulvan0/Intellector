@@ -158,7 +158,7 @@ class Dictionary
         var translation = translations[index];
         if (substitutions != null)
             for (i in 0...substitutions.length)
-                StringTools.replace(translation, '$' + i, substitutions[i]);
+                translation = StringTools.replace(translation, '$' + i, substitutions[i]);
         return translation;
     }
 

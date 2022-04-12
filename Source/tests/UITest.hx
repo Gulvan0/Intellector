@@ -1,5 +1,6 @@
 package tests;
 
+import net.LoginManager;
 import openfl.ui.Keyboard;
 import openfl.events.KeyboardEvent;
 import js.Cookie;
@@ -249,6 +250,7 @@ class UITest extends HBox
     public function new(component:Sprite, ?contentWidthPercent:Float = 72) 
     {
         Networker.ignoreEmitCalls = true;
+        LoginManager.login = "Gulvan";
         
         super();
         this.component = component;
