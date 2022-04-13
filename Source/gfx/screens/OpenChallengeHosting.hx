@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import utils.TimeControl;
 import net.LoginManager;
 import js.html.Clipboard;
 import haxe.ui.containers.HBox;
@@ -29,19 +30,17 @@ class OpenChallengeHosting extends Screen
         //* Do nothing
     }
 
-    public override function getURLPath():String
-    {
-        return 'challenge';
-    }
-
-    public function new(startSecs:Int, bonusSecs:Int, color:Null<PieceColor>)
+	
+	//TODO: Revamp
+    public function new(timeControl:TimeControl, color:Null<PieceColor>)
     {
 		super();
+		//TODO: Process TimeControl accordingly
         var hostingMenu = new VBox();
 		hostingMenu.width = hostingBoxWidth;
 
 		var firstLabel:Label = drawLabel();
-		firstLabel.text = dict.Utils.challengeByText(LoginManager.login, startSecs, bonusSecs, color);
+		//firstLabel.text = dict.Utils.challengeByText(LoginManager.login, startSecs, bonusSecs, color);
 		hostingMenu.addComponent(firstLabel);
 
 		var linkBox:HBox = new HBox();
@@ -70,7 +69,6 @@ class OpenChallengeHosting extends Screen
 		hostingMenu.y = 100;
 		content.addComponent(hostingMenu);
 
-		//TODO: Rework this part of UI (as well as others)
 		var returnBtn = new Button();
 		returnBtn.width = 100;
 		returnBtn.text = Dictionary.getPhrase(RETURN);
@@ -80,7 +78,7 @@ class OpenChallengeHosting extends Screen
 				return;
 
 			Networker.emitEvent(CancelOpenChallenge);
-			ScreenManager.toScreen(new MainMenu());
+			ScreenManager.toScreen(MainMenu);
 		};
             
         returnBtn.x = 10;

@@ -1,5 +1,8 @@
 package gfx;
 
+import struct.PieceColor;
+import utils.TimeControl;
+
 enum ScreenType
 {
     MainMenu;
@@ -10,4 +13,6 @@ enum ScreenType
     RevisitedGame(gameID:Int, whiteLogin:String, blackLogin:String, watchedColor:PieceColor, timeControl:TimeControl, log:String);
     PlayerProfile(ownerLogin:String);
     LoginRegister;
+    ChallengeHosting(timeControl:TimeControl, color:Null<PieceColor>);
+    ChallengeJoining(challengeOwner:String);
 }

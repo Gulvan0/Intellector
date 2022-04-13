@@ -27,11 +27,6 @@ class Settings extends Screen
         //* Do nothing
     }
 
-    public override function getURLPath():String
-    {
-        return 'settings';
-    }
-
 	//TODO: Rewrite using more suitable haxeui components
     public function new()
     {
@@ -54,7 +49,7 @@ class Settings extends Screen
 		var returnBtn = new Button();
 		returnBtn.width = 100;
 		returnBtn.text = Dictionary.getPhrase(RETURN);
-		returnBtn.onClick = (e) -> {ScreenManager.toScreen(new MainMenu());};
+		returnBtn.onClick = (e) -> {ScreenManager.toScreen(MainMenu);};
             
         returnBtn.x = 10;
 	    returnBtn.y = 10;

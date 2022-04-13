@@ -81,7 +81,7 @@ class PlayerProfile extends Screen implements INetObserver
                 studiesPrevBtn.disabled = !hasPrev;
                 studieNextBtn.disabled = !hasNext;
             case PlayerNotFound:
-                ScreenManager.toScreen(new MainMenu());
+                ScreenManager.toScreen(MainMenu);
                 Browser.window.alert(Dictionary.getPhrase(PLAYER_NOT_FOUND));
             default:
         }
@@ -97,11 +97,6 @@ class PlayerProfile extends Screen implements INetObserver
     public override function onClosed()
     {
         Networker.eventQueue.removeObserser(this);
-    }
-
-    public override function getURLPath():String
-    {
-        return 'player/$profileOwnerLogin';
     }
 
     private function onGamesPrev(e) 
@@ -282,7 +277,7 @@ class PlayerProfile extends Screen implements INetObserver
             exploredStudyID = overview.id;
 
         var link:Link = haxeuiLink(text);
-        link.onClick = (e) -> {ScreenManager.toScreen(new Analysis(overview.data.variantStr, exploredStudyID));};
+        link.onClick = (e) -> {ScreenManager.toScreen(Analysis(overview.data.variantStr, exploredStudyID));};
         return link;
     }
 

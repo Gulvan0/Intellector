@@ -1,5 +1,6 @@
 package dict;
 
+import gfx.ScreenType;
 import gfx.game.GameInfoBox.Outcome;
 import Preferences.Markup;
 import gfx.screens.MainMenu.MainMenuButton;
@@ -80,6 +81,38 @@ class Utils
     public static function getPlayerReconnectedMessage(playerColor:PieceColor)
     {
         return Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE, [getColorName(playerColor)]);
+    }
+
+    public static function getScreenTitle(type:ScreenType):String
+    {
+        var translations = [null, null];
+        
+        switch type 
+        {
+            case MainMenu: 
+                translations = ["Home", "Главная"];
+            case Analysis(initialVariantStr, exploredStudyID): 
+                translations = ["Analysis Board", "Доска анализа"];
+            case PlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor, pastLog): 
+                var opponentLogin:String = playerColor == White? blackLogin : whiteLogin;
+                translations = ['Play $opponentLogin', 'Игра $opponentLogin'];
+            case SpectatedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, pastLog):
+                translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
+            case RevisitedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, log): 
+                translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
+            case PlayerProfile(ownerLogin): 
+                translations = [ownerLogin, ownerLogin];
+            case LoginRegister:
+                translations = ['Sign in', 'Войти'];
+            case ChallengeHosting(timeControl, color):
+                var tcStr = timeControl.toString();
+                translations = ['$tcStr challenge', 'Вызов $tcStr'];
+            case ChallengeJoining(challengeOwner):
+                translations = ['Challenge by $challengeOwner', 'Вызов $challengeOwner'];
+            default:
+        }
+
+        return Dictionary.chooseTranslation(translations);
     }
 
     //TODO: Rewrite functions below this comment

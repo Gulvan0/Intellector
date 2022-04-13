@@ -153,13 +153,16 @@ class Dictionary
 
     public static function getPhrase(phrase:Phrase, ?substitutions:Array<String>):String
     {
-        var translations = dict.get(phrase);
-        var index = order.indexOf(Preferences.instance.language);
-        var translation = translations[index];
+        var translation = chooseTranslation(dict.get(phrase));
         if (substitutions != null)
             for (i in 0...substitutions.length)
                 translation = StringTools.replace(translation, '$' + i, substitutions[i]);
         return translation;
+    }
+
+    public static function chooseTranslation(translations:Array<String>):String
+    {
+        return translations[order.indexOf(Preferences.instance.language)];
     }
 
     public static function getLanguageName(lang:Language)

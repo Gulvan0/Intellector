@@ -35,11 +35,6 @@ class MainMenu extends Screen
         //* Do nothing
     }
 
-    public override function getURLPath():String
-    {
-        return "home";
-    }
-
     private function onDirectChallengeParamsSpecified(callee:String, startSecs:Int, bonusSecs:Int, color:PieceColor)
     {
         var colorName = color.getName();
@@ -50,7 +45,7 @@ class MainMenu extends Screen
     {
         var colorName = color.getName();
         Networker.emitEvent(CreateOpenChallenge(startSecs, bonusSecs, colorName));
-        ScreenManager.toScreen(new OpenChallengeHosting(startSecs, bonusSecs, color));
+        //TODO: Rewrite ||| ScreenManager.toScreen(new OpenChallengeHosting(startSecs, bonusSecs, color));
     }
 
     private function onSendChallenge(e) 
@@ -68,7 +63,7 @@ class MainMenu extends Screen
 
     private function onAnalysisBoard(e) 
     {
-        ScreenManager.toScreen(new Analysis());
+        //TODO: Rewrite ||| ScreenManager.toScreen(Analysis);
     }
 
     private function onSpectate(e) 
@@ -79,9 +74,11 @@ class MainMenu extends Screen
             Networker.emitEvent(Spectate(response)); //TODO: Is an answer to this being processed correctly
     }
 
+    
     private function onSettings(e) 
     {
-        ScreenManager.toScreen(new Settings());
+        //TODO: Rewrite completely 
+        //ScreenManager.toScreen(new Settings());
     }
 
     private function onProfile(e) 
@@ -89,7 +86,7 @@ class MainMenu extends Screen
         var response = Browser.window.prompt(Dictionary.getPhrase(ENTER_PROFILE_OWNER));
 
         if (response != null)
-            ScreenManager.toScreen(new PlayerProfile(response));
+            ScreenManager.toScreen(PlayerProfile(response));
     }
 
     private function onLogOut(e) 

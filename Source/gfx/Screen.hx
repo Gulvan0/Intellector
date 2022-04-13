@@ -22,9 +22,11 @@ class Screen extends VBox
         throw "To be overriden";
     }
 
-    public function new()
+    public function new(?hideMenu:Bool = false)
     {
         super();
+        if (hideMenu)
+            menubar.hidden = true;
         //mainPageLink.customStyle = {fontName: "fonts/Futura.ttf", ...};
         //mainPageLink.onClick = e -> {ScreenManager.toScreen(new MainMenu());};
     }

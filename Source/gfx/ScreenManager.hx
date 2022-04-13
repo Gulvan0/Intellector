@@ -1,5 +1,8 @@
 package gfx;
 
+import gfx.screens.LanguageSelectIntro;
+import gfx.screens.LiveGame;
+import gfx.screens.Analysis;
 import net.EventProcessingQueue.INetObserver;
 import js.Browser;
 import net.ServerEvent;
@@ -43,24 +46,53 @@ class ScreenManager extends Sprite implements INetObserver
 
     private static function buildScreen(type:ScreenType):Screen
     {
-        //TODO: Fill + fix toScreen() references
+        return switch type 
+        {
+            case MainMenu:
+                new MainMenu();
+            case Analysis(initialVariantStr, exploredStudyID):
+                new Analysis(initialVariantStr, exploredStudyID);
+            case LanguageSelectIntro:
+                new LanguageSelectIntro();
+            case PlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor, pastLog):
+                new LiveGame(gameID, whiteLogin, blackLogin, playerColor, timeControl.startSecs, timeControl.bonusSecs, playerColor, pastLog);
+            case SpectatedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, pastLog):
+                new LiveGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl.startSecs, timeControl.bonusSecs, null, pastLog);
+            case RevisitedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, log):
+                new LiveGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl.startSecs, timeControl.bonusSecs, null, log);
+            case PlayerProfile(ownerLogin):
+                new PlayerProfile(ownerLogin);
+            case LoginRegister:
+                new Screen(); //TODO: Change
+            case ChallengeHosting(timeControl, color):
+                new OpenChallengeHosting(timeControl, color);
+            case ChallengeJoining(challengeOwner):
+                new OpenChallengeJoining(challengeOwner);
+        };
     }
 
     private static function getURLPath(type:ScreenType):String
     {
-        //TODO: Fill + remove from Screen subclasses
-    }
-
-    private static function getTitle(type:ScreenType):String
-    {
-        //TODO: Fill
+        return switch type 
+        {
+            case MainMenu: "home";
+            case Analysis(initialVariantStr, exploredStudyID): "analysis";
+            case LanguageSelectIntro: "";
+            case PlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor, pastLog): 'live/$gameID';
+            case SpectatedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, pastLog): 'live/$gameID';
+            case RevisitedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, log): 'live/$gameID';
+            case PlayerProfile(ownerLogin): 'player/$ownerLogin';
+            case LoginRegister: 'login';
+            case ChallengeHosting(_, _): "challenge";
+            case ChallengeJoining(challengeOwner): 'join/$challengeOwner';
+        }
     }
 
     public static function toScreen(type:ScreenType)
     {
         instance.removeCurrentScreen();
 
-        URLEditor.setPath(getURLPath(type), getTitle(type));
+        URLEditor.setPath(getURLPath(type), Utils.getScreenTitle(type));
         instance.current = buildScreen(type);
         instance.addChild(instance.current);
         instance.current.onEntered();
@@ -103,7 +135,7 @@ class ScreenManager extends Sprite implements INetObserver
                     if (LoginManager.wasLastSignInAuto())
                         navigateByURL(Browser.location.search);
                     else
-                        toScreen(new MainMenu());
+                        toScreen(MainMenu);
             default:
         }
     }

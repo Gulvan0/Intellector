@@ -23,20 +23,16 @@ class OpenChallengeJoining extends Screen
         //* Do nothing
     }
 
-    public override function getURLPath():String
-    {
-        return 'challenge';
-    }
-
-    public function new(challengeOwner:String, startSecs:Int, bonusSecs:Int, color:Null<String>)
+    public function new(challengeOwner:String)
     {
 		super();
+		//TODO: Delayed initializaiton here to obtain the challenge params
         var joinMenu = new VBox();
 		joinMenu.width = boxWidth;
 
 		var label = new haxe.ui.components.Label();
 		label.width = boxWidth;
-		label.text = Utils.isHostingAChallengeText(challengeOwner, startSecs, bonusSecs, color);
+		//label.text = Utils.isHostingAChallengeText(challengeOwner, startSecs, bonusSecs, color);
 		if (LoginManager.login == null)
 			label.text += Dictionary.getPhrase(WILL_BE_GUEST);
 		else

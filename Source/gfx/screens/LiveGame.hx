@@ -53,11 +53,6 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         GeneralObserver.acceptsDirectChallenges = true;
     }
 
-    public override function getURLPath():String
-    {
-        return 'live/$gameID';
-    }
-
     public function handleNetEvent(event:ServerEvent)
     {
         switch event 
@@ -93,7 +88,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case ExploreInAnalysisRequest:
                 if (!viewingAsParticipatingPlayer)
                     Networker.emitEvent(StopSpectate);
-                ScreenManager.toScreen(new Analysis(board.asVariant().serialize(), null));
+                ScreenManager.toScreen(Analysis(board.asVariant().serialize(), null));
             case PlyScrollRequest(type):
                 board.applyScrolling(type);
             default:

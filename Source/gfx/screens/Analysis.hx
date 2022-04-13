@@ -37,11 +37,6 @@ class Analysis extends Screen implements RightPanelObserver
         //* Do nothing
     }
 
-    public override function getURLPath():String
-    {
-        return "analysis";
-    }
-
     public function handleRightPanelEvent(event:RightPanelEvent)
     {
         switch event 
