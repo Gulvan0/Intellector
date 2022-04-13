@@ -30,6 +30,16 @@ class GameLogParserOutput
     public var datetime:Null<Date>;
     public var currentSituation:Situation;
 
+    public function getPlayerColor():Null<PieceColor>
+    {
+        if (LoginManager.isPlayer(whiteLogin))
+            return White;
+        else if (LoginManager.isPlayer(blackLogin))
+            return Black;
+        else
+            return null;
+    }
+
     public function new()
     {
         currentSituation = Situation.starting();

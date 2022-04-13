@@ -70,6 +70,7 @@ class Analysis extends Screen implements RightPanelObserver
         var response = Browser.window.prompt(Dictionary.getPhrase(STUDY_NAME_SELECTION_MESSAGE));
         if (response != null)
             Networker.emitEvent(SetStudy(response.substr(0, 40), variant.serialize(), decidedOverwriteID));
+            //TODO: Update url and title (ID should be returned from server)
     }
 
     private function onExportSIPRequested() 
@@ -111,6 +112,8 @@ class Analysis extends Screen implements RightPanelObserver
         var variantStrParts:Array<String> = [];
         var startingSituation:Situation;
         var variantHasNodes:Bool;
+
+        //TODO: Request study info from server if exploredStudyID != null && initialVariantStr == null
 
         if (initialVariantStr != null)
         {

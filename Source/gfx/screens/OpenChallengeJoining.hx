@@ -27,6 +27,7 @@ class OpenChallengeJoining extends Screen
     {
 		super();
 		//TODO: Delayed initializaiton here to obtain the challenge params
+		//TODO: Navigate to Hosting if owner is player (delayed, cause we need params + proper sequence)
         var joinMenu = new VBox();
 		joinMenu.width = boxWidth;
 

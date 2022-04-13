@@ -28,8 +28,9 @@ import net.EventProcessingQueue.INetObserver;
 
 class LiveGame extends Screen implements INetObserver implements IGameBoardObserver implements ISideboxObserver
 {
+    /**Attains null if a user doesn't participate in the game (is a spectator or browses a past game)**/
+    private var playerColor:Null<PieceColor>;
     private var gameID:Int;
-    private var viewingAsParticipatingPlayer:Bool;
 
     private var board:GameBoard;
     private var sidebox:Sidebox;
@@ -61,6 +62,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
                 var plyStr:String = ply.toNotation(board.currentSituation);
                 sidebox.makeMove(plyStr);
+            case GameEnded(winner_color, reason):
+                Assets.getSound("sounds/notify.mp3").play();
+                Dialogs.info(Utils.getGameOverPopUpMessage(GameLogParser.decodeColor(winner_color), GameLogParser.decodeOutcome(winner_color), playerColor), Dictionary.getPhrase(GAME_ENDED));
             default:
         }
     }

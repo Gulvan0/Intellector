@@ -43,20 +43,19 @@ class Utils
         return Dictionary.getPhrase(phrase);
     }
 
-    public static function getGameOverExplanation(reason:String):String
+    public static function getGameOverExplanation(reason:Outcome):String
     {
         var phrase:Phrase = switch reason
 		{
-			case 'mate': GAME_OVER_REASON_MATE;
-			case 'breakthrough': GAME_OVER_REASON_BREAKTHROUGH;
-			case 'timeout': GAME_OVER_REASON_TIMEOUT;
-			case 'resignation': GAME_OVER_REASON_RESIGN;
-			case 'abandon': GAME_OVER_REASON_DISCONNECT;
-			case 'threefoldrepetition': GAME_OVER_REASON_THREEFOLD;
-			case 'hundredmoverule': GAME_OVER_REASON_HUNDRED;
-            case 'drawagreement': GAME_OVER_REASON_AGREEMENT;
-            case 'abort': GAME_OVER_REASON_ABORT;
-			default: GAME_OVER_REASON_MATE;
+			case Mate: GAME_OVER_REASON_MATE;
+			case Breakthrough: GAME_OVER_REASON_BREAKTHROUGH;
+			case Timeout: GAME_OVER_REASON_TIMEOUT;
+			case Resign: GAME_OVER_REASON_RESIGN;
+			case Abandon: GAME_OVER_REASON_DISCONNECT;
+			case Repetition: GAME_OVER_REASON_THREEFOLD;
+			case NoProgress: GAME_OVER_REASON_HUNDRED;
+            case DrawAgreement: GAME_OVER_REASON_AGREEMENT;
+            case Abort: GAME_OVER_REASON_ABORT;
 		};
         return Dictionary.getPhrase(phrase);
     }
@@ -113,6 +112,24 @@ class Utils
         }
 
         return Dictionary.chooseTranslation(translations);
+    }
+
+    public static function getGameOverPopUpMessage(outcome:Outcome, winnerColor:Null<PieceColor>, playerColor:PieceColor):String
+    {
+        if (outcome == Abort)
+            return Dictionary.getPhrase(GAME_OVER_REASON_ABORT);
+        
+        var result:String;
+        var explanation:String = Utils.getGameOverExplanation(outcome);
+
+        if (winnerColor == null)
+			result = "½ - ½";
+		else if (winnerColor == playerColor)
+			result = Dictionary.getPhrase(WIN_MESSAGE_PREAMBLE);
+		else 
+			result = Dictionary.getPhrase(LOSS_MESSAGE_PREAMBLE);
+
+        return Dictionary.getPhrase(GAME_OVER) + result + explanation;
     }
 
     //TODO: Rewrite functions below this comment
