@@ -1,4 +1,4 @@
-package gfx.screens;
+package gfx;
 
 import js.Browser;
 import haxe.ui.styles.Style;
@@ -18,11 +18,6 @@ class Screen extends VBox
     }
 
     public function onClosed()
-    {
-        throw "To be overriden";
-    }
-
-    public function getURLPath():String
     {
         throw "To be overriden";
     }

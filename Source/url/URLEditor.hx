@@ -9,11 +9,12 @@ class URLEditor
         setPath("");
     }
 
-    public static function setPath(path:String)
+    public static function setPath(path:String, title:String)
     {
         if (StringTools.startsWith(path, "/"))
             path = path.substr(1);
-        Browser.window.history.pushState({}, "Intellector", ingameToUrlPath(path));
+        var fullTitle:String = title != null? title + " - Intellector" : "Intellector";
+        Browser.window.history.pushState({}, fullTitle, ingameToUrlPath(path));
     }
 
     public static function getChallengeLink(login:String):String

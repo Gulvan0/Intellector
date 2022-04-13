@@ -3,7 +3,6 @@ package gfx;
 import net.EventProcessingQueue.INetObserver;
 import js.Browser;
 import net.ServerEvent;
-import gfx.screens.Screen;
 import net.LoginManager;
 import struct.Situation;
 import struct.ReversiblePly;
@@ -42,12 +41,27 @@ class ScreenManager extends Sprite implements INetObserver
         }
     }
 
-    public static function toScreen(screen:Screen)
+    private static function buildScreen(type:ScreenType):Screen
+    {
+        //TODO: Fill + fix toScreen() references
+    }
+
+    private static function getURLPath(type:ScreenType):String
+    {
+        //TODO: Fill + remove from Screen subclasses
+    }
+
+    private static function getTitle(type:ScreenType):String
+    {
+        //TODO: Fill
+    }
+
+    public static function toScreen(type:ScreenType)
     {
         instance.removeCurrentScreen();
 
-        URLEditor.setPath(screen.getURLPath());
-        instance.current = screen;
+        URLEditor.setPath(getURLPath(type), getTitle(type));
+        instance.current = buildScreen(type);
         instance.addChild(instance.current);
         instance.current.onEntered();
     }
