@@ -8,9 +8,10 @@ enum ScreenType
     MainMenu;
     Analysis(initialVariantStr:Null<String>, exploredStudyID:Null<Int>);
     LanguageSelectIntro;
-    PlayableGame(gameID:Int, whiteLogin:String, blackLogin:String, timeControl:TimeControl, playerColor:PieceColor, pastLog:Null<String>);
-    SpectatedGame(gameID:Int, whiteLogin:String, blackLogin:String, watchedColor:PieceColor, timeControl:TimeControl, pastLog:String);
-    RevisitedGame(gameID:Int, whiteLogin:String, blackLogin:String, watchedColor:PieceColor, timeControl:TimeControl, log:String);
+    StartedPlayableGame(gameID:Int, whiteLogin:String, blackLogin:String, timeControl:TimeControl, playerColor:PieceColor);
+    ReconnectedPlayableGame(gameID:Int, actualizationData:ActualizationData);
+    SpectatedGame(gameID:Int, watchedColor:PieceColor, actualizationData:ActualizationData);
+    RevisitedGame(gameID:Int, watchedColor:PieceColor, log:String);
     PlayerProfile(ownerLogin:String);
     LoginRegister;
     ChallengeHosting(timeControl:TimeControl, color:Null<PieceColor>);

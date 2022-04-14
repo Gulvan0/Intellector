@@ -92,8 +92,11 @@ class Utils
                 translations = ["Home", "Главная"];
             case Analysis(initialVariantStr, exploredStudyID): 
                 translations = ["Analysis Board", "Доска анализа"];
-            case PlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor, pastLog): 
+            case StartedPlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor): 
                 var opponentLogin:String = playerColor == White? blackLogin : whiteLogin;
+                translations = ['Play $opponentLogin', 'Игра $opponentLogin'];
+            case ReconnectedPlayableGame(gameID, data): 
+                var opponentLogin:String = data.logParserOutput.getPlayerOpponentLogin();
                 translations = ['Play $opponentLogin', 'Игра $opponentLogin'];
             case SpectatedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, pastLog):
                 translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];

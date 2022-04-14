@@ -1,5 +1,6 @@
 package gfx.game;
 
+import struct.ActualizationData;
 import openfl.display.Shape;
 import utils.AssetManager;
 import net.EventProcessingQueue.INetObserver;
@@ -71,20 +72,6 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         }
     }
 
-    private function actualize(parsedData:GameLogParserOutput)
-    {
-        if (parsedData.outcome != null)
-            changeResolution(parsedData.outcome, parsedData.winnerColor);
-
-        if (parsedData.datetime != null)
-        {
-            datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
-        }
-
-        for (ply in parsedData.movesPlayed)
-            accountMove(ply);
-    }
-
     private function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
     {
         var outcomeStr:String = switch outcome 
@@ -117,13 +104,28 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         opening.text = openingTree.currentNode.name;
     }
 
-    public function new(timeControl:Null<TimeControl>, whiteLogin:String, blackLogin:String, ?actualizationData:GameLogParserOutput) 
+    public static function constructFromActualizationData(data:ActualizationData):GameInfoBox
+    {
+        var infobox:GameInfoBox = new GameInfoBox(data.logParserOutput.timeControl, data.logParserOutput.whiteLogin, data.logParserOutput.blackLogin);
+
+        var parsedData = data.logParserOutput;
+
+        if (parsedData.outcome != null)
+            infobox.changeResolution(parsedData.outcome, parsedData.winnerColor);
+
+        if (parsedData.datetime != null)
+            infobox.datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+
+        for (ply in parsedData.movesPlayed)
+            infobox.accountMove(ply);
+
+        return infobox;
+    }
+
+    public function new(timeControl:TimeControl, whiteLogin:String, blackLogin:String) 
     {
         super();
         this.openingTree = new OpeningTree();
-
-        if (timeControl == null)
-            timeControl = actualizationData.timeControl;
 
         var tcType:TimeControlType = timeControl.getType();
 
@@ -136,8 +138,5 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         tcIcon.horizontalAlign = 'center';
         tcIcon.verticalAlign = 'center';
         imagebox.addComponent(tcIcon);
-        
-        if (actualizationData != null)
-            actualize(actualizationData);
     }
 }

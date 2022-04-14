@@ -28,6 +28,7 @@ import haxe.ui.containers.VBox;
 import haxe.ui.containers.TableView;
 import haxe.ui.components.Label;
 import openfl.display.Sprite;
+import struct.ActualizationData;
 using utils.CallbackTools;
 
 enum SideboxEvent
@@ -120,16 +121,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
             case ContinuationMove(ply, plyStr, performedBy):
                 makeMove(plyStr);
             default:
-        }
-    }
-
-    private function actualize(movesPlayed:Array<Ply>)
-    {
-        var situation:Situation = Situation.starting();
-        for (ply in movesPlayed)
-        {
-            makeMove(ply.toNotation(situation));
-            situation = situation.makeMove(ply);
         }
     }
 
@@ -357,11 +348,33 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         emit(DeclineTakebackPressed);
     }
 
-    public function new(playingAs:Null<PieceColor>, startSecs:Int, secsPerTurn:Int, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, ?actualizationData:GameLogParserOutput, ?width:Float, ?height:Float) 
+    public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, ?width:Float, ?height:Float):Sidebox
+    {
+        var playingAs:Null<PieceColor> = data.logParserOutput.getPlayerColor();
+        var timeControl:TimeControl = data.logParserOutput.timeControl;
+        var whiteLogin:String = data.logParserOutput.whiteLogin;
+        var blackLogin:String = data.logParserOutput.blackLogin;
+
+        var sidebox:Sidebox = new Sidebox(playingAs, timeControl, whiteLogin, blackLogin, orientationColor, width, height);
+
+        var situation:Situation = Situation.starting();
+        for (ply in data.logParserOutput.movesPlayed)
+        {
+            sidebox.makeMove(ply.toNotation(situation));
+            situation = situation.makeMove(ply);
+        }
+
+        if (data.timeCorrectionData != null)
+            correctTime(data.timeCorrectionData.whiteSeconds, data.timeCorrectionData.blackSeconds, data.timeCorrectionData.timestamp, data.timeCorrectionData.pingSubtractionSide);
+
+        return sidebox;
+    }
+
+    public function new(playingAs:Null<PieceColor>, timeControl:TimeControl, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, ?width:Float, ?height:Float) 
     {
         super();
         this.belongsToSpectator = playingAs == null;
-        this.secsPerTurn = secsPerTurn;
+        this.secsPerTurn = timeControl.bonusSecs;
         this.orientationColor = White;
         this.move = 0;
         this.resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
@@ -369,8 +382,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         if (playingAs != null)
             enableTakebackAfterMove = playingAs == White? 1 : 2;
         
-        whiteClock.init(startSecs, playingAs == White, startSecs >= 90, true);
-        blackClock.init(startSecs, playingAs == Black, startSecs >= 90, false);
+        whiteClock.init(timeControl.startSecs, playingAs == White, timeControl.startSecs >= 90, true);
+        blackClock.init(timeControl.startSecs, playingAs == Black, timeControl.startSecs >= 90, false);
 
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;
@@ -404,8 +417,5 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
         if (orientationColor == Black)
             revertOrientation();
-
-        if (actualizationData != null)
-            actualize(actualizationData.movesPlayed);
     }
 }

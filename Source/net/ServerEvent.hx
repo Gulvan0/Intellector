@@ -4,7 +4,7 @@ package net;
 enum ServerEvent
 {
     GameStarted(match_id:Int, enemy:String, colour:String, startSecs:Int, bonusSecs:Int); //Called when the game featuring player starts. Signals to draw the gameboard. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
-    SpectationData(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String); //Answer to Spectate. All the match details required
+    SpectationData(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String); //Answer to Spectate. All the match details required
     
     PlayerExistanceAnswer(exists:Bool); //Answer to DoesPlayerExist
     GameIsOver(log:String); //Answer to GetGame: game has ended and now can be revisited
@@ -29,7 +29,7 @@ enum ServerEvent
     
     LoginResult(success:Bool); //Answer to Login. Was the login successful
     RegisterResult(success:Bool); //Answer to Register. Was the registration successful
-    ReconnectionNeeded(match_id:Int, whiteLogin:String, blackLogin:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished live game
+    ReconnectionNeeded(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished live game
 
     Message(author:String, message:String); //New in-game player message
     SpectatorMessage(author:String, message:String); //New in-game spectator message

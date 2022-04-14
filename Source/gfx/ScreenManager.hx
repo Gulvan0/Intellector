@@ -1,5 +1,7 @@
 package gfx;
 
+import utils.TimeControl;
+import js.html.URLSearchParams;
 import gfx.screens.LanguageSelectIntro;
 import gfx.screens.LiveGame;
 import gfx.screens.Analysis;
@@ -54,12 +56,14 @@ class ScreenManager extends Sprite implements INetObserver
                 new Analysis(initialVariantStr, exploredStudyID);
             case LanguageSelectIntro:
                 new LanguageSelectIntro();
-            case PlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor, pastLog):
-                new LiveGame(gameID, whiteLogin, blackLogin, playerColor, timeControl.startSecs, timeControl.bonusSecs, playerColor, pastLog);
-            case SpectatedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, pastLog):
-                new LiveGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl.startSecs, timeControl.bonusSecs, null, pastLog);
-            case RevisitedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, log):
-                new LiveGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl.startSecs, timeControl.bonusSecs, null, log);
+            case StartedPlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor):
+                LiveGame.constructFromParams(gameID, whiteLogin, blackLogin, playerColor, timeControl, playerColor);
+            case ReconnectedPlayableGame(gameID, actualizationData):
+                LiveGame.constructFromActualizationData(gameID, actualizationData);
+            case SpectatedGame(gameID, watchedColor, actualizationData):
+                LiveGame.constructFromActualizationData(gameID, actualizationData, watchedColor);
+            case RevisitedGame(gameID, watchedColor, log):
+                LiveGame.constructFromActualizationData(gameID, new ActualizationData(log), watchedColor);
             case PlayerProfile(ownerLogin):
                 new PlayerProfile(ownerLogin);
             case LoginRegister:
@@ -78,9 +82,10 @@ class ScreenManager extends Sprite implements INetObserver
             case MainMenu: "home";
             case Analysis(initialVariantStr, exploredStudyID): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
             case LanguageSelectIntro: "";
-            case PlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor, pastLog): 'live/$gameID';
-            case SpectatedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, pastLog): 'live/$gameID';
-            case RevisitedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, log): 'live/$gameID';
+            case StartedPlayableGame(gameID, _, _, _, _): 'live/$gameID';
+            case ReconnectedPlayableGame(gameID, _): 'live/$gameID';
+            case SpectatedGame(gameID, _, _): 'live/$gameID';
+            case RevisitedGame(gameID, _, _): 'live/$gameID';
             case PlayerProfile(ownerLogin): 'player/$ownerLogin';
             case LoginRegister: 'login';
             case ChallengeHosting(_, _): "challenge";
@@ -90,7 +95,7 @@ class ScreenManager extends Sprite implements INetObserver
 
     public static function toStartScreen() 
     {
-        //TODO: Either to LanguageSelectIntro or to MainMenu
+        //TODO: Either to LanguageSelectIntro or to MainMenu. Is it still needed after the new init logic was introduced?
     }
 
     public static function toScreen(type:ScreenType)
@@ -114,7 +119,7 @@ class ScreenManager extends Sprite implements INetObserver
         URLEditor.clear();
     }
 
-    //TODO: Decide where to put check logic (is logged in? has language selected? player/game exists?) whilist also trying to simplify this method
+    //TODO: Simplify according to the updated init algrorithm from my notes
     public static function navigateByURL(searchParams:String)
     {
         var searcher = new URLSearchParams(searchParams);
@@ -159,17 +164,16 @@ class ScreenManager extends Sprite implements INetObserver
         {
             case GameStarted(match_id, enemy, colour, startSecs, bonusSecs):
                 var timeControl:TimeControl = new TimeControl(startSecs, bonusSecs);
-                var playerColor:PieceColor = PieceColor.createByName(playerColor);
+                var playerColor:PieceColor = PieceColor.createByName(colour);
                 var whiteLogin:String = playerColor == White? LoginManager.login : enemy;
                 var blackLogin:String = playerColor == Black? LoginManager.login : enemy;
                 toScreen(PlayableGame(match_id, whiteLogin, blackLogin, timeControl, playerColor, null));
-            case SpectationData(match_id, whiteLogin, blackLogin, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-                //TODO: Uncomment while also solving these problems:
-                //? Why isn't there a timeControl parameter?
-                //? Time correction upon creation is impossible?!
-                //toScreen(SpectatedGame(match_id, whiteLogin, blackLogin, watchedColor, timeControl, currentLog));
+            case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
+                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
+                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
+                toScreen(SpectatedGame(match_id, watchedColor, actualizationData));
             case LoginResult(success):
-                if (success)
+                if (success) //TODO: Update according to new logic
                     if (LoginManager.wasLastSignInAuto())
                         navigateByURL(Browser.location.search);
                     else

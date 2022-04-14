@@ -1,6 +1,9 @@
 package gfx.screens;
 
+import struct.ActualizationData;
+import gfx.components.Dialogs;
 import dict.Dictionary;
+import dict.Utils;
 import js.Browser;
 import struct.IntPoint;
 import struct.Ply;
@@ -64,7 +67,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 sidebox.makeMove(plyStr);
             case GameEnded(winner_color, reason):
                 Assets.getSound("sounds/notify.mp3").play();
-                Dialogs.info(Utils.getGameOverPopUpMessage(GameLogParser.decodeColor(winner_color), GameLogParser.decodeOutcome(winner_color), playerColor), Dictionary.getPhrase(GAME_ENDED));
+                Dialogs.info(Utils.getGameOverPopUpMessage(GameLogParser.decodeOutcome(winner_color), GameLogParser.decodeColor(winner_color), playerColor), Dictionary.getPhrase(GAME_ENDED));
             default:
         }
     }
@@ -90,7 +93,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 var sip:String = board.shownSituation.serialize();
                 Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
             case ExploreInAnalysisRequest:
-                if (!viewingAsParticipatingPlayer)
+                if (playerColor == null)
                     Networker.emitEvent(StopSpectate);
                 ScreenManager.toScreen(Analysis(board.asVariant().serialize(), null));
             case PlyScrollRequest(type):
@@ -99,29 +102,50 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         }
     }
 
-    //TODO: Set actual time for reconnect, spectation, revisit after calling constructor
-    public function new(gameID:Int, whiteLogin:String, blackLogin:String, orientationColour:PieceColor, startSecs:Int, bonusSecs:Int, ?playerColor:PieceColor, ?logForActualization:String)
+    public static function constructFromActualizationData(gameID:Int, actualizationData:ActualizationData, ?orientationColour:PieceColor):LiveGame
+    {
+        var playingAs:Null<PieceColor> = actualizationData.logParserOutput.getPlayerColor();
+
+        if (orientationColor == null)
+            if (playingAs == null)
+                orientationColor = White;
+            else
+                orientationColor = playingAs;
+
+        var sidebox = Sidebox.constructFromActualizationData(actualizationData, orientationColour); //TODO: Set adaptive width/height
+        var chatbox = Chatbox.constructFromActualizationData(playerColor == null, actualizationData);
+        var gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
+
+        return new LiveGame(gameID, playingAs, actualizationData.logParserOutput.currentSituation, sidebox, chatbox, gameinfobox);
+    }
+
+    public static function constructFromParams(gameID:Int, whiteLogin:String, blackLogin:String, orientationColour:PieceColor, timeControl:TimeControl, playerColor:Null<PieceColor>):LiveGame 
+    {
+        var sidebox = new Sidebox(playerColor, timeControl, whiteLogin, blackLogin, orientationColour); //TODO: Set adaptive width/height
+        var chatbox = new Chatbox(playerColor == null);
+        var gameinfobox = new GameInfoBox(timeControl, whiteLogin, blackLogin);
+
+        return new LiveGame(gameID, playerColor, Situation.starting(), sidebox, chatbox, gameinfobox);
+    }
+
+    private function new(gameID:Int, playerColor:Null<PieceColor>, currentSituation:Situation, sidebox:Sidebox, chatbox:Chatbox, gameinfobox:GameInfoBox)
     {
         super();
         this.gameID = gameID;
-        this.viewingAsParticipatingPlayer = playerColor != null;
-
-        var parsedData = logForActualization != null? GameLogParser.parse(logForActualization) : null;
-        var currentSituation = parsedData != null? parsedData.currentSituation : Situation.starting();
+        this.playerColor = playerColor;
+        this.sidebox = sidebox;
+        this.chatbox = chatbox;
+        this.gameinfobox = gameinfobox;
 
         board = new GameBoard(currentSituation, orientationColour);
-        board.state = viewingAsParticipatingPlayer? new NeutralState(board) : new StubState(board);
+        board.state = playerColor != null? new NeutralState(board) : new StubState(board);
 
-        if (!viewingAsParticipatingPlayer)
+        if (playerColor == null)
             board.behavior = new EnemyMoveBehavior(board, orientationColour); //Behavior doesn't matter at all, that's just a placeholder
         else if (currentSituation.turnColor == playerColor)
             board.behavior = new PlayerMoveBehavior(board, playerColor);
         else
             board.behavior = new EnemyMoveBehavior(board, playerColor);
-
-        sidebox = new Sidebox(playerColor, startSecs, bonusSecs, whiteLogin, blackLogin, orientationColour, parsedData);
-        chatbox = new Chatbox(!viewingAsParticipatingPlayer, parsedData);
-        gameinfobox = new GameInfoBox(new TimeControl(startSecs, bonusSecs), whiteLogin, blackLogin, parsedData);
 
         var vbox:VBox = new VBox();
         vbox.addComponent(gameinfobox);
@@ -135,7 +159,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         hbox.addComponent(boardWrapper);
         hbox.addComponent(vbox);
 
-        addChild(hbox);
+        this.addComponent(hbox);
 
         board.addObserver(gameinfobox);
         board.addObserver(sidebox);

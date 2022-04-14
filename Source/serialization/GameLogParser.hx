@@ -1,5 +1,6 @@
 package serialization;
 
+import net.LoginManager;
 import utils.TimeControl;
 import gfx.game.GameInfoBox.Outcome;
 import struct.PieceColor;
@@ -36,6 +37,16 @@ class GameLogParserOutput
             return White;
         else if (LoginManager.isPlayer(blackLogin))
             return Black;
+        else
+            return null;
+    }
+
+    public function getPlayerOpponentLogin():Null<String>
+    {
+        if (LoginManager.isPlayer(whiteLogin))
+            return blackLogin;
+        else if (LoginManager.isPlayer(blackLogin))
+            return whiteLogin;
         else
             return null;
     }
