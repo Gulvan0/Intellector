@@ -1,5 +1,6 @@
 package net;
 
+import browser.CredentialCookies;
 import net.EventProcessingQueue.INetObserver;
 import openfl.Assets;
 import dict.Utils;
@@ -37,6 +38,9 @@ class GeneralObserver implements INetObserver
             case IncomingDirectChallenge(enemy, colour, startSecs, bonusSecs):
                 if (acceptsDirectChallenges)
                     challengeReceiver(enemy, startSecs, bonusSecs, colour);
+            case LoginResult(success):
+                if (!success)
+                    CredentialCookies.removeLoginDetails();
             case DontReconnect:
                 onReconnectionForbidden();
             case DirectChallengeCalleeIsCaller(callee):

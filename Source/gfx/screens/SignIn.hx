@@ -74,10 +74,6 @@ class SignIn extends Sprite
 				onEntranceResults(success, INVALID_PASSWORD);
 			case RegisterResult(success):
 				onEntranceResults(success, ALREADY_REGISTERED);
-			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
-                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-				ScreenManager.toScreen(ReconnectedPlayableGame(match_id, actualizationData));
 			default:
 		}
 	}

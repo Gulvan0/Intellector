@@ -183,9 +183,22 @@ class ScreenManager extends Sprite implements INetObserver
                         navigateByURL(Browser.location.search);
                     else
                         toScreen(MainMenu);
+			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
+                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
+                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
+				toScreen(ReconnectedPlayableGame(match_id, actualizationData));
             default:
         }
     }
+	
+	/*private function onOngoingGame(data:OngoingBattleData) 
+	{
+		if (data.whiteLogin.toLowerCase() == Networker.login.toLowerCase())
+			data.whiteLogin = Networker.login;
+		else if (data.blackLogin.toLowerCase() == Networker.login.toLowerCase())
+			data.blackLogin = Networker.login;
+		ScreenManager.instance.toGameReconnect(data);
+	}*/
 
     public static function launch(mainInstance:Main)
     {
