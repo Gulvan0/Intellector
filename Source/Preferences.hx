@@ -17,55 +17,83 @@ enum BranchingTabType
     PlainText;
 }
 
-class Preferences
+class Preference<T>
 {
-    public static var instance:Preferences;
     private static var FIVE_YEARS = 60 * 60 * 24 * 365 * 5;
 
-    public static function initSettings() 
+    private var name:String;
+    private var kind:String;
+    private var defaultValue:T;
+    private var value:T;
+
+    public function get() 
     {
-        instance = new Preferences(); 
-        if (Cookie.exists("markup"))
-            instance.markup = Markup.createByName(Cookie.get("markup"));
-        if (Cookie.exists("lang"))
-            instance.language = Language.createByName(Cookie.get("lang"));
-        if (Cookie.exists("premoveEnabled"))
-            instance.premoveEnabled = Cookie.get("premoveEnabled") == "true";
-        if (Cookie.exists("branchingTabType"))
-            instance.branchingTabType = BranchingTabType.createByName(Cookie.get("branchingTabType"));
+        return value;    
     }
 
-    public var markup(default, null):Markup = Over;
-    public var language(default, null):Language = EN;
-    public var premoveEnabled(default, null):Bool = false;
-    public var branchingTabType(default, null):BranchingTabType = Tree; //TODO: Add new options to settings screen
-
-    public static function setMarkup(v:Markup)
+    public function set(v:T) 
     {
-        Cookie.set("markup", v.getName(), FIVE_YEARS);
-        instance.markup = v;
+        value = v;
+        Cookie.set(name, Std.string(value), FIVE_YEARS);
     }
 
-    public static function setLanguage(v:Language)
+    public function resetToDefault()
     {
-        Cookie.set("lang", v.getName(), FIVE_YEARS);
-        instance.language = v;
+        set(defaultValue);
     }
 
-    public static function setPremoveEnabled(v:Bool)
+    public function load():Bool
     {
-        Cookie.set("premoveEnabled", v? "true" : "false", FIVE_YEARS);
-        instance.premoveEnabled = v;
+        if (!Cookie.exists(name))
+            return false;
+
+        var rawValue:String = Cookie.get(name);
+
+        if (kind == 'int')
+            value = Std.parseInt(rawValue)
+        else if (kind == 'float')
+            value = Std.parseFloat(rawValue)
+        else if (kind == 'str')
+            value = rawValue;
+        else if (kind == 'enum')
+            value = Type.createEnum(T, rawValue);
+        else if (kind == 'bool')
+            value = rawValue == 'true';
+        else
+            throw 'Unsupported preference kind: $kind';
+
+        return true;
     }
 
-    public static function setBranchingTabType(v:BranchingTabType)
+    public function new(name:String, defaultValue:T, ?delayLoading:Bool = false) 
     {
-        Cookie.set("branchingTabType", v.getName(), FIVE_YEARS);
-        instance.branchingTabType = v;
-    }
+        this.name = name;
+        this.defaultValue = defaultValue;
+        this.value = defaultValue;
 
-    public function new()
-    {
+        if (Reflect.isEnumValue(defaultValue))
+            this.kind = 'enum';
+        else if (Std.isOfType(defaultValue, Bool))
+            this.kind = 'bool';
+        else if (Std.isOfType(defaultValue, Int))
+            this.kind = 'int';
+        else if (Std.isOfType(defaultValue, Float))
+            this.kind = 'float';
+        else if (Std.isOfType(defaultValue, String))
+            this.kind = 'str';
+        else
+            throw 'Unsupported preference class: ' + Type.getClassName(T);
 
+        if (!delayLoading)
+            this.load();
     }
+}
+
+class Preferences
+{
+    public static final language:Preference<Language> = new Preference("lang", EN, true);
+    
+    public static final markup:Preference<Markup> = new Preference("markup", Over);
+    public static final premoveEnabled:Preference<Bool> = new Preference("premoveEnabled", false);
+    public static final branchingTabType:Preference<BranchingTabType> = new Preference("branchingTabType", Tree);
 }

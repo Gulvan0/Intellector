@@ -1,32 +1,24 @@
 package gfx;
 
-import struct.ActualizationData;
-import utils.TimeControl;
-import js.html.URLSearchParams;
+import dict.Utils;
+import gfx.screens.Analysis;
 import gfx.screens.LanguageSelectIntro;
 import gfx.screens.LiveGame;
-import gfx.screens.Analysis;
-import net.EventProcessingQueue.INetObserver;
-import js.Browser;
-import net.ServerEvent;
-import net.LoginManager;
-import struct.Situation;
-import struct.ReversiblePly;
-import gfx.components.Dialogs;
-import gfx.screens.PlayerProfile;
-import struct.PieceColor;
 import gfx.screens.MainMenu;
-import gfx.screens.Settings;
-import dict.Dictionary;
-import dict.Utils;
 import gfx.screens.OpenChallengeHosting;
-import openfl.Assets;
 import gfx.screens.OpenChallengeJoining;
-import url.URLEditor;
-import url.Utils as URLUtils;
-import haxe.ui.components.Label;
-import gfx.screens.SignIn;
+import gfx.screens.PlayerProfile;
+import js.Browser;
+import js.html.URLSearchParams;
+import net.EventProcessingQueue.INetObserver;
+import net.LoginManager;
+import net.ServerEvent;
 import openfl.display.Sprite;
+import struct.ActualizationData;
+import struct.PieceColor;
+import url.URLEditor;
+import utils.TimeControl;
+
 using StringTools;
 
 /**

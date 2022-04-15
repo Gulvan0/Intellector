@@ -46,22 +46,31 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
-		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
-		var element = Browser.document.getElementById("openfl-content");
-		element.style.width = '${Browser.window.innerWidth}px';
-		element.style.height = '${Browser.window.innerHeight}px';
-
-		Toolkit.init();
-		Preferences.initSettings();
-		OpeningTree.init();
-		AssetManager.init();
-		Changes.initChangelog();
+		init();
 		addChild(new UITest(new TChatBox()));
 		//screenManager = new ScreenManager()
 		//Networker.eventQueue.addObserver(screenManager);
 		//addChild(screenManager);
 		//Networker.onConnectionEstabilished = onConnected;
 		//Networker.connect();
+	}
+
+	private function init() 
+	{
+		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
+		var element = Browser.document.getElementById("openfl-content");
+		element.style.width = '${Browser.window.innerWidth}px';
+		element.style.height = '${Browser.window.innerHeight}px';
+
+		Toolkit.init();
+		OpeningTree.init();
+		AssetManager.init();
+		Changes.initChangelog();
+	}
+
+	private function start() 
+	{
+		//TODO: Fill
 	}
 
 	private function onConnected()
