@@ -316,9 +316,9 @@ class Board extends OffsettedSprite
         addChild(hexagonLayer);
         addChild(pieceLayer);
 
-        produceHexagons(!suppressMarkup && Preferences.instance.markup == Over);
+        produceHexagons(!suppressMarkup && Preferences.markup.get() == Over);
         producePieces();
-        if (!suppressMarkup && Preferences.instance.markup != None)
+        if (!suppressMarkup && Preferences.markup.get() != None)
             disposeLetters();
     }
 

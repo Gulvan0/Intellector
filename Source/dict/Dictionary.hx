@@ -163,7 +163,7 @@ class Dictionary
 
     public static function chooseTranslation(translations:Array<String>):String
     {
-        return translations[order.indexOf(Preferences.instance.language)];
+        return translations[order.indexOf(Preferences.language.get())];
     }
 
     public static function getLanguageName(lang:Language)

@@ -72,7 +72,7 @@ class Settings extends Screen
             optionBox.onChange = (e) -> {
                 if (optionBox.selected)
                 {
-                    Preferences.setMarkup(type);
+                    Preferences.markup.set(type);
                     Cookie.set("markup", type.getName(), 60 * 60 * 24 * 365 * 5);
                 }
             };
@@ -80,7 +80,7 @@ class Settings extends Screen
             markup.addComponent(optionBox);
         }
 
-        markupOptionBoxes[Preferences.instance.markup].selected = true;
+        markupOptionBoxes[Preferences.markup.get()].selected = true;
         return markup;
     }
 
@@ -105,9 +105,9 @@ class Settings extends Screen
 		option.componentGroup = "settings-lang";
 		option.onChange = (e) -> {
 			if (option.selected)
-				Preferences.setLanguage(lang);
+				Preferences.language.set(lang);
 		};
-		if (Preferences.instance.language == lang)
+		if (Preferences.language.get() == lang)
 			option.selected = true;
 		return option;
 	}

@@ -12,7 +12,7 @@ class Utils
 {
     public static function getColorName(color:PieceColor) 
     {
-        return switch Preferences.instance.language 
+        return switch Preferences.language.get()
         {
             case EN: color.getName();
             case RU: color == White? "Белые" : "Черные";
@@ -147,13 +147,13 @@ class Utils
     private static function getMatchlistWinnerText(color:Null<PieceColor>) 
     {
         if (color == null)
-            return switch Preferences.instance.language 
+            return switch Preferences.language.get()
             {
                 case EN: "Draw";
                 case RU: "Ничья";
             }
         else
-            return getColorName(color) + switch Preferences.instance.language 
+            return getColorName(color) + switch Preferences.language.get()
             {
                 case EN: " won";
                 case RU: " победили";
@@ -162,7 +162,7 @@ class Utils
 
     private static function getMatchlistOutcomeText(outcome:Null<Outcome>) 
     {
-        switch Preferences.instance.language 
+        switch Preferences.language.get() 
         {
             case EN: 
                 return switch outcome 
@@ -213,7 +213,7 @@ class Utils
     {
         var timeControlStr = '${start/60}+$bonus';
         var colorStr:String = color == null? Dictionary.getPhrase(COLOR_RANDOM) : getColorName(color);
-        return switch Preferences.instance.language {
+        return switch Preferences.language.get() {
             case EN: 'Challenge by $login\n$timeControlStr ($login plays as $colorStr)\nShare the link to invite your opponent:';
             case RU: 'Вызов $login\n$timeControlStr (Цвет $login: $colorStr)\nОтправьте эту ссылку-приглашение противнику:';
         }
@@ -224,7 +224,7 @@ class Utils
         var timeControlStr = '${startSecs/60}+${bonusSecs/1}';
         var colorSuffix:String = color == null? "" : ", " + getColorName(PieceColor.createByName(color));
         var detailsStr = timeControlStr + colorSuffix;
-        return switch Preferences.instance.language {
+        return switch Preferences.language.get() {
             case EN: '$challengeOwner is hosting a challenge ($detailsStr). First one to accept it will become an opponent\n';
             case RU: '$challengeOwner вызывает на бой ($detailsStr). Первый, кто примет вызов, станет противником\n';
         }
@@ -232,7 +232,7 @@ class Utils
 
     public static function getAnalysisTurnColorSelectLabel(color:PieceColor):String 
     {
-		return switch Preferences.instance.language {
+		return switch Preferences.language.get() {
             case EN: color == White? "White to move" : "Black to move";
             case RU: color == White? "Ход белых" : "Ход черных";
         }

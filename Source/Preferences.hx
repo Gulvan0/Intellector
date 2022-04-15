@@ -50,15 +50,15 @@ class Preference<T>
         var rawValue:String = Cookie.get(name);
 
         if (kind == 'int')
-            value = Std.parseInt(rawValue)
+            value = cast(Std.parseInt(rawValue))
         else if (kind == 'float')
-            value = Std.parseFloat(rawValue)
+            value = cast(Std.parseFloat(rawValue))
         else if (kind == 'str')
-            value = rawValue;
+            value = cast(rawValue);
         else if (kind == 'enum')
-            value = Type.createEnum(T, rawValue);
+            value = Type.createEnum(Type.getEnum(cast(defaultValue)), rawValue);
         else if (kind == 'bool')
-            value = rawValue == 'true';
+            value = cast(rawValue == 'true');
         else
             throw 'Unsupported preference kind: $kind';
 
@@ -82,7 +82,7 @@ class Preference<T>
         else if (Std.isOfType(defaultValue, String))
             this.kind = 'str';
         else
-            throw 'Unsupported preference class: ' + Type.getClassName(T);
+            throw 'Unsupported preference class: ' + Type.getClassName(Type.getClass(defaultValue));
 
         if (!delayLoading)
             this.load();

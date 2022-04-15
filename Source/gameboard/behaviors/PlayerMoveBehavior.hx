@@ -63,7 +63,7 @@ class PlayerMoveBehavior implements IBehavior
         boardInstance.emit(ContinuationMove(ply, ply.toNotation(boardInstance.shownSituation), playerColor));
         Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
         boardInstance.makeMove(ply);
-        if (Preferences.instance.premoveEnabled)
+        if (Preferences.premoveEnabled.get())
             boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
         else
             boardInstance.state = new StubState(boardInstance, boardInstance.state.cursorLocation);

@@ -256,7 +256,7 @@ class RightPanel extends Sprite implements IGameBoardObserver
     private function createControlTabs(startingSituation:Situation):TabView
     {
         overviewTab = new OverviewTab();
-        branchingTab = new BranchingTab(Preferences.instance.branchingTabType, startingSituation, 390, 360);
+        branchingTab = new BranchingTab(Preferences.branchingTabType.get(), startingSituation, 390, 360);
 
         var openingTeaserLabel:Label = new Label();
         openingTeaserLabel.customStyle = {fontSize: 20};

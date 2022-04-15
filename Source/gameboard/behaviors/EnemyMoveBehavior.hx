@@ -146,7 +146,7 @@ class EnemyMoveBehavior implements IBehavior
 
     public function hoverDisabled():Bool
     {
-        return !Preferences.instance.premoveEnabled;
+        return !Preferences.premoveEnabled.get();
     }
     
     public function new(board:GameBoard, playerColor:PieceColor)

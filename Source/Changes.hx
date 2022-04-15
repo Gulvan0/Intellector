@@ -14,7 +14,7 @@ class Changes
 
     public static function initChangelog() 
     {
-        if (Preferences.instance.language == EN)
+        if (Preferences.language.get() == EN)
             changelog = [
                 {date: "04.11.2021", text:"Low-on-time alerts"},
                 {date: "29.10.2021", text:"Some QoL additions"},
@@ -46,7 +46,7 @@ class Changes
                 {date: "19.03.2021", text:"Added in-game chat, open challenges and arbitrary time control"},
                 {date: "17.03.2021", text:"Added changelog"}
             ];
-        else if (Preferences.instance.language == RU)
+        else if (Preferences.language.get() == RU)
             changelog = [
                 {date: "04.11.2021", text:"Предупреждение при цейтноте"},
                 {date: "29.10.2021", text:"QoL-нововведения"},

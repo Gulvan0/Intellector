@@ -43,7 +43,7 @@ class TGameBoard extends Sprite
         playerColor = opposite(playerColor);
         if (Std.isOfType(board.behavior, PlayerMoveBehavior))
         {
-            if (!Preferences.instance.premoveEnabled)
+            if (!Preferences.premoveEnabled.get())
                 board.state = new StubState(board, board.state.cursorLocation);
             board.behavior = new EnemyMoveBehavior(board, playerColor);
         }
@@ -86,7 +86,7 @@ class TGameBoard extends Sprite
 
     private function _act_togglePremoves() 
     {
-        Preferences.setPremoveEnabled(!Preferences.instance.premoveEnabled);
+        Preferences.premoveEnabled.set(!Preferences.premoveEnabled.get());
     }
 
     private function _act_printHistory() 
