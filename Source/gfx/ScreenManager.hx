@@ -1,5 +1,6 @@
 package gfx;
 
+import struct.ActualizationData;
 import utils.TimeControl;
 import js.html.URLSearchParams;
 import gfx.screens.LanguageSelectIntro;
@@ -33,6 +34,7 @@ using StringTools;
 **/
 class ScreenManager extends Sprite implements INetObserver
 {
+    public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event
     private static var instance:ScreenManager;
 
     public var current:Null<Screen>;
@@ -167,11 +169,12 @@ class ScreenManager extends Sprite implements INetObserver
                 var playerColor:PieceColor = PieceColor.createByName(colour);
                 var whiteLogin:String = playerColor == White? LoginManager.login : enemy;
                 var blackLogin:String = playerColor == Black? LoginManager.login : enemy;
-                toScreen(PlayableGame(match_id, whiteLogin, blackLogin, timeControl, playerColor, null));
+                toScreen(StartedPlayableGame(match_id, whiteLogin, blackLogin, timeControl, playerColor));
             case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-                toScreen(SpectatedGame(match_id, watchedColor, actualizationData));
+                var watchedColor:Null<PieceColor> = actualizationData.logParserOutput.getParticipantColor(spectatedPlayerLogin); //TODO: A bit clumsy approach, try to rethink later
+                toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
             case LoginResult(success):
                 if (success) //TODO: Update according to new logic
                     if (LoginManager.wasLastSignInAuto())

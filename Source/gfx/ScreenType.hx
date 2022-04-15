@@ -2,6 +2,7 @@ package gfx;
 
 import struct.PieceColor;
 import utils.TimeControl;
+import struct.ActualizationData;
 
 enum ScreenType
 {

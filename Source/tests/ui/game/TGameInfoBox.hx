@@ -1,5 +1,6 @@
 package tests.ui.game;
 
+import struct.ActualizationData;
 import struct.IntPoint;
 import struct.Ply;
 import serialization.GameLogParser.GameLogParserOutput;
@@ -103,15 +104,18 @@ class TGameInfoBox extends Sprite
 
     private function _act_testActualization() 
     {
-        var actualizationData:GameLogParserOutput = new GameLogParserOutput();
-        actualizationData.whiteLogin = "Gulvan";
-        actualizationData.blackLogin = "kartoved";
-        actualizationData.datetime = Date.now();
-        actualizationData.timeControl = new TimeControl(360, 2);
-        actualizationData.movesPlayed = [Ply.construct(new IntPoint(1, 5), new IntPoint(1, 3)), Ply.construct(new IntPoint(1, 0), new IntPoint(1, 2))];
-        actualizationData.outcome = Resign;
-        actualizationData.winnerColor = Black;
-        setBox(new GameInfoBox(null, "Gulvan", "kartoved", actualizationData));
+        var po:GameLogParserOutput = new GameLogParserOutput();
+        po.whiteLogin = "Gulvan";
+        po.blackLogin = "kartoved";
+        po.datetime = Date.now();
+        po.timeControl = new TimeControl(360, 2);
+        po.movesPlayed = [Ply.construct(new IntPoint(1, 5), new IntPoint(1, 3)), Ply.construct(new IntPoint(1, 0), new IntPoint(1, 2))];
+        po.outcome = Resign;
+        po.winnerColor = Black;
+
+        var actualizationData:ActualizationData = new ActualizationData();
+        actualizationData.logParserOutput = po;
+        setBox(GameInfoBox.constructFromActualizationData(actualizationData));
     }
 
     private var _checks_testActualization:Array<String> = [

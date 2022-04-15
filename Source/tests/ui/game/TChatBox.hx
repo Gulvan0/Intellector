@@ -1,5 +1,6 @@
 package tests.ui.game;
 
+import struct.ActualizationData;
 import gfx.game.Sidebox.SideboxEvent;
 import net.ServerEvent;
 import gfx.game.Chatbox;
@@ -28,18 +29,22 @@ class TChatBox extends Sprite
             case 1:
                 setBox(new Chatbox(true));
             case 2:
-                var data:GameLogParserOutput = new GameLogParserOutput();
-                data.whiteLogin = 'authorW';
-                data.blackLogin = 'AuthorB';
-                data.outcome = Breakthrough;
-                data.winnerColor = White;
-                setBox(new Chatbox(true, data));
+                var po:GameLogParserOutput = new GameLogParserOutput();
+                po.whiteLogin = 'authorW';
+                po.blackLogin = 'AuthorB';
+                po.outcome = Breakthrough;
+                po.winnerColor = White;
+                var data:ActualizationData = new ActualizationData();
+                data.logParserOutput = po;
+                setBox(Chatbox.constructFromActualizationData(true, data));
             case 3:
-                var data:GameLogParserOutput = new GameLogParserOutput();
-                data.whiteLogin = 'authorW';
-                data.blackLogin = 'AuthorB';
-                data.chatEntries = [PlayerMessage(White, 'text1'), Log('Some random log'), PlayerMessage(Black, 'Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery long text2')];
-                setBox(new Chatbox(false, data));
+                var po:GameLogParserOutput = new GameLogParserOutput();
+                po.whiteLogin = 'authorW';
+                po.blackLogin = 'AuthorB';
+                po.chatEntries = [PlayerMessage(White, 'text1'), Log('Some random log'), PlayerMessage(Black, 'Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery long text2')];
+                var data:ActualizationData = new ActualizationData();
+                data.logParserOutput = po;
+                setBox(Chatbox.constructFromActualizationData(false, data));
         }
     }
 

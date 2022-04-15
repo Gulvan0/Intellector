@@ -21,13 +21,14 @@ import openfl.events.KeyboardEvent;
 import haxe.ui.components.TextField;
 import haxe.ui.containers.ScrollView;
 import openfl.display.Sprite;
+import struct.ActualizationData;
 using StringTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/chatbox.xml'))
 class Chatbox extends VBox implements INetObserver implements ISideboxObserver
 {
     private var isOwnerSpectator:Bool;
-    private var actualizationData:GameLogParserOutput;
+    private var actualizationData:ActualizationData;
 
     public function handleNetEvent(event:ServerEvent)
     {
@@ -180,21 +181,21 @@ class Chatbox extends VBox implements INetObserver implements ISideboxObserver
         appendLog(Utils.getGameOverChatMessage(winnerColor, outcome));
     }
 
-    private function applyActualizationData(parsedData:GameLogParserOutput)
+    private function actualize(parserOutput:GameLogParserOutput)
     {
-        for (entry in parsedData.chatEntries)
+        for (entry in parserOutput.chatEntries)
         {
             switch entry
             {
                 case PlayerMessage(authorColor, text):
-                    var author:String = authorColor == White? parsedData.whiteLogin : parsedData.blackLogin;
+                    var author:String = authorColor == White? parserOutput.whiteLogin : parserOutput.blackLogin;
                     appendMessage(author, text, true);
                 case Log(text):
                     appendLog(text);
             }
         }
-        if (parsedData.outcome != null)
-            onGameEnded(parsedData.winnerColor, parsedData.outcome);
+        if (parserOutput.outcome != null)
+            onGameEnded(parserOutput.winnerColor, parserOutput.outcome);
     }
 
     private function init(e) 
@@ -202,13 +203,13 @@ class Chatbox extends VBox implements INetObserver implements ISideboxObserver
         removeEventListener(Event.ADDED_TO_STAGE, init);
         addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
         if (actualizationData != null)
-            applyActualizationData(actualizationData);
+            actualize(actualizationData.logParserOutput);
     }
 
     public static function constructFromActualizationData(isOwnerSpectator:Bool, data:ActualizationData):Chatbox
     {
         var chatbox:Chatbox = new Chatbox(isOwnerSpectator);
-        chatbox.actualizationData = actualizationData;
+        chatbox.actualizationData = data;
         return chatbox;
     }
 

@@ -31,6 +31,16 @@ class GameLogParserOutput
     public var datetime:Null<Date>;
     public var currentSituation:Situation;
 
+    public function getParticipantColor(participantLogin:String)
+    {
+        if (whiteLogin.toLowerCase() == participantLogin.toLowerCase())
+            return White;
+        else if (blackLogin.toLowerCase() == participantLogin.toLowerCase())
+            return Black;
+        else
+            return null;
+    }
+
     public function getPlayerColor():Null<PieceColor>
     {
         if (LoginManager.isPlayer(whiteLogin))

@@ -165,4 +165,6 @@ enum Phrase
     CONFIRM;
     CANCEL;
     RETURN;
+
+    CORRESPONDENCE_TIME_CONTROL_NAME;
 }

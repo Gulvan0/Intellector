@@ -102,7 +102,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         }
     }
 
-    public static function constructFromActualizationData(gameID:Int, actualizationData:ActualizationData, ?orientationColour:PieceColor):LiveGame
+    public static function constructFromActualizationData(gameID:Int, actualizationData:ActualizationData, ?orientationColor:PieceColor):LiveGame
     {
         var playingAs:Null<PieceColor> = actualizationData.logParserOutput.getPlayerColor();
 
@@ -112,23 +112,23 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             else
                 orientationColor = playingAs;
 
-        var sidebox = Sidebox.constructFromActualizationData(actualizationData, orientationColour); //TODO: Set adaptive width/height
-        var chatbox = Chatbox.constructFromActualizationData(playerColor == null, actualizationData);
+        var sidebox = Sidebox.constructFromActualizationData(actualizationData, orientationColor); //TODO: Set adaptive width/height
+        var chatbox = Chatbox.constructFromActualizationData(playingAs == null, actualizationData);
         var gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
 
-        return new LiveGame(gameID, playingAs, actualizationData.logParserOutput.currentSituation, sidebox, chatbox, gameinfobox);
+        return new LiveGame(gameID, playingAs, actualizationData.logParserOutput.currentSituation, sidebox, chatbox, gameinfobox, orientationColor);
     }
 
-    public static function constructFromParams(gameID:Int, whiteLogin:String, blackLogin:String, orientationColour:PieceColor, timeControl:TimeControl, playerColor:Null<PieceColor>):LiveGame 
+    public static function constructFromParams(gameID:Int, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, timeControl:TimeControl, playerColor:Null<PieceColor>):LiveGame 
     {
-        var sidebox = new Sidebox(playerColor, timeControl, whiteLogin, blackLogin, orientationColour); //TODO: Set adaptive width/height
+        var sidebox = new Sidebox(playerColor, timeControl, whiteLogin, blackLogin, orientationColor); //TODO: Set adaptive width/height
         var chatbox = new Chatbox(playerColor == null);
         var gameinfobox = new GameInfoBox(timeControl, whiteLogin, blackLogin);
 
-        return new LiveGame(gameID, playerColor, Situation.starting(), sidebox, chatbox, gameinfobox);
+        return new LiveGame(gameID, playerColor, Situation.starting(), sidebox, chatbox, gameinfobox, orientationColor);
     }
 
-    private function new(gameID:Int, playerColor:Null<PieceColor>, currentSituation:Situation, sidebox:Sidebox, chatbox:Chatbox, gameinfobox:GameInfoBox)
+    private function new(gameID:Int, playerColor:Null<PieceColor>, currentSituation:Situation, sidebox:Sidebox, chatbox:Chatbox, gameinfobox:GameInfoBox, orientationColor:PieceColor)
     {
         super();
         this.gameID = gameID;
@@ -137,11 +137,11 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         this.chatbox = chatbox;
         this.gameinfobox = gameinfobox;
 
-        board = new GameBoard(currentSituation, orientationColour);
+        board = new GameBoard(currentSituation, orientationColor);
         board.state = playerColor != null? new NeutralState(board) : new StubState(board);
 
         if (playerColor == null)
-            board.behavior = new EnemyMoveBehavior(board, orientationColour); //Behavior doesn't matter at all, that's just a placeholder
+            board.behavior = new EnemyMoveBehavior(board, orientationColor); //Behavior doesn't matter at all, that's just a placeholder
         else if (currentSituation.turnColor == playerColor)
             board.behavior = new PlayerMoveBehavior(board, playerColor);
         else

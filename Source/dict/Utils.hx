@@ -1,5 +1,7 @@
 package dict;
 
+import serialization.GameLogParser;
+import serialization.GameLogParser.GameLogParserOutput;
 import gfx.ScreenType;
 import gfx.game.GameInfoBox.Outcome;
 import Preferences.Markup;
@@ -98,9 +100,14 @@ class Utils
             case ReconnectedPlayableGame(gameID, data): 
                 var opponentLogin:String = data.logParserOutput.getPlayerOpponentLogin();
                 translations = ['Play $opponentLogin', 'Игра $opponentLogin'];
-            case SpectatedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, pastLog):
+            case SpectatedGame(gameID, watchedColor, data):
+                var whiteLogin:String = data.logParserOutput.whiteLogin;
+                var blackLogin:String = data.logParserOutput.blackLogin;
                 translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
-            case RevisitedGame(gameID, whiteLogin, blackLogin, watchedColor, timeControl, log): 
+            case RevisitedGame(gameID, watchedColor, log): 
+                var logParserOutput:GameLogParserOutput = GameLogParser.parse(log);
+                var whiteLogin:String = logParserOutput.whiteLogin;
+                var blackLogin:String = logParserOutput.blackLogin;
                 translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
             case PlayerProfile(ownerLogin): 
                 translations = [ownerLogin, ownerLogin];

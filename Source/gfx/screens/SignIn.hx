@@ -14,6 +14,7 @@ import haxe.ui.components.CheckBox;
 import dict.Dictionary;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
+import struct.ActualizationData;
 import url.Utils;
 
 class SignIn extends Sprite

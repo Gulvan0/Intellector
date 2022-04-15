@@ -148,7 +148,8 @@ class Dictionary
         SEND_CHALLENGE_RESULT_NOTFOUND => ["Callee not found", "Вызываемый игрок не найден"],
         ACCEPT_CHALLENGE_RESULT_CANCELLED => ["A challenge has been cancelled", "Оппонент отменил вызов"],
         ACCEPT_CHALLENGE_RESULT_OFFLINE => ["Caller is offline", "Оппонент не в сети"],
-        ACCEPT_CHALLENGE_RESULT_BUSY => ["Caller is currently playing", "Оппонент в игре"]
+        ACCEPT_CHALLENGE_RESULT_BUSY => ["Caller is currently playing", "Оппонент в игре"],
+        CORRESPONDENCE_TIME_CONTROL_NAME => ["Correspondence", "По переписке"]
     ];
 
     public static function getPhrase(phrase:Phrase, ?substitutions:Array<String>):String

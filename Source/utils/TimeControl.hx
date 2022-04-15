@@ -1,5 +1,7 @@
 package utils;
 
+import dict.Dictionary;
+
 enum TimeControlType
 {
     Hyperbullet;
@@ -41,7 +43,9 @@ class TimeControl
 
     public function toString() 
     {
-        if (startSecs % 60 == 0)
+        if (startSecs == 0 && bonusSecs == 0)
+            return Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
+        else if (startSecs % 60 == 0)
         {
             var startMins:Int = Math.round(startSecs / 60);
             return '$startMins+$bonusSecs';

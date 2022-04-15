@@ -29,6 +29,7 @@ import haxe.ui.containers.TableView;
 import haxe.ui.components.Label;
 import openfl.display.Sprite;
 import struct.ActualizationData;
+import utils.TimeControl;
 using utils.CallbackTools;
 
 enum SideboxEvent
@@ -365,7 +366,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         }
 
         if (data.timeCorrectionData != null)
-            correctTime(data.timeCorrectionData.whiteSeconds, data.timeCorrectionData.blackSeconds, data.timeCorrectionData.timestamp, data.timeCorrectionData.pingSubtractionSide);
+            sidebox.correctTime(data.timeCorrectionData.whiteSeconds, data.timeCorrectionData.blackSeconds, data.timeCorrectionData.timestamp, data.timeCorrectionData.pingSubtractionSide);
 
         return sidebox;
     }

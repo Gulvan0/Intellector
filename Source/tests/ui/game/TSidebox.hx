@@ -1,5 +1,8 @@
 package tests.ui.game;
 
+import net.LoginManager;
+import struct.ActualizationData;
+import utils.TimeControl;
 import net.ServerEvent;
 import struct.PieceColor;
 import struct.Situation;
@@ -27,26 +30,28 @@ class TSidebox extends Sprite
 
     private function _act_scaled(i:Int) 
     {
-        replaceSidebox(new Sidebox(White, 600, 5, "PlayerWhite", "PlayerBlack", White, null, 400, 600));
+        replaceSidebox(new Sidebox(White, new TimeControl(600, 5), "PlayerWhite", "PlayerBlack", White, 400, 600));
     }
 
     @steps(12)
     private function _seq_initialStates(i:Int) 
     {
+        var shortTimeControl:TimeControl = new TimeControl(80, 5);
+        var longTimeControl:TimeControl = new TimeControl(600, 5);
         switch i
         {
-            case 0: replaceSidebox(new Sidebox(White, 600, 5, "PlayerWhite", "PlayerBlack", White));
-            case 1: replaceSidebox(new Sidebox(Black, 600, 5, "PlayerWhite", "PlayerBlack", White));
-            case 2: replaceSidebox(new Sidebox(null, 600, 5, "PlayerWhite", "PlayerBlack", White));
-            case 3: replaceSidebox(new Sidebox(White, 80, 5, "PlayerWhite", "PlayerBlack", White));
-            case 4: replaceSidebox(new Sidebox(Black, 80, 5, "PlayerWhite", "PlayerBlack", White));
-            case 5: replaceSidebox(new Sidebox(null, 80, 5, "PlayerWhite", "PlayerBlack", White));
-            case 6: replaceSidebox(new Sidebox(White, 600, 5, "PlayerWhite", "PlayerBlack", Black));
-            case 7: replaceSidebox(new Sidebox(Black, 600, 5, "PlayerWhite", "PlayerBlack", Black));
-            case 8: replaceSidebox(new Sidebox(null, 600, 5, "PlayerWhite", "PlayerBlack", Black));
-            case 9: replaceSidebox(new Sidebox(White, 80, 5, "PlayerWhite", "PlayerBlack", Black));
-            case 10: replaceSidebox(new Sidebox(Black, 80, 5, "PlayerWhite", "PlayerBlack", Black));
-            case 11: replaceSidebox(new Sidebox(null, 80, 5, "PlayerWhite", "PlayerBlack", Black));
+            case 0: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", White));
+            case 1: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", White));
+            case 2: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", White));
+            case 3: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", White));
+            case 4: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", White));
+            case 5: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", White));
+            case 6: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", Black));
+            case 7: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", Black));
+            case 8: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", Black));
+            case 9: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", Black));
+            case 10: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", Black));
+            case 11: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", Black));
         }
     }
 
@@ -69,15 +74,17 @@ class TSidebox extends Sprite
     @steps(10)
     private function _seq_actualized(i:Int)
     {
-        var parsed0 = GameLogParser.parse("");
-        var parsed1 = GameLogParser.parse("6620;\n");
-        var parsed2 = GameLogParser.parse("6620;\n3020Aggressor;\n");
-        var parsed3 = GameLogParser.parse("6620;\n3020Aggressor;\n1514;\n");
+        LoginManager.login = "PlayerBlack";
+
+        var data0 = new ActualizationData("#P|PlayerWhite:PlayerBlack;\n#T80/5;\n");
+        var data1 = new ActualizationData("#P|PlayerWhite:PlayerBlack;\n#T80/5;\n6620;\n");
+        var data2 = new ActualizationData("#P|PlayerWhite:PlayerBlack;\n#T80/5;\n6620;\n3020Aggressor;\n");
+        var data3 = new ActualizationData("#P|PlayerWhite:PlayerBlack;\n#T80/5;\n6620;\n3020Aggressor;\n1514;\n");
 
         switch i
         {
             case 0:
-                replaceSidebox(new Sidebox(Black, 80, 5, "PlayerWhite", "PlayerBlack", White, parsed0));
+                replaceSidebox(Sidebox.constructFromActualizationData(data0, White));
             case 1:
                 sidebox.makeMove("6620");
             case 2:
@@ -85,17 +92,17 @@ class TSidebox extends Sprite
             case 3:
                 sidebox.makeMove("1514");
             case 4:
-                replaceSidebox(new Sidebox(Black, 80, 5, "PlayerWhite", "PlayerBlack", White, parsed1));
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White));
             case 5:
                 sidebox.makeMove("3020Aggressor");
             case 6:
                 sidebox.makeMove("1514");
             case 7:
-                replaceSidebox(new Sidebox(Black, 80, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
+                replaceSidebox(Sidebox.constructFromActualizationData(data2, White));
             case 8:
                 sidebox.makeMove("1514");
             case 9:
-                replaceSidebox(new Sidebox(Black, 80, 5, "PlayerWhite", "PlayerBlack", White, parsed3));
+                replaceSidebox(Sidebox.constructFromActualizationData(data3, White));
         }
     }
 
@@ -116,28 +123,34 @@ class TSidebox extends Sprite
     @steps(10)
     private function _seq_alerts(i:Int)
     {
-        var parsed2 = GameLogParser.parse("6620;\n3020Aggressor;\n");
+        var data0 = new ActualizationData("#P|PlayerWhite:PlayerBlack;\n#T80/15;\n6620;\n3020Aggressor;\n");
+        var data1 = new ActualizationData("#P|PlayerWhite:PlayerBlack;\n#T100/5;\n6620;\n3020Aggressor;\n");
+        var data2 = new ActualizationData("#P|PlayerWhite:PlayerBlack;\n#T100/0;\n6620;\n3020Aggressor;\n");
 
         switch i
         {
             case 0:
-                replaceSidebox(new Sidebox(White, 80, 15, "PlayerWhite", "PlayerBlack", White, parsed2));
+                LoginManager.login = "PlayerWhite";
+                replaceSidebox(Sidebox.constructFromActualizationData(data0, White));
             case 1:
                 sidebox.makeMove("1514");
             case 2:
                 sidebox.makeMove("1011");
             case 3:
-                replaceSidebox(new Sidebox(Black, 100, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
+                LoginManager.login = "PlayerBlack";
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White));
             case 4:
                 sidebox.makeMove("1514");
             case 5:
-                replaceSidebox(new Sidebox(White, 100, 5, "PlayerWhite", "PlayerBlack", White, parsed2));
+                LoginManager.login = "PlayerWhite";
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White));
             case 6:
                 sidebox.makeMove("1514");
             case 7:
                 sidebox.makeMove("1011");
             case 8:
-                replaceSidebox(new Sidebox(null, 100, 0, "PlayerWhite", "PlayerBlack", White, parsed2));
+                LoginManager.login = "PlayerNone";
+                replaceSidebox(Sidebox.constructFromActualizationData(data2, White));
             case 9:
                 sidebox.makeMove("1514");
         }
