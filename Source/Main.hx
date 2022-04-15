@@ -1,5 +1,7 @@
 package;
 
+import gfx.ScreenManager;
+import gfx.screens.LanguageSelectIntro;
 import tests.ui.game.TChatBox;
 import tests.ui.game.TSidebox;
 import tests.ui.board.TGameBoard;
@@ -15,7 +17,7 @@ import struct.Ply;
 import struct.Variant;
 import haxe.ui.components.Link;
 import struct.Situation;
-import url.Utils as URLUtils;
+import browser.CredentialCookies;
 import openings.OpeningTree;
 import dict.Dictionary;
 import haxe.ui.events.UIEvent;
@@ -39,20 +41,19 @@ import openfl.display.SimpleButton;
 import js.Browser;
 import tests.UITest;
 import openfl.display.Sprite;
+import gfx.screens.Analysis;
 using StringTools;
 
 class Main extends Sprite
 {
+	private var languageSelectScreen:Sprite;
+
 	public function new()
 	{
 		super();
 		init();
+		//start();
 		addChild(new UITest(new TChatBox()));
-		//screenManager = new ScreenManager()
-		//Networker.eventQueue.addObserver(screenManager);
-		//addChild(screenManager);
-		//Networker.onConnectionEstabilished = onConnected;
-		//Networker.connect();
 	}
 
 	private function init() 
@@ -66,19 +67,50 @@ class Main extends Sprite
 		OpeningTree.init();
 		AssetManager.init();
 		Changes.initChangelog();
+
+		ScreenManager.launch(this);
 	}
 
 	private function start() 
 	{
-		//TODO: Fill
+		var langInitializedFromCookie:Bool = Preferences.language.load();
+
+		if (langInitializedFromCookie)
+			onLanguageReady();
+		else
+		{
+			languageSelectScreen = new LanguageSelectIntro();
+			//TODO: Fill
+			addChild(languageSelectScreen);
+		}
+	}
+
+	private function onLanguageReady() 
+	{
+		if (languageSelectScreen != null)
+		{
+			removeChild(languageSelectScreen);
+			languageSelectScreen = null;
+		}
+
+		Networker.onConnectionEstabilished = onConnected;
+		Networker.onConnectionFailed = onConnectionFailed;
+		Networker.launch();
 	}
 
 	private function onConnected()
 	{
-		if (URLUtils.hasLoginDetails())
-            LoginManager.signin(URLUtils.getLogin(), URLUtils.getPassword(), true);
-        else
-            throw "Unexpected situation for temporary code";
+		//TODO: Fill (phase 2 according to notes)
+	}
+
+	private function onConnectionFailed(e)
+	{
+		var analysisScreen:Analysis = ScreenManager.toOfflineAnalysis();
+		Networker.startReconnectAttempts(() -> {
+			analysisScreen.enableMenu();
+			if (CredentialCookies.hasLoginDetails())
+				LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), true);
+		});
 	}
 
 	/*private function onNoLogin()

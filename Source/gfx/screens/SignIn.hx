@@ -15,7 +15,7 @@ import dict.Dictionary;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 import struct.ActualizationData;
-import url.Utils;
+import browser.CredentialCookies;
 
 class SignIn extends Sprite
 {
@@ -61,7 +61,7 @@ class SignIn extends Sprite
 	private function onEntranceResults(success:Bool, failMessage:Phrase)
 	{
 		if (success)
-			Utils.saveLoginDetails(!rememberMe.selected);
+			CredentialCookies.saveLoginDetails(!rememberMe.selected);
 		else
 			displayLoginError(Dictionary.getPhrase(failMessage));
 	}

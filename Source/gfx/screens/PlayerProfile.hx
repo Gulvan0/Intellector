@@ -12,7 +12,7 @@ import js.Browser;
 import haxe.ui.containers.ScrollView;
 import haxe.ui.core.Component;
 import haxe.ui.components.Button;
-import url.URLEditor;
+import browser.URLEditor;
 import openfl.text.TextFormat;
 import openfl.text.TextField;
 import dict.Dictionary;

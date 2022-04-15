@@ -9,6 +9,7 @@ import dict.Dictionary;
 import haxe.ui.components.Button;
 import openfl.display.Sprite;
 import gfx.components.Dialogs;
+import browser.CredentialCookies;
 
 enum MainMenuButton
 {
@@ -91,7 +92,7 @@ class MainMenu extends Screen
 
     private function onLogOut(e) 
     {
-        url.Utils.removeLoginDetails();
+        CredentialCookies.removeLoginDetails();
 		Networker.dropConnection();
     }
     

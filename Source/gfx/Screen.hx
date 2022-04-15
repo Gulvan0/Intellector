@@ -22,6 +22,16 @@ class Screen extends VBox
         throw "To be overriden";
     }
 
+    public function disableMenu()
+    {
+        //TODO: Fill
+    }
+
+    public function enableMenu()
+    {
+        //TODO: Fill
+    }
+
     public function new(?hideMenu:Bool = false)
     {
         super();

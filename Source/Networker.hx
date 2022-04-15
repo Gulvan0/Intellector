@@ -1,5 +1,6 @@
 package;
 
+import js.html.Event;
 import net.GeneralObserver;
 import net.Handler;
 import net.ClientEvent;
@@ -8,13 +9,13 @@ import net.EventProcessingQueue;
 import gfx.components.Dialogs;
 import gfx.ScreenManager;
 import struct.PieceColor;
-import url.Utils;
 import dict.Dictionary;
 import struct.PieceType;
 import openfl.utils.Assets;
 import js.Browser;
 import haxe.Json;
 import hx.ws.WebSocket;
+import haxe.Timer;
 
 using utils.CallbackTools;
 using StringTools;
@@ -32,12 +33,14 @@ class Networker
 
     public static var eventQueue:EventProcessingQueue;
     public static var onConnectionEstabilished:Void->Void;
+    public static var onConnectionFailed:Event->Void;
 
     public static var suppressAlert:Bool;
+    private static var backoffDelay:Float;
     public static var doNotReconnect:Bool = false;
     public static var ignoreEmitCalls:Bool = false; 
 
-    public static function connect() 
+    public static function launch() 
     {
         var generalObserver:GeneralObserver = new GeneralObserver();
         eventQueue = new EventProcessingQueue();
@@ -51,7 +54,7 @@ class Networker
         _ws.onopen = onConnectionOpen;
         _ws.onmessage = onMessageRecieved;
         _ws.onclose = onConnectionClosed;
-        _ws.onerror = onConnectionError;
+        _ws.onerror = onConnectionFailed;
     }
     
     public static function dropConnection() 
@@ -66,6 +69,7 @@ class Networker
 
     private static function onConnectionOpen()
     {
+        _ws.onerror = onConnectionError;
         suppressAlert = false;
         onConnectionEstabilished();
     }
@@ -86,7 +90,6 @@ class Networker
 
     private static function onConnectionClosed()
     {
-        _ws = null;
         ScreenManager.clearScreen();
         if (suppressAlert)
             trace("Connection closed");
@@ -96,18 +99,26 @@ class Networker
             suppressAlert = true;
         }
         if (!doNotReconnect)
-            connect();
+            startReconnectAttempts(onConnectionOpen);
     }
 
-    private static function onConnectionError(err:js.html.Event)
+    private static function onConnectionError(err:Event)
     {
-        if (suppressAlert)
-            trace("Connection abrupted");
-        else
-        {
-            Dialogs.alert(Dictionary.getPhrase(CONNECTION_ERROR_OCCURED) + err.type, "Error");
-            suppressAlert = true;
-        }
+        trace("Connection error: " + err.type);
+    }
+
+    public static function startReconnectAttempts(onConnected:Void->Void)
+    {
+        backoffDelay = 1000;
+        _ws.onopen = onConnected;
+        _ws.onerror = (e) -> {
+            Timer.delay(_ws.open, Math.round(backoffDelay));
+            if (backoffDelay < 16000)
+                backoffDelay += backoffDelay * (Math.random() - 0.5);
+            else
+                backoffDelay += 1000 * (Math.random() - 0.5);
+        };
+        _ws.open();
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------------------------

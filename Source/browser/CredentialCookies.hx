@@ -1,4 +1,4 @@
-package url;
+package browser;
 
 import net.LoginManager;
 import dict.Dictionary;
@@ -6,7 +6,7 @@ import js.Browser;
 import js.html.URLSearchParams;
 import js.Cookie;
 
-class Utils
+class CredentialCookies
 {
     private static var LOGIN_COOKIE:String = "saved_login";
     private static var PASSWORD_COOKIE:String = "saved_password";

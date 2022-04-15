@@ -16,7 +16,7 @@ import net.ServerEvent;
 import openfl.display.Sprite;
 import struct.ActualizationData;
 import struct.PieceColor;
-import url.URLEditor;
+import browser.URLEditor;
 import utils.TimeControl;
 
 using StringTools;
@@ -87,9 +87,19 @@ class ScreenManager extends Sprite implements INetObserver
         }
     }
 
-    public static function toStartScreen() 
+    /**Use when a connection to a server cannot be estabilished**/
+    public static function toOfflineAnalysis():Analysis
     {
-        //TODO: Either to LanguageSelectIntro or to MainMenu. Is it still needed after the new init logic was introduced?
+        instance.removeCurrentScreen();
+
+        var analysisScreen:Analysis = new Analysis();
+        analysisScreen.disableMenu();
+
+        instance.current = analysisScreen;
+        instance.addChild(instance.current);
+        instance.current.onEntered();
+
+        return analysisScreen;
     }
 
     public static function toScreen(type:ScreenType)
@@ -138,9 +148,9 @@ class ScreenManager extends Sprite implements INetObserver
                     if (gameID != null)
                         toGameScreen(gameID);
                     else
-                        toStartScreen();
+                        toScreen(MainMenu);
                 default:
-                    toStartScreen();
+                    toScreen(MainMenu);
             }
         }
         else if (searcher.has("id")) //* These are added for the backward compatibility
@@ -148,7 +158,7 @@ class ScreenManager extends Sprite implements INetObserver
         else if (searcher.has("ch"))
             toScreen(ChallengeJoining(searcher.get("ch")));
         else
-            toStartScreen();
+            toScreen(MainMenu);
 
     }
 
@@ -176,8 +186,15 @@ class ScreenManager extends Sprite implements INetObserver
             default:
         }
     }
+
+    public static function launch(mainInstance:Main)
+    {
+        var screenManager:ScreenManager = new ScreenManager();
+		Networker.eventQueue.addObserver(screenManager);
+		mainInstance.addChild(screenManager);
+    }
     
-    public function new() 
+    private function new() 
     {
         super();
         instance = this;

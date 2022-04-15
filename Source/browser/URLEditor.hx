@@ -1,4 +1,4 @@
-package url;
+package browser;
 
 import js.Browser;
 

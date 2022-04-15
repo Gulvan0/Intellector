@@ -8,7 +8,7 @@ import haxe.ui.components.Button;
 import struct.PieceColor;
 import haxe.ui.styles.Style;
 import js.Browser;
-import url.URLEditor;
+import browser.URLEditor;
 import dict.Dictionary;
 import haxe.ui.components.TextField;
 import haxe.ui.components.Label;
