@@ -100,17 +100,17 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
             case DrawCancelled:
                 drawRequestBox.hidden = true;
             case DrawAccepted, DrawDeclined:
-                cancelDrawBtn.hidden = true;
-                offerDrawBtn.hidden = false;
+                actionBar.cancelDrawBtn.hidden = true;
+                actionBar.offerDrawBtn.hidden = false;
             case TakebackOffered:
-                offerTakebackBtn.disabled = true;
+                actionBar.offerTakebackBtn.disabled = true;
                 takebackRequestBox.hidden = false;
             case TakebackCancelled:
                 takebackRequestBox.hidden = true;
-                offerTakebackBtn.disabled = false;
+                actionBar.offerTakebackBtn.disabled = false;
             case TakebackAccepted, TakebackDeclined:
-                cancelTakebackBtn.hidden = true;
-                offerTakebackBtn.hidden = false;
+                actionBar.cancelTakebackBtn.hidden = true;
+                actionBar.offerTakebackBtn.hidden = false;
             default:
         }
     }
@@ -147,7 +147,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         blackClock.setPlayerMove(false);
 
         if (!belongsToSpectator)
-            changeActionButtons([changeOrientationBtn, analyzeBtn, exportSIPBtn, rematchBtn]);
+            changeActionButtons([actionBar.changeOrientationBtn, actionBar.analyzeBtn, actionBar.exportSIPBtn, actionBar.rematchBtn]);
     }
 
     //===========================================================================================================================================================
@@ -212,13 +212,13 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         navigator.scrollAfterDelay();
 
         if (move == enableTakebackAfterMove)
-            offerTakebackBtn.disabled = false;
+            actionBar.offerTakebackBtn.disabled = false;
 
         if (move == 2)
         {
-            offerDrawBtn.disabled = false;
-            resignBtn.text = "⚐";
-            resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_TOOLTIP);
+            actionBar.offerDrawBtn.disabled = false;
+            actionBar.resignBtn.text = "⚐";
+            actionBar.resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_TOOLTIP);
             resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
         }
     }
@@ -245,17 +245,17 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         if (!belongsToSpectator)
         {
             takebackRequestBox.hidden = true;
-            cancelTakebackBtn.hidden = true;
-            offerTakebackBtn.hidden = false;
+            actionBar.cancelTakebackBtn.hidden = true;
+            actionBar.offerTakebackBtn.hidden = false;
 
             if (move < enableTakebackAfterMove)
-                offerTakebackBtn.disabled = true;
+                actionBar.offerTakebackBtn.disabled = true;
 
             if (move < 2)
             {
-                offerDrawBtn.disabled = true;
-                resignBtn.text = "✖";
-                resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_ABORT_TOOLTIP);
+                actionBar.offerDrawBtn.disabled = true;
+                actionBar.resignBtn.text = "✖";
+                actionBar.resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_ABORT_TOOLTIP);
                 resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
             }
         }
@@ -277,8 +277,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
     {
         if (drawRequestBox.hidden)
         {
-            offerDrawBtn.hidden = true;
-            cancelDrawBtn.hidden = false;
+            actionBar.offerDrawBtn.hidden = true;
+            actionBar.cancelDrawBtn.hidden = false;
             Networker.emitEvent(OfferDraw);
             emit(OfferDrawPressed);
         }
@@ -288,8 +288,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     private function onCancelDrawPressed()
     {
-        cancelDrawBtn.hidden = true;
-        offerDrawBtn.hidden = false;
+        actionBar.cancelDrawBtn.hidden = true;
+        actionBar.offerDrawBtn.hidden = false;
         Networker.emitEvent(CancelDraw);
         emit(CancelDrawPressed);
     }
@@ -317,8 +317,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         }
         else
         {
-            offerTakebackBtn.hidden = true;
-            cancelTakebackBtn.hidden = false;
+            actionBar.offerTakebackBtn.hidden = true;
+            actionBar.cancelTakebackBtn.hidden = false;
             emit(OfferTakebackPressed);
         }
         
@@ -327,8 +327,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     private function onCancelTakebackPressed()
     {
-        offerTakebackBtn.hidden = false;
-        cancelTakebackBtn.hidden = true;
+        actionBar.offerTakebackBtn.hidden = false;
+        actionBar.cancelTakebackBtn.hidden = true;
         Networker.emitEvent(CancelTakeback);
         emit(CancelTakebackPressed);
     }
@@ -336,7 +336,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
     private function onAcceptTakebackPressed()
     {
         takebackRequestBox.hidden = true;
-        offerTakebackBtn.disabled = false;
+        actionBar.offerTakebackBtn.disabled = false;
         Networker.emitEvent(AcceptTakeback);
         emit(AcceptTakebackPressed);
     }
@@ -344,7 +344,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
     private function onDeclineTakebackPressed()
     {
         takebackRequestBox.hidden = true;
-        offerTakebackBtn.disabled = false;
+        actionBar.offerTakebackBtn.disabled = false;
         Networker.emitEvent(DeclineTakeback);
         emit(DeclineTakebackPressed);
     }
@@ -389,16 +389,16 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;
 
-        changeOrientationBtn.onClick = revertOrientation.expand();
-        resignBtn.onClick = onResignPressed.expand();
-        offerDrawBtn.onClick = onOfferDrawPressed.expand();
-        cancelDrawBtn.onClick = onCancelDrawPressed.expand();
-        addTimeBtn.onClick = Networker.emitEvent.bind(AddTime).expand();
-        offerTakebackBtn.onClick = onOfferTakebackPressed.expand();
-        cancelTakebackBtn.onClick = onCancelTakebackPressed.expand();
-        rematchBtn.onClick = emit.bind(RematchRequested).expand();
-        exportSIPBtn.onClick = emit.bind(ExportSIPRequested).expand();
-        analyzeBtn.onClick = emit.bind(ExploreInAnalysisRequest).expand();
+        actionBar.changeOrientationBtn.onClick = revertOrientation.expand();
+        actionBar.resignBtn.onClick = onResignPressed.expand();
+        actionBar.offerDrawBtn.onClick = onOfferDrawPressed.expand();
+        actionBar.cancelDrawBtn.onClick = onCancelDrawPressed.expand();
+        actionBar.addTimeBtn.onClick = Networker.emitEvent.bind(AddTime).expand();
+        actionBar.offerTakebackBtn.onClick = onOfferTakebackPressed.expand();
+        actionBar.cancelTakebackBtn.onClick = onCancelTakebackPressed.expand();
+        actionBar.rematchBtn.onClick = emit.bind(RematchRequested).expand();
+        actionBar.exportSIPBtn.onClick = emit.bind(ExportSIPRequested).expand();
+        actionBar.analyzeBtn.onClick = emit.bind(ExploreInAnalysisRequest).expand();
         declineDrawBtn.onClick = onDeclineDrawPressed.expand();
         acceptDrawBtn.onClick = onAcceptDrawPressed.expand();
         declineTakebackBtn.onClick = onDeclineTakebackPressed.expand();
@@ -412,9 +412,9 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         navigator.init(type -> {emit(PlyScrollRequest(type));}, width, explicitNavigatorHeight);
 
         if (belongsToSpectator)
-            changeActionButtons([changeOrientationBtn, analyzeBtn, exportSIPBtn]);
+            changeActionButtons([actionBar.changeOrientationBtn, actionBar.analyzeBtn, actionBar.exportSIPBtn]);
         else
-            changeActionButtons([changeOrientationBtn, offerDrawBtn, offerTakebackBtn, resignBtn, addTimeBtn]);
+            changeActionButtons([actionBar.changeOrientationBtn, actionBar.offerDrawBtn, actionBar.offerTakebackBtn, actionBar.resignBtn, actionBar.addTimeBtn]);
 
         if (orientationColor == Black)
             revertOrientation();

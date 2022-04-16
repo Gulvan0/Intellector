@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import utils.TimeControl;
+import struct.PieceColor;
 import net.LoginManager;
 import haxe.ui.components.Button;
 import haxe.ui.styles.Style;
@@ -23,17 +25,15 @@ class OpenChallengeJoining extends Screen
         //* Do nothing
     }
 
-    public function new(challengeOwner:String)
+    public function new(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>)
     {
 		super();
-		//TODO: Delayed initializaiton here to obtain the challenge params
-		//TODO: Navigate to Hosting if owner is player (delayed, cause we need params + proper sequence)
         var joinMenu = new VBox();
 		joinMenu.width = boxWidth;
 
 		var label = new haxe.ui.components.Label();
 		label.width = boxWidth;
-		//label.text = Utils.isHostingAChallengeText(challengeOwner, startSecs, bonusSecs, color);
+		label.text = Utils.isHostingAChallengeText(challengeOwner, timeControl, color);
 		if (LoginManager.login == null)
 			label.text += Dictionary.getPhrase(WILL_BE_GUEST);
 		else

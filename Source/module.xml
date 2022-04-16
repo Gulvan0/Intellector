@@ -2,6 +2,7 @@
     <components>
         <component class="gfx.common.Clock" alias="clock" />
         <component class="gfx.common.MoveNavigator" alias="movenavigator" />
+        <component class="gfx.common.ActionBar" alias="actionbar" />
     </components>
     <scriptlets>
         <import class="dict.Phrase" keep="true" static="true" />

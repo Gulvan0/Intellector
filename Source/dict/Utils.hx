@@ -1,5 +1,6 @@
 package dict;
 
+import utils.TimeControl;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
 import gfx.ScreenType;
@@ -116,7 +117,7 @@ class Utils
             case ChallengeHosting(timeControl, color):
                 var tcStr = timeControl.toString();
                 translations = ['$tcStr challenge', 'Вызов $tcStr'];
-            case ChallengeJoining(challengeOwner):
+            case ChallengeJoining(challengeOwner, _, _):
                 translations = ['Challenge by $challengeOwner', 'Вызов $challengeOwner'];
             default:
         }
@@ -219,11 +220,10 @@ class Utils
         }
     }
 
-    public static function isHostingAChallengeText(challengeOwner:String, startSecs:Int, bonusSecs:Int, color:Null<String>):String
+    public static function isHostingAChallengeText(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>):String
     {
-        var timeControlStr = '${startSecs/60}+${bonusSecs/1}';
-        var colorSuffix:String = color == null? "" : ", " + getColorName(PieceColor.createByName(color));
-        var detailsStr = timeControlStr + colorSuffix;
+        var colorSuffix:String = color == null? "" : ", " + getColorName(color);
+        var detailsStr = timeControl.toString() + colorSuffix;
         return switch Preferences.language.get() {
             case EN: '$challengeOwner is hosting a challenge ($detailsStr). First one to accept it will become an opponent\n';
             case RU: '$challengeOwner вызывает на бой ($detailsStr). Первый, кто примет вызов, станет противником\n';

@@ -2,7 +2,6 @@ package;
 
 import js.html.Event;
 import net.GeneralObserver;
-import net.Handler;
 import net.ClientEvent;
 import net.ServerEvent;
 import net.EventProcessingQueue;

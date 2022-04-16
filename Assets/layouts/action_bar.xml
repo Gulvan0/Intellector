@@ -1,0 +1,12 @@
+<button-bar toggle="false">
+    <button id="changeOrientationBtn" text="⇵" tooltip="${Dictionary.getPhrase(CHANGE_ORIENTATION_BTN_TOOLTIP)}" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+    <button id="offerDrawBtn" text="½" tooltip="${Dictionary.getPhrase(OFFER_DRAW_BTN_TOOLTIP)}" width="20%" height="35px" disabled="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+    <button id="cancelDrawBtn" text="✖" tooltip="${Dictionary.getPhrase(CANCEL_DRAW_BTN_TOOLTIP)}" width="20%" height="35px" hidden="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+    <button id="offerTakebackBtn" text="⮪" tooltip="${Dictionary.getPhrase(TAKEBACK_BTN_TOOLTIP)}" width="20%" height="35px" disabled="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+    <button id="cancelTakebackBtn" text="✖" tooltip="${Dictionary.getPhrase(CANCEL_TAKEBACK_BTN_TOOLTIP)}" width="20%" height="35px" hidden="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+    <button id="resignBtn" text="✖" tooltip="${Dictionary.getPhrase(RESIGN_BTN_ABORT_TOOLTIP)}" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+    <button id="addTimeBtn" text="+⧖" tooltip="${Dictionary.getPhrase(ADD_TIME_BTN_TOOLTIP)}" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:0px;font-size:26px"/>
+    <button id="analyzeBtn" text="🔬&#xFE0E;" tooltip="${Dictionary.getPhrase(EXPLORE_IN_ANALYSIS_BTN_TOOLTIP)}" hidden="true" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+    <button id="exportSIPBtn" text="SIP" tooltip="${Dictionary.getPhrase(EXPORT_SIP_BTN_TOOLTIP)}" hidden="true" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+    <button id="rematchBtn" text="⚔" tooltip="${Dictionary.getPhrase(REMATCH_BTN_TOOLTIP)}" hidden="true" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
+</button-bar>

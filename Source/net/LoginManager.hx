@@ -1,23 +1,18 @@
 package net;
 
+import browser.CredentialCookies;
 using StringTools;
 
 class LoginManager
 {
-    public static var login:String;
-    public static var password:String;
-    private static var lastAuto:Bool;
-
-    public static function wasLastSignInAuto():Bool 
-    {
-        return lastAuto;
-    }
+    public static var login:Null<String>;
+    public static var password:Null<String>;
 
     public static function signin(login:String, password:String, auto:Bool) 
     {
         LoginManager.login = login;
         LoginManager.password = password;
-        LoginManager.lastAuto = auto;
+        Networker.eventQueue.addHandler(callback);
         Networker.emitEvent(Login(login, password));
     }
 
@@ -25,8 +20,23 @@ class LoginManager
     {
         LoginManager.login = login;
         LoginManager.password = password;
-        LoginManager.lastAuto = false;
         Networker.emitEvent(Register(login, password));
+    }
+
+    private static function callback(event:ServerEvent)
+    {
+        switch event
+        {
+            case LoginResult(success), RegisterResult(success):
+                Networker.eventQueue.removeHandler(callback);
+                if (!success)
+                {
+                    LoginManager.login = null;
+                    LoginManager.password = null;
+                    CredentialCookies.removeLoginDetails();
+                }
+            default:
+        }
     }
 
     public static function isPlayer(suspectedLogin:String)

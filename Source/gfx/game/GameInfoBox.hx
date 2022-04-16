@@ -13,7 +13,6 @@ import net.ServerEvent;
 import utils.TimeControl;
 import haxe.ui.containers.Card;
 import haxe.ui.containers.VBox;
-import gfx.components.Shapes;
 import struct.Ply;
 import openings.OpeningTree;
 import dict.Dictionary;

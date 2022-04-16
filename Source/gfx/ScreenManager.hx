@@ -64,8 +64,8 @@ class ScreenManager extends Sprite implements INetObserver
                 new Screen(); //TODO: Change
             case ChallengeHosting(timeControl, color):
                 new OpenChallengeHosting(timeControl, color);
-            case ChallengeJoining(challengeOwner):
-                new OpenChallengeJoining(challengeOwner);
+            case ChallengeJoining(challengeOwner, timeControl, color):
+                new OpenChallengeJoining(challengeOwner, timeControl, color);
         };
     }
 
@@ -83,7 +83,7 @@ class ScreenManager extends Sprite implements INetObserver
             case PlayerProfile(ownerLogin): 'player/$ownerLogin';
             case LoginRegister: 'login';
             case ChallengeHosting(_, _): "challenge";
-            case ChallengeJoining(challengeOwner): 'join/$challengeOwner';
+            case ChallengeJoining(challengeOwner, timeControl, color): 'join/$challengeOwner';
         }
     }
 
@@ -123,45 +123,6 @@ class ScreenManager extends Sprite implements INetObserver
         URLEditor.clear();
     }
 
-    //TODO: Simplify according to the updated init algrorithm from my notes
-    public static function navigateByURL(searchParams:String)
-    {
-        var searcher = new URLSearchParams(searchParams);
-        if (searcher.has("p"))
-        {
-            var pagePathParts:Array<String> = searcher.get("p").split('/');
-
-            switch pagePathParts[0]
-            {
-                case "study":  
-                    toScreen(Analysis(null, Std.parseInt(pagePathParts[1])));
-                case "analysis":  
-                    toScreen(Analysis(null, null));
-                case "player":  
-                    toScreen(PlayerProfile(pagePathParts[1]));
-                case "login":  
-                    toScreen(LoginRegister);
-                case "join": 
-                    toScreen(ChallengeJoining(pagePathParts[1]));
-                case "live": 
-                    var gameID:Null<Int> = Std.parseInt(pagePathParts[1]);
-                    if (gameID != null)
-                        toGameScreen(gameID);
-                    else
-                        toScreen(MainMenu);
-                default:
-                    toScreen(MainMenu);
-            }
-        }
-        else if (searcher.has("id")) //* These are added for the backward compatibility
-			toGameScreen(Std.parseInt(searcher.get("id")));
-        else if (searcher.has("ch"))
-            toScreen(ChallengeJoining(searcher.get("ch")));
-        else
-            toScreen(MainMenu);
-
-    }
-
     public function handleNetEvent(event:ServerEvent)
     {
         switch event 
@@ -177,12 +138,6 @@ class ScreenManager extends Sprite implements INetObserver
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
                 var watchedColor:Null<PieceColor> = actualizationData.logParserOutput.getParticipantColor(spectatedPlayerLogin); //TODO: A bit clumsy approach, try to rethink later
                 toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
-            case LoginResult(success):
-                if (success) //TODO: Update according to new logic
-                    if (LoginManager.wasLastSignInAuto())
-                        navigateByURL(Browser.location.search);
-                    else
-                        toScreen(MainMenu);
 			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);

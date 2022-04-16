@@ -1,47 +1,20 @@
 package;
 
-import gfx.ScreenManager;
-import gfx.screens.LanguageSelectIntro;
-import tests.ui.game.TChatBox;
-import tests.ui.game.TSidebox;
-import tests.ui.board.TGameBoard;
-import tests.ui.board.TSelectableBoard;
-import tests.ui.board.TBoard;
-import gfx.game.Sidebox;
-import net.LoginManager;
-import gameboard.Board;
-import haxe.ui.containers.Box;
-import gfx.components.SpriteWrapper;
-import utils.AssetManager;
-import struct.Ply;
-import struct.Variant;
-import haxe.ui.components.Link;
-import struct.Situation;
-import browser.CredentialCookies;
-import openings.OpeningTree;
-import dict.Dictionary;
-import haxe.ui.events.UIEvent;
-import haxe.ui.components.OptionBox;
-import haxe.ui.components.Button;
-import haxe.ui.components.CheckBox;
-import haxe.ui.components.TextField;
-import haxe.ui.containers.ScrollView;
-import struct.PieceColor;
+import net.ServerEvent;
 import js.html.URLSearchParams;
-import js.Cookie;
-import struct.PieceType;
-import openfl.Assets;
-import haxe.Timer;
-import haxe.ui.components.Label;
-import haxe.ui.containers.HBox;
-import haxe.ui.containers.VBox;
-import openfl.system.Capabilities;
-import haxe.ui.Toolkit;
-import openfl.display.SimpleButton;
-import js.Browser;
-import tests.UITest;
-import openfl.display.Sprite;
+import browser.CredentialCookies;
+import gfx.ScreenManager;
 import gfx.screens.Analysis;
+import gfx.screens.LanguageSelectIntro;
+import haxe.ui.Toolkit;
+import js.Browser;
+import net.LoginManager;
+import openfl.display.Sprite;
+import openings.OpeningTree;
+import tests.UITest;
+import tests.ui.game.TChatBox;
+import utils.AssetManager;
+
 using StringTools;
 
 class Main extends Sprite
@@ -98,11 +71,6 @@ class Main extends Sprite
 		Networker.launch();
 	}
 
-	private function onConnected()
-	{
-		//TODO: Fill (phase 2 according to notes)
-	}
-
 	private function onConnectionFailed(e)
 	{
 		var analysisScreen:Analysis = ScreenManager.toOfflineAnalysis();
@@ -111,5 +79,55 @@ class Main extends Sprite
 			if (CredentialCookies.hasLoginDetails())
 				LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), true);
 		});
+	}
+
+	private function onConnected()
+	{
+		var searcher = new URLSearchParams(Browser.location.search);
+        if (searcher.has("p"))
+        {
+			var pagePathParts:Array<String> = searcher.get("p").split('/');
+			var section:String = pagePathParts[0];
+
+			if (section == "login")
+				ScreenManager.toScreen(LoginRegister); //* Bypass the usual procedure (no need to login)
+			else
+				navigate(section, pagePathParts.slice(1));
+		}
+		else if (searcher.has("id")) //* These are added for the backward compatibility
+			navigate("live", [searcher.get("id")]);
+        else if (searcher.has("ch"))
+            navigate("join", [searcher.get("ch")]);
+        else
+            navigate("home", []);
+	}
+
+    private function navigate(section:String, pathPartsAfter:Array<String>)
+    {
+		if (CredentialCookies.hasLoginDetails())
+			LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), true);
+
+        switch section
+        {
+            case "analysis":  
+                ScreenManager.toScreen(Analysis(null, null));
+            case "join":
+				//TODO: Process "owner playing" situation in GeneralObserver
+				Networker.emitEvent(GetOpenChallenge(pathPartsAfter[0]));
+            case "player":
+				//TODO: Player exists? (via GetProfile: can return either PlayerNotFound or PlayerProfileDetails[last seen, roles, ..., first 10 games, first 10 studies])
+                ScreenManager.toScreen(PlayerProfile(pathPartsAfter[0]));
+            case "study":
+				//TODO: Get study, delay toScreen(), process StudyNotFound in GeneralObserver - or should I consider another responsible for this?
+                ScreenManager.toScreen(Analysis(null, Std.parseInt(pathPartsAfter[0])));
+            case "live": 
+                var gameID:Null<Int> = Std.parseInt(pathPartsAfter[0]);
+                if (gameID != null)
+                	{} //TODO: GetGame, process possible answers, if ongoing: isLogged + isAmongPlayers
+                else
+                    ScreenManager.toScreen(MainMenu);
+            default:
+                ScreenManager.toScreen(MainMenu);
+        }
 	}
 }

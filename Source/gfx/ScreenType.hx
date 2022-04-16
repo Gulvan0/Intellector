@@ -16,5 +16,5 @@ enum ScreenType
     PlayerProfile(ownerLogin:String);
     LoginRegister;
     ChallengeHosting(timeControl:TimeControl, color:Null<PieceColor>);
-    ChallengeJoining(challengeOwner:String);
+    ChallengeJoining(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>);
 }

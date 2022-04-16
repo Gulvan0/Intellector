@@ -1,11 +1,14 @@
 package net;
 
+import utils.TimeControl;
 import browser.CredentialCookies;
 import net.EventProcessingQueue.INetObserver;
 import openfl.Assets;
 import dict.Utils;
 import dict.Dictionary;
 import gfx.components.Dialogs;
+import gfx.ScreenManager;
+import gfx.ScreenType;
 
 class GeneralObserver implements INetObserver
 {
@@ -64,6 +67,8 @@ class GeneralObserver implements INetObserver
                 Dialogs.alert(Dictionary.getPhrase(ACCEPT_CHALLENGE_RESULT_OFFLINE), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));
             case DirectChallengeCallerInGame(caller):
                 Dialogs.alert(Dictionary.getPhrase(ACCEPT_CHALLENGE_RESULT_BUSY), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));
+            case OpenChallengeInfo(hostLogin, secsStart, secsBonus, color):
+				ScreenManager.toScreen(ChallengeJoining(hostLogin, new TimeControl(secsStart, secsBonus), PieceColor.createByName(color)));
             default:
         }
     }

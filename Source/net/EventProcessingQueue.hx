@@ -8,28 +8,25 @@ interface INetObserver
 class EventProcessingQueue
 {
     private var observers:Array<INetObserver> = [];
-    private var handlers:Array<Handler> = [];
+    private var handlers:Array<ServerEvent->Void> = [];
 
     public function processEvent(event:ServerEvent)
     {
-        var i:Int = 0;
-        while (i < handlers.length)
-        {
-            var handler = handlers[i];
-            var wasProcessed:Bool = handler.processEvent(event);
-            if (handler.disposable && wasProcessed)
-                handlers.splice(i, 1);
-            else
-                i++;
-        }
+        for (handler in handlers)
+            handler(event);
         
         for (obs in observers)
             obs.handleNetEvent(event);
     }
 
-    public function addHandler(handler:Handler)
+    public function addHandler(handler:ServerEvent->Void)
     {
         handlers.push(handler);
+    }
+
+    public function removeHandler(handler:ServerEvent->Void)
+    {
+        handlers.remove(handler);
     }
 
     public function removeObserser(observer:INetObserver)
