@@ -105,10 +105,9 @@ class Utils
                 var whiteLogin:String = data.logParserOutput.whiteLogin;
                 var blackLogin:String = data.logParserOutput.blackLogin;
                 translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
-            case RevisitedGame(gameID, watchedColor, log): 
-                var logParserOutput:GameLogParserOutput = GameLogParser.parse(log);
-                var whiteLogin:String = logParserOutput.whiteLogin;
-                var blackLogin:String = logParserOutput.blackLogin;
+            case RevisitedGame(gameID, watchedColor, data): 
+                var whiteLogin:String = data.logParserOutput.whiteLogin;
+                var blackLogin:String = data.logParserOutput.blackLogin;
                 translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
             case PlayerProfile(ownerLogin): 
                 translations = [ownerLogin, ownerLogin];

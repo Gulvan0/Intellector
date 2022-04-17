@@ -8,34 +8,39 @@ class LoginManager
     public static var login:Null<String>;
     public static var password:Null<String>;
 
-    public static function signin(login:String, password:String, auto:Bool) 
+    public static function signin(login:String, password:String, remember:Null<Bool>, onSuccess:Void->Void, onFail:Void->Void) 
     {
-        LoginManager.login = login;
-        LoginManager.password = password;
-        Networker.eventQueue.addHandler(callback);
+        Networker.eventQueue.addHandler(responseHandler.bind(login, password, remember, onSuccess, onFail));
         Networker.emitEvent(Login(login, password));
     }
 
-    public static function register(login:String, password:String) 
+    public static function register(login:String, password:String, remember:Null<Bool>, onSuccess:Void->Void, onFail:Void->Void) 
     {
-        LoginManager.login = login;
-        LoginManager.password = password;
+        Networker.eventQueue.addHandler(responseHandler.bind(login, password, remember, onSuccess, onFail));
         Networker.emitEvent(Register(login, password));
     }
 
-    private static function callback(event:ServerEvent)
+    private static function responseHandler(login:String, password:String, remember:Null<Bool>, onSuccess:Void->Void, onFail:Void->Void, event:ServerEvent) 
     {
         switch event
         {
             case LoginResult(success), RegisterResult(success):
-                Networker.eventQueue.removeHandler(callback);
-                if (!success)
+                if (success)
                 {
-                    LoginManager.login = null;
-                    LoginManager.password = null;
-                    CredentialCookies.removeLoginDetails();
+                    LoginManager.login = login;
+                    LoginManager.password = password;
+                    if (remember != null)
+                        CredentialCookies.saveLoginDetails(login, password, !remember);
+                    onSuccess();
                 }
+                else
+                {
+                    CredentialCookies.removeLoginDetails();
+                    onFail();
+                }
+                return true;
             default:
+                return false;
         }
     }
 

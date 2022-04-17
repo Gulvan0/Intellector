@@ -50,12 +50,12 @@ class SignIn extends Sprite
 
 	private function onSignInPressed()
 	{
-		LoginManager.signin(loginField.text, passField.text, false);
+		//LoginManager.signin(loginField.text, passField.text, ...);
 	}
 
 	private function onRegisterPressed()
 	{
-		LoginManager.register(loginField.text, passField.text);
+		//LoginManager.register(loginField.text, passField.text, ...);
 	}
 
 	private function onEntranceResults(success:Bool, failMessage:Phrase)

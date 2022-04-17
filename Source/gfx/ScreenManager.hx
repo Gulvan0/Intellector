@@ -56,8 +56,8 @@ class ScreenManager extends Sprite implements INetObserver
                 LiveGame.constructFromActualizationData(gameID, actualizationData);
             case SpectatedGame(gameID, watchedColor, actualizationData):
                 LiveGame.constructFromActualizationData(gameID, actualizationData, watchedColor);
-            case RevisitedGame(gameID, watchedColor, log):
-                LiveGame.constructFromActualizationData(gameID, new ActualizationData(log), watchedColor);
+            case RevisitedGame(gameID, watchedColor, data):
+                LiveGame.constructFromActualizationData(gameID, data, watchedColor);
             case PlayerProfile(ownerLogin):
                 new PlayerProfile(ownerLogin);
             case LoginRegister:
@@ -74,7 +74,7 @@ class ScreenManager extends Sprite implements INetObserver
         return switch type 
         {
             case MainMenu: "home";
-            case Analysis(initialVariantStr, exploredStudyID): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
+            case Analysis(_, exploredStudyID): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
             case LanguageSelectIntro: "";
             case StartedPlayableGame(gameID, _, _, _, _): 'live/$gameID';
             case ReconnectedPlayableGame(gameID, _): 'live/$gameID';
@@ -112,11 +112,6 @@ class ScreenManager extends Sprite implements INetObserver
         instance.current.onEntered();
     }
 
-    public static function toGameScreen(gameID:Int)
-    {
-        //TODO: Fill (request additional info from server and process response, then call toScreen with an appropriate argument)
-    }
-
     public static function clearScreen()
     {
         instance.removeCurrentScreen();
@@ -136,7 +131,7 @@ class ScreenManager extends Sprite implements INetObserver
             case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-                var watchedColor:Null<PieceColor> = actualizationData.logParserOutput.getParticipantColor(spectatedPlayerLogin); //TODO: A bit clumsy approach, try to rethink later
+                var watchedColor:Null<PieceColor> = actualizationData.getColor(spectatedPlayerLogin); //TODO: A bit clumsy approach, try to rethink later
                 toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
 			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
@@ -145,15 +140,6 @@ class ScreenManager extends Sprite implements INetObserver
             default:
         }
     }
-	
-	/*private function onOngoingGame(data:OngoingBattleData) 
-	{
-		if (data.whiteLogin.toLowerCase() == Networker.login.toLowerCase())
-			data.whiteLogin = Networker.login;
-		else if (data.blackLogin.toLowerCase() == Networker.login.toLowerCase())
-			data.blackLogin = Networker.login;
-		ScreenManager.instance.toGameReconnect(data);
-	}*/
 
     public static function launch(mainInstance:Main)
     {

@@ -1,14 +1,10 @@
 package net;
 
-import utils.TimeControl;
-import browser.CredentialCookies;
+import dict.Dictionary;
+import dict.Utils;
+import gfx.components.Dialogs;
 import net.EventProcessingQueue.INetObserver;
 import openfl.Assets;
-import dict.Utils;
-import dict.Dictionary;
-import gfx.components.Dialogs;
-import gfx.ScreenManager;
-import gfx.ScreenType;
 
 class GeneralObserver implements INetObserver
 {
@@ -41,12 +37,9 @@ class GeneralObserver implements INetObserver
             case IncomingDirectChallenge(enemy, colour, startSecs, bonusSecs):
                 if (acceptsDirectChallenges)
                     challengeReceiver(enemy, startSecs, bonusSecs, colour);
-            case LoginResult(success):
-                if (!success)
-                    CredentialCookies.removeLoginDetails();
             case DontReconnect:
                 onReconnectionForbidden();
-            case DirectChallengeCalleeIsCaller(callee):
+            case DirectChallengeCalleeIsCaller(callee): 
                 Dialogs.alert(Dictionary.getPhrase(SEND_CHALLENGE_RESULT_SAME), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));
             case DirectChallengeCalleeOffline(callee):
                 Dialogs.alert(Dictionary.getPhrase(SEND_CHALLENGE_RESULT_OFFLINE), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));
@@ -67,8 +60,6 @@ class GeneralObserver implements INetObserver
                 Dialogs.alert(Dictionary.getPhrase(ACCEPT_CHALLENGE_RESULT_OFFLINE), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));
             case DirectChallengeCallerInGame(caller):
                 Dialogs.alert(Dictionary.getPhrase(ACCEPT_CHALLENGE_RESULT_BUSY), Dictionary.getPhrase(SEND_CHALLENGE_RESULT_ERROR_TITLE));
-            case OpenChallengeInfo(hostLogin, secsStart, secsBonus, color):
-				ScreenManager.toScreen(ChallengeJoining(hostLogin, new TimeControl(secsStart, secsBonus), PieceColor.createByName(color)));
             default:
         }
     }

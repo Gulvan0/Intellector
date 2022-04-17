@@ -12,7 +12,7 @@ enum ScreenType
     StartedPlayableGame(gameID:Int, whiteLogin:String, blackLogin:String, timeControl:TimeControl, playerColor:PieceColor);
     ReconnectedPlayableGame(gameID:Int, actualizationData:ActualizationData);
     SpectatedGame(gameID:Int, watchedColor:PieceColor, actualizationData:ActualizationData);
-    RevisitedGame(gameID:Int, watchedColor:PieceColor, log:String);
+    RevisitedGame(gameID:Int, watchedColor:PieceColor, actualizationData:ActualizationData);
     PlayerProfile(ownerLogin:String);
     LoginRegister;
     ChallengeHosting(timeControl:TimeControl, color:Null<PieceColor>);

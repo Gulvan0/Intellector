@@ -24,6 +24,21 @@ class ActualizationData
     public var logParserOutput:GameLogParserOutput;
     public var timeCorrectionData:Null<TimeCorrectionData>;
 
+    public static function current(pastLog:String, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String):ActualizationData
+    {
+        return new ActualizationData(pastLog, new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide));
+    }
+
+    public function getColor(login:String) 
+    {
+        return logParserOutput.getParticipantColor(login);
+    }
+
+    public function getPlayerColor() 
+    {
+        return logParserOutput.getPlayerColor();
+    }
+
     public function new(?pastLog:String, ?timeCorrectionData:Null<TimeCorrectionData>)
     {
         if (pastLog != null)

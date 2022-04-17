@@ -68,10 +68,10 @@ class PlayerProfile extends Screen implements INetObserver
 
     public function handleNetEvent(event:ServerEvent)
     {
-        switch event 
+        /*switch event 
         {
             case GameIsOver(log):
-                //TODO: ScreenManager.toRevisit(requestedGameID, log) 
+                ...
             case GamesList(listStr, hasNext, hasPrev):
                 populateGames(listStr);
                 gamesPrevBtn.disabled = !hasPrev;
@@ -84,7 +84,7 @@ class PlayerProfile extends Screen implements INetObserver
                 ScreenManager.toScreen(MainMenu);
                 Browser.window.alert(Dictionary.getPhrase(PLAYER_NOT_FOUND));
             default:
-        }
+        }*/
     }
 
     public override function onEntered()

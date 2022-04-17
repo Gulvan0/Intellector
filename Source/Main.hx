@@ -1,5 +1,9 @@
 package;
 
+import struct.PieceColor;
+import utils.TimeControl;
+import struct.ActualizationData;
+import net.Requests;
 import net.ServerEvent;
 import js.html.URLSearchParams;
 import browser.CredentialCookies;
@@ -17,6 +21,38 @@ import utils.AssetManager;
 
 using StringTools;
 
+/**
+	This class contains the entry point of a program followed
+	by all the necessary initialization.
+
+	The file is structured in a waterfall manner: as you go
+	through all of the initialization steps, you descend lower
+	and lower.
+
+	Generally, initialization consists of the following phases:
+	- Some purely technical aspects for the app to work
+	correctly: init();
+	- An attempt to load user's language preference from their
+	cookies; if no exist (usually when this is their first visit),
+	the user is asked to choose: start();
+	- Connection attempt. If it is impossible to connect to the
+	server, leave user in the "playground" (analysis board, that
+	is), while actively trying to reconnect behind the scenes:
+	onLanguageReady();
+	- Auto Sign-In. Loads the user's credentials from the cookies
+	to automatically log them in. Continues right after ANY 
+	response from the server is received, since signing in isn't
+	mandatory. For the same reason, jumps to the next step if no 
+	credential cookies are found. Located in onConnected();
+	- Path parsing. Retrieving the page the user requested from
+	the URL search params: navigate() and navigateToSection(). 
+	The former provides backward compatibility for the old URLs
+	(pre-First-Anniversary-Update). The latter one parses the
+	modern paths;
+	- Navigating to a respective page: all of the following 
+	methods. The ones needing an additional data make use of a
+	Requests class, retrieving the missing data from the server.
+**/
 class Main extends Sprite
 {
 	private var languageSelectScreen:Sprite;
@@ -77,11 +113,19 @@ class Main extends Sprite
 		Networker.startReconnectAttempts(() -> {
 			analysisScreen.enableMenu();
 			if (CredentialCookies.hasLoginDetails())
-				LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), true);
+				LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), null, ()->{}, ()->{});
 		});
 	}
 
 	private function onConnected()
+	{
+		if (CredentialCookies.hasLoginDetails())
+			LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), null, navigate, navigate);
+		else
+			navigate();
+	}
+
+	private function navigate()
 	{
 		var searcher = new URLSearchParams(Browser.location.search);
         if (searcher.has("p"))
@@ -89,45 +133,88 @@ class Main extends Sprite
 			var pagePathParts:Array<String> = searcher.get("p").split('/');
 			var section:String = pagePathParts[0];
 
-			if (section == "login")
-				ScreenManager.toScreen(LoginRegister); //* Bypass the usual procedure (no need to login)
-			else
-				navigate(section, pagePathParts.slice(1));
+			navigateToSection(section, pagePathParts.slice(1));
 		}
 		else if (searcher.has("id")) //* These are added for the backward compatibility
-			navigate("live", [searcher.get("id")]);
+			navigateToSection("live", [searcher.get("id")]);
         else if (searcher.has("ch"))
-            navigate("join", [searcher.get("ch")]);
+            navigateToSection("join", [searcher.get("ch")]);
         else
-            navigate("home", []);
+            navigateToSection("home", []);
 	}
 
-    private function navigate(section:String, pathPartsAfter:Array<String>)
+    private function navigateToSection(section:String, pathPartsAfter:Array<String>)
     {
-		if (CredentialCookies.hasLoginDetails())
-			LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), true);
-
-        switch section
+		switch section
         {
             case "analysis":  
-                ScreenManager.toScreen(Analysis(null, null));
+                toAnalysis();
             case "join":
-				//TODO: Process "owner playing" situation in GeneralObserver
-				Networker.emitEvent(GetOpenChallenge(pathPartsAfter[0]));
+				toOpenChallengeJoining(pathPartsAfter[0]);
             case "player":
-				//TODO: Player exists? (via GetProfile: can return either PlayerNotFound or PlayerProfileDetails[last seen, roles, ..., first 10 games, first 10 studies])
-                ScreenManager.toScreen(PlayerProfile(pathPartsAfter[0]));
+				toProfile(pathPartsAfter[0]);
             case "study":
-				//TODO: Get study, delay toScreen(), process StudyNotFound in GeneralObserver - or should I consider another responsible for this?
-                ScreenManager.toScreen(Analysis(null, Std.parseInt(pathPartsAfter[0])));
+				toStudy(pathPartsAfter[0]);
             case "live": 
-                var gameID:Null<Int> = Std.parseInt(pathPartsAfter[0]);
-                if (gameID != null)
-                	{} //TODO: GetGame, process possible answers, if ongoing: isLogged + isAmongPlayers
-                else
-                    ScreenManager.toScreen(MainMenu);
+                toGame(pathPartsAfter[0]);
             default:
                 ScreenManager.toScreen(MainMenu);
         }
+	}
+
+	private function toAnalysis() 
+	{
+		ScreenManager.toScreen(Analysis(null, null));
+	}
+
+	private function toOpenChallengeJoining(owner:String) 
+	{
+		var onInfo = (hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>) -> {ScreenManager.toScreen(ChallengeJoining(hostLogin, timeControl, color));};
+		var onBusy = (gameID:Int, data:ActualizationData) -> {ScreenManager.toScreen(SpectatedGame(gameID, data.getColor(owner), data));};
+		var onNotFound = ScreenManager.toScreen.bind(MainMenu);
+		Requests.getOpenChallenge(owner, onInfo, onBusy, onNotFound);
+	}
+
+	private function toProfile(login:String) 
+	{
+		var onInfo = () -> {}; //TODO: Implement
+		var onNotFound = ScreenManager.toScreen.bind(MainMenu);
+		Requests.getPlayerProfile(login, onInfo, onNotFound);
+	}
+
+	private function toStudy(idStr:String) 
+	{
+		var id:Null<Int> = Std.parseInt(idStr);
+		if (id != null)
+		{
+			var onInfo = (variantStr:String) -> {ScreenManager.toScreen(Analysis(variantStr, id));};
+			var onNotFound = ScreenManager.toScreen.bind(MainMenu);
+			Requests.getStudy(id, onInfo, onNotFound);
+		}
+		else
+			ScreenManager.toScreen(MainMenu);
+	}
+
+	private function toGame(idStr:String) 
+	{
+		var id:Null<Int> = Std.parseInt(idStr);
+		if (id != null)
+		{
+			var onOver = (data:ActualizationData) -> {ScreenManager.toScreen(RevisitedGame(id, White, data));};
+			var onNotFound = ScreenManager.toScreen.bind(MainMenu);
+			Requests.getGame(id, onOver, toOngoingGame.bind(id), onNotFound);
+		}
+		else
+			ScreenManager.toScreen(MainMenu);
+	}
+
+	private function toOngoingGame(gameID:Int, data:ActualizationData) 
+	{
+		if (LoginManager.login == null)
+			ScreenManager.toScreen(LoginRegister); //TODO: Redirect to a game after logged in
+		else if (data.getPlayerColor() == null)
+			ScreenManager.toScreen(SpectatedGame(gameID, White, data));
+		else
+			ScreenManager.toScreen(ReconnectedPlayableGame(gameID, data));
 	}
 }
