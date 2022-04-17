@@ -147,23 +147,10 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         blackClock.setPlayerMove(false);
 
         if (!belongsToSpectator)
-            changeActionButtons([actionBar.changeOrientationBtn, actionBar.analyzeBtn, actionBar.exportSIPBtn, actionBar.rematchBtn]);
+            actionBar.setMode(PlayerGameEnded);
     }
 
     //===========================================================================================================================================================
-
-    private function changeActionButtons(shownButtons:Array<Button>)
-    {
-        for (i in 0...actionBar.numComponents)
-            actionBar.getComponentAt(i).hidden = true;
-
-        var btnWidth:Float = 100 / shownButtons.length;
-        for (btn in shownButtons)
-        {
-            btn.hidden = false;
-            btn.percentWidth = btnWidth;
-        }
-    }
 
     private function revertOrientation()
     {
@@ -412,9 +399,9 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         navigator.init(type -> {emit(PlyScrollRequest(type));}, width, explicitNavigatorHeight);
 
         if (belongsToSpectator)
-            changeActionButtons([actionBar.changeOrientationBtn, actionBar.analyzeBtn, actionBar.exportSIPBtn]);
+            actionBar.setMode(Spectator);
         else
-            changeActionButtons([actionBar.changeOrientationBtn, actionBar.offerDrawBtn, actionBar.offerTakebackBtn, actionBar.resignBtn, actionBar.addTimeBtn]);
+            actionBar.setMode(PlayerOngoingGame);
 
         if (orientationColor == Black)
             revertOrientation();
