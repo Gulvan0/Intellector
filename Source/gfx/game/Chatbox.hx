@@ -1,8 +1,8 @@
 package gfx.game;
 
-import gfx.game.Sidebox.SideboxEvent;
+import dict.Phrase;
+import gfx.common.ActionBar.ActionBtn;
 import gfx.game.GameInfoBox.Outcome;
-import gfx.game.Sidebox.ISideboxObserver;
 import serialization.GameLogParser;
 import net.EventProcessingQueue.INetObserver;
 import haxe.ui.containers.VBox;
@@ -25,7 +25,7 @@ import struct.ActualizationData;
 using StringTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/chatbox.xml'))
-class Chatbox extends VBox implements INetObserver implements ISideboxObserver
+class Chatbox extends VBox implements INetObserver
 {
     private var isOwnerSpectator:Bool;
     private var actualizationData:ActualizationData;
@@ -69,28 +69,22 @@ class Chatbox extends VBox implements INetObserver implements ISideboxObserver
         }
     }
 
-    public function handleSideboxEvent(event:SideboxEvent)
+    public function reactToOwnAction(btn:ActionBtn)
     {
-        switch event 
+        var message:Null<Phrase> = switch btn 
         {
-            case OfferDrawPressed:
-                appendLog(Dictionary.getPhrase(DRAW_OFFERED_MESSAGE));
-            case CancelDrawPressed:
-                appendLog(Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE));
-            case AcceptDrawPressed:
-                appendLog(Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE));
-            case DeclineDrawPressed:
-                appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE));
-            case OfferTakebackPressed:
-                appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE));
-            case CancelTakebackPressed:
-                appendLog(Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE));
-            case AcceptTakebackPressed:
-                appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE));
-            case DeclineTakebackPressed:
-                appendLog(Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE));
-            default:
-        }
+            case OfferDraw: DRAW_OFFERED_MESSAGE;
+            case CancelDraw: DRAW_CANCELLED_MESSAGE;
+            case OfferTakeback: TAKEBACK_OFFERED_MESSAGE;
+            case CancelTakeback: TAKEBACK_CANCELLED_MESSAGE;
+            case AcceptDraw: DRAW_ACCEPTED_MESSAGE;
+            case DeclineDraw: DRAW_DECLINED_MESSAGE;
+            case AcceptTakeback: TAKEBACK_ACCEPTED_MESSAGE;
+            case DeclineTakeback: TAKEBACK_DECLINED_MESSAGE;
+            default: null;
+        };
+        if (message != null)
+            appendLog(Dictionary.getPhrase(message));
     }
 
     private function appendMessage(author:String, text:String, isNotFromSpectator:Bool) 

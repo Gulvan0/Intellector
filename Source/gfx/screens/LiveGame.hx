@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import gfx.game.CompactGame;
+import gfx.common.ActionBar.ActionBtn;
 import struct.ActualizationData;
 import gfx.components.Dialogs;
 import dict.Dictionary;
@@ -29,7 +31,7 @@ import gameboard.GameBoard;
 import gameboard.GameBoard.IGameBoardObserver;
 import net.EventProcessingQueue.INetObserver;
 
-class LiveGame extends Screen implements INetObserver implements IGameBoardObserver implements ISideboxObserver
+class LiveGame extends Screen implements INetObserver implements IGameBoardObserver
 {
     /**Attains null if a user doesn't participate in the game (is a spectator or browses a past game)**/
     private var playerColor:Null<PieceColor>;
@@ -39,6 +41,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     private var sidebox:Sidebox;
     private var chatbox:Chatbox;
     private var gameinfobox:GameInfoBox;
+
+    private var compactGame:CompactGame;
 
     public override function onEntered()
     {
@@ -82,24 +86,43 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         }
     }
 
-    public function handleSideboxEvent(event:SideboxEvent)
+    public function handleActionBtnPress(btn:ActionBtn)
     {
-        switch event {
-            case ChangeOrientationPressed:
+        switch btn 
+        {
+            case Resign:
+                Networker.emitEvent(Resign);
+            case ChangeOrientation:
                 board.revertOrientation();
-            case RematchRequested:
+            case OfferDraw:
+                Networker.emitEvent(OfferDraw);
+            case CancelDraw:
+                Networker.emitEvent(CancelDraw);
+            case OfferTakeback:
+                Networker.emitEvent(OfferTakeback);
+            case CancelTakeback:
+                Networker.emitEvent(CancelTakeback);
+            case AddTime:
+                Networker.emitEvent(AddTime);
+            case Rematch:
                 Networker.emitEvent(Rematch);
-            case ExportSIPRequested:
+            case ExportSIP:
                 var sip:String = board.shownSituation.serialize();
                 Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
-            case ExploreInAnalysisRequest:
+            case Analyze:
                 if (playerColor == null)
                     Networker.emitEvent(StopSpectate);
                 ScreenManager.toScreen(Analysis(board.asVariant().serialize(), null));
-            case PlyScrollRequest(type):
-                board.applyScrolling(type);
-            default:
+            case AcceptDraw:
+                Networker.emitEvent(AcceptDraw);
+            case DeclineDraw:
+                Networker.emitEvent(DeclineDraw);
+            case AcceptTakeback:
+                Networker.emitEvent(AcceptTakeback);
+            case DeclineTakeback:
+                Networker.emitEvent(DeclineTakeback);
         }
+        chatbox.reactToOwnAction(btn);
     }
 
     public static function constructFromActualizationData(gameID:Int, actualizationData:ActualizationData, ?orientationColor:PieceColor):LiveGame
@@ -128,14 +151,41 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         return new LiveGame(gameID, playerColor, Situation.starting(), sidebox, chatbox, gameinfobox, orientationColor);
     }
 
-    private function new(gameID:Int, playerColor:Null<PieceColor>, currentSituation:Situation, sidebox:Sidebox, chatbox:Chatbox, gameinfobox:GameInfoBox, orientationColor:PieceColor)
+    private function initLarge(sidebox:Sidebox, chatbox:Chatbox, gameinfobox:GameInfoBox)
+    {
+        this.sidebox = sidebox;
+        this.chatbox = chatbox;
+        this.gameinfobox = gameinfobox;
+
+        var boardWrapper:SpriteWrapper = new SpriteWrapper();
+        boardWrapper.sprite = board;
+
+        var vbox:VBox = new VBox();
+        vbox.addComponent(gameinfobox);
+        vbox.addComponent(chatbox);
+
+        var hbox:HBox = new HBox();
+        hbox.addComponent(vbox);
+        hbox.addComponent(boardWrapper);
+        hbox.addComponent(sidebox);
+
+        this.addComponent(hbox);
+
+        board.addObserver(gameinfobox);
+        board.addObserver(sidebox);
+        sidebox.init(handleActionBtnPress, board.applyScrolling);
+    }
+
+    private function initCompact(compactGame:CompactGame)
+    {
+        this.compactGame = compactGame;
+    }
+
+    private function new(gameID:Int, playerColor:Null<PieceColor>, currentSituation:Situation, orientationColor:PieceColor)
     {
         super();
         this.gameID = gameID;
         this.playerColor = playerColor;
-        this.sidebox = sidebox;
-        this.chatbox = chatbox;
-        this.gameinfobox = gameinfobox;
 
         board = new GameBoard(currentSituation, orientationColor);
         board.state = playerColor != null? new NeutralState(board) : new StubState(board);
@@ -146,24 +196,5 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             board.behavior = new PlayerMoveBehavior(board, playerColor);
         else
             board.behavior = new EnemyMoveBehavior(board, playerColor);
-
-        var vbox:VBox = new VBox();
-        vbox.addComponent(gameinfobox);
-        vbox.addComponent(chatbox);
-
-        var boardWrapper:SpriteWrapper = new SpriteWrapper();
-        boardWrapper.sprite = board;
-
-        var hbox:HBox = new HBox();
-        hbox.addComponent(vbox);
-        hbox.addComponent(boardWrapper);
-        hbox.addComponent(vbox);
-
-        this.addComponent(hbox);
-
-        board.addObserver(gameinfobox);
-        board.addObserver(sidebox);
-        sidebox.addObserver(this);
-        sidebox.addObserver(chatbox);
     }
 }

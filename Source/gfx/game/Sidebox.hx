@@ -1,5 +1,6 @@
 package gfx.game;
 
+import gfx.common.ActionBar.ActionBtn;
 import gameboard.GameBoard.GameBoardEvent;
 import gameboard.GameBoard.IGameBoardObserver;
 import serialization.GameLogParser;
@@ -32,58 +33,17 @@ import struct.ActualizationData;
 import utils.TimeControl;
 using utils.CallbackTools;
 
-enum SideboxEvent
-{
-    ChangeOrientationPressed;
-    OfferDrawPressed;
-    CancelDrawPressed;
-    AcceptDrawPressed;
-    DeclineDrawPressed;
-    OfferTakebackPressed;
-    CancelTakebackPressed;
-    AcceptTakebackPressed;
-    DeclineTakebackPressed;
-    RematchRequested;
-    ExportSIPRequested;
-    ExploreInAnalysisRequest;
-    PlyScrollRequest(type:PlyScrollType);
-}
-
-interface ISideboxObserver 
-{
-    public function handleSideboxEvent(event:SideboxEvent):Void;    
-}
-
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/sidebox.xml'))
 class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 {
-    private var resignConfirmationMessage:String;
-
-    private var enableTakebackAfterMove:Int;
-    private var belongsToSpectator:Bool;
     private var orientationColor:PieceColor;
     private var move:Int;
 
     private var secsPerTurn:Int;
     private var lastMovetableEntry:Dynamic;
 
-    private var observers:Array<ISideboxObserver> = [];
-
-    public function addObserver(obs:ISideboxObserver) 
-    {
-        observers.push(obs);
-    }
-
-    public function removeObserver(obs:ISideboxObserver) 
-    {
-        observers.remove(obs);
-    }
-
-    private function emit(event:SideboxEvent) 
-    {
-        for (obs in observers)
-            obs.handleSideboxEvent(event);
-    }
+    private var onActionBtnPressed:ActionBtn->Void;
+    private var onPlyScrollBtnPressed:PlyScrollType->Void;
 
     public function handleNetEvent(event:ServerEvent)
     {
@@ -91,28 +51,13 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         {
             case TimeCorrection(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide):
                 correctTime(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
-            case GameEnded(winner_color, reason):
+            case GameEnded(_, _):
                 onGameEnded();
             case Rollback(plysToUndo):
                 revertPlys(plysToUndo);
-            case DrawOffered:
-                drawRequestBox.hidden = false;
-            case DrawCancelled:
-                drawRequestBox.hidden = true;
-            case DrawAccepted, DrawDeclined:
-                actionBar.cancelDrawBtn.hidden = true;
-                actionBar.offerDrawBtn.hidden = false;
-            case TakebackOffered:
-                actionBar.offerTakebackBtn.disabled = true;
-                takebackRequestBox.hidden = false;
-            case TakebackCancelled:
-                takebackRequestBox.hidden = true;
-                actionBar.offerTakebackBtn.disabled = false;
-            case TakebackAccepted, TakebackDeclined:
-                actionBar.cancelTakebackBtn.hidden = true;
-                actionBar.offerTakebackBtn.hidden = false;
             default:
         }
+        actionBar.handleNetEvent(event);
     }
 
     public function handleGameBoardEvent(event:GameBoardEvent)
@@ -123,6 +68,13 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
                 makeMove(plyStr);
             default:
         }
+    }
+
+    private function handleActionBarBtnPress(btn:ActionBtn) 
+    {
+        if (btn == ChangeOrientation)
+            revertOrientation();
+        onActionBtnPressed(btn);
     }
 
     private function correctTime(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String)
@@ -145,9 +97,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         blackClock.stopTimer();
         whiteClock.setPlayerMove(false);
         blackClock.setPlayerMove(false);
-
-        if (!belongsToSpectator)
-            actionBar.setMode(PlayerGameEnded);
     }
 
     //===========================================================================================================================================================
@@ -171,8 +120,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
         addComponent(bottomLogin);
         addComponent(bottomClock);
-
-        emit(ChangeOrientationPressed);
     }
 
     //========================================================================================================================================================================
@@ -198,16 +145,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         navigator.writePlyStr(plyStr, justMovedColor);
         navigator.scrollAfterDelay();
 
-        if (move == enableTakebackAfterMove)
-            actionBar.offerTakebackBtn.disabled = false;
-
-        if (move == 2)
-        {
-            actionBar.offerDrawBtn.disabled = false;
-            actionBar.resignBtn.text = "⚐";
-            actionBar.resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_TOOLTIP);
-            resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
-        }
+        actionBar.onMoveNumberUpdated(move);
     }
 
     private function revertPlys(cnt:Int) 
@@ -229,114 +167,14 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
             playerToMoveClock.launchTimer();
         }
 
-        if (!belongsToSpectator)
-        {
-            takebackRequestBox.hidden = true;
-            actionBar.cancelTakebackBtn.hidden = true;
-            actionBar.offerTakebackBtn.hidden = false;
-
-            if (move < enableTakebackAfterMove)
-                actionBar.offerTakebackBtn.disabled = true;
-
-            if (move < 2)
-            {
-                actionBar.offerDrawBtn.disabled = true;
-                actionBar.resignBtn.text = "✖";
-                actionBar.resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_ABORT_TOOLTIP);
-                resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
-            }
-        }
+        actionBar.shutAllTakebackRequests();
+        actionBar.onMoveNumberUpdated(move);
 
         navigator.revertPlys(cnt);
         navigator.scrollAfterDelay();
     }
 
-    //==================================================================================================================================================
-
-    private function onResignPressed()
-    {
-        var confirmed:Bool = Browser.window.confirm(resignConfirmationMessage);
-        if (confirmed)
-            Networker.emitEvent(Resign);
-    }
-
-    private function onOfferDrawPressed()
-    {
-        if (drawRequestBox.hidden)
-        {
-            actionBar.offerDrawBtn.hidden = true;
-            actionBar.cancelDrawBtn.hidden = false;
-            Networker.emitEvent(OfferDraw);
-            emit(OfferDrawPressed);
-        }
-        else
-            onAcceptDrawPressed();
-    }
-
-    private function onCancelDrawPressed()
-    {
-        actionBar.cancelDrawBtn.hidden = true;
-        actionBar.offerDrawBtn.hidden = false;
-        Networker.emitEvent(CancelDraw);
-        emit(CancelDrawPressed);
-    }
-
-    private function onAcceptDrawPressed()
-    {
-        drawRequestBox.hidden = true;
-        Networker.emitEvent(AcceptDraw);
-        emit(AcceptDrawPressed);
-    }
-
-    private function onDeclineDrawPressed()
-    {
-        drawRequestBox.hidden = true;
-        Networker.emitEvent(DeclineDraw);
-        emit(DeclineDrawPressed);
-    }
-
-    private function onOfferTakebackPressed()
-    {
-        if (!takebackRequestBox.hidden)
-        {
-            takebackRequestBox.hidden = true;
-            emit(AcceptTakebackPressed);
-        }
-        else
-        {
-            actionBar.offerTakebackBtn.hidden = true;
-            actionBar.cancelTakebackBtn.hidden = false;
-            emit(OfferTakebackPressed);
-        }
-        
-        Networker.emitEvent(OfferTakeback);
-    }
-
-    private function onCancelTakebackPressed()
-    {
-        actionBar.offerTakebackBtn.hidden = false;
-        actionBar.cancelTakebackBtn.hidden = true;
-        Networker.emitEvent(CancelTakeback);
-        emit(CancelTakebackPressed);
-    }
-
-    private function onAcceptTakebackPressed()
-    {
-        takebackRequestBox.hidden = true;
-        actionBar.offerTakebackBtn.disabled = false;
-        Networker.emitEvent(AcceptTakeback);
-        emit(AcceptTakebackPressed);
-    }
-
-    private function onDeclineTakebackPressed()
-    {
-        takebackRequestBox.hidden = true;
-        actionBar.offerTakebackBtn.disabled = false;
-        Networker.emitEvent(DeclineTakeback);
-        emit(DeclineTakebackPressed);
-    }
-
-    public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, ?width:Float, ?height:Float):Sidebox
+    public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, width:Float, height:Float):Sidebox
     {
         var playingAs:Null<PieceColor> = data.logParserOutput.getPlayerColor();
         var timeControl:TimeControl = data.logParserOutput.timeControl;
@@ -358,50 +196,29 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         return sidebox;
     }
 
-    public function new(playingAs:Null<PieceColor>, timeControl:TimeControl, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, ?width:Float, ?height:Float) 
+    public function init(onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void) 
+    {
+        this.onActionBtnPressed = onActionBtnPressed;
+        this.onPlyScrollBtnPressed = onPlyScrollBtnPressed;
+    }
+
+    public function new(playingAs:Null<PieceColor>, timeControl:TimeControl, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, width:Float, height:Float) 
     {
         super();
-        this.belongsToSpectator = playingAs == null;
+        this.width = width;
+        this.height = height;
         this.secsPerTurn = timeControl.bonusSecs;
         this.orientationColor = White;
         this.move = 0;
-        this.resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
-
-        if (playingAs != null)
-            enableTakebackAfterMove = playingAs == White? 1 : 2;
         
         whiteClock.init(timeControl.startSecs, playingAs == White, timeControl.startSecs >= 90, true);
         blackClock.init(timeControl.startSecs, playingAs == Black, timeControl.startSecs >= 90, false);
 
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;
-
-        actionBar.changeOrientationBtn.onClick = revertOrientation.expand();
-        actionBar.resignBtn.onClick = onResignPressed.expand();
-        actionBar.offerDrawBtn.onClick = onOfferDrawPressed.expand();
-        actionBar.cancelDrawBtn.onClick = onCancelDrawPressed.expand();
-        actionBar.addTimeBtn.onClick = Networker.emitEvent.bind(AddTime).expand();
-        actionBar.offerTakebackBtn.onClick = onOfferTakebackPressed.expand();
-        actionBar.cancelTakebackBtn.onClick = onCancelTakebackPressed.expand();
-        actionBar.rematchBtn.onClick = emit.bind(RematchRequested).expand();
-        actionBar.exportSIPBtn.onClick = emit.bind(ExportSIPRequested).expand();
-        actionBar.analyzeBtn.onClick = emit.bind(ExploreInAnalysisRequest).expand();
-        declineDrawBtn.onClick = onDeclineDrawPressed.expand();
-        acceptDrawBtn.onClick = onAcceptDrawPressed.expand();
-        declineTakebackBtn.onClick = onDeclineTakebackPressed.expand();
-        acceptTakebackBtn.onClick = onAcceptTakebackPressed.expand();
         
-        var explicitNavigatorHeight:Null<Float> = null;
-        if (height != null)
-            explicitNavigatorHeight = height - blackClock.height - blackLoginCard.height - specialBox.height - whiteLoginCard.height - whiteClock.height;
-        if (width != null)
-            this.width = width;
-        navigator.init(type -> {emit(PlyScrollRequest(type));}, width, explicitNavigatorHeight);
-
-        if (belongsToSpectator)
-            actionBar.setMode(Spectator);
-        else
-            actionBar.setMode(PlayerOngoingGame);
+        navigator.init(onPlyScrollBtnPressed);
+        actionBar.init(false, playingAs, handleActionBarBtnPress);
 
         if (orientationColor == Black)
             revertOrientation();

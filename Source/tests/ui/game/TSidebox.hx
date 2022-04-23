@@ -18,13 +18,12 @@ import openfl.display.Sprite;
 class TSidebox extends Sprite
 {
     private var sidebox:Sidebox;
-    private var mockObs:MockSideboxObserver;
 
     private function replaceSidebox(sb:Sidebox)
     {
         removeChild(sidebox);
         sidebox = sb;
-        sb.addObserver(mockObs);
+        sb.init(ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());});
         addChild(sidebox);
     }
 
@@ -40,18 +39,18 @@ class TSidebox extends Sprite
         var longTimeControl:TimeControl = new TimeControl(600, 5);
         switch i
         {
-            case 0: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", White));
-            case 1: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", White));
-            case 2: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", White));
-            case 3: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", White));
-            case 4: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", White));
-            case 5: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", White));
-            case 6: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", Black));
-            case 7: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", Black));
-            case 8: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", Black));
-            case 9: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", Black));
-            case 10: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", Black));
-            case 11: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", Black));
+            case 0: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
+            case 1: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
+            case 2: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
+            case 3: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
+            case 4: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
+            case 5: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
+            case 6: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
+            case 7: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
+            case 8: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
+            case 9: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
+            case 10: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
+            case 11: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
         }
     }
 
@@ -84,7 +83,7 @@ class TSidebox extends Sprite
         switch i
         {
             case 0:
-                replaceSidebox(Sidebox.constructFromActualizationData(data0, White));
+                replaceSidebox(Sidebox.constructFromActualizationData(data0, White, 300, 500));
             case 1:
                 sidebox.makeMove("6620");
             case 2:
@@ -92,17 +91,17 @@ class TSidebox extends Sprite
             case 3:
                 sidebox.makeMove("1514");
             case 4:
-                replaceSidebox(Sidebox.constructFromActualizationData(data1, White));
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, 300, 500));
             case 5:
                 sidebox.makeMove("3020Aggressor");
             case 6:
                 sidebox.makeMove("1514");
             case 7:
-                replaceSidebox(Sidebox.constructFromActualizationData(data2, White));
+                replaceSidebox(Sidebox.constructFromActualizationData(data2, White, 300, 500));
             case 8:
                 sidebox.makeMove("1514");
             case 9:
-                replaceSidebox(Sidebox.constructFromActualizationData(data3, White));
+                replaceSidebox(Sidebox.constructFromActualizationData(data3, White, 300, 500));
         }
     }
 
@@ -131,26 +130,26 @@ class TSidebox extends Sprite
         {
             case 0:
                 LoginManager.login = "PlayerWhite";
-                replaceSidebox(Sidebox.constructFromActualizationData(data0, White));
+                replaceSidebox(Sidebox.constructFromActualizationData(data0, White, 300, 500));
             case 1:
                 sidebox.makeMove("1514");
             case 2:
                 sidebox.makeMove("1011");
             case 3:
                 LoginManager.login = "PlayerBlack";
-                replaceSidebox(Sidebox.constructFromActualizationData(data1, White));
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, 300, 500));
             case 4:
                 sidebox.makeMove("1514");
             case 5:
                 LoginManager.login = "PlayerWhite";
-                replaceSidebox(Sidebox.constructFromActualizationData(data1, White));
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, 300, 500));
             case 6:
                 sidebox.makeMove("1514");
             case 7:
                 sidebox.makeMove("1011");
             case 8:
                 LoginManager.login = "PlayerNone";
-                replaceSidebox(Sidebox.constructFromActualizationData(data2, White));
+                replaceSidebox(Sidebox.constructFromActualizationData(data2, White, 300, 500));
             case 9:
                 sidebox.makeMove("1514");
         }
@@ -322,19 +321,5 @@ class TSidebox extends Sprite
     public function new()
     {
         super();
-        mockObs = new MockSideboxObserver();
-    }
-}
-
-private class MockSideboxObserver implements ISideboxObserver
-{
-    public function handleSideboxEvent(e:SideboxEvent)
-    {
-        trace(e.getName(), e.getParameters());
-    }
-    
-    public function new()
-    {
-        
     }
 }

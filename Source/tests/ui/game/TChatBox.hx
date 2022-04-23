@@ -1,7 +1,7 @@
 package tests.ui.game;
 
+import gfx.common.ActionBar.ActionBtn;
 import struct.ActualizationData;
-import gfx.game.Sidebox.SideboxEvent;
 import net.ServerEvent;
 import gfx.game.Chatbox;
 import openfl.display.Sprite;
@@ -67,13 +67,13 @@ class TChatBox extends Sprite
 
     private var _checks_netEvents:Array<String> = ["Message('player', 'insult'), SpectatorMessage('spec', 'opinion'), GameEnded('w', 'bre'), PlayerDisconnected('b'), PlayerReconnected('b'), NewSpectator('spec2'), SpectatorLeft('spec2'), DrawOffered, DrawCancelled, DrawAccepted, DrawDeclined, TakebackOffered, TakebackCancelled, TakebackAccepted, TakebackDeclined"];
 
-    private var sideEvents:Array<SideboxEvent> = [OfferDrawPressed, CancelDrawPressed, AcceptDrawPressed, DeclineDrawPressed, OfferTakebackPressed, CancelTakebackPressed, AcceptTakebackPressed, DeclineTakebackPressed];
+    private var sideEvents:Array<ActionBtn> = [OfferDraw, CancelDraw, AcceptDraw, DeclineDraw, OfferTakeback, CancelTakeback, AcceptTakeback, DeclineTakeback];
 
     @interval(200)
     @iterations(8)
     private function _auto_sideEvents(i:Int) 
     {
-        chatbox.handleSideboxEvent(sideEvents[i]);
+        chatbox.reactToOwnAction(sideEvents[i]);
     }
 
     private var _checks_sideEvents:Array<String> = ['Offer/Cancel/Accept/Decline X Draw/Takeback'];
