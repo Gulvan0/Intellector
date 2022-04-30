@@ -20,6 +20,13 @@ class Clock extends Card
     private var lastUpdate:Float;
     private var playerMove:Bool;
 
+    private var copycats:Array<Clock> = [];
+
+    public function addCopycat(copycat:Clock) 
+    {
+        copycats.push(copycat);
+    }
+
     public function resize(newHeight:Float)
     {
         var unit:Float = newHeight / 11;
@@ -42,6 +49,8 @@ class Clock extends Card
         playerMove = v;
         if (changed)
             refreshColoring();
+        for (copycat in copycats)
+            copycat.setPlayerMove(v);
     }
 
     private function refreshColoring()
@@ -94,7 +103,7 @@ class Clock extends Card
     {
         if (secondsLeft <= 0)
         {
-            stopTimer();
+            pauseTimer();
             secondsLeft = 0;
             label.text = TimeControl.secsToString(0);
             Networker.emitEvent(RequestTimeoutCheck);
@@ -120,13 +129,26 @@ class Clock extends Card
         lastUpdate = Date.now().getTime();
         addEventListener(Event.ENTER_FRAME, onEnterFrame);
         refreshColoring();
+        for (copycat in copycats)
+            copycat.launchTimer();
     }
 
-    public function stopTimer() 
+    public function stopClockCompletely()
+    {
+        pauseTimer();
+        setPlayerMove(false);
+        for (copycat in copycats)
+            copycat.stopClockCompletely();
+    }
+
+    public function pauseTimer() 
     {
         removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 
         refreshColoring();
+
+        for (copycat in copycats)
+            copycat.pauseTimer();
     }
 
     public function correctTime(secsLeft:Float, actualTimestamp:Float) 
@@ -134,6 +156,9 @@ class Clock extends Card
         secondsLeft = secsLeft;
         lastUpdate = actualTimestamp;
         onTimeUpdated();
+
+        for (copycat in copycats)
+            copycat.correctTime(secsLeft, actualTimestamp);
     }
 
     public function addTime(secs:Float) 
@@ -141,6 +166,9 @@ class Clock extends Card
         secondsLeft += secs;
         label.text = TimeControl.secsToString(secondsLeft);
         refreshColoring();
+
+        for (copycat in copycats)
+            copycat.addTime(secs);
     }
 
     public function init(initialSeconds:Float, alertsEnabled:Bool, playSoundOnOneMinuteLeft:Bool, isOwnerToMove:Bool) 

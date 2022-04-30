@@ -1,5 +1,6 @@
 package gfx.common;
 
+import gfx.utils.PlyScrollType;
 import haxe.ui.containers.VBox;
 using utils.CallbackTools;
 
@@ -15,11 +16,17 @@ class CreepingLine extends VBox
         return pointer > 0? plyCards[pointer-1] : null;
     }
 
-    private function onCardClicked(move:Int)
+    private function setPointer(move:Int)
     {
         deselectSelectedCard();
-        plyCards[move-1].select();
+        if (move > 0)
+            plyCards[move-1].select();
         pointer = move;
+    }
+
+    private function onPlyCardClicked(move:Int)
+    {
+        setPointer(move);
         plySelected(move);
     }
 
@@ -34,7 +41,7 @@ class CreepingLine extends VBox
     {
         var move:Int = plyCards.length + 1;
 
-        var plyCard:CreepingLinePly = new CreepingLinePly(move, plyStr, onCardClicked);
+        var plyCard:CreepingLinePly = new CreepingLinePly(move, plyStr, onPlyCardClicked);
 
         if (selected)
         {
@@ -47,11 +54,21 @@ class CreepingLine extends VBox
         lineBox.addComponent(plyCard);
     }
 
-    public function shiftPointer(move:Int) 
+    public function shiftPointer(type:PlyScrollType) 
     {
-        deselectSelectedCard();
-        plyCards[move-1].select();
-        pointer = move;
+        switch type 
+        {
+            case Home: 
+                setPointer(0);
+            case Prev: 
+                if (pointer > 0)
+                    setPointer(pointer-1);
+            case Next:
+                if (pointer < plyCards.length)
+                    setPointer(pointer+1);
+            case End:
+                setPointer(plyCards.length);
+        };
     }
 
     public function rollback(cnt:Int)

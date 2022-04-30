@@ -11,7 +11,6 @@ import haxe.Timer;
 import gameboard.behaviors.PlayerMoveBehavior;
 import struct.Situation;
 import gameboard.GameBoard;
-import gfx.game.CompactGame;
 import struct.PieceColor;
 import utils.TimeControl;
 import struct.ActualizationData;
@@ -74,28 +73,6 @@ class Main extends Sprite
 		super();
 		init();
 		//start();
-		var boardWrapper:BoardWrapper = new BoardWrapper(new Board(Situation.starting(), White, 40, false));
-		boardWrapper.percentHeight = 100;
-		var card1:Card = new Card();
-		card1.percentHeight = 100;
-		card1.width = 30;
-		var card2:Card = new Card();
-		card2.percentHeight = 100;
-		card2.width = 30;
-		var hbox:HBox = new HBox();
-		hbox.percentHeight = 100;
-		hbox.verticalAlign = 'center';
-		hbox.horizontalAlign = 'center';
-		hbox.addComponent(card1);
-		hbox.addComponent(boardWrapper);
-		hbox.addComponent(card2);
-
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(hbox);
-
-		addChild(box);
 	}
 
 	private function init() 

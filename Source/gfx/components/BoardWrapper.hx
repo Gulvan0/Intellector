@@ -65,7 +65,8 @@ class BoardWrapper extends Component
         return super.set_percentHeight(value);
     }
 
-    private override function validateComponentLayout():Bool {
+    private override function validateComponentLayout():Bool 
+    {
         var b = super.validateComponentLayout();
         board.resize(componentWidth / 14);
         return b;

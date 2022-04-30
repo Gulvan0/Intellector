@@ -55,14 +55,14 @@ class ScreenManager extends Sprite implements INetObserver
                 new Analysis(initialVariantStr, exploredStudyID);
             case LanguageSelectIntro:
                 new LanguageSelectIntro();
-            case StartedPlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor):
-                LiveGame.constructFromParams(gameID, whiteLogin, blackLogin, playerColor, timeControl, playerColor);
-            case ReconnectedPlayableGame(gameID, actualizationData):
-                LiveGame.constructFromActualizationData(gameID, actualizationData);
-            case SpectatedGame(gameID, watchedColor, actualizationData):
-                LiveGame.constructFromActualizationData(gameID, actualizationData, watchedColor);
-            case RevisitedGame(gameID, watchedColor, data):
-                LiveGame.constructFromActualizationData(gameID, data, watchedColor);
+            case StartedPlayableGame(_, whiteLogin, blackLogin, timeControl, playerColor):
+                LiveGame.constructFromParams(whiteLogin, blackLogin, playerColor, timeControl, playerColor);
+            case ReconnectedPlayableGame(_, actualizationData):
+                LiveGame.constructFromActualizationData(actualizationData);
+            case SpectatedGame(_, watchedColor, actualizationData):
+                LiveGame.constructFromActualizationData(actualizationData, watchedColor);
+            case RevisitedGame(_, watchedColor, data):
+                LiveGame.constructFromActualizationData(data, watchedColor);
             case PlayerProfile(ownerLogin):
                 new PlayerProfile(ownerLogin);
             case LoginRegister:

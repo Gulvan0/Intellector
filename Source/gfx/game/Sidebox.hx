@@ -42,9 +42,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
     private var secsPerTurn:Int;
     private var lastMovetableEntry:Dynamic;
 
-    private var onActionBtnPressed:ActionBtn->Void;
-    private var onPlyScrollBtnPressed:PlyScrollType->Void;
-
     public function handleNetEvent(event:ServerEvent)
     {
         switch event 
@@ -70,13 +67,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         }
     }
 
-    private function handleActionBarBtnPress(btn:ActionBtn) 
-    {
-        if (btn == ChangeOrientation)
-            revertOrientation();
-        onActionBtnPressed(btn);
-    }
-
     private function correctTime(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, pingSubtractionSide:String)
     {
         var currentTimestamp:Float = Date.now().getTime();
@@ -93,15 +83,13 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     private function onGameEnded()
     {
-        whiteClock.stopTimer();
-        blackClock.stopTimer();
-        whiteClock.setPlayerMove(false);
-        blackClock.setPlayerMove(false);
+        whiteClock.stopClockCompletely();
+        blackClock.stopClockCompletely();
     }
 
     //===========================================================================================================================================================
 
-    private function revertOrientation()
+    public function revertOrientation()
     {
         removeComponent(whiteClock, false);
         removeComponent(blackClock, false);
@@ -132,7 +120,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
         var playerToMoveClock:Clock = justMovedColor == Black? whiteClock : blackClock;
 
-        justMovedPlayerClock.stopTimer();
+        justMovedPlayerClock.pauseTimer();
         justMovedPlayerClock.setPlayerMove(false);
         playerToMoveClock.setPlayerMove(true);
 
@@ -161,7 +149,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
         if (cnt % 2 == 1)
         {
-            justMovedPlayerClock.stopTimer();
+            justMovedPlayerClock.pauseTimer();
             justMovedPlayerClock.setPlayerMove(false);
             playerToMoveClock.setPlayerMove(true);
             playerToMoveClock.launchTimer();
@@ -202,8 +190,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         this.secsPerTurn = timeControl.bonusSecs;
         this.orientationColor = White;
         this.move = 0;
-        this.onActionBtnPressed = onActionBtnPressed;
-        this.onPlyScrollBtnPressed = onPlyScrollBtnPressed;
         
         whiteClock.init(timeControl.startSecs, playingAs == White, timeControl.startSecs >= 90, true);
         blackClock.init(timeControl.startSecs, playingAs == Black, timeControl.startSecs >= 90, false);
@@ -212,7 +198,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         blackLoginLabel.text = blackLogin;
         
         navigator.init(onPlyScrollBtnPressed);
-        actionBar.init(false, playingAs, handleActionBarBtnPress);
+        actionBar.init(false, playingAs, onActionBtnPressed);
 
         if (orientationColor == Black)
             revertOrientation();
