@@ -21,6 +21,6 @@ class Colors
 
     public static function hexRowNumber(isDark:Bool):Int 
     {
-        return isDark? 0x664126 : 0xFFD8B2;
+        return isDark? 0xFFD8B2 : 0x664126;
     }
 }

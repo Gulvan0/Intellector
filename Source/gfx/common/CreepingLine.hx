@@ -67,9 +67,13 @@ class CreepingLine extends VBox
             lineBox.removeComponent(card);
     }
 
-    public function new(plySelected:Int->Void) 
+    public function init(plySelected:Int->Void) 
+    {
+        this.plySelected = plySelected;
+    }
+
+    public function new() 
     {
         super();
-        this.plySelected = plySelected;
     }
 }

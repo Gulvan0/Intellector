@@ -23,9 +23,8 @@ class SelectableBoard extends Board
     private var redSelectedHexIndices:Array<Int> = [];
     private var lastMoveSelectedHexes:Array<Hexagon> = [];
 
-    public override function setOrientation(val:PieceColor) 
+    private function updateAllArrows()
     {
-        super.setOrientation(val);
         for (code => arrow in drawnArrows.keyValueIterator())
         {
             var from:IntPoint = new IntPoint(Std.parseInt(code.charAt(0)), Std.parseInt(code.charAt(1)));
@@ -34,6 +33,18 @@ class SelectableBoard extends Board
             var toPos:Point = hexCoords(to);
             redrawArrow(arrow.graphics, fromPos, toPos);
         }
+    }
+
+    public override function setOrientation(val:PieceColor) 
+    {
+        super.setOrientation(val);
+        updateAllArrows();
+    }
+
+    public override function resize(newHexSideLength:Float)
+    {
+        super.resize(newHexSideLength);
+        updateAllArrows();
     }
 
     public function highlightMove(hexesCoords:Array<IntPoint>) 
@@ -164,7 +175,6 @@ class SelectableBoard extends Board
 
     private function redrawArrow(graphics:Graphics, fromCenter:Point, toCenter:Point) 
     {
-        //New:
         var trunkThickness:Float = 3 * hexSideLength / 8;
         var capTriangleSide:Float = 3 * hexSideLength / 4;
         var startRadius:Float = hexSideLength / 2; //hexSideLength is also a hex radius. We start drawing halfway to the bounding circle's border
@@ -198,25 +208,6 @@ class SelectableBoard extends Board
         graphics.lineTo(capBottomCWVertice.x, capBottomCWVertice.y);
         graphics.lineTo(capTopVertice.x, capTopVertice.y);
         graphics.endFill();
-
-        //Old:
-        /*var thickness:Float = hexSideLength / 6;
-        var lrLength:Float = hexSideLength / 2;
-        var dr = fromCenter.subtract(toCenter);
-        var rotated1 = new Point(Math.sqrt(3)/2 * dr.x + 1/2 * dr.y, -1/2 * dr.x + Math.sqrt(3)/2 * dr.y);
-        var rotated2 = new Point(Math.sqrt(3)/2 * dr.x - 1/2 * dr.y, 1/2 * dr.x + Math.sqrt(3)/2 * dr.y);
-        rotated1.normalize(lrLength);
-        rotated2.normalize(lrLength);
-        var branch1 = toCenter.add(rotated1);
-        var branch2 = toCenter.add(rotated2);
-
-        graphics.clear();
-        graphics.lineStyle(thickness, Colors.arrow, 0.7, null, null, CapsStyle.SQUARE, JointStyle.MITER);
-        graphics.moveTo(fromCenter.x, fromCenter.y);
-        graphics.lineTo(toCenter.x, toCenter.y);
-        graphics.lineTo(branch1.x, branch1.y);
-        graphics.moveTo(toCenter.x, toCenter.y);
-        graphics.lineTo(branch2.x, branch2.y);*/
     }
 
     public function new(situation:Situation, orientationColor:PieceColor = White, hexSideLength:Float = 40, suppressMarkup:Bool = false) 

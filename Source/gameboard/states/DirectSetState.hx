@@ -28,9 +28,9 @@ class DirectSetState extends BaseState
         //* Do nothing
     }
 
-    public function new(board:GameBoard, prototypeHex:Hex, ?cursorLocation:IntPoint)
+    public function new(prototypeHex:Hex)
     {
-        super(board, cursorLocation);
+        super();
         this.prototypeHex = prototypeHex;
     }
 }

@@ -22,19 +22,19 @@ class TGameBoard extends Sprite
 
     private function _act_setPlayerMoveBehavior()
     {
-        board.behavior = new PlayerMoveBehavior(board, playerColor);
+        board.behavior = new PlayerMoveBehavior(playerColor);
         board.plyHistory.clear();
     }
 
     private function _act_setEnemyMoveBehavior()
     {
-        board.behavior = new EnemyMoveBehavior(board, playerColor);
+        board.behavior = new EnemyMoveBehavior(playerColor);
         board.plyHistory.clear();
     }
 
     private function _act_setAnalysisBehavior()
     {
-        board.behavior = new AnalysisBehavior(board, playerColor);
+        board.behavior = new AnalysisBehavior(playerColor);
         board.plyHistory.clear();
     }
 
@@ -44,16 +44,16 @@ class TGameBoard extends Sprite
         if (Std.isOfType(board.behavior, PlayerMoveBehavior))
         {
             if (!Preferences.premoveEnabled.get())
-                board.state = new StubState(board, board.state.cursorLocation);
-            board.behavior = new EnemyMoveBehavior(board, playerColor);
+                board.state = new StubState();
+            board.behavior = new EnemyMoveBehavior(playerColor);
         }
         else if (Std.isOfType(board.behavior, EnemyMoveBehavior))
         {
-            board.state = new NeutralState(board, board.state.cursorLocation);
-            board.behavior = new PlayerMoveBehavior(board, playerColor);
+            board.state = new NeutralState();
+            board.behavior = new PlayerMoveBehavior(playerColor);
         }
         else if (Std.isOfType(board.behavior, AnalysisBehavior))
-            board.behavior = new AnalysisBehavior(board, playerColor);
+            board.behavior = new AnalysisBehavior(playerColor);
     }
 
     private function _act_enemyMove() 
@@ -124,8 +124,7 @@ class TGameBoard extends Sprite
         super();
         playerColor = White;
 
-        board = new GameBoard(Situation.starting(), White, 50);
-        board.init(new NeutralState(board), new EnemyMoveBehavior(board, playerColor));
+        board = new GameBoard(Situation.starting(), White, new EnemyMoveBehavior(playerColor), false, 50);
         addChild(board);
     } 
 }

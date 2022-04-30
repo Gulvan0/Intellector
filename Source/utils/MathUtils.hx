@@ -1,7 +1,9 @@
 package utils;
 
 class MathUtils 
-{
+{   
+    public static var HALF_SQRT3:Float = Math.sqrt(3) / 2;
+
     public static function scaleLike(defaultValue:Float, defaultMeasure:Float, scaledMeasure:Float) 
     {
         return defaultValue * scaledMeasure / defaultMeasure;

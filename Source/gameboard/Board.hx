@@ -1,12 +1,11 @@
 package gameboard;
 
+import haxe.ui.components.Label;
 import struct.Ply;
 import utils.MathUtils;
 import openfl.display.Sprite;
 import gfx.utils.Colors;
 import utils.Notation;
-import openfl.text.TextFormat;
-import openfl.text.TextField;
 import openfl.geom.Point;
 import struct.ReversiblePly;
 import struct.Hex;
@@ -20,8 +19,8 @@ import gfx.components.OffsettedSprite;
 **/
 class Board extends OffsettedSprite
 {
-    //?Maybe a setter will be added later for dynamic resizing
     public var hexSideLength(default, null):Float;
+    public var lettersEnabled(default, null):Bool;
 
     public var hexagons:Array<Hexagon>;
     public var pieces:Array<Null<Piece>>;
@@ -29,7 +28,7 @@ class Board extends OffsettedSprite
     public var orientationColor(default, null):PieceColor;
     public var shownSituation(default, null):Situation;
 
-    private var letters:Array<TextField> = [];
+    private var letters:Array<Label> = [];
 
     private var hexagonLayer:Sprite;
     private var pieceLayer:Sprite;
@@ -37,6 +36,35 @@ class Board extends OffsettedSprite
     public function getFieldHeight():Float
     {
         return Hexagon.sideToHeight(hexSideLength) * 7;
+    }
+    
+    public function resize(newHexSideLength:Float)
+    {
+        this.hexSideLength = newHexSideLength;
+        for (s in 0...IntPoint.hexCount)
+        {
+            var coords = hexCoords(IntPoint.fromScalar(s));
+
+            var hexagon = hexagons[s];
+            var piece = pieces[s];
+
+            hexagon.resize(newHexSideLength);
+            hexagon.x = coords.x;
+            hexagon.y = coords.y;
+
+            if (piece != null)
+            {
+                piece.redraw(newHexSideLength);
+                piece.dispose(coords);
+            }
+        }
+        if (lettersEnabled)
+        {
+            for (letter in letters)
+                hexagonLayer.removeChild(letter);
+            letters = [];
+            disposeLetters();
+        }
     }
 
     public function revertOrientation()
@@ -221,6 +249,8 @@ class Board extends OffsettedSprite
         var hexWidth:Float = Hexagon.sideToWidth(hexSideLength);
         var hexHeight:Float = Hexagon.sideToHeight(hexSideLength);
 
+        var shift:Point = new Point(hexWidth/2, hexHeight/2);
+
         var p:Point = new Point(0, 0);
         p.x = 3 * hexSideLength * i / 2;
         p.y = hexHeight * j;
@@ -228,7 +258,7 @@ class Board extends OffsettedSprite
         if (i % 2 == 1)
             p.y += hexHeight / 2;
 
-        return p;
+        return p.add(shift);
     }
 
     private function produceHexagons(displayRowNumbers:Bool)
@@ -286,21 +316,22 @@ class Board extends OffsettedSprite
     {
         for (i in 0...9)
         {
-            var bottomHexCoords:Point = absHexCoords(i, 6 - i % 2, true);
-            var letter = createLetter(Notation.getColumn(i), hexSideLength);
-            letter.x = bottomHexCoords.x - letter.textWidth / 2 - 5;
+            var bottomHexLocation:IntPoint = new IntPoint(i, orientationColor == White? 6 - i % 2 : 0);
+            var bottomHexCoords:Point = hexCoords(bottomHexLocation);
+            var letter:Label = createLetter(Notation.getColumn(i), hexSideLength);
+            letter.width = 2 * hexSideLength;
+            letter.x = bottomHexCoords.x - hexSideLength;
             letter.y = bottomHexCoords.y + Hexagon.sideToHeight(hexSideLength) / 2;
             letters.push(letter);
             hexagonLayer.addChild(letter); 
         }
     }
 
-    private function createLetter(letter:String, hexSideLength:Float):TextField 
+    private function createLetter(letter:String, hexSideLength:Float):Label 
     {
-        var tf = new TextField();
+        var tf = new Label();
+        tf.customStyle = {fontSize: MathUtils.intScaleLike(28, 40, hexSideLength), color: Colors.border, fontBold: true, textAlign: "center"};
         tf.text = letter;
-        tf.setTextFormat(new TextFormat(null, MathUtils.intScaleLike(28, 40, hexSideLength), Colors.border, true));
-        tf.selectable = false;
         return tf;
     }
 
@@ -308,6 +339,7 @@ class Board extends OffsettedSprite
     {
         super(-hexSideLength, -Hexagon.sideToHeight(hexSideLength) / 2);
         this.hexSideLength = hexSideLength;
+        this.lettersEnabled = !suppressMarkup && Preferences.markup.get() != None;
         this.orientationColor = orientationColor;
         this.shownSituation = situation.copy();
         this.hexagonLayer = new Sprite();
@@ -318,7 +350,7 @@ class Board extends OffsettedSprite
 
         produceHexagons(!suppressMarkup && Preferences.markup.get() == Over);
         producePieces();
-        if (!suppressMarkup && Preferences.markup.get() != None)
+        if (lettersEnabled)
             disposeLetters();
     }
 

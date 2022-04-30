@@ -1,5 +1,8 @@
 package gfx.screens;
 
+import gameboard.behaviors.IBehavior;
+import gameboard.behaviors.StubBehavior;
+import haxe.exceptions.NotImplementedException;
 import gfx.game.CompactGame;
 import gfx.common.ActionBar.ActionBtn;
 import struct.ActualizationData;
@@ -47,6 +50,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     public override function onEntered()
     {
         GeneralObserver.acceptsDirectChallenges = false;
+        //TODO: Rewrite to fit both compact and large layouts
+        //TODO: Connect board to Networker
         Networker.eventQueue.addObserver(gameinfobox);
         Networker.eventQueue.addObserver(chatbox);
         Networker.eventQueue.addObserver(sidebox);
@@ -55,6 +60,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public override function onClosed()
     {
+        //TODO: Rewrite to fit both compact and large layouts
         Networker.eventQueue.removeObserser(gameinfobox);
         Networker.eventQueue.removeObserser(chatbox);
         Networker.eventQueue.removeObserser(sidebox);
@@ -80,7 +86,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     {
         switch event 
         {
-            case ContinuationMove(ply, plyStr, performedBy):
+            case ContinuationMove(ply, _, _):
                 Networker.emitEvent(Move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto.getName()));
             default:
         }
@@ -127,7 +133,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public static function constructFromActualizationData(gameID:Int, actualizationData:ActualizationData, ?orientationColor:PieceColor):LiveGame
     {
-        var playingAs:Null<PieceColor> = actualizationData.logParserOutput.getPlayerColor();
+        throw new NotImplementedException(); //TODO: Rewrite
+        /*var playingAs:Null<PieceColor> = actualizationData.logParserOutput.getPlayerColor();
 
         if (orientationColor == null)
             if (playingAs == null)
@@ -139,21 +146,22 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         var chatbox = Chatbox.constructFromActualizationData(playingAs == null, actualizationData);
         var gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
 
-        return new LiveGame(gameID, playingAs, actualizationData.logParserOutput.currentSituation, sidebox, chatbox, gameinfobox, orientationColor);
+        return new LiveGame(gameID, playingAs, actualizationData.logParserOutput.currentSituation, sidebox, chatbox, gameinfobox, orientationColor);*/
     }
 
     public static function constructFromParams(gameID:Int, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, timeControl:TimeControl, playerColor:Null<PieceColor>):LiveGame 
     {
-        var sidebox = new Sidebox(playerColor, timeControl, whiteLogin, blackLogin, orientationColor); //TODO: Set adaptive width/height
+        throw new NotImplementedException(); //TODO: Rewrite
+        /*var sidebox = new Sidebox(playerColor, timeControl, whiteLogin, blackLogin, orientationColor); //TODO: Set adaptive width/height
         var chatbox = new Chatbox(playerColor == null);
         var gameinfobox = new GameInfoBox(timeControl, whiteLogin, blackLogin);
 
-        return new LiveGame(gameID, playerColor, Situation.starting(), sidebox, chatbox, gameinfobox, orientationColor);
+        return new LiveGame(gameID, playerColor, Situation.starting(), sidebox, chatbox, gameinfobox, orientationColor);*/
     }
 
     private function initLarge(sidebox:Sidebox, chatbox:Chatbox, gameinfobox:GameInfoBox)
     {
-        this.sidebox = sidebox;
+        /*this.sidebox = sidebox;
         this.chatbox = chatbox;
         this.gameinfobox = gameinfobox;
 
@@ -173,7 +181,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         board.addObserver(gameinfobox);
         board.addObserver(sidebox);
-        sidebox.init(handleActionBtnPress, board.applyScrolling);
+        sidebox.init(handleActionBtnPress, board.applyScrolling);*/
     }
 
     private function initCompact(compactGame:CompactGame)
@@ -187,14 +195,15 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         this.gameID = gameID;
         this.playerColor = playerColor;
 
-        board = new GameBoard(currentSituation, orientationColor);
-        board.state = playerColor != null? new NeutralState(board) : new StubState(board);
-
+        var behavior:IBehavior;
         if (playerColor == null)
-            board.behavior = new EnemyMoveBehavior(board, orientationColor); //Behavior doesn't matter at all, that's just a placeholder
+            behavior = new StubBehavior();
         else if (currentSituation.turnColor == playerColor)
-            board.behavior = new PlayerMoveBehavior(board, playerColor);
+            behavior = new PlayerMoveBehavior(playerColor);
         else
-            board.behavior = new EnemyMoveBehavior(board, playerColor);
+            behavior = new EnemyMoveBehavior(playerColor);
+
+        board = new GameBoard(currentSituation, orientationColor, behavior, playerColor == null);
+
     }
 }

@@ -17,7 +17,7 @@ class DraggingState extends BasePlayableState
             boardInstance.getHex(cursorLocation).hideLayer(Hover);
 
         boardInstance.removeMarkers(dragStartLocation);
-        boardInstance.state = new NeutralState(boardInstance, cursorLocation);
+        boardInstance.state = new NeutralState();
     }
 
     public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
@@ -39,7 +39,7 @@ class DraggingState extends BasePlayableState
             draggedPiece.x = newPosition.x;
             draggedPiece.y = newPosition.y;
             boardInstance.getHex(location).showLayer(LMB);
-            boardInstance.state = new SelectedState(boardInstance, location, cursorLocation);
+            boardInstance.state = new SelectedState(location);
         }
         else if (location != null && boardInstance.behavior.movePossible(dragStartLocation, location))
         {
@@ -58,9 +58,9 @@ class DraggingState extends BasePlayableState
         return boardInstance.behavior.movePossible(dragStartLocation, location);
     }
 
-    public function new(board:GameBoard, dragStartLocation:IntPoint, ?cursorLocation:IntPoint)
+    public function new(dragStartLocation:IntPoint)
     {
-        super(board, cursorLocation);
+        super();
         this.dragStartLocation = dragStartLocation;
     }
 }

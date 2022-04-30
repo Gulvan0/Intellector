@@ -1,5 +1,17 @@
 package;
 
+import haxe.ui.containers.HBox;
+import haxe.ui.containers.Card;
+import haxe.ui.containers.Box;
+import haxe.ui.containers.VBox;
+import gfx.components.BoardWrapper;
+import gameboard.Board;
+import openfl.events.Event;
+import haxe.Timer;
+import gameboard.behaviors.PlayerMoveBehavior;
+import struct.Situation;
+import gameboard.GameBoard;
+import gfx.game.CompactGame;
 import struct.PieceColor;
 import utils.TimeControl;
 import struct.ActualizationData;
@@ -62,16 +74,32 @@ class Main extends Sprite
 		super();
 		init();
 		//start();
-		addChild(new UITest(new TChatBox()));
+		var boardWrapper:BoardWrapper = new BoardWrapper(new Board(Situation.starting(), White, 40, false));
+		boardWrapper.percentHeight = 100;
+		var card1:Card = new Card();
+		card1.percentHeight = 100;
+		card1.width = 30;
+		var card2:Card = new Card();
+		card2.percentHeight = 100;
+		card2.width = 30;
+		var hbox:HBox = new HBox();
+		hbox.percentHeight = 100;
+		hbox.verticalAlign = 'center';
+		hbox.horizontalAlign = 'center';
+		hbox.addComponent(card1);
+		hbox.addComponent(boardWrapper);
+		hbox.addComponent(card2);
+
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(hbox);
+
+		addChild(box);
 	}
 
 	private function init() 
 	{
-		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
-		var element = Browser.document.getElementById("openfl-content");
-		element.style.width = '${Browser.window.innerWidth}px';
-		element.style.height = '${Browser.window.innerHeight}px';
-
 		Toolkit.init();
 		OpeningTree.init();
 		AssetManager.init();
@@ -119,6 +147,7 @@ class Main extends Sprite
 
 	private function onConnected()
 	{
+		ScreenManager.observeNetEvents();
 		if (CredentialCookies.hasLoginDetails())
 			LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), null, navigate, navigate);
 		else

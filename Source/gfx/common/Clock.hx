@@ -20,6 +20,22 @@ class Clock extends Card
     private var lastUpdate:Float;
     private var playerMove:Bool;
 
+    public function resize(newHeight:Float)
+    {
+        var unit:Float = newHeight / 11;
+
+        var newLabelStyle = label.customStyle.clone();
+        newLabelStyle.fontSize = 9.6 * unit;
+        label.customStyle = newLabelStyle;
+
+        var newCardStyle = this.customStyle.clone();
+        newCardStyle.paddingTop = unit;
+        newCardStyle.paddingBottom = unit;
+        newCardStyle.paddingLeft = 4 * unit;
+        newCardStyle.paddingRight = 4 * unit;
+        this.customStyle = newCardStyle;
+    }
+
     public function setPlayerMove(v:Bool) 
     {
         var changed:Bool = playerMove != v;
@@ -57,8 +73,13 @@ class Clock extends Card
         else
             throw "Impossible situation at Clock::refreshColoring()";
 
-        label.customStyle = {color: textColor, fontSize: 48};
-        this.customStyle =  {backgroundColor: backgroundColor, horizontalAlign: 'center', paddingTop: 5, paddingBottom: 5, paddingLeft: 20, paddingRight: 20};
+        var newLabelStyle = label.customStyle.clone();
+        newLabelStyle.color = textColor;
+        label.customStyle = newLabelStyle;
+
+        var newCardStyle = this.customStyle.clone();
+        newCardStyle.backgroundColor = backgroundColor;
+        this.customStyle = newCardStyle;
     }
 
     private function onEnterFrame(e)

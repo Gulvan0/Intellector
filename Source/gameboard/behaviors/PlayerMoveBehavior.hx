@@ -1,5 +1,6 @@
 package gameboard.behaviors;
 
+import utils.exceptions.AlreadyInitializedException;
 import struct.IntPoint;
 import struct.Ply;
 import net.ServerEvent;
@@ -22,11 +23,11 @@ class PlayerMoveBehavior implements IBehavior
                 boardInstance.state.abortMove();
                 boardInstance.revertPlys(plysToUndo);
                 if (plysToUndo % 2 == 1)
-                    boardInstance.behavior = new EnemyMoveBehavior(boardInstance, playerColor);
+                    boardInstance.behavior = new EnemyMoveBehavior(playerColor);
                 
             case GameEnded(winner_color, reason):
                 boardInstance.state.abortMove();
-                boardInstance.state = new StubState(boardInstance, boardInstance.state.cursorLocation);
+                boardInstance.state = new StubState();
             
             default:
         }
@@ -64,10 +65,10 @@ class PlayerMoveBehavior implements IBehavior
         Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
         boardInstance.makeMove(ply);
         if (Preferences.premoveEnabled.get())
-            boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
+            boardInstance.state = new NeutralState();
         else
-            boardInstance.state = new StubState(boardInstance, boardInstance.state.cursorLocation);
-        boardInstance.behavior = new EnemyMoveBehavior(boardInstance, playerColor);
+            boardInstance.state = new StubState();
+        boardInstance.behavior = new EnemyMoveBehavior(playerColor);
     }
     
     public function markersDisabled():Bool
@@ -79,10 +80,16 @@ class PlayerMoveBehavior implements IBehavior
     {
         return false;
     }
-    
-    public function new(board:GameBoard, playerColor:PieceColor)
+
+    public function init(board:GameBoard)
     {
+        if (this.boardInstance != null)
+            throw new AlreadyInitializedException();
         this.boardInstance = board;
+    }
+
+    public function new(playerColor:PieceColor)
+    {
         this.playerColor = playerColor;
     }
 }

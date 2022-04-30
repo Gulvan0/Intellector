@@ -1,4 +1,4 @@
-<card width="350px">
+<card width="100%">
     <hbox width="100%">
         <label id="matchParameters" horizontalAlign="left" style="font-size:16px;text-align:left" />
         <spacer width="100%" />

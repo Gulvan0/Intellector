@@ -174,14 +174,14 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         navigator.scrollAfterDelay();
     }
 
-    public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, width:Float, height:Float):Sidebox
+    public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void):Sidebox
     {
         var playingAs:Null<PieceColor> = data.logParserOutput.getPlayerColor();
         var timeControl:TimeControl = data.logParserOutput.timeControl;
         var whiteLogin:String = data.logParserOutput.whiteLogin;
         var blackLogin:String = data.logParserOutput.blackLogin;
 
-        var sidebox:Sidebox = new Sidebox(playingAs, timeControl, whiteLogin, blackLogin, orientationColor, width, height);
+        var sidebox:Sidebox = new Sidebox(playingAs, timeControl, whiteLogin, blackLogin, orientationColor, onActionBtnPressed, onPlyScrollBtnPressed);
 
         var situation:Situation = Situation.starting();
         for (ply in data.logParserOutput.movesPlayed)
@@ -196,20 +196,14 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         return sidebox;
     }
 
-    public function init(onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void) 
-    {
-        this.onActionBtnPressed = onActionBtnPressed;
-        this.onPlyScrollBtnPressed = onPlyScrollBtnPressed;
-    }
-
-    public function new(playingAs:Null<PieceColor>, timeControl:TimeControl, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, width:Float, height:Float) 
+    public function new(playingAs:Null<PieceColor>, timeControl:TimeControl, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void) 
     {
         super();
-        this.width = width;
-        this.height = height;
         this.secsPerTurn = timeControl.bonusSecs;
         this.orientationColor = White;
         this.move = 0;
+        this.onActionBtnPressed = onActionBtnPressed;
+        this.onPlyScrollBtnPressed = onPlyScrollBtnPressed;
         
         whiteClock.init(timeControl.startSecs, playingAs == White, timeControl.startSecs >= 90, true);
         blackClock.init(timeControl.startSecs, playingAs == Black, timeControl.startSecs >= 90, false);

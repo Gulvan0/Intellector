@@ -1,13 +1,12 @@
 package gameboard.behaviors;
 
+import utils.exceptions.AlreadyInitializedException;
 import struct.Ply;
 import struct.IntPoint;
 import net.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;
 import utils.AssetManager;
-import gameboard.states.DraggingState;
-import gameboard.states.NeutralState;
 
 class EditorFreeMoveBehavior implements IBehavior 
 {
@@ -57,9 +56,16 @@ class EditorFreeMoveBehavior implements IBehavior
     {
         return true;
     }
-    
-    public function new(board:GameBoard)
+
+    public function init(board:GameBoard)
     {
+        if (this.boardInstance != null)
+            throw new AlreadyInitializedException();
         this.boardInstance = board;
+    }
+    
+    public function new()
+    {
+        
     }
 }

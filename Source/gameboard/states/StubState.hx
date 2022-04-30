@@ -24,8 +24,8 @@ class StubState extends BaseState
         return false;
     }
 
-    public function new(board:GameBoard, ?cursorLocation:IntPoint)
+    public function new()
     {
-        super(board, cursorLocation);
+        super();
     }
 }

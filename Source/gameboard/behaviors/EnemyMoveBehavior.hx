@@ -1,5 +1,6 @@
 package gameboard.behaviors;
 
+import utils.exceptions.AlreadyInitializedException;
 import struct.Hex;
 import struct.Ply;
 import struct.IntPoint;
@@ -37,7 +38,7 @@ class EnemyMoveBehavior implements IBehavior
             boardInstance.makeMove(ply);
 
             boardInstance.state.abortMove();
-            boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
+            boardInstance.behavior = new PlayerMoveBehavior(playerColor);
         }
         else
         {
@@ -54,7 +55,7 @@ class EnemyMoveBehavior implements IBehavior
             if (premoveDeparture.color != playerColor || !Rules.possible(activatedPremove.from, activatedPremove.to, boardInstance.currentSituation.get))
             {
                 boardInstance.state.abortMove();
-                boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
+                boardInstance.behavior = new PlayerMoveBehavior(playerColor);
             }
             else
             {
@@ -83,12 +84,12 @@ class EnemyMoveBehavior implements IBehavior
                 resetPremoves();
                 boardInstance.revertPlys(plysToUndo);
                 if (plysToUndo % 2 == 1)
-                    boardInstance.behavior = new PlayerMoveBehavior(boardInstance, playerColor);
+                    boardInstance.behavior = new PlayerMoveBehavior(playerColor);
                 
             case GameEnded(winner_color, reason):
                 boardInstance.state.abortMove();
                 resetPremoves();
-                boardInstance.state = new StubState(boardInstance, boardInstance.state.cursorLocation);
+                boardInstance.state = new StubState();
 
             case Move(fromI, toI, fromJ, toJ, morphInto):
                 boardInstance.state.abortMove();
@@ -129,7 +130,7 @@ class EnemyMoveBehavior implements IBehavior
         //No premoveEnabled check because it is impossible to get here from the StubState
         displayPlannedPremove(ply);
         premoves.push(ply);
-        boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
+        boardInstance.state = new NeutralState();
     }
 
     private function displayPlannedPremove(ply:Ply)
@@ -148,10 +149,16 @@ class EnemyMoveBehavior implements IBehavior
     {
         return !Preferences.premoveEnabled.get();
     }
-    
-    public function new(board:GameBoard, playerColor:PieceColor)
+
+    public function init(board:GameBoard)
     {
+        if (this.boardInstance != null)
+            throw new AlreadyInitializedException();
         this.boardInstance = board;
+    }
+    
+    public function new(playerColor:PieceColor)
+    {
         this.playerColor = playerColor;
         this.premoves = [];
     }

@@ -1,4 +1,4 @@
-<vbox width="300px" verticalAlign="center">
+<vbox width="100%" verticalAlign="center">
     <clock id="blackClock" />
     <card id="blackLoginCard" style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px" width="100%">
         <label id="blackLoginLabel" text="player2" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />

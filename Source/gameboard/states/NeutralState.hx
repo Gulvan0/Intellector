@@ -29,7 +29,7 @@ class NeutralState extends BasePlayableState
         if (!boardInstance.behavior.markersDisabled())
             boardInstance.addMarkers(location);
         boardInstance.startPieceDragging(location);
-        boardInstance.state = new DraggingState(boardInstance, location, cursorLocation);
+        boardInstance.state = new DraggingState(location);
     }
 
     public override function reactsToHover(location:IntPoint):Bool
@@ -46,8 +46,8 @@ class NeutralState extends BasePlayableState
         //* Do nothing
     }
 
-    public function new(board:GameBoard, ?cursorLocation:IntPoint)
+    public function new()
     {
-        super(board, cursorLocation);
+        super();
     }
 }

@@ -1,5 +1,6 @@
 package gameboard;
 
+import openfl.display.Graphics;
 import utils.MathUtils;
 import utils.Notation;
 import gfx.utils.Colors;
@@ -25,14 +26,26 @@ class Hexagon extends Sprite
     private var dot:Sprite;
     private var round:Sprite;
 
+    private var dark:Bool;
+
+    public static function sideToWidth(hexSideLength:Float):Float
+    {
+        return hexSideLength * 2;
+    }
+
     public static function sideToHeight(hexSideLength:Float):Float
     {
         return hexSideLength * Math.sqrt(3);
     }
 
-    public static function sideToWidth(hexSideLength:Float):Float
+    public static function widthToSide(w:Float):Float
     {
-        return hexSideLength * 2;
+        return w / 2;
+    }
+
+    public static function heightToSide(h:Float):Float
+    {
+        return h / Math.sqrt(3);
     }
 
     public function showLayer(state:HexagonSelectionState)
@@ -50,39 +63,46 @@ class Hexagon extends Sprite
         sprites[state].visible = !sprites[state].visible;
     }
 
+    public function resize(hexSideLength:Float)
+    {
+        for (state in HexagonSelectionState.createAll())
+            drawHex(hexSideLength, Colors.hexFill(state, dark), sprites[state].graphics);
+        drawDot(hexSideLength, dot.graphics);
+        drawRound(hexSideLength, round.graphics);
+        number.setTextFormat(new TextFormat(null, MathUtils.intScaleLike(14, 40, hexSideLength), Colors.hexRowNumber(dark), true));
+        number.x = -hexSideLength * 0.85;
+        number.y = -number.textHeight * 0.75;
+    }
+
     public function new(hexSideLength:Float, i:Int, j:Int, displayRowNumber:Bool)
     {
         super();
-
-        var dark:Bool = isDark(i, j);
+        this.dark = isDark(i, j);
 
         for (state in HexagonSelectionState.createAll())
         {
-            sprites[state] = drawHex(hexSideLength, Colors.hexFill(state, dark));
+            sprites[state] = new Sprite();
+            if (state != Normal)
+                sprites[state].visible = false;
             addChild(sprites[state]);
-        }
 
-        sprites[Normal].visible = true;
+            drawHex(hexSideLength, Colors.hexFill(state, dark), sprites[state].graphics);
+        }
 
         number = new TextField();
         number.text = Notation.getRow(i, j);
         number.setTextFormat(new TextFormat(null, MathUtils.intScaleLike(14, 40, hexSideLength), Colors.hexRowNumber(dark), true));
-        number.selectable = false;
         number.x = -hexSideLength * 0.85;
         number.y = -number.textHeight * 0.75;
-
-        if (displayRowNumber)
-            number.visible = false;
+        number.selectable = false;
+        number.visible = displayRowNumber;
 
         dot = new Sprite();
-        dot.graphics.beginFill(0x333333);
-        dot.graphics.drawCircle(0, 0, MathUtils.scaleLike(8, 40, hexSideLength));
-        dot.graphics.endFill();
+        drawDot(hexSideLength, dot.graphics);
         dot.visible = false;
 
         round = new Sprite();
-        round.graphics.lineStyle(4, 0x333333);
-        round.graphics.drawCircle(0, 0, 0.8 * hexSideLength);
+        drawRound(hexSideLength, round.graphics);
         round.visible = false;
 
         addChild(number);
@@ -108,26 +128,37 @@ class Hexagon extends Sprite
         round.visible = false;    
     }
 
-    private function drawHex(hexSideLength:Float, color:Int):Sprite
+    private static function drawHex(hexSideLength:Float, color:Int, graphics:Graphics)
     {
-        var sprite:Sprite = new Sprite();
         var rationalStep = hexSideLength/2;
         var irrationalStep = rationalStep * Math.sqrt(3);
 
-        sprite.graphics.lineStyle(MathUtils.scaleLike(3, 40, hexSideLength), Colors.border);
-        sprite.graphics.beginFill(color);
-        sprite.graphics.moveTo(-rationalStep, -irrationalStep);
-        sprite.graphics.lineTo(rationalStep, -irrationalStep);
-        sprite.graphics.lineTo(hexSideLength, 0);
-        sprite.graphics.lineTo(rationalStep, irrationalStep);
-        sprite.graphics.lineTo(-rationalStep, irrationalStep);
-        sprite.graphics.lineTo(-hexSideLength, 0);
-        sprite.graphics.lineTo(-rationalStep, -irrationalStep);
-        sprite.graphics.endFill();
+        graphics.clear();
+        graphics.lineStyle(MathUtils.scaleLike(3, 40, hexSideLength), Colors.border);
+        graphics.beginFill(color);
+        graphics.moveTo(-rationalStep, -irrationalStep);
+        graphics.lineTo(rationalStep, -irrationalStep);
+        graphics.lineTo(hexSideLength, 0);
+        graphics.lineTo(rationalStep, irrationalStep);
+        graphics.lineTo(-rationalStep, irrationalStep);
+        graphics.lineTo(-hexSideLength, 0);
+        graphics.lineTo(-rationalStep, -irrationalStep);
+        graphics.endFill();
+    }
 
-        sprite.visible = false;
+    private static function drawDot(hexSideLength:Float, graphics:Graphics) 
+    {
+        graphics.clear();
+        graphics.beginFill(0x333333);
+        graphics.drawCircle(0, 0, MathUtils.scaleLike(8, 40, hexSideLength));
+        graphics.endFill();
+    }
 
-        return sprite;
+    private static function drawRound(hexSideLength:Float, graphics:Graphics) 
+    {
+        graphics.clear();
+        graphics.lineStyle(4, 0x333333);
+        graphics.drawCircle(0, 0, 0.8 * hexSideLength);
     }
 
     private function isDark(i:Int, j:Int) 

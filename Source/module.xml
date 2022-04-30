@@ -3,6 +3,8 @@
         <component class="gfx.common.Clock" alias="clock" />
         <component class="gfx.common.MoveNavigator" alias="movenavigator" />
         <component class="gfx.common.ActionBar" alias="actionbar" />
+        <component class="gfx.common.CreepingLine" alias="creepingline" />
+        <component class="gfx.components.SpriteWrapper" alias="spritewrapper" />
     </components>
     <scriptlets>
         <import class="dict.Phrase" keep="true" static="true" />

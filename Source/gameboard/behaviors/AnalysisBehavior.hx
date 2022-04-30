@@ -1,13 +1,13 @@
 package gameboard.behaviors;
 
+import gameboard.states.NeutralState;
+import utils.exceptions.AlreadyInitializedException;
 import struct.IntPoint;
 import struct.Ply;
 import net.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;
 import utils.AssetManager;
-import gameboard.states.DraggingState;
-import gameboard.states.NeutralState;
 
 class AnalysisBehavior implements IBehavior 
 {
@@ -65,7 +65,7 @@ class AnalysisBehavior implements IBehavior
         }
 
         colorToMove = opposite(colorToMove);
-        boardInstance.state = new NeutralState(boardInstance, boardInstance.state.cursorLocation);
+        boardInstance.state = new NeutralState();
     }
     
     public function markersDisabled():Bool
@@ -82,10 +82,16 @@ class AnalysisBehavior implements IBehavior
     {
         //* Do nothing
     }
-    
-    public function new(board:GameBoard, colorToMove:PieceColor)
+
+    public function init(board:GameBoard)
     {
+        if (this.boardInstance != null)
+            throw new AlreadyInitializedException();
         this.boardInstance = board;
+    }
+    
+    public function new(colorToMove:PieceColor)
+    {
         this.colorToMove = colorToMove;
     }
 }

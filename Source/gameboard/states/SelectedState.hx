@@ -10,7 +10,7 @@ class SelectedState extends BasePlayableState
     {
         boardInstance.removeMarkers(selectedDepartureLocation);
         boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
-        boardInstance.state = new NeutralState(boardInstance, cursorLocation);
+        boardInstance.state = new NeutralState();
     }
 
     public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
@@ -23,7 +23,7 @@ class SelectedState extends BasePlayableState
 
         if (location == null || location.equals(selectedDepartureLocation))
         {
-            boardInstance.state = new NeutralState(boardInstance, cursorLocation);
+            boardInstance.state = new NeutralState();
         }
         else if (boardInstance.behavior.movePossible(selectedDepartureLocation, location))
         {
@@ -37,7 +37,7 @@ class SelectedState extends BasePlayableState
             if (!boardInstance.behavior.markersDisabled())
                 boardInstance.addMarkers(location);
             boardInstance.startPieceDragging(location);
-            boardInstance.state = new DraggingState(boardInstance, location, cursorLocation);
+            boardInstance.state = new DraggingState(location);
         }
     }
 
@@ -51,9 +51,8 @@ class SelectedState extends BasePlayableState
         //* Do nothing
     }
 
-    public function new(board:GameBoard, selectedDepartureLocation:IntPoint, ?cursorLocation:IntPoint)
+    public function new(selectedDepartureLocation:IntPoint)
     {
-        super(board, cursorLocation);
-        this.selectedDepartureLocation = selectedDepartureLocation;
+        super();
     }
 }

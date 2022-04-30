@@ -1,0 +1,23 @@
+<vbox width="100%" height="100%">
+    <creepingline id="creepLine" width="100%" />
+    <box width="100%" height="100%" style="padding-top:2px;padding-bottom:2px;padding-left:2px;padding-right:2px"> 
+        <box width="100%" height="100%">
+            <vbox id="gameContentsBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="center">
+                <hbox id="blackHBox" width="100%">
+                    <label id="blackLogin" style="color:#666666;font-size:24px" verticalAlign="center" />
+                    <spacer width="100%" />
+                    <clock id="blackClock" />
+                </hbox>
+                <box id="boardContainer" width="100%" height="100%">
+                    <spritewrapper id="boardWrapper" horizontalAlign="center" verticalAlign="center"/>
+                </box>
+                <hbox id="whiteHBox" width="100%">
+                    <label id="whiteLogin" style="color:#666666;font-size:24px" verticalAlign="center" />
+                    <spacer width="100%" />
+                    <clock id="whiteClock" />
+                </hbox>
+                <actionbar id="actionBar" width="100%" />
+            </vbox>
+        </box>
+    </box>    
+</vbox>

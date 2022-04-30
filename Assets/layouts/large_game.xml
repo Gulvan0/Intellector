@@ -1,0 +1,9 @@
+<box width="100%" height="100%" style="padding-top:2px;padding-bottom:2px;padding-left:2px;padding-right:2px">
+    <hbox id="contentHBox" style="spacing:15px" width="100%" height="100%" verticalAlign="center" horizontalAlign="center">
+        <vbox id="leftBox" style="spacing:10px" height="100%" />
+        <box id="boardContainer" height="100%">
+            <spritewrapper id="boardWrapper" horizontalAlign="center" verticalAlign="center"/>
+        </box>
+        <box id="rightBox" height="100%" />
+    </hbox>
+</box>

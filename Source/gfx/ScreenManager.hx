@@ -1,5 +1,7 @@
 package gfx;
 
+import js.html.Element;
+import openfl.events.Event;
 import dict.Utils;
 import gfx.screens.Analysis;
 import gfx.screens.LanguageSelectIntro;
@@ -28,6 +30,9 @@ class ScreenManager extends Sprite implements INetObserver
 {
     public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event
     private static var instance:ScreenManager;
+    private static var openflContent:Element;
+
+    private var lastResizeTimestamp:Float;
 
     public var current:Null<Screen>;
 
@@ -141,16 +146,47 @@ class ScreenManager extends Sprite implements INetObserver
         }
     }
 
+    private function onEnterFrame(e:Event)
+    {
+        var timestamp:Float = Date.now().getTime();
+        if (timestamp - lastResizeTimestamp > 100)
+        {
+            var innerWidthStr = '${Browser.window.innerWidth}px';
+            var innerHeightStr = '${Browser.window.innerHeight}px';
+
+            if (openflContent.style.width == innerWidthStr && openflContent.style.height == innerHeightStr)
+                return;
+
+            openflContent.style.width = innerWidthStr;
+            openflContent.style.height = innerHeightStr;
+            //TODO: current.onResize()
+            lastResizeTimestamp = timestamp;
+        }
+    }
+
     public static function launch(mainInstance:Main)
     {
+		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
+        
         var screenManager:ScreenManager = new ScreenManager();
-		Networker.eventQueue.addObserver(screenManager);
-		mainInstance.addChild(screenManager);
+        mainInstance.addChild(screenManager);
+    }
+
+    public static function observeNetEvents()
+    {
+        Networker.eventQueue.addObserver(instance);
     }
     
     private function new() 
     {
         super();
         instance = this;
+
+		openflContent = Browser.document.getElementById("openfl-content");
+		openflContent.style.width = '${Browser.window.innerWidth}px';
+        openflContent.style.height = '${Browser.window.innerHeight}px';
+        lastResizeTimestamp = Date.now().getTime();
+        
+        addEventListener(Event.ENTER_FRAME, onEnterFrame);
     }
 }

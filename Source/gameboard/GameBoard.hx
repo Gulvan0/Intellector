@@ -1,5 +1,8 @@
 package gameboard;
 
+import gameboard.states.StubState;
+import haxe.exceptions.PosException;
+import utils.exceptions.AlreadyInitializedException;
 import openfl.geom.Point;
 import struct.Variant;
 import net.EventProcessingQueue.INetObserver;
@@ -48,13 +51,50 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     public var plyHistory:PlyHistory;
     public var currentSituation:Situation;
 
-    public var state:BaseState;
-    public var behavior:IBehavior;
+    public var state(default, set):BaseState;
+    public var behavior(default, set):IBehavior;
 
     private var suppressLMBHandler:Bool = false;
+    private var lastMouseMoveEvent:MouseEvent;
 
     private var observers:Array<IGameBoardObserver> = [];
+
+    private function set_state(value:BaseState):BaseState 
+    {
+        try
+        {
+            if (state != null)
+                value.init(this, state.cursorLocation);
+            else
+                value.init(this);
+        }
+        catch (e:AlreadyInitializedException)
+        {
+            throw new PosException("You can't assign already initialized states to GameBoard", e);
+        }
+        return state = value;
+	}
+
+    private function set_behavior(value:IBehavior):IBehavior 
+    {
+		try
+        {
+            value.init(this);
+        }
+        catch (e:AlreadyInitializedException)
+        {
+            throw new PosException("You can't assign already initialized behaviours to GameBoard", e);
+        }
+        return behavior = value;
+    }
     
+    public override function resize(newHexSideLength:Float)
+    {
+        super.resize(newHexSideLength);
+        if (lastMouseMoveEvent != null)
+            onMouseMoved(lastMouseMoveEvent);
+    }
+
     public function startPieceDragging(location:IntPoint)
     {
         var piece:Piece = getPiece(location);
@@ -63,19 +103,26 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
         piece.startDrag(true);
     }
 
-    public function applyScrolling(type:PlyScrollType) 
+    private function prepareToScrollAway()
     {
-        if ((type == Next || type == End) && plyHistory.isAtEnd())
-            return;
-
         if (state.cursorLocation != null)
             getHex(state.cursorLocation).hideLayer(Hover);
 
         if (Std.isOfType(state, BasePlayableState))
             state.abortMove();
 
-        if (plyHistory.isAtEnd() && (type == Prev || type == Home))
+        if (plyHistory.isAtEnd())
             behavior.onAboutToScrollAway();
+    }
+
+    public function applyScrolling(type:PlyScrollType) 
+    {
+        if ((type == Next || type == End) && plyHistory.isAtEnd())
+            return;
+        else if ((type == Prev || type == Home) && plyHistory.isAtBeginning())
+            return;
+
+        prepareToScrollAway();
 
         switch type 
         {
@@ -84,6 +131,20 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
             case Next: next();
             case End: end();
         }
+    }
+
+    public function scrollToMove(moveNum:Int)
+    {
+        if (plyHistory.pointer == moveNum)
+            return;
+
+        prepareToScrollAway();
+
+        while (plyHistory.pointer < moveNum)
+            next();
+
+        while (plyHistory.pointer > moveNum)
+            prev();
     }
 
     public function revertPlys(cnt:Int) 
@@ -192,14 +253,14 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
         switch newEditMode 
         {
             case Move:
-                state = new NeutralState(this, state.cursorLocation);
-                behavior = new EditorFreeMoveBehavior(this);
+                state = new NeutralState();
+                behavior = new EditorFreeMoveBehavior();
             case Delete:
-                state = new DirectSetState(this, Hex.empty(), state.cursorLocation);
-                behavior = new AnalysisBehavior(this, shownSituation.turnColor);
+                state = new DirectSetState(Hex.empty());
+                behavior = new AnalysisBehavior(shownSituation.turnColor);
             case Set(type, color):
-                state = new DirectSetState(this, Hex.occupied(type, color), state.cursorLocation);
-                behavior = new AnalysisBehavior(this, shownSituation.turnColor);
+                state = new DirectSetState(Hex.occupied(type, color));
+                behavior = new AnalysisBehavior(shownSituation.turnColor);
         }
     }
 
@@ -213,6 +274,7 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     private function onMouseMoved(e:MouseEvent)
     {
         state.onMouseMoved(posToIndexes(e.stageX, e.stageY));
+        lastMouseMoveEvent = e;
     }
 
     private function onLMBReleased(e:MouseEvent)
@@ -220,7 +282,6 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
         state.onLMBReleased(posToIndexes(e.stageX, e.stageY), e.shiftKey, e.ctrlKey);
     }
 
-    //TODO: Connect to Networker on creation (somewhere in OnlineGame screen)
     public function handleNetEvent(event:ServerEvent)
     {
         behavior.handleNetEvent(event);
@@ -262,13 +323,13 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
             case ApplyChangesRequested:
                 currentSituation = shownSituation.copy();
                 plyHistory.clear();
-                state = new NeutralState(this, state.cursorLocation);
-                behavior = new AnalysisBehavior(this, currentSituation.turnColor);
+                state = new NeutralState();
+                behavior = new AnalysisBehavior(currentSituation.turnColor);
                 emit(SituationEdited(currentSituation));
             case DiscardChangesRequested:
                 setSituation(currentSituation);
-                state = new NeutralState(this, state.cursorLocation);
-                behavior = new AnalysisBehavior(this, currentSituation.turnColor);
+                state = new NeutralState();
+                behavior = new AnalysisBehavior(currentSituation.turnColor);
             case EditModeChanged(newEditMode):
                 onEditModeChanged(newEditMode);
             case EditorEntered:
@@ -309,12 +370,6 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
             obs.handleGameBoardEvent(e);
     }
 
-    public function init(startState:BaseState, startBehavior:IBehavior)
-    {
-        this.state = startState;
-        this.behavior = startBehavior;
-    }
-
     public function asVariant():Null<Variant> 
     {
         var situation:Situation = Situation.starting();
@@ -330,12 +385,14 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
         return variant;
 	}
 
-    public function new(situation:Situation, orientationColor:PieceColor, hexSideLength:Float = 40) 
+    public function new(situation:Situation, orientationColor:PieceColor, startBehavior:IBehavior, stubState:Bool = false, hexSideLength:Float = 40) 
     {
         super(situation, orientationColor, hexSideLength, false);
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();
+        this.state = stubState? new StubState() : new NeutralState();
+        this.behavior = startBehavior;
 
         addEventListener(Event.ADDED_TO_STAGE, initLMB);
     }

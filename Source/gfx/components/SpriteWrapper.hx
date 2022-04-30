@@ -6,36 +6,52 @@ import haxe.ui.core.Component;
 
 class SpriteWrapper extends Component 
 {
+    private var _originalSprite:Sprite;
     public var _sprite:Sprite = null;
     public var sprite(get, set):Sprite;
+    public var autoDownstreamSync:Bool = true;
 
     private function get_sprite():Sprite {
         return _sprite;
     }
     private function set_sprite(value:Sprite):Sprite {
+        _originalSprite = value;
         _sprite = new Sprite();
-        var bounds = value.getBounds(value);
-        value.x -= bounds.x;
-        value.y -= bounds.y;
-        _sprite.addChild(value);
-        if (_sprite.width > 0) this.width = _sprite.width;
-        if (_sprite.height> 0) this.height= _sprite.height;
+        _sprite.addChild(_originalSprite);
+        refreshLayout();
         addChild(_sprite);
         Timer.delay(() -> {
-            if (_sprite.width > 0) this.width = _sprite.width;
-            if (_sprite.height> 0) this.height= _sprite.height;
+            syncDimensionsUpstream();
             invalidateComponentLayout();
         }, 100);
-        return value;
+        return _originalSprite;
     }
     
     private override function validateComponentLayout():Bool {
         var b = super.validateComponentLayout();
-        if (_sprite != null) {
-            _sprite.width = this.width;
-            _sprite.height = this.height;
-        }
+        if (_sprite != null && autoDownstreamSync) 
+            syncDimensionsDownstream();
         return b;
+    }
+
+    public function refreshLayout()
+    {
+        var bounds = _originalSprite.getBounds(_sprite);
+        _originalSprite.x -= bounds.x;
+        _originalSprite.y -= bounds.y;
+        syncDimensionsUpstream();
+    }
+
+    public function syncDimensionsUpstream()
+    {
+        if (_sprite.width > 0) this.width = _sprite.width;
+        if (_sprite.height> 0) this.height= _sprite.height;
+    }
+
+    public function syncDimensionsDownstream()
+    {
+        _sprite.width = this.width;
+        _sprite.height = this.height;
     }
 
     public function new() 

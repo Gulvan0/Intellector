@@ -149,8 +149,8 @@ class Analysis extends Screen implements RightPanelObserver
                 nodesOnSameLevelArray.sort((ni1, ni2) -> ni1.path[ni1.path.length - 1] - ni2.path[ni2.path.length - 1]);
         }
 
-        board = new GameBoard(startingSituation, startingSituation.turnColor);
-        board.init(new NeutralState(board), new AnalysisBehavior(board, startingSituation.turnColor));
+        //TODO: Adaptive
+        board = new GameBoard(startingSituation, startingSituation.turnColor, new AnalysisBehavior(startingSituation.turnColor), false);
 
         rightPanel = new RightPanel(startingSituation);
 

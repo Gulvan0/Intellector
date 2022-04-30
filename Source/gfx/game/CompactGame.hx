@@ -1,5 +1,6 @@
 package gfx.game;
 
+import haxe.Timer;
 import utils.TimeControl;
 import struct.PieceColor;
 import gfx.components.SpriteWrapper;
@@ -13,17 +14,33 @@ import gfx.common.CreepingLine;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 
-class CompactGame extends VBox
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/compact_game.xml"))
+class CompactGame extends VBox implements IGameLayout
 {
-    private var creepingLine:CreepingLine;
-    private var whiteLogin:Label;
-    private var whiteClock:Clock;
     private var board:GameBoard;
-    private var blackLogin:Label;
-    private var blackClock:Clock;
-    private var actionBar:ActionBar;
 
+    private var orientationColor:PieceColor;
     private var onActionBtnPressed:ActionBtn->Void;
+
+    public function refreshLayout()
+    {
+        //Calculate the available size using haxeui
+        gameContentsBox.percentHeight = 100;
+        boardContainer.percentWidth = 100;
+        boardContainer.percentHeight = 100;
+        this.validateNow();
+
+        //Resize everything related to gameboard according to the calculated size
+        var boardWH:Float = Math.min(boardContainer.width, boardContainer.height);
+        var hexSideLength:Float = boardWH / 14;
+        board.resize(hexSideLength);
+        boardWrapper.refreshLayout();
+        boardWrapper.syncDimensionsUpstream();
+        boardContainer.width = boardWrapper.width;
+        boardContainer.height = boardWrapper.height;
+        gameContentsBox.autoSize();
+        this.validateNow();
+    }
 
     private function handleActionBarBtnPress(btn:ActionBtn) 
     {
@@ -34,82 +51,42 @@ class CompactGame extends VBox
 
     private function revertOrientation()
     {
-        //TODO: Rewrite
-        /*removeComponent(whiteClock, false);
-        removeComponent(blackClock, false);
-        removeComponent(whiteLoginCard, false);
-        removeComponent(blackLoginCard, false);
+        gameContentsBox.removeComponentAt(2, false);
+        gameContentsBox.removeComponentAt(0, false);
 
         orientationColor = opposite(orientationColor);
 
-        var upperClock:Clock = orientationColor == White? blackClock : whiteClock;
-        var bottomClock:Clock = orientationColor == White? whiteClock : blackClock;
-        var upperLogin:Card = orientationColor == White? blackLoginCard : whiteLoginCard;
-        var bottomLogin:Card = orientationColor == White? whiteLoginCard : blackLoginCard;
+        var upperBox:HBox = orientationColor == White? blackHBox : whiteHBox;
+        var lowerBox:HBox = orientationColor == White? whiteHBox : blackHBox;
 
-        addComponentAt(upperLogin, 0);
-        addComponentAt(upperClock, 0);
-
-        addComponent(bottomLogin);
-        addComponent(bottomClock);*/
+        gameContentsBox.addComponentAt(upperBox, 0);
+        gameContentsBox.addComponentAt(lowerBox, 2);
     }
 
-    private function buildLoginLabel(text:String):Label
-    {
-        var label:Label = new Label();
-        label.text = text;
-        label.customStyle = {fontSize: 24};
-        label.verticalAlign = 'center';
-        return label;
-    }
+    //TODO: From actualization
 
-    public function init(onActionBtnPressed:ActionBtn->Void)
-    {
-        this.onActionBtnPressed = onActionBtnPressed;
-    }
-
-    public function new(board:GameBoard, playingAs:Null<PieceColor>, timeControl:TimeControl, whiteLoginStr:String, blackLoginStr:String, orientationColor:PieceColor) 
+    public function new(board:GameBoard, playingAs:Null<PieceColor>, timeControl:TimeControl, whiteLoginStr:String, blackLoginStr:String, orientationColor:PieceColor, onActionBtnPressed:ActionBtn->Void) 
     {
         super();
         this.board = board;
-        
-        this.creepingLine = new CreepingLine(board.applyScrolling);
-        this.whiteLogin = buildLoginLabel(whiteLoginStr);
-        this.whiteClock = new Clock();
-        this.blackLogin = buildLoginLabel(blackLoginStr);
-        this.blackClock = new Clock();
-        this.actionBar = new ActionBar();
+        this.orientationColor = White;
+        this.onActionBtnPressed = onActionBtnPressed;
+
+        boardWrapper.autoDownstreamSync = false;
+        boardWrapper.sprite = board;
+
+        whiteLogin.text = whiteLoginStr;
+        blackLogin.text = blackLoginStr;
+
+        whiteClock.resize(30);
+        blackClock.resize(30);
+
+        creepLine.init(board.scrollToMove);
 
         whiteClock.init(timeControl.startSecs, playingAs == White, timeControl.startSecs >= 90, true);
         blackClock.init(timeControl.startSecs, playingAs == Black, timeControl.startSecs >= 90, false);
 
         actionBar.init(true, playingAs, handleActionBarBtnPress);
-
-        var upperSpacer:Spacer = new Spacer();
-        upperSpacer.percentWidth = 100;
-
-        var upperHBox:HBox = new HBox();
-        upperHBox.addComponent(blackClock);
-        upperHBox.addComponent(upperSpacer);
-        upperHBox.addComponent(blackLogin);
-
-        var boardWrapper:SpriteWrapper = new SpriteWrapper();
-        boardWrapper.sprite = board;
-
-        var lowerSpacer:Spacer = new Spacer();
-        lowerSpacer.percentWidth = 100;
-
-        var lowerHBox:HBox = new HBox();
-        lowerHBox.addComponent(whiteLogin);
-        lowerHBox.addComponent(lowerSpacer);
-        lowerHBox.addComponent(whiteClock);
-
-        var vbox:VBox = new VBox();
-        vbox.addComponent(creepingLine);
-        vbox.addComponent(upperHBox);
-        vbox.addComponent(boardWrapper);
-        vbox.addComponent(lowerHBox);
-        vbox.addComponent(actionBar);
 
         if (orientationColor == Black)
             revertOrientation();

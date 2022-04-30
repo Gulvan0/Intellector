@@ -6,6 +6,7 @@ import net.ServerEvent;
 
 interface IBehavior
 {
+    public function init(board:GameBoard):Void;
     public function handleNetEvent(event:ServerEvent):Void;
     public function movePossible(from:IntPoint, to:IntPoint):Bool;
     public function allowedToMove(piece:Piece):Bool;

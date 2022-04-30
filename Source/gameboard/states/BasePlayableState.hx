@@ -41,8 +41,8 @@ class BasePlayableState extends BaseState
             boardInstance.behavior.onMoveChosen(simplePly);
     }
 
-    public function new(board:GameBoard, ?cursorLocation:IntPoint)
+    public function new()
     {
-        super(board, cursorLocation);
+        super();
     }
 }
