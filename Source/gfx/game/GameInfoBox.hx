@@ -1,5 +1,6 @@
 package gfx.game;
 
+import format.SVG;
 import struct.ActualizationData;
 import openfl.display.Shape;
 import utils.AssetManager;
@@ -42,6 +43,9 @@ enum Outcome
 class GameInfoBox extends Card implements IGameBoardObserver implements INetObserver
 {
     private var openingTree:OpeningTree;
+
+    private var timeControlIcon:SVG;
+    private var renderedForWidth:Float = 0;
 
     public function handleNetEvent(event:ServerEvent)
     {
@@ -121,6 +125,64 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         return infobox;
     }
 
+    private override function validateComponentLayout():Bool 
+    {
+        var b = super.validateComponentLayout();
+
+        if (renderedForWidth == this.width)
+            return b;
+
+        var thisStyle = this.customStyle.clone();
+        thisStyle.verticalSpacing = this.width / 70;
+        thisStyle.padding = this.width * 15 / 350;
+        this.customStyle = thisStyle;
+
+        var mpStyle = matchParameters.customStyle.clone();
+        mpStyle.fontSize = this.width * 16 / 350;
+        matchParameters.customStyle = mpStyle;
+
+        var dtStyle = datetime.customStyle.clone();
+        dtStyle.fontSize = this.width * 12 / 350;
+        datetime.customStyle = dtStyle;
+
+        var resStyle = resolution.customStyle.clone();
+        resStyle.fontSize = this.width / 25;
+        resolution.customStyle = resStyle;
+
+        imagebox.removeAllComponents();
+        imagebox.width = this.width / 5;
+        imagebox.height = this.width / 5;
+
+        var tcIcon = AssetManager.getSVGComponent(timeControlIcon, 0, 0, Math.floor(imagebox.width), Math.floor(imagebox.height));
+        tcIcon.horizontalAlign = 'center';
+        tcIcon.verticalAlign = 'center';
+        imagebox.addComponent(tcIcon);
+
+        var oppStyle = opponentsBox.customStyle.clone();
+        oppStyle.marginLeft = this.width / 70;
+        opponentsBox.customStyle = oppStyle;
+
+        var wlStyle = whiteLoginLabel.customStyle.clone();
+        wlStyle.fontSize = this.width * 17 / 350;
+        whiteLoginLabel.customStyle = wlStyle;
+
+        var crossStyle = crossSign.customStyle.clone();
+        crossStyle.fontSize = this.width * 20 / 350;
+        crossSign.customStyle = crossStyle;
+
+        var blStyle = blackLoginLabel.customStyle.clone();
+        blStyle.fontSize = this.width * 17 / 350;
+        blackLoginLabel.customStyle = blStyle;
+
+        var opStyle = opening.customStyle.clone();
+        opStyle.fontSize = this.width / 25;
+        opStyle.marginTop = this.width / 35;
+        opening.customStyle = opStyle;
+
+        renderedForWidth = this.width;
+        return b;
+    }
+
     public function new(timeControl:TimeControl, whiteLogin:String, blackLogin:String) 
     {
         super();
@@ -129,13 +191,11 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         var tcType:TimeControlType = timeControl.getType();
 
         resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
-        matchParameters.text = timeControl.toString() + " • " + tcType.getName();
-        opponents.text = '$whiteLogin\n✖\n$blackLogin';
+        matchParameters.text = tcType == Correspondence? "Correspondence" : timeControl.toString() + " • " + tcType.getName();
+        whiteLoginLabel.text = whiteLogin;
+        blackLoginLabel.text = blackLogin;
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
 
-        var tcIcon = AssetManager.getSVGComponent(AssetManager.timeControlIcons[tcType], 0, 0, 70, 70);
-        tcIcon.horizontalAlign = 'center';
-        tcIcon.verticalAlign = 'center';
-        imagebox.addComponent(tcIcon);
+        timeControlIcon = AssetManager.timeControlIcons[tcType];
     }
 }

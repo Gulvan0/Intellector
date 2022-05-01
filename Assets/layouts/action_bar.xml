@@ -1,5 +1,5 @@
-<vbox width="300px" style="padding: 1 1 1 1">
-    <button-bar id="btnBar" toggle="false">
+<vbox width="100%" style="padding: 1 1 1 1">
+    <button-bar id="btnBar" width="100%" toggle="false">
         <button id="changeOrientationBtn" text="⇵" tooltip="${Dictionary.getPhrase(CHANGE_ORIENTATION_BTN_TOOLTIP)}" width="20%" height="35px" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
         <button id="offerDrawBtn" text="½" tooltip="${Dictionary.getPhrase(OFFER_DRAW_BTN_TOOLTIP)}" width="20%" height="35px" disabled="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
         <button id="cancelDrawBtn" text="✖" tooltip="${Dictionary.getPhrase(CANCEL_DRAW_BTN_TOOLTIP)}" width="20%" height="35px" hidden="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>

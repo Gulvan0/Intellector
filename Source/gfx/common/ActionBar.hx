@@ -142,8 +142,8 @@ class ActionBar extends VBox
 
     private function changeActionButtons(shownButtons:Array<Button>)
     {
-        for (i in 0...numComponents)
-            getComponentAt(i).hidden = true;
+        for (i in 0...btnBar.numComponents)
+            btnBar.getComponentAt(i).hidden = true;
 
         var btnWidth:Float = 100 / shownButtons.length;
         for (btn in shownButtons)

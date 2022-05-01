@@ -1,5 +1,8 @@
 package;
 
+import tests.ui.game.TGameInfoBox;
+import haxe.ui.macros.ComponentMacros;
+import gfx.common.ActionBar;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.Card;
 import haxe.ui.containers.Box;
@@ -29,6 +32,7 @@ import openings.OpeningTree;
 import tests.UITest;
 import tests.ui.game.TChatBox;
 import utils.AssetManager;
+import dict.Dictionary;
 
 using StringTools;
 
@@ -73,6 +77,7 @@ class Main extends Sprite
 		super();
 		init();
 		//start();
+		addChild(new UITest(new TGameInfoBox()));
 	}
 
 	private function init() 

@@ -17,7 +17,7 @@
                 <spacer width="100%" />
                 <clock id="cWhiteClock" />
             </hbox>
-            <actionbar id="cActionBar" width="100%" />
+            <actionbar id="cActionBar" />
         </vbox>
     </box> 
 </vbox>

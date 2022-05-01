@@ -42,8 +42,8 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
     private var playerColor:Null<PieceColor>;
     private var orientationColor:PieceColor = White;
 
-    private var MIN_SIDEBARS_WIDTH:Float = 100;
-    private var MAX_SIDEBARS_WIDTH:Float = 350;
+    public static var MIN_SIDEBARS_WIDTH:Float = 150;
+    public static var MAX_SIDEBARS_WIDTH:Float = 350;
 
     private function performValidation()
     {

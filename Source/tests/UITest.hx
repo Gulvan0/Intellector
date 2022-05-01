@@ -1,5 +1,6 @@
 package tests;
 
+import haxe.ui.core.Component;
 import net.LoginManager;
 import openfl.ui.Keyboard;
 import openfl.events.KeyboardEvent;
@@ -260,15 +261,20 @@ class UITest extends HBox
         this.height = Browser.window.innerHeight;
         this.customStyle.padding = 5;
 
-        var componentWrapper:SpriteWrapper = new SpriteWrapper();
-        componentWrapper.sprite = component;
-        componentWrapper.horizontalAlign = 'center';
-        componentWrapper.verticalAlign = 'center';
-
         var componentBox:Box = new Box();
         componentBox.percentWidth = contentWidthPercent;
         componentBox.percentHeight = 100;
-        componentBox.addComponent(componentWrapper);
+
+        if (Std.isOfType(component, Component))
+            componentBox.addComponent(cast(component, Component));
+        else
+        {
+            var componentWrapper:SpriteWrapper = new SpriteWrapper();
+            componentWrapper.sprite = component;
+            componentWrapper.horizontalAlign = 'center';
+            componentWrapper.verticalAlign = 'center';
+            componentBox.addComponent(componentWrapper);
+        }
 
         actionBar = new VerticalButtonBar();
         actionBar.toggle = false;

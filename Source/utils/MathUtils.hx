@@ -14,6 +14,16 @@ class MathUtils
         return Math.round(defaultValue * scaledMeasure / defaultMeasure);
     }
 
+    public static function clamp(v:Float, min:Float, max:Float):Float
+    {
+        if (v < min)
+            return min;
+        else if (v > max)
+            return max;
+        else 
+            return v;
+    }
+
     /**Inclusive interval (x in [from; to])**/
     public static function randomInt(from:Int, to:Int) 
     {

@@ -1,4 +1,4 @@
-<card width="100%">
+<card width="100%" layoutName="vertical" style="spacing:5px">
     <hbox width="100%">
         <label id="matchParameters" horizontalAlign="left" style="font-size:16px;text-align:left" />
         <spacer width="100%" />
@@ -7,7 +7,11 @@
     <label id="resolution" style="font-size:14px;font-style:bold;text-align:left" />
     <hbox width="100%" horizontalAlign="center" style="margin-top:5px">
         <box id="imagebox" width="70px" height="70px" style="padding:0 0 0 0" verticalAlign="center" />
-        <label id="opponents" width="100%" verticalAlign="center" style="font-size:18px;margin-left:5px" />
+        <vbox id="opponentsBox" width="100%" style="spacing:0px;margin-left:5px">
+            <label id="whiteLoginLabel" width="100%" verticalAlign="center" style="font-size:17px;text-align:center" />
+            <label id="crossSign" width="100%" verticalAlign="center" text="⚔" style="font-size:20px;text-align:center;font-style:bold" />
+            <label id="blackLoginLabel" width="100%" verticalAlign="center" style="font-size:17px;text-align:center" />
+        </vbox>
     </hbox>
     <label id="opening" width="100%" horizontalAlign="center" style="font-size:14px;margin-top:10px;font-style:italic;text-align:left" />
 </card>

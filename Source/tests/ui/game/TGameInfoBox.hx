@@ -1,5 +1,12 @@
 package tests.ui.game;
 
+import haxe.ui.components.HorizontalSlider;
+import haxe.ui.components.Slider;
+import haxe.ui.components.Label;
+import haxe.ui.containers.HBox;
+import haxe.ui.containers.VBox;
+import gfx.game.GameLayout;
+import haxe.ui.containers.Box;
 import struct.ActualizationData;
 import struct.IntPoint;
 import struct.Ply;
@@ -10,15 +17,18 @@ import utils.TimeControl;
 import gfx.game.GameInfoBox;
 import openfl.display.Sprite;
 
-class TGameInfoBox extends Sprite
+class TGameInfoBox extends VBox
 {
+    private var container:Box;
     private var gameinfobox:GameInfoBox;
 
     private function setBox(v:GameInfoBox)
     {
-        removeChild(gameinfobox);
+        container.removeComponent(gameinfobox);
         gameinfobox = v;
-        addChild(gameinfobox);
+        gameinfobox.horizontalAlign = 'center';
+        gameinfobox.verticalAlign = 'center';
+        container.addComponent(gameinfobox);
     }
 
     @interval(1000)
@@ -126,10 +136,39 @@ class TGameInfoBox extends Sprite
         "Test resolutions after this"
     ];
 
+    //TODO: Maybe move adjusters to UITest.hx
     public function new() 
     {
         super();
+        percentWidth = 100;
+        percentHeight = 100;
+
+        container = new Box();
+        container.width = GameLayout.MAX_SIDEBARS_WIDTH;
+        container.percentHeight = 90;
+
+        var widthLabel:Label = new Label();
+        var widthSlider:HorizontalSlider = new HorizontalSlider();
+        var adjusterBox:HBox = new HBox();
+
+        widthLabel.text = "" + container.width;
+        widthSlider.min = GameLayout.MIN_SIDEBARS_WIDTH;
+        widthSlider.max = GameLayout.MAX_SIDEBARS_WIDTH;
+        widthSlider.pos = container.width;
+        widthSlider.onChange = e -> {
+            widthLabel.text = "" + widthSlider.value;
+            container.width = widthSlider.value;
+        };
+
+        adjusterBox.addComponent(widthSlider);
+        adjusterBox.addComponent(widthLabel);
+
         gameinfobox = new GameInfoBox(new TimeControl(600, 0), "Al", "ra");
-        addChild(gameinfobox);
+        gameinfobox.horizontalAlign = 'center';
+        gameinfobox.verticalAlign = 'center';
+
+        container.addComponent(gameinfobox);
+        addComponent(adjusterBox);
+        addComponent(container);
     }
 }
