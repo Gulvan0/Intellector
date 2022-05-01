@@ -23,13 +23,12 @@ class TSidebox extends Sprite
     {
         removeChild(sidebox);
         sidebox = sb;
-        sb.init(ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());});
         addChild(sidebox);
     }
 
     private function _act_scaled(i:Int) 
     {
-        replaceSidebox(new Sidebox(White, new TimeControl(600, 5), "PlayerWhite", "PlayerBlack", White, 400, 600));
+        replaceSidebox(new Sidebox(White, new TimeControl(600, 5), "PlayerWhite", "PlayerBlack", White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
     }
 
     @steps(12)
@@ -39,18 +38,18 @@ class TSidebox extends Sprite
         var longTimeControl:TimeControl = new TimeControl(600, 5);
         switch i
         {
-            case 0: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
-            case 1: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
-            case 2: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
-            case 3: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
-            case 4: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
-            case 5: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", White, 300, 500));
-            case 6: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
-            case 7: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
-            case 8: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
-            case 9: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
-            case 10: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
-            case 11: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, 300, 500));
+            case 0: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 1: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 2: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 3: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 4: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 5: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 6: replaceSidebox(new Sidebox(White, longTimeControl, "PlayerWhite", "PlayerBlack", Black, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 7: replaceSidebox(new Sidebox(Black, longTimeControl, "PlayerWhite", "PlayerBlack", Black, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 8: replaceSidebox(new Sidebox(null, longTimeControl, "PlayerWhite", "PlayerBlack", Black, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 9: replaceSidebox(new Sidebox(White, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 10: replaceSidebox(new Sidebox(Black, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
+            case 11: replaceSidebox(new Sidebox(null, shortTimeControl, "PlayerWhite", "PlayerBlack", Black, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
         }
     }
 
@@ -83,7 +82,7 @@ class TSidebox extends Sprite
         switch i
         {
             case 0:
-                replaceSidebox(Sidebox.constructFromActualizationData(data0, White, 300, 500));
+                replaceSidebox(Sidebox.constructFromActualizationData(data0, White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
             case 1:
                 sidebox.makeMove("6620");
             case 2:
@@ -91,17 +90,17 @@ class TSidebox extends Sprite
             case 3:
                 sidebox.makeMove("1514");
             case 4:
-                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, 300, 500));
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
             case 5:
                 sidebox.makeMove("3020Aggressor");
             case 6:
                 sidebox.makeMove("1514");
             case 7:
-                replaceSidebox(Sidebox.constructFromActualizationData(data2, White, 300, 500));
+                replaceSidebox(Sidebox.constructFromActualizationData(data2, White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
             case 8:
                 sidebox.makeMove("1514");
             case 9:
-                replaceSidebox(Sidebox.constructFromActualizationData(data3, White, 300, 500));
+                replaceSidebox(Sidebox.constructFromActualizationData(data3, White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
         }
     }
 
@@ -130,26 +129,26 @@ class TSidebox extends Sprite
         {
             case 0:
                 LoginManager.login = "PlayerWhite";
-                replaceSidebox(Sidebox.constructFromActualizationData(data0, White, 300, 500));
+                replaceSidebox(Sidebox.constructFromActualizationData(data0, White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
             case 1:
                 sidebox.makeMove("1514");
             case 2:
                 sidebox.makeMove("1011");
             case 3:
                 LoginManager.login = "PlayerBlack";
-                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, 300, 500));
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
             case 4:
                 sidebox.makeMove("1514");
             case 5:
                 LoginManager.login = "PlayerWhite";
-                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, 300, 500));
+                replaceSidebox(Sidebox.constructFromActualizationData(data1, White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
             case 6:
                 sidebox.makeMove("1514");
             case 7:
                 sidebox.makeMove("1011");
             case 8:
                 LoginManager.login = "PlayerNone";
-                replaceSidebox(Sidebox.constructFromActualizationData(data2, White, 300, 500));
+                replaceSidebox(Sidebox.constructFromActualizationData(data2, White, ab -> {trace(ab.getName());}, ps -> {trace(ps.getName());}));
             case 9:
                 sidebox.makeMove("1514");
         }

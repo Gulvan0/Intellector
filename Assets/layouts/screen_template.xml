@@ -11,22 +11,23 @@
             background-color: $solid-background-color;
             color: $normal-text-color;
         }
-        #site-name {
+        #siteName {
             pointer-events: true;
             padding-left: 10;
             padding-right: 10;
             white-space: nowrap;
             color: #333333;
-            font-size: 25;
+            font-name: 'fonts/Futura.ttf';
+            font-size: 30;
             font-weight: 600;
         }
 
-        #site-name:hover {
+        #siteName:hover {
             color: #428fd8;
         }
     </style>
     <menubar id="menubar" width="100%" height="50px">
-        <label id="siteName" text="intellector.info" verticalAlign="center" onClick="gfx.ScreenManager.toScreen(gfx.ScreenType.MainMenu)" />
+        <label id="siteName" text="intellector.info" verticalAlign="center" onClick="trace(1);gfx.ScreenManager.toScreen(gfx.ScreenType.MainMenu);" />
     </menubar>
     <box id="content" width="100%" height="100%"/>
 </vbox>

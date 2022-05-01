@@ -54,5 +54,6 @@ class SelectedState extends BasePlayableState
     public function new(selectedDepartureLocation:IntPoint)
     {
         super();
+        this.selectedDepartureLocation = selectedDepartureLocation;
     }
 }

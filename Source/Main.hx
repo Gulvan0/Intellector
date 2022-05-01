@@ -1,5 +1,7 @@
 package;
 
+import tests.ui.game.TSidebox;
+import gfx.screens.LiveGame;
 import tests.ui.game.TGameInfoBox;
 import haxe.ui.macros.ComponentMacros;
 import gfx.common.ActionBar;
@@ -77,7 +79,8 @@ class Main extends Sprite
 		super();
 		init();
 		//start();
-		addChild(new UITest(new TGameInfoBox()));
+		//addChild(new UITest(new TSidebox()));
+		addChild(LiveGame.constructFromParams("Gulvan", "kartoved", White, new TimeControl(3*60, 2), White));
 	}
 
 	private function init() 
