@@ -1,5 +1,7 @@
 package gfx.game;
 
+import openfl.events.Event;
+import haxe.Timer;
 import serialization.GameLogParser;
 import dict.Utils;
 import gfx.components.Dialogs;
@@ -42,78 +44,134 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
     private var playerColor:Null<PieceColor>;
     private var orientationColor:PieceColor = White;
 
-    public static var MIN_SIDEBARS_WIDTH:Float = 150;
+    public static var MIN_SIDEBARS_WIDTH:Float = 200;
     public static var MAX_SIDEBARS_WIDTH:Float = 350;
 
+    private var renderedForWidth:Float = 0;
+    private var renderedForHeight:Float = 0;
+    private var validationTimer:Timer;
+
+    //Please don't hate me for this. Responsive layout design is a pain
     private function performValidation()
     {
-        lLeftBox.visible = true;
-        lRightBox.visible = true;
+        //By default, show desktop mode components
+        cBlackPlayerHBox.hidden = true;
+        cWhitePlayerHBox.hidden = true;
+        cCreepingLine.hidden = true;
+        cActionBar.hidden = true;
 
-        cBlackPlayerHBox.visible = false;
-        cWhitePlayerHBox.visible = false;
-        cCreepingLine.visible = false;
-        cActionBar.visible = false;
+        lLeftBox.hidden = false;
+        lRightBox.hidden = false;
 
-        cContentsVBox.percentHeight = 100;
+        //Try to estimate how much width will we need if both left (gameinfobox, chatbox) and right (sidebox) boxes are shown
+        var estimatedGameboardWidth = this.height / boardWrapper.inverseAspectRatio();
+        var hboxWidth = 2 * MIN_SIDEBARS_WIDTH + estimatedGameboardWidth + lContentsHBox.style.horizontalSpacing * 2;
 
-        lContentsHBox.percentWidth = null;
-        lContentsHBox.percentHeight = 100;
-
-        lLeftBox.width = MIN_SIDEBARS_WIDTH;
-        lRightBox.width = MIN_SIDEBARS_WIDTH;
-
-        boardContainer.percentWidth = null;
-        boardContainer.percentHeight = 100;
-
-        boardWrapper.percentHeight = 100;
-
-        cContentsVBox.validateNow();
-
-        if (lContentsHBox.width <= cContentsVBox.width)
+        //If we have enough screen width...
+        if (hboxWidth <= this.width)
         {
-            var widthLeft:Float = cContentsVBox.width - lContentsHBox.width;
+            //We can use the remaining space to increase the width of boxes, but not higher than MAX_SIDEBARS_WIDTH
+            var widthLeft:Float = this.width - hboxWidth;
             lLeftBox.width = Math.min(MAX_SIDEBARS_WIDTH, MIN_SIDEBARS_WIDTH + widthLeft / 2);
             lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, MIN_SIDEBARS_WIDTH + widthLeft / 2);
+
+            //Scale everything based on height
+
+            cContentsVBox.percentWidth = 100;
+            cContentsVBox.percentHeight = 100;
+
+            lContentsHBox.percentWidth = null;
+            lContentsHBox.percentHeight = 100;
+
+            boardContainer.percentWidth = null;
+            boardContainer.percentHeight = 100;
+
+            boardWrapper.percentWidth = null;
+            boardWrapper.percentHeight = 100;
+
+            return;
         }
-        else
+
+        //Since we don't have enough width, maybe we can fit everything by hiding the left box?
+        hboxWidth = MIN_SIDEBARS_WIDTH + estimatedGameboardWidth + lContentsHBox.style.horizontalSpacing;
+
+        //If we can...
+        if (hboxWidth <= this.width)
         {
-            lLeftBox.visible = false;
-            lContentsHBox.validateNow();
+            //Analogically, use the remaining space to increase the width
+            var widthLeft:Float = this.width - hboxWidth;
+            lLeftBox.hidden = true; //The left box is now hidden, ...
+            lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, MIN_SIDEBARS_WIDTH + widthLeft); //...thus, only stretch the right one
 
-            if (lContentsHBox.width <= cContentsVBox.width)
-            {
-                var widthLeft:Float = cContentsVBox.width - lContentsHBox.width;
-                lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, MIN_SIDEBARS_WIDTH + widthLeft / 2);
-            }
-            else
-            {
-                cBlackPlayerHBox.visible = true;
-                cWhitePlayerHBox.visible = true;
-                cCreepingLine.visible = true;
-                cActionBar.visible = true;
+            //Analogically, scale everything based on height
 
-                lLeftBox.visible = false;
-                lRightBox.visible = false;
+            cContentsVBox.percentWidth = 100;
+            cContentsVBox.percentHeight = 100;
 
-                cContentsVBox.percentHeight = null;
+            lContentsHBox.percentWidth = null;
+            lContentsHBox.percentHeight = 100;
 
-                lContentsHBox.percentWidth = 100;
-                lContentsHBox.percentHeight = null;
+            boardContainer.percentWidth = null;
+            boardContainer.percentHeight = 100;
 
-                boardContainer.percentWidth = 100;
-                boardContainer.percentHeight = null;
+            boardWrapper.percentWidth = null;
+            boardWrapper.percentHeight = 100;
 
-                boardWrapper.percentWidth = 100;
-            }
+            return;
+        }
+
+        //If we can't fit everything using the desktop layout anyway, use the mobile layout
+
+        //Display only the components relevant for the mobile layout
+        lLeftBox.hidden = true;
+        lRightBox.hidden = true;
+
+        cBlackPlayerHBox.hidden = false;
+        cWhitePlayerHBox.hidden = false;
+        cCreepingLine.hidden = false;
+        cActionBar.hidden = false;
+
+        //Try to fit everything provided the gameboard's width is equal to the screen's width
+        var estimatedGameboardHeight = this.width * boardWrapper.inverseAspectRatio();
+        var availableHeight = this.height - this.style.verticalSpacing - cCreepingLine.runwaySV.height;
+        var vBoxHeight = estimatedGameboardHeight + cContentsVBox.style.verticalSpacing * 3 + 35 + 30 * 2;
+
+        if (vBoxHeight <= availableHeight) //If we can, use 100% of the screen's width
+        {
+            cContentsVBox.percentWidth = 100;
+            cContentsVBox.percentHeight = null;
+
+            lContentsHBox.percentWidth = 100;
+            lContentsHBox.percentHeight = null;
+
+            boardContainer.percentWidth = 100;
+            boardContainer.percentHeight = null;
+
+            boardWrapper.percentHeight = null;
+            boardWrapper.percentWidth = 100;
+        }
+        else //Otherwise, use 100% of the screen's height
+        {
+            cContentsVBox.percentWidth = null;
+            cContentsVBox.percentHeight = 100;
+
+            lContentsHBox.percentWidth = null;
+            lContentsHBox.percentHeight = 100;
+
+            boardContainer.percentWidth = null;
+            boardContainer.percentHeight = 100;
+
+            boardWrapper.percentWidth = null;
+            boardWrapper.percentHeight = 100;
         }
     }
 
-    private override function validateComponentLayout():Bool 
+    private function ownValidation() 
     {
-        var b = super.validateComponentLayout();
-        performValidation();
-        return b;
+        if (renderedForWidth != Browser.window.innerWidth || renderedForHeight != Browser.window.innerHeight)
+            performValidation();
+        renderedForWidth = Browser.window.innerWidth;
+        renderedForHeight = Browser.window.innerHeight;
     }
 
     //================================================================================================================================================================
@@ -258,9 +316,6 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
         cWhiteLogin.text = whiteLogin;
         cBlackLogin.text = blackLogin;
 
-        cWhiteClock.resize(30);
-        cBlackClock.resize(30);
-
         sidebox.whiteClock.addCopycat(cWhiteClock);
         sidebox.blackClock.addCopycat(cBlackClock);
 
@@ -286,8 +341,26 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
         return new GameBoard(currentSituation, orientationColor, behavior, playerColor == null);
     }
 
+    private function onAdded(e)
+    {
+        removeEventListener(Event.ADDED_TO_STAGE, onAdded);
+        validationTimer = new Timer(500);
+        validationTimer.run = ownValidation;
+        addEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
+    }
+
+    private function onRemoved(e)
+    {
+        removeEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
+        if (validationTimer != null)
+            validationTimer.stop();
+    }
+
     private function new() 
     {
-        super();    
+        super(); 
+        cWhiteClock.resize(30);
+        cBlackClock.resize(30);
+        addEventListener(Event.ADDED_TO_STAGE, onAdded);
     }
 }

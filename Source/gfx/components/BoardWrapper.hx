@@ -11,7 +11,7 @@ class BoardWrapper extends Component
     private var widthBased:Bool = false;
 
     /** height/width **/
-    private function inverseAspectRatio()
+    public function inverseAspectRatio()
     {
         /*
         Regarding the aspect ratio modification:

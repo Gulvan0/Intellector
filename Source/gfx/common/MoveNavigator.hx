@@ -1,5 +1,6 @@
 package gfx.common;
 
+import haxe.ui.styles.Style;
 import struct.PieceColor;
 import gfx.utils.PlyScrollType;
 import struct.Situation;

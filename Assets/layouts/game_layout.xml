@@ -1,6 +1,6 @@
 <vbox width="100%" height="100%">
     <creepingline id="cCreepingLine" width="100%" />
-    <box width="100%" height="100%" style="padding-top:2px;padding-bottom:2px;padding-left:2px;padding-right:2px">
+    <box id="fullContentBox" width="100%" height="100%" style="padding-top:2px;padding-bottom:2px;padding-left:2px;padding-right:2px">
         <vbox id="cContentsVBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="center">
             <hbox id="cBlackPlayerHBox" width="100%">
                 <label id="cBlackLogin" style="color:#666666;font-size:24px" verticalAlign="center" />
@@ -10,7 +10,7 @@
             <hbox id="lContentsHBox" style="spacing:15px" width="100%" height="100%" verticalAlign="center" horizontalAlign="center">
                 <vbox id="lLeftBox" style="spacing:10px" height="98%" />
                 <box id="boardContainer" height="100%" />
-                <box id="lRightBox" height="100%" />
+                <box id="lRightBox" height="98%" />
             </hbox>
             <hbox id="cWhitePlayerHBox" width="100%">
                 <label id="cWhiteLogin" style="color:#666666;font-size:24px" verticalAlign="center" />
