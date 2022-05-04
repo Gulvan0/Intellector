@@ -169,7 +169,10 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
     private function ownValidation() 
     {
         if (renderedForWidth != Browser.window.innerWidth || renderedForHeight != Browser.window.innerHeight)
+        {
             performValidation();
+            Timer.delay(performValidation, 200);
+        }
         renderedForWidth = Browser.window.innerWidth;
         renderedForHeight = Browser.window.innerHeight;
     }
@@ -344,7 +347,8 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
     private function onAdded(e)
     {
         removeEventListener(Event.ADDED_TO_STAGE, onAdded);
-        validationTimer = new Timer(500);
+        performValidation();
+        validationTimer = new Timer(100);
         validationTimer.run = ownValidation;
         addEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
     }
