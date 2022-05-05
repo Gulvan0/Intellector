@@ -41,35 +41,33 @@ class Analysis extends Screen implements RightPanelObserver
     {
         switch event 
         {
-            case AnalyzePressed(color):
-                onAnalyzeRequested(color);
             case ExportSIPRequested:
                 onExportSIPRequested();
-            case ExportStudyRequested(variant):
-                onExportStudyRequested(variant);
+            case ExportStudyRequested(variantStr):
+                onExportStudyRequested(variantStr);
             case InitializationFinished:
                 rightPanel.drawVariant(nodesByPathLength);
             default:
         }
     }
 
-    private function onExportStudyRequested(variant:Variant)
+    private function onExportStudyRequested(variantStr:String)
     {
         if (exploredStudyID != null)
             Dialogs.confirm(Dictionary.getPhrase(STUDY_OVERWRITE_CONFIRMATION_MESSAGE), Dictionary.getPhrase(STUDY_OVERWRITE_CONFIRMATION_TITLE), () -> {
-                Timer.delay(exportStudyAskName.bind(variant, exploredStudyID), 20);
+                Timer.delay(exportStudyAskName.bind(variantStr, exploredStudyID), 20); //To have time to remove the previous dialog window //TODO: More elegant way?
             }, () -> {
-                Timer.delay(exportStudyAskName.bind(variant, null), 20);
+                Timer.delay(exportStudyAskName.bind(variantStr, null), 20);
             });
         else
-            exportStudyAskName(variant, null);
+            exportStudyAskName(variantStr, null);
     }
 
-    private function exportStudyAskName(variant:Variant, decidedOverwriteID:Null<Int>) 
+    private function exportStudyAskName(variantStr:String, decidedOverwriteID:Null<Int>) 
     {
         var response = Browser.window.prompt(Dictionary.getPhrase(STUDY_NAME_SELECTION_MESSAGE));
         if (response != null)
-            Networker.emitEvent(SetStudy(response.substr(0, 40), variant.serialize(), decidedOverwriteID));
+            Networker.emitEvent(SetStudy(response.substr(0, 40), variantStr, decidedOverwriteID));
             //TODO: Update url and title (ID should be returned from server)
     }
 
@@ -77,31 +75,6 @@ class Analysis extends Screen implements RightPanelObserver
     {
         var sip:String = board.shownSituation.serialize();
         Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
-    }
-
-    private function onAnalyzeRequested(color:PieceColor)
-    {
-        //* Deprecated logic moved from another place
-        /*var situation:Situation = field.shownSituation.copy();
-        situation.setTurnWithZobris(color);
-        AlphaBeta.initMeasuredIndicators();
-
-        Timer.delay(() -> {
-            var result = AlphaBeta.findMate(situation, 10, situation.turnColor == White);//AlphaBeta.evaluate(situation, 6);
-            #if measure_time
-            trace("Prune count: " + AlphaBeta.prunedCount + "; Prune ratio: " + AlphaBeta.prunedCount / (AlphaBeta.prunedCount + AlphaBeta.evaluatedCount));
-            for (act in MeasuredProcess.createAll())
-            {
-                trace(act.getName());
-                trace("Calls: " + AlphaBeta.calls[act] + "; Avg: " + (AlphaBeta.totalTime[act] / AlphaBeta.calls[act]) + "; Total: " + AlphaBeta.totalTime[act]);
-            }
-            #end
-            var recommendedMove = result.optimalPly;
-                
-            panel.displayAnalysisResults(result);
-            field.rmbSelectionBackToNormal();
-            field.drawArrow(recommendedMove.from, recommendedMove.to);
-        }, 20);*/
     }
 
     public function new(?initialVariantStr:String, ?exploredStudyID:Int)

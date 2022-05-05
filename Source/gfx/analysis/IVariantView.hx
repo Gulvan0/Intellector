@@ -1,9 +1,8 @@
 package gfx.analysis;
 
 import struct.Variant;
-import gfx.analysis.RightPanel.RightPanelEvent;
 
-interface IVariantView 
+interface IVariantView
 {
     public function selectBranch(branch:Array<Int>):Void;
     public function removeNode(path:Array<Int>, referenceVariant:Variant):Void;

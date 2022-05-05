@@ -53,9 +53,8 @@ enum RightPanelEvent
     EditModeChanged(newEditMode:PosEditMode);
     EditorEntered;
     ScrollBtnPressed(type:PlyScrollType);
-    AnalyzePressed(color:PieceColor);
     ExportSIPRequested;
-    ExportStudyRequested(variant:Variant);
+    ExportStudyRequested(variantStr:String);
     InitializationFinished;
 }
 
@@ -97,13 +96,10 @@ class RightPanel extends Sprite implements IGameBoardObserver
     {
         switch event 
         {
-            case AnalyzePressed(color):
-                overviewTab.displayLoadingOnScoreLabel();
-                emit(AnalyzePressed(color));
             case ExportSIPRequested:
                 emit(ExportSIPRequested);
             case ExportStudyRequested:
-                emit(ExportStudyRequested(branchingTab.variant));
+                emit(ExportStudyRequested(branchingTab.variant.serialize()));
             case ScrollBtnPressed(type):
                 emit(ScrollBtnPressed(type));
             case SetPositionPressed:
@@ -117,7 +113,6 @@ class RightPanel extends Sprite implements IGameBoardObserver
         switch event 
         {
             case BranchSelected(branch, plyStrArray, startingSituation, pointer):
-                overviewTab.deprecateScore();
                 overviewTab.navigator.clear();
                 var color:PieceColor = startingSituation.turnColor;
                 for (plyStr in plyStrArray)
@@ -137,10 +132,8 @@ class RightPanel extends Sprite implements IGameBoardObserver
         switch event 
         {
             case ClearPressed:
-                overviewTab.clearAnalysisScore();
                 emit(ClearRequested);
             case ResetPressed:
-                overviewTab.clearAnalysisScore();
                 emit(ResetRequested);
             case ConstructFromSIPPressed(sip):
                 var situation:Situation = SituationDeserializer.deserialize(sip);
@@ -150,7 +143,6 @@ class RightPanel extends Sprite implements IGameBoardObserver
                 emit(TurnColorChanged(newTurnColor));
             case ApplyChangesPressed:
                 overviewTab.navigator.clear();
-                overviewTab.deprecateScore();
                 showControlTabs();
                 emit(ApplyChangesRequested);
             case DiscardChangesPressed:
@@ -173,11 +165,9 @@ class RightPanel extends Sprite implements IGameBoardObserver
                 branchingTab.updateContentSize();
                 positionEditor.changeColorOptions(opposite(performedBy));
             case SubsequentMove(plyStr, performedBy):
-                overviewTab.deprecateScore();
                 branchingTab.updateContentSize();
                 positionEditor.changeColorOptions(opposite(performedBy));
             case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
-                overviewTab.deprecateScore();
                 var plysToRevertCnt = branchLength - plyPointer;
                 var parentPath = branchingTab.selectedBranch.slice(0, plyPointer);
                 branchingTab.variantView.addChildNode(parentPath, plyStr, true, branchingTab.variant);
