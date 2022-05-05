@@ -17,6 +17,7 @@ using utils.CallbackTools;
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/plynavigator.xml"))
 class MoveNavigator extends VBox
 {
+    private var firstColorToMove:PieceColor;
     private var plyNumber:Int = 0;
     private var lastMovetableEntry:Dynamic;
 
@@ -32,9 +33,11 @@ class MoveNavigator extends VBox
             vscroll.pos = vscroll.max;
     }
 
-    public function writePlyStr(plyStr:String, performedBy:PieceColor)
+    public function writePlyStr(plyStr:String)
     {
         plyNumber++;
+        
+        var performedBy:PieceColor = plyNumber % 2 == 1? firstColorToMove : opposite(firstColorToMove);
 
         if (performedBy == Black)
             if (plyNumber == 1)
@@ -57,8 +60,11 @@ class MoveNavigator extends VBox
     public function writePly(ply:Ply, contextSituation:Situation) 
     {
         var plyStr = ply.toNotation(contextSituation);
-        var performedBy = contextSituation.turnColor;
-        writePlyStr(plyStr, performedBy);
+        writePlyStr(plyStr);
+
+        var supposedPlayerMoveColor:PieceColor = plyNumber % 2 == 1? firstColorToMove : opposite(firstColorToMove);
+        if (contextSituation.turnColor != supposedPlayerMoveColor)
+            trace("WARNING: move order discrepancy in MoveNavigator::writePly()");
     }
 
     public function revertPlys(cnt:Int) 
@@ -88,15 +94,25 @@ class MoveNavigator extends VBox
         }
     }
 
-    public function clear()
+    public function clear(?updatedFirstColorToMove:PieceColor)
     {
         movetable.dataSource.clear();
         lastMovetableEntry = null;
         plyNumber = 0;
+        if (updatedFirstColorToMove != null)
+            this.firstColorToMove = updatedFirstColorToMove;
     }
 
-    public function init(onClickCallback:PlyScrollType->Void) 
+    public function rewrite(newPlyStrSequence:Array<String>)
     {
+        clear();
+        for (plyStr in newPlyStrSequence)
+            writePlyStr(plyStr);
+    }
+
+    public function init(firstColorToMove:PieceColor, onClickCallback:PlyScrollType->Void) 
+    {
+        this.firstColorToMove = firstColorToMove;
         homeBtn.onClick = onClickCallback.bind(Home).expand();
         prevBtn.onClick = onClickCallback.bind(Prev).expand();
         nextBtn.onClick = onClickCallback.bind(Next).expand();

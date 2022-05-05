@@ -1,7 +1,15 @@
 package gfx.analysis;
 
+import gfx.utils.Colors;
 import openfl.display.Sprite;
 import openfl.geom.Point;
+
+enum Highlighting
+{
+    Off;
+    Semi;
+    Full;
+}
 
 class Arrow extends Sprite
 {
@@ -11,20 +19,20 @@ class Arrow extends Sprite
 
     public var from(default, null):Point;
     public var to(default, null):Point;
-    public var highlighted(default, null):Bool;
-    private var arrow:Sprite;
+    public var highlighting(default, null):Highlighting;
+    private var arrow:Sprite = new Sprite();
 
-    public function highlight() 
+    public function highlight(fully:Bool) 
     {
         removeChild(arrow);
-        this.highlighted = true;
+        this.highlighting = fully? Full : Semi;
         drawArrow();
     }
 
     public function unhighlight() 
     {
         removeChild(arrow);
-        this.highlighted = false;
+        this.highlighting = Off;
         drawArrow();
     }
 
@@ -38,6 +46,14 @@ class Arrow extends Sprite
     public function changeDestination(newDest:Point)
     {
         removeChild(arrow);
+        this.to = newDest;
+        drawArrow();
+    }
+
+    public function changeEndpoints(newDep:Point, newDest:Point)
+    {
+        removeChild(arrow);
+        this.from = newDep;
         this.to = newDest;
         drawArrow();
     }
@@ -56,16 +72,30 @@ class Arrow extends Sprite
         var inputVertex:Point = vertex1.add(upperSideVector);
         var fracturePoint:Point = inputVertex.subtract(new Point(0, STRAIGHT_ARROW_SEGMENT_SIZE));
 
-        var color = highlighted? 0x006600 : 0x333333;
+        var color:Int;
+        var alpha:Float;
+
+        switch highlighting 
+        {
+            case Off: 
+                color = Colors.variantTreeUnselectedArrow;
+                alpha = 1;
+            case Semi:
+                color = Colors.variantTreeSelectedArrow;
+                alpha = 0.5;
+            case Full: 
+                color = Colors.variantTreeSelectedArrow;
+                alpha = 1;
+        }
 
         arrow = new Sprite();
-        arrow.graphics.lineStyle(ARROW_THICKNESS, color);
+        arrow.graphics.lineStyle(ARROW_THICKNESS, color, alpha);
         arrow.graphics.moveTo(from.x, from.y);
         arrow.graphics.lineTo(fracturePoint.x, fracturePoint.y);
         arrow.graphics.lineTo(inputVertex.x, inputVertex.y);
 
         var triangle:Sprite = new Sprite();
-        triangle.graphics.beginFill(color);
+        triangle.graphics.beginFill(color, alpha);
         triangle.graphics.moveTo(inputVertex.x, inputVertex.y);
         triangle.graphics.lineTo(vertex1.x, vertex1.y);
         triangle.graphics.lineTo(to.x, to.y);
@@ -77,13 +107,9 @@ class Arrow extends Sprite
         addChild(arrow);
     }
 
-    public function new(from:Point, to:Point, highlighted:Bool) 
+    public function new() 
     {
         super();
-
-        this.from = from;
-        this.to = to;
-        this.highlighted = highlighted;
-        drawArrow();
+        this.highlighting = Off;
     }
 }

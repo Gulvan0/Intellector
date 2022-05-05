@@ -7,6 +7,10 @@ class Colors
     public static var border:Int = 0x664126;
     public static var arrow:Int = 0xFF0000;
 
+    public static var variantTreeBackground:Int = 0xEEEEEE;
+    public static var variantTreeUnselectedArrow:Int = 0x333333;
+    public static var variantTreeSelectedArrow:Int = 0xFF0000;
+
     public static function hexFill(selectionState:HexagonSelectionState, isDark:Bool):Int
     {
         return switch selectionState

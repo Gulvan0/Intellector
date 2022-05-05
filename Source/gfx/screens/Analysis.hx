@@ -46,7 +46,7 @@ class Analysis extends Screen implements RightPanelObserver
             case ExportStudyRequested(variantStr):
                 onExportStudyRequested(variantStr);
             case InitializationFinished:
-                rightPanel.drawVariant(nodesByPathLength);
+                //rightPanel.drawVariant(nodesByPathLength); //TODO: Rewrite
             default:
         }
     }

@@ -2,7 +2,7 @@ package gfx.analysis;
 
 import openfl.display.Sprite;
 
-class VariantOutline extends Sprite implements IVariantView 
+class VariantOutline extends Sprite //implements IVariantView 
 {
     //TODO: Fill
 }

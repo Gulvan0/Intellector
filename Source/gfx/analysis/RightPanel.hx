@@ -1,12 +1,12 @@
 package gfx.analysis;
 
+import gfx.analysis.IVariantView.SelectedBranchInfo;
 import gameboard.GameBoard.IGameBoardObserver;
 import serialization.PlyDeserializer;
 import gfx.screens.Analysis.NodeInfo;
 import gameboard.GameBoard.GameBoardEvent;
 import serialization.SituationDeserializer;
 import haxe.ui.core.Component;
-import gfx.analysis.BranchingTab.BranchingTabEvent;
 import gfx.analysis.PositionEditor.PositionEditorEvent;
 import gfx.analysis.OverviewTab.OverviewTabEvent;
 import openfl.text.TextFormat;
@@ -99,7 +99,7 @@ class RightPanel extends Sprite implements IGameBoardObserver
             case ExportSIPRequested:
                 emit(ExportSIPRequested);
             case ExportStudyRequested:
-                emit(ExportStudyRequested(branchingTab.variant.serialize()));
+                emit(ExportStudyRequested(branchingTab.variantView.getSerializedVariant()));
             case ScrollBtnPressed(type):
                 emit(ScrollBtnPressed(type));
             case SetPositionPressed:
@@ -108,23 +108,16 @@ class RightPanel extends Sprite implements IGameBoardObserver
         }
     }
 
-    private function handleBranchingTabEvent(event:BranchingTabEvent)
+    private function onBranchSelected(branchInfo:SelectedBranchInfo)
     {
-        switch event 
-        {
-            case BranchSelected(branch, plyStrArray, startingSituation, pointer):
-                overviewTab.navigator.clear();
-                var color:PieceColor = startingSituation.turnColor;
-                for (plyStr in plyStrArray)
-                {
-                    overviewTab.navigator.writePlyStr(plyStr, color);
-                    color = opposite(color);
-                }
-                emit(BranchSelected(branch, startingSituation, pointer));
-            case RevertNeeded(plyCnt):
-                overviewTab.navigator.revertPlys(plyCnt);
-                emit(RevertNeeded(plyCnt));
-        }
+        overviewTab.navigator.rewrite(branchInfo.plyStrArray);
+        emit(BranchSelected(branchInfo.plyArray, branchingTab.variantView.getStartingSituation(), branchInfo.selectedPlyNum));
+    }
+
+    private function onRevertRequestedByBranchingTab(plysToRevert:Int)
+    {
+        overviewTab.navigator.revertPlys(plysToRevert);
+        emit(RevertNeeded(plysToRevert));
     }
 
     private function handlePositionEditorEvent(event:PositionEditorEvent)
@@ -158,26 +151,19 @@ class RightPanel extends Sprite implements IGameBoardObserver
         switch event
         {
             case ContinuationMove(ply, plyStr, performedBy):
-                var parentPath = branchingTab.selectedBranch.copy();
-                branchingTab.variantView.addChildNode(parentPath, plyStr, true, branchingTab.variant);
-                overviewTab.navigator.writePlyStr(plyStr, performedBy);
-                branchingTab.variant.addChildToNode(ply, parentPath);
-                branchingTab.updateContentSize();
+                branchingTab.variantView.addChildToSelectedNode(ply, true);
+                overviewTab.navigator.writePlyStr(plyStr);
                 positionEditor.changeColorOptions(opposite(performedBy));
             case SubsequentMove(plyStr, performedBy):
-                branchingTab.updateContentSize();
                 positionEditor.changeColorOptions(opposite(performedBy));
             case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
                 var plysToRevertCnt = branchLength - plyPointer;
-                var parentPath = branchingTab.selectedBranch.slice(0, plyPointer);
-                branchingTab.variantView.addChildNode(parentPath, plyStr, true, branchingTab.variant);
+                branchingTab.variantView.addChildToSelectedNode(ply, true);
                 overviewTab.navigator.revertPlys(plysToRevertCnt);
-                overviewTab.navigator.writePlyStr(plyStr, performedBy);
-                branchingTab.variant.addChildToNode(ply, parentPath);
-                branchingTab.updateContentSize();
+                overviewTab.navigator.writePlyStr(plyStr);
                 positionEditor.changeColorOptions(opposite(performedBy));
             case SituationEdited(newSituation):
-                branchingTab.clearVariant(newSituation);
+                branchingTab.variantView.clear(newSituation);
             default:
         }
     }
@@ -195,22 +181,6 @@ class RightPanel extends Sprite implements IGameBoardObserver
         controlTabs.visible = true;
     }
 
-    public function drawVariant(nodesByPathLength:Map<Int, Array<NodeInfo>>)
-    {
-        var maxPathLength:Int = 0;
-        for (k in nodesByPathLength.keys())
-            if (k > maxPathLength)
-                maxPathLength = k;
-
-        for (len in 1...maxPathLength)
-            for (node in nodesByPathLength.get(len))
-            {
-                var parentPath = Variant.parentPath(node.path);
-                branchingTab.variantView.addChildNode(parentPath, node.plyStr, false, branchingTab.variant);
-                branchingTab.variant.addChildToNode(PlyDeserializer.deserialize(node.plyStr), parentPath);
-            }
-    }
-
     public function new(startingSituation:Situation) 
     {
         super();
@@ -221,7 +191,6 @@ class RightPanel extends Sprite implements IGameBoardObserver
 
         positionEditor.init(handlePositionEditorEvent);
         overviewTab.init(handleOverviewTabEvent);
-        branchingTab.init(handleBranchingTabEvent);
         
         var fullBox:HBox = new HBox();
         fullBox.addComponent(positionEditor);
@@ -236,7 +205,6 @@ class RightPanel extends Sprite implements IGameBoardObserver
 
         Timer.delay(() -> {
             overviewTab.init(handleOverviewTabEvent);
-            branchingTab.init(handleBranchingTabEvent);
             positionEditor.init(handlePositionEditorEvent);
             controlTabs.pageIndex = 0;
             emit(InitializationFinished);
@@ -246,7 +214,7 @@ class RightPanel extends Sprite implements IGameBoardObserver
     private function createControlTabs(startingSituation:Situation):TabView
     {
         overviewTab = new OverviewTab();
-        branchingTab = new BranchingTab(Preferences.branchingTabType.get(), startingSituation, 390, 360);
+        branchingTab = new BranchingTab(Preferences.branchingTabType.get(), startingSituation, onBranchSelected, onRevertRequestedByBranchingTab);
 
         var openingTeaserLabel:Label = new Label();
         openingTeaserLabel.customStyle = {fontSize: 20};

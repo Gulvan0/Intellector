@@ -1,5 +1,7 @@
 package;
 
+import gfx.analysis.VariantTree;
+import tests.ui.analysis.TVariantView;
 import tests.ui.game.TSidebox;
 import gfx.screens.LiveGame;
 import tests.ui.game.TGameInfoBox;
@@ -79,8 +81,8 @@ class Main extends Sprite
 		super();
 		init();
 		//start();
-		//addChild(new UITest(new TSidebox()));
-		ScreenManager.toScreen(ScreenType.StartedPlayableGame(228, "Gulvan", "kartoved", new TimeControl(3*60, 2), White));
+		addChild(new UITest(new TVariantView(new VariantTree())));
+		//ScreenManager.toScreen(ScreenType.StartedPlayableGame(228, "Gulvan", "kartoved", new TimeControl(3*60, 2), White));
 	}
 
 	private function init() 

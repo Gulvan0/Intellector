@@ -5,22 +5,107 @@ import haxe.Json;
 import haxe.ui.util.Variant;
 import struct.Ply;
 
+abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
+{
+    public var length(get, never):Int;
+
+    public function get_length():Int
+    {
+        return this.length;
+    }
+
+    public function asArray():Array<Int>
+    {
+        return this;
+    }
+
+    public function lastNodeNum():Int
+    {
+        return this[this.length - 1];
+    }
+
+    public static function fromCode(code:String):VariantPath
+    {
+        return code.split(":").map(Std.parseInt);
+    }
+
+    public function code():String
+    {
+        return this.join(":");
+    }
+
+    public function copy():VariantPath
+    {
+        return this.copy();
+    }
+
+    public function parent():Null<VariantPath>
+    {
+        return Lambda.empty(this)? null : this.slice(0, -1);
+    }
+
+    public function child(num:Int):VariantPath
+    {
+        return this.concat([num]);
+    }
+
+    public function upstreamParents(includeThis:Bool):Array<VariantPath>
+    {
+        var paths:Array<VariantPath> = includeThis? [this] : [];
+        var path:Array<Int> = copy();
+        for (i in 0...this.length)
+        {
+            path.pop();
+            paths.push(path);
+        }
+        return paths;
+    }
+
+    public function contains(p:VariantPath):Bool
+    {
+        if (p.length > this.length)
+            return false;
+
+        for (i in 0...p.length)
+            if (p[i] != this[i])
+                return false;
+        return true;
+    }
+
+    public function equals(p:VariantPath):Bool
+    {
+        return p.length == this.length && p.contains(this);
+    }
+
+    public inline function new(a:Array<Int>) 
+    {
+        this = a;
+    }
+}
+
 class VariantNode
 {
     public var ply:Ply;
-    public var parent:Null<VariantNode>;
+    public var situationBefore:Situation;
+    public var situationAfter:Situation;
     public var children:Array<VariantNode>;
 
     public function addChild(ply:Ply) 
     {
-        var child = new VariantNode(ply, this);
+        var child = new VariantNode(ply, situationAfter);
         children.push(child);
     }
 
-    public function new(ply:Ply, parent:Null<VariantNode>) 
+    public function getPlyStr():String
+    {
+        return ply.toNotation(situationBefore);
+    }
+
+    public function new(ply:Ply, situationBefore:Situation) 
     {
         this.ply = ply;
-        this.parent = parent;
+        this.situationBefore = situationBefore;
+        this.situationAfter = ply != null? situationBefore.makeMove(ply) : situationBefore;
         this.children = [];
     }
 }
@@ -29,31 +114,12 @@ class Variant extends VariantNode
 {
     public var startingSituation(default, null):Situation;
 
-    public static function parentPath(childPath:Array<Int>):Array<Int>
+    public function getAllNodes():Map<String, VariantNode>
     {
-        return childPath.slice(0, -1);
-    }
-
-    public static function belongs(nodePath:Array<Int>, branchPath:Array<Int>):Bool
-    {
-        if (nodePath.length > branchPath.length)
-            return false;
-
-        for (i in 0...nodePath.length)
-            if (nodePath[i] != branchPath[i])
-                return false;
-        return true;
-    }
-
-    public static function equalPaths(path1:Array<Int>, path2:Array<Int>):Bool 
-    {
-        if (path1.length != path2.length)
-            return false;
-
-        for (i in 0...path1.length)
-            if (path1[i] != path2[i])
-                return false;
-        return true;
+        var m:Map<String, VariantNode> = [];
+        for (path in getFamilyPaths([]))
+            m.set(path.code(), getByPath(path));
+        return m;
     }
 
     //TODO: Rewrite existing study data files on the server to match new format
@@ -61,83 +127,66 @@ class Variant extends VariantNode
     {
         var serialized:String = "";
 
-        for (path in getFamilyPaths([]))
-            if (!Lambda.empty(path))
-            {
-                var code = path.join(":");
-                var ply = PlyDeserializer.serialize(getByPath(path).ply);
-                serialized += code + "/" + ply + ";";
-            }
+        for (code => node in getAllNodes())
+            serialized += code + "/" + PlyDeserializer.serialize(node.ply) + ";";
 
         serialized += startingSituation.serialize();
                 
         return serialized;
     }
 
-    public function addChildToNode(ply:Ply, parentPath:Array<Int>) 
+    public function addChildToNode(ply:Ply, parentPath:VariantPath) 
     {
         getByPath(parentPath).addChild(ply);
     }
 
-    public function extendPathLeftmost(path:Array<Int>):Array<Int>
+    public function extendPathLeftmost(path:VariantPath):VariantPath
     {
         var extendedPath = path.copy();
         var node:VariantNode = getByPath(extendedPath);
         while (!Lambda.empty(node.children))
         {
             node = node.children[0];
-            extendedPath.push(0);
+            extendedPath = extendedPath.child(0);
         }
         return extendedPath;
     }
 
-    public function getRightSiblingsPaths(nodePath:Array<Int>, includeSpecifiedNode:Bool):Array<Array<Int>>
+    public function getRightSiblingsPaths(nodePath:VariantPath, includeSpecifiedNode:Bool):Array<VariantPath>
     {
-        var parent_path:Array<Int> = parentPath(nodePath);
+        var parent_path:VariantPath = nodePath.parent();
         var nodeNum:Int = nodePath[nodePath.length - 1];
         var parent:VariantNode = getByPath(parent_path);
         var startNum = includeSpecifiedNode? nodeNum : nodeNum+1;
-        return [for (i in startNum...parent.children.length) parent_path.concat([i])];
+        return [for (i in startNum...parent.children.length) parent_path.child(i)];
     }
 
-    public function getFamilyPaths(nodePath:Array<Int>):Array<Array<Int>>
+    public function getFamilyPaths(nodePath:VariantPath):Array<VariantPath>
     {
         return getFamilyPathsRecursive(getByPath(nodePath), nodePath);
     }
 
-    public function upstreamParentsPaths(nodePath:Array<Int>, includeSpecifiedNode:Bool):Array<Array<Int>>
-    {
-        var paths:Array<Array<Int>> = includeSpecifiedNode? [nodePath] : [];
-        var path = nodePath.copy();
-        while (path.length > 1)
-        {
-            path.pop();
-            paths.push(path);
-        }
-        return paths;
-    }
-
-    public function childCount(nodePath:Array<Int>)
+    public function childCount(nodePath:VariantPath)
     {
         return getByPath(nodePath).children.length;
     }
 
-    private function getFamilyPathsRecursive(node:VariantNode, nodePath:Array<Int>):Array<Array<Int>>
+    private function getFamilyPathsRecursive(node:VariantNode, nodePath:VariantPath):Array<VariantPath>
     {
-        var paths:Array<Array<Int>> = [nodePath.copy()];
+        var paths:Array<VariantPath> = [nodePath.copy()];
         for (i in 0...node.children.length)
         {
             var child = node.children[i];
-            paths = paths.concat(getFamilyPathsRecursive(child, nodePath.concat([i])));
+            paths = paths.concat(getFamilyPathsRecursive(child, nodePath.child(i)));
         }
         return paths;
     }
 
-    public function getBranchByPath(branchPath:Array<Int>):Array<Ply>
+    public function getBranchByPath(branchPath:VariantPath):Array<Ply>
     {
         var branch:Array<Ply> = [];
         var node:VariantNode = this;
-        for (childNum in branchPath)
+        for (childNum in branchPath.asArray())
         {
             node = node.children[childNum];
             branch.push(node.ply);
@@ -145,24 +194,29 @@ class Variant extends VariantNode
         return branch;
     }
 
-    public function removeNode(path:Array<Int>) 
+    public function removeNode(path:VariantPath) 
     {
-        var parent = getByPath(parentPath(path));
+        var parent = getByPath(path.parent());
         var childNum = path[path.length - 1];
         parent.children.splice(childNum, 1);
     }
 
-    private function getByPath(path:Array<Int>):VariantNode
+    public function getSituationByPath(path:VariantPath):Situation
+    {
+        return getByPath(path).situationBefore;
+    }
+
+    private function getByPath(path:VariantPath):VariantNode
     {
         var node:VariantNode = this;
-        for (childNum in path)
+        for (childNum in path.asArray())
             node = node.children[childNum];
         return node;
     }
 
     public function new(startingSituation:Situation) 
     {
-        super(new Ply(), null);
+        super(null, startingSituation);
         this.startingSituation = startingSituation;
     }
 }
