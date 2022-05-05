@@ -80,7 +80,7 @@ class Main extends Sprite
 		init();
 		//start();
 		//addChild(new UITest(new TSidebox()));
-		addChild(LiveGame.constructFromParams("Gulvan", "kartoved", White, new TimeControl(3*60, 2), White));
+		ScreenManager.toScreen(ScreenType.StartedPlayableGame(228, "Gulvan", "kartoved", new TimeControl(3*60, 2), White));
 	}
 
 	private function init() 

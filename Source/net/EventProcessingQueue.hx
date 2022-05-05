@@ -43,6 +43,12 @@ class EventProcessingQueue
         observers.push(observer);
     }
 
+    public function flush()
+    {
+        observers = [];
+        handlers = [];
+    }
+
     public function new() 
     {
         

@@ -30,7 +30,7 @@ class Networker
 {
     private static var _ws:WebSocket;
 
-    public static var eventQueue:EventProcessingQueue;
+    public static var eventQueue:EventProcessingQueue = new EventProcessingQueue();
     public static var onConnectionEstabilished:Void->Void;
     public static var onConnectionFailed:Event->Void;
 
@@ -41,9 +41,8 @@ class Networker
 
     public static function launch() 
     {
-        var generalObserver:GeneralObserver = new GeneralObserver();
-        eventQueue = new EventProcessingQueue();
-        eventQueue.addObserver(generalObserver);
+        eventQueue.flush();
+        eventQueue.addObserver(new GeneralObserver());
 
         #if prod
         _ws = new WebSocket("wss://play-intellector.ru:5000");
