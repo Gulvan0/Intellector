@@ -11,12 +11,10 @@ class TVariantView extends Sprite
 
     private function _act_straightSequence()
     {
-        var refVar:Variant = new Variant(Situation.starting());
         var parentPath:Array<Int> = [];
         for (plyInfo in Situation.starting().randomContinuation(12))
         {
             variantView.addChildNode(parentPath, plyInfo.ply, true);
-            refVar.addChildToNode(plyInfo.ply, parentPath);
             parentPath.push(0);
         }
     }

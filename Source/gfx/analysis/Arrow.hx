@@ -82,7 +82,7 @@ class Arrow extends Sprite
                 alpha = 1;
             case Semi:
                 color = Colors.variantTreeSelectedArrow;
-                alpha = 0.5;
+                alpha = 0.4;
             case Full: 
                 color = Colors.variantTreeSelectedArrow;
                 alpha = 1;

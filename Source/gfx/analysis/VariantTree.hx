@@ -58,7 +58,16 @@ class VariantTree extends Sprite implements IVariantView
 
     private function onNodeSelectRequest(code:String)
     {
-        //TODO: Fill
+        //TODO: Do not select leftmost if newSelected is a part of oldSelected
+        var path:VariantPath = VariantPath.fromCode(code);
+        var extendedPath:VariantPath = variant.extendPathLeftmost(path);
+        var info:SelectedBranchInfo = new SelectedBranchInfo();
+        info.plyArray = variant.getBranchByPath(extendedPath);
+        info.plyStrArray = variant.getBranchNotationByPath(extendedPath);
+        info.selectedPlyNum = path.length;
+
+        selectBranch(path);
+        onBranchSelect(info);
     }
 
     private function onNodeRemoveRequest(code:String)
@@ -99,6 +108,9 @@ class VariantTree extends Sprite implements IVariantView
         var normalLength:Int = branchToSelect.length;
         var extendedLength:Int = extendedBranch.length;
 
+        if (Lambda.empty(branchToSelect))
+            nodes[""].select();
+
         var code:String = "";
         for (i in 0...extendedLength)
         {
@@ -109,6 +121,7 @@ class VariantTree extends Sprite implements IVariantView
                 nodes[code].select();
             code += ":";
         }
+
         selectedBranch = branchToSelect.copy();
     }
 
@@ -179,7 +192,7 @@ class VariantTree extends Sprite implements IVariantView
         columnWidths = [];
         for (column => codes in displacement.columnContents.keyValueIterator())
         {
-            var maxWidth:Float = 0;
+            var maxWidth:Float = column == 1? nodes.get('').textWidth : 0;
             for (code in codes)
             {
                 var node = nodes.get(code);

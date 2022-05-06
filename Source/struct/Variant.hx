@@ -27,7 +27,7 @@ abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
 
     public static function fromCode(code:String):VariantPath
     {
-        return code.split(":").map(Std.parseInt);
+        return code == ''? [] : code.split(":").map(Std.parseInt);
     }
 
     public function code():String
@@ -229,6 +229,18 @@ class Variant extends VariantNode
         {
             node = node.children[childNum];
             branch.push(node.ply);
+        }
+        return branch;
+    }
+
+    public function getBranchNotationByPath(branchPath:VariantPath):Array<String>
+    {
+        var branch:Array<String> = [];
+        var node:VariantNode = this;
+        for (childNum in branchPath.asArray())
+        {
+            node = node.children[childNum];
+            branch.push(node.getPlyStr());
         }
         return branch;
     }
