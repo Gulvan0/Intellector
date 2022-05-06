@@ -132,7 +132,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         if (move >= 3)
             justMovedPlayerClock.addTime(secsPerTurn);
 
-        navigator.writePlyStr(plyStr, justMovedColor);
+        navigator.writePlyStr(plyStr);
         navigator.scrollAfterDelay();
 
         actionBar.onMoveNumberUpdated(move);
@@ -244,7 +244,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;
         
-        navigator.init(onPlyScrollBtnPressed);
+        navigator.init(White, onPlyScrollBtnPressed);
         actionBar.init(false, playingAs, onActionBtnPressed);
 
         if (orientationColor == Black)

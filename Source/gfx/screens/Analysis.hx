@@ -77,55 +77,18 @@ class Analysis extends Screen implements RightPanelObserver
         Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
     }
 
+    //TODO: Adaptive
     public function new(?initialVariantStr:String, ?exploredStudyID:Int)
     {
         super();
         this.exploredStudyID = exploredStudyID;
 
-        var variantStrParts:Array<String> = [];
-        var startingSituation:Situation;
-        var variantHasNodes:Bool;
+        var initialVariant:Variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.starting());
+        var startingSituation:Situation = initialVariant.startingSituation;
 
-        //TODO: Request study info from server if exploredStudyID != null && initialVariantStr == null
-
-        if (initialVariantStr != null)
-        {
-            variantStrParts = initialVariantStr.split(";");
-            var startingSituationSIP:String = variantStrParts.pop();
-            startingSituation = SituationDeserializer.deserialize(startingSituationSIP);
-            variantHasNodes = !Lambda.empty(variantStrParts);
-        }
-        else
-        {
-            startingSituation = Situation.starting();
-            variantHasNodes = false;
-        }
-
-        if (variantHasNodes)
-        {
-            for (nodeStr in variantStrParts)
-            {
-                var nodeStrParts = nodeStr.split("/");
-                var code = nodeStrParts[0];
-                var path = code.split(":").map(Std.parseInt);
-                var plyStr = nodeStrParts[1];
-                var nodeInfo = {path: path, plyStr: plyStr};
-    
-                if (nodesByPathLength.exists(path.length))
-                    nodesByPathLength[path.length].push(nodeInfo);
-                else
-                    nodesByPathLength.set(path.length, [nodeInfo]);
-            }
-
-            //For each level sort the corresponding nodes by their numbers (last elements of their paths)
-            for (nodesOnSameLevelArray in nodesByPathLength)
-                nodesOnSameLevelArray.sort((ni1, ni2) -> ni1.path[ni1.path.length - 1] - ni2.path[ni2.path.length - 1]);
-        }
-
-        //TODO: Adaptive
         board = new GameBoard(startingSituation, startingSituation.turnColor, new AnalysisBehavior(startingSituation.turnColor), false);
 
-        rightPanel = new RightPanel(startingSituation);
+        rightPanel = new RightPanel(initialVariant);
 
         var boardComponent = new SpriteWrapper();
         boardComponent.sprite = board;

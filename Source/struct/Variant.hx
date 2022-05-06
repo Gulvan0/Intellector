@@ -1,5 +1,6 @@
 package struct;
 
+import serialization.SituationDeserializer;
 import serialization.PlyDeserializer;
 import haxe.Json;
 import haxe.ui.util.Variant;
@@ -128,11 +129,49 @@ class Variant extends VariantNode
         var serialized:String = "";
 
         for (code => node in getAllNodes())
-            serialized += code + "/" + PlyDeserializer.serialize(node.ply) + ";";
+            if (code != '')
+                serialized += code + "/" + PlyDeserializer.serialize(node.ply) + ";";
 
         serialized += startingSituation.serialize();
                 
         return serialized;
+    }
+
+    public static function deserialize(s:String):Variant
+    {
+        var variantStrParts:Array<String> = s.split(";");
+        var startingSituationSIP:String = variantStrParts.pop();
+        var startingSituation:Situation = SituationDeserializer.deserialize(startingSituationSIP);
+        var nodesByPathLength:Map<Int, Array<{parentPath:VariantPath, nodeNum:Int, ply:Ply}>> = [];
+        var maxPathLength:Int = 0;
+
+        for (nodeStr in variantStrParts)
+        {
+            var nodeStrParts = nodeStr.split("/");
+            var code = nodeStrParts[0];
+            var path = VariantPath.fromCode(code);
+            var ply = PlyDeserializer.deserialize(nodeStrParts[1]);
+            var nodeInfo = {parentPath: path.parent(), nodeNum: path.lastNodeNum(), ply: ply};
+            var pathLength:Int = path.length;
+
+            if (maxPathLength < pathLength)
+                maxPathLength = pathLength;
+    
+            if (nodesByPathLength.exists(pathLength))
+                nodesByPathLength[pathLength].push(nodeInfo);
+            else
+                nodesByPathLength.set(pathLength, [nodeInfo]);
+        }
+
+        for (nodesOnSameLevelArray in nodesByPathLength)
+            nodesOnSameLevelArray.sort((ni1, ni2) -> ni1.nodeNum - ni2.nodeNum);
+
+        var variant:Variant = new Variant(startingSituation);
+        for (pathLength in 1...maxPathLength+1)
+            for (nodeInfo in nodesByPathLength[pathLength])
+                variant.addChildToNode(nodeInfo.ply, nodeInfo.parentPath);
+        
+        return variant;
     }
 
     public function addChildToNode(ply:Ply, parentPath:VariantPath) 

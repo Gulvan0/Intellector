@@ -26,9 +26,10 @@ class OverviewTab extends VBox
 
     private var eventHandler:OverviewTabEvent->Void;
 
-    public function init(eventHandler:OverviewTabEvent->Void)
+    public function init(firstToMove:PieceColor, eventHandler:OverviewTabEvent->Void)
     {
         this.eventHandler = eventHandler;
+        navigator.init(firstToMove, m -> {eventHandler(ScrollBtnPressed(m));});
     }
 
     public function new()
@@ -37,7 +38,6 @@ class OverviewTab extends VBox
 
         //TODO: Redesign; define in XML; add actionBar; add special mode to actionBar; add export image btn; add export as puzzle 'todo'
         navigator = new MoveNavigator();
-        navigator.init(m -> {eventHandler(ScrollBtnPressed(m));});
         navigator.horizontalAlign = 'center';
 
         var setPositionBtn:Button = createSimpleBtn(ANALYSIS_SET_POSITION, 300, SetPositionPressed);

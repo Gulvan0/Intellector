@@ -15,7 +15,7 @@ class TVariantView extends Sprite
         var parentPath:Array<Int> = [];
         for (plyInfo in Situation.starting().randomContinuation(12))
         {
-            variantView.addChildNode(parentPath, plyInfo.plyStr, true, refVar);
+            variantView.addChildNode(parentPath, plyInfo.ply, true);
             refVar.addChildToNode(plyInfo.ply, parentPath);
             parentPath.push(0);
         }

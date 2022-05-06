@@ -181,16 +181,16 @@ class RightPanel extends Sprite implements IGameBoardObserver
         controlTabs.visible = true;
     }
 
-    public function new(startingSituation:Situation) 
+    public function new(initialVariant:Variant) 
     {
         super();
 
         positionEditor = new PositionEditor();
-        positionEditor.changeColorOptions(startingSituation.turnColor);
-        controlTabs = createControlTabs(startingSituation);
+        positionEditor.changeColorOptions(initialVariant.startingSituation.turnColor);
+        controlTabs = createControlTabs(initialVariant);
 
         positionEditor.init(handlePositionEditorEvent);
-        overviewTab.init(handleOverviewTabEvent);
+        overviewTab.init(initialVariant.startingSituation.turnColor, handleOverviewTabEvent);
         
         var fullBox:HBox = new HBox();
         fullBox.addComponent(positionEditor);
@@ -204,17 +204,15 @@ class RightPanel extends Sprite implements IGameBoardObserver
         controlTabs.pageIndex = 1;
 
         Timer.delay(() -> {
-            overviewTab.init(handleOverviewTabEvent);
-            positionEditor.init(handlePositionEditorEvent);
             controlTabs.pageIndex = 0;
             emit(InitializationFinished);
-        }, 20);
+        }, 20); //TODO: Is it still needed?
     }
 
-    private function createControlTabs(startingSituation:Situation):TabView
+    private function createControlTabs(initialVariant:Variant):TabView
     {
         overviewTab = new OverviewTab();
-        branchingTab = new BranchingTab(Preferences.branchingTabType.get(), startingSituation, onBranchSelected, onRevertRequestedByBranchingTab);
+        branchingTab = new BranchingTab(Preferences.branchingTabType.get(), initialVariant, onBranchSelected, onRevertRequestedByBranchingTab);
 
         var openingTeaserLabel:Label = new Label();
         openingTeaserLabel.customStyle = {fontSize: 20};

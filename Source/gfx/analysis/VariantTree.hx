@@ -66,7 +66,7 @@ class VariantTree extends Sprite implements IVariantView
         if (code == '')
             return;
         
-        var plysToRevert:Null<Int>;
+        var plysToRevert:Null<Int> = null;
         var path:VariantPath = VariantPath.fromCode(code);
 
         if (selectedBranch.contains(path))
@@ -119,12 +119,10 @@ class VariantTree extends Sprite implements IVariantView
         for (arrow in arrows)
             removeChild(arrow);
 
-        var startNode:Node;
+        var startNode:Node = nodes.get("");
         for (code => node in nodes.keyValueIterator())
             if (code != "")
                 removeChild(node);
-            else
-                startNode = node;
 
         arrows = [];
         nodes = ["" => startNode];

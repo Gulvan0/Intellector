@@ -159,7 +159,6 @@ class ScreenManager extends Sprite implements INetObserver
 
             openflContent.style.width = innerWidthStr;
             openflContent.style.height = innerHeightStr;
-            //TODO: current.onResize()
             lastResizeTimestamp = timestamp;
         }
     }
