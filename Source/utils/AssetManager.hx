@@ -78,11 +78,7 @@ class AssetManager
     {
         var sprite:Sprite = new Sprite();
         svg.render(sprite.graphics, x, y, width, height);
-
-        var wrapper:SpriteWrapper = new SpriteWrapper();
-        wrapper.sprite = sprite;
-
-        return wrapper;
+        return new SpriteWrapper(sprite);
     }
 
     public static function init() 

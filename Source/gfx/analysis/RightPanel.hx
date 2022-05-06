@@ -63,6 +63,7 @@ interface RightPanelObserver
     public function handleRightPanelEvent(event:RightPanelEvent):Void;    
 }
 
+//TODO: Should be defined via XML and be a haxeui component
 class RightPanel extends Sprite implements IGameBoardObserver
 {
     public static var PANEL_WIDTH = 400;

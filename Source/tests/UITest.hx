@@ -269,8 +269,7 @@ class UITest extends HBox
             componentBox.addComponent(cast(component, Component));
         else
         {
-            var componentWrapper:SpriteWrapper = new SpriteWrapper();
-            componentWrapper.sprite = component;
+            var componentWrapper:SpriteWrapper = new SpriteWrapper(component, false);
             componentWrapper.horizontalAlign = 'center';
             componentWrapper.verticalAlign = 'center';
             componentBox.addComponent(componentWrapper);

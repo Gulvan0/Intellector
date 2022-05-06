@@ -89,11 +89,11 @@ class Analysis extends Screen implements RightPanelObserver
         board = new GameBoard(startingSituation, startingSituation.turnColor, new AnalysisBehavior(startingSituation.turnColor), false);
 
         rightPanel = new RightPanel(initialVariant);
-
-        var boardComponent = new SpriteWrapper();
+        /*
+        var boardComponent = new SpriteWrapper(); //TODO: Use board wrapper
         boardComponent.sprite = board;
 
-        var rightPanelComponent = new SpriteWrapper();
+        var rightPanelComponent = new SpriteWrapper(); //TODO: Won't be needed
         rightPanelComponent.sprite = rightPanel;
 
         var hbox = new HBox();
@@ -104,6 +104,6 @@ class Analysis extends Screen implements RightPanelObserver
         
         board.addObserver(rightPanel);
         rightPanel.addObserver(board);
-        rightPanel.addObserver(this);
+        rightPanel.addObserver(this);*/
     }
 }
