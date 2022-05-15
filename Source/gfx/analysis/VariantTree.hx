@@ -41,7 +41,8 @@ class VariantTree extends Sprite implements IVariantView
     private var onRevertNeeded:(plysToRevert:Int)->Void;
 
     private var variant:Variant;
-    private var selectedBranch:VariantPath = []; //TODO: Consider init() with selectedBranch as a parameter
+    private var selectedBranch:VariantPath = [];
+    private var selectedMove:Int;
 
     private function columnX(column:Int):Float
     {
@@ -78,8 +79,8 @@ class VariantTree extends Sprite implements IVariantView
         var plysToRevert:Null<Int> = null;
         var path:VariantPath = VariantPath.fromCode(code);
 
-        if (selectedBranch.contains(path))
-            plysToRevert = selectedBranch.length - path.length + 1;
+        if (selectedBranch.subpath(selectedMove).contains(path))
+            plysToRevert = selectedMove - path.length + 1;
 
         removeNode(path);
 
@@ -89,16 +90,16 @@ class VariantTree extends Sprite implements IVariantView
 
     private function deselectAll() 
     {
-        nodes[selectedBranch.code()].deselect();
-
         var code:String = "";
         for (childNum in selectedBranch.asArray())
         {
             code += childNum;
+            nodes[code].deselect();
             arrows[code].unhighlight();
             code += ":";
         }
         selectedBranch = [];
+        selectedMove = 0;
     }
 
     private function selectBranch(branchToSelect:VariantPath)
@@ -122,42 +123,48 @@ class VariantTree extends Sprite implements IVariantView
             code += ":";
         }
 
-        selectedBranch = branchToSelect.copy();
+        selectedBranch = extendedBranch.copy();
+        selectedMove = normalLength;
     }
 
     public function clear(?newStartingSituation:Situation)
     {
-        var startingSit:Situation = newStartingSituation != null? newStartingSituation.copy() : variant.startingSituation;
-        variant = new Variant(startingSit);
         for (arrow in arrows)
             removeChild(arrow);
 
         var startNode:Node = nodes.get("");
+        startNode.select();
         for (code => node in nodes.keyValueIterator())
             if (code != "")
                 removeChild(node);
 
+        var startingSit:Situation = newStartingSituation != null? newStartingSituation.copy() : variant.startingSituation;
+        variant = new Variant(startingSit);
+
         arrows = [];
         nodes = ["" => startNode];
         selectedBranch = [];
+        selectedMove = 0;
         columnWidths = [];
     }
 
     public function removeNode(path:VariantPath)
     {
-        var code:String = path.code();
+        if (selectedBranch.subpath(selectedMove).contains(path))
+            selectBranch(path.parent());
+
+        for (familyMemberPath in variant.getFamilyPaths(path))
+        {
+            var code:String = familyMemberPath.code();
+            removeChild(nodes.get(code));
+            removeChild(arrows.get(code));
+            nodes.remove(code);
+            arrows.remove(code);
+        }
 
         variant.removeNode(path);
 
-        removeChild(nodes.get(code));
-        removeChild(arrows.get(code));
-        nodes.remove(code);
-        arrows.remove(code);
-
         refreshLayout();
-
-        if (selectedBranch.contains(path))
-            selectBranch(path.parent());
     }
 
     public function addChildNode(parentPath:VariantPath, ply:Ply, selectChild:Bool)
@@ -269,17 +276,12 @@ class VariantTree extends Sprite implements IVariantView
 
     public function addChildToSelectedNode(ply:Ply, selectChild:Bool) 
     {
-        addChildNode(selectedBranch, ply, selectChild);
+        addChildNode(selectedBranch.subpath(selectedMove), ply, selectChild);
     }
 
     public function getSerializedVariant():String 
     {
 		return variant.serialize();
-	}
-
-    public function getSelectedBranch():VariantPath 
-    {
-		return selectedBranch.copy();
 	}
 
     public function getStartingSituation():Situation 

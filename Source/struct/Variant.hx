@@ -1,5 +1,6 @@
 package struct;
 
+import haxe.display.Display.Package;
 import serialization.SituationDeserializer;
 import serialization.PlyDeserializer;
 import haxe.Json;
@@ -18,6 +19,11 @@ abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
     public function asArray():Array<Int>
     {
         return this;
+    }
+
+    public function subpath(subLength:Int):VariantPath
+    {
+        return this.slice(0, subLength);
     }
 
     public function lastNodeNum():Int
