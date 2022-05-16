@@ -59,15 +59,19 @@ class VariantTree extends Sprite implements IVariantView
 
     private function onNodeSelectRequest(code:String)
     {
-        //TODO: Do not select leftmost if newSelected is a part of oldSelected
         var path:VariantPath = VariantPath.fromCode(code);
-        var extendedPath:VariantPath = variant.extendPathLeftmost(path);
+        var extendedPath:VariantPath;
+        if (selectedBranch.contains(path))
+            extendedPath = selectedBranch;
+        else
+            extendedPath = variant.extendPathLeftmost(path);
+
         var info:SelectedBranchInfo = new SelectedBranchInfo();
         info.plyArray = variant.getBranchByPath(extendedPath);
         info.plyStrArray = variant.getBranchNotationByPath(extendedPath);
         info.selectedPlyNum = path.length;
 
-        selectBranch(path);
+        selectBranchUnsafe(extendedPath, path.length);
         onBranchSelect(info);
     }
 
@@ -102,29 +106,31 @@ class VariantTree extends Sprite implements IVariantView
         selectedMove = 0;
     }
 
-    private function selectBranch(branchToSelect:VariantPath)
+    private function selectBranchUnsafe(fullBranch:VariantPath, selectUpToMove:Int)
     {
+        #if debug
+        if (fullBranch.code() != variant.extendPathLeftmost(fullBranch).code())
+            throw "fullBranch isn't really full";
+        #end
+        
         deselectAll();
-        var extendedBranch = variant.extendPathLeftmost(branchToSelect);
-        var normalLength:Int = branchToSelect.length;
-        var extendedLength:Int = extendedBranch.length;
 
-        if (Lambda.empty(branchToSelect))
+        if (selectUpToMove == 0)
             nodes[""].select();
 
         var code:String = "";
-        for (i in 0...extendedLength)
+        for (i in 0...fullBranch.length)
         {
-            var childNum = extendedBranch[i];
+            var childNum = fullBranch[i];
             code += childNum;
-            arrows[code].highlight(i < normalLength);
-            if (i == normalLength - 1)
+            arrows[code].highlight(i < selectUpToMove);
+            if (i == selectUpToMove - 1)
                 nodes[code].select();
             code += ":";
         }
 
-        selectedBranch = extendedBranch.copy();
-        selectedMove = normalLength;
+        selectedBranch = fullBranch.copy();
+        selectedMove = selectUpToMove;
     }
 
     public function clear(?newStartingSituation:Situation)
@@ -150,8 +156,12 @@ class VariantTree extends Sprite implements IVariantView
 
     public function removeNode(path:VariantPath)
     {
-        if (selectedBranch.subpath(selectedMove).contains(path))
-            selectBranch(path.parent());
+        var parentPath = path.parent();
+        var belongsToSelected:Bool = selectedBranch.contains(path);
+        var newMoveNumToSelect:Int = Math.round(Math.min(parentPath.length, selectedMove));
+        
+        if (belongsToSelected)
+            deselectAll();
 
         for (familyMemberPath in variant.getFamilyPaths(path))
         {
@@ -163,6 +173,9 @@ class VariantTree extends Sprite implements IVariantView
         }
 
         variant.removeNode(path);
+
+        if (belongsToSelected)
+            selectBranchUnsafe(variant.extendPathLeftmost(parentPath), newMoveNumToSelect);
 
         refreshLayout();
     }
@@ -188,7 +201,7 @@ class VariantTree extends Sprite implements IVariantView
         refreshLayout();
 
         if (selectChild)
-            selectBranch(nodePath);
+            selectBranchUnsafe(nodePath, nodePath.length);
     }
 
     private function refreshLayout()
@@ -295,7 +308,7 @@ class VariantTree extends Sprite implements IVariantView
         this.onRevertNeeded = onRevertNeeded;
     }
 
-    public function new(?initialVariant:Variant, ?selectedBranch:VariantPath) 
+    public function new(?initialVariant:Variant, ?selectedNodePath:VariantPath) 
     {
         super();
 
@@ -324,9 +337,9 @@ class VariantTree extends Sprite implements IVariantView
             }
         }
 
-        if (selectedBranch != null)
-            selectBranch(selectedBranch);
+        if (selectedNodePath != null)
+            selectBranchUnsafe(variant.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
         else
-            selectBranch([]);
+            selectBranchUnsafe(variant.extendPathLeftmost([]), 0);
     }
 }
