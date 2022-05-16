@@ -24,5 +24,8 @@ interface IVariantView
     public function addChildToSelectedNode(ply:Ply, selectChild:Bool):Void;
     public function removeNode(path:VariantPath):Void;
     public function getSerializedVariant():String;
-    public function getStartingSituation():Situation;    
+    public function getStartingSituation():Situation;
+    #if debug
+    public function getCurrentSituation():Situation;
+    #end
 }

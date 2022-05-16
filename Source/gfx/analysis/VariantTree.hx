@@ -204,10 +204,17 @@ class VariantTree extends Sprite implements IVariantView
             selectBranchUnsafe(nodePath, nodePath.length);
     }
 
+    #if debug
+    public function getCurrentSituation():Situation
+    {
+        return variant.getSituationByPath(selectedBranch.subpath(selectedMove));
+    }
+    #end
+
     private function refreshLayout()
     {
         var displacement:DisplacementInfo = buildOptimalDisplacement();
-
+        trace(displacement);
         //Update column widths
         columnWidths = [];
         for (column => codes in displacement.columnContents.keyValueIterator())
@@ -253,23 +260,20 @@ class VariantTree extends Sprite implements IVariantView
 
         function recursive(path:VariantPath)
         {
-            for (childNum in 0...variant.childCount(path))
-                recursive(path.child(childNum));
-
             var row:Int = path.length;
-            if (row == 0)
-                return;
-
             var code:String = path.code();
 
-            var column:Null<Int> = rowLengths.get(row);
-            if (column == null)
+            var column:Int;
+            if (rowLengths.exists(row))
+            {
+                column = rowLengths.get(row) + 1;
+                rowLengths[row]++;
+            }
+            else
             {
                 column = 1;
                 rowLengths[row] = 1;
             }
-            else
-                rowLengths[row]++;
 
             info.cellularMapping.set(code, {row: row, column: column});
 
@@ -281,9 +285,14 @@ class VariantTree extends Sprite implements IVariantView
                 if (info.maxColumn < column)
                     info.maxColumn = column;
             }
+
+            for (childNum in 0...variant.childCount(path))
+                recursive(path.child(childNum));
         }
 
-        recursive([]);
+        var path:VariantPath = [];
+        for (childNum in 0...variant.childCount(path))
+            recursive(path.child(childNum));
         return info;
     }
 
