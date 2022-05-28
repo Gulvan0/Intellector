@@ -1,10 +1,15 @@
 package tests.ui.board;
 
+import tests.ui.TestedComponent;
+import struct.IntPoint;
+import openfl.events.MouseEvent;
+import gfx.components.Dialogs;
+import gfx.utils.PlyScrollType;
+import tests.ui.ArgumentType;
 import struct.Situation;
 import haxe.Timer;
 import serialization.PlyDeserializer;
 import struct.Ply;
-import js.Browser;
 import gameboard.behaviors.AnalysisBehavior;
 import struct.PieceColor;
 import gameboard.behaviors.EnemyMoveBehavior;
@@ -14,76 +19,156 @@ import gameboard.states.NeutralState;
 import gameboard.GameBoard;
 import openfl.display.Sprite;
 
-class TGameBoard extends Sprite
+class AugmentedGameBoard extends GameBoard
 {
-    private var board:GameBoard;
-
-    private var playerColor:PieceColor;
-
-    private function _act_setPlayerMoveBehavior()
+    private override function onClick(e:MouseEvent)
     {
-        board.behavior = new PlayerMoveBehavior(playerColor);
-        board.plyHistory.clear();
+        UITest.logHandledEvent("click");
+        super.onClick(e);
+    }
+    
+    private override function onLMBPressed(e:MouseEvent)
+    {
+        var location = posToIndexes(e.stageX, e.stageY);
+        if (location != null)
+            UITest.logHandledEvent('lpress|${e.shiftKey? "T" : "F"}|${e.ctrlKey? "T" : "F"}|${location.i}|${location.j}');
+        else
+            UITest.logHandledEvent('lpress|${e.shiftKey? "T" : "F"}|${e.ctrlKey? "T" : "F"}');
+        super.onRightPress(e);
     }
 
-    private function _act_setEnemyMoveBehavior()
+    private override function onLMBReleased(e:MouseEvent)
     {
-        board.behavior = new EnemyMoveBehavior(playerColor);
-        board.plyHistory.clear();
+        var lastMoveLocation = posToIndexes(lastMouseMoveEvent.stageX, lastMouseMoveEvent.stageY);
+        if (lastMoveLocation != null)
+            UITest.logHandledEvent('move|${lastMoveLocation.i}|${lastMoveLocation.j}');
+        else
+            UITest.logHandledEvent('move');
+
+        var location = posToIndexes(e.stageX, e.stageY);
+        if (location != null)
+            UITest.logHandledEvent('lrelease|${e.shiftKey? "T" : "F"}|${e.ctrlKey? "T" : "F"}|${location.i}|${location.j}');
+        else
+            UITest.logHandledEvent('lrelease|${e.shiftKey? "T" : "F"}|${e.ctrlKey? "T" : "F"}');
+        super.onRightRelease(e);
     }
 
-    private function _act_setAnalysisBehavior()
+    private override function onRightPress(e:MouseEvent)
     {
-        board.behavior = new AnalysisBehavior(playerColor);
-        board.plyHistory.clear();
+        var location = posToIndexes(e.stageX, e.stageY);
+        if (location != null)
+            UITest.logHandledEvent('rpress|${location.i}|${location.j}');
+        else
+            UITest.logHandledEvent('rpress');
+        super.onRightPress(e);
     }
 
-    private function _act_invertPlayerColor() 
+    private override function onRightRelease(e:MouseEvent)
     {
-        playerColor = opposite(playerColor);
-        if (Std.isOfType(board.behavior, PlayerMoveBehavior))
+        var location = posToIndexes(e.stageX, e.stageY);
+        if (location != null)
+            UITest.logHandledEvent('rrelease|${location.i}|${location.j}');
+        else
+            UITest.logHandledEvent('rrelease');
+        super.onRightRelease(e);
+    }
+
+    public function _imitateEvent(encodedEvent:String)
+    {
+        var parts:Array<String> = encodedEvent.split('|');
+
+        var event = new MouseEvent(MouseEvent.CLICK);
+        if (parts.length == 5)
         {
-            if (!Preferences.premoveEnabled.get())
-                board.state = new StubState();
-            board.behavior = new EnemyMoveBehavior(playerColor);
+            var pos = hexCoords(new IntPoint(Std.parseInt(parts[3]), Std.parseInt(parts[4])));
+            event.shiftKey = parts[1] == "T";
+            event.ctrlKey = parts[2] == "T";
+            event.stageX = pos.x;
+            event.stageY = pos.y;
         }
-        else if (Std.isOfType(board.behavior, EnemyMoveBehavior))
+        else if (parts.length == 3)
+        {
+            var pos = hexCoords(new IntPoint(Std.parseInt(parts[1]), Std.parseInt(parts[2])));
+            event.stageX = pos.x;
+            event.stageY = pos.y;
+        }
+        else
+        {
+            event.stageX = -1;
+            event.stageY = -1;
+        }
+
+        switch parts[0]
+        {
+            case 'click':
+                super.onClick(event);
+            case 'rpress':
+                super.onRightPress(event);
+            case 'rrelease':
+                super.onRightRelease(event);
+            case 'lpress':
+                super.onLMBPressed(event);
+            case 'lrelease':
+                super.onLMBReleased(event);
+            case 'move':
+                super.onMouseMoved(event);
+            default:
+                throw "Cant decode event: " + encodedEvent;
+        }
+    }
+
+}
+
+class TGameBoard extends TestedComponent
+{
+    private var board:AugmentedGameBoard;
+
+    public override function _provide_situation():Situation
+    {
+        return board.shownSituation;
+    }
+
+    @prompt("AEnumerable", "Behavior", ["PlayerMove", "EnemyMove", "Analysis"], "Player color", ["White", "Black"])
+    private function _act_setBehavior(type:String, color:String)
+    {
+        var playerColor:PieceColor = PieceColor.createByName(color);
+        if (type == "PlayerMove")
         {
             board.state = new NeutralState();
             board.behavior = new PlayerMoveBehavior(playerColor);
         }
-        else if (Std.isOfType(board.behavior, AnalysisBehavior))
+        else if (type == "EnemyMove")
+        {
+            board.state = Preferences.premoveEnabled.get()? new NeutralState() : new StubState();
+            board.behavior = new PlayerMoveBehavior(playerColor);
+        }
+        else
+        {
+            board.state = new NeutralState();
             board.behavior = new AnalysisBehavior(playerColor);
-    }
-
-    private function _act_enemyMove() 
-    {
-        var resp:String = Browser.window.prompt("Input the serialized ply", "");
-        if (resp != "")
-        {
-            var ply:Ply = PlyDeserializer.deserialize(resp);
-            board.handleNetEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
         }
+        board.plyHistory.clear();
     }
 
-    private function _act_rollback() 
+    @prompt("APly", "Enemy move")
+    private function _act_enemyMove(ply:Ply) 
     {
-        var resp:String = Browser.window.prompt("Input the number of moves to cancel", "");
-        if (resp != "")
-        {
-            board.handleNetEvent(Rollback(Std.parseInt(resp)));
-        }
+        board.handleNetEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
     }
 
-    private function _act_endGame() 
+    @prompt("AInt", "Moves to cancel")
+    private function _act_rollback(cnt:Int) 
     {
-        var resp:String = Browser.window.prompt("Input the delay", "");
-        if (resp != "")
-        {
-            Timer.delay(() -> {board.handleNetEvent(GameEnded('NONE', 'NONE'));}, Std.parseInt(resp));
-        }
+        board.handleNetEvent(Rollback(cnt));
     }
 
+    @prompt("AInt", "Delay in ms")
+    private function _act_endGame(delay:Int) 
+    {
+        Timer.delay(() -> {board.handleNetEvent(GameEnded('NONE', 'NONE'));}, delay);
+    }
+
+    //TODO: Deprecate when there will be a way to edit settings in testing environment
     private function _act_togglePremoves() 
     {
         Preferences.premoveEnabled.set(!Preferences.premoveEnabled.get());
@@ -91,27 +176,21 @@ class TGameBoard extends Sprite
 
     private function _act_printHistory() 
     {
-        trace(Ply.plySequenceToNotation(board.plyHistory.getPlySequence(), Situation.starting()).join(" > "));
+        output(Ply.plySequenceToNotation(board.plyHistory.getPlySequence(), Situation.starting()).join(" > "));
     }
 
-    private function _act_home() 
+    @split(["<<", "<", ">", ">>"])
+    private function _act_scroll(scrollType:String) 
     {
-        board.applyScrolling(Home);
-    }
-
-    private function _act_prev() 
-    {
-        board.applyScrolling(Prev);
-    }
-
-    private function _act_next() 
-    {
-        board.applyScrolling(Next);
-    }
-
-    private function _act_end() 
-    {
-        board.applyScrolling(End);
+        var plyScrollType:PlyScrollType = switch scrollType 
+        {
+            case "<<": Home;
+            case "<": Prev;
+            case ">": Next;
+            case ">>": End;
+            default: null;
+        }
+        board.applyScrolling(plyScrollType);
     }
 
     private function _act_revertOrientation()
@@ -119,12 +198,18 @@ class TGameBoard extends Sprite
         board.revertOrientation();
     }
 
-    public function new() 
+    private override function getComponent():ComponentGraphics
     {
-        super();
-        playerColor = White;
+		return Sprite(board);
+    }
 
-        board = new GameBoard(Situation.starting(), White, new EnemyMoveBehavior(playerColor), false, 50);
-        addChild(board);
-    } 
+    private override function rebuildComponent()
+    {
+        board = new AugmentedGameBoard(Situation.starting(), White, new EnemyMoveBehavior(White), false, 50);
+    }
+
+    public override function _imitateEvent(encodedEvent:String)
+    {
+        board._imitateEvent(encodedEvent);
+    }
 }

@@ -1,5 +1,6 @@
 package tests.ui.game;
 
+import tests.ui.TestedComponent;
 import haxe.ui.components.HorizontalSlider;
 import haxe.ui.components.Slider;
 import haxe.ui.components.Label;
@@ -17,63 +18,29 @@ import utils.TimeControl;
 import gfx.game.GameInfoBox;
 import openfl.display.Sprite;
 
-class TGameInfoBox extends VBox
+class TGameInfoBox extends TestedComponent
 {
-    private var container:Box;
     private var gameinfobox:GameInfoBox;
-
-    private function setBox(v:GameInfoBox)
-    {
-        container.removeComponent(gameinfobox);
-        gameinfobox = v;
-        gameinfobox.horizontalAlign = 'center';
-        gameinfobox.verticalAlign = 'center';
-        container.addComponent(gameinfobox);
-    }
-
-    @interval(1000)
-    @iterations(6)
-    private function _auto_varyTimeControls(i:Int) 
-    {
-        switch i
-        {
-            case 0:
-                setBox(new GameInfoBox(new TimeControl(0, 0), "Gulvan", "kartoved"));
-            case 1:
-                setBox(new GameInfoBox(new TimeControl(15, 1), "Gulvan", "kartoved"));
-            case 2:
-                setBox(new GameInfoBox(new TimeControl(60, 1), "Gulvan", "kartoved"));
-            case 3:
-                setBox(new GameInfoBox(new TimeControl(180, 2), "Gulvan", "kartoved"));
-            case 4:
-                setBox(new GameInfoBox(new TimeControl(600, 0), "Gulvan", "kartoved"));
-            case 5:
-                setBox(new GameInfoBox(new TimeControl(3600, 0), "Gulvan", "kartoved"));
-        }
-    }
-
-    @interval(1000)
-    @iterations(4)
-    private function _auto_varyNames(i:Int) 
-    {
-        switch i
-        {
-            case 0:
-                setBox(new GameInfoBox(new TimeControl(3, 0), "Al", "ra"));
-            case 1:
-                setBox(new GameInfoBox(new TimeControl(3, 0), "wswswswswswswswswsws", "swswswswswswswswswsw"));
-            case 2:
-                setBox(new GameInfoBox(new TimeControl(3, 0), "Al", "swswswswswswswswswsw"));
-            case 3:
-                setBox(new GameInfoBox(new TimeControl(3, 0), "swswswswswswswswswsw", "ra"));
-        }
-    }
-
     private var playthrough_sit:Situation;
 
-    @interval(1000)
+    private var _paramvalues_timeControl = [new TimeControl(0, 0), new TimeControl(15, 1), new TimeControl(60, 1), new TimeControl(180, 2), new TimeControl(600, 0), new TimeControl(3600, 0)];
+    private var _initparam_timeControl:TimeControl = new TimeControl(600, 0);
+
+    private var _paramvalues_whiteLogin = ["Al", "ra", "Gulvan", "kartoved", "wswswswswswswswswsws", "SwsWswSwsWswSwsWswSW"];
+    private var _initparam_whiteLogin:String = "Gulvan";
+
+    private var _paramvalues_blackLogin = ["Al", "ra", "Gulvan", "kartoved", "wswswswswswswswswsws", "SwsWswSwsWswSwsWswSW"];
+    private var _initparam_blackLogin:String = "kartoved";
+
+    private var _initparam_actualization:Bool = false;
+
+    public override function _provide_situation():Situation
+    {
+        return playthrough_sit;
+    }
+
     @iterations(3)
-    private function _auto_playthrough(i:Int) 
+    private function _seq_playthrough(i:Int) 
     {
         if (i == 0)
             playthrough_sit = Situation.starting();
@@ -112,63 +79,42 @@ class TGameInfoBox extends VBox
         };
     }
 
-    private function _act_testActualization() 
+    private var _checks:Array<String> = [
+        "Actualization: Pillar opening",
+        "Actualization: 3+2 Time control",
+        "Actualization: White resigned",
+        "Actualization: DateTime displayed correctly",
+        "Actualization: Test resolutions after this"
+    ];
+
+    private override function getComponent():ComponentGraphics
     {
+		return Component(gameinfobox);
+    }
+
+    private override function rebuildComponent()
+    {
+        if (!_initparam_actualization)
+        {
+            gameinfobox = new GameInfoBox(_initparam_timeControl, _initparam_whiteLogin, _initparam_blackLogin);
+            return;
+        }
+        
         var po:GameLogParserOutput = new GameLogParserOutput();
-        po.whiteLogin = "Gulvan";
-        po.blackLogin = "kartoved";
+        po.whiteLogin = _initparam_whiteLogin;
+        po.blackLogin = _initparam_blackLogin;
         po.datetime = Date.now();
-        po.timeControl = new TimeControl(360, 2);
+        po.timeControl = _initparam_timeControl;
         po.movesPlayed = [Ply.construct(new IntPoint(1, 5), new IntPoint(1, 3)), Ply.construct(new IntPoint(1, 0), new IntPoint(1, 2))];
         po.outcome = Resign;
         po.winnerColor = Black;
 
         var actualizationData:ActualizationData = new ActualizationData();
         actualizationData.logParserOutput = po;
-        setBox(GameInfoBox.constructFromActualizationData(actualizationData));
-    }
 
-    private var _checks_testActualization:Array<String> = [
-        "Pillar opening",
-        "3+2 Time control",
-        "White resigned",
-        "DateTime displayed correctly",
-        "Test resolutions after this"
-    ];
-
-    //TODO: Maybe move adjusters to UITest.hx
-    public function new() 
-    {
-        super();
-        percentWidth = 100;
-        percentHeight = 100;
-
-        container = new Box();
-        container.width = GameLayout.MAX_SIDEBARS_WIDTH;
-        container.percentHeight = 90;
-
-        var widthLabel:Label = new Label();
-        var widthSlider:HorizontalSlider = new HorizontalSlider();
-        var adjusterBox:HBox = new HBox();
-
-        widthLabel.text = "" + container.width;
-        widthSlider.min = GameLayout.MIN_SIDEBARS_WIDTH;
-        widthSlider.max = GameLayout.MAX_SIDEBARS_WIDTH;
-        widthSlider.pos = container.width;
-        widthSlider.onChange = e -> {
-            widthLabel.text = "" + widthSlider.value;
-            container.width = widthSlider.value;
-        };
-
-        adjusterBox.addComponent(widthSlider);
-        adjusterBox.addComponent(widthLabel);
-
-        gameinfobox = new GameInfoBox(new TimeControl(600, 0), "Al", "ra");
-        gameinfobox.horizontalAlign = 'center';
-        gameinfobox.verticalAlign = 'center';
-
-        container.addComponent(gameinfobox);
-        addComponent(adjusterBox);
-        addComponent(container);
+        gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
+        playthrough_sit = Situation.starting();
+        for (ply in po.movesPlayed)
+            playthrough_sit.makeMove(ply, true);
     }
 }

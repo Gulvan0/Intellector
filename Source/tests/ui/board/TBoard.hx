@@ -1,5 +1,6 @@
 package tests.ui.board;
 
+import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.display.Sprite;
 import struct.Ply;
 import struct.Hex;
@@ -8,9 +9,14 @@ import struct.IntPoint;
 import struct.Situation;
 import gameboard.Board;
 
-class TBoard extends Sprite
+class TBoard extends TestedComponent
 {
     private var board:Board;
+    
+    public override function _provide_situation():Situation
+    {
+        return board.shownSituation;
+    }
 
     private function _act_clear()
     {
@@ -18,8 +24,7 @@ class TBoard extends Sprite
     }
 
     @iterations(60)
-    @interval(200)
-    private function _auto_runningInt(i:Int)
+    private function _seq_runningInt(i:Int)
     {
         if (i == 0)
             board.clearPieces();
@@ -33,7 +38,7 @@ class TBoard extends Sprite
         'There is only one intellector at a time'
     ];
 
-    @steps(10)
+    @iterations(10)
     private function _seq_setHex(i:Int)
     { 
         switch i
@@ -65,7 +70,7 @@ class TBoard extends Sprite
 
     private var revPly:ReversiblePly;
 
-    @steps(8)
+    @iterations(8)
     private function _seq_transpositions(i:Int)
     { 
         switch i
@@ -106,11 +111,13 @@ class TBoard extends Sprite
         7 => ['Prev move is cancelled']
     ];
 
-    public function new() 
+    private override function getComponent():ComponentGraphics
     {
-        super();
+		return Sprite(board);
+    }
 
+    private override function rebuildComponent()
+    {
         board = new Board(Situation.starting());
-        addChild(board);
     }
 }

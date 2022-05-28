@@ -81,7 +81,7 @@ class Main extends Sprite
 		super();
 		init();
 		//start();
-		addChild(new UITest(new TVariantView(new VariantTree())));
+		////addChild(new UITest(new TVariantView(new VariantTree())));
 		//ScreenManager.toScreen(ScreenType.StartedPlayableGame(228, "Gulvan", "kartoved", new TimeControl(3*60, 2), White));
 	}
 

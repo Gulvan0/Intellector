@@ -204,13 +204,6 @@ class VariantTree extends Sprite implements IVariantView
             selectBranchUnsafe(nodePath, nodePath.length);
     }
 
-    #if debug
-    public function getCurrentSituation():Situation
-    {
-        return variant.getSituationByPath(selectedBranch.subpath(selectedMove));
-    }
-    #end
-
     private function refreshLayout()
     {
         var displacement:DisplacementInfo = buildOptimalDisplacement();

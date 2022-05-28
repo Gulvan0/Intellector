@@ -1,5 +1,7 @@
 package tests;
 
+import browser.CredentialCookies;
+import tests.ui.EndpointType;
 import haxe.ui.core.Component;
 import net.LoginManager;
 import openfl.ui.Keyboard;
@@ -21,13 +23,6 @@ import gfx.components.SpriteWrapper;
 import haxe.ui.containers.HBox;
 using StringTools;
 
-enum EndpointType
-{
-    Action;
-    Auto;
-    Sequence;
-}
-
 class UITest extends HBox
 {
     private var component:Sprite;
@@ -41,6 +36,11 @@ class UITest extends HBox
     private var seqIterators:Map<String, Int> = [];
     private var seqIteratorLimits:Map<String, Int> = [];
     private var seqButtons:Map<String, Button> = [];
+
+    public static function logHandledEvent(encodedEvent:String)
+    {
+        //TODO: Implement
+    }
 
     private function getFieldNamePrefix(type:EndpointType):String
     {
@@ -248,12 +248,18 @@ class UITest extends HBox
         }
     }
 
-    public function new(component:Sprite, ?contentWidthPercent:Float = 72) 
+    private function initSinks()
     {
         Networker.ignoreEmitCalls = true;
-        LoginManager.login = "Gulvan";
-        
+        LoginManager.login = CredentialCookies.getLogin();
+        if (LoginManager.login == null)
+            LoginManager.login = "TesterPlayer";
+    }
+
+    public function new(component:Sprite, ?contentWidthPercent:Float = 72) 
+    {
         super();
+        initSinks();
         this.component = component;
         this.cookiePrefix = Type.getClassName(Type.getClass(component));
         

@@ -1,17 +1,83 @@
 package tests.ui.board;
 
+import tests.ui.TestedComponent.ComponentGraphics;
+import openfl.events.MouseEvent;
 import openfl.display.Sprite;
 import struct.IntPoint;
 import struct.PieceColor.opposite;
 import struct.Situation;
 import gameboard.SelectableBoard;
 
-class TSelectableBoard extends Sprite
+class AugmentedSelectableBoard extends SelectableBoard
 {
-    private var board:SelectableBoard;
+    private override function onClick(e:MouseEvent)
+    {
+        UITest.logHandledEvent("click");
+        super.onClick(e);
+    }
 
-    @steps(8)
-    private function _seq_basics(i:Int)
+    private override function onRightPress(e:MouseEvent)
+    {
+        var location = posToIndexes(e.stageX, e.stageY);
+        if (location != null)
+            UITest.logHandledEvent('rpress|${location.i}|${location.j}');
+        else
+            UITest.logHandledEvent('rpress');
+        super.onRightPress(e);
+    }
+
+    private override function onRightRelease(e:MouseEvent)
+    {
+        var location = posToIndexes(e.stageX, e.stageY);
+        if (location != null)
+            UITest.logHandledEvent('rrelease|${location.i}|${location.j}');
+        else
+            UITest.logHandledEvent('rrelease');
+        super.onRightRelease(e);
+    }
+
+    public function _imitateEvent(encodedEvent:String)
+    {
+        var parts:Array<String> = encodedEvent.split('|');
+
+        var event = new MouseEvent(MouseEvent.CLICK);
+        if (parts.length > 1)
+        {
+            var pos = hexCoords(new IntPoint(Std.parseInt(parts[1]), Std.parseInt(parts[2])));
+            event.stageX = pos.x;
+            event.stageY = pos.y;
+        }
+        else
+        {
+            event.stageX = -1;
+            event.stageY = -1;
+        }
+
+        switch parts[0]
+        {
+            case 'click':
+                super.onClick(event);
+            case 'rpress':
+                super.onRightPress(event);
+            case 'rrelease':
+                super.onRightRelease(event);
+            default:
+                throw "Cant decode event: " + encodedEvent;
+        }
+    }
+}
+
+class TSelectableBoard extends TestedComponent
+{
+    private var board:AugmentedSelectableBoard;
+
+    public override function _provide_situation():Situation
+    {
+        return board.shownSituation;
+    }
+
+    @iterations(8)
+    private function _seq_basicSelectionTests(i:Int)
     { 
         switch i
         {
@@ -31,7 +97,7 @@ class TSelectableBoard extends Sprite
         }
     }
 
-    private var _checks_basics:Map<Int, Array<String>> = [
+    private var _checks_basicSelectionTests:Map<Int, Array<String>> = [
         -1 => ['Everything works the same with RMB hints'],
         0 => ['Starting pos, normal orientation, no highlighted moves, no markers'],
         1 => ['Upper left corner liberator jump highlighted'],
@@ -44,8 +110,7 @@ class TSelectableBoard extends Sprite
     ];
 
     @iterations(29)
-    @interval(800)
-    private function _auto_markers(i:Int)
+    private function _seq_markers(i:Int)
     { 
         if (i == 0)
         {
@@ -99,11 +164,18 @@ class TSelectableBoard extends Sprite
         'RMB selections drawable correctly after flipBoard'
     ];
 
-    public function new() 
+    private override function getComponent():ComponentGraphics
     {
-        super();
+		return Sprite(board);
+    }
 
-        board = new SelectableBoard(Situation.starting(), White, 50);
-        addChild(board);
-    }    
+    private override function rebuildComponent()
+    {
+        board = new AugmentedSelectableBoard(Situation.starting(), White, 50);
+    }
+
+    public override function _imitateEvent(encodedEvent:String)
+    {
+        board._imitateEvent(encodedEvent);
+    }
 }
