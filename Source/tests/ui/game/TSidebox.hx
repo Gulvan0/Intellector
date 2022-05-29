@@ -23,7 +23,7 @@ class TSidebox extends TestedComponent
     private var previousSituations:Array<Situation> = [];
     private var situation:Situation;
 
-    private var _paramvalues_timeControl = [new TimeControl(80, 5), new TimeControl(600, 5)];
+    private var _paramvalues_timeControl = [new TimeControl(80, 5), new TimeControl(100, 5), new TimeControl(600, 5)];
     private var _initparam_timeControl:TimeControl = new TimeControl(600, 5);
 
     private var _paramvalues_whiteLogin = ["Al", "ra", "Gulvan", "kartoved", "wswswswswswswswswsws", "SwsWswSwsWswSwsWswSW"];
@@ -46,7 +46,7 @@ class TSidebox extends TestedComponent
     }
 
     @prompt("APly", "Move")
-    private function _act_ContinuationMove(ply:Ply) 
+    private function _act_continuationMove(ply:Ply) 
     {
         var plyStr:String = ply.toNotation(situation);
         var performedBy:PieceColor = situation.get(ply.from).color;
@@ -55,7 +55,7 @@ class TSidebox extends TestedComponent
         situation.makeMove(ply, true);
     }
 
-    private function _act_FillGame() 
+    private function _act_fillGame() 
     {
         var turnColor:PieceColor = situation.turnColor;
         for (plyInfo in situation.randomContinuation(25))
@@ -66,10 +66,6 @@ class TSidebox extends TestedComponent
             situation.makeMove(plyInfo.ply, true);
         }
     }
-
-    private var _checks_FillGame:Array<String> = [
-        "Overflow is handled correctly"
-    ];
     
     @prompt("AEnumerable", "Event name", ["DrawOffered", "DrawCancelled", "DrawAccepted", "DrawDeclined", "TakebackOffered", "TakebackCancelled", "TakebackAccepted", "TakebackDeclined"])
     private function _act_offerEvent(event:String) 
@@ -77,32 +73,12 @@ class TSidebox extends TestedComponent
         sidebox.handleNetEvent(ServerEvent.createByName(event));
     }
 
-    private var _checks_offerEvent:Array<String> = [
-        "DrawOffered => click 'accept'",
-        "DrawOffered => click 'decline'",
-        "TakebackOffered => click 'accept'",
-        "TakebackOffered => click 'decline'",
-        "DrawOffered => DrawCancelled",
-        "DrawOffered => click 'offer draw'",
-        "TakebackOffered => TakebackCancelled",
-        "click 'offer draw' => DrawAccepted",
-        "click 'offer draw' => DrawDeclined",
-        "click 'offer takeback' => TakebackAccepted",
-        "click 'offer takeback' => TakebackDeclined",
-        "DrawOffered => TakebackOffered"
-    ];
-
-    private function _act_GameEnded() 
+    private function _act_gameEnded() 
     {
         sidebox.handleNetEvent(GameEnded('w', 'mat'));
     }
 
-    private var _checks_GameEnded:Array<String> = [
-        "Timers are stopped",
-        "Spectator: action button set is changed"
-    ];
-
-    private function _act_RollbackThree() 
+    private function _act_rollbackThree() 
     {
         sidebox.handleNetEvent(Rollback(3));
         previousSituations.pop();
@@ -110,26 +86,11 @@ class TSidebox extends TestedComponent
         situation = previousSituations.pop();
     }
 
-    private var _checks_RollbackThree:Array<String> = [
-        "History cut correctly",
-        "ContinuationMove processed correctly after a rollback",
-        "Current timer stops, Another timer starts running, WAIT/MOVE styles are reverted",
-        "Draw disabled if rolled too far",
-        "Takeback disabled if rolled too far",
-        "Draw reenabled after rolled too far + moved",
-        "Takeback reenabled if rolled too far + moved"
-    ];
-
     private function _act_correctTime() 
     {
         var ts = Date.now().getTime() - 200;
         sidebox.handleNetEvent(TimeCorrection(124, 9, ts, 'b'));
     }
-
-    private var _checks_correctTime:Array<String> = [
-        "Time set to 2:04 white / 0:08.800 black",
-        "Graphic and sound alerts work properly given the initialization type"
-    ];
 
     private override function getComponent():ComponentGraphics
     {

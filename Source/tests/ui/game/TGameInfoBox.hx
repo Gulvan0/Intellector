@@ -21,6 +21,7 @@ import openfl.display.Sprite;
 class TGameInfoBox extends TestedComponent
 {
     private var gameinfobox:GameInfoBox;
+    private var previousSituations:Array<Situation> = [];
     private var playthrough_sit:Situation;
 
     private var _paramvalues_timeControl = [new TimeControl(0, 0), new TimeControl(15, 1), new TimeControl(60, 1), new TimeControl(180, 2), new TimeControl(600, 0), new TimeControl(3600, 0)];
@@ -43,19 +44,26 @@ class TGameInfoBox extends TestedComponent
     private function _seq_playthrough(i:Int) 
     {
         if (i == 0)
+        {
+            previousSituations = [];
             playthrough_sit = Situation.starting();
+            return;
+        }
 
         var plyInfo = playthrough_sit.randomContinuation(1)[0];
         if (i % 2 == 1)
             gameinfobox.handleGameBoardEvent(ContinuationMove(plyInfo.ply, plyInfo.plyStr, Black));
         else
             gameinfobox.handleNetEvent(Move(plyInfo.ply.from.i, plyInfo.ply.to.i, plyInfo.ply.from.j, plyInfo.ply.to.j, plyInfo.ply.morphInto == null? null : plyInfo.ply.morphInto.getName()));
+        
+        previousSituations.push(playthrough_sit.copy());
         playthrough_sit.makeMove(plyInfo.ply, true);
     }
 
     private function _act_rollback() 
     {
         gameinfobox.handleNetEvent(Rollback(1));
+        playthrough_sit = previousSituations.pop();
     }
 
     private function _act_seeResolutions() 
@@ -79,14 +87,6 @@ class TGameInfoBox extends TestedComponent
         };
     }
 
-    private var _checks:Array<String> = [
-        "Actualization: Pillar opening",
-        "Actualization: 3+2 Time control",
-        "Actualization: White resigned",
-        "Actualization: DateTime displayed correctly",
-        "Actualization: Test resolutions after this"
-    ];
-
     private override function getComponent():ComponentGraphics
     {
 		return Component(gameinfobox);
@@ -94,6 +94,9 @@ class TGameInfoBox extends TestedComponent
 
     private override function rebuildComponent()
     {
+        previousSituations = [];
+        playthrough_sit = Situation.starting();
+
         if (!_initparam_actualization)
         {
             gameinfobox = new GameInfoBox(_initparam_timeControl, _initparam_whiteLogin, _initparam_blackLogin);
@@ -113,8 +116,11 @@ class TGameInfoBox extends TestedComponent
         actualizationData.logParserOutput = po;
 
         gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
-        playthrough_sit = Situation.starting();
+
         for (ply in po.movesPlayed)
+        {
+            previousSituations.push(playthrough_sit.copy());
             playthrough_sit.makeMove(ply, true);
+        }
     }
 }

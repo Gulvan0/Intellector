@@ -32,12 +32,6 @@ class TBoard extends TestedComponent
             board.setHexDirectly(IntPoint.fromScalar(i-1), Hex.occupied(Intellector, White));
     }
 
-    private var _checks_runningInt:Array<String> = [
-        'All hexes are visited',
-        'Hexes are visited in order',
-        'There is only one intellector at a time'
-    ];
-
     @iterations(10)
     private function _seq_setHex(i:Int)
     { 
@@ -55,18 +49,6 @@ class TBoard extends TestedComponent
             case 9: board.setHexDirectly(new IntPoint(3, 5), Hex.occupied(Intellector, White));
         }
     }
-
-    private var _checks_setHex:Map<Int, Array<String>> = [
-        1 => ['White Int appears on 3;3'],
-        2 => ['White Int teleports to 5;5'],
-        3 => ['Black Int appears on 3;3'],
-        4 => ['Black Liberator appears on 0;1'],
-        5 => ['Black Liberator replaced with White Defensor'],
-        6 => ['No changes'],
-        7 => ['Black int goes down'],
-        8 => ['Black int goes down'],
-        9 => ['Black int replaced with White']
-    ];
 
     private var revPly:ReversiblePly;
 
@@ -100,16 +82,6 @@ class TBoard extends TestedComponent
                 board.applyMoveTransposition(revPly, true);
         }
     }
-
-    private var _checks_transpositions:Map<Int, Array<String>> = [
-        1 => ['White Int goes up'],
-        2 => ['Prev move is cancelled'],
-        3 => ['Prev move is repeated'],
-        4 => ['Orientation reverted correctly'],
-        5 => ['Liberator captures Defensor'],
-        6 => ['Orientation reverted correctly'],
-        7 => ['Prev move is cancelled']
-    ];
 
     private override function getComponent():ComponentGraphics
     {

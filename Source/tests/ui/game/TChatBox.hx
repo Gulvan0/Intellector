@@ -51,17 +51,13 @@ class TChatbox extends TestedComponent
 
     private var _initparam_type:InitType = Playable;
 
-    private var _checks_netEvents:Array<String> = ["Message('player', 'insult'), SpectatorMessage('spec', 'opinion'), GameEnded('w', 'bre'), PlayerDisconnected('b'), PlayerReconnected('b'), NewSpectator('spec2'), SpectatorLeft('spec2'), DrawOffered, DrawCancelled, DrawAccepted, DrawDeclined, TakebackOffered, TakebackCancelled, TakebackAccepted, TakebackDeclined"];
-    private var _checks_sideEvents:Array<String> = ['Offer/Cancel/Accept/Decline X Draw/Takeback'];
-    private var _checks:Array<String> = ['Enter can be used to send message', 'Illegal chars are cut from the text', 'Chat autoscrolls on overflow', 'Messages can be sent'];
-
     @iterations(15)
     private function _seq_netEvents(i:Int) 
     {
         var event = switch i
         {
-            case 0: Message('player', 'insult');
-            case 1: SpectatorMessage('spec', 'opinion');
+            case 0: Message('biba', 'haha');
+            case 1: SpectatorMessage('boba', 'opinion');
             case 2: GameEnded('w', 'bre');
             case 3: PlayerDisconnected('Black');
             case 4: PlayerReconnected('Black');

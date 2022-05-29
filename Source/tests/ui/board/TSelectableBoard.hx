@@ -97,18 +97,6 @@ class TSelectableBoard extends TestedComponent
         }
     }
 
-    private var _checks_basicSelectionTests:Map<Int, Array<String>> = [
-        -1 => ['Everything works the same with RMB hints'],
-        0 => ['Starting pos, normal orientation, no highlighted moves, no markers'],
-        1 => ['Upper left corner liberator jump highlighted'],
-        2 => ['Markers added for the leftmost black progressor'],
-        3 => ['The follow-up jump in the same direction highlighted instead of the former move'],
-        4 => ['Highlighting rotated', 'Markers rotated'],
-        5 => ['Markers removed'],
-        6 => ['Markers added for black int'],
-        7 => ['Move unhighlighted', 'Nothing else changed']
-    ];
-
     @iterations(29)
     private function _seq_markers(i:Int)
     { 
@@ -139,30 +127,10 @@ class TSelectableBoard extends TestedComponent
         }
     }
 
-    private var _checks_markers:Array<String> = [
-        'Markers are correct'
-    ];
-
     private function _act_flipBoard() 
     {
         board.setOrientation(opposite(board.orientationColor));
     }
-
-    private var _checks_flipBoard:Array<String> = [
-        'RMB arrows drawable',
-        'RMB selections drawable',
-        'RMB arrows & arrows overlap nice',
-        'RMB arrows & selections overlap nice',
-        'RMB arrow disappears on 2nd draw attempt',
-        'RMB arrow reappears on 3rd draw attempt',
-        'RMB subsequent arrows look good',
-        'RMB arrows & selections removed on LMB',
-        'Same hex selectable after being removed',
-        'Same arrow drawable after being removed', 
-        'RMB hints rotate on flipBoard press', 
-        'RMB arrows drawable correctly after flipBoard',
-        'RMB selections drawable correctly after flipBoard'
-    ];
 
     private override function getComponent():ComponentGraphics
     {
