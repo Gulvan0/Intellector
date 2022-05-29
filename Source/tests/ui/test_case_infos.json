@@ -29,22 +29,22 @@
                 "name": "Macro name",
                 "sequence": [
                     {
-                        "type": "methodcall",
-                        "method": "playthrough",
+                        "type": "endpointcall",
+                        "endpoint": "playthrough",
                         "args": [
                             {
                                 "value": 0,
-                                "converter": null
+                                "type": "AInt"
                             }
                         ]
                     },
                     {
-                        "type": "methodcall",
-                        "method": "playthrough",
+                        "type": "endpointcall",
+                        "endpoint": "playthrough",
                         "args": [
                             {
                                 "value": 1,
-                                "converter": null
+                                "type": "AInt"
                             }
                         ]
                     },
