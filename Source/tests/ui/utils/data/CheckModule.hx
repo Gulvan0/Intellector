@@ -1,30 +1,13 @@
 package tests.ui.utils.data;
 
+import tests.ui.utils.data.CheckMap;
+import tests.ui.utils.data.CheckList;
+import tests.ui.utils.data.CheckList.construct as constructChecklist;
+
 enum CheckModule
 {
-    Normal(checklist:Array<String>);
-    Stepwise(checks:Map<String, Array<String>>);
-}
-
-private function constructNormalCheckModule(moduleJson:Dynamic, testCaseName:String, moduleName:String):CheckModule
-{
-    var checklist:Array<String> = moduleJson;
-    return Normal(checklist);
-}
-
-private function constructStepwiseCheckModule(moduleJson:Dynamic, testCaseName:String, moduleName:String):CheckModule
-{
-    var checkMap:Map<String, Array<String>> = [];
-
-    for (step in Reflect.fields(moduleJson))
-    {
-        var checklist:Array<String> = Reflect.field(moduleJson, step);
-        if ((Std.parseInt(step) == null || Std.parseInt(step) < 0) && step != "common")
-            throw 'Invalid step \'$step\' in module $moduleName of test case $testCaseName';
-        checkMap.set(step, checklist);
-    }
-
-    return Stepwise(checkMap);
+    Normal(checklist:CheckList);
+    Stepwise(checks:CheckMap);
 }
 
 function constructCheckModule(moduleJson:Dynamic, testCaseName:String, moduleName:String):CheckModule
@@ -38,7 +21,18 @@ function constructCheckModule(moduleJson:Dynamic, testCaseName:String, moduleNam
     var content = Reflect.field(moduleJson, "content");
     
     if (steps)
-        return constructStepwiseCheckModule(content, testCaseName, moduleName);
+        return Stepwise(CheckMap.construct(content, testCaseName, moduleName));
     else
-        return constructNormalCheckModule(content, testCaseName, moduleName);
+        return Normal(constructChecklist(content, testCaseName, moduleName));
+}
+
+function getCheckIndex(module:CheckModule, checkText:String)
+{
+    switch module 
+    {
+        case Normal(checklist):
+            return checklist.indexOf(checkText);
+        case Stepwise(checks):
+            return checks.getCheckIndex(checkText);
+    }
 }

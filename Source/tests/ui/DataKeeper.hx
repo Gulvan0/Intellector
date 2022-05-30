@@ -27,6 +27,11 @@ class DataKeeper
         return map;
     }
 
+    public static function get(testCase:String):TestCaseInfo
+    {
+        return testCaseInfos.get(testCase);
+    }
+
     public static function load() 
     {
         var rawDataStr:String = Resource.getString("test_case_infos");
@@ -34,10 +39,5 @@ class DataKeeper
             rawDataStr = Http.requestUrl("https://raw.githubusercontent.com/Gulvan0/Intellector/main/Source/tests/ui/test_case_infos.json");
         
         testCaseInfos = constructTestCaseMap(Json.parse(rawDataStr));
-    }
-
-    public static function save() 
-    {
-        //TODO: Fill
     }
 }
