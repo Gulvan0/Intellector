@@ -2,10 +2,10 @@ package gfx.analysis;
 
 import gfx.analysis.IVariantView.SelectedBranchInfo;
 import gameboard.GameBoard.IGameBoardObserver;
-import serialization.PlyDeserializer;
+import serialization.PlySerializer;
 import gfx.screens.Analysis.NodeInfo;
 import gameboard.GameBoard.GameBoardEvent;
-import serialization.SituationDeserializer;
+import serialization.SituationSerializer;
 import haxe.ui.core.Component;
 import gfx.analysis.PositionEditor.PositionEditorEvent;
 import gfx.analysis.OverviewTab.OverviewTabEvent;
@@ -130,7 +130,7 @@ class RightPanel extends Sprite implements IGameBoardObserver
             case ResetPressed:
                 emit(ResetRequested);
             case ConstructFromSIPPressed(sip):
-                var situation:Situation = SituationDeserializer.deserialize(sip);
+                var situation:Situation = SituationSerializer.deserialize(sip);
                 positionEditor.changeColorOptions(situation.turnColor);
                 emit(ConstructSituationRequested(situation));
             case TurnColorChanged(newTurnColor):

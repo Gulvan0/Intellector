@@ -8,7 +8,7 @@ import gfx.utils.PlyScrollType;
 import tests.ui.ArgumentType;
 import struct.Situation;
 import haxe.Timer;
-import serialization.PlyDeserializer;
+import serialization.PlySerializer;
 import struct.Ply;
 import gameboard.behaviors.AnalysisBehavior;
 import struct.PieceColor;

@@ -3,7 +3,7 @@ package tests.ui.analysis;
 import tests.ui.analysis.variantviews.AugmentedVariantTree;
 import Preferences.BranchingTabType;
 import tests.ui.TestedComponent;
-import serialization.PlyDeserializer;
+import serialization.PlySerializer;
 import struct.Ply;
 import struct.Variant;
 import struct.Situation;
@@ -67,11 +67,11 @@ class TVariantView extends TestedComponent
                 }
                 selectedPath = [0,0,0,0,0,0];
             case Branching:
-                startingVariant.addChildToNode(PlyDeserializer.deserialize("7573"), []);
-                startingVariant.addChildToNode(PlyDeserializer.deserialize("8182"), [0]);
-                startingVariant.addChildToNode(PlyDeserializer.deserialize("6564"), [0, 0]);
-                startingVariant.addChildToNode(PlyDeserializer.deserialize("1513"), [0, 0]);
-                startingVariant.addChildToNode(PlyDeserializer.deserialize("6654"), []);
+                startingVariant.addChildToNode(PlySerializer.deserialize("7573"), []);
+                startingVariant.addChildToNode(PlySerializer.deserialize("8182"), [0]);
+                startingVariant.addChildToNode(PlySerializer.deserialize("6564"), [0, 0]);
+                startingVariant.addChildToNode(PlySerializer.deserialize("1513"), [0, 0]);
+                startingVariant.addChildToNode(PlySerializer.deserialize("6654"), []);
                 selectedPath = [0];
             case Empty:
                 //* Leave it as it is

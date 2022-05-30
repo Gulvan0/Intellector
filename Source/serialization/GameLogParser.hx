@@ -79,7 +79,7 @@ class GameLogParser
                 processSpecialEntry(trimmedEntry.charAt(1), trimmedEntry.substr(3), parserOutput);
             else if (trimmedEntry.length >= 4)
             {
-                var ply:Ply = PlyDeserializer.deserialize(trimmedEntry);
+                var ply:Ply = PlySerializer.deserialize(trimmedEntry);
                 parserOutput.movesPlayed.push(ply);
                 parserOutput.currentSituation = parserOutput.currentSituation.makeMove(ply);
             }

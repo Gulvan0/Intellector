@@ -2,7 +2,7 @@ package gfx.screens;
 
 import haxe.ui.containers.HBox;
 import gfx.components.SpriteWrapper;
-import serialization.SituationDeserializer;
+import serialization.SituationSerializer;
 import struct.Situation;
 import haxe.Timer;
 import gfx.components.Dialogs;

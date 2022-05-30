@@ -6,7 +6,7 @@ import struct.PieceType;
 import struct.ReversiblePly;
 import struct.IntPoint;
 
-class PlyDeserializer 
+class PlySerializer 
 {
 
     public static function deserialize(serialized:String):Ply

@@ -223,7 +223,7 @@ class AnalysisCompound extends GameCompound
             for (node in nodesByPathLength.get(i))
             {
                 onBranchClick(Variant.parentPath(node.path));
-                onBranchingMove(PlyDeserializer.deserialize(node.plyStr));
+                onBranchingMove(PlySerializer.deserialize(node.plyStr));
             }
         onBranchClick([]);
     }

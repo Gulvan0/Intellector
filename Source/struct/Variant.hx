@@ -1,8 +1,8 @@
 package struct;
 
 import haxe.display.Display.Package;
-import serialization.SituationDeserializer;
-import serialization.PlyDeserializer;
+import serialization.SituationSerializer;
+import serialization.PlySerializer;
 import haxe.Json;
 import haxe.ui.util.Variant;
 import struct.Ply;
@@ -136,7 +136,7 @@ class Variant extends VariantNode
 
         for (code => node in getAllNodes())
             if (code != '')
-                serialized += code + "/" + PlyDeserializer.serialize(node.ply) + ";";
+                serialized += code + "/" + PlySerializer.serialize(node.ply) + ";";
 
         serialized += startingSituation.serialize();
                 
@@ -147,7 +147,7 @@ class Variant extends VariantNode
     {
         var variantStrParts:Array<String> = s.split(";");
         var startingSituationSIP:String = variantStrParts.pop();
-        var startingSituation:Situation = SituationDeserializer.deserialize(startingSituationSIP);
+        var startingSituation:Situation = SituationSerializer.deserialize(startingSituationSIP);
         var nodesByPathLength:Map<Int, Array<{parentPath:VariantPath, nodeNum:Int, ply:Ply}>> = [];
         var maxPathLength:Int = 0;
 
@@ -156,7 +156,7 @@ class Variant extends VariantNode
             var nodeStrParts = nodeStr.split("/");
             var code = nodeStrParts[0];
             var path = VariantPath.fromCode(code);
-            var ply = PlyDeserializer.deserialize(nodeStrParts[1]);
+            var ply = PlySerializer.deserialize(nodeStrParts[1]);
             var nodeInfo = {parentPath: path.parent(), nodeNum: path.lastNodeNum(), ply: ply};
             var pathLength:Int = path.length;
 

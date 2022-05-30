@@ -1,5 +1,6 @@
 package struct;
 
+import serialization.SituationSerializer;
 import utils.MathUtils;
 import struct.PieceColor.opposite;
 
@@ -225,22 +226,17 @@ class Situation
 
     public function serialize():String
     {
-        var whitePart = '';
-        var blackPart = '';
-        for (t in 0...IntPoint.hexCount) 
-        {
-            var piece = hexArray[t];
-            if (piece.color == White)
-                whitePart += '${String.fromCharCode(t + 64)}${PieceType.letter(piece.type)}';
-            else if (piece.color == Black)
-                blackPart += '${String.fromCharCode(t + 64)}${PieceType.letter(piece.type)}';
-        }
-        return PieceColor.letter(turnColor) + whitePart + "!" + blackPart;
+        return SituationSerializer.serialize(this);
+    }
+
+    public inline function getS(scalarCoord:Int):Hex
+    {
+        return hexArray[scalarCoord];
     }
 
     public inline function get(coords:IntPoint):Hex
     {
-        return hexArray[coords.toScalar()];
+        return getS(coords.toScalar());
     }
 
     private inline function getC(i:Int, j:Int):Hex

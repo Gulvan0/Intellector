@@ -11,7 +11,7 @@ class TRightPanel extends TestedComponent //TODO: Add more tests
         var resp:String = Browser.window.prompt("Input the serialized ply");
         if (resp == null)
             return;
-        var ply:Ply = PlyDeserializer.deserialize(resp);
+        var ply:Ply = PlySerializer.deserialize(resp);
         var situation:Situation = Situation.starting();
         var plyStr:String = ply.toNotation(situation);
         var performedBy:PieceColor = situation.get(ply.from).color;
@@ -28,7 +28,7 @@ class TRightPanel extends TestedComponent //TODO: Add more tests
         var resp:String = Browser.window.prompt("Input the serialized ply");
         if (resp == null)
             return;
-        var ply:Ply = PlyDeserializer.deserialize(resp);
+        var ply:Ply = PlySerializer.deserialize(resp);
         var situation:Situation = Situation.starting();
         var plyStr:String = ply.toNotation(situation);
         var performedBy:PieceColor = situation.get(ply.from).color;

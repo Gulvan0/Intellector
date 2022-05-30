@@ -8,7 +8,7 @@ import net.ServerEvent;
 import struct.PieceColor;
 import struct.Situation;
 import struct.Ply;
-import serialization.PlyDeserializer;
+import serialization.PlySerializer;
 import js.Browser;
 import gameboard.GameBoard.GameBoardEvent;
 import serialization.GameLogParser;
