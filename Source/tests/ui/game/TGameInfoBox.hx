@@ -89,7 +89,7 @@ class TGameInfoBox extends TestedComponent
 
     private override function getComponent():ComponentGraphics
     {
-		return Component(gameinfobox);
+		return AdjustableContent(gameinfobox, GameLayout.MIN_SIDEBARS_WIDTH, GameLayout.MAX_SIDEBARS_WIDTH, -1, -1);
     }
 
     private override function rebuildComponent()
