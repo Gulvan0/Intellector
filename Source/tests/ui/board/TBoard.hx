@@ -85,7 +85,7 @@ class TBoard extends TestedComponent
 
     private override function getComponent():ComponentGraphics
     {
-		return Sprite(board);
+		return Board(board);
     }
 
     private override function rebuildComponent()
