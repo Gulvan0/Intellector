@@ -387,7 +387,7 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
 
     public function new(situation:Situation, orientationColor:PieceColor, startBehavior:IBehavior, stubState:Bool = false, hexSideLength:Float = 40) 
     {
-        super(situation, orientationColor, hexSideLength, false);
+        super(situation, Free, Free, orientationColor, hexSideLength, false);
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();

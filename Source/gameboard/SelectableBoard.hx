@@ -14,9 +14,19 @@ import openfl.events.MouseEvent;
 using Lambda;
 using utils.Geometry;
 
+enum SelectionMode
+{
+    Disabled;
+    EnsureSingle;
+    Free;
+}
+
 /**A basic Board with automatic RMB selection handling plus option to highlight last moves and add hex markers**/
 class SelectableBoard extends Board
 {
+    public final arrowMode:SelectionMode;
+    public final hexMode:SelectionMode;
+
     private var arrowLayer:Sprite;
     private var drawnArrows:Map<String, Sprite> = [];
     private var arrowStartLocation:Null<IntPoint>;
@@ -84,13 +94,24 @@ class SelectableBoard extends Board
 
     public function removeArrowsAndSelections()
     {
+        removeArrows();
+        removeRedHexSelections();
+    }
+
+    private function removeRedHexSelections()
+    {
         for (index in redSelectedHexIndices)
             hexagons[index].hideLayer(RMB);
+        
+        redSelectedHexIndices = [];
+    }
+
+    private function removeArrows() 
+    {
         for (arrow in drawnArrows)
             arrowLayer.removeChild(arrow);
 
         drawnArrows = [];
-        redSelectedHexIndices = [];
     }
 
     private function onClick(e:MouseEvent)
@@ -117,8 +138,10 @@ class SelectableBoard extends Board
                     hexToSelect.hideLayer(RMB);
                     redSelectedHexIndices.remove(hexScalarIndex);
                 }
-                else 
+                else
                 {
+                    if (hexMode == EnsureSingle)
+                        removeRedHexSelections();
                     hexToSelect.showLayer(RMB);
                     redSelectedHexIndices.push(hexScalarIndex);
                 }
@@ -132,7 +155,11 @@ class SelectableBoard extends Board
                     drawnArrows.remove(code);
                 }
                 else 
+                {
+                    if (arrowMode == EnsureSingle)
+                        removeArrows();
                     drawArrow(arrowStartLocation, arrowEndLocation);
+                }
             }
 
         arrowStartLocation = null;
@@ -141,6 +168,9 @@ class SelectableBoard extends Board
     private function onAdded(e)
     {
         removeEventListener(Event.ADDED_TO_STAGE, onAdded);
+        if (hexMode == Disabled && arrowMode == Disabled)
+            return;
+
         addEventListener(MouseEvent.CLICK, onClick);
         stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRightPress);
         stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightRelease);
@@ -210,9 +240,11 @@ class SelectableBoard extends Board
         graphics.endFill();
     }
 
-    public function new(situation:Situation, orientationColor:PieceColor = White, hexSideLength:Float = 40, suppressMarkup:Bool = false) 
+    public function new(situation:Situation, arrowMode:SelectionMode, hexMode:SelectionMode, orientationColor:PieceColor = White, hexSideLength:Float = 40, suppressMarkup:Bool = false) 
     {
         super(situation, orientationColor, hexSideLength, suppressMarkup);
+        this.arrowMode = arrowMode;
+        this.hexMode = hexMode;
 
         arrowLayer = new Sprite();
         addChild(arrowLayer);
