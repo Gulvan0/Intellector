@@ -1,11 +1,13 @@
 package tests.ui.utils.data;
 
+import haxe.Json;
+import struct.Ply;
 import tests.ui.utils.data.MacroStep.constructMacroStep;
 
 class Macro
 {
     public var name:String;
-    public var sequence:Array<MacroStep>;
+    private final sequence:Array<MacroStep>;
     
     public static function construct(json:Dynamic, testCaseName:String):Macro
     {
@@ -28,6 +30,40 @@ class Macro
         }
         
         return new Macro(macroName, constructedMacroSequence);
+    }
+
+    public function iterator()
+    {
+        return sequence.iterator();
+    }
+
+    public function serialize():String
+    {
+        var sequenceJson:Array<Dynamic> = [];
+        for (step in sequence)
+        {
+            switch step 
+            {
+                case EndpointCall(endpointName, arguments):
+                    var argsJson:Array<Dynamic> = [];
+                    for (arg in arguments)
+                    {
+                        var value:Dynamic = switch arg.type 
+                        {
+                            case APly: cast(arg.value, Ply).serialize();
+                            default: arg.value;
+                        }
+                        argsJson.push(value);
+                    }
+                    sequenceJson.push({type: 'endpointcall', endpoint: endpointName, args: argsJson});
+                case Event(serializedEvent):
+                    sequenceJson.push({type: 'event', eventstr: serializedEvent});
+            }
+        }
+
+        var json:Dynamic = {name: name, sequence: sequenceJson};
+
+        return Json.stringify(json, null, "\t");
     }
 
     public function new(name:String, sequence:Array<MacroStep>) 

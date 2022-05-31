@@ -1,10 +1,11 @@
 package tests.ui.utils.data;
 
+import haxe.ds.ReadOnlyArray;
 import tests.ui.utils.data.EndpointArgument;
 
 enum MacroStep 
 {
-    EndpointCall(endpointName:String, arguments:Array<EndpointArgument>);
+    EndpointCall(endpointName:String, arguments:ReadOnlyArray<EndpointArgument>);
     Event(serializedEvent:String);
 }
 

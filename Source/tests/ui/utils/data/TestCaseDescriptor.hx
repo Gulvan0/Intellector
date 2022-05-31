@@ -5,7 +5,9 @@ import tests.ui.utils.data.CheckModule.constructCheckModule;
 class TestCaseDescriptor 
 {
     public var checks:Map<String, CheckModule> = [];
-    public var macros:Array<Macro> = [];
+    private var macros:Array<Macro> = [];
+
+    private var untrackedMacros:Map<String, Macro> = [];
 
     private static function constructCheckModuleMap(json:Dynamic, testCaseName:String):Map<String, CheckModule>
     {
@@ -43,6 +45,46 @@ class TestCaseDescriptor
         }
 
         return testCaseDescriptor;
+    }
+
+    public function getMacro(name:String):Macro
+    {
+        return Lambda.find(macros, m -> m.name == name);
+    }
+
+    public function removeMacro(name:String)
+    {
+        var requestedMacro = untrackedMacros.get(name);
+        if (requestedMacro != null)
+        {
+            macros.remove(requestedMacro);
+            untrackedMacros.remove(name);
+        }
+        else 
+            throw 'Attempting to remove published macro $name';
+    }
+
+    public function getUntrackedMacroNames():Array<String>
+    {
+        return [for (m in untrackedMacros) m.name];
+    }
+
+    public function addMacro(m:Macro)
+    {
+        macros.push(m);
+        untrackedMacros.set(m.name, m);
+    }
+
+    public function proposeMacros(exclude:Array<String>) 
+    {
+        for (m in untrackedMacros)
+        {
+            if (exclude.contains(m.name))
+                continue;
+
+            var message:String = 'A new macro was proposed:\n```\n' + m.serialize() + '\n```';
+            Telegram.notifyAdmin(message);
+        }
     }
 
     private function new() 
