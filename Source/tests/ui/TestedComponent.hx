@@ -32,6 +32,7 @@ class TestedComponent extends Box
     private var heightSlider:Slider;
     private var widthLabel:Label;
     private var heightLabel:Label;
+
     //To be overriden in the subclasses as well
     public function _provide_situation():Situation
     {
@@ -57,11 +58,10 @@ class TestedComponent extends Box
     {
         Dialogs.alert(message, 'output');
     }
-    //TODO: (in UITest.hx on button pressed) emit signals for board view; log to history
 
-    public function new() 
+    public function update()
     {
-        super();
+        removeAllComponents();
         rebuildComponent();
         var compGfx:ComponentGraphics = getComponent();
         switch compGfx 
@@ -158,5 +158,11 @@ class TestedComponent extends Box
 
                 addComponent(vbox);
         }
+    }
+
+    public function new() 
+    {
+        super();
+        update();
     }
 }

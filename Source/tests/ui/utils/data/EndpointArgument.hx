@@ -21,6 +21,15 @@ class EndpointArgument
         return new EndpointArgument(argValue, argType);
     }
 
+    public function asString():String
+    {
+        return switch type 
+        {
+            case AInt, AFloat, AString, AEnumerable: Std.string(value);
+            case APly: cast(value, Ply).serialize();
+        }
+    }
+
     public function new(serializedValue:String, type:ArgumentType)
     {
         this.type = type;

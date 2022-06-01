@@ -1,6 +1,6 @@
 <hbox width="100%">
     <label id="paramName" width="50%" />
-    <dropdown width="50%" text="Select...">
-        <data id="paramValuesDropdown" />
+    <dropdown id="paramValuesDropdown" width="50%" text="Select...">
+        
     </dropdown>
 </hbox>

@@ -6,7 +6,7 @@
             <button id="manageCookiesBtn" text="Manage Cookie Data" disabled="true" width="50%" />
         </hbox>
         <hbox width="100%">
-            <label width="100%" htmlText="Component: <u>\<None\></u>" />
+            <label id="componentNameLabel" width="100%" htmlText="Component: <u>\<None\></u>" />
         </hbox>
         <hbox width="100%" height="70%">
             <scrollview width="50%" height="100%" contentWidth="100%">
