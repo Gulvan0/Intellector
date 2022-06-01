@@ -62,7 +62,6 @@ class TestedComponent extends Box
     public function new() 
     {
         super();
-        //TODO: Resizability
         rebuildComponent();
         var compGfx:ComponentGraphics = getComponent();
         switch compGfx 

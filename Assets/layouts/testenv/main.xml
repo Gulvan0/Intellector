@@ -1,0 +1,46 @@
+<hbox width="100%" height="100%" style="padding:2px">
+    <box id="testedComponentBox" width="60%" height="100%" style="padding:2px" />
+    <vbox>
+        <hbox width="100%">
+            <button id="selectTestCaseBtn" text="Select Test Case" disabled="true" width="50%" />
+            <button id="manageCookiesBtn" text="Manage Cookie Data" disabled="true" width="50%" />
+        </hbox>
+        <hbox width="100%">
+            <label width="100%" htmlText="Component: <u>\<None\></u>" />
+        </hbox>
+        <hbox width="100%" height="70%">
+            <scrollview width="50%" height="100%" contentWidth="100%">
+                <vbox width="50%">
+                    <section-header text="Init Options" />
+                    <vbox id="initParamsVBox" width="100%" />
+                    <button id="initializeBtn" width="100%" text="Initialize" />
+                    <section-header text="Special" />
+                    <hbox>
+                        <button id="traceStateBtn" width="50%" text="Trace State" />
+                        <button id="executeCustomBtn" width="50%" text="Execute Custom" disabled="true" />
+                    </hbox>
+                    <section-header text="Actions" />
+                    <vbox id="actionsVBox" width="100%" />
+                    <section-header text="Sequences" />
+                    <link id="addMacroLink" text="➕ Add Macro" />
+                    <vbox id="sequencesVBox" width="100%" />
+                </vbox>
+            </scrollview>
+            <scrollview width="50%" height="100%" contentWidth="100%">
+                <vbox id="checksVBox" width="100%" />
+            </scrollview>
+        </hbox>
+        <hbox width="100%">
+            <button id="proposeMacrosBtn" text="Propose Macros" width="33.3%" />
+            <button id="reportBugBtn" text="Report Bug" disabled="true" width="33.3%" />
+            <button id="proposeChecksBtn" text="Propose Checks" disabled="true" width="33.3%" />
+        </hbox>
+        <hbox width="100%" height="30%">
+            <scrollview width="50%" height="100%" contentWidth="100%">
+                <label width="100%" text="History" style="font-size:20px;font-bold:true;" />
+                <vbox id="historyVBox" width="100%" />
+            </scrollview>
+            <box id="boardContainer" width="50%" height="100%" />
+        </hbox>
+    </vbox>
+</hbox>
