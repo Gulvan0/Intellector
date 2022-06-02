@@ -61,8 +61,9 @@ class MainView extends HBox
     @:bind(proposeMacrosBtn, MouseEvent.CLICK)
     private function proposeMacros(e)
     {
-        //TODO: Fill (create dialog)
-        //DataKeeper.get(currentTestCase).descriptor.proposeMacros();
+        var untrackedMacroNames = DataKeeper.getUntrackedMacroNames(currentTestCase);
+        var dialog = new ProposeMacrosDialog(untrackedMacroNames, currentTestCase);
+        dialog.showDialog();
     }
 
     private function timerRun()

@@ -1,0 +1,9 @@
+<dialog width="50%">
+    <vbox width="100%">
+        <label width="100%" text="Propose Macro" style="font-size:30px" />
+        <scrollview width="100%" contentWidth="100%">
+            <vbox id="macrolistVBox" width="100%" />
+        </scrollview>
+        <button id="confirmBtn" width="100%" text="Propose selected" />
+    </vbox>
+</dialog>

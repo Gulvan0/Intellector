@@ -27,6 +27,16 @@ class DataKeeper
         return map;
     }
 
+    public static function getUntrackedMacroNames(testCaseName:String):Array<String>
+    {
+        return get(testCaseName).descriptor.getUntrackedMacroNames();
+    }
+
+    public static function proposeMacros(testCaseName:String, excludedMacroNames:Array<String>) 
+    {
+        get(testCaseName).descriptor.proposeMacros(excludedMacroNames);
+    }
+
     public static function get(testCase:String):TestCaseInfo
     {
         return testCaseInfos.get(testCase);
