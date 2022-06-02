@@ -13,4 +13,9 @@ class FieldNaming
     {
         return '_paramvalues_' + param.paramName;    
     }
+
+    public static function initParamLabelsField<T>(param:MaterializedInitParameter<T>):String
+    {
+        return '_paramlabels_' + param.paramName;    
+    }
 }

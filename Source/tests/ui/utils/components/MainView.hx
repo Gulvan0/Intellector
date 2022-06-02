@@ -83,7 +83,9 @@ class MainView extends HBox
 
         for (param in initParams)
         {
-            var paramEntry:InitParameterEntry = new InitParameterEntry(param.displayName, param.possibleValues.map(Std.string));
+            var labelsField = Reflect.field(component, FieldNaming.initParamLabelsField(param));
+            var paramValueLabels:Array<String> = labelsField != null? labelsField : param.possibleValues.map(Std.string);
+            var paramEntry:InitParameterEntry = new InitParameterEntry(param.displayName, paramValueLabels);
             initParamEntries.set(param.identifier, paramEntry);
             initParamsVBox.addComponent(paramEntry);
         }
