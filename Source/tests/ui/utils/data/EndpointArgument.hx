@@ -1,5 +1,6 @@
 package tests.ui.utils.data;
 
+import struct.Situation;
 import struct.Ply;
 
 class EndpointArgument
@@ -27,6 +28,15 @@ class EndpointArgument
         {
             case AInt, AFloat, AString, AEnumerable: Std.string(value);
             case APly: cast(value, Ply).serialize();
+        }
+    }
+
+    public function getDisplayText(currentSituation:Situation):String
+    {
+        return switch type 
+        {
+            case AInt, AFloat, AString, AEnumerable: Std.string(value);
+            case APly: cast(value, Ply).toNotation(currentSituation);
         }
     }
 

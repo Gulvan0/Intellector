@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import tests.ui.utils.data.ActionEndpointPrompt;
 import tests.ui.utils.data.TestCaseInfo;
 import tests.ui.FieldTraverser.FieldTraverserResults;
 import struct.Situation;
@@ -20,6 +21,8 @@ class MainView extends HBox
 
     private var initParams:Array<MaterializedInitParameter<Dynamic>>;
     private var initParamEntries:Map<String, InitParameterEntry>;
+
+    private var actionEndpointPrompts:Map<String, Array<ActionEndpointPrompt>> = [];
 
     private var board:SelectableBoard;
 
@@ -73,6 +76,11 @@ class MainView extends HBox
         board.setSituation(component._provide_situation());
     }
 
+    private function onActionBtnPressed(fieldName:String, ?splitterValue:String)
+    {
+        //TODO: Fill
+    }
+
     public function new(component:TestedComponent, fieldData:FieldTraverserResults, storedData:TestCaseInfo)
     {
         super();
@@ -89,6 +97,16 @@ class MainView extends HBox
             var paramEntry:InitParameterEntry = new InitParameterEntry(param.displayName, param.labels);
             initParamEntries.set(param.identifier, paramEntry);
             initParamsVBox.addComponent(paramEntry);
+        }
+
+        for (endpoint in fieldData.endpoints)
+        {
+            switch endpoint 
+            {
+                case Action(fieldName, displayName, splitterValues, prompts):
+                    actionEndpointPrompts.set(fieldName, prompts);
+                case Sequence(fieldName, displayName, iterations):
+            }
         }
 
         //TODO: Add & Bind Actions

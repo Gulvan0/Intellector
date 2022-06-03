@@ -39,6 +39,11 @@ class UITest
         //TODO: Implement
     }
 
+    public static function logEndpointCall()
+    {
+        //TODO: Implement
+    }
+
     private static function initSinks()
     {
         Networker.ignoreEmitCalls = true;
