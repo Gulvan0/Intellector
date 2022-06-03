@@ -47,6 +47,11 @@ class TestCaseDescriptor
         return testCaseDescriptor;
     }
 
+    public function allMacros():Array<Macro>
+    {
+        return macros.copy();
+    }
+
     public function getMacro(name:String):Macro
     {
         return Lambda.find(macros, m -> m.name == name);

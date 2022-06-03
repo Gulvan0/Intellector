@@ -1,5 +1,9 @@
 package tests.ui.utils.components;
 
+import haxe.ui.containers.HorizontalButtonBar;
+import haxe.ui.containers.ButtonBar;
+import haxe.ui.components.Button;
+import haxe.Constraints.Function;
 import tests.ui.utils.data.EndpointArgument;
 import tests.ui.utils.data.ActionEndpointPrompt;
 import tests.ui.utils.data.TestCaseInfo;
@@ -84,17 +88,40 @@ class MainView extends HBox
             if (splitterValue != null)
                 args.unshift(new EndpointArgument(AString, splitterValue));
 
-            var method = Reflect.field(component, fieldName);
-            if (method == null)
-                throw 'Field not found: $fieldName, test case: $currentTestCase';
-            else if (!Reflect.isFunction(method))
-                throw 'Field is not a function: $fieldName, test case: $currentTestCase';
-
-
             UITest.logEndpointCall(fieldName, args);
-            Reflect.callMethod(component, method, args.map(x -> x.value));
+            Reflect.callMethod(component, getMethod(fieldName), args.map(x -> x.value));
         });
         dialog.showDialog();
+    }
+
+    private function onSequenceStep(fieldName:String, step:Int)
+    {
+        var endpointArgs:Array<EndpointArgument> = [new EndpointArgument(AInt, step)];
+        UITest.logEndpointCall(fieldName, endpointArgs);
+        Reflect.callMethod(component, getMethod(fieldName), [step]);
+    }
+
+    private function onMacroStep(step:MacroStep) 
+    {
+        UITest.logStep(step);
+        switch step 
+        {
+            case EndpointCall(endpointName, arguments):
+                Reflect.callMethod(component, getMethod(endpointName), arguments.map(x -> x.value));
+            case Event(serializedEvent):
+                component._imitateEvent(serializedEvent);
+        }
+    }
+
+    private function getMethod(fieldName:String):Function 
+    {
+        var method = Reflect.field(component, fieldName);
+        if (method == null)
+            throw 'Field not found: $fieldName, test case: $currentTestCase';
+        else if (!Reflect.isFunction(method))
+            throw 'Field is not a function: $fieldName, test case: $currentTestCase';
+        else
+            return method;
     }
 
     public function new(component:TestedComponent, fieldData:FieldTraverserResults, storedData:TestCaseInfo)
@@ -121,12 +148,44 @@ class MainView extends HBox
             {
                 case Action(fieldName, displayName, splitterValues, prompts):
                     actionEndpointPrompts.set(fieldName, prompts);
+                    if (splitterValues == null)
+                    {
+                        var btn:Button = new Button();
+                        btn.percentWidth = 100;
+                        btn.text = displayName;
+                        btn.onClick = e -> {onActionBtnPressed(fieldName);};
+                        actionsVBox.addComponent(btn);
+                    }
+                    else
+                    {
+                        var buttonBar:ButtonBar = new HorizontalButtonBar();
+                        buttonBar.percentWidth = 100;
+                        buttonBar.toggle = false;
+                        for (splitterValue in splitterValues)
+                        {
+                            var btn:Button = new Button();
+                            btn.percentWidth = 100 / splitterValues.length;
+                            btn.text = splitterValue;
+                            btn.onClick = e -> {onActionBtnPressed(fieldName, splitterValue);};
+                            buttonBar.addComponent(btn);
+                        }
+                        actionsVBox.addComponent(buttonBar);
+                    }
                 case Sequence(fieldName, displayName, iterations):
+                    var widget:SequenceWidget = new SequenceWidget(displayName, iterations, false, onSequenceStep.bind(fieldName));
+                    sequencesVBox.addComponent(widget);
             }
         }
 
-        //TODO: Add & Bind Actions
-        //TODO: Add & Bind Sequences
+        for (storedMacro in storedData.descriptor.allMacros())
+        {
+            var callback:Int->Void = step -> {
+                var macroStep:MacroStep = storedMacro.getStep(step);
+                onMacroStep(macroStep);
+            };
+            var widget:SequenceWidget = new SequenceWidget(storedMacro.name, storedMacro.totalSteps(), false, callback);
+            sequencesVBox.addComponent(widget);
+        }
 
         //TODO: Add & Bind Checks
 

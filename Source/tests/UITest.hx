@@ -46,7 +46,7 @@ class UITest
         logStep(EndpointCall(fieldName, args));
     }
 
-    private static function logStep(step:MacroStep)
+    public static function logStep(step:MacroStep)
     {
         //TODO: Implement
     }

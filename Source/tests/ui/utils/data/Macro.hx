@@ -32,6 +32,16 @@ class Macro
         return new Macro(macroName, constructedMacroSequence);
     }
 
+    public function getStep(step:Int):MacroStep
+    {
+        return sequence[step];
+    }
+
+    public function totalSteps():Int
+    {
+        return sequence.length;
+    }
+
     public function iterator()
     {
         return sequence.iterator();
