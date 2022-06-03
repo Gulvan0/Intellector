@@ -1,7 +1,12 @@
 package tests;
 
+import tests.ui.utils.data.TestCaseInfo;
+import tests.ui.DataKeeper;
+import tests.ui.FieldTraverser;
+import haxe.ui.core.Screen;
+import tests.ui.utils.components.MainView;
+import tests.ui.TestedComponent;
 import browser.CredentialCookies;
-import tests.ui.EndpointType;
 import haxe.ui.core.Component;
 import net.LoginManager;
 import openfl.ui.Keyboard;
@@ -23,232 +28,18 @@ import gfx.components.SpriteWrapper;
 import haxe.ui.containers.HBox;
 using StringTools;
 
-class UITest extends HBox
+class UITest
 {
-    private var component:Sprite;
-    private var cookiePrefix:String;
+    private static var mainView:MainView;
 
-    private var actionBar:VerticalButtonBar;
-    private var checksVBox:VBox;
-
-    private var exploredFieldNamesSet:Map<String, Bool> = [];
-
-    private var seqIterators:Map<String, Int> = [];
-    private var seqIteratorLimits:Map<String, Int> = [];
-    private var seqButtons:Map<String, Button> = [];
+    //TODO: History
 
     public static function logHandledEvent(encodedEvent:String)
     {
         //TODO: Implement
     }
 
-    private function getFieldNamePrefix(type:EndpointType):String
-    {
-        return switch type
-        {
-            case Action: "_act_";
-            case Auto: "_auto_";
-            case Sequence: "_seq_";
-        }
-    }
-
-    private function getRequiredMetatags(type:EndpointType):Array<String>
-    {
-        return switch type
-        {
-            case Action: [];
-            case Auto: ["interval", "iterations"];
-            case Sequence: ["steps"];
-        }
-    }
-
-    private function getSequenceButtonText(pureName:String) 
-    {
-        return pureName + ' / Step ' + seqIterators[pureName];
-    }
-
-    private function actionCallback(field:Void->Void, e)
-    {
-        Reflect.callMethod(component, field, []);
-    }
-
-    private function autoCallback(field:Void->Void, interval:Int, iterations:Int, e)
-    {
-        actionBar.disabled = true;
-        var timer:Timer = new Timer(interval);
-        var i:Int = 0;
-        timer.run = () -> {
-            Reflect.callMethod(component, field, [i]);
-            i++;
-            if (i == iterations)
-            {
-                timer.stop();
-                actionBar.disabled = false;
-            }
-        };
-    }
-
-    private function sequenceCallback(field:Void->Void, pureName:String, e)
-    {
-        Reflect.callMethod(component, field, [seqIterators[pureName]]);
-        seqIterators[pureName]++;
-        seqIterators[pureName] %= seqIteratorLimits[pureName];
-        seqButtons[pureName].text = getSequenceButtonText(pureName);
-    }
-
-    private function arrayCheckBoxes(checks:Array<String>, fieldName:String):Array<CheckBox>
-    {
-        var checkboxes:Array<CheckBox> = [];
-        var i:Int = 0;
-
-        for (check in checks)
-        {
-            var cookieName:String = '$cookiePrefix||$fieldName||$i';
-            var cookie:Null<String> = Cookie.get(cookieName);
-
-            var checkBox:CheckBox = new CheckBox();
-            checkBox.text = check;
-            checkBox.percentWidth = 100;
-            checkBox.onChange = e -> {Cookie.set(cookieName, checkBox.selected? 'T' : 'F');};
-
-            if (cookie == 'T')
-                checkBox.selected = true;
-
-            checkboxes.push(checkBox);
-            i++;
-        }
-
-        return checkboxes;
-    }
-
-    private function mapCheckBoxes(checkMap:Map<Int, Array<String>>, fieldName:String):Array<CheckBox>
-    {
-        var checkboxes:Array<CheckBox> = [];
-
-        for (step => stepChecks in checkMap.keyValueIterator())
-        {
-            var i:Int = 0;
-
-            for (check in stepChecks)
-            {
-                var cookieName:String = '$cookiePrefix||$fieldName||$step||$i';
-                var cookie:Null<String> = Cookie.get(cookieName);
-
-                var checkBox:CheckBox = new CheckBox();
-                checkBox.percentWidth = 100;
-                checkBox.onChange = e -> {Cookie.set(cookieName, checkBox.selected? 'T' : 'F');};
-    
-                if (cookie == 'T')
-                    checkBox.selected = true;
-
-                if (step == -1)
-                    checkBox.text = check;
-                else
-                    checkBox.text = 'Step $step: $check';
-
-                checkboxes.push(checkBox);
-                i++;
-            }
-        }
-            
-
-        return checkboxes;
-    }
-
-    private function retrieveMetaValues(fieldName:String, tagNames:Array<String>):Map<String, Dynamic>
-    {
-        var values:Map<String, Dynamic> = [];
-
-        var classMetas = Meta.getFields(Type.getClass(component));
-        var methodMetas = Reflect.field(classMetas, fieldName);
-        if (methodMetas == null)
-            throw 'No metatags: $fieldName';
-
-        for (tagName in tagNames)
-        {
-            var tagValue = Reflect.field(methodMetas, tagName);
-            if (tagValue == null)
-                throw 'No @$tagName metatag: $fieldName';
-            else
-                values.set(tagName, tagValue);
-        }
-
-        return values;
-    }
-
-    private function processFields(type:EndpointType, fieldNames:Array<String>) 
-    {
-        var requiredMetatags:Array<String> = getRequiredMetatags(type);
-        var namePrefix:String = getFieldNamePrefix(type);
-
-        for (fieldName in fieldNames)
-        {
-            var pureName:String = fieldName.replace(namePrefix, '');
-            if (exploredFieldNamesSet.exists(pureName))
-                throw 'Duplicate field: $pureName';
-
-            var field = Reflect.field(component, fieldName);
-            if (!Reflect.isFunction(field))
-                throw 'Not a function field: $fieldName';
-
-            var metavalues:Map<String, Dynamic> = type == Action? [] : retrieveMetaValues(fieldName, requiredMetatags);
-
-            var btn = new Button();
-            btn.percentWidth = 100;
-            actionBar.addComponent(btn);
-
-            switch type
-            {
-                case Action: 
-                    btn.onClick = actionCallback.bind(field);
-                    btn.text = pureName;
-                case Auto: 
-                    btn.onClick = autoCallback.bind(field, metavalues["interval"], metavalues["iterations"]);
-                    btn.text = '$pureName / auto';
-                case Sequence: 
-                    seqIterators.set(pureName, 0);
-                    seqIteratorLimits.set(pureName, metavalues["steps"]);
-                    seqButtons.set(pureName, btn);
-                    btn.onClick = sequenceCallback.bind(field, pureName);
-                    btn.text = getSequenceButtonText(pureName);
-            }
-
-            createCheckboxes('_checks_' + pureName, pureName);
-
-            exploredFieldNamesSet.set(pureName, true);
-        }
-    }
-
-    private function createCheckboxes(fieldName:String, ?headerText:String)
-    {
-        var checks:Dynamic = Reflect.field(component, fieldName);
-
-        if (checks != null)
-        {
-            if (headerText != null)
-            {
-                var header:Label = new Label();
-                header.text = headerText;
-                header.percentWidth = 100;
-                header.customStyle.fontBold = true;
-                checksVBox.addComponent(header);
-            }
-
-            var checkboxes:Array<CheckBox> = [];
-            
-            if (Std.isOfType(checks, Array))
-                checkboxes = arrayCheckBoxes(checks, fieldName);
-            else if (Std.isOfType(checks, IntMap))
-                checkboxes = mapCheckBoxes(checks, fieldName);
-            else
-                throw 'Invalid checklist type $fieldName (expected either Array<String> or Map<Int, Array<String>>)';
-
-            for (checkbox in checkboxes)
-                checksVBox.addComponent(checkbox);
-        }
-    }
-
-    private function initSinks()
+    private static function initSinks()
     {
         Networker.ignoreEmitCalls = true;
         LoginManager.login = CredentialCookies.getLogin();
@@ -256,92 +47,17 @@ class UITest extends HBox
             LoginManager.login = "TesterPlayer";
     }
 
-    public function new(component:Sprite, ?contentWidthPercent:Float = 72) 
+    public static function launchTest(component:TestedComponent)
     {
-        super();
         initSinks();
-        this.component = component;
-        this.cookiePrefix = Type.getClassName(Type.getClass(component));
-        
-        this.width = Browser.window.innerWidth;
-        this.height = Browser.window.innerHeight;
-        this.customStyle.padding = 5;
 
-        var componentBox:Box = new Box();
-        componentBox.percentWidth = contentWidthPercent;
-        componentBox.percentHeight = 100;
+        var traverser:FieldTraverser = new FieldTraverser(component);
+        var fieldResults:FieldTraverserResults = traverser.traverse();
 
-        if (Std.isOfType(component, Component))
-            componentBox.addComponent(cast(component, Component));
-        else
-        {
-            var componentWrapper:SpriteWrapper = new SpriteWrapper(component, false);
-            componentWrapper.horizontalAlign = 'center';
-            componentWrapper.verticalAlign = 'center';
-            componentBox.addComponent(componentWrapper);
-        }
+        DataKeeper.load();
+        var storedData:TestCaseInfo = DataKeeper.get(Type.getClassName(Type.getClass(component)));
 
-        actionBar = new VerticalButtonBar();
-        actionBar.toggle = false;
-        actionBar.percentWidth = 100;
-
-        var actionsSV:ScrollView = new ScrollView();
-        actionsSV.percentWidth = contentWidthPercent == 100? 40 : (100 - contentWidthPercent) / 2;
-        actionsSV.percentHeight = 100;
-        actionsSV.percentContentWidth = 100;
-        actionsSV.addComponent(actionBar);
-
-        checksVBox = new VBox();
-        checksVBox.percentWidth = 100;
-
-        var checksSV:ScrollView = new ScrollView();
-        checksSV.percentWidth = contentWidthPercent == 100? 40 : (100 - contentWidthPercent) / 2;
-        checksSV.percentHeight = 100;
-        checksSV.percentContentWidth = 100;
-        checksSV.addComponent(checksVBox);
-
-        addComponent(componentBox);
-        if (contentWidthPercent == 100)
-        {
-            var hbox:HBox = new HBox();
-            hbox.percentWidth = 100;
-            hbox.percentHeight = 100;
-            hbox.addComponent(actionsSV);
-            hbox.addComponent(checksSV);
-            hbox.visible = false;
-            addChild(hbox);
-            addEventListener(KeyboardEvent.KEY_DOWN, e -> {
-                if (e.keyCode == Keyboard.BACKQUOTE)
-                {
-                    hbox.visible = !hbox.visible;
-                    componentBox.mouseEnabled = !hbox.visible;
-                }
-            });
-        }
-        else 
-        {
-            addComponent(actionsSV);
-            addComponent(checksSV);
-        }
-
-        var endpointFieldNames:Map<EndpointType, Array<String>> = [for (type in EndpointType.createAll()) type => []];
-
-        var allFields = Type.getInstanceFields(Type.getClass(component));
-        var commonFields = Type.getInstanceFields(Sprite);
-        
-        var sMap:Map<String, Bool> = [];
-        for (cf in commonFields)
-            sMap.set(cf, true);
-        
-        for (fieldName in allFields) 
-            if (fieldName.startsWith('_') && !sMap.exists(fieldName))
-                for (type in EndpointType.createAll())
-                    if (fieldName.startsWith(getFieldNamePrefix(type)))
-                        endpointFieldNames[type].push(fieldName);
-
-        createCheckboxes('_checks_');
-
-        for (endpointType in [Action, Auto, Sequence])
-            processFields(endpointType, endpointFieldNames[endpointType]);
+        mainView = new MainView(component, fieldResults, storedData);
+        Screen.instance.addComponent(mainView);
     }
 }

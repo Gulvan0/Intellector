@@ -1,5 +1,7 @@
 package tests.ui.utils.components;
 
+import tests.ui.utils.data.TestCaseInfo;
+import tests.ui.FieldTraverser.FieldTraverserResults;
 import struct.Situation;
 import haxe.Timer;
 import haxe.ui.components.Label;
@@ -15,11 +17,12 @@ class MainView extends HBox
 {
     private var currentTestCase:String;
     private var component:TestedComponent;
+
     private var initParams:Array<MaterializedInitParameter<Dynamic>>;
     private var initParamEntries:Map<String, InitParameterEntry>;
+
     private var board:SelectableBoard;
 
-    //TODO: Keep history in UITest
     public function appendToHistory(step:MacroStep)
     {
         var stepStr = switch step 
@@ -38,9 +41,8 @@ class MainView extends HBox
         for (parameter in initParams)
         {
             var selectedIndex:Int = initParamEntries[parameter.identifier].getSelected();
-            var possibleValues:Array<Dynamic> = Reflect.field(component, FieldNaming.initParamValuesField(parameter));
-            var selectedValue:Dynamic = possibleValues[selectedIndex];
-            Reflect.setField(component, FieldNaming.initParamField(parameter), selectedValue);
+            var selectedValue:Dynamic = parameter.possibleValues[selectedIndex];
+            Reflect.setField(component, parameter.fieldName, selectedValue);
         }
 
         component.update();
@@ -71,12 +73,12 @@ class MainView extends HBox
         board.setSituation(component._provide_situation());
     }
 
-    public function new(component:TestedComponent, initParams:Array<MaterializedInitParameter<Dynamic>>)
+    public function new(component:TestedComponent, fieldData:FieldTraverserResults, storedData:TestCaseInfo)
     {
         super();
         this.currentTestCase = Type.getClassName(Type.getClass(component));
         this.component = component;
-        this.initParams = initParams;
+        this.initParams = fieldData.initParameters;
 
         testedComponentBox.addComponent(component);
 
@@ -84,9 +86,7 @@ class MainView extends HBox
 
         for (param in initParams)
         {
-            var labelsField = Reflect.field(component, FieldNaming.initParamLabelsField(param));
-            var paramValueLabels:Array<String> = labelsField != null? labelsField : param.possibleValues.map(Std.string);
-            var paramEntry:InitParameterEntry = new InitParameterEntry(param.displayName, paramValueLabels);
+            var paramEntry:InitParameterEntry = new InitParameterEntry(param.displayName, param.labels);
             initParamEntries.set(param.identifier, paramEntry);
             initParamsVBox.addComponent(paramEntry);
         }

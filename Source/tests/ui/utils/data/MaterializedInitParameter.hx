@@ -5,15 +5,17 @@ import utils.StringUtils;
 class MaterializedInitParameter<T>
 {
 	public final identifier:String;
+	public final fieldName:String;
 	public final displayName:String;
-	public final paramName:String;
 	public final possibleValues:Array<T>;
+	public final labels:Array<String>;
 
-	public function new(paramName:String, possibleValues:Array<T>)
+	public function new(fieldName:String, identifier:String, displayName:String, possibleValues:Array<T>, labels:Array<String>)
 	{
-		this.paramName = paramName;
-		this.displayName = StringUtils.asPhrase(paramName);
-		this.identifier = StringUtils.asFrankenstein(paramName);
+		this.fieldName = fieldName;
+		this.displayName = displayName;
+		this.identifier = identifier;
 		this.possibleValues = possibleValues;
+		this.labels = labels;
 	}
 }
