@@ -9,6 +9,8 @@ class BoardWrapper extends Component
 {
     private var board:Board;
     private var widthBased:Bool = false;
+    public var maxPercentWidth:Null<Float>;
+    public var maxPercentHeight:Null<Float>;
 
     /** height/width **/
     public function inverseAspectRatio()
@@ -33,34 +35,56 @@ class BoardWrapper extends Component
 
     private override function get_componentWidth():Null<Float>
     {
-        return widthBased? super.get_componentWidth() : super.get_componentHeight() / inverseAspectRatio();
+        if (widthBased)
+            if (maxPercentHeight != null)
+                return Math.min(super.get_componentWidth(), maxPercentHeight * parentComponent.componentHeight / inverseAspectRatio());
+            else
+                return super.get_componentWidth();
+        else
+            if (maxPercentWidth != null)
+                return Math.min(super.get_componentHeight() / inverseAspectRatio(), maxPercentWidth * parentComponent.componentWidth);
+            else
+                return super.get_componentHeight() / inverseAspectRatio();
     }
 
     private override function get_componentHeight():Null<Float>
     {
-        return widthBased? super.get_componentWidth() * inverseAspectRatio() : super.get_componentHeight();
+        if (widthBased)
+            if (maxPercentHeight != null)
+                return Math.min(super.get_componentWidth() * inverseAspectRatio(), maxPercentHeight * parentComponent.componentHeight);
+            else
+                return super.get_componentWidth() * inverseAspectRatio();
+        else
+            if (maxPercentWidth != null)
+                return Math.min(super.get_componentHeight(), maxPercentWidth * parentComponent.componentWidth * inverseAspectRatio());
+            else
+                return super.get_componentHeight();
     }
 
     private override function set_width(value:Float):Float
     {
+        maxPercentWidth = null;
         widthBased = true;  
         return super.set_width(value);
     }
 
     private override function set_height(value:Float):Float
     {
+        maxPercentHeight = null;
         widthBased = false; 
         return super.set_height(value);
     }
 
     private override function set_percentWidth(value:Null<Float>):Null<Float>
     {
+        maxPercentWidth = null;
         widthBased = true;  
         return super.set_percentWidth(value);
     }
 
     private override function set_percentHeight(value:Null<Float>):Null<Float>
     {
+        maxPercentHeight = null;
         widthBased = false;    
         return super.set_percentHeight(value);
     }
@@ -68,7 +92,7 @@ class BoardWrapper extends Component
     private override function validateComponentLayout():Bool 
     {
         var b = super.validateComponentLayout();
-        board.resize(componentWidth / 14);
+        board.resize(componentWidth / 14); //Uses overriden getter, so the calculation is OK
         return b;
     }
 

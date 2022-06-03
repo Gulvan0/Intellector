@@ -117,6 +117,7 @@ class MainView extends HBox
         board = new SelectableBoard(Situation.starting(), Disabled, Disabled);
         var boardWrapper:BoardWrapper = new BoardWrapper(board);
         boardWrapper.percentWidth = 100;
+        boardWrapper.maxPercentHeight = 100;
         boardContainer.addComponent(boardWrapper);
 
         var timer:Timer = new Timer(1000);

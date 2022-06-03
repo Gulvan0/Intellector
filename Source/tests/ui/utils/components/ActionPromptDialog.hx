@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import struct.Ply;
 import haxe.exceptions.NotImplementedException;
 import gfx.components.BoardWrapper;
 import struct.Situation;
@@ -27,12 +28,12 @@ class ActionPromptDialog extends Dialog
         throw new NotImplementedException();
     }
 
-    private function onConfirmPressed(e)
+    private function onConfirmed()
     {
         //TODO: Fill
     }
 
-    private function constructDefaultValuesBox(defaultValues:Array<EndpointArgument>, inputTextfield:TextField):HBox
+    private function constructDefaultValuesBox(defaultValues:Array<EndpointArgument>, promptKey:String):HBox
     {
         var hbox:HBox = new HBox();
         hbox.percentWidth = 100;
@@ -43,7 +44,21 @@ class ActionPromptDialog extends Dialog
             var btn:Button = new Button();
             btn.text = arg.getDisplayText(currentSituation);
             btn.percentWidth = btnPercentWidth;
-            btn.onClick = e -> {inputTextfield.text = btn.text;};
+            btn.onClick = e -> {
+                if (arg.type == APly)
+                    if (inputBoards.exists(promptKey))
+                    {
+                        var ply:Ply = cast(arg.value, Ply);
+                        inputBoards.get(promptKey).drawArrow(ply.from, ply.to);
+                    }
+                    else
+                        throw 'inputBoards has no mapping for prompt $promptKey';
+                else
+                    if (inputTextfields.exists(promptKey))
+                        inputTextfields.get(promptKey).text = btn.text;
+                    else
+                        throw 'inputTextfields has no mapping for prompt $promptKey';
+            };
             hbox.addComponent(btn);
         }
 
@@ -72,7 +87,7 @@ class ActionPromptDialog extends Dialog
         inputRow.addComponent(label);
         inputRow.addComponent(inputField);
 
-        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt.defaultValues, inputField);
+        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt.defaultValues, prompt.displayName);
 
         var vbox:VBox = new VBox();
         vbox.addComponent(inputRow);
@@ -89,11 +104,12 @@ class ActionPromptDialog extends Dialog
 
         var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, EnsureSingle, Disabled);
         var boardWrapper:BoardWrapper = new BoardWrapper(inputBoard);
-        boardWrapper.percentHeight = 100 / totalPlyInputs; //TODO: Ensure fitting
+        boardWrapper.maxPercentWidth = 100;
+        boardWrapper.percentHeight = 100 / totalPlyInputs;
 
         inputBoards.set(prompt.displayName, inputBoard);
 
-        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt.defaultValues, inputField);
+        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt.defaultValues, prompt.displayName);
 
         var vbox:VBox = new VBox();
         vbox.addComponent(label);
@@ -121,10 +137,11 @@ class ActionPromptDialog extends Dialog
                 addComponent(constructNormalInput(prompt));
         }
 
-        var confirmBtn:Button = new Button();
-        confirmBtn.text = "Confirm";
-        confirmBtn.percentWidth = 100;
-        confirmBtn.onClick = onConfirmPressed;
-        addComponent(confirmBtn); //TODO: Use built-in button
+        buttons = DialogButton.APPLY;
+
+        onDialogClosed = e -> {
+            if (e.button == DialogButton.APPLY)
+                onConfirmed();
+        }
     }
 }

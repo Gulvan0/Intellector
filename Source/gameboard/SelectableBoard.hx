@@ -33,14 +33,29 @@ class SelectableBoard extends Board
     private var redSelectedHexIndices:Array<Int> = [];
     private var lastMoveSelectedHexes:Array<Hexagon> = [];
 
+    public function getAnyDrawnArrow():Null<{from:IntPoint, to:IntPoint}>
+    {
+        var keys = drawnArrows.keys();
+        if (keys.hasNext())
+            return decodeArrowKey(keys.next());
+        else
+            return null;
+    }
+
+    private function decodeArrowKey(code:String):{from:IntPoint, to:IntPoint}
+    {
+        var from:IntPoint = new IntPoint(Std.parseInt(code.charAt(0)), Std.parseInt(code.charAt(1)));
+        var to:IntPoint = new IntPoint(Std.parseInt(code.charAt(2)), Std.parseInt(code.charAt(3)));
+        return {from: from, to: to};
+    }
+
     private function updateAllArrows()
     {
         for (code => arrow in drawnArrows.keyValueIterator())
         {
-            var from:IntPoint = new IntPoint(Std.parseInt(code.charAt(0)), Std.parseInt(code.charAt(1)));
-            var to:IntPoint = new IntPoint(Std.parseInt(code.charAt(2)), Std.parseInt(code.charAt(3)));
-            var fromPos:Point = hexCoords(from);
-            var toPos:Point = hexCoords(to);
+            var decoded = decodeArrowKey(code);
+            var fromPos:Point = hexCoords(decoded.from);
+            var toPos:Point = hexCoords(decoded.to);
             redrawArrow(arrow.graphics, fromPos, toPos);
         }
     }
@@ -129,23 +144,7 @@ class SelectableBoard extends Board
         var arrowEndLocation = posToIndexes(e.stageX, e.stageY);
         if (arrowStartLocation != null && arrowEndLocation != null)
             if (arrowStartLocation.equals(arrowEndLocation))
-            {
-                var hexToSelect = getHex(arrowStartLocation);
-                var hexScalarIndex = arrowStartLocation.toScalar();
-
-                if (redSelectedHexIndices.has(hexScalarIndex))
-                {
-                    hexToSelect.hideLayer(RMB);
-                    redSelectedHexIndices.remove(hexScalarIndex);
-                }
-                else
-                {
-                    if (hexMode == EnsureSingle)
-                        removeRedHexSelections();
-                    hexToSelect.showLayer(RMB);
-                    redSelectedHexIndices.push(hexScalarIndex);
-                }
-            }
+                toggleHexSelection(arrowStartLocation);
             else
             {
                 var code = '${arrowStartLocation.i}${arrowStartLocation.j}${arrowEndLocation.i}${arrowEndLocation.j}';
@@ -155,11 +154,7 @@ class SelectableBoard extends Board
                     drawnArrows.remove(code);
                 }
                 else 
-                {
-                    if (arrowMode == EnsureSingle)
-                        removeArrows();
                     drawArrow(arrowStartLocation, arrowEndLocation);
-                }
             }
 
         arrowStartLocation = null;
@@ -185,8 +180,30 @@ class SelectableBoard extends Board
         stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightRelease);
     }
 
+    public function toggleHexSelection(location:IntPoint) 
+    {
+        var hexToSelect = getHex(location);
+        var hexScalarIndex = location.toScalar();
+
+        if (redSelectedHexIndices.has(hexScalarIndex))
+        {
+            hexToSelect.hideLayer(RMB);
+            redSelectedHexIndices.remove(hexScalarIndex);
+        }
+        else
+        {
+            if (hexMode == EnsureSingle)
+                removeRedHexSelections();
+            hexToSelect.showLayer(RMB);
+            redSelectedHexIndices.push(hexScalarIndex);
+        }
+    }
+
     public function drawArrow(from:IntPoint, to:IntPoint)
     {
+        if (arrowMode == EnsureSingle)
+            removeArrows();
+
         var fromPos:Point = hexCoords(from);
         var toPos:Point = hexCoords(to);
 

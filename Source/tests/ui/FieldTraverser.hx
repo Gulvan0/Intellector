@@ -29,8 +29,8 @@ class FieldTraverser
 
         if (promptMeta != null)
         {
-            var type:Null<ArgumentType>;
-            var displayName:Null<String>;
+            var type:Null<ArgumentType> = null;
+            var displayName:Null<String> = null;
 
             for (tagArgument in promptMeta)
             {
