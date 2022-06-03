@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import tests.ui.utils.data.EndpointArgument;
 import tests.ui.utils.data.ActionEndpointPrompt;
 import tests.ui.utils.data.TestCaseInfo;
 import tests.ui.FieldTraverser.FieldTraverserResults;
@@ -78,7 +79,22 @@ class MainView extends HBox
 
     private function onActionBtnPressed(fieldName:String, ?splitterValue:String)
     {
-        //TODO: Fill
+        var dialog:ActionPromptDialog = new ActionPromptDialog(actionEndpointPrompts.get(fieldName), component._provide_situation(), promptArgs -> {
+            var args:Array<EndpointArgument> = promptArgs;
+            if (splitterValue != null)
+                args.unshift(new EndpointArgument(AString, splitterValue));
+
+            var method = Reflect.field(component, fieldName);
+            if (method == null)
+                throw 'Field not found: $fieldName, test case: $currentTestCase';
+            else if (!Reflect.isFunction(method))
+                throw 'Field is not a function: $fieldName, test case: $currentTestCase';
+
+
+            UITest.logEndpointCall(fieldName, args);
+            Reflect.callMethod(component, method, args.map(x -> x.value));
+        });
+        dialog.showDialog();
     }
 
     public function new(component:TestedComponent, fieldData:FieldTraverserResults, storedData:TestCaseInfo)

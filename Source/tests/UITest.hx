@@ -1,5 +1,7 @@
 package tests;
 
+import tests.ui.utils.data.EndpointArgument;
+import tests.ui.utils.data.MacroStep;
 import tests.ui.utils.data.TestCaseInfo;
 import tests.ui.DataKeeper;
 import tests.ui.FieldTraverser;
@@ -36,10 +38,15 @@ class UITest
 
     public static function logHandledEvent(encodedEvent:String)
     {
-        //TODO: Implement
+        logStep(Event(encodedEvent));
     }
 
-    public static function logEndpointCall()
+    public static function logEndpointCall(fieldName:String, args:Array<EndpointArgument>)
+    {
+        logStep(EndpointCall(fieldName, args));
+    }
+
+    private static function logStep(step:MacroStep)
     {
         //TODO: Implement
     }

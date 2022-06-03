@@ -50,7 +50,7 @@ class FieldTraverser
                     for (defaultArg in cast(tagArgument, Array<Dynamic>))
                     {
                         var defaultArgStr:String = cast(defaultArg, String);
-                        var processedDefaultArg:EndpointArgument = new EndpointArgument(defaultArgStr, type);
+                        var processedDefaultArg:EndpointArgument = EndpointArgument.fromSerialized(defaultArgStr, type);
                         defaultValues.push(processedDefaultArg);
                     }
                     prompts.push(new ActionEndpointPrompt(displayName, type, defaultValues));

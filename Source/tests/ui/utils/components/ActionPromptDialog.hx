@@ -16,36 +16,83 @@ import haxe.ui.containers.dialogs.Dialog;
 
 class ActionPromptDialog extends Dialog
 {
+    private var onConfirmed:Array<EndpointArgument>->Void;
     private var prompts:Array<ActionEndpointPrompt>;
     private var currentSituation:Situation;
 
     private var inputTextfields:Map<String, TextField> = [];
     private var inputBoards:Map<String, SelectableBoard> = [];
 
-    private function retrieveArguments():Array<EndpointArgument>
+    private function retrieveArguments():Null<Array<EndpointArgument>>
     {
-        //TODO: Fill
-        throw new NotImplementedException();
+        var arguments:Array<EndpointArgument> = [];
+        for (prompt in prompts)
+        {
+            switch prompt.type 
+            {
+                case AInt:
+                    var inputTextfield = inputTextfields.get(prompt.displayName);
+                    if (inputTextfield == null)
+                        throw 'inputTextfields has no mapping for prompt ${prompt.displayName}';
+                    else 
+                    {
+                        var value = Std.parseInt(inputTextfield.text);
+                        if (value == null)
+                            return null;
+                        else
+                            arguments.push(new EndpointArgument(prompt.type, value));  
+                    }                  
+                case AFloat:
+                    var inputTextfield = inputTextfields.get(prompt.displayName);
+                    if (inputTextfield == null)
+                        throw 'inputTextfields has no mapping for prompt ${prompt.displayName}';
+                    else 
+                    {
+                        var value = Std.parseFloat(inputTextfield.text);
+                        if (value == null)
+                            return null;
+                        else
+                            arguments.push(new EndpointArgument(prompt.type, value));  
+                    }   
+                case AString, AEnumerable:
+                    var inputTextfield = inputTextfields.get(prompt.displayName);
+                    if (inputTextfield == null)
+                        throw 'inputTextfields has no mapping for prompt ${prompt.displayName}';
+                    else
+                        arguments.push(new EndpointArgument(prompt.type, inputTextfield.text));
+                case APly:
+                    var inputBoard = inputBoards.get(prompt.displayName);
+                    if (inputBoard == null)
+                        throw 'inputTextfields has no mapping for prompt ${prompt.displayName}';
+                    else 
+                    {
+                        var value = inputBoard.getAnyDrawnArrow();
+                        if (value == null)
+                            return null;
+                        else
+                            arguments.push(new EndpointArgument(prompt.type, Ply.construct(value.from, value.to)));  //TODO: Enable chameleon
+                    }   
+            }
+        }
+
+        return arguments;
     }
 
-    private function onConfirmed()
+    private function constructDefaultValuesBox(prompt:ActionEndpointPrompt):HBox
     {
-        //TODO: Fill
-    }
+        var promptKey:String = prompt.displayName;
 
-    private function constructDefaultValuesBox(defaultValues:Array<EndpointArgument>, promptKey:String):HBox
-    {
         var hbox:HBox = new HBox();
         hbox.percentWidth = 100;
 
-        var btnPercentWidth:Float = 100 / defaultValues.length;
-        for (arg in defaultValues)
+        var btnPercentWidth:Float = 100 / prompt.defaultValues.length;
+        for (arg in prompt.defaultValues)
         {
             var btn:Button = new Button();
             btn.text = arg.getDisplayText(currentSituation);
             btn.percentWidth = btnPercentWidth;
             btn.onClick = e -> {
-                if (arg.type == APly)
+                if (prompt.type == APly)
                     if (inputBoards.exists(promptKey))
                     {
                         var ply:Ply = cast(arg.value, Ply);
@@ -87,7 +134,7 @@ class ActionPromptDialog extends Dialog
         inputRow.addComponent(label);
         inputRow.addComponent(inputField);
 
-        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt.defaultValues, prompt.displayName);
+        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt);
 
         var vbox:VBox = new VBox();
         vbox.addComponent(inputRow);
@@ -109,7 +156,7 @@ class ActionPromptDialog extends Dialog
 
         inputBoards.set(prompt.displayName, inputBoard);
 
-        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt.defaultValues, prompt.displayName);
+        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt);
 
         var vbox:VBox = new VBox();
         vbox.addComponent(label);
@@ -118,9 +165,10 @@ class ActionPromptDialog extends Dialog
         return vbox;
     }
 
-    public function new(prompts:Array<ActionEndpointPrompt>, currentSituation:Situation) 
+    public function new(prompts:Array<ActionEndpointPrompt>, currentSituation:Situation, onConfirmed:Array<EndpointArgument>->Void) 
     {
         super();
+        this.onConfirmed = onConfirmed;
         percentWidth = 75;
         percentHeight = 90;
 
@@ -141,7 +189,14 @@ class ActionPromptDialog extends Dialog
 
         onDialogClosed = e -> {
             if (e.button == DialogButton.APPLY)
-                onConfirmed();
+            {
+                var args = retrieveArguments();
+                if (args != null)
+                    onConfirmed(args);
+                else 
+                    trace("Failed to collect arguments: some values are not provided");
+            }
+                
         }
     }
 }

@@ -19,7 +19,7 @@ class EndpointArgument
         var argTypeStr:String = cast(Reflect.field(json, "type"), String);
         var argType:ArgumentType = ArgumentType.createByName(argTypeStr);
 
-        return new EndpointArgument(argValue, argType);
+        return EndpointArgument.fromSerialized(argValue, argType);
     }
 
     public function asString():String
@@ -40,10 +40,9 @@ class EndpointArgument
         }
     }
 
-    public function new(serializedValue:String, type:ArgumentType)
+    public static function fromSerialized(serializedValue:String, type:ArgumentType):EndpointArgument
     {
-        this.type = type;
-        this.value = switch type 
+        var value:Dynamic = switch type 
         {
             case AInt: Std.parseInt(serializedValue);
             case AFloat: Std.parseFloat(serializedValue);
@@ -51,5 +50,12 @@ class EndpointArgument
             case AEnumerable: serializedValue;
             case APly: Ply.deserialize(serializedValue);
         }
+        return new EndpointArgument(type, value);
+    }
+
+    public function new(type:ArgumentType, value:Dynamic)
+    {
+        this.type = type;
+        this.value = value;
     }
 }
