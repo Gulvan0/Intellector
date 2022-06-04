@@ -1,5 +1,5 @@
 <hbox width="100%">
     <button id="includeBtn" width="25px" height="25px" hidden="true" text="➕" style="padding: 0 0 0 0;font-size:20px" tooltip="Include macro into proposal" />
-    <button id="excludeBtn" width="25px" height="25px" text="✖" style="padding: 0 0 0 0;font-size:20px;font-color:#DD0000" tooltip="Exclude macro from proposal" />
+    <button id="excludeBtn" width="25px" height="25px" text="✖" style="padding: 0 0 0 0;font-size:20px;color:#DD0000" tooltip="Exclude macro from proposal" />
     <label id="macroNameLabel" width="100%" style="font-size:25px;color:#333333" />
 </hbox>

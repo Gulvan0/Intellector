@@ -1,5 +1,7 @@
 package tests.ui.utils.components;
 
+import haxe.ui.components.CheckBox;
+import haxe.ui.components.SectionHeader;
 import haxe.ui.containers.HorizontalButtonBar;
 import haxe.ui.containers.ButtonBar;
 import haxe.ui.components.Button;
@@ -21,7 +23,7 @@ import haxe.ui.containers.HBox;
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/testenv/main.xml"))
 class MainView extends HBox
 {
-    private var currentTestCase:String;
+    
     private var component:TestedComponent;
 
     private var initParams:Array<MaterializedInitParameter<Dynamic>>;
@@ -33,13 +35,8 @@ class MainView extends HBox
 
     public function appendToHistory(step:MacroStep)
     {
-        var stepStr = switch step 
-        {
-            case EndpointCall(endpointName, arguments): endpointName + '(' + [for (arg in arguments) arg.asString()].join(', ') + ')';
-            case Event(serializedEvent): serializedEvent;
-        }
         var label:Label = new Label();
-        label.text = stepStr;
+        label.text = macroStepDisplayText(step);
         historyVBox.addComponent(label);
     }
 
@@ -65,14 +62,16 @@ class MainView extends HBox
     @:bind(addMacroLink, MouseEvent.CLICK)
     private function addMacro(e)
     {
-        //TODO: Fill
+        var descriptor = DataKeeper.getCurrent().descriptor;
+        var dialog = new AddMacroDialog(descriptor.addMacro);
+        dialog.showDialog();
     }
 
     @:bind(proposeMacrosBtn, MouseEvent.CLICK)
     private function proposeMacros(e)
     {
-        var untrackedMacroNames = DataKeeper.getUntrackedMacroNames(currentTestCase);
-        var dialog = new ProposeMacrosDialog(untrackedMacroNames, currentTestCase);
+        var untrackedMacroNames = DataKeeper.getUntrackedMacroNames();
+        var dialog = new ProposeMacrosDialog(untrackedMacroNames);
         dialog.showDialog();
     }
 
@@ -117,9 +116,9 @@ class MainView extends HBox
     {
         var method = Reflect.field(component, fieldName);
         if (method == null)
-            throw 'Field not found: $fieldName, test case: $currentTestCase';
+            throw 'Field not found: $fieldName';
         else if (!Reflect.isFunction(method))
-            throw 'Field is not a function: $fieldName, test case: $currentTestCase';
+            throw 'Field is not a function: $fieldName';
         else
             return method;
     }
@@ -127,13 +126,12 @@ class MainView extends HBox
     public function new(component:TestedComponent, fieldData:FieldTraverserResults, storedData:TestCaseInfo)
     {
         super();
-        this.currentTestCase = Type.getClassName(Type.getClass(component));
         this.component = component;
         this.initParams = fieldData.initParameters;
 
         testedComponentBox.addComponent(component);
 
-        componentNameLabel.htmlText = 'Component: <u>$currentTestCase</u>';
+        componentNameLabel.htmlText = 'Component: <u>${UITest.getCurrentTestCase()}</u>';
 
         for (param in initParams)
         {
@@ -149,26 +147,14 @@ class MainView extends HBox
                 case Action(fieldName, displayName, splitterValues, prompts):
                     actionEndpointPrompts.set(fieldName, prompts);
                     if (splitterValues == null)
-                    {
-                        var btn:Button = new Button();
-                        btn.percentWidth = 100;
-                        btn.text = displayName;
-                        btn.onClick = e -> {onActionBtnPressed(fieldName);};
-                        actionsVBox.addComponent(btn);
-                    }
+                        actionsVBox.addComponent(SimpleComponents.fullActionBtn(displayName, onActionBtnPressed.bind(fieldName)));
                     else
                     {
                         var buttonBar:ButtonBar = new HorizontalButtonBar();
                         buttonBar.percentWidth = 100;
                         buttonBar.toggle = false;
                         for (splitterValue in splitterValues)
-                        {
-                            var btn:Button = new Button();
-                            btn.percentWidth = 100 / splitterValues.length;
-                            btn.text = splitterValue;
-                            btn.onClick = e -> {onActionBtnPressed(fieldName, splitterValue);};
-                            buttonBar.addComponent(btn);
-                        }
+                            buttonBar.addComponent(SimpleComponents.splittedActionBtn(splitterValue, splitterValues.length, onActionBtnPressed.bind(fieldName, _)));
                         actionsVBox.addComponent(buttonBar);
                     }
                 case Sequence(fieldName, displayName, iterations):
@@ -187,7 +173,32 @@ class MainView extends HBox
             sequencesVBox.addComponent(widget);
         }
 
-        //TODO: Add & Bind Checks
+        for (moduleName => checkModule in storedData.descriptor.checks)
+        {
+            var header:SectionHeader = new SectionHeader();
+            header.text = moduleName;
+            checksVBox.addComponent(header);
+
+            switch checkModule 
+            {
+                case Normal(checklist):
+                    for (check in checklist)
+                        checksVBox.addComponent(SimpleComponents.checkbox(moduleName, check, storedData));
+                case Stepwise(checks):
+                    for (check in checks.commonChecks)
+                        checksVBox.addComponent(SimpleComponents.checkbox(moduleName, check, storedData));
+                    for (step in checks.checkedStepsOrdered)
+                    {
+                        var stepHeader:Label = new Label();
+                        stepHeader.text = 'Step $step';
+                        stepHeader.customStyle = {fontItalic: true};
+                        checksVBox.addComponent(stepHeader);
+
+                        for (check in checks.stepChecks.get(step))
+                            checksVBox.addComponent(SimpleComponents.checkbox(moduleName, check, storedData));
+                    }
+            }
+        }
 
         board = new SelectableBoard(Situation.starting(), Disabled, Disabled);
         var boardWrapper:BoardWrapper = new BoardWrapper(board);

@@ -27,19 +27,24 @@ class DataKeeper
         return map;
     }
 
-    public static function getUntrackedMacroNames(testCaseName:String):Array<String>
+    public static function getUntrackedMacroNames():Array<String>
     {
-        return get(testCaseName).descriptor.getUntrackedMacroNames();
+        return getCurrent().descriptor.getUntrackedMacroNames();
     }
 
-    public static function proposeMacros(testCaseName:String, excludedMacroNames:Array<String>) 
+    public static function proposeMacros(excludedMacroNames:Array<String>) 
     {
-        get(testCaseName).descriptor.proposeMacros(excludedMacroNames);
+        getCurrent().descriptor.proposeMacros(excludedMacroNames);
     }
 
     public static function get(testCase:String):TestCaseInfo
     {
         return testCaseInfos.get(testCase);
+    }
+
+    public static function getCurrent():TestCaseInfo
+    {
+        return get(UITest.getCurrentTestCase());
     }
 
     public static function load() 

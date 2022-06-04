@@ -1,6 +1,6 @@
 <hbox width="100%">
     <button id="dropBeforeBtn" width="25px" height="25px" text="⤝" style="padding: 0 0 0 0;font-size:20px" tooltip="Drop all preceeding entries" />
-    <button id="dropThisBtn" width="25px" height="25px" text="✖" style="padding: 0 0 0 0;font-size:20px;font-color:#DD0000" tooltip="Drop this entry" />
+    <button id="dropThisBtn" width="25px" height="25px" text="✖" style="padding: 0 0 0 0;font-size:20px;color:#DD0000" tooltip="Drop this entry" />
     <button id="dropAfterBtn" width="25px" height="25px" text="⤞" style="padding: 0 0 0 0;font-size:20px" tooltip="Drop all successive entries" />
     <label id="stepLabel" width="100%" style="font-size:25px" />
 </hbox>

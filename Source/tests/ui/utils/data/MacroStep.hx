@@ -52,3 +52,12 @@ function constructMacroStep(stepJson:Dynamic, testCaseName:String, macroName:Str
     else
         throw 'Macro $macroName in test case $testCaseName has a step with invalid type \'$macroType\'';
 }
+
+function macroStepDisplayText(step:MacroStep):String
+{
+    return switch step 
+    {
+        case EndpointCall(endpointName, arguments): endpointName + '(' + [for (arg in arguments) arg.asString()].join(', ') + ')';
+        case Event(serializedEvent): serializedEvent;
+    };
+}

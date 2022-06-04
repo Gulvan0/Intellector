@@ -9,32 +9,25 @@ import haxe.ui.core.Screen;
 import tests.ui.utils.components.MainView;
 import tests.ui.TestedComponent;
 import browser.CredentialCookies;
-import haxe.ui.core.Component;
 import net.LoginManager;
-import openfl.ui.Keyboard;
-import openfl.events.KeyboardEvent;
-import js.Cookie;
-import haxe.ds.IntMap;
-import js.Browser;
-import haxe.ui.components.Label;
-import haxe.rtti.Meta;
-import haxe.Timer;
-import haxe.ui.components.CheckBox;
-import haxe.ui.components.Button;
-import haxe.ui.containers.VBox;
-import haxe.ui.containers.VerticalButtonBar;
-import openfl.display.Sprite;
-import haxe.ui.containers.Box;
-import haxe.ui.containers.ScrollView;
-import gfx.components.SpriteWrapper;
-import haxe.ui.containers.HBox;
 using StringTools;
 
 class UITest
 {
+    private static var currentTestCase:String;
     private static var mainView:MainView;
 
-    //TODO: History
+    private static var history:Array<MacroStep> = [];
+
+    public static function getHistory():Array<MacroStep>
+    {
+        return history.copy();
+    }
+
+    public static function getCurrentTestCase():String
+    {
+        return currentTestCase;
+    }
 
     public static function logHandledEvent(encodedEvent:String)
     {
@@ -48,7 +41,8 @@ class UITest
 
     public static function logStep(step:MacroStep)
     {
-        //TODO: Implement
+        history.push(step);
+        mainView.appendToHistory(step);
     }
 
     private static function initSinks()
@@ -61,13 +55,14 @@ class UITest
 
     public static function launchTest(component:TestedComponent)
     {
+        currentTestCase = Type.getClassName(Type.getClass(component));
         initSinks();
 
         var traverser:FieldTraverser = new FieldTraverser(component);
         var fieldResults:FieldTraverserResults = traverser.traverse();
 
         DataKeeper.load();
-        var storedData:TestCaseInfo = DataKeeper.get(Type.getClassName(Type.getClass(component)));
+        var storedData:TestCaseInfo = DataKeeper.get(currentTestCase);
 
         mainView = new MainView(component, fieldResults, storedData);
         Screen.instance.addComponent(mainView);

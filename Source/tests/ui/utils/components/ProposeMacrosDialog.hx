@@ -7,7 +7,6 @@ import haxe.ui.containers.dialogs.Dialog;
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/testenv/proposemacrosdialog.xml"))
 class ProposeMacrosDialog extends Dialog 
 {
-    private var testCaseName:String;
     private var excludedMacros:Array<String>;
 
     private function onMacroExcluded(name:String) 
@@ -23,14 +22,13 @@ class ProposeMacrosDialog extends Dialog
     @:bind(confirmBtn, MouseEvent.CLICK)
     private function onConfirmBtnPressed(e) 
     {
-        DataKeeper.proposeMacros(testCaseName, excludedMacros); //TODO: Maybe put currentTestCase to UITest
+        DataKeeper.proposeMacros(excludedMacros);
         hideDialog(DialogButton.APPLY);
     }
 
-    public function new(macroNames:Array<String>, testCaseName:String) 
+    public function new(macroNames:Array<String>) 
     {
         super();
-        this.testCaseName = testCaseName;
         this.excludedMacros = [];
 
         for (macroName in macroNames)

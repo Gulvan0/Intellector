@@ -5,7 +5,7 @@ class CheckMap
     public var commonChecks:CheckList;
     public var stepChecks:Map<Int, CheckList>;
 
-    private var checkedStepsOrdered:Array<Int> = [];
+    public var checkedStepsOrdered(default, null):Array<Int> = [];
 
     public static function construct(moduleJson:Dynamic, testCaseName:String, moduleName:String):CheckMap
     {
