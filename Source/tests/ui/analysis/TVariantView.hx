@@ -87,10 +87,10 @@ class TVariantView extends TestedComponent
                 new AugmentedVariantTree(startingVariant, selectedPath); //TODO: Replace with AugmentedPlainText
         }
 
-        variantView.init(p->{trace(p);}, p->{trace(p);});
+        variantView.init(p->{trace(p.plyStrArray.join(' -> '));}, p->{trace(p);});
     }
 
-    public override function _imitateEvent(encodedEvent:String)
+    public override function imitateEvent(encodedEvent:String)
     {
         variantView._imitateEvent(encodedEvent);
     }

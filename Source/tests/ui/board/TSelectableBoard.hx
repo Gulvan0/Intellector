@@ -142,7 +142,7 @@ class TSelectableBoard extends TestedComponent
         board = new AugmentedSelectableBoard(Situation.starting(), White, 50);
     }
 
-    public override function _imitateEvent(encodedEvent:String)
+    public override function imitateEvent(encodedEvent:String)
     {
         board._imitateEvent(encodedEvent);
     }

@@ -1,4 +1,4 @@
-<dialog width="50%">
+<dialog width="1000">
     <vbox width="100%">
         <label width="100%" text="Propose Macro" style="font-size:30px" />
         <scrollview width="100%" contentWidth="100%">

@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import haxe.ui.core.Screen;
 import struct.Ply;
 import haxe.exceptions.NotImplementedException;
 import gfx.components.BoardWrapper;
@@ -149,7 +150,7 @@ class ActionPromptDialog extends Dialog
         label.text = prompt.displayName + ":";
         label.customStyle = {fontSize: 24};
 
-        var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, EnsureSingle, Disabled);
+        var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, EnsureSingle, Disabled, White, 40, true);
         var boardWrapper:BoardWrapper = new BoardWrapper(inputBoard);
         boardWrapper.maxPercentWidth = 100;
         boardWrapper.percentHeight = 100 / totalPlyInputs;
@@ -169,8 +170,8 @@ class ActionPromptDialog extends Dialog
     {
         super();
         this.onConfirmed = onConfirmed;
-        percentWidth = 75;
-        percentHeight = 90;
+        width = 0.75 * Screen.instance.width;
+        height = 0.90 * Screen.instance.height;
 
         var totalPlyPrompts:Int = 0;
         for (prompt in prompts)

@@ -29,7 +29,7 @@ using StringTools;
 class ScreenManager extends Sprite implements INetObserver
 {
     public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event
-    private static var instance:ScreenManager;
+    public static var instance:ScreenManager;
     private static var openflContent:Element;
 
     private var lastResizeTimestamp:Float;
@@ -160,6 +160,7 @@ class ScreenManager extends Sprite implements INetObserver
             openflContent.style.width = innerWidthStr;
             openflContent.style.height = innerHeightStr;
             lastResizeTimestamp = timestamp;
+            trace(innerWidthStr, innerHeightStr);
         }
     }
 

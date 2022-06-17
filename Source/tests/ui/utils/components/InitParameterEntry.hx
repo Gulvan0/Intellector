@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import haxe.ui.data.ArrayDataSource;
 import utils.StringUtils;
 import haxe.ui.containers.HBox;
 
@@ -14,9 +15,7 @@ class InitParameterEntry extends HBox
     public function new(nameLabel:String, valueLabels:Array<String>) 
     {
         super();
-
         paramName.text = nameLabel + ":";
-        for (value in valueLabels)
-            paramValuesDropdown.dataSource.add({text: value});
+        paramValuesDropdown.dataSource = ArrayDataSource.fromArray(valueLabels);
     }    
 }

@@ -134,7 +134,7 @@ class TChatbox extends TestedComponent
             chatbox = new AugmentedChatBox(false);
 	}
 
-    public override function _imitateEvent(encodedEvent:String)
+    public override function imitateEvent(encodedEvent:String)
     {
         chatbox._imitateEvent(encodedEvent);
     }

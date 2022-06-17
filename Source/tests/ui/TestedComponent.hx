@@ -39,7 +39,7 @@ class TestedComponent extends Box
         return Situation.starting();
     }
 
-    public function _imitateEvent(encodedEvent:String)
+    public function imitateEvent(encodedEvent:String)
     {
         throw "Not overriden";
     }

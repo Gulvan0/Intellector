@@ -37,12 +37,12 @@ class BoardWrapper extends Component
     {
         if (widthBased)
             if (maxPercentHeight != null)
-                return Math.min(super.get_componentWidth(), maxPercentHeight * parentComponent.componentHeight / inverseAspectRatio());
+                return Math.min(super.get_componentWidth(), (maxPercentHeight / 100) * parentComponent.componentHeight / inverseAspectRatio());
             else
                 return super.get_componentWidth();
         else
             if (maxPercentWidth != null)
-                return Math.min(super.get_componentHeight() / inverseAspectRatio(), maxPercentWidth * parentComponent.componentWidth);
+                return Math.min(super.get_componentHeight() / inverseAspectRatio(), (maxPercentWidth / 100) * parentComponent.componentWidth);
             else
                 return super.get_componentHeight() / inverseAspectRatio();
     }
@@ -51,12 +51,12 @@ class BoardWrapper extends Component
     {
         if (widthBased)
             if (maxPercentHeight != null)
-                return Math.min(super.get_componentWidth() * inverseAspectRatio(), maxPercentHeight * parentComponent.componentHeight);
+                return Math.min(super.get_componentWidth() * inverseAspectRatio(), (maxPercentHeight / 100) * parentComponent.componentHeight);
             else
                 return super.get_componentWidth() * inverseAspectRatio();
         else
             if (maxPercentWidth != null)
-                return Math.min(super.get_componentHeight(), maxPercentWidth * parentComponent.componentWidth * inverseAspectRatio());
+                return Math.min(super.get_componentHeight(), (maxPercentWidth / 100) * parentComponent.componentWidth * inverseAspectRatio());
             else
                 return super.get_componentHeight();
     }

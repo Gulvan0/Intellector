@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import haxe.Timer;
 import dict.Dictionary;
 import struct.Ply;
 import struct.Situation;
@@ -323,6 +324,7 @@ class VariantTree extends Sprite implements IVariantView
         else
         {
             this.variant = initialVariant;
+
             for (code => nodeInfo in initialVariant.getAllNodes())
             {
                 if (code == '')
@@ -343,5 +345,7 @@ class VariantTree extends Sprite implements IVariantView
             selectBranchUnsafe(variant.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
         else
             selectBranchUnsafe(variant.extendPathLeftmost([]), 0);
+
+        Timer.delay(refreshLayout, 200);
     }
 }

@@ -1,22 +1,22 @@
-<hbox width="100%" height="100%" style="padding:2px">
+<hbox width="1920px" height="937px" style="padding:5px">
     <box id="testedComponentBox" width="60%" height="100%" style="padding:2px" />
-    <vbox>
+    <vbox width="40%" height="100%">
+        <hbox width="100%">
+            <label id="componentNameLabel" width="100%" style="text-align:center;font-size:20px" />
+        </hbox>
         <hbox width="100%">
             <button id="selectTestCaseBtn" text="Select Test Case" disabled="true" width="50%" />
             <button id="manageCookiesBtn" text="Manage Cookie Data" disabled="true" width="50%" />
         </hbox>
-        <hbox width="100%">
-            <label id="componentNameLabel" width="100%" htmlText="Component: <u>\<None\></u>" />
-        </hbox>
         <hbox width="100%" height="70%">
             <scrollview width="50%" height="100%" contentWidth="100%">
-                <vbox width="50%">
+                <vbox width="100%">
                     <section-header text="Init Options" />
                     <vbox id="initParamsVBox" width="100%" />
                     <button id="initializeBtn" width="100%" text="Initialize" />
                     <section-header text="Special" />
-                    <hbox>
-                        <button id="traceStateBtn" width="50%" text="Trace State" />
+                    <hbox width="100%">
+                        <button id="traceStateBtn" width="50%" text="Trace State" disabled="true" />
                         <button id="executeCustomBtn" width="50%" text="Execute Custom" disabled="true" />
                     </hbox>
                     <section-header text="Actions" />

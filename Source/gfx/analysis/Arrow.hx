@@ -24,15 +24,23 @@ class Arrow extends Sprite
 
     public function highlight(fully:Bool) 
     {
-        removeChild(arrow);
         this.highlighting = fully? Full : Semi;
+
+        if (from == null || to == null)
+            return;
+
+        removeChild(arrow);
         drawArrow();
     }
 
     public function unhighlight() 
     {
-        removeChild(arrow);
         this.highlighting = Off;
+
+        if (from == null || to == null)
+            return;
+        
+        removeChild(arrow);
         drawArrow();
     }
 

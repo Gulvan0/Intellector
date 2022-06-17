@@ -208,7 +208,7 @@ class TGameBoard extends TestedComponent
         board = new AugmentedGameBoard(Situation.starting(), White, new EnemyMoveBehavior(White), false, 50);
     }
 
-    public override function _imitateEvent(encodedEvent:String)
+    public override function imitateEvent(encodedEvent:String)
     {
         board._imitateEvent(encodedEvent);
     }

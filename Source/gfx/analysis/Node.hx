@@ -4,9 +4,7 @@ import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFieldType;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import haxe.ui.components.Label;
 import openfl.geom.Point;
-import struct.Variant.VariantPath;
 import haxe.ui.components.Link;
 
 class Node extends Link

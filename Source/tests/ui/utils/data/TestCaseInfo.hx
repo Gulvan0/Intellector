@@ -54,6 +54,11 @@ class TestCaseInfo
         return new TestCaseInfo(testCaseName, descriptor, passedChecksMap);
     }
 
+    public static function empty(testCaseName:String):TestCaseInfo
+    {
+        return new TestCaseInfo(testCaseName, TestCaseDescriptor.empty(), []);
+    }
+
     public function savePassedChecks()
     {
         var cookieStr:String = "";
@@ -111,5 +116,8 @@ class TestCaseInfo
         this.testCase = testCase;
         this.descriptor = descriptor;
         this.passedChecksByModule = passedChecksByModule;
+        for (moduleName in descriptor.checks.keys())
+            if (!passedChecksByModule.exists(moduleName))
+                passedChecksByModule.set(moduleName, []);
     }
 }

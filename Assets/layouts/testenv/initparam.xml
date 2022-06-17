@@ -1,6 +1,8 @@
 <hbox width="100%">
-    <label id="paramName" width="50%" />
-    <dropdown id="paramValuesDropdown" width="50%" text="Select...">
-        
-    </dropdown>
+    <label id="paramName" verticalAlign="center" width="50%" style="font-size: 16px;text-align: center" />
+    <option-stepper id="paramValuesDropdown" verticalAlign="center" width="50%" height="25px" text="Select...">
+        <data>
+            <item text="Test item" />
+        </data>
+    </option-stepper>
 </hbox>

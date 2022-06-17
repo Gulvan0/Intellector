@@ -4,9 +4,6 @@ import haxe.Http;
 import tests.ui.utils.data.TestCaseInfo;
 import haxe.Json;
 import haxe.Resource;
-import tests.ui.ArgumentType;
-import js.Cookie;
-import haxe.crypto.Md5;
 
 class DataKeeper 
 {
@@ -39,7 +36,15 @@ class DataKeeper
 
     public static function get(testCase:String):TestCaseInfo
     {
-        return testCaseInfos.get(testCase);
+        var info:Null<TestCaseInfo> = testCaseInfos.get(testCase);
+        if (info == null)
+        {
+            trace('Data for test case $testCase was not loaded. Loaded cases: ${[for (s in testCaseInfos.keys()) s].join(', ')}');
+            testCaseInfos.set(testCase, TestCaseInfo.empty(testCase));
+            return testCaseInfos.get(testCase);
+        }
+        else
+            return info;
     }
 
     public static function getCurrent():TestCaseInfo
@@ -47,12 +52,22 @@ class DataKeeper
         return get(UITest.getCurrentTestCase());
     }
 
-    public static function load() 
+    public static function load(onLoaded:Void->Void) 
     {
+        function onRawTestCaseInfosRetrieved(rawDataStr:String) 
+        {
+            testCaseInfos = constructTestCaseMap(Json.parse(rawDataStr));
+            onLoaded();
+        }
+
         var rawDataStr:String = Resource.getString("test_case_infos");
         if (rawDataStr == null)
-            rawDataStr = Http.requestUrl("https://raw.githubusercontent.com/Gulvan0/Intellector/main/Source/tests/ui/test_case_infos.json");
-        
-        testCaseInfos = constructTestCaseMap(Json.parse(rawDataStr));
+        {
+            var request:Http = new Http("https://raw.githubusercontent.com/Gulvan0/Intellector/main/Source/tests/ui/test_case_infos.json");
+            request.onData = onRawTestCaseInfosRetrieved;
+            request.request();
+        }
+        else
+            onRawTestCaseInfosRetrieved(rawDataStr);
     }
 }

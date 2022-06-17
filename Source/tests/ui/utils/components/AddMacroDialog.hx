@@ -7,7 +7,7 @@ import haxe.ui.containers.dialogs.Dialog;
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/testenv/addmacrodialog.xml"))
 class AddMacroDialog extends Dialog
 {
-    private var entryIDs:Array<Int>;
+    /*private var entryIDs:Array<Int>;
     private var historySlice:Array<MacroStep>;
 
     private var onConfirmed:Macro->Void;
@@ -36,12 +36,12 @@ class AddMacroDialog extends Dialog
         historySlice = historySlice.slice(0, index+1);
         for (i in (index+1)...entryIDs.length)
             historyVBox.removeComponentAt(index+1);
-    }
+    }*/
 
     public function new(onConfirmed:Macro->Void)
     {
         super();
-        this.onConfirmed = onConfirmed;
+        /*this.onConfirmed = onConfirmed;
         this.entryIDs = [];
         this.historySlice = UITest.getHistory();
 
@@ -61,6 +61,6 @@ class AddMacroDialog extends Dialog
                     onConfirmed(new Macro(nameInputField.text, historySlice));
                 else 
                     trace("Failed to add macro: name not specified");
-        };
+        };*/
     }    
 }

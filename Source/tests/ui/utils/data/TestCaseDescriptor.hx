@@ -47,6 +47,11 @@ class TestCaseDescriptor
         return testCaseDescriptor;
     }
 
+    public static function empty():TestCaseDescriptor
+    {
+        return new TestCaseDescriptor();
+    }
+
     public function allMacros():Array<Macro>
     {
         return macros.copy();

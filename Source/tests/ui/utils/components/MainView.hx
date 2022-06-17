@@ -1,5 +1,11 @@
 package tests.ui.utils.components;
 
+import haxe.ui.core.Screen;
+import haxe.ui.containers.VBox;
+import haxe.ui.containers.dialogs.Dialogs;
+import haxe.exceptions.NotImplementedException;
+import haxe.Json;
+import haxe.Serializer;
 import haxe.ui.components.CheckBox;
 import haxe.ui.components.SectionHeader;
 import haxe.ui.containers.HorizontalButtonBar;
@@ -23,12 +29,11 @@ import haxe.ui.containers.HBox;
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/testenv/main.xml"))
 class MainView extends HBox
 {
-    
     private var component:TestedComponent;
 
     private var initParams:Array<MaterializedInitParameter<Dynamic>>;
-    private var initParamEntries:Map<String, InitParameterEntry>;
 
+    private var initParamEntries:Map<String, InitParameterEntry> = [];
     private var actionEndpointPrompts:Map<String, Array<ActionEndpointPrompt>> = [];
 
     private var board:SelectableBoard;
@@ -56,15 +61,18 @@ class MainView extends HBox
     @:bind(traceStateBtn, MouseEvent.CLICK)
     private function traceComponentState(e)
     {
-        trace(component);
+        throw new NotImplementedException();
     }
 
     @:bind(addMacroLink, MouseEvent.CLICK)
     private function addMacro(e)
     {
         var descriptor = DataKeeper.getCurrent().descriptor;
-        var dialog = new AddMacroDialog(descriptor.addMacro);
-        dialog.showDialog();
+        var vbox:VBox = new VBox();
+        vbox.width = 1000;
+        addComponent(Dialogs.messageBox("Nahui", false));
+        //var dialog = new AddMacroDialog(descriptor.addMacro);
+        //dialog.showDialog();
     }
 
     @:bind(proposeMacrosBtn, MouseEvent.CLICK)
@@ -77,12 +85,28 @@ class MainView extends HBox
 
     private function timerRun()
     {
-        board.setSituation(component._provide_situation());
+        //board.setSituation(component._provide_situation());
     }
 
     private function onActionBtnPressed(fieldName:String, ?splitterValue:String)
     {
-        var dialog:ActionPromptDialog = new ActionPromptDialog(actionEndpointPrompts.get(fieldName), component._provide_situation(), promptArgs -> {
+        var prompts = actionEndpointPrompts.get(fieldName);
+        if (Lambda.empty(prompts))
+        {
+            if (splitterValue != null)
+            {
+                UITest.logEndpointCall(fieldName, [new EndpointArgument(AString, splitterValue)]);
+                Reflect.callMethod(component, getMethod(fieldName), [splitterValue]);
+            }
+            else
+            {
+                UITest.logEndpointCall(fieldName, []);
+                Reflect.callMethod(component, getMethod(fieldName), []);
+            }
+            return;
+        }
+
+        var dialog:ActionPromptDialog = new ActionPromptDialog(prompts, component._provide_situation(), promptArgs -> {
             var args:Array<EndpointArgument> = promptArgs;
             if (splitterValue != null)
                 args.unshift(new EndpointArgument(AString, splitterValue));
@@ -108,7 +132,7 @@ class MainView extends HBox
             case EndpointCall(endpointName, arguments):
                 Reflect.callMethod(component, getMethod(endpointName), arguments.map(x -> x.value));
             case Event(serializedEvent):
-                component._imitateEvent(serializedEvent);
+                component.imitateEvent(serializedEvent);
         }
     }
 
@@ -129,9 +153,11 @@ class MainView extends HBox
         this.component = component;
         this.initParams = fieldData.initParameters;
 
+        component.horizontalAlign = 'center';
+        component.verticalAlign = 'center';
         testedComponentBox.addComponent(component);
 
-        componentNameLabel.htmlText = 'Component: <u>${UITest.getCurrentTestCase()}</u>';
+        componentNameLabel.htmlText = '<b>Test Case: <i>${UITest.getCurrentTestCase()}</i></b>';
 
         for (param in initParams)
         {
@@ -200,11 +226,14 @@ class MainView extends HBox
             }
         }
 
-        board = new SelectableBoard(Situation.starting(), Disabled, Disabled);
+        board = new SelectableBoard(Situation.starting(), Disabled, Disabled, White, 40, true);
         var boardWrapper:BoardWrapper = new BoardWrapper(board);
-        boardWrapper.percentWidth = 100;
         boardWrapper.maxPercentHeight = 100;
+        boardWrapper.percentWidth = 100;
+        boardWrapper.horizontalAlign = 'center';
+        boardWrapper.verticalAlign = 'center';
         boardContainer.addComponent(boardWrapper);
+        Timer.delay(boardWrapper.validateNow, 500);
 
         var timer:Timer = new Timer(1000);
         timer.run = timerRun;

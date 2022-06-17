@@ -12,12 +12,11 @@ import struct.Hex;
 import struct.Situation;
 import struct.IntPoint;
 import struct.PieceColor;
-import gfx.components.OffsettedSprite;
 
 /**
     A simplest board with a very basic functionality
 **/
-class Board extends OffsettedSprite
+class Board extends Sprite
 {
     public var hexSideLength(default, null):Float;
     public var lettersEnabled(default, null):Bool;
@@ -337,7 +336,7 @@ class Board extends OffsettedSprite
 
     public function new(situation:Situation, orientationColor:PieceColor = White, hexSideLength:Float = 40, suppressMarkup:Bool = false) 
     {
-        super(-hexSideLength, -Hexagon.sideToHeight(hexSideLength) / 2);
+        super();
         this.hexSideLength = hexSideLength;
         this.lettersEnabled = !suppressMarkup && Preferences.markup.get() != None;
         this.orientationColor = orientationColor;

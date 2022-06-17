@@ -15,7 +15,7 @@ class EndpointArgument
         if (!Reflect.hasField(json, "type")) 
             throw 'Macro $macroName in test case $testCaseName has an \'endpointcall\' step which argument has no attribute \'type\' (endpoint: $endpointName)';
 
-        var argValue:String = cast(Reflect.field(json, "value"), String);
+        var argValue = Std.string(Reflect.field(json, "value"));
         var argTypeStr:String = cast(Reflect.field(json, "type"), String);
         var argType:ArgumentType = ArgumentType.createByName(argTypeStr);
 

@@ -21,5 +21,6 @@
 	<assets path="Assets/fonts" rename="fonts" />
 	<assets path="Assets/layouts" rename="layouts" />
 
+	<haxedef name="haxeJSON" />
 	
 </project>

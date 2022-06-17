@@ -1,5 +1,8 @@
 package tests;
 
+import haxe.ui.HaxeUIApp;
+import gfx.ScreenManager;
+import openfl.Lib;
 import tests.ui.utils.data.EndpointArgument;
 import tests.ui.utils.data.MacroStep;
 import tests.ui.utils.data.TestCaseInfo;
@@ -53,18 +56,22 @@ class UITest
             LoginManager.login = "TesterPlayer";
     }
 
-    public static function launchTest(component:TestedComponent)
+    private static function onDataReady(component:TestedComponent) 
     {
-        currentTestCase = Type.getClassName(Type.getClass(component));
+        currentTestCase = Type.getClassName(Type.getClass(component)).split('.').pop();
         initSinks();
 
         var traverser:FieldTraverser = new FieldTraverser(component);
         var fieldResults:FieldTraverserResults = traverser.traverse();
 
-        DataKeeper.load();
         var storedData:TestCaseInfo = DataKeeper.get(currentTestCase);
 
         mainView = new MainView(component, fieldResults, storedData);
-        Screen.instance.addComponent(mainView);
+        ScreenManager.instance.addChild(mainView);
+    }
+
+    public static function launchTest(component:TestedComponent)
+    {
+        DataKeeper.load(onDataReady.bind(component));
     }
 }

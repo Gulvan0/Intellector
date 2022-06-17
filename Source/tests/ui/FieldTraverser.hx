@@ -48,11 +48,8 @@ class FieldTraverser
                 {
                     var defaultValues:Array<EndpointArgument> = [];
                     for (defaultArg in cast(tagArgument, Array<Dynamic>))
-                    {
-                        var defaultArgStr:String = cast(defaultArg, String);
-                        var processedDefaultArg:EndpointArgument = EndpointArgument.fromSerialized(defaultArgStr, type);
-                        defaultValues.push(processedDefaultArg);
-                    }
+                        defaultValues.push(new EndpointArgument(defaultArg, type));
+
                     prompts.push(new ActionEndpointPrompt(displayName, type, defaultValues));
                     type = null;
                     displayName = null;
@@ -111,14 +108,14 @@ class FieldTraverser
             if (optional)
                 return null;
             else
-                throw 'Metatag $metatagName not found for field $fieldName of test case ${Type.getClassName(testCaseClass)}';
+                throw 'Metatag $metatagName not found for field $fieldName of test case ${UITest.getCurrentTestCase()}';
         
         return Reflect.field(methodMetas, metatagName);
     }
 
     private function processField(fieldName:String)
     {
-        if (!Reflect.hasField(component, fieldName))
+        if (Reflect.field(component, fieldName) == null)
             throw 'Field not found: $fieldName';
 
         var fieldPrefix:String = FieldNaming.getFieldPrefix(fieldName);
@@ -166,7 +163,7 @@ class FieldTraverser
 
     public function new(component:TestedComponent)
     {
-        this.testCase = Type.getClassName(Type.getClass(component));
+        this.testCase = UITest.getCurrentTestCase();
         this.component = component;
     }
 }

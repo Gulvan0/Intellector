@@ -2,8 +2,8 @@ package tests.ui.utils.data;
 
 class CheckMap
 {
-    public var commonChecks:CheckList;
-    public var stepChecks:Map<Int, CheckList>;
+    public var commonChecks:CheckList = [];
+    public var stepChecks:Map<Int, CheckList> = [];
 
     public var checkedStepsOrdered(default, null):Array<Int> = [];
 

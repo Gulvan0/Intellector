@@ -66,7 +66,7 @@ using StringTools;
 	- Path parsing. Retrieving the page the user requested from
 	the URL search params: navigate() and navigateToSection(). 
 	The former provides backward compatibility for the old URLs
-	(pre-First-Anniversary-Update). The latter one parses the
+	(pre-2.0). The latter one parses the
 	modern paths;
 	- Navigating to a respective page: all of the following 
 	methods. The ones needing an additional data make use of a
@@ -81,8 +81,8 @@ class Main extends Sprite
 		super();
 		init();
 		//start();
-		////addChild(new UITest(new TVariantView(new VariantTree())));
-		//ScreenManager.toScreen(ScreenType.StartedPlayableGame(228, "Gulvan", "kartoved", new TimeControl(3*60, 2), White));
+		UITest.launchTest(new TGameInfoBox());
+		//ScreenManager.toScreen(ScreenType.Analysis(null, null));
 	}
 
 	private function init() 

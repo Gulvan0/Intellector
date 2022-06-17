@@ -260,7 +260,7 @@ class Variant extends VariantNode
 
     public function getSituationByPath(path:VariantPath):Situation
     {
-        return getByPath(path).situationBefore;
+        return getByPath(path).situationAfter;
     }
 
     private function getByPath(path:VariantPath):VariantNode
