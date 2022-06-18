@@ -65,7 +65,7 @@ class TestCaseInfo
 
         for (moduleName => checkNums in passedChecksByModule.keyValueIterator())
         {
-            cookieStr += moduleName;
+            var checksPart:String = "";
 
             var checkPassed:Array<Bool> = [];
             for (checkNum in checkNums)
@@ -73,11 +73,14 @@ class TestCaseInfo
             
             for (flag in checkPassed)
                 if (flag == true)
-                    cookieStr += "1";
+                    checksPart += "1";
                 else 
-                    cookieStr += "0";
-        }
+                    checksPart += "0";
 
+            if (checksPart != "")
+                cookieStr += moduleName + checksPart;
+        }
+        
         Cookie.set(testCase, cookieStr);
     }
 

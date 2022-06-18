@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import utils.StringUtils;
 import haxe.ui.core.Screen;
 import haxe.ui.containers.VBox;
 import haxe.ui.containers.dialogs.Dialogs;
@@ -85,7 +86,7 @@ class MainView extends HBox
 
     private function timerRun()
     {
-        //board.setSituation(component._provide_situation());
+        board.setSituation(component._provide_situation());
     }
 
     private function onActionBtnPressed(fieldName:String, ?splitterValue:String)
@@ -153,8 +154,6 @@ class MainView extends HBox
         this.component = component;
         this.initParams = fieldData.initParameters;
 
-        component.horizontalAlign = 'center';
-        component.verticalAlign = 'center';
         testedComponentBox.addComponent(component);
 
         componentNameLabel.htmlText = '<b>Test Case: <i>${UITest.getCurrentTestCase()}</i></b>';
@@ -202,7 +201,7 @@ class MainView extends HBox
         for (moduleName => checkModule in storedData.descriptor.checks)
         {
             var header:SectionHeader = new SectionHeader();
-            header.text = moduleName;
+            header.text = StringUtils.asPhrase(moduleName);
             checksVBox.addComponent(header);
 
             switch checkModule 

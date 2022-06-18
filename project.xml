@@ -14,13 +14,17 @@
 	<haxelib name="haxeui-core" />
 	<haxelib name="haxeui-openfl" />
 	<haxelib name="polygonal-ds" />
-	<haxelib name="utest" />
+
+	<section if="unit">
+		<haxelib name="utest" />
+		<template path="templates" />
+	</section>
+
+	<haxeflag name="--resource" value="./Source/tests/ui/test_case_infos.json@test_case_infos" if="localtests" />
 	
 	<assets path="Assets/sounds" rename="sounds" />
 	<assets path="Assets" rename="assets" />
 	<assets path="Assets/fonts" rename="fonts" />
 	<assets path="Assets/layouts" rename="layouts" />
-
-	<haxedef name="haxeJSON" />
 	
 </project>

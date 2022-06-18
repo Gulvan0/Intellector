@@ -1,5 +1,6 @@
 package utils;
 
+import haxe.CallStack;
 import openfl.display.Sprite;
 import gfx.components.SpriteWrapper;
 import utils.TimeControl.TimeControlType;
@@ -22,10 +23,22 @@ enum AssetName
 
 class AssetManager 
 {
-    public static var pieces:Map<PieceType, Map<PieceColor, SVG>>; //new
-    public static var pieceBitmaps:Map<PieceType, Map<PieceColor, BitmapData>>; //deprecated
-    public static var otherBitmaps:Map<AssetName, BitmapData>;
-    public static var timeControlIcons:Map<TimeControlType, SVG>;
+    public static var pieces:Map<PieceType, Map<PieceColor, SVG>> = []; //new
+    public static var pieceBitmaps:Map<PieceType, Map<PieceColor, BitmapData>> = []; //deprecated
+    public static var otherBitmaps:Map<AssetName, BitmapData> = [];
+    public static var timeControlIcons:Map<TimeControlType, SVG> = [];
+
+    private static var loadedResourcesCnt:Int = 0;
+    private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length * 2 + TimeControlType.createAll().length + AssetName.createAll().length;
+    private static var onLoadedCallback:Void->Void;
+
+    private static inline function bmpPath(name:AssetName):String
+    {
+        return switch name {
+            case AnalysisMove: 'assets/symbols/move.png';
+            case AnalysisDelete: 'assets/symbols/delete.png';
+        }   
+    }
 
     private static inline function piecePath(type:PieceType, color:PieceColor, ?svg:Bool = false):String
     {
@@ -81,35 +94,34 @@ class AssetManager
         return new SpriteWrapper(sprite);
     }
 
-    public static function init() 
+    private static function onResourceLoaded<T, S, P>(map:Map<T, S>, mapKey:T, converter:P->S, res:P) 
     {
-        initPieces();
-        initOther();
+        map.set(mapKey, converter(res));
+        loadedResourcesCnt++;
+        trace('Loaded resource: $loadedResourcesCnt/$totalResourcesCnt');
+        if (loadedResourcesCnt == totalResourcesCnt)
+            onLoadedCallback();
     }
 
-    private static function initPieces()
-    {
-        pieces = [];
-        pieceBitmaps = [];
+    public static function load(callback:Void->Void)
+    {  
+        onLoadedCallback = callback;
         for (fig in PieceType.createAll())
         {
             pieces[fig] = new Map<PieceColor, SVG>();
             pieceBitmaps[fig] = new Map<PieceColor, BitmapData>();
             for (col in PieceColor.createAll())
             {
-                pieceBitmaps[fig][col] = Assets.getBitmapData(piecePath(fig, col));
-                pieces[fig][col] = new SVG(Assets.getText(piecePath(fig, col, true)));
+                Assets.loadBitmapData(piecePath(fig, col)).onComplete(onResourceLoaded.bind(pieceBitmaps[fig], col, x->x));
+                Assets.loadText(piecePath(fig, col, true)).onComplete(onResourceLoaded.bind(pieces[fig], col, x->new SVG(x)));
             }
         }
-    }
 
-    private static function initOther() 
-    {
-        otherBitmaps = [
-            AnalysisMove => Assets.getBitmapData('assets/symbols/move.png'),
-            AnalysisDelete => Assets.getBitmapData('assets/symbols/delete.png')
-        ];
-        timeControlIcons = [for (type in TimeControlType.createAll()) type => new SVG(Assets.getText(timeControlPath(type)))];
+        for (type in TimeControlType.createAll())
+            Assets.loadText(timeControlPath(type)).onComplete(onResourceLoaded.bind(timeControlIcons, type, x->new SVG(x)));
+        
+        for (asset in AssetName.createAll())
+            Assets.loadBitmapData(bmpPath(asset)).onComplete(onResourceLoaded.bind(otherBitmaps, asset, x->x));
     }
 
     private static function scaleBitmapData(bitmapData:BitmapData, scale:Float):BitmapData 

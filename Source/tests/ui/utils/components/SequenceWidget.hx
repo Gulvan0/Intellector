@@ -25,7 +25,14 @@ class SequenceWidget extends VBox
 
     private function updateSliderPosLabel()
     {
-        sliderPosLabel.text = "" + Math.round(intervalSlider.pos);
+        var msInt:Int = Math.round(intervalSlider.pos);
+        if (intervalSlider.pos < 1000)
+            sliderPosLabel.text = "Interval: 0." + msInt + "s";
+        else
+        {
+            var sStr = Std.string(msInt);
+            sliderPosLabel.text = "Interval: " + sStr.substring(0, sStr.length - 3) + "." + sStr.substring(sStr.length - 3) + "s";
+        }
     }
 
     private function step()

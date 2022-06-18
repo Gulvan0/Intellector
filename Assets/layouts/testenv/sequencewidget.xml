@@ -1,14 +1,14 @@
-<vbox width="100%" height="50px">
-    <hbox width="100%" height="24px">
-        <button id="removeBtn" width="24px" height="24px" text="✖" style="padding:0 0 0 0;font-size:20px;color:#DD0000" />
-        <button id="editBtn" width="24px" height="24px" text="✎" style="padding:0 0 0 0;font-size:20px" />
-        <label id="macroNameLabel" width="100%" height="24px" style="font-size:21px" />
-        <label id="macroStepLabel" width="100px" height="24px" style="font-size:21px;text-align:center" />
+<vbox width="100%" height="40px">
+    <hbox width="100%" height="20px">
+        <button id="removeBtn" width="20px" height="20px" text="✖" verticalAlign='center' style="padding:0 0 0 0;font-size:20px;color:#DD0000" />
+        <button id="editBtn" width="20px" height="20px" text="✎" verticalAlign='center' style="padding:0 0 0 0;font-size:20px" />
+        <label id="macroNameLabel" width="100%" height="20px" verticalAlign='center' style="font-size:18px;font-bold:true" />
+        <label id="macroStepLabel" height="20px" verticalAlign='center' style="font-size:18px" />
     </hbox>
-    <hbox width="100%" height="24px">
-        <label id="sliderPosLabel" width="80px" height="24px" style="font-size:21px;text-align:center" />
-        <slider id="intervalSlider" width="100%" height="24px" min="100" max="5000" pos="500" />
-        <button id="playBtn" width="24px" height="24px" text="▶" style="padding:0 0 0 0;font-size:20px" />
-        <button id="stepBtn" width="24px" height="24px" text="⭲" style="padding:0 0 0 0;font-size:20px" />
+    <hbox width="100%" height="20px">
+        <label id="sliderPosLabel" height="20px" verticalAlign='center' style="font-size:18px;text-align:center" />
+        <slider id="intervalSlider" width="100%" height="20px" min="100" max="5000" pos="500" verticalAlign='center' />
+        <button id="playBtn" width="20px" height="20px" text="▶" verticalAlign='center' style="padding:0 0 0 0;font-size:14px" />
+        <button id="stepBtn" width="20px" height="20px" text="⭲" verticalAlign='center' style="padding:0 0 0 0;font-size:20px" />
     </hbox>
 </vbox>

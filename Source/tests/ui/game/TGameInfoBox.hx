@@ -47,7 +47,6 @@ class TGameInfoBox extends TestedComponent
         {
             previousSituations = [];
             playthrough_sit = Situation.starting();
-            return;
         }
 
         var plyInfo = playthrough_sit.randomContinuation(1)[0];
@@ -66,25 +65,25 @@ class TGameInfoBox extends TestedComponent
         playthrough_sit = previousSituations.pop();
     }
 
-    private function _act_seeResolutions() 
+    @iterations(14)
+    private function _seq_seeResolutions(i:Int) 
     {
+        if (i == 0)
+        {
+            previousSituations = [];
+            playthrough_sit = Situation.starting();
+        }
+
         var decisiveOutcomes:Array<String> = ['mat', 'bre', 'res', 'aba', 'tim'];
         var drawishOutcomes:Array<String> = ['agr', 'rep', '100', 'abo'];
-        var i:Int = 0;
-        var t:Timer = new Timer(1000);
-        t.run = () -> {
-            if (i < decisiveOutcomes.length * 2)
-            {
-                var winner = i % 2 == 0? 'w' : 'b';
-                var outcome = decisiveOutcomes[Math.floor(i/2)];
-                gameinfobox.handleNetEvent(GameEnded(winner, outcome));
-            }
-            else if (i < decisiveOutcomes.length * 2 + drawishOutcomes.length)
-                gameinfobox.handleNetEvent(GameEnded('d', drawishOutcomes[i - decisiveOutcomes.length * 2]));
-            else
-                t.stop();
-            i++;
-        };
+        if (i < decisiveOutcomes.length * 2)
+        {
+            var winner = i % 2 == 0? 'w' : 'b';
+            var outcome = decisiveOutcomes[Math.floor(i/2)];
+            gameinfobox.handleNetEvent(GameEnded(winner, outcome));
+        }
+        else
+            gameinfobox.handleNetEvent(GameEnded('d', drawishOutcomes[i - decisiveOutcomes.length * 2]));
     }
 
     private override function getComponent():ComponentGraphics

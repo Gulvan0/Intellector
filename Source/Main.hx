@@ -79,20 +79,23 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
-		init();
-		//start();
-		UITest.launchTest(new TGameInfoBox());
-		//ScreenManager.toScreen(ScreenType.Analysis(null, null));
+		init(() -> {
+			UITest.launchTest(new TGameInfoBox());
+			//ScreenManager.toScreen(ScreenType.Analysis(null, null));
+			/*ScreenManager.launch();
+			start();*/
+		});
+		
 	}
 
-	private function init() 
+	private function init(callback:Void->Void) 
 	{
-		Toolkit.init();
+		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
 		OpeningTree.init();
-		AssetManager.init();
 		Changes.initChangelog();
-
-		ScreenManager.launch(this);
+		
+		Toolkit.init({container: stage});
+		AssetManager.load(callback);
 	}
 
 	private function start() 

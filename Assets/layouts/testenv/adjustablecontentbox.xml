@@ -1,0 +1,16 @@
+<vbox width="100%" height="100%">
+    <vbox width="100%" height="30px" style="border-bottom:2px;border-color:#dddddd">
+        <hbox horizontalAlign='center' width="80%" height="100%">
+            <label verticalAlign='center' text="Width" style="font-size:16px" />
+            <slider verticalAlign='center' id="widthSlider" width="20%" />
+            <label verticalAlign='center' id="widthLabel" text="" style="font-size:16px"/>
+            <spacer verticalAlign='center' width="60%" />
+            <label verticalAlign='center' text="Height" style="font-size:16px" />
+            <slider verticalAlign='center' id="heightSlider" width="20%" />
+            <label verticalAlign='center' id="heightLabel" text="" style="font-size:16px" />
+        </hbox>
+    </vbox>
+    <box width="100%" height="100%">
+        <box id="componentContainer" horizontalAlign="center" verticalAlign="center" />
+    </box>
+</vbox>

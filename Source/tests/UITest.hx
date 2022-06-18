@@ -67,7 +67,7 @@ class UITest
         var storedData:TestCaseInfo = DataKeeper.get(currentTestCase);
 
         mainView = new MainView(component, fieldResults, storedData);
-        ScreenManager.instance.addChild(mainView);
+        Screen.instance.addComponent(mainView);
     }
 
     public static function launchTest(component:TestedComponent)

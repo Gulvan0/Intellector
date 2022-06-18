@@ -13,6 +13,11 @@ class MathUtils
     {
         return Math.round(defaultValue * scaledMeasure / defaultMeasure);
     }
+    
+    public static inline function avg(a:Float, b:Float):Float
+    {
+        return (a + b) / 2;
+    }
 
     public static function clamp(v:Float, min:Float, max:Float):Float
     {

@@ -1,7 +1,7 @@
 {
     "TGameInfoBox": {
         "checks": {
-            "_Actualized": {
+            "Actualized": {
                 "steps": false,
                 "content": [
                     "Pillar opening",
@@ -23,42 +23,7 @@
                     "Random 3-move opening"
                 ]
             }
-        },
-        "macros": [
-            {
-                "name": "Macro name",
-                "sequence": [
-                    {
-                        "type": "endpointcall",
-                        "endpoint": "playthrough",
-                        "args": [
-                            {
-                                "value": 0,
-                                "type": "AInt"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "endpointcall",
-                        "endpoint": "playthrough",
-                        "args": [
-                            {
-                                "value": 1,
-                                "type": "AInt"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "event",
-                        "eventstr": "rpress|3|1"
-                    },
-                    {
-                        "type": "event",
-                        "eventstr": "rrelease"
-                    }
-                ]
-            }
-        ]
+        }
     },
     "TSidebox": {
         "checks": {
@@ -71,7 +36,7 @@
                     "Check flipBoard effect (both login and time should swap)"
                 ]
             },
-            "_Actualized": {
+            "Actualized": {
                 "steps": false,
                 "content": [
                     "Navigator entries regenerate correctly (due to the loaded past history)", 
@@ -86,7 +51,7 @@
                     "Timers react correctly when a move is made"
                 ]
             },
-            "_Alerts": {
+            "Alerts": {
                 "steps": false,
                 "content": [
                     "Check critical styling (depends on turnColor, playerColor, startSeconds)", 
@@ -166,7 +131,7 @@
                     "Chat autoscrolls on overflow"
                 ]
             },
-            "_Actualized": {
+            "Actualized": {
                 "steps": false,
                 "content": [
                     "Messages & logs are loaded correctly", 

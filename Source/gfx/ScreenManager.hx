@@ -1,5 +1,6 @@
 package gfx;
 
+import haxe.ui.containers.Box;
 import js.html.Element;
 import openfl.events.Event;
 import dict.Utils;
@@ -26,7 +27,7 @@ using StringTools;
 /**
     Manages state transition correctness (both for url and for displayed objects)
 **/
-class ScreenManager extends Sprite implements INetObserver
+class ScreenManager extends Box implements INetObserver
 {
     public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event
     public static var instance:ScreenManager;
@@ -41,7 +42,7 @@ class ScreenManager extends Sprite implements INetObserver
         if (current != null)
         {
             current.onClosed();
-            removeChild(current);
+            removeComponent(current);
         }
     }
 
@@ -101,7 +102,7 @@ class ScreenManager extends Sprite implements INetObserver
         analysisScreen.disableMenu();
 
         instance.current = analysisScreen;
-        instance.addChild(instance.current);
+        instance.addComponent(instance.current);
         instance.current.onEntered();
 
         return analysisScreen;
@@ -113,7 +114,7 @@ class ScreenManager extends Sprite implements INetObserver
 
         URLEditor.setPath(getURLPath(type), Utils.getScreenTitle(type));
         instance.current = buildScreen(type);
-        instance.addChild(instance.current);
+        instance.addComponent(instance.current);
         instance.current.onEntered();
     }
 
@@ -164,12 +165,10 @@ class ScreenManager extends Sprite implements INetObserver
         }
     }
 
-    public static function launch(mainInstance:Main)
+    public static function launch()
     {
-		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
-        
         var screenManager:ScreenManager = new ScreenManager();
-        mainInstance.addChild(screenManager);
+        haxe.ui.core.Screen.instance.addComponent(screenManager);
     }
 
     public static function observeNetEvents()
