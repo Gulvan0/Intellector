@@ -1,2 +1,13 @@
-<dialog width="1000">
+<dialog width="50%">
+    <vbox width="100%">
+        <label width="100%" text="Add Macro" style="font-size:30px" />
+        <hbox width="100%">
+            <label text="Name:" />
+            <textfield id="nameInputField" width="100%" placeholder="Enter macro name..." /> 
+        </hbox>
+        <scrollview width="100%" contentWidth="100%">
+            <vbox id="historyVBox" width="100%" />
+        </scrollview>
+        <button id="confirmBtn" width="100%" text="Confirm and Add" />
+    </vbox>
 </dialog>

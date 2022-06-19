@@ -69,11 +69,8 @@ class MainView extends HBox
     private function addMacro(e)
     {
         var descriptor = DataKeeper.getCurrent().descriptor;
-        var vbox:VBox = new VBox();
-        vbox.width = 1000;
-        addComponent(Dialogs.messageBox("Nahui", false));
-        //var dialog = new AddMacroDialog(descriptor.addMacro);
-        //dialog.showDialog();
+        var dialog = new AddMacroDialog(descriptor.addMacro);
+        dialog.showDialog();
     }
 
     @:bind(proposeMacrosBtn, MouseEvent.CLICK)

@@ -2,7 +2,7 @@ package gfx.game;
 
 import dict.Phrase;
 import gfx.common.ActionBar.ActionBtn;
-import gfx.game.GameInfoBox.Outcome;
+import struct.Outcome;
 import serialization.GameLogParser;
 import net.EventProcessingQueue.INetObserver;
 import haxe.ui.containers.VBox;

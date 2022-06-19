@@ -2,7 +2,7 @@ package serialization;
 
 import net.LoginManager;
 import utils.TimeControl;
-import gfx.game.GameInfoBox.Outcome;
+import struct.Outcome;
 import struct.PieceColor;
 import struct.Ply;
 import struct.Situation;

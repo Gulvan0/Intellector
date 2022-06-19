@@ -4,7 +4,7 @@ import utils.TimeControl;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
 import gfx.ScreenType;
-import gfx.game.GameInfoBox.Outcome;
+import struct.Outcome;
 import Preferences.Markup;
 import gfx.screens.MainMenu.MainMenuButton;
 import struct.PieceColor;

@@ -1,4 +1,12 @@
 <hbox width="100%">
+    <style>
+        .option-stepper {
+            clip: true;
+        }
+        .option-stepper .label {
+            word-wrap: false;
+        }
+    </style>
     <label id="paramName" verticalAlign="center" width="50%" style="font-size: 16px;text-align: center" />
     <option-stepper id="paramValuesDropdown" verticalAlign="center" width="50%" height="25px" text="Select...">
         <data>

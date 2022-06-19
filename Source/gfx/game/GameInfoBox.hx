@@ -24,25 +24,13 @@ import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import openfl.text.TextField;
 import openfl.display.Sprite;
-
-//TODO: Move to struct
-enum Outcome
-{
-    Mate;
-    Breakthrough;
-    Resign;
-    Abandon;
-    DrawAgreement;
-    Repetition;
-    NoProgress;
-    Timeout;
-    Abort;
-}
+import struct.Outcome;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/gameinfobox.xml'))
 class GameInfoBox extends Card implements IGameBoardObserver implements INetObserver
 {
     private var openingTree:OpeningTree;
+    private var movesAfterTerminalOpeningNode:Int = 0;
 
     private var timeControlIcon:SVG;
     private var renderedForWidth:Float = 0;
@@ -99,12 +87,20 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
             openingTree.makeMove(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
             opening.text = openingTree.currentNode.name;
         }
+        else
+            movesAfterTerminalOpeningNode++;
     }
 
     private function revertPlys(cnt:Int) 
     {
-        openingTree.revertMoves(cnt);
-        opening.text = openingTree.currentNode.name;
+        if (movesAfterTerminalOpeningNode < cnt)
+        {
+            openingTree.revertMoves(cnt - movesAfterTerminalOpeningNode);
+            opening.text = openingTree.currentNode.name;
+            movesAfterTerminalOpeningNode = 0;
+        }
+        else
+            movesAfterTerminalOpeningNode -= cnt;
     }
 
     public static function constructFromActualizationData(data:ActualizationData):GameInfoBox
