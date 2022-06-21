@@ -73,7 +73,7 @@ class Macro
 
         var json:Dynamic = {name: name, sequence: sequenceJson};
 
-        return Json.stringify(json, null, "\t");
+        return Json.stringify(json, null, "    ");
     }
 
     public function new(name:String, sequence:Array<MacroStep>) 

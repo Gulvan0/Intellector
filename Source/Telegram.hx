@@ -1,6 +1,7 @@
 package;
 
 import haxe.Http;
+using StringTools;
 
 class Telegram 
 {
@@ -11,20 +12,16 @@ class Telegram
         useMethod('sendMessage', ['chat_id' => Config.adminChatID, 'text' => message, 'parse_mode' => 'MarkdownV2']);
     }
 
-    public static function useMethod(methodName:String, ?params:Map<String, String>) 
+    public static function useMethod(methodName:String, params:Map<String, String>) 
     {
-        var url = requestUrlPrefix + methodName;
+        var http = new Http(requestUrlPrefix + methodName);
 
-        if (params != null && !Lambda.empty(params))
+        for (paramName => paramValue in params.keyValueIterator())
         {
-            var paramPairs:Array<String> = [];
-            for (paramName => paramValue in params.keyValueIterator())
-                paramPairs.push('$paramName=$paramValue');
-
-            url += '?' + paramPairs.join('&');
+            var escaped:String = paramValue.replace('{', '\\{').replace('}', '\\}');
+            http.addParameter(paramName, escaped);
         }
-            
-        var http = new Http(url);
+        
         http.request();
     }
 }

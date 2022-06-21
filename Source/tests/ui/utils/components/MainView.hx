@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import tests.ui.utils.data.Macro;
 import utils.StringUtils;
 import haxe.ui.core.Screen;
 import haxe.ui.containers.VBox;
@@ -69,7 +70,17 @@ class MainView extends HBox
     private function addMacro(e)
     {
         var descriptor = DataKeeper.getCurrent().descriptor;
-        var dialog = new AddMacroDialog(descriptor.addMacro);
+
+        if (Lambda.empty(UITest.getHistory()))
+        {
+            gfx.components.Dialogs.alert("History is empty", "TestEnv Warning");
+            return;
+        }
+
+        var dialog = new AddMacroDialog(m -> {
+            descriptor.addMacro(m);
+            addMacroWidget(m);
+        });
         dialog.showDialog();
     }
 
@@ -77,6 +88,13 @@ class MainView extends HBox
     private function proposeMacros(e)
     {
         var untrackedMacroNames = DataKeeper.getUntrackedMacroNames();
+
+        if (Lambda.empty(untrackedMacroNames))
+        {
+            gfx.components.Dialogs.alert("No untracked macros detected", "TestEnv Warning");
+            return;
+        }
+
         var dialog = new ProposeMacrosDialog(untrackedMacroNames);
         dialog.showDialog();
     }
@@ -145,6 +163,16 @@ class MainView extends HBox
             return method;
     }
 
+    private function addMacroWidget(m:Macro)
+    {
+        var callback:Int->Void = step -> {
+            var macroStep:MacroStep = m.getStep(step);
+            onMacroStep(macroStep);
+        };
+        var widget:SequenceWidget = new SequenceWidget(m.name, m.totalSteps(), false, callback);
+        sequencesVBox.addComponent(widget);
+    }
+
     public function new(component:TestedComponent, fieldData:FieldTraverserResults, storedData:TestCaseInfo)
     {
         super();
@@ -186,14 +214,7 @@ class MainView extends HBox
         }
 
         for (storedMacro in storedData.descriptor.allMacros())
-        {
-            var callback:Int->Void = step -> {
-                var macroStep:MacroStep = storedMacro.getStep(step);
-                onMacroStep(macroStep);
-            };
-            var widget:SequenceWidget = new SequenceWidget(storedMacro.name, storedMacro.totalSteps(), false, callback);
-            sequencesVBox.addComponent(widget);
-        }
+            addMacroWidget(storedMacro);
 
         for (moduleName => checkModule in storedData.descriptor.checks)
         {

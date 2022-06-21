@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import gfx.components.Dialogs;
 import haxe.ui.events.MouseEvent;
 import tests.ui.utils.data.Macro;
 import haxe.ui.containers.dialogs.Dialog;
@@ -22,7 +23,8 @@ class ProposeMacrosDialog extends Dialog
     @:bind(confirmBtn, MouseEvent.CLICK)
     private function onConfirmBtnPressed(e) 
     {
-        DataKeeper.proposeMacros(excludedMacros);
+        if (!Lambda.empty(excludedMacros))
+            DataKeeper.proposeMacros(excludedMacros);
         hideDialog(DialogButton.APPLY);
     }
 

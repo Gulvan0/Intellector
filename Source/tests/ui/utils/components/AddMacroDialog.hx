@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import gfx.components.Dialogs;
 import tests.ui.utils.data.Macro;
 import tests.ui.utils.data.MacroStep;
 import haxe.ui.containers.dialogs.Dialog;
@@ -41,6 +42,7 @@ class AddMacroDialog extends Dialog
     public function new(onConfirmed:Macro->Void)
     {
         super();
+        this.title = "Add Macro";
         this.onConfirmed = onConfirmed;
         this.entryIDs = [];
         this.historySlice = UITest.getHistory();
@@ -60,7 +62,7 @@ class AddMacroDialog extends Dialog
                 if (nameInputField.text != "")
                     onConfirmed(new Macro(nameInputField.text, historySlice));
                 else 
-                    trace("Failed to add macro: name not specified");
+                    Dialogs.alert("Failed to add macro: name not specified", "TestEnv Warning");
         };
     }    
 }
