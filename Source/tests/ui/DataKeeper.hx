@@ -29,6 +29,11 @@ class DataKeeper
         return getCurrent().descriptor.getUntrackedMacroNames();
     }
 
+    public static function getAllMacroNames():Array<String>
+    {
+        return getCurrent().descriptor.getAllMacroNames();
+    }
+
     public static function proposeMacros(excludedMacroNames:Array<String>) 
     {
         getCurrent().descriptor.proposeMacros(excludedMacroNames);

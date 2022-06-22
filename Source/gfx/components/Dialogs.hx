@@ -42,6 +42,11 @@ class Dialogs
         });
     }
 
+    public static function custom(dialog:Dialog, modal:Bool = true)
+    {
+        dialog.showDialog(modal);
+    }
+
     public static function alert(message:String, title:String)
     {
         var dialogNum = activeDialogs.push(++dialogCount);

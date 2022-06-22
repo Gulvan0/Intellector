@@ -1,5 +1,6 @@
 package tests.ui.utils.data;
 
+import js.Cookie;
 import tests.ui.utils.data.CheckModule.constructCheckModule;
 
 class TestCaseDescriptor 
@@ -62,16 +63,17 @@ class TestCaseDescriptor
         return Lambda.find(macros, m -> m.name == name);
     }
 
-    public function removeMacro(name:String)
+    public function removeMacro(m:Macro)
     {
-        var requestedMacro = untrackedMacros.get(name);
+        var requestedMacro = untrackedMacros.get(m.name);
         if (requestedMacro != null)
         {
             macros.remove(requestedMacro);
-            untrackedMacros.remove(name);
+            untrackedMacros.remove(m.name);
+            updateUntrackedMacrosCookie();
         }
         else 
-            throw 'Attempting to remove published macro $name';
+            throw 'Attempting to remove published macro ${m.name}';
     }
 
     public function getUntrackedMacroNames():Array<String>
@@ -79,10 +81,37 @@ class TestCaseDescriptor
         return [for (m in untrackedMacros) m.name];
     }
 
-    public function addMacro(m:Macro)
+    public function getAllMacroNames():Array<String>
+    {
+        return macros.map(m -> m.name);
+    }
+
+    public function addMacro(m:Macro, ?updateCookie:Bool = true)
     {
         macros.push(m);
         untrackedMacros.set(m.name, m);
+
+        if (updateCookie)
+            updateUntrackedMacrosCookie();
+    }
+
+    public function renameMacro(m:Macro, newName:String)
+    {
+        if (!untrackedMacros.exists(m.name))
+            throw 'Attempting to rename published macro ${m.name}';
+
+        untrackedMacros.remove(m.name);
+        untrackedMacros.set(newName, m);
+        m.name = newName;
+        updateUntrackedMacrosCookie();
+    }
+
+    private function updateUntrackedMacrosCookie()
+    {
+        var s:String = "";
+        for (um in untrackedMacros)
+            s += um.compactSerialize();
+        Cookie.set("_" + UITest.getCurrentTestCase(), s, 60 * 60 * 24 * 2);
     }
 
     public function proposeMacros(exclude:Array<String>) 

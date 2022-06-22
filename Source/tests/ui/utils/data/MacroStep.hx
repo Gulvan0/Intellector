@@ -7,6 +7,7 @@ enum MacroStep
 {
     EndpointCall(endpointName:String, arguments:ReadOnlyArray<EndpointArgument>);
     Event(serializedEvent:String);
+    Initialization(paramValueIndexes:Map<String, Int>);
 }
 
 private function constructEndpointCall(stepJson:Dynamic, testCaseName:String, macroName:String):MacroStep
@@ -38,6 +39,21 @@ private function constructEventEntry(stepJson:Dynamic, testCaseName:String, macr
     return Event(eventstr);
 }
 
+private function constructInitialization(stepJson:Dynamic, testCaseName:String, macroName:String):MacroStep
+{
+    if (!Reflect.hasField(stepJson, "params")) 
+        throw 'Macro $macroName in test case $testCaseName has an \'init\' step having no \'params\' associated';
+
+    var paramsJson = Reflect.field(stepJson, "params");
+
+    var paramValueIndexes:Map<String, Int> = [];
+
+    for (paramIdentifier in Reflect.fields(paramsJson))
+        paramValueIndexes.set(paramIdentifier, cast(Reflect.field(paramsJson, paramIdentifier), Int));
+
+    return Initialization(paramValueIndexes);
+}
+
 function constructMacroStep(stepJson:Dynamic, testCaseName:String, macroName:String):MacroStep
 {
     if (!Reflect.hasField(stepJson, "type")) 
@@ -49,6 +65,8 @@ function constructMacroStep(stepJson:Dynamic, testCaseName:String, macroName:Str
         return constructEndpointCall(stepJson, testCaseName, macroName);
     else if (macroType == "event")
         return constructEventEntry(stepJson, testCaseName, macroName);
+    else if (macroType == "init")
+        return constructInitialization(stepJson, testCaseName, macroName);
     else
         throw 'Macro $macroName in test case $testCaseName has a step with invalid type \'$macroType\'';
 }
@@ -59,5 +77,6 @@ function macroStepDisplayText(step:MacroStep):String
     {
         case EndpointCall(endpointName, arguments): endpointName + '(' + [for (arg in arguments) arg.asString()].join(', ') + ')';
         case Event(serializedEvent): serializedEvent;
+        case Initialization(paramValueIndexes): 'INIT<' + [for (i in paramValueIndexes) i].join(', ') + '>';
     };
 }

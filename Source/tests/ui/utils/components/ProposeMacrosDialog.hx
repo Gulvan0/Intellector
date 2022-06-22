@@ -9,6 +9,7 @@ import haxe.ui.containers.dialogs.Dialog;
 class ProposeMacrosDialog extends Dialog 
 {
     private var excludedMacros:Array<String>;
+    private final totalPending:Int;
 
     private function onMacroExcluded(name:String) 
     {
@@ -20,18 +21,11 @@ class ProposeMacrosDialog extends Dialog
         excludedMacros.remove(name);
     }
 
-    @:bind(confirmBtn, MouseEvent.CLICK)
-    private function onConfirmBtnPressed(e) 
-    {
-        if (!Lambda.empty(excludedMacros))
-            DataKeeper.proposeMacros(excludedMacros);
-        hideDialog(DialogButton.APPLY);
-    }
-
     public function new(macroNames:Array<String>) 
     {
         super();
         this.excludedMacros = [];
+        this.totalPending = macroNames.length;
 
         for (macroName in macroNames)
         {
@@ -40,5 +34,13 @@ class ProposeMacrosDialog extends Dialog
             var macroEntry:MacroListEntry = new MacroListEntry(macroName, includeCallback, excludeCallback);
             macrolistVBox.addComponent(macroEntry);
         }
+
+        buttons = DialogButton.APPLY;
+
+        onDialogClosed = e -> {
+            if (e.button == DialogButton.APPLY)
+                if (excludedMacros.length < totalPending)
+                    DataKeeper.proposeMacros(excludedMacros);
+        };
     }
 }

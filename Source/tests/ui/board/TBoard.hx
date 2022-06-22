@@ -24,7 +24,7 @@ class TBoard extends TestedComponent
     }
 
     @iterations(60)
-    private function _seq_runningInt(i:Int)
+    private function _seq_runningInt(i:Int) //TODO: Rewrite, rebuild on i==0
     {
         if (i == 0)
             board.clearPieces();
@@ -33,7 +33,7 @@ class TBoard extends TestedComponent
     }
 
     @iterations(10)
-    private function _seq_setHex(i:Int)
+    private function _seq_setHex(i:Int) //TODO: Rewrite, rebuild on i==0
     { 
         switch i
         {
@@ -53,7 +53,7 @@ class TBoard extends TestedComponent
     private var revPly:ReversiblePly;
 
     @iterations(8)
-    private function _seq_transpositions(i:Int)
+    private function _seq_transpositions(i:Int) //TODO: Rewrite, rebuild on i==0
     { 
         switch i
         {

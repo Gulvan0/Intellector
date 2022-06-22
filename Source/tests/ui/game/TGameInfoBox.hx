@@ -44,10 +44,7 @@ class TGameInfoBox extends TestedComponent
     private function _seq_playthrough(i:Int) 
     {
         if (i == 0)
-        {
-            previousSituations = [];
-            playthrough_sit = Situation.starting();
-        }
+            update();
 
         var plyInfo = playthrough_sit.randomContinuation(1)[0];
         if (i % 2 == 1)
@@ -69,10 +66,7 @@ class TGameInfoBox extends TestedComponent
     private function _seq_seeResolutions(i:Int) 
     {
         if (i == 0)
-        {
-            previousSituations = [];
-            playthrough_sit = Situation.starting();
-        }
+            update();
 
         var decisiveOutcomes:Array<String> = ['mat', 'bre', 'res', 'aba', 'tim'];
         var drawishOutcomes:Array<String> = ['agr', 'rep', '100', 'abo'];

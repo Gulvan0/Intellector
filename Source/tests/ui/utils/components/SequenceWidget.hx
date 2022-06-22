@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import gfx.components.Dialogs;
 import haxe.Timer;
 import js.Browser;
 import haxe.ui.events.UIEvent;
@@ -85,8 +86,13 @@ class SequenceWidget extends VBox
         var response:String = Browser.window.prompt("Enter the new macro name:");
         if (response != null && response != "")
         {
-            macroNameLabel.text = response;
-            renameCallback(response);
+            if (DataKeeper.getAllMacroNames().contains(response))
+                Dialogs.alert("Failed to add macro: a macro with this name already exists", "TestEnv Warning");
+            else
+            {
+                macroNameLabel.text = response;
+                renameCallback(response);
+            }
         }
     }
 
@@ -96,23 +102,23 @@ class SequenceWidget extends VBox
         updateSliderPosLabel();
     }
 
-    public function new(sequenceName:String, totalSteps:Int, isEditable:Bool, stepCallback:Int->Void, ?removeCallback:Void->Void, ?renameCallback:String->Void) 
+    public function makeEditable(removeCallback:Void->Void, renameCallback:String->Void)
+    {
+        this.removeCallback = removeCallback;
+        this.renameCallback = renameCallback;
+        removeBtn.hidden = false;
+        editBtn.hidden = false;
+    }
+
+    public function new(sequenceName:String, totalSteps:Int, stepCallback:Int->Void) 
     {
         super();
         this.currentStep = 0;
         this.totalSteps = totalSteps;
         this.stepCallback = stepCallback;
-        this.removeCallback = removeCallback;
-        this.renameCallback = renameCallback;
 
         macroNameLabel.text = sequenceName;
         updateStepLabel();
         updateSliderPosLabel();
-
-        if (!isEditable)
-        {
-            removeBtn.hidden = true;
-            editBtn.hidden = true;
-        }
     }    
 }

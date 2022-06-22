@@ -77,7 +77,7 @@ class TSelectableBoard extends TestedComponent
     }
 
     @iterations(8)
-    private function _seq_basicSelectionTests(i:Int)
+    private function _seq_basicSelectionTests(i:Int) //TODO: Rewrite, rebuild on i==0
     { 
         switch i
         {
@@ -98,7 +98,7 @@ class TSelectableBoard extends TestedComponent
     }
 
     @iterations(29)
-    private function _seq_markers(i:Int)
+    private function _seq_markers(i:Int) //TODO: Rewrite, rebuild on i==0
     { 
         if (i == 0)
         {
@@ -139,7 +139,7 @@ class TSelectableBoard extends TestedComponent
 
     private override function rebuildComponent()
     {
-        board = new AugmentedSelectableBoard(Situation.starting(), White, 50);
+        board = new AugmentedSelectableBoard(Situation.starting(), Free, Free, White, 50); //TODO: Add init parameters
     }
 
     public override function imitateEvent(encodedEvent:String)

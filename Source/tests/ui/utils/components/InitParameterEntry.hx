@@ -12,6 +12,11 @@ class InitParameterEntry extends HBox
         return paramValuesDropdown.selectedIndex;
     }
 
+    public function setSelected(index:Int)
+    {
+        return paramValuesDropdown.selectedIndex = index;
+    }
+
     public function new(nameLabel:String, valueLabels:Array<String>) 
     {
         super();

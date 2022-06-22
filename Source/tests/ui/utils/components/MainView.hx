@@ -1,10 +1,11 @@
 package tests.ui.utils.components;
 
+import js.Cookie;
+import gfx.components.Dialogs;
 import tests.ui.utils.data.Macro;
 import utils.StringUtils;
 import haxe.ui.core.Screen;
 import haxe.ui.containers.VBox;
-import haxe.ui.containers.dialogs.Dialogs;
 import haxe.exceptions.NotImplementedException;
 import haxe.Json;
 import haxe.Serializer;
@@ -50,14 +51,19 @@ class MainView extends HBox
     @:bind(initializeBtn, MouseEvent.CLICK)
     private function reinitializeComponent(e)
     {
+        var paramValueIndexes:Map<String, Int> = [];
+
         for (parameter in initParams)
         {
             var selectedIndex:Int = initParamEntries[parameter.identifier].getSelected();
             var selectedValue:Dynamic = parameter.possibleValues[selectedIndex];
             Reflect.setField(component, parameter.fieldName, selectedValue);
+            paramValueIndexes.set(parameter.identifier, selectedIndex);
         }
 
         component.update();
+
+        UITest.logStep(Initialization(paramValueIndexes));
     }
 
     @:bind(traceStateBtn, MouseEvent.CLICK)
@@ -69,19 +75,10 @@ class MainView extends HBox
     @:bind(addMacroLink, MouseEvent.CLICK)
     private function addMacro(e)
     {
-        var descriptor = DataKeeper.getCurrent().descriptor;
-
-        if (Lambda.empty(UITest.getHistory()))
-        {
-            gfx.components.Dialogs.alert("History is empty", "TestEnv Warning");
-            return;
-        }
-
-        var dialog = new AddMacroDialog(m -> {
-            descriptor.addMacro(m);
-            addMacroWidget(m);
-        });
-        dialog.showDialog();
+        if (!Lambda.empty(UITest.getHistory()))
+            Dialogs.custom(new AddMacroDialog(addMacroWidget.bind(_, false)));
+        else
+            Dialogs.alert("History is empty", "TestEnv Warning");
     }
 
     @:bind(proposeMacrosBtn, MouseEvent.CLICK)
@@ -89,14 +86,10 @@ class MainView extends HBox
     {
         var untrackedMacroNames = DataKeeper.getUntrackedMacroNames();
 
-        if (Lambda.empty(untrackedMacroNames))
-        {
-            gfx.components.Dialogs.alert("No untracked macros detected", "TestEnv Warning");
-            return;
-        }
-
-        var dialog = new ProposeMacrosDialog(untrackedMacroNames);
-        dialog.showDialog();
+        if (!Lambda.empty(untrackedMacroNames))
+            Dialogs.custom(new ProposeMacrosDialog(untrackedMacroNames));
+        else
+            Dialogs.alert("No untracked macros detected", "TestEnv Warning");
     }
 
     private function timerRun()
@@ -149,6 +142,13 @@ class MainView extends HBox
                 Reflect.callMethod(component, getMethod(endpointName), arguments.map(x -> x.value));
             case Event(serializedEvent):
                 component.imitateEvent(serializedEvent);
+            case Initialization(paramValueIndexes):
+                for (parameter in initParams)
+                {
+                    var selectedIndex:Int = paramValueIndexes[parameter.identifier];
+                    initParamEntries[parameter.identifier].setSelected(selectedIndex);
+                }
+                reinitializeComponent(null);
         }
     }
 
@@ -163,13 +163,27 @@ class MainView extends HBox
             return method;
     }
 
-    private function addMacroWidget(m:Macro)
+    private function addMacroWidget(m:Macro, ?immutable:Bool = true)
     {
-        var callback:Int->Void = step -> {
+        var stepCallback:Int->Void = step -> {
             var macroStep:MacroStep = m.getStep(step);
             onMacroStep(macroStep);
         };
-        var widget:SequenceWidget = new SequenceWidget(m.name, m.totalSteps(), false, callback);
+
+        var widget:SequenceWidget = new SequenceWidget(m.name, m.totalSteps(), stepCallback);
+
+        var removeCallback = () -> {
+            DataKeeper.getCurrent().descriptor.removeMacro(m);
+            sequencesVBox.removeComponent(widget);
+        };
+
+        var renameCallback = (newName:String) -> {
+            DataKeeper.getCurrent().descriptor.renameMacro(m, newName);
+        };
+        
+        if (!immutable)
+            widget.makeEditable(removeCallback, renameCallback);
+
         sequencesVBox.addComponent(widget);
     }
 
@@ -208,13 +222,29 @@ class MainView extends HBox
                         actionsVBox.addComponent(buttonBar);
                     }
                 case Sequence(fieldName, displayName, iterations):
-                    var widget:SequenceWidget = new SequenceWidget(displayName, iterations, false, onSequenceStep.bind(fieldName));
+                    var widget:SequenceWidget = new SequenceWidget(displayName, iterations, onSequenceStep.bind(fieldName));
                     sequencesVBox.addComponent(widget);
             }
         }
 
         for (storedMacro in storedData.descriptor.allMacros())
             addMacroWidget(storedMacro);
+
+        if (Cookie.exists("_" + UITest.getCurrentTestCase()))
+        {
+            var shortTermMacrosStr:String = Cookie.get("_" + UITest.getCurrentTestCase());
+            var currentIndex:Int = 0;
+
+            while (currentIndex < shortTermMacrosStr.length)
+            {
+                var lbIndex:Int = shortTermMacrosStr.indexOf('[', currentIndex);
+                var rbIndex:Int = shortTermMacrosStr.indexOf(']', lbIndex+1);
+                var m:Macro = Macro.compactDeserialize(shortTermMacrosStr.substring(currentIndex, lbIndex), shortTermMacrosStr.substring(lbIndex+1, rbIndex));
+                DataKeeper.getCurrent().descriptor.addMacro(m, false);
+                addMacroWidget(m, false);
+                currentIndex = rbIndex + 1;
+            }
+        }
 
         for (moduleName => checkModule in storedData.descriptor.checks)
         {
