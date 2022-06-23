@@ -63,7 +63,9 @@ class MainView extends HBox
 
         component.update();
 
-        UITest.logStep(Initialization(paramValueIndexes));
+        //If we call it manually, therefore, e is null, we have logged the step already previously in onMacroStep()
+        if (e != null)
+            UITest.logStep(Initialization(paramValueIndexes));
     }
 
     @:bind(traceStateBtn, MouseEvent.CLICK)

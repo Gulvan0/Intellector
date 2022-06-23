@@ -151,7 +151,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         var tcIcon = AssetManager.getSVGComponent(timeControlIcon, 0, 0, Math.floor(imagebox.width), Math.floor(imagebox.height));
         tcIcon.horizontalAlign = 'center';
-        tcIcon.verticalAlign = 'center';
+        tcIcon.verticalAlign = 'top';
         imagebox.addComponent(tcIcon);
 
         var oppStyle = opponentsBox.customStyle.clone();

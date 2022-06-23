@@ -15,7 +15,8 @@ class AugmentedChatBox extends Chatbox
 {
     private override function onKeyPress(e:KeyboardEvent) 
     {
-        UITest.logHandledEvent('keypress|${e.keyCode}');
+        if (messageInput.focus)
+            UITest.logHandledEvent('keypress|${e.keyCode}');
         super.onKeyPress(e);
     }
 
@@ -28,6 +29,7 @@ class AugmentedChatBox extends Chatbox
 
         var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
         event.keyCode = Std.parseInt(parts[1]);
+        messageInput.dispatchEvent(event); //Doesn't work
         super.onKeyPress(event);
     }
 

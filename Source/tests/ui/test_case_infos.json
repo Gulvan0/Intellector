@@ -27,7 +27,7 @@
     },
     "TSidebox": {
         "checks": {
-            "_Common": {
+            "Common": {
                 "steps": false,
                 "content": [
                     "Check login card positions", 
@@ -121,7 +121,7 @@
     },
     "TChatbox": {
         "checks": {
-            "_Common": {
+            "Common": {
                 "steps": false,
                 "content": [
                     "Enter can be used to send message", 
