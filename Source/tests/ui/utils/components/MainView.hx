@@ -124,7 +124,9 @@ class MainView extends HBox
 
             UITest.logEndpointCall(fieldName, args);
             Reflect.callMethod(component, getMethod(fieldName), args.map(x -> x.value));
+            component.onDialogHidden();
         });
+        component.onDialogShown();
         dialog.showDialog();
     }
 

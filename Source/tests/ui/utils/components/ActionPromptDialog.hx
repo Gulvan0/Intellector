@@ -160,6 +160,7 @@ class ActionPromptDialog extends Dialog
         var boardWrapper:BoardWrapper = new BoardWrapper(inputBoard);
         boardWrapper.maxPercentWidth = 100;
         boardWrapper.percentHeight = 100;
+        boardWrapper.horizontalAlign = 'center';
 
         inputBoards.set(prompt.displayName, inputBoard);
 

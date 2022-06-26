@@ -17,7 +17,6 @@ class DraggingState extends BasePlayableState
             boardInstance.getHex(cursorLocation).hideLayer(Hover);
 
         boardInstance.removeMarkers(dragStartLocation);
-        boardInstance.state = new NeutralState();
     }
 
     public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)

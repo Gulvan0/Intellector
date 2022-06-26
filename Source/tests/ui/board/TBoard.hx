@@ -24,20 +24,25 @@ class TBoard extends TestedComponent
     }
 
     @iterations(60)
-    private function _seq_runningInt(i:Int) //TODO: Rewrite, rebuild on i==0
+    private function _seq_runningInt(i:Int)
     {
         if (i == 0)
+        {
+            update();
             board.clearPieces();
+        }
         else
             board.setHexDirectly(IntPoint.fromScalar(i-1), Hex.occupied(Intellector, White));
     }
 
     @iterations(10)
-    private function _seq_setHex(i:Int) //TODO: Rewrite, rebuild on i==0
+    private function _seq_setHex(i:Int)
     { 
         switch i
         {
-            case 0: board.clearPieces();
+            case 0:
+                update(); 
+                board.clearPieces();
             case 1: board.setHexDirectly(new IntPoint(3, 3), Hex.occupied(Intellector, White));
             case 2: board.setHexDirectly(new IntPoint(5, 5), Hex.occupied(Intellector, White));
             case 3: board.setHexDirectly(new IntPoint(3, 3), Hex.occupied(Intellector, Black));
@@ -53,11 +58,12 @@ class TBoard extends TestedComponent
     private var revPly:ReversiblePly;
 
     @iterations(8)
-    private function _seq_transpositions(i:Int) //TODO: Rewrite, rebuild on i==0
+    private function _seq_transpositions(i:Int)
     { 
         switch i
         {
             case 0: 
+                update();
                 board.clearPieces();
                 board.setHexDirectly(new IntPoint(5, 5), Hex.occupied(Intellector, White));
                 board.setHexDirectly(new IntPoint(3, 3), Hex.occupied(Intellector, Black));

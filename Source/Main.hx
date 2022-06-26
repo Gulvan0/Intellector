@@ -1,5 +1,6 @@
 package;
 
+import tests.ui.board.TGameBoard;
 import gfx.analysis.VariantTree;
 import tests.ui.analysis.TVariantView;
 import tests.ui.game.TSidebox;
@@ -80,7 +81,7 @@ class Main extends Sprite
 	{
 		super();
 		init(() -> {
-			UITest.launchTest(new TSidebox());
+			UITest.launchTest(new TGameBoard());
 			//ScreenManager.toScreen(ScreenType.Analysis(null, null));
 			/*ScreenManager.launch();
 			start();*/

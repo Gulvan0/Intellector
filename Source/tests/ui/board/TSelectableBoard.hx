@@ -1,5 +1,6 @@
 package tests.ui.board;
 
+import struct.PieceColor;
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.events.MouseEvent;
 import openfl.display.Sprite;
@@ -62,7 +63,7 @@ class AugmentedSelectableBoard extends SelectableBoard
             case 'rrelease':
                 super.onRightRelease(event);
             default:
-                throw "Cant decode event: " + encodedEvent;
+                throw "Can't decode event: " + encodedEvent;
         }
     }
 }
@@ -71,22 +72,21 @@ class TSelectableBoard extends TestedComponent
 {
     private var board:AugmentedSelectableBoard;
 
+    private var _initparam_arrowSelectionMode:SelectionMode = Free;
+    private var _initparam_hexSelectionMode:SelectionMode = Free;
+    private var _initparam_orientationColor:PieceColor = White;
+
     public override function _provide_situation():Situation
     {
         return board.shownSituation;
     }
 
     @iterations(8)
-    private function _seq_basicSelectionTests(i:Int) //TODO: Rewrite, rebuild on i==0
+    private function _seq_basicSelectionTests(i:Int)
     { 
         switch i
         {
-            case 0: 
-                board.setOrientation(White);
-                board.setSituation(Situation.starting());
-                board.highlightMove([]);
-                for (coords in IntPoint.allHexCoords)
-                    board.removeSingleMarker(coords);
+            case 0: update();
             case 1: board.highlightMove([new IntPoint(0, 0), new IntPoint(2, 1)]);
             case 2: board.addMarkers(new IntPoint(0, 1));
             case 3: board.highlightMove([new IntPoint(2, 1), new IntPoint(4, 2)]);
@@ -98,16 +98,10 @@ class TSelectableBoard extends TestedComponent
     }
 
     @iterations(29)
-    private function _seq_markers(i:Int) //TODO: Rewrite, rebuild on i==0
+    private function _seq_markers(i:Int)
     { 
         if (i == 0)
-        {
-            board.setOrientation(White);
-            board.setSituation(Situation.starting());
-            board.highlightMove([]);
-            for (coords in IntPoint.allHexCoords)
-                board.removeSingleMarker(coords);
-        }
+            update();
         else if (i == 1)
             board.addMarkers(IntPoint.fromScalar(0));
         else if (i <= 14)
@@ -139,11 +133,21 @@ class TSelectableBoard extends TestedComponent
 
     private override function rebuildComponent()
     {
-        board = new AugmentedSelectableBoard(Situation.starting(), Free, Free, White, 50); //TODO: Add init parameters
+        board = new AugmentedSelectableBoard(Situation.starting(), _initparam_arrowSelectionMode, _initparam_hexSelectionMode, _initparam_orientationColor, 50);
     }
 
     public override function imitateEvent(encodedEvent:String)
     {
         board._imitateEvent(encodedEvent);
+    }
+
+    public override function onDialogShown()
+    {
+        board.suppressRMBHandler = true;
+    }
+
+    public override function onDialogHidden()
+    {
+        board.suppressRMBHandler = false;
     }
 }

@@ -265,8 +265,8 @@ class Situation
         s.hexArray = [for (t in 0...IntPoint.hexCount) this.hexArray[t].copy()];
         s.turnColor = this.turnColor;
         s.intellectorPos = [
-            White => (intellectorPos.exists(White)? intellectorPos[PieceColor.White].copy() : null), 
-            Black => (intellectorPos.exists(Black)? intellectorPos[PieceColor.Black].copy() : null)
+            White => (intellectorPos.get(White) != null? intellectorPos[PieceColor.White].copy() : null), 
+            Black => (intellectorPos.get(Black) != null? intellectorPos[PieceColor.Black].copy() : null)
         ];
         return s;
     }

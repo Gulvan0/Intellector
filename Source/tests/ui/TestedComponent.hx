@@ -45,6 +45,18 @@ class TestedComponent extends Box
         throw "Not overriden";
     }
 
+    //To be overriden in the subclasses as well
+    public function onDialogShown()
+    {
+        //* Do nothing
+    }
+
+    //To be overriden in the subclasses as well
+    public function onDialogHidden()
+    {
+        //* Do nothing
+    }
+
     private function getComponent():ComponentGraphics
     {
         throw "Not overriden";
@@ -70,6 +82,7 @@ class TestedComponent extends Box
             case Board(board):
                 var boardWrapper:BoardWrapper = new BoardWrapper(board);
                 boardWrapper.percentWidth = 90;
+                boardWrapper.maxPercentHeight = 90;
                 boardWrapper.horizontalAlign = 'center';
                 boardWrapper.verticalAlign = 'center';
                 addComponent(boardWrapper);

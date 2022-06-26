@@ -33,6 +33,8 @@ class SelectableBoard extends Board
     private var redSelectedHexIndices:Array<Int> = [];
     private var lastMoveSelectedHexes:Array<Hexagon> = [];
 
+    public var suppressRMBHandler:Bool = false;
+
     public function getAnyDrawnArrow():Null<{from:IntPoint, to:IntPoint}>
     {
         var keys = drawnArrows.keys();
@@ -131,22 +133,39 @@ class SelectableBoard extends Board
 
     private function onClick(e:MouseEvent)
     {
+        if (suppressRMBHandler)
+            return;
+
         removeArrowsAndSelections();
     }
 
     private function onRightPress(e:MouseEvent)
     {
+        if (suppressRMBHandler)
+            return;
+
         arrowStartLocation = posToIndexes(e.stageX, e.stageY);
     }
 
     private function onRightRelease(e:MouseEvent)
     {
+        if (suppressRMBHandler)
+            return;
+
         var arrowEndLocation = posToIndexes(e.stageX, e.stageY);
         if (arrowStartLocation != null && arrowEndLocation != null)
             if (arrowStartLocation.equals(arrowEndLocation))
+            {
+                if (hexMode == Disabled)
+                    return;
+
                 toggleHexSelection(arrowStartLocation);
+            }
             else
             {
+                if (arrowMode == Disabled)
+                    return;
+
                 var code = '${arrowStartLocation.i}${arrowStartLocation.j}${arrowEndLocation.i}${arrowEndLocation.j}';
                 if (drawnArrows.exists(code))
                 {

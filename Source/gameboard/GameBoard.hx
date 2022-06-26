@@ -54,7 +54,7 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
     public var state(default, set):BaseState;
     public var behavior(default, set):IBehavior;
 
-    private var suppressLMBHandler:Bool = false;
+    public var suppressLMBHandler:Bool = false;
     private var lastMouseMoveEvent:MouseEvent;
 
     private var observers:Array<IGameBoardObserver> = [];
@@ -266,19 +266,27 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
 
     private function onLMBPressed(e:MouseEvent)
     {
-        if (!suppressLMBHandler)
-            if (getBounds(stage).contains(e.stageX, e.stageY))
-                state.onLMBPressed(posToIndexes(e.stageX, e.stageY), e.shiftKey, e.ctrlKey);
+        if (suppressLMBHandler)
+            return;
+
+        if (getBounds(stage).contains(e.stageX, e.stageY))
+            state.onLMBPressed(posToIndexes(e.stageX, e.stageY), e.shiftKey, e.ctrlKey);
     }
 
     private function onMouseMoved(e:MouseEvent)
     {
+        if (suppressLMBHandler)
+            return;
+
         state.onMouseMoved(posToIndexes(e.stageX, e.stageY));
         lastMouseMoveEvent = e;
     }
 
     private function onLMBReleased(e:MouseEvent)
     {
+        if (suppressLMBHandler)
+            return;
+
         state.onLMBReleased(posToIndexes(e.stageX, e.stageY), e.shiftKey, e.ctrlKey);
     }
 

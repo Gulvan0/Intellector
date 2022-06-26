@@ -34,7 +34,7 @@ class AugmentedGameBoard extends GameBoard
             UITest.logHandledEvent('lpress|${e.shiftKey? "T" : "F"}|${e.ctrlKey? "T" : "F"}|${location.i}|${location.j}');
         else
             UITest.logHandledEvent('lpress|${e.shiftKey? "T" : "F"}|${e.ctrlKey? "T" : "F"}');
-        super.onRightPress(e);
+        super.onLMBPressed(e);
     }
 
     private override function onLMBReleased(e:MouseEvent)
@@ -50,7 +50,7 @@ class AugmentedGameBoard extends GameBoard
             UITest.logHandledEvent('lrelease|${e.shiftKey? "T" : "F"}|${e.ctrlKey? "T" : "F"}|${location.i}|${location.j}');
         else
             UITest.logHandledEvent('lrelease|${e.shiftKey? "T" : "F"}|${e.ctrlKey? "T" : "F"}');
-        super.onRightRelease(e);
+        super.onLMBReleased(e);
     }
 
     private override function onRightPress(e:MouseEvent)
@@ -125,10 +125,10 @@ class TGameBoard extends TestedComponent
 
     public override function _provide_situation():Situation
     {
-        return board.shownSituation;
+        return board.currentSituation;
     }
 
-    @prompt("AEnumerable", "Behavior", ["PlayerMove", "EnemyMove", "Analysis"], "Player color", ["White", "Black"])
+    @prompt("AEnumerable", "Behavior", ["PlayerMove", "EnemyMove", "Analysis"], "AEnumerable", "Player color", ["White", "Black"])
     private function _act_setBehavior(type:String, color:String)
     {
         var playerColor:PieceColor = PieceColor.createByName(color);
@@ -140,7 +140,7 @@ class TGameBoard extends TestedComponent
         else if (type == "EnemyMove")
         {
             board.state = Preferences.premoveEnabled.get()? new NeutralState() : new StubState();
-            board.behavior = new PlayerMoveBehavior(playerColor);
+            board.behavior = new EnemyMoveBehavior(playerColor);
         }
         else
         {
@@ -179,7 +179,7 @@ class TGameBoard extends TestedComponent
         output(Ply.plySequenceToNotation(board.plyHistory.getPlySequence(), Situation.starting()).join(" > "));
     }
 
-    @split(["<<", "<", ">", ">>"])
+    @split("<<", "<", ">", ">>")
     private function _act_scroll(scrollType:String) 
     {
         var plyScrollType:PlyScrollType = switch scrollType 
@@ -211,5 +211,17 @@ class TGameBoard extends TestedComponent
     public override function imitateEvent(encodedEvent:String)
     {
         board._imitateEvent(encodedEvent);
+    }
+
+    public override function onDialogShown()
+    {
+        board.suppressLMBHandler = true;
+        board.suppressRMBHandler = true;
+    }
+
+    public override function onDialogHidden()
+    {
+        board.suppressLMBHandler = false;
+        board.suppressRMBHandler = false;
     }
 }

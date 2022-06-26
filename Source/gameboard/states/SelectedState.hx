@@ -10,7 +10,6 @@ class SelectedState extends BasePlayableState
     {
         boardInstance.removeMarkers(selectedDepartureLocation);
         boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
-        boardInstance.state = new NeutralState();
     }
 
     public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)

@@ -38,6 +38,7 @@ class EnemyMoveBehavior implements IBehavior
             boardInstance.makeMove(ply);
 
             boardInstance.state.abortMove();
+            boardInstance.state = new NeutralState();
             boardInstance.behavior = new PlayerMoveBehavior(playerColor);
         }
         else
