@@ -23,9 +23,9 @@ class AugmentedVariantTree extends VariantTree implements ITestedVariantView
     {
         var parts = encodedEvent.split('|');
         if (parts[0] == 'select')
-            onNodeSelectRequest(parts[1]);
+            super.onNodeSelectRequest(parts[1]);
         else if (parts[0] == 'remove')
-            onNodeRemoveRequest(parts[1]);
+            super.onNodeRemoveRequest(parts[1]);
     }
 
     public function getCurrentSituation():Situation

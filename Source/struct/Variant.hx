@@ -103,9 +103,9 @@ class VariantNode
         children.push(child);
     }
 
-    public function getPlyStr():String
+    public function getPlyStr(?indicateColor:Bool = false):String
     {
-        return ply.toNotation(situationBefore);
+        return ply.toNotation(situationBefore, indicateColor);
     }
 
     public function new(ply:Ply, situationBefore:Situation) 
@@ -237,6 +237,18 @@ class Variant extends VariantNode
             branch.push(node.ply);
         }
         return branch;
+    }
+
+    public function pathExists(branchPath:VariantPath):Bool
+    {
+        var node:VariantNode = this;
+        for (childNum in branchPath.asArray())
+        {
+            if (node.children.length <= childNum)
+                return false;
+            node = node.children[childNum];
+        }
+        return true;
     }
 
     public function getBranchNotationByPath(branchPath:VariantPath):Array<String>

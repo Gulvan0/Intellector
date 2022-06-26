@@ -1,5 +1,7 @@
 package gfx.analysis;
 
+import haxe.ds.ArraySort;
+import utils.MathUtils;
 import haxe.Timer;
 import dict.Dictionary;
 import struct.Ply;
@@ -44,6 +46,8 @@ class VariantTree extends Sprite implements IVariantView
     private var variant:Variant;
     private var selectedBranch:VariantPath = [];
     private var selectedMove:Int;
+
+    private var indicateColors:Bool = true;
 
     private function columnX(column:Int):Float
     {
@@ -125,6 +129,7 @@ class VariantTree extends Sprite implements IVariantView
             var childNum = fullBranch[i];
             code += childNum;
             arrows[code].highlight(i < selectUpToMove);
+            addChild(arrows[code]); //Brings highlighted arrows to the front to make them more visible
             if (i == selectUpToMove - 1)
                 nodes[code].select();
             code += ":";
@@ -173,6 +178,19 @@ class VariantTree extends Sprite implements IVariantView
             arrows.remove(code);
         }
 
+        for (siblingPath in variant.getRightSiblingsPaths(path, false))
+            for (familyMemberPath in variant.getFamilyPaths(siblingPath))
+            {
+                var oldCode:String = familyMemberPath.code();
+                var newPath:VariantPath = familyMemberPath.copy();
+                newPath.asArray()[path.length - 1]--;
+                var newCode:String = newPath.code();
+                nodes.set(newCode, nodes.get(oldCode));
+                nodes.remove(oldCode);
+                arrows.set(newCode, arrows.get(oldCode));
+                arrows.remove(oldCode);
+            }
+
         variant.removeNode(path);
 
         if (belongsToSelected)
@@ -187,7 +205,7 @@ class VariantTree extends Sprite implements IVariantView
         var nodePath:VariantPath = parentPath.child(nodeNum);
         var nodeCode:String = nodePath.code();
 
-        var plyStr:String = ply.toNotation(variant.getSituationByPath(parentPath));
+        var plyStr:String = ply.toNotation(variant.getSituationByPath(parentPath), indicateColors);
 
         variant.addChildToNode(ply, parentPath);
 
@@ -208,7 +226,7 @@ class VariantTree extends Sprite implements IVariantView
     private function refreshLayout()
     {
         var displacement:DisplacementInfo = buildOptimalDisplacement();
-        trace(displacement);
+        
         //Update column widths
         columnWidths = [];
         for (column => codes in displacement.columnContents.keyValueIterator())
@@ -246,7 +264,7 @@ class VariantTree extends Sprite implements IVariantView
     private function buildOptimalDisplacement():DisplacementInfo
     {
         var info:DisplacementInfo = new DisplacementInfo();
-        info.cellularMapping = [];
+        info.cellularMapping = ['' => {row: 0, column: 1}];
         info.columnContents = [];
         info.maxColumn = 0;
 
@@ -256,18 +274,20 @@ class VariantTree extends Sprite implements IVariantView
         {
             var row:Int = path.length;
             var code:String = path.code();
+            var parentCode:String = path.parent().code();
 
-            var column:Int;
-            if (rowLengths.exists(row))
+            var column:Int = 1;
+            var iteratedRow:Int = row;
+            var iteratedDescendantPath:VariantPath = path.copy();
+            while (rowLengths.exists(iteratedRow) && variant.pathExists(iteratedDescendantPath))
             {
-                column = rowLengths.get(row) + 1;
-                rowLengths[row]++;
+                column = MathUtils.maxInt(column, rowLengths.get(iteratedRow) + 1);
+                iteratedRow++;
+                iteratedDescendantPath = iteratedDescendantPath.child(0);
             }
-            else
-            {
-                column = 1;
-                rowLengths[row] = 1;
-            }
+
+            column = MathUtils.maxInt(column, info.cellularMapping.get(parentCode).column);
+            rowLengths[row] = column;
 
             info.cellularMapping.set(code, {row: row, column: column});
 
@@ -314,6 +334,7 @@ class VariantTree extends Sprite implements IVariantView
     public function new(?initialVariant:Variant, ?selectedNodePath:VariantPath) 
     {
         super();
+        this.indicateColors = Preferences.branchingTurnColorIndicators.get();
 
         var startingNode:Node = new Node('', Dictionary.getPhrase(OPENING_STARTING_POSITION), false, onNodeSelectRequest, v->{});
         nodes.set('', startingNode);
@@ -330,7 +351,7 @@ class VariantTree extends Sprite implements IVariantView
                 if (code == '')
                     continue;
 
-                var node = new Node(code, nodeInfo.getPlyStr(), false, onNodeSelectRequest, onNodeRemoveRequest);
+                var node = new Node(code, nodeInfo.getPlyStr(indicateColors), false, onNodeSelectRequest, onNodeRemoveRequest);
                 var arrow = new Arrow();
 
                 nodes.set(code, node);

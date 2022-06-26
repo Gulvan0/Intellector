@@ -64,7 +64,7 @@ class Notation
         return ply;
     }
 
-    public static function plyToNotation(ply:Ply, context:Situation):String
+    public static function plyToNotation(ply:Ply, context:Situation, ?indicateColor:Bool):String
     {
         var hexFrom = context.get(ply.from);
         var hexTo = context.get(ply.to);
@@ -73,10 +73,16 @@ class Notation
         var capture = !castle && !hexTo.isEmpty();
         var mate = capture && hexTo.type == Intellector;
 
-        if (castle)
-            return Notation.hexNotation(ply.from).toUpperCase() + ":" + Notation.hexNotation(ply.to).toUpperCase();
-
         var str:String = "";
+
+        if (indicateColor)
+            if (context.turnColor == White)
+                str += '⬡';
+            else 
+                str += '⬢';
+
+        if (castle)
+            return str + Notation.hexNotation(ply.from).toUpperCase() + ":" + Notation.hexNotation(ply.to).toUpperCase();
 
         str += Notation.pieceAbbreviation(hexFrom.type);
 

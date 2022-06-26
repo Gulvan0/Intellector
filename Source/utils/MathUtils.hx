@@ -39,4 +39,14 @@ class MathUtils
     {
         return a[randomInt(0, a.length - 1)];
     }
+
+    public static function maxInt(a:Int, b:Int)
+    {
+        return a > b? a : b;
+    }
+
+    public static function minInt(a:Int, b:Int)
+    {
+        return a < b? a : b;
+    }
 }

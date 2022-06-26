@@ -81,7 +81,7 @@ class Main extends Sprite
 	{
 		super();
 		init(() -> {
-			UITest.launchTest(new TGameBoard());
+			UITest.launchTest(new TVariantView());
 			//ScreenManager.toScreen(ScreenType.Analysis(null, null));
 			/*ScreenManager.launch();
 			start();*/

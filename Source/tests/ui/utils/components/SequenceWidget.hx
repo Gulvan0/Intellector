@@ -118,6 +118,7 @@ class SequenceWidget extends VBox
         this.stepCallback = stepCallback;
 
         macroNameLabel.text = sequenceName;
+        macroNameLabel.tooltip = sequenceName;
         updateStepLabel();
         updateSliderPosLabel();
     }    

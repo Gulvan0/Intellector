@@ -37,9 +37,9 @@ class Ply
         return Notation.plyFromNotation(plyStr, context);
     }
 
-    public function toNotation(context:Situation):String
+    public function toNotation(context:Situation, ?indicateColor:Bool):String
     {
-        return Notation.plyToNotation(this, context);
+        return Notation.plyToNotation(this, context, indicateColor);
     }
 
     public static function deserialize(plyStr:String):Ply
