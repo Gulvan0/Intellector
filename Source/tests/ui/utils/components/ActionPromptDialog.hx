@@ -1,5 +1,6 @@
 package tests.ui.utils.components;
 
+import gfx.components.Dialogs;
 import haxe.ui.core.Screen;
 import struct.Ply;
 import haxe.exceptions.NotImplementedException;
@@ -59,6 +60,8 @@ class ActionPromptDialog extends Dialog
                     var inputTextfield = inputTextfields.get(prompt.displayName);
                     if (inputTextfield == null)
                         throw 'inputTextfields has no mapping for prompt ${prompt.displayName}';
+                    else if (prompt.type == AEnumerable && !prompt.defaultValues.map(arg -> arg.value).contains(inputTextfield.text))
+                        return null;
                     else
                         arguments.push(new EndpointArgument(prompt.type, inputTextfield.text));
                 case APly:
@@ -92,6 +95,7 @@ class ActionPromptDialog extends Dialog
             var btn:Button = new Button();
             btn.text = arg.getDisplayText(currentSituation);
             btn.percentWidth = btnPercentWidth;
+            btn.verticalAlign = 'center';
             btn.onClick = e -> {
                 if (prompt.type == APly)
                     if (inputBoards.exists(promptKey))
@@ -117,11 +121,13 @@ class ActionPromptDialog extends Dialog
     {
         var label:Label = new Label();
         label.text = prompt.displayName + ":";
-        label.customStyle = {fontSize: 24};
+        label.customStyle = {fontSize: 18};
+        label.verticalAlign = 'center';
 
         var inputField:TextField = new TextField();
         inputField.percentWidth = 100;
-        inputField.height = 25;
+        inputField.height = 22;
+        inputField.verticalAlign = 'center';
 
         if (prompt.type == AInt)
             inputField.restrictChars = "0-9";
@@ -135,11 +141,11 @@ class ActionPromptDialog extends Dialog
         inputRow.addComponent(label);
         inputRow.addComponent(inputField);
 
-        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt);
-
         var vbox:VBox = new VBox();
+        vbox.percentWidth = 100;
         vbox.addComponent(inputRow);
-        vbox.addComponent(defaultValuesRow);
+        if (!Lambda.empty(prompt.defaultValues))
+            vbox.addComponent(constructDefaultValuesBox(prompt));
         return vbox;
     }
 
@@ -148,35 +154,41 @@ class ActionPromptDialog extends Dialog
         var label:Label = new Label();
         label.percentWidth = 100;
         label.text = prompt.displayName + ":";
-        label.customStyle = {fontSize: 24};
+        label.customStyle = {fontSize: 18};
 
         var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, EnsureSingle, Disabled, White, 40, true);
         var boardWrapper:BoardWrapper = new BoardWrapper(inputBoard);
         boardWrapper.maxPercentWidth = 100;
-        boardWrapper.percentHeight = 100 / totalPlyInputs;
+        boardWrapper.percentHeight = 100;
 
         inputBoards.set(prompt.displayName, inputBoard);
 
-        var defaultValuesRow:HBox = constructDefaultValuesBox(prompt);
-
         var vbox:VBox = new VBox();
+        vbox.percentWidth = 100;
+        vbox.percentHeight = 100 / totalPlyInputs;
         vbox.addComponent(label);
         vbox.addComponent(boardWrapper);
-        vbox.addComponent(defaultValuesRow);
+        if (!Lambda.empty(prompt.defaultValues))
+            vbox.addComponent(constructDefaultValuesBox(prompt));
         return vbox;
     }
 
     public function new(prompts:Array<ActionEndpointPrompt>, currentSituation:Situation, onConfirmed:Array<EndpointArgument>->Void) 
     {
         super();
+        this.currentSituation = currentSituation;
         this.onConfirmed = onConfirmed;
-        width = 0.75 * Screen.instance.width;
-        height = 0.90 * Screen.instance.height;
+        this.prompts = prompts;
+        this.title = "Input Action Parameters";
+        this.percentWidth = 75;
 
         var totalPlyPrompts:Int = 0;
         for (prompt in prompts)
             if (prompt.type == APly)
                 totalPlyPrompts++;
+        
+        if (totalPlyPrompts > 0)
+            this.percentHeight = 90;
 
         for (prompt in prompts)
         {
@@ -195,7 +207,7 @@ class ActionPromptDialog extends Dialog
                 if (args != null)
                     onConfirmed(args);
                 else 
-                    trace("Failed to collect arguments: some values are not provided");
+                    Dialogs.alert("Action execution aborted with reason 'Failed to collect arguments: some values are not provided or invalid'", "TestEnv Warning");
             }
                 
         }

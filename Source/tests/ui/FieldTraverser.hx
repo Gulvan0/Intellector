@@ -48,7 +48,7 @@ class FieldTraverser
                 {
                     var defaultValues:Array<EndpointArgument> = [];
                     for (defaultArg in cast(tagArgument, Array<Dynamic>))
-                        defaultValues.push(new EndpointArgument(defaultArg, type));
+                        defaultValues.push(new EndpointArgument(type, defaultArg));
 
                     prompts.push(new ActionEndpointPrompt(displayName, type, defaultValues));
                     type = null;

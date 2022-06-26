@@ -57,7 +57,7 @@ class TestedComponent extends Box
 
     private function output(message:String) 
     {
-        Dialogs.alert(message, 'output');
+        Dialogs.info(message, 'output');
     }
 
     public function update()

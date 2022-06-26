@@ -80,7 +80,7 @@ class Main extends Sprite
 	{
 		super();
 		init(() -> {
-			UITest.launchTest(new TChatbox());
+			UITest.launchTest(new TSidebox());
 			//ScreenManager.toScreen(ScreenType.Analysis(null, null));
 			/*ScreenManager.launch();
 			start();*/
