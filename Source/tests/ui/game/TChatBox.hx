@@ -1,5 +1,7 @@
 package tests.ui.game;
 
+import openfl.events.Event;
+import openfl.ui.Keyboard;
 import gfx.game.GameLayout;
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.events.KeyboardEvent;
@@ -13,30 +15,46 @@ import serialization.GameLogParser.ChatEntry;
 
 class AugmentedChatBox extends Chatbox
 {
-    private override function onKeyPress(e:KeyboardEvent) 
+    private override function send() 
     {
-        if (messageInput.focus)
-            UITest.logHandledEvent('keypress|${e.keyCode}');
-        super.onKeyPress(e);
+        UITest.logHandledEvent('send');
+        super.send();
+    }
+
+    private function changeHandler(e)
+    {
+        UITest.logHandledEvent('change|${messageInput.getTextInput().textField.text}|${messageInput.focus? "T" : "F"}');
     }
 
     public function _imitateEvent(encodedEvent:String)
     {
         var parts:Array<String> = encodedEvent.split('|');
 
-        if (parts[0] != 'keypress')
+        if (parts[0] == 'send')
+            super.send();
+        else if (parts[0] == 'change')
+        {
+            if (messageInput.focus)
+            {
+                if (parts[2] == "F")
+                    messageInput.focus = false;
+            }
+            else
+                if (parts[2] == "T")
+                    messageInput.focus = true;
+                
+            messageInput.getTextInput().textField.text = parts[1];
+            @:privateAccess messageInput.getTextInput().onChange(null);
+        }
+        else
             throw "Cant decode event: " + encodedEvent;
-
-        var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
-        event.keyCode = Std.parseInt(parts[1]);
-        messageInput.dispatchEvent(event); //Doesn't work
-        super.onKeyPress(event);
     }
 
     public function new(ownerSpectator:Bool, ?data:ActualizationData)
     {
         super(ownerSpectator);
         actualizationData = data;
+        messageInput.getTextInput().textField.addEventListener(Event.CHANGE, changeHandler);
     }
 }
 

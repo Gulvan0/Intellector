@@ -131,28 +131,29 @@ class Chatbox extends VBox implements INetObserver
     private function onKeyPress(e:KeyboardEvent) 
     {
         if (e.keyCode == Keyboard.ENTER || e.keyCode == Keyboard.NUMPAD_ENTER)
-        {
             if (messageInput.focus)
-            {
-                var formerText = messageInput.text.trim();
-                var text = "";
-                var lastIndex = cast(Math.min(500, formerText.length), Int);
+                send();
+    }
 
-                messageInput.text = "";
+    private function send() 
+    {
+        var formerText = messageInput.text.trim();
+        var text = "";
+        var lastIndex = cast(Math.min(500, formerText.length), Int);
 
-                for (index in 0...lastIndex)
-                    if (isLegalChar(formerText.charCodeAt(index)))
-                        text += formerText.charAt(index);
+        messageInput.text = "";
 
-                if (text != "")
-                {
-                    Networker.emitEvent(Message(text));
-                    if (isOwnerSpectator)
-                        appendMessage(LoginManager.login, text, false);
-                    else 
-                        appendMessage(LoginManager.login, text, true);
-                }
-            }
+        for (index in 0...lastIndex)
+            if (isLegalChar(formerText.charCodeAt(index)))
+                text += formerText.charAt(index);
+
+        if (text != "")
+        {
+            Networker.emitEvent(Message(text));
+            if (isOwnerSpectator)
+                appendMessage(LoginManager.login, text, false);
+            else 
+                appendMessage(LoginManager.login, text, true);
         }
     }
 
