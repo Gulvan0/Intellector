@@ -1,0 +1,12 @@
+<vbox width="100%" height="100%">
+    <!--Something like <creepingline id="cCreepingLine" width="100%" /> there-->
+    <box id="fullContentBox" width="100%" height="100%" style="padding-top:2px;padding-bottom:2px;padding-left:2px;padding-right:2px">
+        <vbox id="cContentsVBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="center">
+            <hbox id="lContentsHBox" style="spacing:15px" width="100%" height="100%" verticalAlign="center" horizontalAlign="center">
+                <box id="boardContainer" height="100%" />
+                <box id="lRightBox" width="30%" height="98%" />
+            </hbox>
+            <!--Compact analysis action bar/editor panel there-->
+        </vbox>
+    </box> 
+</vbox>

@@ -1,0 +1,47 @@
+<hbox width="100%" height="100%">
+    <vbox id="positionEditor" width="100%" height="100%" hidden="true">
+        <grid id="editModesGrid" columns="7" horizontalAlign="center" />
+        <spacer height="10px" />
+        <hbox width="100%">
+            <button id="clearBtn" text="Clear [P]" width="33.3%"/>
+            <button id="resetBtn" text="Reset [P]" width="33.3%"/>
+            <button id="startBtn" text="To Initial [P]" width="33.3%"/>
+        </hbox>
+        <spacer height="10px" />
+        <option-stepper id="turnColorStepper" width="100%">
+            <data>
+                <item text="White to Move [P]" />
+                <item text="Black to Move [P]" />
+            </data>
+        </option-stepper>
+        <spacer height="40px" />
+        <label text="${Dictionary.getPhrase(FROM_SIP_LABEL)}" style="font-size:20px" />
+        <hbox width="100%" height="20px">
+            <textfield id="sipInputField" placeholder="Enter SIP... [P]" width="100%" height="100%" verticalAlign="center" />
+            <button id="applySIPBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY)}" height="100%" verticalAlign="center" />
+        </hbox>
+        <spacer height="40px" />
+        <hbox width="100%" height="20px">
+            <button id="applyChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES)}" width="50%" height="100%" verticalAlign="center" />
+            <button id="discardChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_DISCARD_CHANGES)}" width="50%" height="100%" verticalAlign="center" />
+        </hbox>
+    </vbox>
+    <tabview id="controlTabs" width="100%" height="100%">
+        <box text="${Dictionary.getPhrase(ANALYSIS_OVERVIEW_TAB_NAME)}" width="100%" height="100%">
+            <movenavigator id="navigator" height="100%" />
+            <actionbar id="actionBar" width="100%" />
+        </box>
+        <box text="${Dictionary.getPhrase(ANALYSIS_BRANCHES_TAB_NAME)}" width="100%" height="100%">
+            <vbox width="100%" height="100%">
+                <hbox style="background-color:#AAAAAA" width="100%">
+                    <!--Add info icon-->
+                    <link id="branchingHelpLink" text="${Dictionary.getPhrase(BRANCHING_HELP_LINK)}" style="font-size:16px" />
+                </hbox>
+                <scrollview id="variantViewSV" width="100%" height="100%">
+            </vbox>
+        </box>
+        <box text="${Dictionary.getPhrase(ANALYSIS_OPENINGS_TAB_NAME)}" width="100%" height="100%">
+            <label text="${Dictionary.getPhrase(ANALYSIS_OPENINGS_TEASER_TEXT)}" style="fontSize:20px" horizontalAlign="center" verticalAlign="center" />
+        </box>
+    </vbox>
+</hbox>
