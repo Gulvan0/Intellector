@@ -5,7 +5,7 @@ import openfl.ui.Keyboard;
 import gfx.game.GameLayout;
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.events.KeyboardEvent;
-import gfx.common.ActionBar.ActionBtn;
+import gfx.common.GameActionBar.ActionBtn;
 import struct.ActualizationData;
 import net.ServerEvent;
 import gfx.game.Chatbox;

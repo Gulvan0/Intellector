@@ -85,4 +85,32 @@ class StringUtils
         }
         return converted;
     }
+
+    public static inline function clean(orig:String, ?maxChars:Int):String
+    {
+        var formerText = orig.trim();
+        var text = "";
+        var newLength = formerText.length;
+
+        if (maxChars != null && maxChars < newLength)
+            newLength = maxChars;
+
+        for (index in 0...newLength)
+            if (isLegalChar(formerText.charCodeAt(index)))
+                text += formerText.charAt(index);
+
+        return text;    
+    }
+
+    private static function isLegalChar(code:Int) 
+    {
+        if (code == "#".code || code == ";".code || code == "/".code || code == "\\".code || code == "|".code)
+            return false;
+        else if (code < 32)
+            return false;
+        else if (code > 126 && code < 161)
+            return false;
+        else 
+            return true;
+    }
 }

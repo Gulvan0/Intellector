@@ -7,8 +7,6 @@ import gfx.screens.Analysis.NodeInfo;
 import gameboard.GameBoard.GameBoardEvent;
 import serialization.SituationSerializer;
 import haxe.ui.core.Component;
-import gfx.analysis.PositionEditor.PositionEditorEvent;
-import gfx.analysis.OverviewTab.OverviewTabEvent;
 import openfl.text.TextFormat;
 import openfl.events.Event;
 import haxe.ui.components.Image;
@@ -63,29 +61,10 @@ interface RightPanelObserver
     public function handleRightPanelEvent(event:RightPanelEvent):Void;    
 }
 
-//TODO: Should be defined via XML and be a haxeui component
-class RightPanel extends Sprite implements IGameBoardObserver
+@:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/analysis/right_panel.xml"))
+class RightPanel extends HBox implements IGameBoardObserver
 {
-    public static var PANEL_WIDTH = 400;
-    public static var PANEL_HEIGHT = 500;
-
-    private var positionEditor:PositionEditor;
-    private var controlTabs:TabView;
-
-    private var overviewTab:OverviewTab;
-    private var branchingTab:BranchingTab;
-
-    private var observers:Array<RightPanelObserver> = [];
-    
-    public function addObserver(obs:RightPanelObserver)
-    {
-        observers.push(obs);
-    }
-    
-    public function removeObserver(obs:RightPanelObserver)
-    {
-        observers.remove(obs);
-    }
+    public var observers(default, null):Array<RightPanelObserver> = [];
 
     private function emit(event:RightPanelEvent)
     {
@@ -93,6 +72,7 @@ class RightPanel extends Sprite implements IGameBoardObserver
             obs.handleRightPanelEvent(event);
     }
 
+    /* Deprecated
     private function handleOverviewTabEvent(event:OverviewTabEvent)
     {
         switch event 
@@ -107,18 +87,6 @@ class RightPanel extends Sprite implements IGameBoardObserver
                 showPositionEditor();
                 emit(EditorEntered);
         }
-    }
-
-    private function onBranchSelected(branchInfo:SelectedBranchInfo)
-    {
-        overviewTab.navigator.rewrite(branchInfo.plyStrArray);
-        emit(BranchSelected(branchInfo.plyArray, branchingTab.variantView.getStartingSituation(), branchInfo.selectedPlyNum));
-    }
-
-    private function onRevertRequestedByBranchingTab(plysToRevert:Int)
-    {
-        overviewTab.navigator.revertPlys(plysToRevert);
-        emit(RevertNeeded(plysToRevert));
     }
 
     private function handlePositionEditorEvent(event:PositionEditorEvent)
@@ -145,6 +113,18 @@ class RightPanel extends Sprite implements IGameBoardObserver
             case EditModeChanged(newEditMode):
                 emit(EditModeChanged(newEditMode));
         }
+    }
+
+    private function onBranchSelected(branchInfo:SelectedBranchInfo)
+    {
+        overviewTab.navigator.rewrite(branchInfo.plyStrArray);
+        emit(BranchSelected(branchInfo.plyArray, branchingTab.variantView.getStartingSituation(), branchInfo.selectedPlyNum));
+    }
+
+    private function onRevertRequestedByBranchingTab(plysToRevert:Int)
+    {
+        overviewTab.navigator.revertPlys(plysToRevert);
+        emit(RevertNeeded(plysToRevert));
     }
 
     public function handleGameBoardEvent(event:GameBoardEvent)
@@ -182,6 +162,42 @@ class RightPanel extends Sprite implements IGameBoardObserver
         controlTabs.visible = true;
     }
 
+    
+    PositionEditor:
+
+        public function returnToDefaultEditMode()
+        {
+            pressedEditModeBtn.selected = false;
+            defaultEditModeBtn.selected = true;
+            pressedEditModeBtn = defaultEditModeBtn;
+        }
+
+        public function changeColorOptions(selectedColor:PieceColor) 
+        {
+            turnColorSelectOptions[selectedColor].selected = true;
+            turnColorSelectOptions[opposite(selectedColor)].selected = false;
+        }
+
+    BranchingTab:
+        public function new(type:BranchingTabType, initialVariant:Variant, onBranchSelected:SelectedBranchInfo->Void, onRevertNeeded:(plysToRevert:Int)->Void)
+        {
+            super();
+
+            switch type 
+            {
+                case Tree:
+                    var variantTree = new VariantTree(initialVariant);
+                    //addComponent(variantTree);
+                    variantView = variantTree;
+                case Outline:
+                    //Fill
+                case PlainText:
+                    //Fill
+            }
+
+            variantView.init(onBranchSelected, onRevertNeeded); 
+        }
+
     public function new(initialVariant:Variant) 
     {
         super();
@@ -197,49 +213,15 @@ class RightPanel extends Sprite implements IGameBoardObserver
         fullBox.addComponent(positionEditor);
         fullBox.addComponent(controlTabs);
         addChild(fullBox);
+    }*/
+
+    public function handleGameBoardEvent(event:GameBoardEvent)
+    {
+        
     }
 
-    private function onControlTabsAdded(e) 
+    public function new()
     {
-        controlTabs.removeEventListener(Event.ADDED_TO_STAGE, onControlTabsAdded);
-        controlTabs.pageIndex = 1;
-
-        Timer.delay(() -> {
-            controlTabs.pageIndex = 0;
-            emit(InitializationFinished);
-        }, 20); //TODO: Is it still needed?
-    }
-
-    private function createControlTabs(initialVariant:Variant):TabView
-    {
-        overviewTab = new OverviewTab();
-        branchingTab = new BranchingTab(Preferences.branchingTabType.get(), initialVariant, onBranchSelected, onRevertRequestedByBranchingTab);
-
-        var openingTeaserLabel:Label = new Label();
-        openingTeaserLabel.customStyle = {fontSize: 20};
-        openingTeaserLabel.horizontalAlign = 'center';
-        openingTeaserLabel.verticalAlign = 'center';
-        openingTeaserLabel.text = Dictionary.getPhrase(ANALYSIS_OPENINGS_TEASER_TEXT);
-
-        var controlTabs = new TabView();
-        controlTabs.width = PANEL_WIDTH;
-        controlTabs.height = PANEL_HEIGHT;
-        controlTabs.addComponent(createTab(ANALYSIS_OVERVIEW_TAB_NAME, overviewTab));
-        controlTabs.addComponent(createTab(ANALYSIS_BRANCHES_TAB_NAME, branchingTab, 463));
-        controlTabs.addComponent(createTab(ANALYSIS_OPENINGS_TAB_NAME, openingTeaserLabel));
-
-        controlTabs.addEventListener(Event.ADDED_TO_STAGE, onControlTabsAdded);
-
-        return controlTabs;
-    }
-
-    private function createTab(phrase:Phrase, component:Component, ?height:Float = 360):Box
-    {
-        var tab = new Box();
-        tab.text = Dictionary.getPhrase(ANALYSIS_OVERVIEW_TAB_NAME);
-        tab.width = PANEL_WIDTH - 10;
-        tab.height = height;
-        tab.addComponent(component);
-        return tab;
+        super();
     }
 }

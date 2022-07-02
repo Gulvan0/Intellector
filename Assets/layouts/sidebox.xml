@@ -4,7 +4,7 @@
         <label id="blackLoginLabel" text="player2" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
     </card>
     <movenavigator id="navigator" height="100%" />
-    <actionbar id="actionBar" />
+    <gameactionbar id="actionBar" />
     <card id="whiteLoginCard" style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px" width="100%" >
         <label id="whiteLoginLabel" text="player1" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
     </card>

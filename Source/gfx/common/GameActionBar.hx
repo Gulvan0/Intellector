@@ -25,7 +25,7 @@ enum ActionBtn
     CancelTakeback;
     AddTime;
     Rematch;
-    ExportSIP;
+    Share;
     Analyze;
     AcceptDraw;
     DeclineDraw;
@@ -34,7 +34,7 @@ enum ActionBtn
 }
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/action_bar.xml"))
-class ActionBar extends VBox
+class GameActionBar extends VBox
 {
     private var mode:Mode;
     private var enableDrawAfterMove:Int;
@@ -134,8 +134,8 @@ class ActionBar extends VBox
         var shownButtons:Array<Button> = switch mode 
         {
             case PlayerOngoingGame: [changeOrientationBtn, offerDrawBtn, offerTakebackBtn, resignBtn, addTimeBtn];
-            case PlayerGameEnded: [changeOrientationBtn, analyzeBtn, exportSIPBtn, rematchBtn];
-            case Spectator: [changeOrientationBtn, analyzeBtn, exportSIPBtn];
+            case PlayerGameEnded: [changeOrientationBtn, analyzeBtn, shareBtn, rematchBtn];
+            case Spectator: [changeOrientationBtn, analyzeBtn, shareBtn];
         }
         changeActionButtons(shownButtons);
     }
@@ -196,7 +196,7 @@ class ActionBar extends VBox
 
     private function onOfferTakebackPressed()
     {
-        if (!incomingDrawRequestPending)
+        if (!incomingTakebackRequestPending)
         {
             offerTakebackBtn.hidden = true;
             cancelTakebackBtn.hidden = false;
@@ -264,7 +264,7 @@ class ActionBar extends VBox
         attachHandler(declineTakebackBtn, DeclineTakeback, disableTakebackRequest);
         attachHandler(addTimeBtn, AddTime);
         attachHandler(rematchBtn, Rematch);
-        attachHandler(exportSIPBtn, ExportSIP);
+        attachHandler(shareBtn, Share);
         attachHandler(analyzeBtn, Analyze);
 
         setMode(playingAs == null? Spectator : PlayerOngoingGame);

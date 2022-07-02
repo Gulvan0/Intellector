@@ -1,5 +1,9 @@
 package gfx.game;
 
+import browser.URLEditor;
+import struct.Outcome;
+import serialization.PortableIntellectorNotation;
+import gfx.common.ShareDialog;
 import openfl.events.Event;
 import haxe.Timer;
 import serialization.GameLogParser;
@@ -15,7 +19,7 @@ import serialization.GameLogParser.GameLogParserOutput;
 import struct.Variant;
 import struct.Ply;
 import gfx.utils.PlyScrollType;
-import gfx.common.ActionBar.ActionBtn;
+import gfx.common.GameActionBar.ActionBtn;
 import haxe.ui.containers.HBox;
 import gfx.components.BoardWrapper;
 import struct.Situation;
@@ -43,6 +47,12 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
     /**Attains null if a user doesn't participate in the game (is a spectator or browses a past game)**/
     private var playerColor:Null<PieceColor>;
     private var orientationColor:PieceColor = White;
+
+    private var whiteLogin:String;
+    private var blackLogin:String;
+    private var timeControl:TimeControl;
+    private var winnerColor:Null<PieceColor> = null;
+    private var outcome:Null<Outcome> = null;
 
     public static var MIN_SIDEBARS_WIDTH:Float = 200;
     public static var MAX_SIDEBARS_WIDTH:Float = 350;
@@ -192,9 +202,11 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
             case Move(fromI, toI, fromJ, toJ, morphInto): //Located in GameLayout since we need board's currentSituation to construct an argument for sidebox
                 var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
                 sidebox.makeMove(ply.toNotation(board.currentSituation));
-            case GameEnded(winner_color, _):
+            case GameEnded(winnerColorCode, outcomeCode):
+                winnerColor = GameLogParser.decodeColor(winnerColorCode);
+                outcome = GameLogParser.decodeOutcome(outcomeCode);
                 Assets.getSound("sounds/notify.mp3").play();
-                Dialogs.info(Utils.getGameOverPopUpMessage(GameLogParser.decodeOutcome(winner_color), GameLogParser.decodeColor(winner_color), playerColor), Dictionary.getPhrase(GAME_ENDED));
+                Dialogs.info(Utils.getGameOverPopUpMessage(outcome, winnerColor, playerColor), Dictionary.getPhrase(GAME_ENDED));
             default:
         }
     }
@@ -231,9 +243,22 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
                 Networker.emitEvent(AddTime);
             case Rematch:
                 Networker.emitEvent(Rematch);
-            case ExportSIP:
-                var sip:String = board.shownSituation.serialize();
-                Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_EXPORTED_SIP_MESSAGE), sip);
+            case Share:
+                var gameLink:String = URLEditor.getGameLink(Std.string(ScreenManager.viewedGameID));
+                var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
+                //TODO: Pass DateTime instead of null
+                var pin:String = PortableIntellectorNotation.serialize(playedMoves, whiteLogin, blackLogin, timeControl, null, outcome, winnerColor);
+
+                var shareDialog:ShareDialog = new ShareDialog();
+                shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, playedMoves);
+                shareDialog.onDialogClosed = e -> {
+                    board.suppressLMBHandler = false;
+                    board.suppressRMBHandler = false;
+                }
+
+                board.suppressLMBHandler = true;
+                board.suppressRMBHandler = true;
+                shareDialog.showDialog(false);
             case Analyze:
                 if (playerColor == null)
                     Networker.emitEvent(StopSpectate);
@@ -306,6 +331,9 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
     private function performCommonInitSteps(whiteLogin:String, blackLogin:String, timeControl:TimeControl, playerColor:PieceColor)
     {
         this.playerColor = playerColor;
+        this.whiteLogin = whiteLogin;
+        this.blackLogin = blackLogin;
+        this.timeControl = timeControl;
 
         board.addObserver(this);
 

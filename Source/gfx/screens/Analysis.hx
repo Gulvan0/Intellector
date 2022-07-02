@@ -81,7 +81,7 @@ class Analysis extends Screen implements RightPanelObserver
     public function new(?initialVariantStr:String, ?exploredStudyID:Int)
     {
         super();
-        this.exploredStudyID = exploredStudyID;
+        /*this.exploredStudyID = exploredStudyID;
 
         var initialVariant:Variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.starting());
         var startingSituation:Situation = initialVariant.startingSituation;
@@ -89,7 +89,7 @@ class Analysis extends Screen implements RightPanelObserver
         board = new GameBoard(startingSituation, startingSituation.turnColor, new AnalysisBehavior(startingSituation.turnColor), false);
 
         rightPanel = new RightPanel(initialVariant);
-        /*
+        
         var boardComponent = new SpriteWrapper(); //TODO: Use board wrapper
         boardComponent.sprite = board;
 

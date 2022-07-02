@@ -1,7 +1,8 @@
 package gfx.game;
 
+import utils.StringUtils;
 import dict.Phrase;
-import gfx.common.ActionBar.ActionBtn;
+import gfx.common.GameActionBar.ActionBtn;
 import struct.Outcome;
 import serialization.GameLogParser;
 import net.EventProcessingQueue.INetObserver;
@@ -137,15 +138,9 @@ class Chatbox extends VBox implements INetObserver
 
     private function send() 
     {
-        var formerText = messageInput.text.trim();
-        var text = "";
-        var lastIndex = cast(Math.min(500, formerText.length), Int);
+        var text = StringUtils.clean(messageInput.text, 500);
 
         messageInput.text = "";
-
-        for (index in 0...lastIndex)
-            if (isLegalChar(formerText.charCodeAt(index)))
-                text += formerText.charAt(index);
 
         if (text != "")
         {
@@ -155,18 +150,6 @@ class Chatbox extends VBox implements INetObserver
             else 
                 appendMessage(LoginManager.login, text, true);
         }
-    }
-
-    private function isLegalChar(code:Int) 
-    {
-        if (code == "#".code || code == ";".code || code == "/".code || code == "\\".code || code == "|".code)
-            return false;
-        else if (code < 32)
-            return false;
-        else if (code > 126 && code < 161)
-            return false;
-        else 
-            return true;
     }
 
     private function onGameEnded(winnerColor:Null<PieceColor>, outcome:Outcome) 

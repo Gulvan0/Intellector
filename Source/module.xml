@@ -2,9 +2,24 @@
     <components>
         <component class="gfx.common.Clock" alias="clock" />
         <component class="gfx.common.MoveNavigator" alias="movenavigator" />
-        <component class="gfx.common.ActionBar" alias="actionbar" />
+        <component class="gfx.common.GameActionBar" alias="gameactionbar" />
         <component class="gfx.common.CreepingLine" alias="creepingline" />
+        <component class="gfx.game.ShareGameTab" alias="sharegametab" />
+        <component class="gfx.analysis.ShareExportTab" alias="shareexporttab" />
+        <component class="gfx.analysis.AnalysisActionBar" alias="analysisactionbar" />
     </components>
+    <themes>
+        <global>
+            <style>
+                .tool-button {
+                    background-image-repeat: stretch;
+                    border: none;
+                    background:none;
+                    padding: none;
+                }
+            </style>
+        </global>
+    </themes>
     <scriptlets>
         <import class="dict.Phrase" keep="true" static="true" />
     </scriptlets>

@@ -1,0 +1,19 @@
+<dialog width="50%" height="50%" title="Share [P]">
+    <tabview width="100%" height="100%" styleName="full-width-buttons">
+        <box width="100%" height="100%" text="Share Position [P]">
+            <vbox width="100%" height="100%">
+                <section-header  width="100%" text="SIP [P]" />
+                <hbox width="100%">
+                    <textfield id="sipTextField" width="100%" height="30px" verticalAlign="center" />
+                    <button id="copySIPBtn" width="30px" height="30px" verticalAlign="center" tooltip="Copy [P]" style="background-image: Assets/symbols/common/copy.svg" styleName="tool-button" />
+                    <button id="copySIPBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="Copied! [P]" style="background-image: Assets/symbols/common/tick.svg" styleName="tool-button" />
+                </hbox>
+                <section-header width="100%" text="Image [P]" />
+                <box id="boardContainer" width="100%" height="100%" horizontalAlign="center" />
+                <button id="downloadPNGBtn" text="Download PNG [P]" horizontalAlign="center"/>
+            </vbox>
+        </box>
+        <sharegametab id="shareGameTab" hidden="true" />
+        <shareexporttab id="shareExportTab" hidden="true" />
+    </tabview>
+</dialog>

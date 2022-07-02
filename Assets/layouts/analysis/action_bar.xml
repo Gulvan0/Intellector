@@ -1,0 +1,23 @@
+<vbox width="100%" style="padding: 1 1 1 1">
+    <style>
+        .button-bar .button {
+            border: 1 solid $normal-border-color;
+        }
+
+        .horizontal-button-bar .button.first {
+            border-left-size: 1;
+            border-top-left-radius: 0.5;
+            border-bottom-left-radius: 0.5;
+        }
+
+        .horizontal-button-bar .button.last {
+            border-top-right-radius: 0.5;
+            border-bottom-right-radius: 0.5;
+        }
+    </style>
+    <button-bar id="btnBar" width="100%" toggle="false">
+        <button id="changeOrientationBtn" text="🗘" tooltip="{Dictionary.getPhrase(CHANGE_ORIENTATION_BTN_TOOLTIP)}" width="25%" height="35px" style="padding: 0 0;font-size: 32;"/>
+        <button id="editPositionBtn" text="✎" tooltip="{Dictionary.getPhrase(ANALYSIS_SET_POSITION)}" width="25%" height="35px" style="padding: 0 0;font-size:26px"/>
+        <button id="shareBtn" text="⮫" width="25%" height="35px" style="padding: 0 0;font-size:26px"/>
+    </button-bar>
+</vbox>

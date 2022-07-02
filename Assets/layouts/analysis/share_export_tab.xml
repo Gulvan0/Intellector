@@ -1,0 +1,15 @@
+<box width="100%" height="100%" text="Export [P]">
+    <vbox width="100%" height="100%">
+        <section-header  width="100%" text="Export as Study [P]" />
+        <hbox width="100%">
+            <label text="Name: [P]" verticalAlign="center" style="font-size:16px;font-bold:true" />
+            <textfield id="nameInputField" width="100%" placeholder="Enter study name... [P]" /> 
+        </hbox>
+        <hbox horizontalAlign="center">
+            <button id="exportNewBtn" text="Export New [P]" />
+            <button id="overwriteBtn" text="Overwrite %name% [P]" />
+        </hbox>
+        <section-header  width="100%" text="Export as ??? [P]" />
+        <label text="Coming Soon! [P]" horizontalAlign="center" style="font-size:22px" />
+    </vbox>
+</box>

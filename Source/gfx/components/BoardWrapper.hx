@@ -33,6 +33,11 @@ class BoardWrapper extends Component
         return board.lettersEnabled? MathUtils.HALF_SQRT3 * (15/14) : MathUtils.HALF_SQRT3;
     }
 
+    public static function widthToHexSideLength(w:Float):Float 
+    {
+        return w / 14;
+    }
+
     private override function get_componentWidth():Null<Float>
     {
         if (widthBased)
@@ -92,7 +97,7 @@ class BoardWrapper extends Component
     private override function validateComponentLayout():Bool 
     {
         var b = super.validateComponentLayout();
-        board.resize(componentWidth / 14); //Uses overriden getter, so the calculation is OK
+        board.resize(widthToHexSideLength(componentWidth)); //Uses overriden getter, so the calculation is OK
         return b;
     }
 

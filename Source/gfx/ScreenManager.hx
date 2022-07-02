@@ -36,6 +36,7 @@ class ScreenManager extends Box implements INetObserver
     private var lastResizeTimestamp:Float;
 
     public var current:Null<Screen>;
+    public static var viewedGameID:Null<Int> = null;
 
     public function removeCurrentScreen()
     {
@@ -112,6 +113,15 @@ class ScreenManager extends Box implements INetObserver
     {
         instance.removeCurrentScreen();
 
+        viewedGameID = switch type 
+        {
+            case StartedPlayableGame(gameID, _, _, _, _): gameID;
+            case ReconnectedPlayableGame(gameID, _): gameID;
+            case SpectatedGame(gameID, _, _): gameID;
+            case RevisitedGame(gameID, _, _): gameID;
+            default: null;
+        }
+
         URLEditor.setPath(getURLPath(type), Utils.getScreenTitle(type));
         instance.current = buildScreen(type);
         instance.addComponent(instance.current);
@@ -137,7 +147,7 @@ class ScreenManager extends Box implements INetObserver
             case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-                var watchedColor:Null<PieceColor> = actualizationData.getColor(spectatedPlayerLogin); //TODO: A bit clumsy approach, try to rethink later
+                var watchedColor:Null<PieceColor> = actualizationData.getColor(spectatedPlayerLogin);
                 toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
 			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);

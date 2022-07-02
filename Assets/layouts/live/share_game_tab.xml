@@ -1,0 +1,18 @@
+<box width="100%" height="100%" text="Share Game [P]">
+    <vbox width="100%" height="100%">
+        <section-header  width="100%" text="Link [P]" />
+        <hbox width="100%">
+            <textfield id="linkTextField" width="100%" height="30px" verticalAlign="center" />
+            <button id="copyLinkBtn" width="30px" height="30px" verticalAlign="center" tooltip="Copy [P]" style="background-image: Assets/symbols/common/copy.svg" styleName="tool-button" />
+            <button id="copyLinkBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="Copied! [P]" style="background-image: Assets/symbols/common/tick.svg" styleName="tool-button" />
+        </hbox>
+        <section-header  width="100%" text="PIN [P]" />
+        <hbox width="100%" height="100%">
+            <textarea id="pinTextArea" width="100%" height="100%" />
+            <button id="copyPINBtn" width="30px" height="30px" verticalAlign="center" tooltip="Copy [P]" style="background-image: Assets/symbols/common/copy.svg" styleName="tool-button" />
+            <button id="copyPINBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="Copied! [P]" style="background-image: Assets/symbols/common/tick.svg" styleName="tool-button" />
+        </hbox>
+        <section-header width="100%" text="Animated Gif [P]" />
+        <button id="downloadGifBtn" text="Export &amp; Download [P]" horizontalAlign="center" />
+    </vbox>
+</box>

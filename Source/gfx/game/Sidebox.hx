@@ -1,6 +1,6 @@
 package gfx.game;
 
-import gfx.common.ActionBar.ActionBtn;
+import gfx.common.GameActionBar.ActionBtn;
 import gameboard.GameBoard.GameBoardEvent;
 import gameboard.GameBoard.IGameBoardObserver;
 import serialization.GameLogParser;

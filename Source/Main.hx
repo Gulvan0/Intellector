@@ -1,29 +1,10 @@
 package;
 
-import tests.ui.board.TGameBoard;
-import gfx.analysis.VariantTree;
 import tests.ui.analysis.TVariantView;
-import tests.ui.game.TSidebox;
-import gfx.screens.LiveGame;
-import tests.ui.game.TGameInfoBox;
-import haxe.ui.macros.ComponentMacros;
-import gfx.common.ActionBar;
-import haxe.ui.containers.HBox;
-import haxe.ui.containers.Card;
-import haxe.ui.containers.Box;
-import haxe.ui.containers.VBox;
-import gfx.components.BoardWrapper;
-import gameboard.Board;
-import openfl.events.Event;
-import haxe.Timer;
-import gameboard.behaviors.PlayerMoveBehavior;
-import struct.Situation;
-import gameboard.GameBoard;
 import struct.PieceColor;
 import utils.TimeControl;
 import struct.ActualizationData;
 import net.Requests;
-import net.ServerEvent;
 import js.html.URLSearchParams;
 import browser.CredentialCookies;
 import gfx.ScreenManager;
@@ -35,9 +16,7 @@ import net.LoginManager;
 import openfl.display.Sprite;
 import openings.OpeningTree;
 import tests.UITest;
-import tests.ui.game.TChatBox;
 import utils.AssetManager;
-import dict.Dictionary;
 
 using StringTools;
 
