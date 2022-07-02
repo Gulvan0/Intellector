@@ -223,5 +223,7 @@ class RightPanel extends HBox implements IGameBoardObserver
     public function new()
     {
         super();
+        //TODO: Add handlers: eventHandler(EditModeChanged(mode));
+        //TODO: Fill
     }
 }
