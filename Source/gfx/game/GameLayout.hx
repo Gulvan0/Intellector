@@ -244,25 +244,18 @@ class GameLayout extends VBox implements INetObserver implements IGameBoardObser
             case Rematch:
                 Networker.emitEvent(Rematch);
             case Share:
-                var gameLink:String = URLEditor.getGameLink(Std.string(ScreenManager.viewedGameID));
+                var gameLink:String = URLEditor.getGameLink(ScreenManager.getViewedGameID());
                 var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
                 //TODO: Pass DateTime instead of null
                 var pin:String = PortableIntellectorNotation.serialize(playedMoves, whiteLogin, blackLogin, timeControl, null, outcome, winnerColor);
 
                 var shareDialog:ShareDialog = new ShareDialog();
                 shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, playedMoves);
-                shareDialog.onDialogClosed = e -> {
-                    board.suppressLMBHandler = false;
-                    board.suppressRMBHandler = false;
-                }
-
-                board.suppressLMBHandler = true;
-                board.suppressRMBHandler = true;
-                shareDialog.showDialog(false);
+                shareDialog.showShareDialog(board);
             case Analyze:
                 if (playerColor == null)
                     Networker.emitEvent(StopSpectate);
-                ScreenManager.toScreen(Analysis(board.asVariant().serialize(), null));
+                ScreenManager.toScreen(Analysis(board.asVariant().serialize(), null, null));
             case AcceptDraw:
                 Networker.emitEvent(AcceptDraw);
             case DeclineDraw:

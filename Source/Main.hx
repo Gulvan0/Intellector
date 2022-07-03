@@ -1,6 +1,6 @@
 package;
 
-import tests.ui.analysis.TVariantView;
+import tests.ui.game.TSidebox;
 import struct.PieceColor;
 import utils.TimeControl;
 import struct.ActualizationData;
@@ -60,7 +60,7 @@ class Main extends Sprite
 	{
 		super();
 		init(() -> {
-			UITest.launchTest(new TVariantView());
+			UITest.launchTest(new TSidebox());
 			//ScreenManager.toScreen(ScreenType.Analysis(null, null));
 			/*ScreenManager.launch();
 			start();*/
@@ -163,7 +163,7 @@ class Main extends Sprite
 
 	private function toAnalysis() 
 	{
-		ScreenManager.toScreen(Analysis(null, null));
+		ScreenManager.toScreen(Analysis(null, null, null));
 	}
 
 	private function toOpenChallengeJoining(owner:String) 
@@ -186,7 +186,7 @@ class Main extends Sprite
 		var id:Null<Int> = Std.parseInt(idStr);
 		if (id != null)
 		{
-			var onInfo = (variantStr:String) -> {ScreenManager.toScreen(Analysis(variantStr, id));};
+			var onInfo = (name:String, variantStr:String) -> {ScreenManager.toScreen(Analysis(variantStr, id, name));};
 			var onNotFound = ScreenManager.toScreen.bind(MainMenu);
 			Requests.getStudy(id, onInfo, onNotFound);
 		}

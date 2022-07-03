@@ -1,29 +1,21 @@
 package gfx.analysis;
 
+import gfx.analysis.AnalysisActionBar.BtnPressEvent;
+import haxe.ui.events.UIEvent;
+import haxe.ui.events.MouseEvent;
+import gfx.components.Dialogs;
 import gfx.analysis.IVariantView.SelectedBranchInfo;
 import gameboard.GameBoard.IGameBoardObserver;
-import serialization.PlySerializer;
-import gfx.screens.Analysis.NodeInfo;
 import gameboard.GameBoard.GameBoardEvent;
-import serialization.SituationSerializer;
 import haxe.ui.core.Component;
-import openfl.text.TextFormat;
-import openfl.events.Event;
 import haxe.ui.components.Image;
 import struct.Ply;
-import utils.AssetManager;
 import gfx.common.MoveNavigator;
-import js.Browser;
-import dict.Phrase;
-import haxe.Timer;
 import struct.Situation;
-import struct.Variant;
-import haxe.ui.styles.Style;
 import gfx.utils.PlyScrollType;
 import struct.Variant;
 import haxe.ui.containers.ScrollView;
 import haxe.ui.containers.Box;
-import haxe.ui.components.OptionBox;
 import struct.PieceColor;
 import haxe.ui.components.TextField;
 import haxe.ui.components.Label;
@@ -33,9 +25,7 @@ import haxe.ui.components.Button;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.TabView;
 import haxe.ui.containers.VBox;
-import openfl.display.Sprite;
 import gfx.analysis.PosEditMode;
-import haxe.ui.util.Variant as UIVariant;
 using utils.CallbackTools;
 
 enum RightPanelEvent
@@ -43,7 +33,9 @@ enum RightPanelEvent
     BranchSelected(branch:Array<Ply>, startingSituation:Situation, pointer:Int);
     RevertNeeded(plyCnt:Int);
     ClearRequested;
-    ResetRequested;
+    ResetRequested; //TODO: Situation may be passed as an argument so that GameBoard won't need to keep track of it
+    StartPosRequested;
+    OrientationChangeRequested; //TODO: Ensure that after the editor is closed everyone knows the correct orientation
     ConstructSituationRequested(situation:Situation);
     TurnColorChanged(newTurnColor:PieceColor);
     ApplyChangesRequested;
@@ -51,179 +43,143 @@ enum RightPanelEvent
     EditModeChanged(newEditMode:PosEditMode);
     EditorEntered;
     ScrollBtnPressed(type:PlyScrollType);
-    ExportSIPRequested;
-    ExportStudyRequested(variantStr:String);
-    InitializationFinished;
-}
-
-interface RightPanelObserver
-{
-    public function handleRightPanelEvent(event:RightPanelEvent):Void;    
 }
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/analysis/right_panel.xml"))
 class RightPanel extends HBox implements IGameBoardObserver
 {
-    public var observers(default, null):Array<RightPanelObserver> = [];
+    private var variantView:IVariantView;
 
-    private function emit(event:RightPanelEvent)
-    {
-        for (obs in observers)
-            obs.handleRightPanelEvent(event);
-    }
-
-    /* Deprecated
-    private function handleOverviewTabEvent(event:OverviewTabEvent)
-    {
-        switch event 
-        {
-            case ExportSIPRequested:
-                emit(ExportSIPRequested);
-            case ExportStudyRequested:
-                emit(ExportStudyRequested(branchingTab.variantView.getSerializedVariant()));
-            case ScrollBtnPressed(type):
-                emit(ScrollBtnPressed(type));
-            case SetPositionPressed:
-                showPositionEditor();
-                emit(EditorEntered);
-        }
-    }
-
-    private function handlePositionEditorEvent(event:PositionEditorEvent)
-    {
-        switch event 
-        {
-            case ClearPressed:
-                emit(ClearRequested);
-            case ResetPressed:
-                emit(ResetRequested);
-            case ConstructFromSIPPressed(sip):
-                var situation:Situation = SituationSerializer.deserialize(sip);
-                positionEditor.changeColorOptions(situation.turnColor);
-                emit(ConstructSituationRequested(situation));
-            case TurnColorChanged(newTurnColor):
-                emit(TurnColorChanged(newTurnColor));
-            case ApplyChangesPressed:
-                overviewTab.navigator.clear();
-                showControlTabs();
-                emit(ApplyChangesRequested);
-            case DiscardChangesPressed:
-                showControlTabs();
-                emit(DiscardChangesRequested);
-            case EditModeChanged(newEditMode):
-                emit(EditModeChanged(newEditMode));
-        }
-    }
-
-    private function onBranchSelected(branchInfo:SelectedBranchInfo)
-    {
-        overviewTab.navigator.rewrite(branchInfo.plyStrArray);
-        emit(BranchSelected(branchInfo.plyArray, branchingTab.variantView.getStartingSituation(), branchInfo.selectedPlyNum));
-    }
-
-    private function onRevertRequestedByBranchingTab(plysToRevert:Int)
-    {
-        overviewTab.navigator.revertPlys(plysToRevert);
-        emit(RevertNeeded(plysToRevert));
-    }
+    private var shareCallback:(serializedVariant:String)->Void;
+    private var eventHandler:(event:RightPanelEvent)->Void;
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
         switch event
         {
             case ContinuationMove(ply, plyStr, performedBy):
-                branchingTab.variantView.addChildToSelectedNode(ply, true);
-                overviewTab.navigator.writePlyStr(plyStr);
-                positionEditor.changeColorOptions(opposite(performedBy));
+                variantView.addChildToSelectedNode(ply, true);
+                navigator.writePlyStr(plyStr);
+                turnColorStepper.selectedIndex = performedBy == Black? 0 : 1; //If the move that just happened was performed by Black, it's now White to move (and vice-versa)
             case SubsequentMove(plyStr, performedBy):
-                positionEditor.changeColorOptions(opposite(performedBy));
+                turnColorStepper.selectedIndex = performedBy == Black? 0 : 1; //If the move that just happened was performed by Black, it's now White to move (and vice-versa)
             case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
                 var plysToRevertCnt = branchLength - plyPointer;
-                branchingTab.variantView.addChildToSelectedNode(ply, true);
-                overviewTab.navigator.revertPlys(plysToRevertCnt);
-                overviewTab.navigator.writePlyStr(plyStr);
-                positionEditor.changeColorOptions(opposite(performedBy));
+                variantView.addChildToSelectedNode(ply, true);
+                navigator.revertPlys(plysToRevertCnt);
+                navigator.writePlyStr(plyStr);
+                turnColorStepper.selectedIndex = performedBy == Black? 0 : 1; //If the move that just happened was performed by Black, it's now White to move (and vice-versa)
             case SituationEdited(newSituation):
-                branchingTab.variantView.clear(newSituation);
+                variantView.clear(newSituation);
             default:
         }
     }
 
-    public function showPositionEditor() 
+    private function onBranchSelected(branchInfo:SelectedBranchInfo)
     {
-        positionEditor.returnToDefaultEditMode();
-        controlTabs.visible = false;
-        positionEditor.visible = true;
+        navigator.rewrite(branchInfo.plyStrArray);
+        eventHandler(BranchSelected(branchInfo.plyArray, variantView.getStartingSituation(), branchInfo.selectedPlyNum));
     }
 
-    public function showControlTabs() 
+    private function onRevertRequestedByBranchingTab(plysToRevert:Int)
     {
-        positionEditor.visible = false;
-        controlTabs.visible = true;
+        navigator.revertPlys(plysToRevert);
+        eventHandler(RevertNeeded(plysToRevert));
     }
 
-    
-    PositionEditor:
+    @:bind(applyChangesBtn, MouseEvent.CLICK)
+    private function onApplyChangesPressed(e)
+    {
+        var turnColor:PieceColor = turnColorStepper.selectedIndex == 0? White : Black;
+        navigator.clear(turnColor);
+        positionEditor.hidden = true;
+        controlTabs.hidden = false;
+        eventHandler(ApplyChangesRequested);
+    }
 
-        public function returnToDefaultEditMode()
+    @:bind(discardChangesBtn, MouseEvent.CLICK)
+    private function onDiscardChangesPressed(e)
+    {
+        positionEditor.hidden = true;
+        controlTabs.hidden = false;
+        eventHandler(DiscardChangesRequested);
+    }
+
+    @:bind(applySIPBtn, MouseEvent.CLICK)
+    private function onApplySIPPressed(e)
+    {
+        var deserializedSituation:Null<Situation> = Situation.fromSIP(sipInputField.text);
+        if (deserializedSituation != null)
         {
-            pressedEditModeBtn.selected = false;
-            defaultEditModeBtn.selected = true;
-            pressedEditModeBtn = defaultEditModeBtn;
+            turnColorStepper.selectedIndex = deserializedSituation.turnColor == White? 0 : 1;
+            eventHandler(ConstructSituationRequested(deserializedSituation));
         }
+        else
+            Dialogs.alert("The SIP specified is invalid [P]", "Warning: Invalid SIP");
+    }
 
-        public function changeColorOptions(selectedColor:PieceColor) 
+    private function onActionBarButtonPressed(btnEvent:BtnPressEvent)
+    {
+        switch btnEvent 
         {
-            turnColorSelectOptions[selectedColor].selected = true;
-            turnColorSelectOptions[opposite(selectedColor)].selected = false;
+            case ChangeOrientation: 
+                eventHandler(OrientationChangeRequested);
+            case EditPosition:
+                moveModeBtn.selected = true;
+                controlTabs.hidden = true;
+                positionEditor.hidden = false;
+                eventHandler(EditorEntered);
+            case Share: 
+                shareCallback(variantView.getSerializedVariant());
         }
+    }
 
-    BranchingTab:
-        public function new(type:BranchingTabType, initialVariant:Variant, onBranchSelected:SelectedBranchInfo->Void, onRevertNeeded:(plysToRevert:Int)->Void)
-        {
-            super();
+    @:bind(turnColorStepper, UIEvent.CHANGE)
+    private function onTurnColorChanged(e)
+    {
+        var turnColor:PieceColor = turnColorStepper.selectedIndex == 0? White : Black;
+        eventHandler(TurnColorChanged(turnColor));
+    }
 
-            switch type 
-            {
-                case Tree:
-                    var variantTree = new VariantTree(initialVariant);
-                    //addComponent(variantTree);
-                    variantView = variantTree;
-                case Outline:
-                    //Fill
-                case PlainText:
-                    //Fill
-            }
-
-            variantView.init(onBranchSelected, onRevertNeeded); 
-        }
-
-    public function new(initialVariant:Variant) 
+    public function new(initialVariant:Variant, shareCallback:(serializedVariant:String)->Void, eventHandler:(event:RightPanelEvent)->Void)
     {
         super();
+        this.shareCallback = shareCallback;
+        this.eventHandler = eventHandler;
 
-        positionEditor = new PositionEditor();
-        positionEditor.changeColorOptions(initialVariant.startingSituation.turnColor);
-        controlTabs = createControlTabs(initialVariant);
+        moveModeBtn.onClick = e -> {eventHandler(EditModeChanged(Move));};
+        setProgWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Progressor, White)));};
+        setAgrWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Aggressor, White)));};
+        setDefWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Defensor, White)));};
+        setLibWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Liberator, White)));};
+        setDomWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Dominator, White)));};
+        setIntWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Intellector, White)));};
+        deleteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Delete));};
+        setProgBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Progressor, Black)));};
+        setAgrBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Aggressor, Black)));};
+        setDefBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Defensor, Black)));};
+        setLibBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Liberator, Black)));};
+        setDomBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Dominator, Black)));};
+        setIntBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Intellector, Black)));};
+        clearBtn.onClick = e -> {eventHandler(ClearRequested);};
+        resetBtn.onClick = e -> {eventHandler(ResetRequested);};
+        startBtn.onClick = e -> {eventHandler(StartPosRequested);};
 
-        positionEditor.init(handlePositionEditorEvent);
-        overviewTab.init(initialVariant.startingSituation.turnColor, handleOverviewTabEvent);
-        
-        var fullBox:HBox = new HBox();
-        fullBox.addComponent(positionEditor);
-        fullBox.addComponent(controlTabs);
-        addChild(fullBox);
-    }*/
+        actionBar.btnCallback = onActionBarButtonPressed;
 
-    public function handleGameBoardEvent(event:GameBoardEvent)
-    {
-        
-    }
+        navigator.init(initialVariant.startingSituation.turnColor, btn -> {eventHandler(ScrollBtnPressed(btn));});
 
-    public function new()
-    {
-        super();
-        //TODO: Add handlers: eventHandler(EditModeChanged(mode));
-        //TODO: Fill
+        branchingHelpLink.onClick = e -> {
+            Dialogs.info("Some help here [P]", "Branching Help [P]");
+        };
+
+        variantView = switch Preferences.branchingTabType.get() 
+        {
+            case Tree: new VariantTree(initialVariant);
+            case Outline: new VariantTree(initialVariant); //TODO: Change to Outline
+            case PlainText: new VariantTree(initialVariant); //TODO: Change to PlainText
+        };
+
+        variantView.init(onBranchSelected, onRevertRequestedByBranchingTab);
     }
 }

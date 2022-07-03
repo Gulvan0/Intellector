@@ -271,6 +271,11 @@ class Situation
         return s;
     }
 
+    public static function fromSIP(sip:String):Situation 
+    {
+        return SituationSerializer.deserialize(sip);
+    }
+
     public function new() 
     {
         

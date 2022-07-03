@@ -1,5 +1,6 @@
 package dict;
 
+import utils.StringUtils;
 import utils.TimeControl;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
@@ -93,8 +94,14 @@ class Utils
         {
             case MainMenu: 
                 translations = ["Home", "Главная"];
-            case Analysis(initialVariantStr, exploredStudyID): 
-                translations = ["Analysis Board", "Доска анализа"];
+            case Analysis(_, exploredStudyID, exploredStudyName):
+                if (exploredStudyName != null)
+                {
+                    var shortenedName:String = StringUtils.shorten(exploredStudyName);
+                    translations = ['Study $shortenedName ($exploredStudyID) | Analysis Board', 'Студия $shortenedName ($exploredStudyID) | Доска анализа'];
+                }
+                else
+                    translations = ["Analysis Board", "Доска анализа"];
             case StartedPlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor): 
                 var opponentLogin:String = playerColor == White? blackLogin : whiteLogin;
                 translations = ['Play $opponentLogin', 'Игра $opponentLogin'];

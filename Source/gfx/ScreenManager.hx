@@ -29,14 +29,26 @@ using StringTools;
 **/
 class ScreenManager extends Box implements INetObserver
 {
-    public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event
+    public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event (Rework via Requests.hx?)
     public static var instance:ScreenManager;
     private static var openflContent:Element;
 
     private var lastResizeTimestamp:Float;
 
     public var current:Null<Screen>;
-    public static var viewedGameID:Null<Int> = null;
+    public static var currentScreenType:Null<ScreenType>;
+
+    public static function getViewedGameID():Null<Int>
+    {
+        return switch type 
+        {
+            case StartedPlayableGame(gameID, _, _, _, _): gameID;
+            case ReconnectedPlayableGame(gameID, _): gameID;
+            case SpectatedGame(gameID, _, _): gameID;
+            case RevisitedGame(gameID, _, _): gameID;
+            default: null;
+        }
+    }
 
     public function removeCurrentScreen()
     {
@@ -53,8 +65,8 @@ class ScreenManager extends Box implements INetObserver
         {
             case MainMenu:
                 new MainMenu();
-            case Analysis(initialVariantStr, exploredStudyID):
-                new Analysis(initialVariantStr, exploredStudyID);
+            case Analysis(initialVariantStr, _, _):
+                new Analysis(initialVariantStr);
             case LanguageSelectIntro:
                 new LanguageSelectIntro();
             case StartedPlayableGame(_, whiteLogin, blackLogin, timeControl, playerColor):
@@ -81,7 +93,7 @@ class ScreenManager extends Box implements INetObserver
         return switch type 
         {
             case MainMenu: "home";
-            case Analysis(_, exploredStudyID): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
+            case Analysis(_, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
             case LanguageSelectIntro: "";
             case StartedPlayableGame(gameID, _, _, _, _): 'live/$gameID';
             case ReconnectedPlayableGame(gameID, _): 'live/$gameID';
@@ -113,14 +125,7 @@ class ScreenManager extends Box implements INetObserver
     {
         instance.removeCurrentScreen();
 
-        viewedGameID = switch type 
-        {
-            case StartedPlayableGame(gameID, _, _, _, _): gameID;
-            case ReconnectedPlayableGame(gameID, _): gameID;
-            case SpectatedGame(gameID, _, _): gameID;
-            case RevisitedGame(gameID, _, _): gameID;
-            default: null;
-        }
+        currentScreenType = type;
 
         URLEditor.setPath(getURLPath(type), Utils.getScreenTitle(type));
         instance.current = buildScreen(type);
@@ -152,7 +157,15 @@ class ScreenManager extends Box implements INetObserver
 			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-				toScreen(ReconnectedPlayableGame(match_id, actualizationData));
+                toScreen(ReconnectedPlayableGame(match_id, actualizationData));
+            case StudyCreated(studyID, studyName):
+                if (currentScreenType.match(Analysis(_, _, _)))
+                {
+                    var newScreenType:ScreenType = Analysis(null, studyID, studyName);
+                    URLEditor.setPath(getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
+                    currentScreenType = newScreenType;
+                    exploredStudyID = studyID;
+                }
             default:
         }
     }

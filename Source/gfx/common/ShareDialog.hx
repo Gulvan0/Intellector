@@ -1,5 +1,6 @@
 package gfx.common;
 
+import gameboard.GameBoard;
 import struct.Ply;
 import utils.MathUtils;
 import haxe.io.Bytes;
@@ -51,6 +52,17 @@ class ShareDialog extends Dialog
         FileSaver.saveAs(blob, 'intpos_$rand.png');
     }
 
+    public function showShareDialog(mutedGameboard:GameBoard)
+    {
+        mutedGameboard.suppressLMBHandler = true;
+        mutedGameboard.suppressRMBHandler = true;
+        onDialogClosed = e -> {
+            mutedGameboard.suppressLMBHandler = false;
+            mutedGameboard.suppressRMBHandler = false;
+        };
+        showDialog(false);
+    }
+
     public function initInGame(situation:Situation, orientation:PieceColor, gameLink:String, pin:String, plySequence:Array<Ply>)
     {
         init(situation, orientation);
@@ -58,10 +70,10 @@ class ShareDialog extends Dialog
         shareGameTab.hidden = false;
     }
 
-    public function initInAnalysis(situation:Situation, orientation:PieceColor, exportNewCallback:(name:String)->Void, ?overwriteCallback:(newName:String)->Void, ?overwrittenStudyName:String)
+    public function initInAnalysis(situation:Situation, orientation:PieceColor, exportNewCallback:(name:String)->Void, ?overwriteCallback:(newName:String)->Void, ?oldStudyName:String)
     {
         init(situation, orientation);
-        shareExportTab.init(exportNewCallback, overwriteCallback, overwrittenStudyName);
+        shareExportTab.init(exportNewCallback, overwriteCallback, oldStudyName);
         shareExportTab.hidden = false;
     }
 

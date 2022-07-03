@@ -53,8 +53,9 @@ enum ServerEvent
     TakebackAccepted;
     TakebackDeclined;
 
-    SingleStudy(variantStr:String); //Answer to GetStudy
+    SingleStudy(name:String, variantStr:String); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy
+    StudyCreated(studyID:Int, studyName:String); //Answer to SetStudy with no overwriteID specified
     PlayerProfile(recentGamesStr:String, recentStudiesStr:String, hasMoreGames:Bool, hasMoreStudies:Bool); //Answer to GetPlayerProfile //TODO: add more params (stats)
     GamesList(listStr:String, hasNext:Bool); //Answer to GetPlayerGames
     StudiesList(listStr:String, hasNext:Bool); //Answer to GetPlayerStudies

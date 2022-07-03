@@ -7,6 +7,40 @@
                 <box id="lRightBox" width="30%" height="98%" />
             </hbox>
             <analysisactionbar id="cActionBar" width="100%" />
+            <vbox id="cPositionEditor" width="100%">
+                <grid id="editModesGrid" width="100%" columns="7" horizontalAlign="center">
+                    <button id="moveModeBtn" width="14.28%" height="50px" icon="Assets/symbols/analysis/move.svg" styleName="normalModeBtn" group="editModes" toggle="true" selected="true" />
+                    <button id="setProgWhiteModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Progressor_White.svg" styleName="smallPieceModeBtn" group="editModes" toggle="true" />
+                    <button id="setAgrWhiteModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Aggressor_White.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
+                    <button id="setDefWhiteModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Defensor_White.svg" styleName="mediumPieceModeBtn" group="editModes" toggle="true" />
+                    <button id="setLibWhiteModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Liberaror_White.svg" styleName="mediumPieceModeBtn" group="editModes" toggle="true" />
+                    <button id="setDomWhiteModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Dominator_White.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
+                    <button id="setIntWhiteModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Intellector_White.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
+                    <button id="deleteModeBtn" width="14.28%" height="50px" icon="Assets/symbols/analysis/delete.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
+                    <button id="setProgBlackModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Progressor_Black.svg" styleName="smallPieceModeBtn" group="editModes" toggle="true" />
+                    <button id="setAgrBlackModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Aggressor_Black.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
+                    <button id="setDefBlackModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Defensor_Black.svg" styleName="mediumPieceModeBtn" group="editModes" toggle="true" />
+                    <button id="setLibBlackModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Liberaror_Black.svg" styleName="mediumPieceModeBtn" group="editModes" toggle="true" />
+                    <button id="setDomBlackModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Dominator_Black.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
+                    <button id="setIntBlackModeBtn" width="14.28%" height="50px" icon="Assets/pieces/Intellector_Black.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
+                </grid>
+                <buttonbar width="100%" height="25px" toggle="false">
+                    <button id="clearBtn" icon="Assets/symbols/analysis/flush.svg" tooltip="Clear [P]" width="25%" height="100%" />
+                    <button id="resetBtn" icon="Assets/symbols/analysis/reset.svg" tooltip="Reset [P]" width="25%" height="100%" />
+                    <button id="startBtn" icon="Assets/symbols/analysis/initial.svg" tooltip="To Initial [P]" width="25%" height="100%" />
+                    <button id="orientationBtn" icon="Assets/symbols/analysis/flip.svg" tooltip="Flip Board [P]" width="25%" height="100%" />
+                </buttonbar>
+                <option-stepper id="turnColorStepper" width="100%">
+                    <data>
+                        <item text="White to Move [P]" />
+                        <item text="Black to Move [P]" />
+                    </data>
+                </option-stepper>
+                <hbox width="100%" height="20px">
+                    <button id="applyChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES)}" width="50%" height="100%" verticalAlign="center" />
+                    <button id="discardChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_DISCARD_CHANGES)}" width="50%" height="100%" verticalAlign="center" />
+                </hbox>
+            </vbox>
         </vbox>
     </box> 
 </vbox>

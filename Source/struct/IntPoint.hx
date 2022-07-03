@@ -1,5 +1,6 @@
 package struct;
 
+import ds.tools.Assert;
 import struct.PieceColor;
 
 function equal(p1:Null<IntPoint>, p2:Null<IntPoint>):Bool
@@ -37,6 +38,7 @@ class IntPoint
 
     public static function fromScalar(s:Int):IntPoint
     {
+        Assert.assert(s >= 0 && s < hexCount);
         var res = s % 9;
         if (res < 5)
             return new IntPoint(2 * res, Math.ceil((s - res) / 9));

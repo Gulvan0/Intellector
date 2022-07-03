@@ -24,12 +24,12 @@ class Screen extends VBox
 
     public function disableMenu()
     {
-        //TODO: Fill
+        menubar.disabled = true;
     }
 
     public function enableMenu()
     {
-        //TODO: Fill
+        menubar.disabled = false;
     }
 
     public function new(?hideMenu:Bool = false)
@@ -37,7 +37,7 @@ class Screen extends VBox
         super();
         if (hideMenu)
             menubar.hidden = true;
-        //mainPageLink.customStyle = {fontName: "fonts/Futura.ttf", ...};
+        //mainPageLink.customStyle = {fontName: "fonts/Futura.ttf", ...}; //TODO: Rewrite
         //mainPageLink.onClick = e -> {ScreenManager.toScreen(new MainMenu());};
     }
 }

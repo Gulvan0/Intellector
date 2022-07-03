@@ -143,6 +143,7 @@ class Variant extends VariantNode
         return serialized;
     }
 
+    //TODO: Assumes the valid argument, should I make it safer?
     public static function deserialize(s:String):Variant
     {
         var variantStrParts:Array<String> = s.split(";");

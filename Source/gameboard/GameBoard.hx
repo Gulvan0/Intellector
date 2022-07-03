@@ -6,7 +6,6 @@ import utils.exceptions.AlreadyInitializedException;
 import openfl.geom.Point;
 import struct.Variant;
 import net.EventProcessingQueue.INetObserver;
-import gfx.analysis.RightPanel.RightPanelObserver;
 import openfl.events.Event;
 import struct.ReversiblePly;
 import gameboard.behaviors.AnalysisBehavior;
@@ -46,7 +45,7 @@ interface IGameBoardObserver
 
     Changes behaviour based on the current state
 **/
-class GameBoard extends SelectableBoard implements RightPanelObserver implements INetObserver
+class GameBoard extends SelectableBoard implements INetObserver
 {
     public var plyHistory:PlyHistory;
     public var currentSituation:Situation;
@@ -346,6 +345,10 @@ class GameBoard extends SelectableBoard implements RightPanelObserver implements
                 onEditModeChanged(Move);
             case ScrollBtnPressed(type):
                 applyScrolling(type);
+            case StartPosRequested:
+                rearrangeToSituation(Situation.starting());
+            case OrientationChangeRequested:
+                revertOrientation();
             default:
         }
     }

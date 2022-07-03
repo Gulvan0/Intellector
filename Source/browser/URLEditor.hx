@@ -22,7 +22,7 @@ class URLEditor
         return Browser.location.host + ingameToUrlPath('challenge/$login');
     }
 
-    public static function getGameLink(id:String):String
+    public static function getGameLink(id:Int):String
     {
         return Browser.location.host + ingameToUrlPath('live/$id');
     }

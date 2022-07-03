@@ -113,4 +113,12 @@ class StringUtils
         else 
             return true;
     }
+
+    public static function shorten(orig:String, ?maxChars:Int = 10):String
+    {
+        if (orig.length > maxChars)
+            return orig.substr(0, maxChars - 3) + "...";
+        else 
+            return orig;
+    }
 }

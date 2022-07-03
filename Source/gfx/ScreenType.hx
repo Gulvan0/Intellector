@@ -7,7 +7,7 @@ import struct.ActualizationData;
 enum ScreenType
 {
     MainMenu;
-    Analysis(initialVariantStr:Null<String>, exploredStudyID:Null<Int>);
+    Analysis(initialVariantStr:Null<String>, exploredStudyID:Null<Int>, exploredStudyName:String);
     LanguageSelectIntro;
     StartedPlayableGame(gameID:Int, whiteLogin:String, blackLogin:String, timeControl:TimeControl, playerColor:PieceColor);
     ReconnectedPlayableGame(gameID:Int, actualizationData:ActualizationData);

@@ -23,13 +23,13 @@ class ShareExportTab extends Box
         overwriteCallback(StringUtils.clean(nameInputField.text, 50));
     }
 
-    public function init(exportNewCallback:(name:String)->Void, ?overwriteCallback:(newName:String)->Void, ?overwrittenStudyName:String)
+    public function init(exportNewCallback:(name:String)->Void, ?overwriteCallback:(newName:String)->Void, ?oldStudyName:String)
     {
         this.exportNewCallback = exportNewCallback;
         this.overwriteCallback = overwriteCallback;
 
-        if (overwrittenStudyName != null)
-            overwriteBtn.text = overwriteBtn.text.replace('%name%', overwrittenStudyName);
+        if (oldStudyName != null)
+            overwriteBtn.text = overwriteBtn.text.replace('%name%', oldStudyName);
         else
             overwriteBtn.hidden = true;
     }

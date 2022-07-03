@@ -72,18 +72,18 @@ class Requests
         return true;
     }
 
-    public static function getStudy(id:Int, onInfo:String->Void, onNotFound:Void->Void) 
+    public static function getStudy(id:Int, onInfo:(name:String, variantStr:String)->Void, onNotFound:Void->Void) 
     {
         Networker.eventQueue.addHandler(getStudy_handler.bind(onInfo, onNotFound));
         Networker.emitEvent(GetStudy(id));
     }
 
-    private static function getStudy_handler(onInfo:String->Void, onNotFound:Void->Void, event:ServerEvent) 
+    private static function getStudy_handler(onInfo:(name:String, variantStr:String)->Void, onNotFound:Void->Void, event:ServerEvent) 
     {
         switch event
         {
-            case SingleStudy(variantStr):
-                onInfo(variantStr);
+            case SingleStudy(name, variantStr):
+                onInfo(name, variantStr);
             case StudyNotFound:
                 onNotFound();
             default:

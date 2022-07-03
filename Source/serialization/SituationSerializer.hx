@@ -25,7 +25,7 @@ class SituationSerializer
         return colorLetter(situation.turnColor) + playerPiecesStr[White] + "!" + playerPiecesStr[Black];
     }
 
-    public static function deserialize(sip:String):Situation
+    public static function deserialize(sip:String):Null<Situation>
     {
         var situation:Situation = Situation.empty();
         var turnColor:PieceColor = colorByLetter(sip.charAt(0));
@@ -37,14 +37,24 @@ class SituationSerializer
         {
             if (sip.charCodeAt(ci) == "!".code)
             {
+                if (exclamationMarkPassed)
+                    return null; //Exactly one exclamation mark per SIP expected
+
                 exclamationMarkPassed = true;
                 ci++;
                 continue;
             }
             
-            var location = IntPoint.fromScalar(sip.charCodeAt(ci) - 64);
-            var type = pieceByLetter(sip.charAt(ci + 1));
-            var color = exclamationMarkPassed? Black : White;
+            var scalarCoord:Int = sip.charCodeAt(ci) - 64;
+            var type:PieceType = pieceByLetter(sip.charAt(ci + 1));
+
+            if (scalarCoord < 0 || scalarCoord >= IntPoint.hexCount)
+                return null; //Invalid hex location
+            else if (type == null)
+                return null; //Invalid PieceType code
+
+            var location:IntPoint = IntPoint.fromScalar(scalarCoord);
+            var color:PieceColor = exclamationMarkPassed? Black : White;
 
             situation.set(location, Hex.occupied(type, color));
             ci += 2;
