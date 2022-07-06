@@ -1,4 +1,4 @@
-package gfx.common;
+package gfx.game;
 
 import openfl.events.Event;
 import haxe.ui.containers.Box;

@@ -11,18 +11,24 @@ import js.Browser;
 import dict.Utils;
 import openfl.display.Sprite;
 
-class OpenChallengeJoining extends Screen 
+//TODO: Needs total revamp (also XML-ize)
+class OpenChallengeJoining extends VBox implements IScreen
 {
 	private static var boxWidth:Float = 800;
 
-	public override function onEntered()
+	public function onEntered()
     {
         //* Do nothing
     }
 
-    public override function onClosed()
+    public function onClosed()
     {
         //* Do nothing
+    }
+
+    public function menuHidden():Bool
+    {
+        return false;
     }
 
     public function new(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>)

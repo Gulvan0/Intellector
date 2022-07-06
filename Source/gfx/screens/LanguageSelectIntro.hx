@@ -1,17 +1,24 @@
 package gfx.screens;
 
-class LanguageSelectIntro extends Screen
+import haxe.ui.containers.HBox;
+
+class LanguageSelectIntro extends HBox implements IScreen
 {
     //TODO: Fill
 
-    public override function onEntered()
+    public function onEntered()
     {
         //* Do nothing
     }
 
-    public override function onClosed()
+    public function onClosed()
     {
         //* Do nothing
+    }
+
+    public function menuHidden():Bool
+    {
+        return true;
     }
 
     public function new()

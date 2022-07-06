@@ -1,9 +1,9 @@
 <module>
     <components>
-        <component class="gfx.common.Clock" alias="clock" />
         <component class="gfx.common.MoveNavigator" alias="movenavigator" />
-        <component class="gfx.common.GameActionBar" alias="gameactionbar" />
         <component class="gfx.common.CreepingLine" alias="creepingline" />
+        <component class="gfx.game.Clock" alias="clock" />
+        <component class="gfx.game.GameActionBar" alias="gameactionbar" />
         <component class="gfx.game.ShareGameTab" alias="sharegametab" />
         <component class="gfx.analysis.ShareExportTab" alias="shareexporttab" />
         <component class="gfx.analysis.AnalysisActionBar" alias="analysisactionbar" />

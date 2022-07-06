@@ -2,7 +2,7 @@ package gfx.game;
 
 import utils.StringUtils;
 import dict.Phrase;
-import gfx.common.GameActionBar.ActionBtn;
+import gfx.game.GameActionBar.ActionBtn;
 import struct.Outcome;
 import serialization.GameLogParser;
 import net.EventProcessingQueue.INetObserver;

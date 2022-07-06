@@ -15,7 +15,7 @@ import openfl.display.Sprite;
 using utils.CallbackTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/plynavigator.xml"))
-class MoveNavigator extends VBox
+class MoveNavigator extends VBox implements IPlyHistoryView
 {
     private var firstColorToMove:PieceColor;
     private var plyNumber:Int = 0;
@@ -33,7 +33,7 @@ class MoveNavigator extends VBox
             vscroll.pos = vscroll.max;
     }
 
-    public function writePlyStr(plyStr:String)
+    public function writePlyStr(plyStr:String, selected:Bool)
     {
         plyNumber++;
         
@@ -60,7 +60,7 @@ class MoveNavigator extends VBox
     public function writePly(ply:Ply, contextSituation:Situation) 
     {
         var plyStr = ply.toNotation(contextSituation);
-        writePlyStr(plyStr);
+        writePlyStr(plyStr, true);
 
         var supposedPlayerMoveColor:PieceColor = plyNumber % 2 == 1? firstColorToMove : opposite(firstColorToMove);
         if (contextSituation.turnColor != supposedPlayerMoveColor)
@@ -107,7 +107,7 @@ class MoveNavigator extends VBox
     {
         clear();
         for (plyStr in newPlyStrSequence)
-            writePlyStr(plyStr);
+            writePlyStr(plyStr, true);
     }
 
     public function init(firstColorToMove:PieceColor, onClickCallback:PlyScrollType->Void) 

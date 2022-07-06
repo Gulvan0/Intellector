@@ -1,6 +1,6 @@
 package gfx;
 
-import haxe.ui.containers.Box;
+import haxe.ui.containers.VBox;
 import js.html.Element;
 import openfl.events.Event;
 import dict.Utils;
@@ -21,41 +21,34 @@ import struct.ActualizationData;
 import struct.PieceColor;
 import browser.URLEditor;
 import utils.TimeControl;
+import haxe.ui.core.Screen;
 
 using StringTools;
 
 /**
-    Manages state transition correctness (both for url and for displayed objects)
+    Manages screen transitions (components+URL) and resizing
 **/
-class ScreenManager extends Box implements INetObserver
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/screen_template.xml'))
+class ScreenManager extends VBox implements INetObserver
 {
     public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event (Rework via Requests.hx?)
-    public static var instance:ScreenManager;
+    private static var instance:ScreenManager;
     private static var openflContent:Element;
 
     private var lastResizeTimestamp:Float;
 
-    public var current:Null<Screen>;
+    private var current:Null<IScreen>;
     public static var currentScreenType:Null<ScreenType>;
 
     public static function getViewedGameID():Null<Int>
     {
-        return switch type 
+        return switch currentScreenType 
         {
             case StartedPlayableGame(gameID, _, _, _, _): gameID;
             case ReconnectedPlayableGame(gameID, _): gameID;
             case SpectatedGame(gameID, _, _): gameID;
             case RevisitedGame(gameID, _, _): gameID;
             default: null;
-        }
-    }
-
-    public function removeCurrentScreen()
-    {
-        if (current != null)
-        {
-            current.onClosed();
-            removeComponent(current);
         }
     }
 
@@ -80,7 +73,7 @@ class ScreenManager extends Box implements INetObserver
             case PlayerProfile(ownerLogin):
                 new PlayerProfile(ownerLogin);
             case LoginRegister:
-                new Screen(); //TODO: Change
+                new MainMenu(); //TODO: Change
             case ChallengeHosting(timeControl, color):
                 new OpenChallengeHosting(timeControl, color);
             case ChallengeJoining(challengeOwner, timeControl, color):
@@ -88,37 +81,13 @@ class ScreenManager extends Box implements INetObserver
         };
     }
 
-    private static function getURLPath(type:ScreenType):String
+    private function removeCurrentScreen()
     {
-        return switch type 
+        if (current != null)
         {
-            case MainMenu: "home";
-            case Analysis(_, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
-            case LanguageSelectIntro: "";
-            case StartedPlayableGame(gameID, _, _, _, _): 'live/$gameID';
-            case ReconnectedPlayableGame(gameID, _): 'live/$gameID';
-            case SpectatedGame(gameID, _, _): 'live/$gameID';
-            case RevisitedGame(gameID, _, _): 'live/$gameID';
-            case PlayerProfile(ownerLogin): 'player/$ownerLogin';
-            case LoginRegister: 'login';
-            case ChallengeHosting(_, _): "challenge";
-            case ChallengeJoining(challengeOwner, timeControl, color): 'join/$challengeOwner';
+            current.onClosed();
+            content.removeComponent(current);
         }
-    }
-
-    /**Use when a connection to a server cannot be estabilished**/
-    public static function toOfflineAnalysis():Analysis
-    {
-        instance.removeCurrentScreen();
-
-        var analysisScreen:Analysis = new Analysis();
-        analysisScreen.disableMenu();
-
-        instance.current = analysisScreen;
-        instance.addComponent(instance.current);
-        instance.current.onEntered();
-
-        return analysisScreen;
     }
 
     public static function toScreen(type:ScreenType)
@@ -129,7 +98,8 @@ class ScreenManager extends Box implements INetObserver
 
         URLEditor.setPath(getURLPath(type), Utils.getScreenTitle(type));
         instance.current = buildScreen(type);
-        instance.addComponent(instance.current);
+        instance.menubar.hidden = instance.current.menuHidden();
+        instance.content.addComponent(instance.current);
         instance.current.onEntered();
     }
 
@@ -137,6 +107,16 @@ class ScreenManager extends Box implements INetObserver
     {
         instance.removeCurrentScreen();
         URLEditor.clear();
+    }
+
+    public static function disableMenu()
+    {
+        instance.menubar.disabled = true;
+    }
+
+    public static function enableMenu()
+    {
+        instance.menubar.disabled = false;
     }
 
     public function handleNetEvent(event:ServerEvent)
@@ -161,10 +141,10 @@ class ScreenManager extends Box implements INetObserver
             case StudyCreated(studyID, studyName):
                 if (currentScreenType.match(Analysis(_, _, _)))
                 {
+                    //Only change URL and screen data, but do not touch displayed components
                     var newScreenType:ScreenType = Analysis(null, studyID, studyName);
                     URLEditor.setPath(getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
                     currentScreenType = newScreenType;
-                    exploredStudyID = studyID;
                 }
             default:
         }
@@ -191,7 +171,7 @@ class ScreenManager extends Box implements INetObserver
     public static function launch()
     {
         var screenManager:ScreenManager = new ScreenManager();
-        haxe.ui.core.Screen.instance.addComponent(screenManager);
+        Screen.instance.addComponent(screenManager);
     }
 
     public static function observeNetEvents()
@@ -203,6 +183,9 @@ class ScreenManager extends Box implements INetObserver
     {
         super();
         instance = this;
+
+        //mainPageLink.customStyle = {fontName: "fonts/Futura.ttf", ...}; //TODO: Rewrite
+        //mainPageLink.onClick = e -> {ScreenManager.toScreen(new MainMenu());};
 
 		openflContent = Browser.document.getElementById("openfl-content");
 		openflContent.style.width = '${Browser.window.innerWidth}px';

@@ -1,5 +1,6 @@
 package gameboard;
 
+import gfx.analysis.PeripheralEvent;
 import gameboard.states.StubState;
 import haxe.exceptions.PosException;
 import utils.exceptions.AlreadyInitializedException;
@@ -14,7 +15,6 @@ import gameboard.behaviors.EditorFreeMoveBehavior;
 import gfx.analysis.PosEditMode;
 import gameboard.states.NeutralState;
 import gameboard.states.BasePlayableState;
-import gfx.analysis.RightPanel.RightPanelEvent;
 import struct.Hex;
 import gameboard.behaviors.IBehavior;
 import struct.IntPoint;
@@ -49,6 +49,7 @@ class GameBoard extends SelectableBoard implements INetObserver
 {
     public var plyHistory:PlyHistory;
     public var currentSituation:Situation;
+    private var startingSituation:Situation;
 
     public var state(default, set):BaseState;
     public var behavior(default, set):IBehavior;
@@ -205,19 +206,8 @@ class GameBoard extends SelectableBoard implements INetObserver
 
     private function home()
     {
-        var initialSituation:Situation = shownSituation.copy();
-        var modifiedHexes:Array<IntPoint> = [];
-        var seq:Array<ReversiblePly> = plyHistory.home(); 
-
-        for (ply in seq)
-            for (transform in ply)
-                if (!modifiedHexes.exists(transform.coords.equals))
-                {
-                    initialSituation.set(transform.coords, transform.former.copy());
-                    modifiedHexes.push(transform.coords);
-                }
-        
-        setSituation(initialSituation);
+        plyHistory.home();
+        setSituation(startingSituation);
         highlightMove([]);
     }   
     
@@ -301,11 +291,11 @@ class GameBoard extends SelectableBoard implements INetObserver
         setSituation(situation.copy());
     }
     
-    public function handleRightPanelEvent(event:RightPanelEvent)
+    public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
         switch event 
         {
-            case BranchSelected(branch, startingSituation, pointer):
+            case BranchSelected(branch, branchStr, pointer):
                 var situation = startingSituation.copy();
                 var i = 0;
                 plyHistory.clear();
@@ -323,11 +313,15 @@ class GameBoard extends SelectableBoard implements INetObserver
                 rearrangeToSituation(Situation.empty());
             case ResetRequested:
                 rearrangeToSituation(currentSituation);
+            case StartPosRequested:
+                rearrangeToSituation(Situation.starting());
+            case OrientationChangeRequested:
+                revertOrientation();
             case ConstructSituationRequested(situation):
                 rearrangeToSituation(situation);
             case TurnColorChanged(newTurnColor):
                 shownSituation.turnColor = newTurnColor;
-            case ApplyChangesRequested:
+            case ApplyChangesRequested(turnColor):
                 currentSituation = shownSituation.copy();
                 plyHistory.clear();
                 state = new NeutralState();
@@ -339,16 +333,14 @@ class GameBoard extends SelectableBoard implements INetObserver
                 behavior = new AnalysisBehavior(currentSituation.turnColor);
             case EditModeChanged(newEditMode):
                 onEditModeChanged(newEditMode);
-            case EditorEntered:
+            case EditorLaunchRequested:
                 removeArrowsAndSelections();
                 highlightMove([]);
                 onEditModeChanged(Move);
             case ScrollBtnPressed(type):
                 applyScrolling(type);
-            case StartPosRequested:
-                rearrangeToSituation(Situation.starting());
-            case OrientationChangeRequested:
-                revertOrientation();
+            case PlySelected(index):
+                scrollToMove(index);
             default:
         }
     }
@@ -402,6 +394,7 @@ class GameBoard extends SelectableBoard implements INetObserver
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();
+        this.startingSituation = situation.copy();
         this.state = stubState? new StubState() : new NeutralState();
         this.behavior = startBehavior;
 

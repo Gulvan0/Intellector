@@ -15,19 +15,25 @@ import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 
-class OpenChallengeHosting extends Screen
+//TODO: Needs total revamp (also XML-ize)
+class OpenChallengeHosting extends VBox implements IScreen
 {
 	private static var hostingBoxWidth:Float = 800;
 	private static var selectAllBtnWidth:Float = 30;
 
-	public override function onEntered()
+	public function onEntered()
     {
         //* Do nothing
     }
 
-    public override function onClosed()
+    public function onClosed()
     {
         //* Do nothing
+    }
+
+    public function menuHidden():Bool
+    {
+        return false;
     }
 
 	

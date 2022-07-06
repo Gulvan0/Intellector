@@ -17,6 +17,7 @@ import openfl.display.Sprite;
 import struct.ActualizationData;
 import browser.CredentialCookies;
 
+//TODO: Needs total revamp (also XML-ize)
 class SignIn extends Sprite
 {
 	private static var menuWidth:Float = 200;

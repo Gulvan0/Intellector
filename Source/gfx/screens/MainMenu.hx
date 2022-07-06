@@ -22,18 +22,24 @@ enum MainMenuButton
     LogOut;
 }
 
-class MainMenu extends Screen
+//TODO: Needs total revamp (also XML-ize)
+class MainMenu extends VBox implements IScreen
 {
     private static var standardBtnWidth:Float = 200;
 
-    public override function onEntered()
+    public function onEntered()
     {
         //* Do nothing
     }
 
-    public override function onClosed()
+    public function onClosed()
     {
         //* Do nothing
+    }
+
+    public function menuHidden():Bool
+    {
+        return false;
     }
 
     private function onDirectChallengeParamsSpecified(callee:String, startSecs:Int, bonusSecs:Int, color:PieceColor)

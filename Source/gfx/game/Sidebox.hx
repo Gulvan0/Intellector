@@ -1,13 +1,13 @@
 package gfx.game;
 
-import gfx.common.GameActionBar.ActionBtn;
+import gfx.game.GameActionBar.ActionBtn;
 import gameboard.GameBoard.GameBoardEvent;
 import gameboard.GameBoard.IGameBoardObserver;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
 import net.EventProcessingQueue.INetObserver;
 import net.ServerEvent;
-import gfx.common.Clock;
+import gfx.game.Clock;
 import haxe.ui.containers.Card;
 import dict.Phrase;
 import gfx.utils.PlyScrollType;

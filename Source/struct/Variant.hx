@@ -284,6 +284,18 @@ class Variant extends VariantNode
         return node;
     }
 
+    public function clear(?newStartingSituation:Situation)
+    {
+        this.ply = null;
+        this.children = [];
+        if (newStartingSituation != null)
+        {
+            this.situationBefore = newStartingSituation;
+            this.situationAfter = newStartingSituation;
+            this.startingSituation = newStartingSituation;
+        }
+    }
+
     public function new(startingSituation:Situation) 
     {
         super(null, startingSituation);

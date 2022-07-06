@@ -19,7 +19,7 @@ import serialization.GameLogParser.GameLogParserOutput;
 import struct.Variant;
 import struct.Ply;
 import gfx.utils.PlyScrollType;
-import gfx.common.GameActionBar.ActionBtn;
+import gfx.game.GameActionBar.ActionBtn;
 import haxe.ui.containers.HBox;
 import gfx.components.BoardWrapper;
 import struct.Situation;
@@ -33,6 +33,9 @@ import struct.ActualizationData;
 import struct.PieceColor;
 import haxe.exceptions.NotImplementedException;
 import haxe.ui.containers.VBox;
+
+//TODO: Move to LiveGame. Use observer more, like in Analysis.hx. Also use BoardWrapper's maxPercent sizing. Maybe simplify even more somehow? 
+//TODO: Organize layouts folder a bit more
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game_layout.xml"))
 class GameLayout extends VBox implements INetObserver implements IGameBoardObserver

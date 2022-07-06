@@ -1,4 +1,4 @@
-package gfx.common;
+package gfx.game;
 
 import haxe.ui.containers.VBox;
 import struct.PieceColor;

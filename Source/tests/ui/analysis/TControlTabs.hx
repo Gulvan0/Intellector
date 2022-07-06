@@ -2,7 +2,7 @@ package tests.ui.analysis;
 
 import tests.ui.TestedComponent.ComponentGraphics;
 
-class TRightPanel extends TestedComponent //TODO: Add more tests
+class TControlTabs extends TestedComponent //TODO: Add more tests
 {
     //TODO: Implement
 

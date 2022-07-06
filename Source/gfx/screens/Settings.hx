@@ -13,18 +13,24 @@ import haxe.ui.containers.VBox;
 import haxe.ui.components.OptionBox;
 import openfl.display.Sprite;
 
-class Settings extends Screen
+//TODO: Needs total revamp (also XML-ize). Probably make it a pop-up instead of a separate screen
+class Settings extends VBox implements IScreen
 {
     private var markupOptionBoxes:Map<Markup, OptionBox> = [];
 
-	public override function onEntered()
+	public function onEntered()
     {
         //* Do nothing
     }
 
-    public override function onClosed()
+    public function onClosed()
     {
         //* Do nothing
+	}
+	
+	public function menuHidden():Bool
+    {
+        return false;
     }
 
 	//TODO: Rewrite using more suitable haxeui components

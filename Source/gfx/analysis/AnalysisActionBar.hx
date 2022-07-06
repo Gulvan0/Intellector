@@ -4,34 +4,27 @@ import gfx.common.ShareDialog;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
 
-enum BtnPressEvent
-{
-    ChangeOrientation;
-    EditPosition;
-    Share;
-}
-
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/analysis/action_bar.xml"))
 class AnalysisActionBar extends VBox
 {
-    public var btnCallback:BtnPressEvent->Void;
+    public var eventHandler:PeripheralEvent->Void;
 
     @:bind(changeOrientationBtn, MouseEvent.CLICK)
     private function onChangeOrientationPressed(e)
     {
-        btnCallback(ChangeOrientation);
+        eventHandler(OrientationChangeRequested);
     }
 
     @:bind(editPositionBtn, MouseEvent.CLICK)
     private function onEditPositionPressed(e)
     {
-        btnCallback(EditPosition);
+        eventHandler(EditorLaunchRequested);
     }
     
     @:bind(shareBtn, MouseEvent.CLICK)
     private function onSharePressed(e)
     {
-        btnCallback(Share);
+        eventHandler(ShareRequested);
     }
 
     public function new() 

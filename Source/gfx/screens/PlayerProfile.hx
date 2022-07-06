@@ -44,7 +44,8 @@ typedef StudyData =
     var variantStr:String;
 }
 
-class PlayerProfile extends Screen implements INetObserver
+//TODO: Needs total revamp (also XML-ize)
+class PlayerProfile extends VBox implements IScreen implements INetObserver
 {
     private var profileOwnerLogin:String;
 
@@ -87,16 +88,21 @@ class PlayerProfile extends Screen implements INetObserver
         }*/
     }
 
-    public override function onEntered()
+    public function onEntered()
     {
         Networker.eventQueue.addObserver(this);
         Networker.emitEvent(GetPlayerGames(profileOwnerLogin, gamePaginationAfter, gamePaginationPageSize));
         Networker.emitEvent(GetPlayerStudies(profileOwnerLogin, studyPaginationAfter, studyPaginationPageSize));
     }
 
-    public override function onClosed()
+    public function onClosed()
     {
         Networker.eventQueue.removeObserser(this);
+    }
+
+    public function menuHidden():Bool
+    {
+        return false;
     }
 
     private function onGamesPrev(e) 

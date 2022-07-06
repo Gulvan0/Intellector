@@ -1,5 +1,6 @@
 package browser;
 
+import gfx.ScreenType;
 import js.Browser;
 
 class URLEditor 
@@ -25,6 +26,24 @@ class URLEditor
     public static function getGameLink(id:Int):String
     {
         return Browser.location.host + ingameToUrlPath('live/$id');
+    }
+
+    public static function getURLPath(type:ScreenType):String
+    {
+        return switch type 
+        {
+            case MainMenu: "home";
+            case Analysis(_, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
+            case LanguageSelectIntro: "";
+            case StartedPlayableGame(gameID, _, _, _, _): 'live/$gameID';
+            case ReconnectedPlayableGame(gameID, _): 'live/$gameID';
+            case SpectatedGame(gameID, _, _): 'live/$gameID';
+            case RevisitedGame(gameID, _, _): 'live/$gameID';
+            case PlayerProfile(ownerLogin): 'player/$ownerLogin';
+            case LoginRegister: 'login';
+            case ChallengeHosting(_, _): "challenge";
+            case ChallengeJoining(challengeOwner, timeControl, color): 'join/$challengeOwner';
+        }
     }
 
     private static function ingameToUrlPath(ingamePath:String)

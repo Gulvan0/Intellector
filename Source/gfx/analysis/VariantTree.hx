@@ -43,7 +43,7 @@ class VariantTree extends Sprite implements IVariantView
     private var onBranchSelect:SelectedBranchInfo->Void;
     private var onRevertNeeded:(plysToRevert:Int)->Void;
 
-    private var variant:Variant;
+    private var variantRef:Variant;
     private var selectedBranch:VariantPath = [];
     private var selectedMove:Int;
 
@@ -69,11 +69,11 @@ class VariantTree extends Sprite implements IVariantView
         if (selectedBranch.contains(path))
             extendedPath = selectedBranch;
         else
-            extendedPath = variant.extendPathLeftmost(path);
+            extendedPath = variantRef.extendPathLeftmost(path);
 
         var info:SelectedBranchInfo = new SelectedBranchInfo();
-        info.plyArray = variant.getBranchByPath(extendedPath);
-        info.plyStrArray = variant.getBranchNotationByPath(extendedPath);
+        info.plyArray = variantRef.getBranchByPath(extendedPath);
+        info.plyStrArray = variantRef.getBranchNotationByPath(extendedPath);
         info.selectedPlyNum = path.length;
 
         selectBranchUnsafe(extendedPath, path.length);
@@ -114,7 +114,7 @@ class VariantTree extends Sprite implements IVariantView
     private function selectBranchUnsafe(fullBranch:VariantPath, selectUpToMove:Int)
     {
         #if debug
-        if (fullBranch.code() != variant.extendPathLeftmost(fullBranch).code())
+        if (fullBranch.code() != variantRef.extendPathLeftmost(fullBranch).code())
             throw "fullBranch isn't really full";
         #end
         
@@ -150,8 +150,7 @@ class VariantTree extends Sprite implements IVariantView
             if (code != "")
                 removeChild(node);
 
-        var startingSit:Situation = newStartingSituation != null? newStartingSituation.copy() : variant.startingSituation;
-        variant = new Variant(startingSit);
+        variantRef.clear(newStartingSituation);
 
         arrows = [];
         nodes = ["" => startNode];
@@ -169,7 +168,7 @@ class VariantTree extends Sprite implements IVariantView
         if (belongsToSelected)
             deselectAll();
 
-        for (familyMemberPath in variant.getFamilyPaths(path))
+        for (familyMemberPath in variantRef.getFamilyPaths(path))
         {
             var code:String = familyMemberPath.code();
             removeChild(nodes.get(code));
@@ -178,8 +177,8 @@ class VariantTree extends Sprite implements IVariantView
             arrows.remove(code);
         }
 
-        for (siblingPath in variant.getRightSiblingsPaths(path, false))
-            for (familyMemberPath in variant.getFamilyPaths(siblingPath))
+        for (siblingPath in variantRef.getRightSiblingsPaths(path, false))
+            for (familyMemberPath in variantRef.getFamilyPaths(siblingPath))
             {
                 var oldCode:String = familyMemberPath.code();
                 var newPath:VariantPath = familyMemberPath.copy();
@@ -191,23 +190,23 @@ class VariantTree extends Sprite implements IVariantView
                 arrows.remove(oldCode);
             }
 
-        variant.removeNode(path);
+            variantRef.removeNode(path);
 
         if (belongsToSelected)
-            selectBranchUnsafe(variant.extendPathLeftmost(parentPath), newMoveNumToSelect);
+            selectBranchUnsafe(variantRef.extendPathLeftmost(parentPath), newMoveNumToSelect);
 
         refreshLayout();
     }
 
     public function addChildNode(parentPath:VariantPath, ply:Ply, selectChild:Bool)
     {
-        var nodeNum:Int = variant.childCount(parentPath);
+        var nodeNum:Int = variantRef.childCount(parentPath);
         var nodePath:VariantPath = parentPath.child(nodeNum);
         var nodeCode:String = nodePath.code();
 
-        var plyStr:String = ply.toNotation(variant.getSituationByPath(parentPath), indicateColors);
+        var plyStr:String = ply.toNotation(variantRef.getSituationByPath(parentPath), indicateColors);
 
-        variant.addChildToNode(ply, parentPath);
+        variantRef.addChildToNode(ply, parentPath);
 
         var node:Node = new Node(nodeCode, plyStr, selectChild, onNodeSelectRequest, onNodeRemoveRequest);
         nodes.set(nodeCode, node);
@@ -279,7 +278,7 @@ class VariantTree extends Sprite implements IVariantView
             var column:Int = 1;
             var iteratedRow:Int = row;
             var iteratedDescendantPath:VariantPath = path.copy();
-            while (rowLengths.exists(iteratedRow) && variant.pathExists(iteratedDescendantPath))
+            while (rowLengths.exists(iteratedRow) && variantRef.pathExists(iteratedDescendantPath))
             {
                 column = MathUtils.maxInt(column, rowLengths.get(iteratedRow) + 1);
                 iteratedRow++;
@@ -300,12 +299,12 @@ class VariantTree extends Sprite implements IVariantView
                     info.maxColumn = column;
             }
 
-            for (childNum in 0...variant.childCount(path))
+            for (childNum in 0...variantRef.childCount(path))
                 recursive(path.child(childNum));
         }
 
         var path:VariantPath = [];
-        for (childNum in 0...variant.childCount(path))
+        for (childNum in 0...variantRef.childCount(path))
             recursive(path.child(childNum));
         return info;
     }
@@ -315,57 +314,41 @@ class VariantTree extends Sprite implements IVariantView
         addChildNode(selectedBranch.subpath(selectedMove), ply, selectChild);
     }
 
-    public function getSerializedVariant():String 
-    {
-		return variant.serialize();
-	}
-
-    public function getStartingSituation():Situation 
-    {
-		return variant.startingSituation.copy();
-	}
-
     public function init(onBranchSelect:SelectedBranchInfo->Void, onRevertNeeded:Int->Void)
     {
         this.onBranchSelect = onBranchSelect;
         this.onRevertNeeded = onRevertNeeded;
     }
 
-    public function new(?initialVariant:Variant, ?selectedNodePath:VariantPath) 
+    public function new(variant:Variant, ?selectedNodePath:VariantPath) 
     {
         super();
+        this.variantRef = variant;
         this.indicateColors = Preferences.branchingTurnColorIndicators.get();
 
         var startingNode:Node = new Node('', Dictionary.getPhrase(OPENING_STARTING_POSITION), false, onNodeSelectRequest, v->{});
         nodes.set('', startingNode);
         addChild(startingNode);
 
-        if (initialVariant == null)
-            this.variant = new Variant(Situation.starting());
-        else
+        for (code => nodeInfo in initialVariant.getAllNodes())
         {
-            this.variant = initialVariant;
+            if (code == '')
+                continue;
 
-            for (code => nodeInfo in initialVariant.getAllNodes())
-            {
-                if (code == '')
-                    continue;
+            var node = new Node(code, nodeInfo.getPlyStr(indicateColors), false, onNodeSelectRequest, onNodeRemoveRequest);
+            var arrow = new Arrow();
 
-                var node = new Node(code, nodeInfo.getPlyStr(indicateColors), false, onNodeSelectRequest, onNodeRemoveRequest);
-                var arrow = new Arrow();
+            nodes.set(code, node);
+            arrows.set(code, arrow);
 
-                nodes.set(code, node);
-                arrows.set(code, arrow);
-
-                addChild(node);
-                addChild(arrow);
-            }
+            addChild(node);
+            addChild(arrow);
         }
 
         if (selectedNodePath != null)
-            selectBranchUnsafe(variant.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
+            selectBranchUnsafe(variantRef.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
         else
-            selectBranchUnsafe(variant.extendPathLeftmost([]), 0);
+            selectBranchUnsafe(variantRef.extendPathLeftmost([]), 0);
 
         Timer.delay(refreshLayout, 200);
     }

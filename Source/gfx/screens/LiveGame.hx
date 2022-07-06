@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.containers.VBox;
 import gfx.game.GameLayout;
 import net.GeneralObserver;
 import openfl.Assets;
@@ -7,21 +8,26 @@ import struct.ActualizationData;
 import struct.PieceColor;
 import utils.TimeControl;
 
-class LiveGame extends Screen
+class LiveGame extends VBox implements IScreen
 {
     private var gameLayout:GameLayout;
 
-    public override function onEntered()
+    public function onEntered()
     {
         GeneralObserver.acceptsDirectChallenges = false;
         Networker.eventQueue.addObserver(gameLayout);
 		Assets.getSound("sounds/notify.mp3").play();
     }
 
-    public override function onClosed()
+    public function onClosed()
     {
         Networker.eventQueue.removeObserser(gameLayout);
         GeneralObserver.acceptsDirectChallenges = true;
+    }
+
+    public function menuHidden():Bool
+    {
+        return false;
     }
 
     public static function constructFromActualizationData(actualizationData:ActualizationData, ?orientationColor:PieceColor):LiveGame
