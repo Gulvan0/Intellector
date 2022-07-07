@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Component;
 import utils.TimeControl;
 import struct.PieceColor;
 import net.LoginManager;
@@ -31,6 +32,11 @@ class OpenChallengeJoining extends VBox implements IScreen
         return false;
     }
 
+    public function asComponent():Component
+    {
+        return this;
+    }
+
     public function new(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>)
     {
 		super();
@@ -60,6 +66,6 @@ class OpenChallengeJoining extends VBox implements IScreen
 
 		joinMenu.x = (Browser.window.innerWidth - boxWidth) / 2;
 		joinMenu.y = 100;
-		content.addComponent(joinMenu);
+		addComponent(joinMenu);
     }
 }

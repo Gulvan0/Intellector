@@ -33,7 +33,7 @@ import struct.ActualizationData;
 import utils.TimeControl;
 using utils.CallbackTools;
 
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/sidebox.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/live/sidebox.xml'))
 class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 {
     private var orientationColor:PieceColor;
@@ -41,8 +41,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     private var secsPerTurn:Int;
     private var lastMovetableEntry:Dynamic;
-
-    private var invalid:Bool = true;
 
     public function handleNetEvent(event:ServerEvent)
     {
@@ -132,7 +130,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         if (move >= 3)
             justMovedPlayerClock.addTime(secsPerTurn);
 
-        navigator.writePlyStr(plyStr);
+        navigator.writePlyStr(plyStr, true);
         navigator.scrollAfterDelay();
 
         actionBar.onMoveNumberUpdated(move);
@@ -162,51 +160,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
         navigator.revertPlys(cnt);
         navigator.scrollAfterDelay();
-    }
-
-    private override function set_componentWidth(value:Null<Float>):Null<Float> 
-    {
-        invalid = true;
-        return super.set_componentWidth(value);
-    }
-
-    private override function set_componentHeight(value:Null<Float>):Null<Float> 
-    {
-        invalid = true;
-        return super.set_componentHeight(value);
-    }
-
-    private override function validateComponentLayout():Bool 
-    {
-        var sizeChanged = super.validateComponentLayout();
-
-        if (!sizeChanged)
-            return false;
-        
-        /*var tmpStyle:Style;
-
-        tmpStyle = whiteLoginCard.customStyle.clone();
-        tmpStyle.paddingLeft = this.width / 30;
-        tmpStyle.paddingRight = this.width / 30;
-        tmpStyle.paddingTop = this.height / 100;
-        tmpStyle.paddingBottom = this.height / 100;
-        whiteLoginCard.customStyle = tmpStyle;
-        
-        tmpStyle = blackLoginCard.customStyle.clone();
-        tmpStyle.paddingLeft = this.width / 30;
-        tmpStyle.paddingRight = this.width / 30;
-        tmpStyle.paddingTop = this.height / 100;
-        tmpStyle.paddingBottom = this.height / 100;
-        blackLoginCard.customStyle = tmpStyle;
-
-        tmpStyle = whiteLoginLabel.customStyle.clone();
-        tmpStyle.fontSize = this.height * 0.045;
-        whiteLoginLabel.customStyle = tmpStyle;
-        tmpStyle = blackLoginLabel.customStyle.clone();
-        tmpStyle.fontSize = this.height * 0.045;
-        blackLoginLabel.customStyle = tmpStyle;*/
-
-        return true;
     }
 
     public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void):Sidebox

@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import haxe.ui.core.Component;
 import haxe.ds.ArraySort;
 import utils.MathUtils;
 import haxe.Timer;
@@ -330,7 +331,7 @@ class VariantTree extends Sprite implements IVariantView
         nodes.set('', startingNode);
         addChild(startingNode);
 
-        for (code => nodeInfo in initialVariant.getAllNodes())
+        for (code => nodeInfo in variantRef.getAllNodes())
         {
             if (code == '')
                 continue;

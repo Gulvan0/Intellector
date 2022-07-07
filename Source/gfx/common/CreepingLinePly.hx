@@ -2,7 +2,7 @@ package gfx.common;
 
 import haxe.ui.containers.Card;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/creeping_line_ply.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/creeping_line_ply.xml"))
 class CreepingLinePly extends Card 
 {
     private final move:Int;

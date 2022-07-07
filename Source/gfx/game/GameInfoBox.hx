@@ -26,7 +26,7 @@ import openfl.text.TextField;
 import openfl.display.Sprite;
 import struct.Outcome;
 
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/gameinfobox.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/live/gameinfobox.xml'))
 class GameInfoBox extends Card implements IGameBoardObserver implements INetObserver
 {
     private var openingTree:OpeningTree;

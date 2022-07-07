@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Component;
 import Preferences.Markup;
 import dict.Language;
 import haxe.ui.styles.Style;
@@ -31,6 +32,11 @@ class Settings extends VBox implements IScreen
 	public function menuHidden():Bool
     {
         return false;
+    }
+
+    public function asComponent():Component
+    {
+        return this;
     }
 
 	//TODO: Rewrite using more suitable haxeui components

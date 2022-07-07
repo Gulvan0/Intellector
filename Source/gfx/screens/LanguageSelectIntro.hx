@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Component;
 import haxe.ui.containers.HBox;
 
 class LanguageSelectIntro extends HBox implements IScreen
@@ -21,8 +22,13 @@ class LanguageSelectIntro extends HBox implements IScreen
         return true;
     }
 
+    public function asComponent():Component
+    {
+        return this;
+    }
+
     public function new()
     {
-        super(true);
+        super();
     }
 }

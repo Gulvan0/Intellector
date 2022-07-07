@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import gfx.components.SpriteWrapper;
 import haxe.ui.events.UIEvent;
 import haxe.ui.events.MouseEvent;
 import gfx.components.Dialogs;
@@ -55,12 +56,12 @@ class ControlTabs extends TabView
         {
             case ContinuationMove(ply, plyStr, performedBy):
                 variantView.addChildToSelectedNode(ply, true);
-                navigator.writePlyStr(plyStr);
+                navigator.writePlyStr(plyStr, true);
             case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
                 var plysToRevertCnt = branchLength - plyPointer;
                 variantView.addChildToSelectedNode(ply, true);
                 navigator.revertPlys(plysToRevertCnt);
-                navigator.writePlyStr(plyStr);
+                navigator.writePlyStr(plyStr, true);
             case SituationEdited(newSituation):
                 variantView.clear(newSituation);
             default:
@@ -92,14 +93,22 @@ class ControlTabs extends TabView
             Dialogs.info("Some help here [P]", "Branching Help [P]");
         };
 
-        variantView = switch Preferences.branchingTabType.get() 
+        var variantViewWrapper:SpriteWrapper = null;
+
+        switch Preferences.branchingTabType.get() 
         {
-            case Tree: new VariantTree(initialVariant);
-            case Outline: new VariantTree(initialVariant); //TODO: Change to Outline
-            case PlainText: new VariantTree(initialVariant); //TODO: Change to PlainText
+            case Tree: 
+                var tree:VariantTree = new VariantTree(initialVariant);
+                variantViewWrapper = new SpriteWrapper(tree, false);
+                variantView = tree;
+            case Outline: 
+                //TODO:
+            case PlainText: 
+                //TODO:
         };
 
         variantView.init(onBranchSelected, onRevertRequestedByBranchingTab);
-        variantViewSV.addComponent(variantView);
+
+        variantViewSV.addComponent(variantViewWrapper);
     }
 }

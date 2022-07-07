@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Component;
 import net.GeneralObserver;
 import net.ServerEvent;
 import struct.PieceColor;
@@ -40,6 +41,11 @@ class MainMenu extends VBox implements IScreen
     public function menuHidden():Bool
     {
         return false;
+    }
+
+    public function asComponent():Component
+    {
+        return this;
     }
 
     private function onDirectChallengeParamsSpecified(callee:String, startSecs:Int, bonusSecs:Int, color:PieceColor)
@@ -133,6 +139,6 @@ class MainMenu extends VBox implements IScreen
 
 		mainMenu.x = (Browser.window.innerWidth - mainMenu.width) / 2;
 		mainMenu.y = 100;
-		content.addComponent(mainMenu);
+		addComponent(mainMenu);
     }
 }

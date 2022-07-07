@@ -1,6 +1,6 @@
 package tests.ui.game;
 
-import gfx.game.GameLayout;
+import gfx.screens.LiveGame;
 import tests.ui.TestedComponent;
 import net.LoginManager;
 import struct.ActualizationData;
@@ -95,7 +95,7 @@ class TSidebox extends TestedComponent
 
     private override function getComponent():ComponentGraphics
     {
-		return AdjustableContent(sidebox, GameLayout.MIN_SIDEBARS_WIDTH, GameLayout.MAX_SIDEBARS_WIDTH, 300, 1000);
+		return AdjustableContent(sidebox, LiveGame.MIN_SIDEBARS_WIDTH, LiveGame.MAX_SIDEBARS_WIDTH, 300, 1000);
     }
 
     private override function rebuildComponent()

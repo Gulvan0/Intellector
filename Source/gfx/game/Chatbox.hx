@@ -25,7 +25,7 @@ import openfl.display.Sprite;
 import struct.ActualizationData;
 using StringTools;
 
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/chatbox.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/live/chatbox.xml'))
 class Chatbox extends VBox implements INetObserver
 {
     private var isOwnerSpectator:Bool;

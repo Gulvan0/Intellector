@@ -14,4 +14,5 @@ interface IScreen
     public function onEntered():Void;
     public function onClosed():Void;
     public function menuHidden():Bool;
+    public function asComponent():Component;
 }

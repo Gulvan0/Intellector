@@ -52,7 +52,7 @@ class ScreenManager extends VBox implements INetObserver
         }
     }
 
-    private static function buildScreen(type:ScreenType):Screen
+    private static function buildScreen(type:ScreenType):IScreen
     {
         return switch type 
         {
@@ -86,7 +86,7 @@ class ScreenManager extends VBox implements INetObserver
         if (current != null)
         {
             current.onClosed();
-            content.removeComponent(current);
+            content.removeComponent(current.asComponent());
         }
     }
 
@@ -96,10 +96,10 @@ class ScreenManager extends VBox implements INetObserver
 
         currentScreenType = type;
 
-        URLEditor.setPath(getURLPath(type), Utils.getScreenTitle(type));
+        URLEditor.setPath(URLEditor.getURLPath(type), Utils.getScreenTitle(type));
         instance.current = buildScreen(type);
         instance.menubar.hidden = instance.current.menuHidden();
-        instance.content.addComponent(instance.current);
+        instance.content.addComponent(instance.current.asComponent());
         instance.current.onEntered();
     }
 
@@ -143,7 +143,7 @@ class ScreenManager extends VBox implements INetObserver
                 {
                     //Only change URL and screen data, but do not touch displayed components
                     var newScreenType:ScreenType = Analysis(null, studyID, studyName);
-                    URLEditor.setPath(getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
+                    URLEditor.setPath(URLEditor.getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
                     currentScreenType = newScreenType;
                 }
             default:

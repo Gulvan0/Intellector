@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import haxe.ui.core.Component;
 import struct.Variant.VariantPath;
 import struct.Situation;
 import struct.Ply;

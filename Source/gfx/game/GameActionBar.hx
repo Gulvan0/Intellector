@@ -33,7 +33,7 @@ enum ActionBtn
     DeclineTakeback;
 }
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/action_bar.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/action_bar.xml"))
 class GameActionBar extends VBox
 {
     private var mode:Mode;

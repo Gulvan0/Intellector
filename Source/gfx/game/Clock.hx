@@ -10,7 +10,7 @@ import utils.TimeControl;
 import haxe.ui.components.Label;
 import haxe.ui.macros.ComponentMacros;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/clock.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/clock.xml"))
 class Clock extends Card
 {
     public var secondsLeft(default, null):Float;

@@ -2,7 +2,7 @@ package tests.ui.game;
 
 import openfl.events.Event;
 import openfl.ui.Keyboard;
-import gfx.game.GameLayout;
+import gfx.screens.LiveGame;
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.events.KeyboardEvent;
 import gfx.game.GameActionBar.ActionBtn;
@@ -117,7 +117,7 @@ class TChatbox extends TestedComponent
     
     private override function getComponent():ComponentGraphics
     {
-		return AdjustableContent(chatbox, GameLayout.MIN_SIDEBARS_WIDTH, GameLayout.MAX_SIDEBARS_WIDTH, 300, 800);
+		return AdjustableContent(chatbox, LiveGame.MIN_SIDEBARS_WIDTH, LiveGame.MAX_SIDEBARS_WIDTH, 300, 800);
     }
 
     private override function rebuildComponent()

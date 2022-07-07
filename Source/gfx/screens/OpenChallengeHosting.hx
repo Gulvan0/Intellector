@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Component;
 import utils.TimeControl;
 import net.LoginManager;
 import js.html.Clipboard;
@@ -34,6 +35,11 @@ class OpenChallengeHosting extends VBox implements IScreen
     public function menuHidden():Bool
     {
         return false;
+    }
+
+    public function asComponent():Component
+    {
+        return this;
     }
 
 	
@@ -73,7 +79,7 @@ class OpenChallengeHosting extends VBox implements IScreen
 
 		hostingMenu.x = (Browser.window.innerWidth - hostingBoxWidth) / 2;
 		hostingMenu.y = 100;
-		content.addComponent(hostingMenu);
+		addComponent(hostingMenu);
 
 		var returnBtn = new Button();
 		returnBtn.width = 100;
@@ -89,7 +95,7 @@ class OpenChallengeHosting extends VBox implements IScreen
             
         returnBtn.x = 10;
 	    returnBtn.y = 10;
-	    content.addComponent(returnBtn);
+	    addComponent(returnBtn);
     }
 
     private function drawLabel():Label

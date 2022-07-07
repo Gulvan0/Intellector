@@ -1,5 +1,12 @@
 package gfx.screens;
 
+import gfx.common.ShareDialog;
+import js.Browser;
+import gameboard.behaviors.AnalysisBehavior;
+import struct.Situation;
+import struct.PieceColor;
+import gfx.components.BoardWrapper;
+import haxe.ui.core.Component;
 import struct.Variant;
 import gameboard.GameBoard;
 import gfx.analysis.ControlTabs;
@@ -32,7 +39,10 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         return false;
     }
 
-    //TODO: Add importBtn SVG icon
+    public function asComponent():Component
+    {
+        return this;
+    }
 
     private override function validateComponentLayout():Bool 
     {
@@ -74,7 +84,7 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
 
     private function handlePeripheralEvent(event:PeripheralEvent)
     {
-        board.handlePeripheralEvent(event);
+        board.handleAnalysisPeripheralEvent(event);
         controlTabs.handlePeripheralEvent(event);
         positionEditor.handlePeripheralEvent(event);
         creepingLine.handlePeripheralEvent(event);
@@ -87,7 +97,7 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
     {
         controlTabs.handleGameBoardEvent(event);
         positionEditor.handleGameBoardEvent(event);
-        creepingLine.handlePeripheralEvent(event);
+        creepingLine.handleGameBoardEvent(event);
     }
 
     public function new(?initialVariantStr:String)

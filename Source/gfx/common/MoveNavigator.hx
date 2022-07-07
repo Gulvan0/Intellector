@@ -14,7 +14,7 @@ import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
 using utils.CallbackTools;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/plynavigator.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/plynavigator.xml"))
 class MoveNavigator extends VBox implements IPlyHistoryView
 {
     private var firstColorToMove:PieceColor;

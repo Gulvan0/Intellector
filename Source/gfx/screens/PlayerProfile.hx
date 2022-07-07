@@ -105,6 +105,11 @@ class PlayerProfile extends VBox implements IScreen implements INetObserver
         return false;
     }
 
+    public function asComponent():Component
+    {
+        return this;
+    }
+
     private function onGamesPrev(e) 
     {
         gamePaginationAfter -= gamePaginationPageSize;
@@ -263,7 +268,7 @@ class PlayerProfile extends VBox implements IScreen implements INetObserver
         mainBox.addComponent(loginLabel);
         mainBox.addComponent(Shapes.vSpacer(60));
         mainBox.addComponent(contentHBox);
-        content.addComponent(mainBox);
+        addComponent(mainBox);
     }
 
     private function gameLink(text:String, gameID:Int):Link

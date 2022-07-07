@@ -6,7 +6,7 @@ import haxe.ui.components.Slider;
 import haxe.ui.components.Label;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
-import gfx.game.GameLayout;
+import gfx.screens.LiveGame;
 import haxe.ui.containers.Box;
 import struct.ActualizationData;
 import struct.IntPoint;
@@ -82,7 +82,7 @@ class TGameInfoBox extends TestedComponent
 
     private override function getComponent():ComponentGraphics
     {
-		return AdjustableContent(gameinfobox, GameLayout.MIN_SIDEBARS_WIDTH, GameLayout.MAX_SIDEBARS_WIDTH, -1, -1);
+		return AdjustableContent(gameinfobox, LiveGame.MIN_SIDEBARS_WIDTH, LiveGame.MAX_SIDEBARS_WIDTH, -1, -1);
     }
 
     private override function rebuildComponent()

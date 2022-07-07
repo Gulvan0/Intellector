@@ -1,8 +1,14 @@
 package gfx.analysis;
 
+import haxe.ui.events.UIEvent;
+import gfx.components.Dialogs;
+import gameboard.GameBoard.GameBoardEvent;
+import struct.Situation;
+import struct.PieceColor;
 import js.Browser;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
+import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/analysis/position_editor.xml"))
 class PositionEditor extends VBox

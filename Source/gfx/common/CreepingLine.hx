@@ -1,5 +1,6 @@
 package gfx.common;
 
+import net.ServerEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import gfx.analysis.PeripheralEvent;
 import struct.PieceColor;
@@ -7,7 +8,7 @@ import gfx.utils.PlyScrollType;
 import haxe.ui.containers.VBox;
 using utils.CallbackTools;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/creeping_line.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/creeping_line.xml"))
 class CreepingLine extends VBox implements IPlyHistoryView
 {
     private var plySelected:Int->Void;
@@ -15,8 +16,7 @@ class CreepingLine extends VBox implements IPlyHistoryView
     private var pointer:Int = 0;
     private var firstColorToMove:PieceColor = White;
 
-
-    private function handlePeripheralEvent(event:PeripheralEvent)
+    public function handlePeripheralEvent(event:PeripheralEvent)
     {
         switch event 
         {
@@ -38,10 +38,11 @@ class CreepingLine extends VBox implements IPlyHistoryView
                 shiftPointer(type);
             case PlySelected(index):
                 setPointer(index+1);
+            default:
         }
     }
 
-    public function handleGameBoardEvent(event:GameBoardEvent) //TODO: Use in GameLayout; Check the overall logic there
+    public function handleGameBoardEvent(event:GameBoardEvent)
     {
         switch event 
         {
@@ -51,6 +52,17 @@ class CreepingLine extends VBox implements IPlyHistoryView
                 writePlyStr(plyStr, true);
             case BranchingMove(_, plyStr, _, _, _):
                 writePlyStr(plyStr, true);
+            default:
+        }
+    }
+
+    public function handleNetEvent(event:ServerEvent)
+    {
+        switch event 
+        {
+            case Rollback(plysToUndo):
+                revertPlys(plysToUndo);
+            default:
         }
     }
 
@@ -80,7 +92,7 @@ class CreepingLine extends VBox implements IPlyHistoryView
             card.deselect();
     }
 
-    public function writePlyStr(plyStr:String, selected:Bool) //TODO: Why is it unused? GameLayout should reference it
+    public function writePlyStr(plyStr:String, selected:Bool)
     {
         var plyCardIndex:Int = plyCards.length;
         var move:Int = firstColorToMove == White? plyCardIndex + 1 : plyCardIndex + 2;
@@ -115,7 +127,7 @@ class CreepingLine extends VBox implements IPlyHistoryView
         };
     }
 
-    public function revertPlys(cnt:Int) //TODO: Why is it unused? GameLayout should reference it
+    public function revertPlys(cnt:Int) //TODO: Why is it unused? LiveGame should reference it
     {
         var newMoveCount = plyCards.length - cnt;
         if (pointer > newMoveCount)
