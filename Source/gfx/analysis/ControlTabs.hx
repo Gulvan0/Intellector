@@ -37,10 +37,10 @@ class ControlTabs extends TabView
 
     public function handlePeripheralEvent(event:PeripheralEvent)
     {
+        navigator.handlePeripheralEvent(event);
         switch event 
         {
             case ApplyChangesRequested(turnColor):
-                navigator.clear(turnColor);
                 disabled = false;
             case DiscardChangesRequested:
                 disabled = false;
@@ -52,32 +52,17 @@ class ControlTabs extends TabView
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
+        navigator.handleGameBoardEvent(event);
         switch event
         {
             case ContinuationMove(ply, plyStr, performedBy):
                 variantView.addChildToSelectedNode(ply, true);
-                navigator.writePlyStr(plyStr, true);
             case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
-                var plysToRevertCnt = branchLength - plyPointer;
                 variantView.addChildToSelectedNode(ply, true);
-                navigator.revertPlys(plysToRevertCnt);
-                navigator.writePlyStr(plyStr, true);
             case SituationEdited(newSituation):
                 variantView.clear(newSituation);
             default:
         }
-    }
-
-    private function onBranchSelected(branchInfo:SelectedBranchInfo)
-    {
-        navigator.rewrite(branchInfo.plyStrArray);
-        eventHandler(BranchSelected(branchInfo.plyArray, branchInfo.plyStrArray, branchInfo.selectedPlyNum));
-    }
-
-    private function onRevertRequestedByBranchingTab(plysToRevert:Int)
-    {
-        navigator.revertPlys(plysToRevert);
-        eventHandler(RevertNeeded(plysToRevert));
     }
 
     public function new(initialVariant:Variant, eventHandler:PeripheralEvent->Void)
@@ -107,7 +92,7 @@ class ControlTabs extends TabView
                 //TODO:
         };
 
-        variantView.init(onBranchSelected, onRevertRequestedByBranchingTab);
+        variantView.init(eventHandler);
 
         variantViewSV.addComponent(variantViewWrapper);
     }

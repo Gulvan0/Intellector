@@ -44,6 +44,8 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     public function handleNetEvent(event:ServerEvent)
     {
+        actionBar.handleNetEvent(event);
+        navigator.handleNetEvent(event);
         switch event 
         {
             case TimeCorrection(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide):
@@ -54,11 +56,11 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
                 revertPlys(plysToUndo);
             default:
         }
-        actionBar.handleNetEvent(event);
     }
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
+        navigator.handleGameBoardEvent(event);
         switch event 
         {
             case ContinuationMove(ply, plyStr, performedBy):
@@ -130,9 +132,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         if (move >= 3)
             justMovedPlayerClock.addTime(secsPerTurn);
 
-        navigator.writePlyStr(plyStr, true);
-        navigator.scrollAfterDelay();
-
         actionBar.onMoveNumberUpdated(move);
     }
 
@@ -157,9 +156,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
         actionBar.shutAllTakebackRequests();
         actionBar.onMoveNumberUpdated(move);
-
-        navigator.revertPlys(cnt);
-        navigator.scrollAfterDelay();
     }
 
     public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void):Sidebox

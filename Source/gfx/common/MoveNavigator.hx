@@ -1,5 +1,8 @@
 package gfx.common;
 
+import gfx.analysis.PeripheralEvent;
+import gameboard.GameBoard.GameBoardEvent;
+import net.ServerEvent;
 import haxe.ui.styles.Style;
 import struct.PieceColor;
 import gfx.utils.PlyScrollType;
@@ -18,10 +21,81 @@ using utils.CallbackTools;
 class MoveNavigator extends VBox implements IPlyHistoryView
 {
     private var firstColorToMove:PieceColor;
-    private var plyNumber:Int = 0;
+    private var plyCount:Int = 0;
+    private var pointer:Int = 0;
     private var lastMovetableEntry:Dynamic;
 
-    public function scrollAfterDelay() 
+    public function handlePeripheralEvent(event:PeripheralEvent)
+    {
+        switch event 
+        {
+            case BranchSelected(branch, branchStr, pointer):
+                rewrite(branchStr, pointer);
+            case RevertNeeded(plyCnt):
+                revertPlys(plyCnt);
+            case ApplyChangesRequested(turnColor):
+                clear(turnColor);
+            case ScrollBtnPressed(type):
+                shiftPointer(type);
+            case PlySelected(index):
+                setPointer(index+1);
+            default:
+        }
+    }
+
+    public function handleGameBoardEvent(event:GameBoardEvent)
+    {
+        switch event 
+        {
+            case ContinuationMove(_, plyStr, _):
+                writePlyStr(plyStr, true);
+            case SubsequentMove(plyStr, _):
+                shiftPointer(Next);
+            case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
+                revertPlys(branchLength - plyPointer);
+                writePlyStr(plyStr, true);
+            default:
+        }
+    }
+
+    public function handleNetEvent(event:ServerEvent)
+    {
+        switch event 
+        {
+            case Rollback(plysToUndo):
+                revertPlys(plysToUndo);
+            default:
+        }
+    }
+
+    public function shiftPointer(type:PlyScrollType) 
+    {
+        switch type 
+        {
+            case Home: 
+                setPointer(0);
+            case Prev: 
+                if (pointer > 0)
+                    setPointer(pointer-1);
+            case Next:
+                if (pointer < plyCount)
+                    setPointer(pointer+1);
+            case End:
+                setPointer(plyCount);
+        };
+    }
+
+    private function setPointer(move:Int)
+    {
+        //TODO: Make selected move bold
+        pointer = move;
+        homeBtn.disabled = pointer == 0;
+        prevBtn.disabled = pointer == 0;
+        nextBtn.disabled = pointer == plyCount;
+        endBtn.disabled = pointer == plyCount;
+    }
+
+    private function scrollAfterDelay() 
     {
         Timer.delay(scrollToEnd, 100);
     }
@@ -35,12 +109,12 @@ class MoveNavigator extends VBox implements IPlyHistoryView
 
     public function writePlyStr(plyStr:String, selected:Bool)
     {
-        plyNumber++;
+        plyCount++;
         
-        var performedBy:PieceColor = plyNumber % 2 == 1? firstColorToMove : opposite(firstColorToMove);
+        var performedBy:PieceColor = plyCount % 2 == 1? firstColorToMove : opposite(firstColorToMove);
 
         if (performedBy == Black)
-            if (plyNumber == 1)
+            if (plyCount == 1)
             {
                 lastMovetableEntry = {"num": '1', "white_move": "", "black_move": plyStr};
                 movetable.dataSource.add(lastMovetableEntry);
@@ -52,9 +126,14 @@ class MoveNavigator extends VBox implements IPlyHistoryView
             }
         else 
         {
-            lastMovetableEntry = {"num": '$plyNumber', "white_move": plyStr, "black_move": " "};
+            lastMovetableEntry = {"num": '$plyCount', "white_move": plyStr, "black_move": " "};
             movetable.dataSource.add(lastMovetableEntry);
         }
+
+        if (selected)
+            setPointer(plyCount);
+
+        scrollAfterDelay();
     }
 
     public function writePly(ply:Ply, contextSituation:Situation) 
@@ -62,7 +141,7 @@ class MoveNavigator extends VBox implements IPlyHistoryView
         var plyStr = ply.toNotation(contextSituation);
         writePlyStr(plyStr, true);
 
-        var supposedPlayerMoveColor:PieceColor = plyNumber % 2 == 1? firstColorToMove : opposite(firstColorToMove);
+        var supposedPlayerMoveColor:PieceColor = plyCount % 2 == 1? firstColorToMove : opposite(firstColorToMove);
         if (contextSituation.turnColor != supposedPlayerMoveColor)
             trace("WARNING: move order discrepancy in MoveNavigator::writePly()");
     }
@@ -72,7 +151,10 @@ class MoveNavigator extends VBox implements IPlyHistoryView
         if (cnt <= 0)
             return;
         
-        plyNumber -= cnt;
+        plyCount -= cnt;
+
+        if (pointer > plyCount)
+            setPointer(plyCount);
 
         if (lastMovetableEntry.black_move == " ")
         {
@@ -92,22 +174,26 @@ class MoveNavigator extends VBox implements IPlyHistoryView
             lastMovetableEntry.black_move = " ";
             movetable.dataSource.update(movetable.dataSource.size - 1, lastMovetableEntry);
         }
+
+        scrollAfterDelay();
     }
 
     public function clear(?updatedFirstColorToMove:PieceColor)
     {
+        pointer = 0;
         movetable.dataSource.clear();
         lastMovetableEntry = null;
-        plyNumber = 0;
+        plyCount = 0;
         if (updatedFirstColorToMove != null)
             this.firstColorToMove = updatedFirstColorToMove;
     }
 
-    public function rewrite(newPlyStrSequence:Array<String>)
+    public function rewrite(newPlyStrSequence:Array<String>, newPointerPos:Int)
     {
         clear();
         for (plyStr in newPlyStrSequence)
-            writePlyStr(plyStr, true);
+            writePlyStr(plyStr, false);
+        setPointer(newPointerPos);
     }
 
     public function init(firstColorToMove:PieceColor, onClickCallback:PlyScrollType->Void) 

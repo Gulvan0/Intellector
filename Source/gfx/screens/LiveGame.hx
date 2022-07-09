@@ -155,6 +155,7 @@ class LiveGame extends HBox implements INetObserver implements IGameBoardObserve
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
         cCreepingLine.handleGameBoardEvent(event);
+        sidebox.handleGameBoardEvent(event);
 
         switch event 
         {

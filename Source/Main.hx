@@ -105,7 +105,7 @@ class Main extends Sprite
 			LocaleManager.instance.language = "ru";
 		else
 			LocaleManager.instance.language = "en";
-		
+
 		Networker.onConnectionEstabilished = onConnected;
 		Networker.onConnectionFailed = onConnectionFailed;
 		Networker.launch();

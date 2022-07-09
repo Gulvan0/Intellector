@@ -11,7 +11,7 @@ using utils.CallbackTools;
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/creeping_line.xml"))
 class CreepingLine extends VBox implements IPlyHistoryView
 {
-    private var plySelected:Int->Void;
+    private var onPlySelectedManually:Int->Void;
     private var plyCards:Array<CreepingLinePly> = [];
     private var pointer:Int = 0;
     private var firstColorToMove:PieceColor = White;
@@ -21,10 +21,7 @@ class CreepingLine extends VBox implements IPlyHistoryView
         switch event 
         {
             case BranchSelected(branch, branchStr, pointer):
-                clear();
-                for (plyStr in branchStr)
-                    writePlyStr(plyStr, false);
-                setPointer(pointer);
+                rewrite(branchStr, pointer);
             case RevertNeeded(plyCnt):
                 revertPlys(plyCnt);
             case ApplyChangesRequested(turnColor):
@@ -49,8 +46,9 @@ class CreepingLine extends VBox implements IPlyHistoryView
             case ContinuationMove(_, plyStr, _):
                 writePlyStr(plyStr, true);
             case SubsequentMove(plyStr, _):
-                writePlyStr(plyStr, true);
-            case BranchingMove(_, plyStr, _, _, _):
+                shiftPointer(Next);
+            case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
+                revertPlys(branchLength - plyPointer);
                 writePlyStr(plyStr, true);
             default:
         }
@@ -64,50 +62,6 @@ class CreepingLine extends VBox implements IPlyHistoryView
                 revertPlys(plysToUndo);
             default:
         }
-    }
-
-    private function getSelectedCard():Null<CreepingLinePly>
-    {
-        return pointer > 0? plyCards[pointer-1] : null;
-    }
-
-    private function setPointer(move:Int)
-    {
-        deselectSelectedCard();
-        if (move > 0)
-            plyCards[move-1].select();
-        pointer = move;
-    }
-
-    private function onPlyCardClicked(move:Int)
-    {
-        setPointer(move);
-        plySelected(move);
-    }
-
-    private function deselectSelectedCard() 
-    {
-        var card = getSelectedCard();
-        if (card != null)
-            card.deselect();
-    }
-
-    public function writePlyStr(plyStr:String, selected:Bool)
-    {
-        var plyCardIndex:Int = plyCards.length;
-        var move:Int = firstColorToMove == White? plyCardIndex + 1 : plyCardIndex + 2;
-
-        var plyCard:CreepingLinePly = new CreepingLinePly(move, plyStr, onPlyCardClicked);
-
-        if (selected)
-        {
-            deselectSelectedCard();
-            plyCard.select();
-            pointer = plyCardIndex + 1;
-        }
-
-        plyCards.push(plyCard);
-        lineBox.addComponent(plyCard);
     }
 
     public function shiftPointer(type:PlyScrollType) 
@@ -127,25 +81,62 @@ class CreepingLine extends VBox implements IPlyHistoryView
         };
     }
 
-    public function revertPlys(cnt:Int) //TODO: Why is it unused? LiveGame should reference it
+    private function setPointer(move:Int)
+    {
+        deselectSelectedCard();
+        if (move > 0)
+            plyCards[move-1].select();
+        pointer = move;
+    }
+
+    private function getSelectedCard():Null<CreepingLinePly>
+    {
+        return pointer > 0? plyCards[pointer-1] : null;
+    }
+
+    private function onPlyCardClicked(move:Int)
+    {
+        setPointer(move);
+        onPlySelectedManually(move);
+    }
+
+    private function deselectSelectedCard() 
+    {
+        var card = getSelectedCard();
+        if (card != null)
+            card.deselect();
+    }
+
+    public function writePlyStr(plyStr:String, selected:Bool)
+    {
+        var plyCardIndex:Int = plyCards.length;
+        var move:Int = firstColorToMove == White? plyCardIndex + 1 : plyCardIndex + 2;
+
+        var plyCard:CreepingLinePly = new CreepingLinePly(move, plyStr, onPlyCardClicked);
+
+        plyCards.push(plyCard);
+        lineBox.addComponent(plyCard);
+
+        if (selected)
+            setPointer(plyCardIndex + 1);
+    }
+
+    public function revertPlys(cnt:Int)
     {
         var newMoveCount = plyCards.length - cnt;
         if (pointer > newMoveCount)
-        {
-            deselectSelectedCard();
-            if (newMoveCount > 0)
-                plyCards[newMoveCount-1].select();
-            pointer = newMoveCount;
-        }
+            setPointer(newMoveCount);
+
         for (card in plyCards.splice(newMoveCount, plyCards.length))
             lineBox.removeComponent(card);
     }
 
-    public function rewrite(newPlyStrSequence:Array<String>)
+    public function rewrite(newPlyStrSequence:Array<String>, newPointerPos:Int)
     {
         clear();
         for (plyStr in newPlyStrSequence)
             writePlyStr(plyStr, true);
+        setPointer(newPointerPos);
     }
 
     public function clear(?updatedFirstColorToMove:PieceColor)
@@ -159,9 +150,9 @@ class CreepingLine extends VBox implements IPlyHistoryView
             firstColorToMove = updatedFirstColorToMove;
     }
 
-    public function init(plySelected:Int->Void, ?firstColorToMove:PieceColor = White) 
+    public function init(onPlySelectedManually:Int->Void, ?firstColorToMove:PieceColor = White) 
     {
-        this.plySelected = plySelected;
+        this.onPlySelectedManually = onPlySelectedManually;
         this.firstColorToMove = firstColorToMove;
     }
 

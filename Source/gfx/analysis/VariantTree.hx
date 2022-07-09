@@ -7,7 +7,6 @@ import haxe.Timer;
 import dict.Dictionary;
 import struct.Ply;
 import struct.Situation;
-import gfx.analysis.IVariantView.SelectedBranchInfo;
 import haxe.ui.components.Link;
 import openfl.geom.Point;
 import struct.Variant;
@@ -41,12 +40,11 @@ class VariantTree extends Sprite implements IVariantView
 
     private var columnWidths:Map<Int, Float> = [];
 
-    private var onBranchSelect:SelectedBranchInfo->Void;
-    private var onRevertNeeded:(plysToRevert:Int)->Void;
-
     private var variantRef:Variant;
     private var selectedBranch:VariantPath = [];
     private var selectedMove:Int;
+
+    private var eventHandler:PeripheralEvent->Void;
 
     private var indicateColors:Bool = true;
 
@@ -72,13 +70,12 @@ class VariantTree extends Sprite implements IVariantView
         else
             extendedPath = variantRef.extendPathLeftmost(path);
 
-        var info:SelectedBranchInfo = new SelectedBranchInfo();
-        info.plyArray = variantRef.getBranchByPath(extendedPath);
-        info.plyStrArray = variantRef.getBranchNotationByPath(extendedPath);
-        info.selectedPlyNum = path.length;
+        var branch = variantRef.getBranchByPath(extendedPath);
+        var branchStr = variantRef.getBranchNotationByPath(extendedPath);
+        var pointer = path.length;
 
         selectBranchUnsafe(extendedPath, path.length);
-        onBranchSelect(info);
+        eventHandler(BranchSelected(branch, branchStr, pointer));
     }
 
     private function onNodeRemoveRequest(code:String)
@@ -95,7 +92,7 @@ class VariantTree extends Sprite implements IVariantView
         removeNode(path);
 
         if (plysToRevert != null)
-            onRevertNeeded(plysToRevert);
+            eventHandler(RevertNeeded(plysToRevert));
     }
 
     private function deselectAll() 
@@ -315,10 +312,9 @@ class VariantTree extends Sprite implements IVariantView
         addChildNode(selectedBranch.subpath(selectedMove), ply, selectChild);
     }
 
-    public function init(onBranchSelect:SelectedBranchInfo->Void, onRevertNeeded:Int->Void)
+    public function init(eventHandler:PeripheralEvent->Void)
     {
-        this.onBranchSelect = onBranchSelect;
-        this.onRevertNeeded = onRevertNeeded;
+        this.eventHandler = eventHandler;
     }
 
     public function new(variant:Variant, ?selectedNodePath:VariantPath) 
