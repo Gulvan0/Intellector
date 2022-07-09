@@ -61,9 +61,13 @@ class TControlTabs extends TestedComponent //TODO: Add more tests
         "No reaction"
     ];*/
 
-	function getComponent():ComponentGraphics {
+    public override function getComponent():ComponentGraphics 
+    {
 		throw new haxe.exceptions.NotImplementedException();
 	}
 
-	function rebuildComponent() {}
+    public override function rebuildComponent() 
+    {
+        throw new haxe.exceptions.NotImplementedException();
+    }
 }

@@ -23,9 +23,9 @@
         <button id="cancelTakebackBtn" text="✖" tooltip="${Dictionary.getPhrase(CANCEL_TAKEBACK_BTN_TOOLTIP)}" width="20%" height="35px" hidden="true" style="padding-top:0px;padding-bottom:0px;font-size:26px"/>
         <button id="resignBtn" text="✖" tooltip="${Dictionary.getPhrase(RESIGN_BTN_ABORT_TOOLTIP)}" width="20%" height="35px" style="padding: 0 0;font-size: 30"/>
         <button id="addTimeBtn" text="➕&#xFE0E;" tooltip="${Dictionary.getPhrase(ADD_TIME_BTN_TOOLTIP)}" width="20%" height="35px" style="padding: 0 0;font-size: 28"/>
-        <button id="analyzeBtn" text="🔬&#xFE0E;" width="20%" height="35px" style="padding: 0 0;font-size:26px"/>
-        <button id="shareBtn" text="⮫" width="20%" height="35px" style="padding: 0 0;font-size:26px"/>
-        <button id="rematchBtn" text="⚔" width="20%" height="35px" style="padding: 0 0;font-size:26px"/>
+        <button id="analyzeBtn" text="🔬&#xFE0E;" tooltip="${Dictionary.getPhrase(EXPLORE_IN_ANALYSIS_BTN_TOOLTIP)}" width="20%" height="35px" style="padding: 0 0;font-size:26px"/>
+        <button id="shareBtn" text="⮫" tooltip="${Dictionary.getPhrase(LIVE_SHARE_BTN_TOOLTIP)}" width="20%" height="35px" style="padding: 0 0;font-size:26px"/>
+        <button id="rematchBtn" text="⚔" tooltip="${Dictionary.getPhrase(REMATCH_BTN_TOOLTIP)}" width="20%" height="35px" style="padding: 0 0;font-size:26px"/>
     </button-bar>
     <hbox id="drawRequestBox" width="100%" height="35px" hidden="true" style="background-color: #f7f7f7;border-bottom: 1;border-color: #dddddd;padding: 0 0 0 1;">
         <button id="declineDrawBtn" width="13.5%" height="100%" text="✘" style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:0px;text-align:center;font-size:24px;color: #c80316" horizontalAlign="left"/>

@@ -16,8 +16,8 @@
         }
     </style>
     <button-bar id="btnBar" width="100%" toggle="false">
-        <button id="changeOrientationBtn" text="🗘" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="25%" height="35px" style="padding: 0 0;font-size: 32;"/>
-        <button id="editPositionBtn" text="✎" tooltip="${Dictionary.getPhrase(ANALYSIS_SET_POSITION_BTN_TOOLTIP)}" width="25%" height="35px" style="padding: 0 0;font-size:26px"/>
-        <button id="shareBtn" text="⮫" width="25%" height="35px" style="padding: 0 0;font-size:26px"/>
+        <button id="changeOrientationBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="25%" height="35px" style="background-image: Assets/symbols/analysis/flip.svg" styleName="tool-button"/>
+        <button id="editPositionBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SET_POSITION_BTN_TOOLTIP)}" width="25%" height="35px" style="background-image: Assets/symbols/common/edit.svg" styleName="tool-button"/>
+        <button id="shareBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SHARE_BTN_TOOLTIP)}" width="25%" height="35px" style="background-image: Assets/symbols/common/share.svg" styleName="tool-button"/>
     </button-bar>
 </vbox>

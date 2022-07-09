@@ -7,6 +7,7 @@ class Dictionary
     private static var dict:Map<Phrase, Array<String>> = 
     [
         ANALYSIS_SET_POSITION_BTN_TOOLTIP => ["Set position", "Задать позицию"],
+        ANALYSIS_SHARE_BTN_TOOLTIP => ["Share", "Поделиться"],
         ANALYSIS_OVERVIEW_TAB_NAME => ["Overview", "Обзор"],
         ANALYSIS_BRANCHING_TAB_NAME => ["Branches", "Ветви"],
         ANALYSIS_OPENINGS_TAB_NAME => ["Openings", "Дебюты"],
@@ -48,6 +49,8 @@ class Dictionary
         
         COPY_BTN_TOOLTIP  => ["Copy", "Копировать"],
         COPY_BTN_SUCCESS_TOOLTIP  => ["Copied!", "Скопировано!"],
+
+        LIVE_SHARE_BTN_TOOLTIP => ["Share", "Поделиться"], 
 
         CHATBOX_MESSAGE_PLACEHOLDER => ["Message text...", "Сообщение..."],
         PROMOTION_DIALOG_QUESTION => ["Select a piece to which you want to promote", "Выберите фигуру, в которую хотите превратиться"],
