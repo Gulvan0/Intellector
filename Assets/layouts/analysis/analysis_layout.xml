@@ -9,7 +9,7 @@
         <box id="cActionBarContainer" width="100%">
             <analysisactionbar id="actionBar" width="100%" />
         </box>
-        <box id="positionEditorContainer" width="100%" />
+        <box id="positionEditorContainer" width="100%" hidden="true"/>
     </vbox>
-    <box id="lControlTabsContainer" width="350px" height="100%" />
+    <box id="lControlTabsContainer" width="350px" height="98%" />
 </hbox>

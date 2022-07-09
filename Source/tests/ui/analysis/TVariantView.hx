@@ -87,7 +87,7 @@ class TVariantView extends TestedComponent
                 new AugmentedVariantTree(startingVariant, selectedPath); //TODO: Replace with AugmentedPlainText
         }
 
-        variantView.init(p->{trace('Selected: ' + p.plyStrArray.join(' -> '));}, p->{trace('Removed: ' + p);});
+        variantView.init(p->{trace(p);});
     }
 
     public override function imitateEvent(encodedEvent:String)

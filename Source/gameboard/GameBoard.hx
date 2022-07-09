@@ -297,14 +297,18 @@ class GameBoard extends SelectableBoard implements INetObserver
         {
             case BranchSelected(branch, branchStr, pointer):
                 var situation = startingSituation.copy();
-                var i = 0;
+                var i = 1;
                 plyHistory.clear();
                 for (ply in branch)
                 {
-                    plyHistory.append(ply, ply.toReversible(situation));
+                    var reversiblePly:ReversiblePly = ply.toReversible(situation);
+                    plyHistory.append(ply, reversiblePly, i > pointer);
                     situation = situation.makeMove(ply);
                     if (i == pointer)
+                    {
                         rearrangeToSituation(situation);
+                        highlightMove(reversiblePly.affectedCoords());
+                    }
                     i++;
                 }
             case RevertNeeded(plyCnt):

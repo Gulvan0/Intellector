@@ -10,7 +10,7 @@ import haxe.ui.components.Link;
 class Node extends Link
 {
     public var code:String;
-    public var textWidth(default, null):Float;
+    public var textSize(default, null):{w:Float, h:Float};
 
     public function inputPos():Point
     {
@@ -49,11 +49,12 @@ class Node extends Link
         else
             deselect();
 
-        textWidth = measureTextWidthArg(text);
-        width = textWidth;
+        textSize = measureTextSize(text);
+        width = textSize.w;
+        height = textSize.h;
     }
 
-    private function measureTextWidthArg(text:String):Float {
+    private function measureTextSize(text:String):{w:Float, h:Float} {
         var _tempField = new TextField();
         _tempField.type = TextFieldType.DYNAMIC;
         _tempField.selectable = false;
@@ -62,6 +63,6 @@ class Node extends Link
         
         _tempField.defaultTextFormat = new TextFormat("_sans", 13, null, true, false, true);
         _tempField.text = text;
-        return _tempField.textWidth + 4;
+        return {w: _tempField.textWidth + 4, h: _tempField.textHeight + 2};
     }
 }

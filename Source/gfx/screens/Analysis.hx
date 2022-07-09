@@ -104,12 +104,12 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
     {
         super();
 
-        var initialVariant:Variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.starting());
-        var startingSituation:Situation = initialVariant.startingSituation;
+        variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.starting());
+        var startingSituation:Situation = variant.startingSituation;
         var firstColorToMove:PieceColor = startingSituation.turnColor;
 
         board = new GameBoard(startingSituation, firstColorToMove, new AnalysisBehavior(firstColorToMove), false);
-        controlTabs = new ControlTabs(initialVariant, handlePeripheralEvent);
+        controlTabs = new ControlTabs(variant, handlePeripheralEvent);
         positionEditor = new PositionEditor(handlePeripheralEvent);
 
         creepingLine.init(i -> {handlePeripheralEvent(PlySelected(i));}, firstColorToMove);

@@ -14,10 +14,15 @@
             border-top-right-radius: 0.5;
             border-bottom-right-radius: 0.5;
         }
+
+        .analysis-actionbar-button .icon {
+            width: 30px;
+            height: 30px;
+        }
     </style>
     <button-bar id="btnBar" width="100%" toggle="false">
-        <button id="changeOrientationBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="25%" height="35px" style="background-image: assets/symbols/analysis/flip.svg" styleName="tool-button"/>
-        <button id="editPositionBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SET_POSITION_BTN_TOOLTIP)}" width="25%" height="35px" style="background-image: assets/symbols/common/edit.svg" styleName="tool-button"/>
-        <button id="shareBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SHARE_BTN_TOOLTIP)}" width="25%" height="35px" style="background-image: assets/symbols/common/share.svg" styleName="tool-button"/>
+        <button id="changeOrientationBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="33.33%" height="36px" icon="assets/symbols/analysis/flip.svg" styleName="analysis-actionbar-button"/>
+        <button id="editPositionBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SET_POSITION_BTN_TOOLTIP)}" width="33.33%" height="36px" icon="assets/symbols/common/edit.svg" styleName="analysis-actionbar-button"/>
+        <button id="shareBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SHARE_BTN_TOOLTIP)}" width="33.33%" height="36px" icon="assets/symbols/common/share.svg" styleName="analysis-actionbar-button"/>
     </button-bar>
 </vbox>

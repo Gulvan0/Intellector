@@ -30,7 +30,7 @@ class AugmentedVariantTree extends VariantTree implements ITestedVariantView
 
     public function getCurrentSituation():Situation
     {
-        return variant.getSituationByPath(selectedBranch.subpath(selectedMove));
+        return variantRef.getSituationByPath(selectedBranch.subpath(selectedMove));
     }
 
     public function getComponent():ComponentGraphics 

@@ -1,10 +1,10 @@
 package gfx.analysis;
 
+import haxe.ui.containers.dialogs.MessageBox;
 import gfx.components.SpriteWrapper;
 import haxe.ui.events.UIEvent;
 import haxe.ui.events.MouseEvent;
 import gfx.components.Dialogs;
-import gfx.analysis.IVariantView.SelectedBranchInfo;
 import gameboard.GameBoard.IGameBoardObserver;
 import gameboard.GameBoard.GameBoardEvent;
 import haxe.ui.core.Component;
@@ -75,7 +75,14 @@ class ControlTabs extends TabView
         navigator.init(initialVariant.startingSituation.turnColor, btn -> {eventHandler(ScrollBtnPressed(btn));});
 
         branchingHelpLink.onClick = e -> {
-            Dialogs.info(dict.Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TEXT), dict.Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TITLE));
+            var messageBox = new MessageBox();
+            messageBox.type = MessageBoxType.TYPE_INFO;
+            messageBox.title = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TITLE);
+            messageBox.messageLabel.htmlText = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TEXT);
+            messageBox.messageLabel.customStyle = {fontSize: 18};
+            messageBox.width = 500;
+            messageBox.modal = true;
+            messageBox.show();
         };
 
         var variantViewWrapper:SpriteWrapper = null;

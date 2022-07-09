@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import openfl.events.Event;
 import haxe.ui.core.Component;
 import haxe.ds.ArraySort;
 import utils.MathUtils;
@@ -228,12 +229,12 @@ class VariantTree extends Sprite implements IVariantView
         columnWidths = [];
         for (column => codes in displacement.columnContents.keyValueIterator())
         {
-            var maxWidth:Float = column == 1? nodes.get('').textWidth : 0;
+            var maxWidth:Float = column == 1? nodes.get('').textSize.w : 0;
             for (code in codes)
             {
                 var node = nodes.get(code);
-                if (node.textWidth > maxWidth)
-                    maxWidth = node.textWidth;
+                if (node.textSize.w > maxWidth)
+                    maxWidth = node.textSize.w;
             }
             columnWidths.set(column, maxWidth);
         }
@@ -317,6 +318,12 @@ class VariantTree extends Sprite implements IVariantView
         this.eventHandler = eventHandler;
     }
 
+    private function onReady(e)
+    {
+        removeEventListener(Event.RENDER, onReady);
+        refreshLayout();
+    }
+
     public function new(variant:Variant, ?selectedNodePath:VariantPath) 
     {
         super();
@@ -347,6 +354,6 @@ class VariantTree extends Sprite implements IVariantView
         else
             selectBranchUnsafe(variantRef.extendPathLeftmost([]), 0);
 
-        Timer.delay(refreshLayout, 200);
+        addEventListener(Event.RENDER, onReady);
     }
 }

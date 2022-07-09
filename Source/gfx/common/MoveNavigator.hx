@@ -85,14 +85,19 @@ class MoveNavigator extends VBox implements IPlyHistoryView
         };
     }
 
-    private function setPointer(move:Int)
+    public function updateScrollButtons() 
     {
-        //TODO: Make selected move bold
-        pointer = move;
         homeBtn.disabled = pointer == 0;
         prevBtn.disabled = pointer == 0;
         nextBtn.disabled = pointer == plyCount;
         endBtn.disabled = pointer == plyCount;
+    }
+
+    public function setPointer(move:Int)
+    {
+        //TODO: Make selected move bold
+        pointer = move;
+        updateScrollButtons();
     }
 
     private function scrollAfterDelay() 
@@ -132,6 +137,8 @@ class MoveNavigator extends VBox implements IPlyHistoryView
 
         if (selected)
             setPointer(plyCount);
+        else
+            updateScrollButtons();
 
         scrollAfterDelay();
     }
@@ -155,6 +162,8 @@ class MoveNavigator extends VBox implements IPlyHistoryView
 
         if (pointer > plyCount)
             setPointer(plyCount);
+        else
+            updateScrollButtons();
 
         if (lastMovetableEntry.black_move == " ")
         {
@@ -181,11 +190,13 @@ class MoveNavigator extends VBox implements IPlyHistoryView
     public function clear(?updatedFirstColorToMove:PieceColor)
     {
         pointer = 0;
-        movetable.dataSource.clear();
         lastMovetableEntry = null;
         plyCount = 0;
         if (updatedFirstColorToMove != null)
             this.firstColorToMove = updatedFirstColorToMove;
+
+        movetable.dataSource.clear();
+        updateScrollButtons();
     }
 
     public function rewrite(newPlyStrSequence:Array<String>, newPointerPos:Int)
@@ -203,6 +214,7 @@ class MoveNavigator extends VBox implements IPlyHistoryView
         prevBtn.onClick = onClickCallback.bind(Prev).expand();
         nextBtn.onClick = onClickCallback.bind(Next).expand();
         endBtn.onClick = onClickCallback.bind(End).expand();
+        updateScrollButtons();
     } 
     
     public function new()

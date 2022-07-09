@@ -1,5 +1,6 @@
 package;
 
+import tests.ui.analysis.TAnalysisScreen;
 import haxe.ui.locale.LocaleManager;
 import tests.ui.game.TSidebox;
 import struct.PieceColor;
@@ -61,10 +62,9 @@ class Main extends Sprite
 	{
 		super();
 		init(() -> {
-			UITest.launchTest(new TSidebox());
-			//ScreenManager.toScreen(ScreenType.Analysis(null, null));
-			/*ScreenManager.launch();
-			start();*/
+			ScreenManager.launch();
+			ScreenManager.toScreen(Analysis(null, null, null));
+			/*start();*/
 		});
 		
 	}

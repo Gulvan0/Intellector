@@ -1,35 +1,51 @@
 <vbox width="100%">
     <style>
-        .normalModeBtn .icon {
-            width: 50px;
-            height: 50px;
-        }
-        .smallPieceModeBtn .icon {
+        .moveDelete .icon {
             width: 35px;
             height: 35px;
         }
-        .mediumPieceModeBtn .icon {
-            width: 45px;
-            height: 45px;
+        .aggressor .icon {
+            width: 23.43px;
+            height: 35px;
+        }
+        .dominator .icon {
+            width: 23.4375px;
+            height: 35px;
+        }
+        .intellector .icon {
+            width: 22.12px;
+            height: 35px;
+        }
+        .liberator .icon {
+            width: 25.25px;
+            height: 31.5px;
+        }
+        .defensor .icon {
+            width: 20.6px;
+            height: 31.5px;
+        }
+        .progressor .icon {
+            width: 24.5px;
+            height: 22.5px;
         }
     </style>
-    <grid id="editModesGrid" width="100%" columns="7" horizontalAlign="center">
-        <button id="moveModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/move.svg" styleName="normalModeBtn" group="editModes" toggle="true" selected="true" />
-        <button id="setProgWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_White.svg" styleName="smallPieceModeBtn" group="editModes" toggle="true" />
-        <button id="setAgrWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Aggressor_White.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
-        <button id="setDefWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Defensor_White.svg" styleName="mediumPieceModeBtn" group="editModes" toggle="true" />
-        <button id="setLibWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Liberaror_White.svg" styleName="mediumPieceModeBtn" group="editModes" toggle="true" />
-        <button id="setDomWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Dominator_White.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
-        <button id="setIntWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_White.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
-        <button id="deleteModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/delete.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
-        <button id="setProgBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_Black.svg" styleName="smallPieceModeBtn" group="editModes" toggle="true" />
-        <button id="setAgrBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Aggressor_Black.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
-        <button id="setDefBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Defensor_Black.svg" styleName="mediumPieceModeBtn" group="editModes" toggle="true" />
-        <button id="setLibBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Liberaror_Black.svg" styleName="mediumPieceModeBtn" group="editModes" toggle="true" />
-        <button id="setDomBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Dominator_Black.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
-        <button id="setIntBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_Black.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
+    <grid id="editModesGrid" columns="7" horizontalAlign="center">
+        <button id="moveModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/move.svg" styleName="moveDelete" group="editModes" toggle="true" selected="true" />
+        <button id="setProgWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_White.svg" styleName="progressor" group="editModes" toggle="true" />
+        <button id="setAgrWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Aggressor_White.svg" styleName="aggressor" group="editModes" toggle="true" />
+        <button id="setDefWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Defensor_White.svg" styleName="defensor" group="editModes" toggle="true" />
+        <button id="setLibWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Liberaror_White.svg" styleName="liberator" group="editModes" toggle="true" />
+        <button id="setDomWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Dominator_White.svg" styleName="dominator" group="editModes" toggle="true" />
+        <button id="setIntWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_White.svg" styleName="intellector" group="editModes" toggle="true" />
+        <button id="deleteModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/delete.svg" styleName="moveDelete" group="editModes" toggle="true" />
+        <button id="setProgBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_Black.svg" styleName="progressor" group="editModes" toggle="true" />
+        <button id="setAgrBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Aggressor_Black.svg" styleName="aggressor" group="editModes" toggle="true" />
+        <button id="setDefBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Defensor_Black.svg" styleName="defensor" group="editModes" toggle="true" />
+        <button id="setLibBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Liberaror_Black.svg" styleName="liberator" group="editModes" toggle="true" />
+        <button id="setDomBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Dominator_Black.svg" styleName="dominator" group="editModes" toggle="true" />
+        <button id="setIntBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_Black.svg" styleName="intellector" group="editModes" toggle="true" />
     </grid>
-    <hbox>
+    <hbox width="100%">
         <button id="orientationBtn" style="background-image: assets/symbols/analysis/flip.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <option-stepper id="turnColorStepper" verticalAlign="center" width="100%" height="40px">
             <data>

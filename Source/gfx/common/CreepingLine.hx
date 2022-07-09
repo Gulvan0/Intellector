@@ -34,7 +34,7 @@ class CreepingLine extends VBox implements IPlyHistoryView
             case ScrollBtnPressed(type):
                 shiftPointer(type);
             case PlySelected(index):
-                setPointer(index+1);
+                setPointer(index);
             default:
         }
     }
@@ -81,44 +81,27 @@ class CreepingLine extends VBox implements IPlyHistoryView
         };
     }
 
-    private function setPointer(move:Int)
+    public function setPointer(value:Int)
     {
-        deselectSelectedCard();
-        if (move > 0)
-            plyCards[move-1].select();
-        pointer = move;
-    }
-
-    private function getSelectedCard():Null<CreepingLinePly>
-    {
-        return pointer > 0? plyCards[pointer-1] : null;
-    }
-
-    private function onPlyCardClicked(move:Int)
-    {
-        setPointer(move);
-        onPlySelectedManually(move);
-    }
-
-    private function deselectSelectedCard() 
-    {
-        var card = getSelectedCard();
-        if (card != null)
-            card.deselect();
+        if (pointer > 0)
+            plyCards[pointer-1].deselect();
+        pointer = value;
+        if (pointer > 0)
+            plyCards[pointer-1].select();
     }
 
     public function writePlyStr(plyStr:String, selected:Bool)
     {
-        var plyCardIndex:Int = plyCards.length;
-        var move:Int = firstColorToMove == White? plyCardIndex + 1 : plyCardIndex + 2;
+        var pointerPos:Int = plyCards.length + 1;
+        var moveNum:Int = firstColorToMove == White? pointerPos : pointerPos + 1;
 
-        var plyCard:CreepingLinePly = new CreepingLinePly(move, plyStr, onPlyCardClicked);
+        var plyCard:CreepingLinePly = new CreepingLinePly(pointerPos, moveNum, plyStr, onPlySelectedManually);
 
         plyCards.push(plyCard);
         lineBox.addComponent(plyCard);
 
         if (selected)
-            setPointer(plyCardIndex + 1);
+            setPointer(pointerPos);
     }
 
     public function revertPlys(cnt:Int)
