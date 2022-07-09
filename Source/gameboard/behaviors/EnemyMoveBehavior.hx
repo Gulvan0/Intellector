@@ -56,6 +56,7 @@ class EnemyMoveBehavior implements IBehavior
             if (premoveDeparture.color != playerColor || !Rules.possible(activatedPremove.from, activatedPremove.to, boardInstance.currentSituation.get))
             {
                 boardInstance.state.abortMove();
+                boardInstance.state = new NeutralState();
                 boardInstance.behavior = new PlayerMoveBehavior(playerColor);
             }
             else
@@ -86,6 +87,11 @@ class EnemyMoveBehavior implements IBehavior
                 boardInstance.revertPlys(plysToUndo);
                 if (plysToUndo % 2 == 1)
                     boardInstance.behavior = new PlayerMoveBehavior(playerColor);
+
+                if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 0)
+                    boardInstance.state = new StubState();
+                else
+                    boardInstance.state = new NeutralState();
                 
             case GameEnded(winner_color, reason):
                 boardInstance.state.abortMove();
@@ -94,6 +100,8 @@ class EnemyMoveBehavior implements IBehavior
 
             case Move(fromI, toI, fromJ, toJ, morphInto):
                 boardInstance.state.abortMove();
+                if (Preferences.premoveEnabled.get())
+                    boardInstance.state = new NeutralState();
                 var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
                 handleOpponentMove(ply);
 

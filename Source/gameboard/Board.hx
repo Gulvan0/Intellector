@@ -39,6 +39,7 @@ class Board extends Sprite
     
     public function resize(newHexSideLength:Float)
     {
+        trace(hexSideLength, newHexSideLength);
         this.hexSideLength = newHexSideLength;
         for (s in 0...IntPoint.hexCount)
         {

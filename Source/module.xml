@@ -12,9 +12,9 @@
         <global>
             <style>
                 .tool-button {
-                    background-image-repeat: stretch;
+                    background-color: yellow;
+                    background-opacity: 0;
                     border: none;
-                    background:none;
                     padding: none;
                 }
             </style>

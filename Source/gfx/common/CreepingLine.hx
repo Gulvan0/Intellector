@@ -26,9 +26,9 @@ class CreepingLine extends VBox implements IPlyHistoryView
                 revertPlys(plyCnt);
             case ApplyChangesRequested(turnColor):
                 clear(turnColor);
-                hidden = true;
+                hidden = false;
             case DiscardChangesRequested:
-                hidden = true;
+                hidden = false;
             case EditorLaunchRequested:
                 hidden = true;
             case ScrollBtnPressed(type):

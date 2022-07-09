@@ -36,6 +36,7 @@ class ScreenManager extends VBox implements INetObserver
     private static var openflContent:Element;
 
     private var lastResizeTimestamp:Float;
+    private var resizeHandlers:Array<Void->Void> = [];
 
     private var current:Null<IScreen>;
     public static var currentScreenType:Null<ScreenType>;
@@ -150,7 +151,23 @@ class ScreenManager extends VBox implements INetObserver
         }
     }
 
-    private function onEnterFrame(e:Event)
+    public static function addResizeHandler(handler:Void->Void)
+    {
+        if (instance == null)
+            throw "Not initialized";
+
+        instance.resizeHandlers.push(handler);
+    }
+
+    public static function removeResizeHandler(handler:Void->Void)
+    {
+        if (instance == null)
+            throw "Not initialized";
+
+        instance.resizeHandlers.remove(handler);
+    }
+
+    private function onEnterFrame(e)
     {
         var timestamp:Float = Date.now().getTime();
         if (timestamp - lastResizeTimestamp > 100)
@@ -164,6 +181,10 @@ class ScreenManager extends VBox implements INetObserver
             openflContent.style.width = innerWidthStr;
             openflContent.style.height = innerHeightStr;
             lastResizeTimestamp = timestamp;
+
+            for (handler in resizeHandlers)
+                handler();
+            
             trace(innerWidthStr, innerHeightStr);
         }
     }

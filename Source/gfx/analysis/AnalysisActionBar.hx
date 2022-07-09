@@ -9,6 +9,20 @@ class AnalysisActionBar extends VBox
 {
     public var eventHandler:PeripheralEvent->Void;
 
+    public function handlePeripheralEvent(event:PeripheralEvent)
+    {
+        switch event 
+        {
+            case ApplyChangesRequested(turnColor):
+                hidden = false;
+            case DiscardChangesRequested:
+                hidden = false;
+            case EditorLaunchRequested:
+                hidden = true;
+            default:
+        }
+    }
+
     @:bind(changeOrientationBtn, MouseEvent.CLICK)
     private function onChangeOrientationPressed(e)
     {

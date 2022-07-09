@@ -31,5 +31,5 @@
     <menubar id="menubar" width="100%" height="50px">
         <label id="siteName" text="intellector.info" verticalAlign="center" onClick="gfx.ScreenManager.toScreen(gfx.ScreenType.MainMenu);" />
     </menubar>
-    <box id="content" width="100%" height="100%"/>
+    <box id="content" width="100%" height="100%" style="padding: 5 5 5 5"/>
 </vbox>

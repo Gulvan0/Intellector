@@ -8,7 +8,8 @@ class SelectedState extends BasePlayableState
 
     public override function abortMove()
     {
-        boardInstance.removeMarkers(selectedDepartureLocation);
+        if (!boardInstance.behavior.markersDisabled())
+            boardInstance.removeMarkers(selectedDepartureLocation);
         boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
     }
 
@@ -17,7 +18,8 @@ class SelectedState extends BasePlayableState
         var pressedDestinationPiece:Null<Piece> = boardInstance.getPiece(location);
         var selectedDeparturePiece:Null<Piece> = boardInstance.getPiece(selectedDepartureLocation);
 
-        boardInstance.removeMarkers(selectedDepartureLocation);
+        if (!boardInstance.behavior.markersDisabled())
+            boardInstance.removeMarkers(selectedDepartureLocation);
         boardInstance.getHex(selectedDepartureLocation).hideLayer(LMB);
 
         if (location == null || location.equals(selectedDepartureLocation))

@@ -16,7 +16,8 @@ class DraggingState extends BasePlayableState
         if (cursorLocation != null)
             boardInstance.getHex(cursorLocation).hideLayer(Hover);
 
-        boardInstance.removeMarkers(dragStartLocation);
+        if (!boardInstance.behavior.markersDisabled())
+            boardInstance.removeMarkers(dragStartLocation);
     }
 
     public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
@@ -42,13 +43,14 @@ class DraggingState extends BasePlayableState
         }
         else if (location != null && boardInstance.behavior.movePossible(dragStartLocation, location))
         {
-            boardInstance.removeMarkers(dragStartLocation);
+            if (!boardInstance.behavior.markersDisabled())
+                boardInstance.removeMarkers(dragStartLocation);
             askMoveDetails(dragStartLocation, location, shiftPressed, ctrlPressed);
         }
         else
         {
-            boardInstance.removeMarkers(dragStartLocation);
             abortMove();
+            boardInstance.state = new NeutralState();
         }
     }
 

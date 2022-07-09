@@ -1,5 +1,8 @@
 package gfx.components;
 
+import haxe.Timer;
+import haxe.ui.Toolkit;
+import openfl.events.Event;
 import utils.MathUtils;
 import gameboard.Hexagon;
 import gameboard.Board;
@@ -96,9 +99,41 @@ class BoardWrapper extends Component
 
     private override function validateComponentLayout():Bool 
     {
-        var b = super.validateComponentLayout();
-        board.resize(widthToHexSideLength(componentWidth)); //Uses overriden getter, so the calculation is OK
-        return b;
+        var b1 = super.validateComponentLayout();
+        var b2 = updateBoardSize();
+        
+        return b1 || b2;
+    }
+
+    private function updateBoardSize():Bool
+    {
+        var newHexSideLength = widthToHexSideLength(componentWidth);
+        
+        if (board.hexSideLength != newHexSideLength)
+        {
+            board.resize(newHexSideLength); //Uses overriden getter, so the calculation is OK
+            return true;
+        }
+        else
+            return false;
+    }
+
+    private function updateBoardSizeLater()
+    {
+        Timer.delay(updateBoardSize, 120);
+    }
+
+    private function onAdded(e)
+    {
+        removeEventListener(Event.ADDED_TO_STAGE, onAdded);
+        ScreenManager.addResizeHandler(updateBoardSizeLater);
+        addEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
+    }
+
+    private function onRemoved(e)
+    {
+        removeEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
+        ScreenManager.removeResizeHandler(updateBoardSizeLater);
     }
 
     public function new(board:Board) 
@@ -108,6 +143,7 @@ class BoardWrapper extends Component
         this.width = board.width;
         this.height = board.height;
         addChild(board);
+        addEventListener(Event.ADDED_TO_STAGE, onAdded);
     }
     
 }

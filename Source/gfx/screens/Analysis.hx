@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.Toolkit;
 import gfx.common.ShareDialog;
 import js.Browser;
 import gameboard.behaviors.AnalysisBehavior;
@@ -47,12 +48,13 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
     private override function validateComponentLayout():Bool 
     {
         var compact:Bool = Browser.window.innerWidth / Browser.window.innerHeight < 1.2;
+        var wasCompact:Bool = lControlTabsContainer.hidden;
 
         cCreepingLineContainer.hidden = !compact;
         cActionBarContainer.hidden = !compact;
         lControlTabsContainer.hidden = compact;
 
-        return super.validateComponentLayout();
+        return super.validateComponentLayout() || wasCompact != compact;
     }
 
     private function displayShareDialog()
@@ -88,6 +90,7 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         controlTabs.handlePeripheralEvent(event);
         positionEditor.handlePeripheralEvent(event);
         creepingLine.handlePeripheralEvent(event);
+        actionBar.handlePeripheralEvent(event);
 
         if (event == ShareRequested)
             displayShareDialog();
@@ -111,6 +114,7 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         board = new GameBoard(startingSituation, firstColorToMove, new AnalysisBehavior(firstColorToMove), false);
         controlTabs = new ControlTabs(variant, handlePeripheralEvent);
         positionEditor = new PositionEditor(handlePeripheralEvent);
+        positionEditor.hidden = true;
 
         creepingLine.init(i -> {handlePeripheralEvent(PlySelected(i));}, firstColorToMove);
         actionBar.eventHandler = handlePeripheralEvent;

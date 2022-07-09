@@ -28,35 +28,39 @@
             width: 24.5px;
             height: 22.5px;
         }
+        .tool-button .icon {
+            width: 40px;
+            height: 40px;
+        }
     </style>
     <grid id="editModesGrid" columns="7" horizontalAlign="center">
         <button id="moveModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/move.svg" styleName="moveDelete" group="editModes" toggle="true" selected="true" />
         <button id="setProgWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_White.svg" styleName="progressor" group="editModes" toggle="true" />
         <button id="setAgrWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Aggressor_White.svg" styleName="aggressor" group="editModes" toggle="true" />
         <button id="setDefWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Defensor_White.svg" styleName="defensor" group="editModes" toggle="true" />
-        <button id="setLibWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Liberaror_White.svg" styleName="liberator" group="editModes" toggle="true" />
+        <button id="setLibWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Liberator_White.svg" styleName="liberator" group="editModes" toggle="true" />
         <button id="setDomWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Dominator_White.svg" styleName="dominator" group="editModes" toggle="true" />
         <button id="setIntWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_White.svg" styleName="intellector" group="editModes" toggle="true" />
         <button id="deleteModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/delete.svg" styleName="moveDelete" group="editModes" toggle="true" />
         <button id="setProgBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_Black.svg" styleName="progressor" group="editModes" toggle="true" />
         <button id="setAgrBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Aggressor_Black.svg" styleName="aggressor" group="editModes" toggle="true" />
         <button id="setDefBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Defensor_Black.svg" styleName="defensor" group="editModes" toggle="true" />
-        <button id="setLibBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Liberaror_Black.svg" styleName="liberator" group="editModes" toggle="true" />
+        <button id="setLibBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Liberator_Black.svg" styleName="liberator" group="editModes" toggle="true" />
         <button id="setDomBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Dominator_Black.svg" styleName="dominator" group="editModes" toggle="true" />
         <button id="setIntBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_Black.svg" styleName="intellector" group="editModes" toggle="true" />
     </grid>
     <hbox width="100%">
-        <button id="orientationBtn" style="background-image: assets/symbols/analysis/flip.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="orientationBtn" icon="assets/symbols/analysis/flip.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <option-stepper id="turnColorStepper" verticalAlign="center" width="100%" height="40px">
             <data>
                 <item text="${Dictionary.getPhrase(ANALYSIS_WHITE_TO_MOVE_OPTION_TEXT)}" />
                 <item text="${Dictionary.getPhrase(ANALYSIS_BLACK_TO_MOVE_OPTION_TEXT)}" />
             </data>
         </option-stepper>
-        <button id="importBtn" style="background-image: assets/symbols/analysis/import.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_IMPORT_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
-        <button id="clearBtn" style="background-image: assets/symbols/analysis/flush.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_CLEAR_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
-        <button id="resetBtn" style="background-image: assets/symbols/analysis/reset.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_RESET_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
-        <button id="startBtn" style="background-image: assets/symbols/analysis/initial.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_TO_STARTPOS_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="importBtn" icon="assets/symbols/analysis/import.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_IMPORT_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="clearBtn" icon="assets/symbols/analysis/flush.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_CLEAR_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="resetBtn" icon="assets/symbols/analysis/reset.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_RESET_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="startBtn" icon="assets/symbols/analysis/initial.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_TO_STARTPOS_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
     </hbox>
     <hbox width="70%" height="40px" horizontalAlign="center">
         <button id="applyChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES_BTN_TEXT)}" width="44%" height="100%" verticalAlign="center" />

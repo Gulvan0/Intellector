@@ -16,10 +16,13 @@ class SituationSerializer
 
         for (t in 0...IntPoint.hexCount) 
         {
-            var piece = situation.getS(t);
-            var pieceStr:String = String.fromCharCode(t + 64) + pieceLetter(piece.type);
+            var hex = situation.getS(t);
+            if (hex.isEmpty())
+                continue;
+            
+            var pieceStr:String = String.fromCharCode(t + 64) + pieceLetter(hex.type);
 
-            playerPiecesStr[piece.color] += pieceStr;
+            playerPiecesStr[hex.color] += pieceStr;
         }
 
         return colorLetter(situation.turnColor) + playerPiecesStr[White] + "!" + playerPiecesStr[Black];

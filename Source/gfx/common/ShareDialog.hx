@@ -1,5 +1,7 @@
 package gfx.common;
 
+import js.lib.ArrayBufferView;
+import js.lib.ArrayBuffer;
 import gameboard.GameBoard;
 import struct.Ply;
 import utils.MathUtils;
@@ -24,6 +26,7 @@ import dict.Dictionary;
 class ShareDialog extends Dialog 
 {   
     private var positionBoard:Board;
+    private var boardWrapper:BoardWrapper;
 
     @:bind(copySIPBtn, MouseEvent.CLICK)
     @:bind(copySIPBtnTick, MouseEvent.CLICK)
@@ -45,10 +48,9 @@ class ShareDialog extends Dialog
     public function onDownloadPNGPressed(e) 
     {
         var image:BitmapData = new BitmapData(Std.int(positionBoard.width), Std.int(positionBoard.height));
-        image.draw(positionBoard);
+        image.draw(positionBoard, new Rectangle(0, 0, Std.int(positionBoard.width), Std.int(positionBoard.height)));
 
-        var b:ByteArray = image.encode(new Rectangle(0, 0, Std.int(positionBoard.width), Std.int(positionBoard.height)), new openfl.display.PNGEncoderOptions());
-        var blob:Blob = new Blob([b.toString()], {type: 'image/png'});
+        var blob:Blob = new Blob([image.image.encode(PNG).getData()], {type: 'image/png'});
         var rand:Int = MathUtils.randomInt(1, 1000000);
         FileSaver.saveAs(blob, 'intpos_$rand.png');
     }
@@ -60,22 +62,24 @@ class ShareDialog extends Dialog
         onDialogClosed = e -> {
             mutedGameboard.suppressLMBHandler = false;
             mutedGameboard.suppressRMBHandler = false;
+            boardContainer.removeComponent(boardWrapper);
         };
         showDialog(false);
+        boardContainer.addComponent(boardWrapper);
     }
 
     public function initInGame(situation:Situation, orientation:PieceColor, gameLink:String, pin:String, plySequence:Array<Ply>)
     {
         init(situation, orientation);
         shareGameTab.init(gameLink, pin, plySequence);
-        shareGameTab.hidden = false;
+        tabView.removeComponent(shareExportTab);
     }
 
     public function initInAnalysis(situation:Situation, orientation:PieceColor, exportNewCallback:(name:String)->Void, ?overwriteCallback:(newName:String)->Void, ?oldStudyName:String)
     {
         init(situation, orientation);
         shareExportTab.init(exportNewCallback, overwriteCallback, oldStudyName);
-        shareExportTab.hidden = false;
+        tabView.removeComponent(shareGameTab);
     }
 
     private function init(situation:Situation, orientation:PieceColor)
@@ -84,10 +88,11 @@ class ShareDialog extends Dialog
 
         sipTextField.text = situation.serialize();
 
-        var boardWrapper:BoardWrapper = new BoardWrapper(positionBoard);
+        boardWrapper = new BoardWrapper(positionBoard);
         boardWrapper.percentWidth = 100;
         boardWrapper.maxPercentHeight = 100;
-        boardContainer.addComponent(boardWrapper);
+        boardWrapper.horizontalAlign = 'center';
+        boardWrapper.verticalAlign = 'center';
     }
 
     public function new()
