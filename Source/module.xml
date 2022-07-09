@@ -22,5 +22,6 @@
     </themes>
     <scriptlets>
         <import class="dict.Phrase" keep="true" static="true" />
+        <import class="dict.Dictionary" keep="true" static="true" />
     </scriptlets>
 </module>

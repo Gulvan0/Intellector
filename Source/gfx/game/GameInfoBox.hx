@@ -187,7 +187,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         var tcType:TimeControlType = timeControl.getType();
 
         resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
-        matchParameters.text = tcType == Correspondence? "Correspondence" : timeControl.toString() + " • " + tcType.getName();
+        matchParameters.text = tcType == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : timeControl.toString() + " • " + tcType.getName();
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);

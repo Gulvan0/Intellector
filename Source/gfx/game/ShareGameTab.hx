@@ -11,6 +11,7 @@ import gfx.components.Dialogs;
 import js.Browser;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.Box;
+import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/live/share_game_tab.xml"))
 class ShareGameTab extends Box
@@ -22,7 +23,7 @@ class ShareGameTab extends Box
     private function onCopyLinkPressed(e)
     {
         Browser.navigator.clipboard.writeText(linkTextField.text)
-            .catchError(e -> {Dialogs.alert('Failed to copy: $e', "Clipboard Error");})
+            .catchError(e -> {Dialogs.alert(Dictionary.getPhrase(CLIPBOARD_ERROR_ALERT_TEXT, ['$e']), Dictionary.getPhrase(CLIPBOARD_ERROR_ALERT_TITLE));})
             .finally(() -> {
                 copyLinkBtn.hidden = true;
                 copyLinkBtnTick.hidden = false;
@@ -38,7 +39,7 @@ class ShareGameTab extends Box
     private function onCopyPINPressed(e)
     {
         Browser.navigator.clipboard.writeText(pinTextArea.text)
-            .catchError(e -> {Dialogs.alert('Failed to copy: $e', "Clipboard Error");})
+            .catchError(e -> {Dialogs.alert(Dictionary.getPhrase(CLIPBOARD_ERROR_ALERT_TEXT, ['$e']), Dictionary.getPhrase(CLIPBOARD_ERROR_ALERT_TITLE));})
             .finally(() -> {
                 copyPINBtn.hidden = true;
                 copyPINBtnTick.hidden = false;

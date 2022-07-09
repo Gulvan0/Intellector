@@ -3,6 +3,7 @@ package gfx.analysis;
 import utils.StringUtils;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.Box;
+import dict.Dictionary;
 using StringTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/analysis/share_export_tab.xml"))

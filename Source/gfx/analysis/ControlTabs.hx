@@ -90,7 +90,7 @@ class ControlTabs extends TabView
         navigator.init(initialVariant.startingSituation.turnColor, btn -> {eventHandler(ScrollBtnPressed(btn));});
 
         branchingHelpLink.onClick = e -> {
-            Dialogs.info("Some help here [P]", "Branching Help [P]");
+            Dialogs.info(dict.Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TEXT), dict.Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TITLE));
         };
 
         var variantViewWrapper:SpriteWrapper = null;

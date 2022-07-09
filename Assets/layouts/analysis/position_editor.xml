@@ -30,21 +30,21 @@
         <button id="setIntBlackModeBtn" width="50px" height="50px" icon="Assets/pieces/Intellector_Black.svg" styleName="normalModeBtn" group="editModes" toggle="true" />
     </grid>
     <hbox>
-        <button id="orientationBtn" icon="Assets/symbols/analysis/flip.svg" verticalAlign="center" tooltip="Flip Board [P]" width="40px" height="40px" styleName="tool-button" />
+        <button id="orientationBtn" style="background-image: Assets/symbols/analysis/flip.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <option-stepper id="turnColorStepper" verticalAlign="center" width="100%" height="40px">
             <data>
-                <item text="White to Move [P]" />
-                <item text="Black to Move [P]" />
+                <item text="${Dictionary.getPhrase(ANALYSIS_WHITE_TO_MOVE_OPTION_TEXT)}" />
+                <item text="${Dictionary.getPhrase(ANALYSIS_BLACK_TO_MOVE_OPTION_TEXT)}" />
             </data>
         </option-stepper>
-        <button id="importBtn" icon="Assets/symbols/analysis/import.svg" verticalAlign="center" tooltip="Import [P]" width="40px" height="40px" styleName="tool-button" />
-        <button id="clearBtn" icon="Assets/symbols/analysis/flush.svg" verticalAlign="center" tooltip="Clear [P]" width="40px" height="40px" styleName="tool-button" />
-        <button id="resetBtn" icon="Assets/symbols/analysis/reset.svg" verticalAlign="center" tooltip="Reset [P]" width="40px" height="40px" styleName="tool-button" />
-        <button id="startBtn" icon="Assets/symbols/analysis/initial.svg" verticalAlign="center" tooltip="To Initial [P]" width="40px" height="40px" styleName="tool-button" />
+        <button id="importBtn" style="background-image: Assets/symbols/analysis/import.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_IMPORT_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="clearBtn" style="background-image: Assets/symbols/analysis/flush.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_CLEAR_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="resetBtn" style="background-image: Assets/symbols/analysis/reset.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_RESET_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="startBtn" style="background-image: Assets/symbols/analysis/initial.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_TO_STARTPOS_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
     </hbox>
     <hbox width="70%" height="40px" horizontalAlign="center">
-        <button id="applyChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES)}" width="44%" height="100%" verticalAlign="center" />
+        <button id="applyChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES_BTN_TEXT)}" width="44%" height="100%" verticalAlign="center" />
         <spacer width="12%" />
-        <button id="discardChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_DISCARD_CHANGES)}" width="44%" height="100%" verticalAlign="center" />
+        <button id="discardChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_DISCARD_CHANGES_BTN_TEXT)}" width="44%" height="100%" verticalAlign="center" />
     </hbox>
 </vbox>

@@ -1,8 +1,8 @@
 package gfx.analysis;
 
-import gfx.common.ShareDialog;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
+import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/analysis/action_bar.xml"))
 class AnalysisActionBar extends VBox

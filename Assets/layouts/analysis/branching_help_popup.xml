@@ -1,3 +1,0 @@
-<dialog width="90%" height="90%">
-    <label width="90%" height="90%" text="${Dictionary.getPhrase(BRANCHING_HELP_TEXT)}" style="font-size:20px"/>
-</dialog>

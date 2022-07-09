@@ -29,7 +29,7 @@ class PositionEditor extends VBox
     private function onImportSIPPressed(e)
     {
         var deserializedSituation:Null<Situation> = null;
-        var response:Null<String> = Browser.window.prompt("Input SIP [P]");
+        var response:Null<String> = Browser.window.prompt(dict.Dictionary.getPhrase(ANALYSIS_INPUT_SIP_PROMPT_TEXT));
         if (response != null)
             deserializedSituation = Situation.fromSIP(response);
        
@@ -39,7 +39,7 @@ class PositionEditor extends VBox
             eventHandler(ConstructSituationRequested(deserializedSituation));
         }
         else
-            Dialogs.alert("The SIP specified is invalid [P]", "Warning: Invalid SIP [P]");
+            Dialogs.alert(dict.Dictionary.getPhrase(ANALYSIS_INVALID_SIP_WARNING_TEXT), dict.Dictionary.getPhrase(ANALYSIS_INVALID_SIP_WARNING_TITLE));
     }
 
     @:bind(turnColorStepper, UIEvent.CHANGE)

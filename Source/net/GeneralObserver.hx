@@ -13,7 +13,7 @@ class GeneralObserver implements INetObserver
     private function onReconnectionForbidden() 
     {
         Networker.doNotReconnect = true;
-        Dialogs.alert("Session closed", "Alert");
+        Dialogs.alert(Dictionary.getPhrase(SESSION_CLOSED_ALERT_TEXT), Dictionary.getPhrase(SESSION_CLOSED_ALERT_TITLE));
     }
 
     private static function challengeReceiver(caller:String, startSecs:Int, bonusSecs:Int, color:String) 

@@ -18,6 +18,7 @@ import gfx.components.BoardWrapper;
 import struct.Situation;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.dialogs.Dialog;
+import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/common/share_dialog.xml"))
 class ShareDialog extends Dialog 

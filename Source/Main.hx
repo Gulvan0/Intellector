@@ -1,5 +1,6 @@
 package;
 
+import haxe.ui.locale.LocaleManager;
 import tests.ui.game.TSidebox;
 import struct.PieceColor;
 import utils.TimeControl;
@@ -100,6 +101,11 @@ class Main extends Sprite
 			languageSelectScreen = null;
 		}
 
+		if (Preferences.language.get() == RU)
+			LocaleManager.instance.language = "ru";
+		else
+			LocaleManager.instance.language = "en";
+		
 		Networker.onConnectionEstabilished = onConnected;
 		Networker.onConnectionFailed = onConnectionFailed;
 		Networker.launch();
