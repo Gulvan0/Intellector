@@ -1,5 +1,9 @@
 package gfx.common;
 
+import openfl.geom.Matrix;
+import haxe.ui.events.FocusEvent;
+import haxe.ui.events.UIEvent;
+import openfl.events.Event;
 import js.lib.ArrayBufferView;
 import js.lib.ArrayBuffer;
 import gameboard.GameBoard;
@@ -22,10 +26,33 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.dialogs.Dialog;
 import dict.Dictionary;
 
+class ImageExportData
+{
+    public final board:Board;
+    public final pngWidth:Int;
+    public final pngHeight:Int;
+    public final backgroundColor:Int;
+    public final transform:Matrix;
+
+    public function new(board:Board, pngWidth:Int, pngHeight:Int, boardWidth:Int, boardHeight:Int, backgroundColor:Int)
+    {
+        this.board = board;
+        this.pngWidth = pngWidth;
+        this.pngHeight = pngHeight;
+        this.backgroundColor = 0xFF000000 | backgroundColor;
+        this.transform = new Matrix();
+        this.transform.translate(Math.round((pngWidth - boardWidth)/2), Math.round((pngHeight - boardHeight)/2));
+    }
+}
+
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/common/share_dialog.xml"))
 class ShareDialog extends Dialog 
 {   
-    private var positionBoard:Board;
+    private var situation:Situation;
+    private var orientation:PieceColor;
+
+    private var pngExportData:ImageExportData;
+
     private var boardWrapper:BoardWrapper;
 
     @:bind(copySIPBtn, MouseEvent.CLICK)
@@ -43,16 +70,44 @@ class ShareDialog extends Dialog
                 }, 500);
             });
     }
-    
-    @:bind(downloadPNGBtn, MouseEvent.CLICK)
-    public function onDownloadPNGPressed(e) 
+
+    private function onReadyForPNGExport(e)
     {
-        var image:BitmapData = new BitmapData(Std.int(positionBoard.width), Std.int(positionBoard.height));
-        image.draw(positionBoard, new Rectangle(0, 0, Std.int(positionBoard.width), Std.int(positionBoard.height)));
+        pngExportData.board.removeEventListener(Event.EXIT_FRAME, onReadyForPNGExport);
+
+        var image:BitmapData = new BitmapData(pngExportData.pngWidth, pngExportData.pngHeight, true, pngExportData.backgroundColor);
+        image.draw(pngExportData.board, pngExportData.transform);
+
+        stage.removeChild(pngExportData.board);
+        pngExportData = null;
 
         var blob:Blob = new Blob([image.image.encode(PNG).getData()], {type: 'image/png'});
         var rand:Int = MathUtils.randomInt(1, 1000000);
         FileSaver.saveAs(blob, 'intpos_$rand.png');
+    }
+    
+    @:bind(downloadPNGBtn, MouseEvent.CLICK)
+    public function onDownloadPNGPressed(e) 
+    {
+        var pngWidth:Int = Std.parseInt(pngWidthTF.text);
+        var pngHeight:Int = Std.parseInt(pngHeightTF.text);
+        var estimatedThickness:Int = Math.ceil((3/560) * pngWidth);
+        var boardWidth:Int = pngWidth - estimatedThickness - 2;
+        var boardHeight:Int = pngHeight - estimatedThickness - 2;
+
+        if (BoardWrapper.invAspectRatio(addMarkupCheckbox.selected) * boardWidth > boardHeight)
+            boardWidth = Math.floor(boardHeight / BoardWrapper.invAspectRatio(addMarkupCheckbox.selected));
+        else
+            boardHeight = Math.floor(boardWidth * BoardWrapper.invAspectRatio(addMarkupCheckbox.selected));
+
+        var hexSideLength:Float = BoardWrapper.widthToHexSideLength(boardWidth);
+        var backgroundColor:Int = transparentBackgroundCheckbox.selected? 0x00FFFFFF : bgColorPreview.customStyle.backgroundColor;
+        
+        var board:Board = new Board(situation, orientation, hexSideLength, addMarkupCheckbox.selected? Over : None);
+        pngExportData = new ImageExportData(board, pngWidth, pngHeight, boardWidth, boardHeight, backgroundColor);
+
+        board.addEventListener(Event.EXIT_FRAME, onReadyForPNGExport);
+        stage.addChild(board);
     }
 
     public function showShareDialog(mutedGameboard:GameBoard)
@@ -66,6 +121,72 @@ class ShareDialog extends Dialog
         };
         showDialog(false);
         boardContainer.addComponent(boardWrapper);
+    }
+    
+    @:bind(preserveAspectRatioCheckbox, UIEvent.CHANGE)
+    public function onKeepRatioCheckChanged(e) 
+    {
+        if (preserveAspectRatioCheckbox.selected)
+        {
+            pngHeightTF.text = "" + Math.ceil(BoardWrapper.invAspectRatio(addMarkupCheckbox.selected) * Std.parseInt(pngWidthTF.text));
+            pngHeightTF.disabled = true;
+        }
+        else
+            pngHeightTF.disabled = false;
+    }
+    
+    @:bind(transparentBackgroundCheckbox, UIEvent.CHANGE)
+    public function onTransparentBGCheckChanged(e) 
+    {
+        bgColorBox.disabled = transparentBackgroundCheckbox.selected;
+    }
+    
+    @:bind(addMarkupCheckbox, UIEvent.CHANGE)
+    public function onAddMarkupCheckChanged(e) 
+    {
+        if (addMarkupCheckbox.selected && preserveAspectRatioCheckbox.selected)
+            pngHeightTF.text = "" + Math.ceil(BoardWrapper.invAspectRatio(true) * Std.parseInt(pngWidthTF.text));
+    }
+    
+    @:bind(pngWidthTF, FocusEvent.FOCUS_OUT)
+    public function onWidthFocusLost(e) 
+    {
+        var value:Null<Int> = Std.parseInt(pngWidthTF.text);
+        if (value == null)
+            pngWidthTF.text = "" + MathUtils.clampI(Math.ceil(Std.parseInt(pngHeightTF.text) / BoardWrapper.invAspectRatio(addMarkupCheckbox.selected)), 100, 2048);
+        else
+        {
+            var clampedValue:Int = MathUtils.clampI(value, 100, 2048);
+            pngWidthTF.text = "" + clampedValue;
+            if (preserveAspectRatioCheckbox.selected)
+                pngHeightTF.text = "" + Math.ceil(BoardWrapper.invAspectRatio(addMarkupCheckbox.selected) * clampedValue);
+        }
+    }
+    
+    @:bind(pngHeightTF, FocusEvent.FOCUS_OUT)
+    public function onHeightFocusLost(e) 
+    {
+        var value:Null<Int> = Std.parseInt(pngHeightTF.text);
+        if (value == null)
+            pngHeightTF.text = "" + MathUtils.clampI(Math.ceil(BoardWrapper.invAspectRatio(addMarkupCheckbox.selected) * Std.parseInt(pngWidthTF.text)), 100, 2048);
+        else
+        {
+            var clampedValue:Int = MathUtils.clampI(value, 100, 2048);
+            if (preserveAspectRatioCheckbox.selected)
+                pngWidthTF.text = "" + Math.ceil(clampedValue / BoardWrapper.invAspectRatio(addMarkupCheckbox.selected));
+            pngHeightTF.text = "" + clampedValue;
+        }
+    }
+    
+    @:bind(bgColorTF, FocusEvent.FOCUS_OUT)
+    @:bind(bgColorTF, UIEvent.CHANGE)
+    public function onBGColorFocusLost(e) 
+    {
+        var value:Null<Int> = Std.parseInt("0x" + bgColorTF.text);
+        if (value == null)
+            bgColorTF.text = StringTools.hex(bgColorPreview.customStyle.backgroundColor, 6);
+        else
+            bgColorPreview.customStyle = {backgroundColor: value};
     }
 
     public function initInGame(situation:Situation, orientation:PieceColor, gameLink:String, pin:String, plySequence:Array<Ply>)
@@ -84,15 +205,23 @@ class ShareDialog extends Dialog
 
     private function init(situation:Situation, orientation:PieceColor)
     {
-        positionBoard = new Board(situation, orientation, 40, true);
+        var board:Board = new Board(situation, orientation, 40, None);
 
         sipTextField.text = situation.serialize();
 
-        boardWrapper = new BoardWrapper(positionBoard);
+        boardWrapper = new BoardWrapper(board);
         boardWrapper.percentWidth = 100;
         boardWrapper.maxPercentHeight = 100;
         boardWrapper.horizontalAlign = 'center';
         boardWrapper.verticalAlign = 'center';
+
+        bgColorTF.text = "BBBBBB";
+        bgColorPreview.customStyle = {backgroundColor: 0xBBBBBB};
+        pngWidthTF.text = "720";
+        pngHeightTF.text = "" + Math.ceil(BoardWrapper.invAspectRatio(addMarkupCheckbox.selected) * 720);
+
+        this.situation = situation;
+        this.orientation = orientation;
     }
 
     public function new()

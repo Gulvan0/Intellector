@@ -29,6 +29,16 @@ class MathUtils
             return v;
     }
 
+    public static function clampI(v:Int, min:Int, max:Int):Int
+    {
+        if (v < min)
+            return min;
+        else if (v > max)
+            return max;
+        else 
+            return v;
+    }
+
     /**Inclusive interval (x in [from; to])**/
     public static function randomInt(from:Int, to:Int) 
     {

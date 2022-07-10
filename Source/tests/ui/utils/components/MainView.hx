@@ -277,7 +277,7 @@ class MainView extends HBox
             }
         }
 
-        board = new SelectableBoard(Situation.starting(), Disabled, Disabled, White, 40, true);
+        board = new SelectableBoard(Situation.starting(), Disabled, Disabled, White, 40, None);
         var boardWrapper:BoardWrapper = new BoardWrapper(board);
         boardWrapper.maxPercentHeight = 100;
         boardWrapper.percentWidth = 100;

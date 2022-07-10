@@ -394,7 +394,7 @@ class GameBoard extends SelectableBoard implements INetObserver
 
     public function new(situation:Situation, orientationColor:PieceColor, startBehavior:IBehavior, stubState:Bool = false, hexSideLength:Float = 40) 
     {
-        super(situation, Free, Free, orientationColor, hexSideLength, false);
+        super(situation, Free, Free, orientationColor, hexSideLength);
 
         this.plyHistory = new PlyHistory();
         this.currentSituation = situation.copy();

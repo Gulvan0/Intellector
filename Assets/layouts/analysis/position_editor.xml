@@ -51,12 +51,12 @@
     </grid>
     <hbox width="100%">
         <button id="orientationBtn" icon="assets/symbols/analysis/flip.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
-        <option-stepper id="turnColorStepper" verticalAlign="center" width="100%" height="40px">
+        <dropdown id="turnColorStepper" verticalAlign="center" width="100%" height="40px">
             <data>
                 <item text="${Dictionary.getPhrase(ANALYSIS_WHITE_TO_MOVE_OPTION_TEXT)}" />
                 <item text="${Dictionary.getPhrase(ANALYSIS_BLACK_TO_MOVE_OPTION_TEXT)}" />
             </data>
-        </option-stepper>
+        </dropdown>
         <button id="importBtn" icon="assets/symbols/analysis/import.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_IMPORT_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <button id="clearBtn" icon="assets/symbols/analysis/flush.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_CLEAR_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <button id="resetBtn" icon="assets/symbols/analysis/reset.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_RESET_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />

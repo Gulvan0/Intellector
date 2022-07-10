@@ -16,7 +16,7 @@ class BoardWrapper extends Component
     public var maxPercentHeight:Null<Float>;
 
     /** height/width **/
-    public function inverseAspectRatio()
+    public static function invAspectRatio(lettersEnabled:Bool):Float
     {
         /*
         Regarding the aspect ratio modification:
@@ -33,7 +33,12 @@ class BoardWrapper extends Component
         Recall that when there are no letters, the board's height is seven times hex's height
         The rest is obvious (just substitute all of the above)
         */
-        return board.lettersEnabled? MathUtils.HALF_SQRT3 * (15/14) : MathUtils.HALF_SQRT3;
+        return lettersEnabled? MathUtils.HALF_SQRT3 * (15/14) : MathUtils.HALF_SQRT3;
+    }
+
+    public function inverseAspectRatio():Float
+    {
+        return invAspectRatio(board.lettersEnabled);
     }
 
     public static function widthToHexSideLength(w:Float):Float 

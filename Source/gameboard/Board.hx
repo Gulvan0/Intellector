@@ -1,5 +1,6 @@
 package gameboard;
 
+import Preferences.Markup;
 import haxe.ui.components.Label;
 import struct.Ply;
 import utils.MathUtils;
@@ -182,6 +183,7 @@ class Board extends Sprite
                 pieceLayer.removeChild(getPiece(transform.coords));
             producePiece(transform.coords, goalHex);
             shownSituation.set(transform.coords, goalHex);
+            shownSituation.turnColor = opposite(shownSituation.turnColor);
         }
     }
 
@@ -335,11 +337,13 @@ class Board extends Sprite
         return tf;
     }
 
-    public function new(situation:Situation, orientationColor:PieceColor = White, hexSideLength:Float = 40, suppressMarkup:Bool = false) 
+    public function new(situation:Situation, orientationColor:PieceColor = White, hexSideLength:Float = 40, enforcedMarkup:Null<Markup> = null) 
     {
         super();
+        var markup:Markup = enforcedMarkup == null? Preferences.markup.get() : enforcedMarkup;
+
         this.hexSideLength = hexSideLength;
-        this.lettersEnabled = !suppressMarkup && Preferences.markup.get() != None;
+        this.lettersEnabled = markup != None;
         this.orientationColor = orientationColor;
         this.shownSituation = situation.copy();
         this.hexagonLayer = new Sprite();
@@ -348,7 +352,7 @@ class Board extends Sprite
         addChild(hexagonLayer);
         addChild(pieceLayer);
 
-        produceHexagons(!suppressMarkup && Preferences.markup.get() == Over);
+        produceHexagons(markup == Over);
         producePieces();
         if (lettersEnabled)
             disposeLetters();

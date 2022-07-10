@@ -54,7 +54,7 @@ class ShareGameTab extends Box
     private function onDownloadGIFPressed(e)
     {
         var img:Gif = new Gif(720, 720, 1);
-        var board:Board = new Board(Situation.starting(), White, BoardWrapper.widthToHexSideLength(720), true);
+        var board:Board = new Board(Situation.starting(), White, BoardWrapper.widthToHexSideLength(720), None);
 
         var bitmapData:BitmapData = new BitmapData(720, 720);
         bitmapData.draw(board);

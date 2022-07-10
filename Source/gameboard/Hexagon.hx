@@ -157,7 +157,7 @@ class Hexagon extends Sprite
     private static function drawRound(hexSideLength:Float, graphics:Graphics) 
     {
         graphics.clear();
-        graphics.lineStyle(4, 0x333333);
+        graphics.lineStyle(MathUtils.scaleLike(4, 40, hexSideLength), 0x333333);
         graphics.drawCircle(0, 0, 0.8 * hexSideLength);
     }
 

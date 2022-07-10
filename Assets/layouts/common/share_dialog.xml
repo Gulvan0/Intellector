@@ -15,7 +15,27 @@
                     <button id="copySIPBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_SUCCESS_TOOLTIP)}" icon="assets/symbols/common/tick.svg" styleName="tool-button" />
                 </hbox>
                 <section-header width="100%" text="${Dictionary.getPhrase(SHARE_IMAGE_HEADER)}" />
-                <box id="boardContainer" width="100%" height="100%" />
+                <hbox width="100%" height="100%">
+                    <box id="boardContainer" width="50%" height="100%" />
+                    <vbox width="50%" verticalAlign="center">
+                        <checkbox id="preserveAspectRatioCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_KEEP_RATIO_CHECKBOX_TEXT)}" selected="false" horizontalAlign="center" />
+                        <hbox horizontalAlign="center" height="30px">
+                            <label text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_DIMENSIONS_LABEL_TEXT)}" verticalAlign="center" style="font-size: 16px" />
+                            <textfield id="pngWidthTF" width="54px" restrictChars="0-9" verticalAlign="center" />
+                            <label text="x" verticalAlign="center" style="font-size: 16px" />
+                            <textfield id="pngHeightTF" width="54px" restrictChars="0-9" verticalAlign="center" />
+                        </hbox>
+                        <spacer height="10px" />
+                        <checkbox id="transparentBackgroundCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_TRANSPARENT_BG_CHECKBOX_TEXT)}" selected="true" horizontalAlign="center" />
+                        <hbox id="bgColorBox" horizontalAlign="center" disabled="true" height="30px">
+                            <label text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_BGCOLOR_LABEL_TEXT)}" verticalAlign="center" style="font-size: 16px" />
+                            <textfield id="bgColorTF" width="76px" restrictChars="0-9A-Fa-f" verticalAlign="center" />
+                            <box id="bgColorPreview" width="28px" height="28px" verticalAlign="center"/>
+                        </hbox>
+                        <spacer height="10px" />
+                        <checkbox id="addMarkupCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_MARKUP_CHECKBOX_TEXT)}" selected="false" horizontalAlign="center" />
+                    </vbox>
+                </hbox>
                 <button id="downloadPNGBtn" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_BTN_TEXT)}" horizontalAlign="center"/>
             </vbox>
         </box>

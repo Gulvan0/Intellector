@@ -156,7 +156,7 @@ class ActionPromptDialog extends Dialog
         label.text = prompt.displayName + ":";
         label.customStyle = {fontSize: 18};
 
-        var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, EnsureSingle, Disabled, White, 40, true);
+        var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, EnsureSingle, Disabled, White, 40, None);
         var boardWrapper:BoardWrapper = new BoardWrapper(inputBoard);
         boardWrapper.maxPercentWidth = 100;
         boardWrapper.percentHeight = 100;

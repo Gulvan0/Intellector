@@ -1,5 +1,6 @@
 package gameboard;
 
+import Preferences.Markup;
 import openfl.display.Graphics;
 import gfx.utils.Colors;
 import openfl.display.JointStyle;
@@ -276,9 +277,9 @@ class SelectableBoard extends Board
         graphics.endFill();
     }
 
-    public function new(situation:Situation, arrowMode:SelectionMode, hexMode:SelectionMode, orientationColor:PieceColor = White, hexSideLength:Float = 40, suppressMarkup:Bool = false) 
+    public function new(situation:Situation, arrowMode:SelectionMode, hexMode:SelectionMode, orientationColor:PieceColor = White, hexSideLength:Float = 40, enforcedMarkup:Null<Markup> = null) 
     {
-        super(situation, orientationColor, hexSideLength, suppressMarkup);
+        super(situation, orientationColor, hexSideLength, enforcedMarkup);
         this.arrowMode = arrowMode;
         this.hexMode = hexMode;
 
