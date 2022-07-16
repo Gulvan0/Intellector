@@ -1,5 +1,6 @@
 package gameboard;
 
+import struct.IntPoint;
 import openfl.display.Shape;
 import format.SVG;
 import openfl.geom.Point;
@@ -20,7 +21,12 @@ class Piece extends Sprite
         return new Piece(hex.type, hex.color, hexSideLength);
     }
 
-    public function dispose(pos:Point) 
+    public function reposition(location:IntPoint, board:Board) 
+    {
+        repositionExact(board.hexCoords(location));
+    }
+
+    public function repositionExact(pos:Point) 
     {
         x = pos.x;
         y = pos.y;    

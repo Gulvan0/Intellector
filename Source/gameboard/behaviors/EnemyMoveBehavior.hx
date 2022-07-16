@@ -1,5 +1,6 @@
 package gameboard.behaviors;
 
+import gfx.analysis.PeripheralEvent;
 import utils.exceptions.AlreadyInitializedException;
 import struct.Hex;
 import struct.Ply;
@@ -26,7 +27,7 @@ class EnemyMoveBehavior implements IBehavior
             boardInstance.getHex(premovePly.to).hideLayer(Premove);
         }
 
-        boardInstance.setSituation(boardInstance.currentSituation); //Resetting the shownSituation    
+        boardInstance.setShownSituation(boardInstance.currentSituation); //Resetting the shownSituation    
         premoves = [];
     }
 
@@ -37,8 +38,7 @@ class EnemyMoveBehavior implements IBehavior
             AssetManager.playPlySound(ply, boardInstance.currentSituation);
             boardInstance.makeMove(ply);
 
-            boardInstance.state.abortMove();
-            boardInstance.state = new NeutralState();
+            boardInstance.state.exitToNeutral();
             boardInstance.behavior = new PlayerMoveBehavior(playerColor);
         }
         else
@@ -55,8 +55,7 @@ class EnemyMoveBehavior implements IBehavior
     
             if (premoveDeparture.color != playerColor || !Rules.possible(activatedPremove.from, activatedPremove.to, boardInstance.currentSituation.get))
             {
-                boardInstance.state.abortMove();
-                boardInstance.state = new NeutralState();
+                boardInstance.state.exitToNeutral();
                 boardInstance.behavior = new PlayerMoveBehavior(playerColor);
             }
             else
@@ -82,7 +81,7 @@ class EnemyMoveBehavior implements IBehavior
         switch event 
         {
             case Rollback(plysToUndo):
-                boardInstance.state.abortMove();
+                boardInstance.state.exitToNeutral();
                 resetPremoves();
                 boardInstance.revertPlys(plysToUndo);
                 if (plysToUndo % 2 == 1)
@@ -90,24 +89,27 @@ class EnemyMoveBehavior implements IBehavior
 
                 if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 0)
                     boardInstance.state = new StubState();
-                else
-                    boardInstance.state = new NeutralState();
                 
             case GameEnded(winner_color, reason):
-                boardInstance.state.abortMove();
+                boardInstance.state.exitToNeutral();
                 resetPremoves();
                 boardInstance.state = new StubState();
 
             case Move(fromI, toI, fromJ, toJ, morphInto):
-                boardInstance.state.abortMove();
-                if (Preferences.premoveEnabled.get())
-                    boardInstance.state = new NeutralState();
+                boardInstance.state.exitToNeutral();
+                if (!Preferences.premoveEnabled.get())
+                    boardInstance.state = new StubState();
                 var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
                 handleOpponentMove(ply);
 
             default:
         }
-	}
+    }
+
+    public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
+    {
+        //* Do nothing
+    }
     
     public function movePossible(from:IntPoint, to:IntPoint):Bool
 	{
@@ -140,6 +142,11 @@ class EnemyMoveBehavior implements IBehavior
         displayPlannedPremove(ply);
         premoves.push(ply);
         boardInstance.state = new NeutralState();
+    }
+    
+    public function onHexChosen(coords:IntPoint)
+    {
+        throw "onHexChosen() called while in EnemyMoveBehavior";
     }
 
     private function displayPlannedPremove(ply:Ply)

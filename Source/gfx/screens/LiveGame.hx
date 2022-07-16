@@ -199,7 +199,7 @@ class LiveGame extends HBox implements INetObserver implements IGameBoardObserve
             case Analyze:
                 if (playerColor == null)
                     Networker.emitEvent(StopSpectate);
-                ScreenManager.toScreen(Analysis(board.asVariant().serialize(), null, null));
+                ScreenManager.toScreen(Analysis(getSerializedVariant(), null, null));
             case AcceptDraw:
                 Networker.emitEvent(AcceptDraw);
             case DeclineDraw:
@@ -211,6 +211,20 @@ class LiveGame extends HBox implements INetObserver implements IGameBoardObserve
         }
         chatbox.reactToOwnAction(btn);
     }
+
+    private function getSerializedVariant():String
+    {
+        var variant:Variant = new Variant(board.startingSituation);
+
+        var path:Array<Int> = [];
+        for (ply in board.plyHistory.getPlySequence())
+        {
+            variant.addChildToNode(ply, path);
+            path.push(0);
+        }
+
+        return variant.serialize();
+	}
 
     //================================================================================================================================================================
 
@@ -301,7 +315,7 @@ class LiveGame extends HBox implements INetObserver implements IGameBoardObserve
         whiteClock.init(timeControl.startSecs, playerColor == White, timeControl.startSecs >= 90, true);
         blackClock.init(timeControl.startSecs, playerColor == Black, timeControl.startSecs >= 90, false);
         cCreepingLine.init(i -> {
-            board.scrollToMove(i);
+            board.scrollToPly(i);
             cCreepingLine.setPointer(i);
             sidebox.navigator.setPointer(i);
         });

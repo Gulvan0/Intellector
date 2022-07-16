@@ -26,7 +26,7 @@ class Board extends Sprite
     public var pieces:Array<Null<Piece>>;
 
     public var orientationColor(default, null):PieceColor;
-    public var shownSituation(default, null):Situation;
+    public var shownSituation(get, null):Situation;
 
     private var letters:Array<Label> = [];
 
@@ -36,6 +36,11 @@ class Board extends Sprite
     public function getFieldHeight():Float
     {
         return Hexagon.sideToHeight(hexSideLength) * 7;
+    }
+
+    private function get_shownSituation():Situation
+    {
+        return shownSituation.copy();
     }
     
     public function resize(newHexSideLength:Float)
@@ -56,7 +61,7 @@ class Board extends Sprite
             if (piece != null)
             {
                 piece.redraw(newHexSideLength);
-                piece.dispose(coords);
+                piece.repositionExact(coords);
             }
         }
         if (lettersEnabled)
@@ -64,7 +69,7 @@ class Board extends Sprite
             for (letter in letters)
                 hexagonLayer.removeChild(letter);
             letters = [];
-            disposeLetters();
+            drawLetters();
         }
     }
 
@@ -90,7 +95,7 @@ class Board extends Sprite
                 hexagon.y = coords.y;
 
                 if (piece != null)
-                    piece.dispose(coords);
+                    piece.repositionExact(coords);
             }
 
             if (!Lambda.empty(letters))
@@ -98,7 +103,7 @@ class Board extends Sprite
         } 
     }
 
-    public function setSituation(val:Situation)
+    public function setShownSituation(val:Situation)
     {
         for (piece in pieces)
             pieceLayer.removeChild(piece);
@@ -109,7 +114,7 @@ class Board extends Sprite
 
     public function clearPieces()
     {
-        setSituation(Situation.empty());
+        setShownSituation(Situation.empty());
     }
 
     public function setHexDirectly(location:IntPoint, hex:Hex)
@@ -149,7 +154,7 @@ class Board extends Sprite
         }
         else
         {
-            departurePiece.dispose(hexCoords(ply.to));
+            departurePiece.reposition(ply.to, this);
             pieces[ply.to.toScalar()] = departurePiece;
             shownSituation.set(ply.to, Hex.occupied(departurePiece.type, departurePiece.color));
 
@@ -160,7 +165,7 @@ class Board extends Sprite
             }
             else if (departurePiece.color == destinationPiece.color && (departurePiece.type == Intellector && destinationPiece.type == Defensor || departurePiece.type == Defensor && destinationPiece.type == Intellector))
             {
-                destinationPiece.dispose(hexCoords(ply.from));
+                destinationPiece.reposition(ply.from, this);
                 pieces[ply.from.toScalar()] = destinationPiece;
                 shownSituation.set(ply.from, Hex.occupied(destinationPiece.type, destinationPiece.color));
             }
@@ -298,7 +303,7 @@ class Board extends Sprite
         else
         {
             var piece:Piece = Piece.fromHex(hex, hexSideLength);
-            piece.dispose(hexCoords(location));
+            piece.reposition(location, this);
             pieceLayer.addChild(piece);
             pieces[scalarCoord] = piece;
         }
@@ -314,7 +319,7 @@ class Board extends Sprite
         }
     }
 
-    private function disposeLetters() 
+    private function drawLetters() 
     {
         for (i in 0...9)
         {
@@ -355,7 +360,7 @@ class Board extends Sprite
         produceHexagons(markup == Over);
         producePieces();
         if (lettersEnabled)
-            disposeLetters();
+            drawLetters();
     }
 
 }

@@ -75,11 +75,10 @@ class Ply
     {
         var reversible:ReversiblePly = [];
 
-        var current:Situation = context.copy();
         var forecasted:Situation = context.makeMove(this);
 
-        var formerFrom:Hex = current.get(from);
-        var formerTo:Hex = current.get(to);
+        var formerFrom:Hex = context.get(from);
+        var formerTo:Hex = context.get(to);
         var latterFrom:Hex = forecasted.get(from);
         var latterTo:Hex = forecasted.get(to);
 

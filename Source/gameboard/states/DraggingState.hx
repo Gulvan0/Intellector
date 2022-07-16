@@ -1,67 +1,77 @@
 package gameboard.states;
 
-import openfl.geom.Point;
 import struct.IntPoint;
+
+private enum Transition
+{
+    ToNeutral;
+    ToSelected;
+}
 
 class DraggingState extends BasePlayableState
 {
     private var dragStartLocation:IntPoint;
+    private var draggedPiece:Piece;
 
-    public override function abortMove()
+    public function onEntered()
     {
-        boardInstance.getPiece(dragStartLocation).stopDrag();
-        boardInstance.returnPieceToOriginalPosition(dragStartLocation);
+        draggedPiece = boardInstance.getPiece(dragStartLocation);
+        boardInstance.bringPieceToFront(draggedPiece);
+        draggedPiece.startDrag(true);
+
+        boardInstance.getHex(dragStartLocation).showLayer(LMB);
+
+        if (!boardInstance.behavior.markersDisabled())
+            boardInstance.addMarkers(dragStartLocation);
+    }
+
+    private function exit(transition:Transition)
+    {
+        draggedPiece.stopDrag();
+        draggedPiece.reposition(dragStartLocation, boardInstance);
 
         boardInstance.getHex(dragStartLocation).hideLayer(LMB);
-        if (cursorLocation != null)
-            boardInstance.getHex(cursorLocation).hideLayer(Hover);
 
         if (!boardInstance.behavior.markersDisabled())
             boardInstance.removeMarkers(dragStartLocation);
+
+        switch transition 
+        {
+            case ToNeutral:
+                boardInstance.state = new NeutralState();
+            case ToSelected:
+                boardInstance.state = new SelectedState(dragStartLocation);
+        }
     }
 
-    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function exitToNeutral()
+    {
+        exit(ToNeutral);
+    }
+
+    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }
 
-    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
-        var draggedPiece:Piece = boardInstance.getPiece(dragStartLocation);
-        draggedPiece.stopDrag();
-        boardInstance.getHex(dragStartLocation).hideLayer(LMB);
-        if (cursorLocation != null)
-            boardInstance.getHex(cursorLocation).hideLayer(Hover);
-
         if (location != null && location.equals(dragStartLocation))
-        {
-            var newPosition:Point = boardInstance.hexCoords(location);
-            draggedPiece.x = newPosition.x;
-            draggedPiece.y = newPosition.y;
-            boardInstance.getHex(location).showLayer(LMB);
-            boardInstance.state = new SelectedState(location);
-        }
-        else if (location != null && boardInstance.behavior.movePossible(dragStartLocation, location))
-        {
-            if (!boardInstance.behavior.markersDisabled())
-                boardInstance.removeMarkers(dragStartLocation);
-            askMoveDetails(dragStartLocation, location, shiftPressed, ctrlPressed);
-        }
+            exit(ToSelected);
         else
-        {
-            abortMove();
-            boardInstance.state = new NeutralState();
-        }
+            exit(ToNeutral);
+
+        if (location != null && boardInstance.behavior.movePossible(dragStartLocation, location))
+            askMoveDetails(dragStartLocation, location, shiftPressed, ctrlPressed);
     }
 
-    public override function reactsToHover(location:IntPoint):Bool
+    public function reactsToHover(location:IntPoint):Bool
     {
         return boardInstance.behavior.movePossible(dragStartLocation, location);
     }
 
     public function new(dragStartLocation:IntPoint)
     {
-        super();
         this.dragStartLocation = dragStartLocation;
     }
 }

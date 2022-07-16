@@ -49,7 +49,7 @@ class Dialogs
         DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true);
     }
 
-    public static function promotionSelect(color:PieceColor, callback:PieceType->Void, onCancel:Void->Void)
+    public static function promotionSelect(color:PieceColor, callback:PieceType->Void)
     {
         function cb(dialog:Dialog, type:PieceType) 
         {
@@ -75,21 +75,16 @@ class Dialogs
         dialog.addComponent(body);
         dialog.title = Dictionary.getPhrase(PROMOTION_DIALOG_TITLE);
         dialog.buttons = DialogButton.CANCEL;
-        dialog.onDialogClosed = (e) -> {
-            onCancel();
-        };
         dialog.showDialog(false);
     }
 
-    public static function chameleonConfirm(onDecided:Bool->Void, onCancelled:Void->Void)
+    public static function chameleonConfirm(onDecided:Bool->Void)
     {
         DialogManager.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
             if (btn == DialogButton.YES)
                 onDecided(true);
             else if (btn == DialogButton.NO)
                 onDecided(false);
-            else 
-                onCancelled();
         });
     }
 

@@ -96,7 +96,7 @@ class MainView extends HBox
 
     private function timerRun()
     {
-        board.setSituation(component._provide_situation());
+        board.setShownSituation(component._provide_situation());
     }
 
     private function onActionBtnPressed(fieldName:String, ?splitterValue:String)

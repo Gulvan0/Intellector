@@ -50,7 +50,6 @@ class CreepingLine extends VBox implements IPlyHistoryView
             case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
                 revertPlys(branchLength - plyPointer);
                 writePlyStr(plyStr, true);
-            default:
         }
     }
 

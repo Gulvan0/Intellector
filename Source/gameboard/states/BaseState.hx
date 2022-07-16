@@ -5,20 +5,16 @@ import struct.Hex;
 import struct.IntPoint;
 import net.ServerEvent;
 
-class BaseState
+abstract class BaseState
 {
     private var boardInstance:GameBoard;
     public var cursorLocation(default, null):Null<IntPoint>;
     
-    public function abortMove()
-    {
-        throw "Should be overriden";
-    }
+    private abstract function onEntered():Void;
+    
+    public abstract function exitToNeutral():Void;
 
-    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
-    {
-        throw "Should be overriden";
-    }
+    public abstract function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool):Void;
 
     public final function onMouseMoved(newCursorLocation:Null<IntPoint>)
     {
@@ -34,15 +30,9 @@ class BaseState
         cursorLocation = newCursorLocation;
     }
 
-    public function reactsToHover(location:IntPoint):Bool
-    {
-        throw "Should be overriden";
-    }
+    public abstract function reactsToHover(location:IntPoint):Bool;
 
-    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
-    {
-        throw "Should be overriden";
-    }
+    public abstract function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool):Void;
 
     public function init(board:GameBoard, ?cursorLocation:IntPoint)
     {
@@ -50,10 +40,7 @@ class BaseState
             throw new AlreadyInitializedException();
         this.boardInstance = board;
         this.cursorLocation = cursorLocation;
-    }
-
-    public function new()
-    {
-
+        this.onEntered();
+        this.onMouseMoved(cursorLocation);
     }
 }

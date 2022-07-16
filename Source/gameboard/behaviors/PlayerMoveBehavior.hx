@@ -1,5 +1,6 @@
 package gameboard.behaviors;
 
+import gfx.analysis.PeripheralEvent;
 import utils.exceptions.AlreadyInitializedException;
 import struct.IntPoint;
 import struct.Ply;
@@ -20,23 +21,26 @@ class PlayerMoveBehavior implements IBehavior
         switch event 
         {
             case Rollback(plysToUndo):
-                boardInstance.state.abortMove();
+                boardInstance.state.exitToNeutral();
                 boardInstance.revertPlys(plysToUndo);
                 if (plysToUndo % 2 == 1)
                     boardInstance.behavior = new EnemyMoveBehavior(playerColor);
 
                 if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 1)
                     boardInstance.state = new StubState();
-                else
-                    boardInstance.state = new NeutralState();
                 
             case GameEnded(winner_color, reason):
-                boardInstance.state.abortMove();
+                boardInstance.state.exitToNeutral();
                 boardInstance.state = new StubState();
             
             default:
         }
 	}
+
+    public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
+    {
+        //* Do nothing
+    }
     
     public function movePossible(from:IntPoint, to:IntPoint):Bool
 	{
@@ -74,6 +78,11 @@ class PlayerMoveBehavior implements IBehavior
         else
             boardInstance.state = new StubState();
         boardInstance.behavior = new EnemyMoveBehavior(playerColor);
+    }
+    
+    public function onHexChosen(coords:IntPoint)
+    {
+        throw "onHexChosen() called while in PlayerMoveBehavior";
     }
     
     public function markersDisabled():Bool

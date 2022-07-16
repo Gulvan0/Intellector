@@ -7,7 +7,7 @@ import struct.Ply;
 import struct.IntPoint;
 import net.ServerEvent;
 
-class BasePlayableState extends BaseState
+abstract class BasePlayableState extends BaseState
 {
     private function askMoveDetails(from:IntPoint, to:IntPoint, shiftPressed:Bool, ctrlPressed:Bool) 
     {
@@ -29,20 +29,15 @@ class BasePlayableState extends BaseState
             if (shiftPressed)
                 boardInstance.behavior.onMoveChosen(dominatorPromotionPly);
             else
-                Dialogs.promotionSelect(departureHex.color, onPromotionSelected, abortMove);
+                Dialogs.promotionSelect(departureHex.color, onPromotionSelected);
         else if (chameleonPossible)
             if (ctrlPressed)
                 boardInstance.behavior.onMoveChosen(simplePly);
             else if (shiftPressed)
                 boardInstance.behavior.onMoveChosen(chameleonPly);
             else
-                Dialogs.chameleonConfirm(onChameleonDecisionMade, abortMove);
+                Dialogs.chameleonConfirm(onChameleonDecisionMade);
         else
             boardInstance.behavior.onMoveChosen(simplePly);
-    }
-
-    public function new()
-    {
-        super();
     }
 }

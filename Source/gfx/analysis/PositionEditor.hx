@@ -84,7 +84,6 @@ class PositionEditor extends VBox
                 setTurnColor(opposite(performedBy));
             case BranchingMove(_, _, performedBy, _, _):
                 setTurnColor(opposite(performedBy));
-            default:
         }
     }
 

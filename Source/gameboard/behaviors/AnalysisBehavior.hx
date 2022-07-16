@@ -1,5 +1,6 @@
 package gameboard.behaviors;
 
+import gfx.analysis.PeripheralEvent;
 import gameboard.states.NeutralState;
 import utils.exceptions.AlreadyInitializedException;
 import struct.IntPoint;
@@ -17,7 +18,44 @@ class AnalysisBehavior implements IBehavior
     public function handleNetEvent(event:ServerEvent):Void
 	{
         //* Do nothing
-	}
+    }
+
+    public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
+    {
+        switch event 
+        {
+            case BranchSelected(branch, _, pointer):
+                onBranchSelected(branch, pointer);
+            case RevertNeeded(plyCnt):
+                boardInstance.revertPlys(plyCnt);
+            case OrientationChangeRequested:
+                boardInstance.revertOrientation();
+            case EditorLaunchRequested:
+                boardInstance.removeArrowsAndSelections();
+                boardInstance.highlightMove([]);
+                boardInstance.state = new NeutralState();
+                boardInstance.behavior = new EditorFreeMoveBehavior();
+            case ScrollBtnPressed(type):
+                boardInstance.applyScrolling(type);
+            case PlySelected(index):
+                boardInstance.scrollToPly(index);
+            default:
+        }
+    }
+
+    private function onBranchSelected(plySequence:Array<Ply>, selectedPlyNum:Int)
+    {
+        boardInstance.removeArrowsAndSelections();
+
+        boardInstance.plyHistory.clear();
+        boardInstance.currentSituation = boardInstance.startingSituation.copy();
+        boardInstance.setShownSituation(boardInstance.startingSituation);
+
+        for (ply in plySequence)
+            boardInstance.makeMove(ply);
+
+        boardInstance.scrollToPly(selectedPlyNum);
+    }
     
     public function movePossible(from:IntPoint, to:IntPoint):Bool
 	{
@@ -66,6 +104,11 @@ class AnalysisBehavior implements IBehavior
 
         colorToMove = opposite(colorToMove);
         boardInstance.state = new NeutralState();
+    }
+    
+    public function onHexChosen(coords:IntPoint)
+    {
+        throw "onHexChosen() called while in AnalysisBehavior";
     }
     
     public function markersDisabled():Bool

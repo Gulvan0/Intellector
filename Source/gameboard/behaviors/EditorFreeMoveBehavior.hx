@@ -1,67 +1,22 @@
 package gameboard.behaviors;
 
-import utils.exceptions.AlreadyInitializedException;
+import struct.Hex;
 import struct.Ply;
 import struct.IntPoint;
-import net.ServerEvent;
-import struct.ReversiblePly;
-import struct.PieceColor;
-import utils.AssetManager;
 
-class EditorFreeMoveBehavior implements IBehavior 
+class EditorFreeMoveBehavior extends EditorBehavior implements IBehavior 
 {
-    private var boardInstance:GameBoard;
-
-    public function handleNetEvent(event:ServerEvent):Void
-	{
-        //* Do nothing
-	}
-    
-    public function movePossible(from:IntPoint, to:IntPoint):Bool
-	{
-        return true;
-    }
-    
-    public function allowedToMove(piece:Piece):Bool
-	{
-        return true;
-    }
-    
-    public function returnToCurrentOnLMB():Bool
-	{
-        return false;
-    }
-    
-    public function onVoidClick()
-	{
-        //* Do nothing
-    }
-
-    public function onAboutToScrollAway()
-    {
-        trace("Warning: scroll callback called while board.behavior is EditorFreeMoveBehavior");
-    }
-    
     public function onMoveChosen(ply:Ply):Void
 	{
-        boardInstance.teleportPiece(ply.from, ply.to);
+        var situation = boardInstance.shownSituation.copy();
+        situation.set(ply.to, situation.get(ply.from));
+        situation.set(ply.from, Hex.empty());
+        boardInstance.setShownSituation(situation);
     }
     
-    public function markersDisabled():Bool
+    public function onHexChosen(coords:IntPoint)
     {
-        return true;
-    }
-
-    public function hoverDisabled():Bool
-    {
-        return true;
-    }
-
-    public function init(board:GameBoard)
-    {
-        if (this.boardInstance != null)
-            throw new AlreadyInitializedException();
-        this.boardInstance = board;
+        //* Do nothing
     }
     
     public function new()

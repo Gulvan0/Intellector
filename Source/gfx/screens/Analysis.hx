@@ -92,8 +92,10 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         creepingLine.handlePeripheralEvent(event);
         actionBar.handlePeripheralEvent(event);
 
-        if (event == ShareRequested)
+        if (event.match(ShareRequested))
             displayShareDialog();
+        else if (event.match(ApplyChangesRequested(_)))
+            controlTabs.clearBranching(board.startingSituation);
     }
 
     public function handleGameBoardEvent(event:GameBoardEvent)

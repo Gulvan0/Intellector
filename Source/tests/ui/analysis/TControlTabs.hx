@@ -50,15 +50,6 @@ class TControlTabs extends TestedComponent //TODO: Add more tests
         "Ply history gets cut after specified number of plys, then, new ply is appended",
         "ContinuationMove works correctly after BranchingMove",
         "2+ successive BranchingMove's work correctly"
-    ];
-
-    private function _act_SituationEdited() 
-    {
-        sidebox.handleGameBoardEvent(SituationEdited(Situation.randomPlay(3)));
-    }
-
-    private var _checks_SituationEdited:Array<String> = [
-        "No reaction"
     ];*/
 
     public override function getComponent():ComponentGraphics 

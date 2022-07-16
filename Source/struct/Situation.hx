@@ -108,9 +108,9 @@ class Situation
         return next;
     }
 
-    public function makeMoves(plys:Array<ReversiblePly>):Situation 
+    public function makeMoves(plys:Array<ReversiblePly>, inPlace:Bool = false):Situation 
     {
-        var nextSituation:Situation = this.copy();
+        var nextSituation:Situation = inPlace? this : this.copy();
 
         for (ply in plys)
             for (transform in ply)
@@ -126,9 +126,9 @@ class Situation
         return nextSituation;
     }
 
-    public function unmakeMoves(plys:Array<ReversiblePly>):Situation 
+    public function unmakeMoves(plys:Array<ReversiblePly>, inPlace:Bool = false):Situation 
     {
-        var formerSituation:Situation = this.copy();
+        var formerSituation:Situation = inPlace? this : this.copy();
         var reversedPlys = plys.copy();
         reversedPlys.reverse();
 

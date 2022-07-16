@@ -2,37 +2,49 @@ package gameboard.states;
 
 import struct.IntPoint;
 
+private enum Transition 
+{
+    ToDragging(dragStartLocation:IntPoint);
+}
+
 class NeutralState extends BasePlayableState
 {
-    public override function abortMove()
+    public function onEntered()
     {
         //* Do nothing
     }
 
-    public override function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function exitToNeutral()
     {
-        var pressedPiece:Null<Piece> = boardInstance.getPiece(location);
+        //* Do nothing
+    }
 
+    private function exit(transition:Transition)
+    {
+        switch transition 
+        {
+            case ToDragging(dragStartLocation):
+                boardInstance.state = new DraggingState(dragStartLocation);
+        }
+    }
+
+    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    {
         if (boardInstance.behavior.returnToCurrentOnLMB() && !boardInstance.plyHistory.isAtEnd())
         {
             boardInstance.applyScrolling(End);
             return;
         }
         
-        if (pressedPiece == null || !boardInstance.behavior.allowedToMove(pressedPiece))
-        {
-            boardInstance.behavior.onVoidClick();
-            return;
-        }
+        var pressedPiece:Null<Piece> = boardInstance.getPiece(location);
 
-        boardInstance.getHex(location).showLayer(LMB);
-        if (!boardInstance.behavior.markersDisabled())
-            boardInstance.addMarkers(location);
-        boardInstance.startPieceDragging(location);
-        boardInstance.state = new DraggingState(location);
+        if (pressedPiece != null && boardInstance.behavior.allowedToMove(pressedPiece))
+            exit(ToDragging(location));
+        else
+            boardInstance.behavior.onVoidClick();
     }
 
-    public override function reactsToHover(location:IntPoint):Bool
+    public function reactsToHover(location:IntPoint):Bool
     {
         var piece = boardInstance.getPiece(location);
         if (piece == null)
@@ -41,13 +53,13 @@ class NeutralState extends BasePlayableState
             return boardInstance.behavior.allowedToMove(piece);
     }
 
-    public override function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }
 
     public function new()
     {
-        super();
+        
     }
 }

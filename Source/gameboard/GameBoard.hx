@@ -10,7 +10,7 @@ import net.EventProcessingQueue.INetObserver;
 import openfl.events.Event;
 import struct.ReversiblePly;
 import gameboard.behaviors.AnalysisBehavior;
-import gameboard.states.DirectSetState;
+import gameboard.states.HexSelectionState;
 import gameboard.behaviors.EditorFreeMoveBehavior;
 import gfx.analysis.PosEditMode;
 import gameboard.states.NeutralState;
@@ -32,7 +32,6 @@ enum GameBoardEvent
     ContinuationMove(ply:Ply, plyStr:String, performedBy:PieceColor);
     SubsequentMove(plyStr:String, performedBy:PieceColor);
     BranchingMove(ply:Ply, plyStr:String, performedBy:PieceColor, plyPointer:Int, branchLength:Int);
-    SituationEdited(newSituation:Situation);
 }
 
 interface IGameBoardObserver
@@ -42,14 +41,14 @@ interface IGameBoardObserver
 
 /**
     SelectableBoard that allows scrolling through the game and emits various events
-
-    Changes behaviour based on the current state
 **/
+@:allow(gameboard.behaviors.IBehavior)
+@:allow(gameboard.states.BaseState)
 class GameBoard extends SelectableBoard implements INetObserver
 {
     public var plyHistory:PlyHistory;
-    public var currentSituation:Situation;
-    private var startingSituation:Situation;
+    public var currentSituation(get, null):Situation;
+    public var startingSituation(get, null):Situation;
 
     public var state(default, set):BaseState;
     public var behavior(default, set):IBehavior;
@@ -58,6 +57,16 @@ class GameBoard extends SelectableBoard implements INetObserver
     private var lastMouseMoveEvent:MouseEvent;
 
     private var observers:Array<IGameBoardObserver> = [];
+
+    private function get_currentSituation():Situation
+    {
+        return currentSituation.copy();
+    }
+
+    private function get_startingSituation():Situation
+    {
+        return startingSituation.copy();
+    }
 
     private function set_state(value:BaseState):BaseState 
     {
@@ -95,21 +104,18 @@ class GameBoard extends SelectableBoard implements INetObserver
             onMouseMoved(lastMouseMoveEvent);
     }
 
-    public function startPieceDragging(location:IntPoint)
+    public function bringPieceToFront(piece:Piece)
     {
-        var piece:Piece = getPiece(location);
-        pieceLayer.removeChild(piece);
-        pieceLayer.addChild(piece);
-        piece.startDrag(true);
+        if (piece.parent != null)
+            pieceLayer.addChild(piece);
     }
 
     private function prepareToScrollAway()
     {
+        state.exitToNeutral();
+
         if (state.cursorLocation != null)
             getHex(state.cursorLocation).hideLayer(Hover);
-
-        if (Std.isOfType(state, BasePlayableState))
-            state.abortMove();
 
         if (plyHistory.isAtEnd())
             behavior.onAboutToScrollAway();
@@ -133,7 +139,7 @@ class GameBoard extends SelectableBoard implements INetObserver
         }
     }
 
-    public function scrollToMove(moveNum:Int)
+    public function scrollToPly(moveNum:Int)
     {
         if (plyHistory.pointer == moveNum)
             return;
@@ -156,7 +162,7 @@ class GameBoard extends SelectableBoard implements INetObserver
 
         var toRevert:Array<ReversiblePly> = plyHistory.dropLast(cnt);
         currentSituation = currentSituation.unmakeMoves(toRevert);
-        setSituation(currentSituation);
+        setShownSituation(currentSituation);
         highlightMove(plyHistory.getLastMove().affectedCoords());
     }
 
@@ -167,13 +173,6 @@ class GameBoard extends SelectableBoard implements INetObserver
 
         plyHistory.dropSinceShown();
         currentSituation = shownSituation.copy();
-    }
-
-    public function returnPieceToOriginalPosition(pieceOriginalLocation:IntPoint)
-    {
-        var piece = getPiece(pieceOriginalLocation);
-        var origPosition = hexCoords(pieceOriginalLocation);
-        piece.dispose(origPosition);
     }
 
     /**
@@ -193,21 +192,10 @@ class GameBoard extends SelectableBoard implements INetObserver
         }
     }
 
-    /**For editor usage only**/
-    public function teleportPiece(from:IntPoint, to:IntPoint)
-    {
-        if (!shownSituation.get(to).isEmpty())
-            removeChild(getPiece(to));
-                
-        getPiece(from).dispose(hexCoords(to));
-        shownSituation.set(to, shownSituation.get(from));
-        shownSituation.set(from, Hex.empty());
-    }
-
     private function home()
     {
         plyHistory.home();
-        setSituation(startingSituation);
+        setShownSituation(startingSituation);
         highlightMove([]);
     }   
     
@@ -231,26 +219,8 @@ class GameBoard extends SelectableBoard implements INetObserver
     private function end()
     {
         plyHistory.end(); 
-        setSituation(currentSituation.copy());
+        setShownSituation(currentSituation.copy());
         highlightMove(plyHistory.getLastMove().affectedCoords());
-    } 
-
-    private function onEditModeChanged(newEditMode:PosEditMode)
-    {
-        state.abortMove();
-
-        switch newEditMode 
-        {
-            case Move:
-                state = new NeutralState();
-                behavior = new EditorFreeMoveBehavior();
-            case Delete:
-                state = new DirectSetState(Hex.empty());
-                behavior = new AnalysisBehavior(shownSituation.turnColor);
-            case Set(type, color):
-                state = new DirectSetState(Hex.occupied(type, color));
-                behavior = new AnalysisBehavior(shownSituation.turnColor);
-        }
     }
 
     private function onLMBPressed(e:MouseEvent)
@@ -284,69 +254,9 @@ class GameBoard extends SelectableBoard implements INetObserver
         behavior.handleNetEvent(event);
     }
 
-    private function rearrangeToSituation(situation:Situation)
-    {
-        removeArrowsAndSelections();
-        highlightMove([]);
-        setSituation(situation.copy());
-    }
-    
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
-        switch event 
-        {
-            case BranchSelected(branch, branchStr, pointer):
-                var situation = startingSituation.copy();
-                var i = 1;
-                plyHistory.clear();
-                for (ply in branch)
-                {
-                    var reversiblePly:ReversiblePly = ply.toReversible(situation);
-                    plyHistory.append(ply, reversiblePly, i > pointer);
-                    situation = situation.makeMove(ply);
-                    if (i == pointer)
-                    {
-                        rearrangeToSituation(situation);
-                        highlightMove(reversiblePly.affectedCoords());
-                    }
-                    i++;
-                }
-            case RevertNeeded(plyCnt):
-                revertPlys(plyCnt);
-            case ClearRequested:
-                rearrangeToSituation(Situation.empty());
-            case ResetRequested:
-                rearrangeToSituation(currentSituation);
-            case StartPosRequested:
-                rearrangeToSituation(Situation.starting());
-            case OrientationChangeRequested:
-                revertOrientation();
-            case ConstructSituationRequested(situation):
-                rearrangeToSituation(situation);
-            case TurnColorChanged(newTurnColor):
-                shownSituation.turnColor = newTurnColor;
-            case ApplyChangesRequested(turnColor):
-                currentSituation = shownSituation.copy();
-                plyHistory.clear();
-                state = new NeutralState();
-                behavior = new AnalysisBehavior(currentSituation.turnColor);
-                emit(SituationEdited(currentSituation));
-            case DiscardChangesRequested:
-                setSituation(currentSituation);
-                state = new NeutralState();
-                behavior = new AnalysisBehavior(currentSituation.turnColor);
-            case EditModeChanged(newEditMode):
-                onEditModeChanged(newEditMode);
-            case EditorLaunchRequested:
-                removeArrowsAndSelections();
-                highlightMove([]);
-                onEditModeChanged(Move);
-            case ScrollBtnPressed(type):
-                applyScrolling(type);
-            case PlySelected(index):
-                scrollToMove(index);
-            default:
-        }
+        behavior.handleAnalysisPeripheralEvent(event);
     }
 
     private function initLMB(e)
@@ -376,21 +286,6 @@ class GameBoard extends SelectableBoard implements INetObserver
         for (obs in observers)
             obs.handleGameBoardEvent(e);
     }
-
-    public function asVariant():Null<Variant> 
-    {
-        var situation:Situation = Situation.starting();
-        var variant:Variant = new Variant(situation);
-
-        var path:Array<Int> = [];
-        for (ply in plyHistory.getPlySequence())
-        {
-            variant.addChildToNode(ply, path);
-            path.push(0);
-        }
-
-        return variant;
-	}
 
     public function new(situation:Situation, orientationColor:PieceColor, startBehavior:IBehavior, stubState:Bool = false, hexSideLength:Float = 40) 
     {

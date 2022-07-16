@@ -59,10 +59,13 @@ class ControlTabs extends TabView
                 variantView.addChildToSelectedNode(ply, true);
             case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
                 variantView.addChildToSelectedNode(ply, true);
-            case SituationEdited(newSituation):
-                variantView.clear(newSituation);
             default:
         }
+    }
+
+    public function clearBranching(?newStartingSituation:Situation)
+    {
+        variantView.clear(newStartingSituation);
     }
 
     public function new(initialVariant:Variant, eventHandler:PeripheralEvent->Void)
