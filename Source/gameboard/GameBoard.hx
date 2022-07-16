@@ -47,8 +47,12 @@ interface IGameBoardObserver
 class GameBoard extends SelectableBoard implements INetObserver
 {
     public var plyHistory:PlyHistory;
-    public var currentSituation(get, null):Situation;
-    public var startingSituation(get, null):Situation;
+
+    private var _currentSituation:Situation;
+    public var currentSituation(get, never):Situation;
+
+    private var _startingSituation:Situation;
+    public var startingSituation(get, never):Situation;
 
     public var state(default, set):BaseState;
     public var behavior(default, set):IBehavior;
@@ -60,12 +64,12 @@ class GameBoard extends SelectableBoard implements INetObserver
 
     private function get_currentSituation():Situation
     {
-        return currentSituation.copy();
+        return _currentSituation.copy();
     }
 
     private function get_startingSituation():Situation
     {
-        return startingSituation.copy();
+        return _startingSituation.copy();
     }
 
     private function set_state(value:BaseState):BaseState 
@@ -161,7 +165,7 @@ class GameBoard extends SelectableBoard implements INetObserver
         end();
 
         var toRevert:Array<ReversiblePly> = plyHistory.dropLast(cnt);
-        currentSituation = currentSituation.unmakeMoves(toRevert);
+        _currentSituation.unmakeMoves(toRevert, true);
         setShownSituation(currentSituation);
         highlightMove(plyHistory.getLastMove().affectedCoords());
     }
@@ -172,7 +176,7 @@ class GameBoard extends SelectableBoard implements INetObserver
             return;
 
         plyHistory.dropSinceShown();
-        currentSituation = shownSituation.copy();
+        _currentSituation = shownSituation.copy();
     }
 
     /**
@@ -184,7 +188,7 @@ class GameBoard extends SelectableBoard implements INetObserver
     {
         var revPly:ReversiblePly = ply.toReversible(currentSituation);
         plyHistory.append(ply, revPly);
-        currentSituation = currentSituation.makeMove(ply);
+        _currentSituation.makeMove(ply, true);
         if (plyHistory.isAtEnd())
         {
             applyMoveTransposition(revPly);
@@ -292,8 +296,8 @@ class GameBoard extends SelectableBoard implements INetObserver
         super(situation, Free, Free, orientationColor, hexSideLength);
 
         this.plyHistory = new PlyHistory();
-        this.currentSituation = situation.copy();
-        this.startingSituation = situation.copy();
+        this._currentSituation = situation.copy();
+        this._startingSituation = situation.copy();
         this.state = stubState? new StubState() : new NeutralState();
         this.behavior = startBehavior;
 

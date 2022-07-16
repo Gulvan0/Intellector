@@ -26,7 +26,9 @@ class Board extends Sprite
     public var pieces:Array<Null<Piece>>;
 
     public var orientationColor(default, null):PieceColor;
-    public var shownSituation(get, null):Situation;
+
+    private var _shownSituation:Situation;
+    public var shownSituation(get, never):Situation;
 
     private var letters:Array<Label> = [];
 
@@ -40,7 +42,7 @@ class Board extends Sprite
 
     private function get_shownSituation():Situation
     {
-        return shownSituation.copy();
+        return _shownSituation.copy();
     }
     
     public function resize(newHexSideLength:Float)
@@ -108,7 +110,7 @@ class Board extends Sprite
         for (piece in pieces)
             pieceLayer.removeChild(piece);
         pieces = [];
-        shownSituation = val.copy();
+        _shownSituation = val.copy();
         producePieces();
     }
 
@@ -121,19 +123,19 @@ class Board extends Sprite
     {
         if (hex.type == Intellector)
         {
-            var oldIntellectorPosition:Null<IntPoint> = shownSituation.intellectorPos[hex.color];
+            var oldIntellectorPosition:Null<IntPoint> = _shownSituation.intellectorPos[hex.color];
             if (oldIntellectorPosition != null)
             {
                 pieceLayer.removeChild(getPiece(oldIntellectorPosition));
                 pieces[oldIntellectorPosition.toScalar()] = null;
-                shownSituation.set(oldIntellectorPosition, Hex.empty());
+                _shownSituation.set(oldIntellectorPosition, Hex.empty());
             }
         }
         var formerPiece = getPiece(location);
         if (formerPiece != null)
             pieceLayer.removeChild(formerPiece);
         producePiece(location, hex);
-        shownSituation.set(location, hex.copy());
+        _shownSituation.set(location, hex.copy());
     }
 
     public function applyPremoveTransposition(ply:Ply) 
@@ -145,35 +147,35 @@ class Board extends Sprite
         {
             pieceLayer.removeChild(departurePiece);
             pieces[ply.from.toScalar()] = null;
-            shownSituation.set(ply.from, Hex.empty());
+            _shownSituation.set(ply.from, Hex.empty());
 
             if (destinationPiece != null)
                 pieceLayer.removeChild(destinationPiece);
             producePiece(ply.to, Hex.occupied(ply.morphInto, departurePiece.color));
-            shownSituation.set(ply.to, Hex.occupied(ply.morphInto, departurePiece.color));
+            _shownSituation.set(ply.to, Hex.occupied(ply.morphInto, departurePiece.color));
         }
         else
         {
             departurePiece.reposition(ply.to, this);
             pieces[ply.to.toScalar()] = departurePiece;
-            shownSituation.set(ply.to, Hex.occupied(departurePiece.type, departurePiece.color));
+            _shownSituation.set(ply.to, Hex.occupied(departurePiece.type, departurePiece.color));
 
             if (destinationPiece == null)
             {
                 pieces[ply.from.toScalar()] = null;
-                shownSituation.set(ply.from, Hex.empty());
+                _shownSituation.set(ply.from, Hex.empty());
             }
             else if (departurePiece.color == destinationPiece.color && (departurePiece.type == Intellector && destinationPiece.type == Defensor || departurePiece.type == Defensor && destinationPiece.type == Intellector))
             {
                 destinationPiece.reposition(ply.from, this);
                 pieces[ply.from.toScalar()] = destinationPiece;
-                shownSituation.set(ply.from, Hex.occupied(destinationPiece.type, destinationPiece.color));
+                _shownSituation.set(ply.from, Hex.occupied(destinationPiece.type, destinationPiece.color));
             }
             else
             {
                 pieceLayer.removeChild(destinationPiece);
                 pieces[ply.from.toScalar()] = null;
-                shownSituation.set(ply.from, Hex.empty());
+                _shownSituation.set(ply.from, Hex.empty());
             }
         }
     }
@@ -187,9 +189,9 @@ class Board extends Sprite
             if (!currentHex.isEmpty())
                 pieceLayer.removeChild(getPiece(transform.coords));
             producePiece(transform.coords, goalHex);
-            shownSituation.set(transform.coords, goalHex);
-            shownSituation.turnColor = opposite(shownSituation.turnColor);
+            _shownSituation.set(transform.coords, goalHex);
         }
+        _shownSituation.turnColor = opposite(_shownSituation.turnColor);
     }
 
     public function getHex(coords:Null<IntPoint>):Null<Hexagon>
@@ -291,7 +293,7 @@ class Board extends Sprite
         for (s in 0...59)
         {
             var p = IntPoint.fromScalar(s);
-            producePiece(p, shownSituation.get(p));
+            producePiece(p, _shownSituation.get(p));
         }
     }
 
@@ -350,7 +352,7 @@ class Board extends Sprite
         this.hexSideLength = hexSideLength;
         this.lettersEnabled = markup != None;
         this.orientationColor = orientationColor;
-        this.shownSituation = situation.copy();
+        this._shownSituation = situation.copy();
         this.hexagonLayer = new Sprite();
         this.pieceLayer = new Sprite();
 

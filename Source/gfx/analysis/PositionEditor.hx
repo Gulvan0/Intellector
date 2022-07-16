@@ -45,7 +45,6 @@ class PositionEditor extends VBox
     @:bind(turnColorStepper, UIEvent.CHANGE)
     private function onTurnColorChanged(e)
     {
-        trace('stepper');
         eventHandler(TurnColorChanged(getTurnColor()));
     }
 
@@ -79,6 +78,7 @@ class PositionEditor extends VBox
         switch event
         {
             case ContinuationMove(_, _, performedBy):
+                trace(performedBy);
                 setTurnColor(opposite(performedBy));
             case SubsequentMove(_, performedBy):
                 setTurnColor(opposite(performedBy));

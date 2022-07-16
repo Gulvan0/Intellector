@@ -33,6 +33,7 @@
             height: 40px;
         }
     </style>
+    <spacer height="10px" />
     <grid id="editModesGrid" columns="7" horizontalAlign="center">
         <button id="moveModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/move.svg" styleName="moveDelete" group="editModes" toggle="true" selected="true" />
         <button id="setProgWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_White.svg" styleName="progressor" group="editModes" toggle="true" />
@@ -49,22 +50,25 @@
         <button id="setDomBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Dominator_Black.svg" styleName="dominator" group="editModes" toggle="true" />
         <button id="setIntBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_Black.svg" styleName="intellector" group="editModes" toggle="true" />
     </grid>
-    <hbox width="100%">
+    <hbox horizontalAlign="center" width="500px">
         <button id="orientationBtn" icon="assets/symbols/analysis/flip.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
-        <dropdown id="turnColorStepper" verticalAlign="center" width="100%" height="40px">
+        <spacer width="5px" />
+        <dropdown id="turnColorStepper" width="100%" verticalAlign="center" style="font-size:20px">
             <data>
                 <item text="${Dictionary.getPhrase(ANALYSIS_WHITE_TO_MOVE_OPTION_TEXT)}" />
                 <item text="${Dictionary.getPhrase(ANALYSIS_BLACK_TO_MOVE_OPTION_TEXT)}" />
             </data>
         </dropdown>
+        <spacer width="5px" />
         <button id="importBtn" icon="assets/symbols/analysis/import.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_IMPORT_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <button id="clearBtn" icon="assets/symbols/analysis/flush.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_CLEAR_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <button id="resetBtn" icon="assets/symbols/analysis/reset.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_RESET_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <button id="startBtn" icon="assets/symbols/analysis/initial.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_TO_STARTPOS_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
     </hbox>
-    <hbox width="70%" height="40px" horizontalAlign="center">
-        <button id="applyChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES_BTN_TEXT)}" width="44%" height="100%" verticalAlign="center" />
-        <spacer width="12%" />
-        <button id="discardChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_DISCARD_CHANGES_BTN_TEXT)}" width="44%" height="100%" verticalAlign="center" />
+    <hbox height="40px" horizontalAlign="center">
+        <button id="applyChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES_BTN_TEXT)}" height="100%" verticalAlign="center" style="font-size:20px" />
+        <spacer width="5px" />
+        <button id="discardChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_DISCARD_CHANGES_BTN_TEXT)}" height="100%" verticalAlign="center" style="font-size:20px" />
     </hbox>
+    <spacer height="10px" />
 </vbox>

@@ -1,5 +1,6 @@
 package gameboard.states;
 
+import struct.Hex;
 import struct.IntPoint;
 
 private enum Transition
@@ -43,17 +44,17 @@ class SelectedState extends BasePlayableState
 
     public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
-        var pressedDestinationPiece:Null<Piece> = boardInstance.getPiece(location);
-        var selectedDeparturePiece:Null<Piece> = boardInstance.getPiece(selectedDepartureLocation);
+        var pressedDestinationHex:Null<Hex> = location == null? null : boardInstance.shownSituation.get(location);
+        var selectedDepartureHex:Hex = boardInstance.shownSituation.get(selectedDepartureLocation);
 
-        if (location == null)
+        if (pressedDestinationHex == null)
             exit(ToNeutral);
         else if (boardInstance.behavior.movePossible(selectedDepartureLocation, location))
         {
             exit(ToNeutral);
             askMoveDetails(selectedDepartureLocation, location, shiftPressed, ctrlPressed);
         }
-        else if (pressedDestinationPiece.color == selectedDeparturePiece.color)
+        else if (pressedDestinationHex.color == selectedDepartureHex.color)
             exit(ToDragging(location));
         else
             exit(ToNeutral);

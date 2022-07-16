@@ -48,7 +48,7 @@ class AnalysisBehavior implements IBehavior
         boardInstance.removeArrowsAndSelections();
 
         boardInstance.plyHistory.clear();
-        boardInstance.currentSituation = boardInstance.startingSituation.copy();
+        boardInstance._currentSituation = boardInstance.startingSituation;
         boardInstance.setShownSituation(boardInstance.startingSituation);
 
         for (ply in plySequence)

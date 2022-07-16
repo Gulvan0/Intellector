@@ -36,10 +36,11 @@ abstract class EditorBehavior implements IBehavior
             case ConstructSituationRequested(situation):
                 boardInstance.setShownSituation(situation);
             case TurnColorChanged(newTurnColor):
+                trace(boardInstance.shownSituation);
                 var updatedSituation = boardInstance.shownSituation;
                 updatedSituation.turnColor = newTurnColor;
                 boardInstance.setShownSituation(updatedSituation);
-            case ApplyChangesRequested(turnColor):
+            case ApplyChangesRequested(_):
                 onChangesApplied();
             case DiscardChangesRequested:
                 onChangesDiscarded();
@@ -63,8 +64,8 @@ abstract class EditorBehavior implements IBehavior
 
     public function onChangesApplied()
     {
-        boardInstance.startingSituation = boardInstance.shownSituation.copy();
-        boardInstance.currentSituation = boardInstance.shownSituation.copy();
+        boardInstance._startingSituation = boardInstance.shownSituation;
+        boardInstance._currentSituation = boardInstance.shownSituation;
         boardInstance.plyHistory.clear();
 
         boardInstance.state = new NeutralState();

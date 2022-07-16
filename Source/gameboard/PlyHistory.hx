@@ -98,9 +98,9 @@ class PlyHistory
         return revPlys.splice(newLength, cnt);
     }
 
-    public function append(ply:Ply, reversible:ReversiblePly, ?doNotIncrementPointerAtEnd:Bool = false) 
+    public function append(ply:Ply, reversible:ReversiblePly) 
     {
-        if (isAtEnd() && !doNotIncrementPointerAtEnd)
+        if (isAtEnd())
             pointer++;
         plys.push(ply);
         revPlys.push(reversible);
