@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import net.GeneralObserver;
 import net.ServerEvent;
@@ -137,7 +138,7 @@ class MainMenu extends VBox implements IScreen
         for (type in MainMenuButton.createAll())
 		    mainMenu.addComponent(createBtn(type));
 
-		mainMenu.x = (Browser.window.innerWidth - mainMenu.width) / 2;
+		mainMenu.x = (Screen.instance.width - mainMenu.width) / 2;
 		mainMenu.y = 100;
 		addComponent(mainMenu);
     }

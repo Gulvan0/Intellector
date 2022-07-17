@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import utils.TimeControl;
 import struct.PieceColor;
@@ -64,7 +65,7 @@ class OpenChallengeJoining extends VBox implements IScreen
 			Networker.emitEvent(AcceptOpenChallenge(challengeOwner));
 		}
 
-		joinMenu.x = (Browser.window.innerWidth - boxWidth) / 2;
+		joinMenu.x = (Screen.instance.width - boxWidth) / 2;
 		joinMenu.y = 100;
 		addComponent(joinMenu);
     }

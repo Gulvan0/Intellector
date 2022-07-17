@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Screen;
 import haxe.ui.Toolkit;
 import gfx.common.ShareDialog;
 import js.Browser;
@@ -47,7 +48,7 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
 
     private override function validateComponentLayout():Bool 
     {
-        var compact:Bool = Browser.window.innerWidth / Browser.window.innerHeight < 1.2;
+        var compact:Bool = Screen.instance.width / Screen.instance.height < 1.2;
         var wasCompact:Bool = lControlTabsContainer.hidden;
 
         cCreepingLineContainer.hidden = !compact;
@@ -113,12 +114,12 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         var startingSituation:Situation = variant.startingSituation;
         var firstColorToMove:PieceColor = startingSituation.turnColor;
 
-        board = new GameBoard(startingSituation, firstColorToMove, new AnalysisBehavior(firstColorToMove), false);
+        board = new GameBoard(startingSituation, firstColorToMove, new AnalysisBehavior(), false);
         controlTabs = new ControlTabs(variant, handlePeripheralEvent);
         positionEditor = new PositionEditor(handlePeripheralEvent);
         positionEditor.hidden = true;
 
-        creepingLine.init(i -> {handlePeripheralEvent(PlySelected(i));}, firstColorToMove);
+        creepingLine.init(i -> {handlePeripheralEvent(ScrollBtnPressed(Precise(i)));}, firstColorToMove);
         actionBar.eventHandler = handlePeripheralEvent;
         
         var boardWrapper:BoardWrapper = new BoardWrapper(board);

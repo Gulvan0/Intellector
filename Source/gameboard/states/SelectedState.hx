@@ -64,6 +64,11 @@ class SelectedState extends BasePlayableState
     {
         return boardInstance.behavior.movePossible(selectedDepartureLocation, location);
     }
+    
+    private function isHoverStrong():Bool
+    {
+        return false;
+    }
 
     public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {

@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Screen;
 import dict.Phrase;
 import net.ServerEvent;
 import net.LoginManager;
@@ -101,7 +102,7 @@ class SignIn extends Sprite
 		errorLabel.alpha = 0;
 		signinMenu.addComponent(errorLabel);
 
-		signinMenu.x = (Browser.window.innerWidth - menuWidth) / 2;
+		signinMenu.x = (Screen.instance.width - menuWidth) / 2;
 		signinMenu.y = 100;
 		addChild(signinMenu);    
 	}

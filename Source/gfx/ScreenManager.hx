@@ -1,5 +1,6 @@
 package gfx;
 
+import js.html.VisualViewport;
 import haxe.ui.containers.VBox;
 import js.html.Element;
 import openfl.events.Event;
@@ -172,8 +173,8 @@ class ScreenManager extends VBox implements INetObserver
         var timestamp:Float = Date.now().getTime();
         if (timestamp - lastResizeTimestamp > 100)
         {
-            var innerWidthStr = '${Browser.window.innerWidth}px';
-            var innerHeightStr = '${Browser.window.innerHeight}px';
+            var innerWidthStr = '${Browser.document.documentElement.clientWidth}px';
+            var innerHeightStr = '${Browser.document.documentElement.clientHeight}px';
 
             if (openflContent.style.width == innerWidthStr && openflContent.style.height == innerHeightStr)
                 return;

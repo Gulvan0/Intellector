@@ -92,7 +92,7 @@ class PlayerMoveBehavior implements IBehavior
 
     public function hoverDisabled():Bool
     {
-        return false;
+        return !boardInstance.plyHistory.isAtEnd();
     }
 
     public function init(board:GameBoard)

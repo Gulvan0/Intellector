@@ -69,6 +69,11 @@ class DraggingState extends BasePlayableState
     {
         return boardInstance.behavior.movePossible(dragStartLocation, location);
     }
+    
+    private function isHoverStrong():Bool
+    {
+        return false;
+    }
 
     public function new(dragStartLocation:IntPoint)
     {

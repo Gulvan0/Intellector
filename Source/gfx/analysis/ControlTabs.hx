@@ -40,6 +40,8 @@ class ControlTabs extends TabView
         navigator.handlePeripheralEvent(event);
         switch event 
         {
+            case ScrollBtnPressed(type):
+                variantView.handlePlyScrolling(type);
             case ApplyChangesRequested(turnColor):
                 disabled = false;
             case DiscardChangesRequested:
@@ -57,7 +59,7 @@ class ControlTabs extends TabView
         {
             case ContinuationMove(ply, plyStr, performedBy):
                 variantView.addChildToSelectedNode(ply, true);
-            case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
+            case BranchingMove(ply, _, _, _):
                 variantView.addChildToSelectedNode(ply, true);
             default:
         }

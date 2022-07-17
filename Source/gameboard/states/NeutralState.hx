@@ -52,6 +52,11 @@ class NeutralState extends BasePlayableState
         else
             return boardInstance.behavior.allowedToMove(piece);
     }
+    
+    private function isHoverStrong():Bool
+    {
+        return true;
+    }
 
     public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {

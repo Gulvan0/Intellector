@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import gfx.utils.PlyScrollType;
 import openfl.events.Event;
 import haxe.ui.core.Component;
 import haxe.ds.ArraySort;
@@ -62,6 +63,19 @@ class VariantTree extends Sprite implements IVariantView
         return row * PERIOD_Y;
     }
 
+    public function handlePlyScrolling(type:PlyScrollType)
+    {
+        var plyNumber:Int = switch type 
+        {
+            case Home: 0;
+            case Prev: MathUtils.maxInt(selectedMove - 1, 0);
+            case Next: MathUtils.minInt(selectedMove + 1, selectedBranch.length);
+            case End: selectedBranch.length;
+            case Precise(plyNum): plyNum;
+        }
+        selectBranchUnsafe(selectedBranch, plyNumber);
+    }
+
     private function onNodeSelectRequest(code:String)
     {
         var path:VariantPath = VariantPath.fromCode(code);
@@ -84,16 +98,9 @@ class VariantTree extends Sprite implements IVariantView
         if (code == '')
             return;
         
-        var plysToRevert:Null<Int> = null;
         var path:VariantPath = VariantPath.fromCode(code);
 
-        if (selectedBranch.subpath(selectedMove).contains(path))
-            plysToRevert = selectedMove - path.length + 1;
-
         removeNode(path);
-
-        if (plysToRevert != null)
-            eventHandler(RevertNeeded(plysToRevert));
     }
 
     private function deselectAll() 
@@ -192,7 +199,13 @@ class VariantTree extends Sprite implements IVariantView
             variantRef.removeNode(path);
 
         if (belongsToSelected)
+        {
             selectBranchUnsafe(variantRef.extendPathLeftmost(parentPath), newMoveNumToSelect);
+
+            var branch = variantRef.getBranchByPath(selectedBranch);
+            var branchStr = variantRef.getBranchNotationByPath(selectedBranch);
+            eventHandler(BranchSelected(branch, branchStr, selectedMove));
+        }
 
         refreshLayout();
     }

@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import utils.TimeControl;
 import net.LoginManager;
@@ -77,7 +78,7 @@ class OpenChallengeHosting extends VBox implements IScreen
 		secondLabel.text = Dictionary.getPhrase(OPEN_CHALLENGE_FIRST_TO_FOLLOW_NOTE);
 		hostingMenu.addComponent(secondLabel);
 
-		hostingMenu.x = (Browser.window.innerWidth - hostingBoxWidth) / 2;
+		hostingMenu.x = (Screen.instance.width - hostingBoxWidth) / 2;
 		hostingMenu.y = 100;
 		addComponent(hostingMenu);
 

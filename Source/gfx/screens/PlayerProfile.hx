@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Screen;
 import net.LoginManager;
 import net.EventProcessingQueue.INetObserver;
 import net.ServerEvent;
@@ -263,7 +264,7 @@ class PlayerProfile extends VBox implements IScreen implements INetObserver
         contentHBox.addComponent(studiesBox);
 
         var mainBox:VBox = new VBox();
-        mainBox.width = Browser.window.innerWidth;
+        mainBox.width = Screen.instance.width;
         mainBox.addComponent(Shapes.vSpacer(25));
         mainBox.addComponent(loginLabel);
         mainBox.addComponent(Shapes.vSpacer(60));

@@ -1,5 +1,7 @@
 package gfx.common;
 
+import haxe.Timer;
+import haxe.ui.components.HorizontalScroll;
 import net.ServerEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import gfx.analysis.PeripheralEvent;
@@ -33,8 +35,6 @@ class CreepingLine extends VBox implements IPlyHistoryView
                 hidden = true;
             case ScrollBtnPressed(type):
                 shiftPointer(type);
-            case PlySelected(index):
-                setPointer(index);
             default:
         }
     }
@@ -45,10 +45,10 @@ class CreepingLine extends VBox implements IPlyHistoryView
         {
             case ContinuationMove(_, plyStr, _):
                 writePlyStr(plyStr, true);
-            case SubsequentMove(plyStr, _):
+            case SubsequentMove(_, _):
                 shiftPointer(Next);
-            case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
-                revertPlys(branchLength - plyPointer);
+            case BranchingMove(_, plyStr, _, droppedMovesCount):
+                revertPlys(droppedMovesCount);
                 writePlyStr(plyStr, true);
         }
     }
@@ -77,6 +77,8 @@ class CreepingLine extends VBox implements IPlyHistoryView
                     setPointer(pointer+1);
             case End:
                 setPointer(plyCards.length);
+            case Precise(plyNum):
+                setPointer(plyNum);
         };
     }
 
@@ -101,6 +103,15 @@ class CreepingLine extends VBox implements IPlyHistoryView
 
         if (selected)
             setPointer(pointerPos);
+
+        Timer.delay(scrollToEnd, 50);
+    }
+
+    public function scrollToEnd() 
+    {
+        var hscroll = runwaySV.findComponent(HorizontalScroll, false);
+        if (hscroll != null)
+            hscroll.pos = hscroll.max;
     }
 
     public function revertPlys(cnt:Int)

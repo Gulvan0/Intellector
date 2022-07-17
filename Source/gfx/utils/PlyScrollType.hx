@@ -6,4 +6,5 @@ enum PlyScrollType
     Prev;
     Next;
     End;
+    Precise(plyNum:Int);
 }

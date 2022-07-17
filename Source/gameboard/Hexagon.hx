@@ -15,7 +15,8 @@ enum HexagonSelectionState
     Premove;
     LMB;
     RMB;
-    Hover;
+    PaleHover;
+    StrongHover;
 }
 
 class Hexagon extends Sprite
@@ -51,11 +52,19 @@ class Hexagon extends Sprite
     public function showLayer(state:HexagonSelectionState)
     {
         sprites[state].visible = true;
+        if (state == StrongHover)
+            sprites[PaleHover].visible = false;
+        else if (state == PaleHover)
+            sprites[StrongHover].visible = false;
     }
 
     public function hideLayer(state:HexagonSelectionState)
     {
         sprites[state].visible = false;
+        if (state == StrongHover)
+            sprites[PaleHover].visible = false;
+        else if (state == PaleHover)
+            sprites[StrongHover].visible = false;
     }
 
     public function toggleLayer(state:HexagonSelectionState)

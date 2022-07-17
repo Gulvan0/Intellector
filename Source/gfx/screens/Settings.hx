@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import Preferences.Markup;
 import dict.Language;
@@ -54,7 +55,7 @@ class Settings extends VBox implements IScreen
 		box.addComponent(buildMarkupRow());
 		box.addComponent(buildLangRow());
 
-		box.x = (Browser.window.innerWidth - 290) / 2;
+		box.x = (Screen.instance.width - 290) / 2;
 		box.y = 100;
 		addChild(box);
 

@@ -13,7 +13,6 @@ import utils.AssetManager;
 class AnalysisBehavior implements IBehavior 
 {
     private var boardInstance:GameBoard;
-    private var colorToMove:PieceColor;
 
     public function handleNetEvent(event:ServerEvent):Void
 	{
@@ -37,8 +36,6 @@ class AnalysisBehavior implements IBehavior
                 boardInstance.behavior = new EditorFreeMoveBehavior();
             case ScrollBtnPressed(type):
                 boardInstance.applyScrolling(type);
-            case PlySelected(index):
-                boardInstance.scrollToPly(index);
             default:
         }
     }
@@ -54,7 +51,7 @@ class AnalysisBehavior implements IBehavior
         for (ply in plySequence)
             boardInstance.makeMove(ply);
 
-        boardInstance.scrollToPly(selectedPlyNum);
+        boardInstance.applyScrolling(Precise(selectedPlyNum));
     }
     
     public function movePossible(from:IntPoint, to:IntPoint):Bool
@@ -64,7 +61,7 @@ class AnalysisBehavior implements IBehavior
     
     public function allowedToMove(piece:Piece):Bool
 	{
-        return piece.color == colorToMove;
+        return piece.color == boardInstance.shownSituation.turnColor;
     }
     
     public function returnToCurrentOnLMB():Bool
@@ -97,12 +94,12 @@ class AnalysisBehavior implements IBehavior
         }
         else
         {
+            var droppedMovesCount:Int = boardInstance.plyHistory.length() - boardInstance.plyHistory.pointer;
             boardInstance.revertToShown();
             boardInstance.makeMove(ply);
-            boardInstance.emit(BranchingMove(ply, plyStr, performedBy, boardInstance.plyHistory.pointer, boardInstance.plyHistory.length()));
+            boardInstance.emit(BranchingMove(ply, plyStr, performedBy, droppedMovesCount));
         }
 
-        colorToMove = opposite(colorToMove);
         boardInstance.state = new NeutralState();
     }
     
@@ -133,8 +130,8 @@ class AnalysisBehavior implements IBehavior
         this.boardInstance = board;
     }
     
-    public function new(colorToMove:PieceColor)
+    public function new()
     {
-        this.colorToMove = colorToMove;
+        
     }
 }

@@ -21,5 +21,4 @@ enum PeripheralEvent
     EditorLaunchRequested;
     ShareRequested;
     ScrollBtnPressed(type:PlyScrollType);
-    PlySelected(index:Int);
 }

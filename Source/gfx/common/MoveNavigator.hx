@@ -37,8 +37,6 @@ class MoveNavigator extends VBox implements IPlyHistoryView
                 clear(turnColor);
             case ScrollBtnPressed(type):
                 shiftPointer(type);
-            case PlySelected(index):
-                setPointer(index+1);
             default:
         }
     }
@@ -51,8 +49,8 @@ class MoveNavigator extends VBox implements IPlyHistoryView
                 writePlyStr(plyStr, true);
             case SubsequentMove(plyStr, _):
                 shiftPointer(Next);
-            case BranchingMove(ply, plyStr, performedBy, plyPointer, branchLength):
-                revertPlys(branchLength - plyPointer);
+            case BranchingMove(_, plyStr, _, droppedMovesCount):
+                revertPlys(droppedMovesCount);
                 writePlyStr(plyStr, true);
         }
     }
@@ -81,6 +79,8 @@ class MoveNavigator extends VBox implements IPlyHistoryView
                     setPointer(pointer+1);
             case End:
                 setPointer(plyCount);
+            case Precise(plyNum):
+                setPointer(plyNum);
         };
     }
 

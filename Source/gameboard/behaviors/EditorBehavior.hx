@@ -69,7 +69,7 @@ abstract class EditorBehavior implements IBehavior
         boardInstance.plyHistory.clear();
 
         boardInstance.state = new NeutralState();
-        boardInstance.behavior = new AnalysisBehavior(boardInstance.currentSituation.turnColor);
+        boardInstance.behavior = new AnalysisBehavior();
     }
 
     public function onChangesDiscarded()
@@ -77,7 +77,7 @@ abstract class EditorBehavior implements IBehavior
         boardInstance.setShownSituation(boardInstance.currentSituation);
 
         boardInstance.state = new NeutralState();
-        boardInstance.behavior = new AnalysisBehavior(boardInstance.currentSituation.turnColor);
+        boardInstance.behavior = new AnalysisBehavior();
     }
     
     public function movePossible(from:IntPoint, to:IntPoint):Bool

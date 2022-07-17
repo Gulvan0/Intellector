@@ -31,7 +31,7 @@ enum GameBoardEvent
 {
     ContinuationMove(ply:Ply, plyStr:String, performedBy:PieceColor);
     SubsequentMove(plyStr:String, performedBy:PieceColor);
-    BranchingMove(ply:Ply, plyStr:String, performedBy:PieceColor, plyPointer:Int, branchLength:Int);
+    BranchingMove(ply:Ply, plyStr:String, performedBy:PieceColor, droppedMovesCount:Int);
 }
 
 interface IGameBoardObserver
@@ -114,49 +114,6 @@ class GameBoard extends SelectableBoard implements INetObserver
             pieceLayer.addChild(piece);
     }
 
-    private function prepareToScrollAway()
-    {
-        state.exitToNeutral();
-
-        if (state.cursorLocation != null)
-            getHex(state.cursorLocation).hideLayer(Hover);
-
-        if (plyHistory.isAtEnd())
-            behavior.onAboutToScrollAway();
-    }
-
-    public function applyScrolling(type:PlyScrollType) 
-    {
-        if ((type == Next || type == End) && plyHistory.isAtEnd())
-            return;
-        else if ((type == Prev || type == Home) && plyHistory.isAtBeginning())
-            return;
-
-        prepareToScrollAway();
-
-        switch type 
-        {
-            case Home: home();
-            case Prev: prev();
-            case Next: next();
-            case End: end();
-        }
-    }
-
-    public function scrollToPly(moveNum:Int)
-    {
-        if (plyHistory.pointer == moveNum)
-            return;
-
-        prepareToScrollAway();
-
-        while (plyHistory.pointer < moveNum)
-            next();
-
-        while (plyHistory.pointer > moveNum)
-            prev();
-    }
-
     public function revertPlys(cnt:Int) 
     {
         if (cnt < 1)
@@ -196,6 +153,44 @@ class GameBoard extends SelectableBoard implements INetObserver
         }
     }
 
+    public function applyScrolling(type:PlyScrollType) 
+    {
+        switch type 
+        {
+            case Home, Prev: 
+                if (plyHistory.isAtBeginning())
+                    return;
+            case Next, End: 
+                if (plyHistory.isAtEnd())
+                    return;
+            case Precise(plyNum):
+                if (plyHistory.pointer == plyNum)
+                    return;
+        }
+
+        state.exitToNeutral();
+
+        if (plyHistory.isAtEnd())
+            behavior.onAboutToScrollAway();
+
+        switch type 
+        {
+            case Home: 
+                home();
+            case Prev: 
+                prev();
+            case Next: 
+                next();
+            case End: 
+                end();
+            case Precise(plyNum):
+                while (plyHistory.pointer < plyNum)
+                    next();
+                while (plyHistory.pointer > plyNum)
+                    prev();
+        }
+    }
+
     private function home()
     {
         plyHistory.home();
@@ -226,6 +221,8 @@ class GameBoard extends SelectableBoard implements INetObserver
         setShownSituation(currentSituation.copy());
         highlightMove(plyHistory.getLastMove().affectedCoords());
     }
+
+    //=======================================================================================================
 
     private function onLMBPressed(e:MouseEvent)
     {

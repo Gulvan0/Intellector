@@ -28,6 +28,11 @@ class StubState extends BaseState
     {
         return false;
     }
+    
+    private function isHoverStrong():Bool
+    {
+        return false;
+    }
 
     public function new()
     {

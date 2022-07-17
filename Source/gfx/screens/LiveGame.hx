@@ -315,7 +315,7 @@ class LiveGame extends HBox implements INetObserver implements IGameBoardObserve
         whiteClock.init(timeControl.startSecs, playerColor == White, timeControl.startSecs >= 90, true);
         blackClock.init(timeControl.startSecs, playerColor == Black, timeControl.startSecs >= 90, false);
         cCreepingLine.init(i -> {
-            board.scrollToPly(i);
+            board.applyScrolling(Precise(i));
             cCreepingLine.setPointer(i);
             sidebox.navigator.setPointer(i);
         });

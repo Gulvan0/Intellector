@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import gfx.utils.PlyScrollType;
 import haxe.ui.core.Component;
 import struct.Variant.VariantPath;
 import struct.Situation;
@@ -12,4 +13,5 @@ interface IVariantView
     public function addChildNode(parentPath:VariantPath, ply:Ply, selectChild:Bool):Void;
     public function addChildToSelectedNode(ply:Ply, selectChild:Bool):Void;
     public function removeNode(path:VariantPath):Void;
+    public function handlePlyScrolling(type:PlyScrollType):Void;
 }
