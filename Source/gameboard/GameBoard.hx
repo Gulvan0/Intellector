@@ -124,7 +124,7 @@ class GameBoard extends SelectableBoard implements INetObserver
         var toRevert:Array<ReversiblePly> = plyHistory.dropLast(cnt);
         _currentSituation.unmakeMoves(toRevert, true);
         setShownSituation(currentSituation);
-        highlightMove(plyHistory.getLastMove().affectedCoords());
+        highlightLastMove();
     }
 
     public function revertToShown() 
@@ -134,6 +134,19 @@ class GameBoard extends SelectableBoard implements INetObserver
 
         plyHistory.dropSinceShown();
         _currentSituation = shownSituation.copy();
+    }
+
+    private function removeLastMoveHighlighting()
+    {
+        highlightMove([]);
+    }
+
+    private function highlightLastMove()
+    {
+        if (plyHistory.isAtBeginning())
+            removeLastMoveHighlighting();
+        else
+            highlightMove(plyHistory.getLastMove().affectedCoords());
     }
 
     /**
@@ -195,17 +208,14 @@ class GameBoard extends SelectableBoard implements INetObserver
     {
         plyHistory.home();
         setShownSituation(startingSituation);
-        highlightMove([]);
+        removeLastMoveHighlighting();
     }   
     
     private function prev() 
     {
         var ply = plyHistory.prev(); 
         applyMoveTransposition(ply, true);
-        if (plyHistory.isAtBeginning())
-            highlightMove([]);
-        else
-            highlightMove(plyHistory.getLastMove().affectedCoords());
+        highlightLastMove();
     }
 
     public function next()
@@ -219,7 +229,7 @@ class GameBoard extends SelectableBoard implements INetObserver
     {
         plyHistory.end(); 
         setShownSituation(currentSituation.copy());
-        highlightMove(plyHistory.getLastMove().affectedCoords());
+        highlightLastMove();
     }
 
     //=======================================================================================================

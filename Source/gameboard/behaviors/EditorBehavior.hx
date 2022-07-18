@@ -36,7 +36,6 @@ abstract class EditorBehavior implements IBehavior
             case ConstructSituationRequested(situation):
                 boardInstance.setShownSituation(situation);
             case TurnColorChanged(newTurnColor):
-                trace(boardInstance.shownSituation);
                 var updatedSituation = boardInstance.shownSituation;
                 updatedSituation.turnColor = newTurnColor;
                 boardInstance.setShownSituation(updatedSituation);
@@ -51,10 +50,10 @@ abstract class EditorBehavior implements IBehavior
                         boardInstance.state = new NeutralState();
                         boardInstance.behavior = new EditorFreeMoveBehavior();
                     case Delete:
-                        boardInstance.state = new HexSelectionState();
+                        boardInstance.state = new HexSelectionState(true);
                         boardInstance.behavior = new EditorDeleteBehavior();
                     case Set(type, color):
-                        boardInstance.state = new HexSelectionState();
+                        boardInstance.state = new HexSelectionState(false);
                         boardInstance.behavior = new EditorSetBehavior(type, color);
                     default:
                 }
@@ -75,14 +74,10 @@ abstract class EditorBehavior implements IBehavior
     public function onChangesDiscarded()
     {
         boardInstance.setShownSituation(boardInstance.currentSituation);
+        boardInstance.highlightLastMove();
 
         boardInstance.state = new NeutralState();
         boardInstance.behavior = new AnalysisBehavior();
-    }
-    
-    public function movePossible(from:IntPoint, to:IntPoint):Bool
-	{
-        return true;
     }
     
     public function allowedToMove(piece:Piece):Bool

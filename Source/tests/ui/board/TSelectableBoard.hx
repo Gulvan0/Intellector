@@ -68,6 +68,7 @@ class AugmentedSelectableBoard extends SelectableBoard
     }
 }
 
+@:access(gameboard.SelectableBoard)
 class TSelectableBoard extends TestedComponent
 {
     private var board:AugmentedSelectableBoard;

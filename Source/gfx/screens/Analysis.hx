@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.Timer;
 import haxe.ui.core.Screen;
 import haxe.ui.Toolkit;
 import gfx.common.ShareDialog;
@@ -46,6 +47,11 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         return this;
     }
 
+    private function redrawPositionEditor()
+    {
+        positionEditor.updateLayout(positionEditorContainer.width, Screen.instance.height * 0.3);
+    }
+
     private override function validateComponentLayout():Bool 
     {
         var compact:Bool = Screen.instance.width / Screen.instance.height < 1.2;
@@ -55,7 +61,11 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         cActionBarContainer.hidden = !compact;
         lControlTabsContainer.hidden = compact;
 
-        return super.validateComponentLayout() || wasCompact != compact;
+        var parentChanged:Bool = super.validateComponentLayout();
+
+        Timer.delay(redrawPositionEditor, 100);
+
+        return parentChanged || wasCompact != compact;
     }
 
     private function displayShareDialog()
@@ -104,6 +114,12 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         controlTabs.handleGameBoardEvent(event);
         positionEditor.handleGameBoardEvent(event);
         creepingLine.handleGameBoardEvent(event);
+    }
+
+    private override function onReady()
+    {
+        super.onReady();
+        redrawPositionEditor();
     }
 
     public function new(?initialVariantStr:String)

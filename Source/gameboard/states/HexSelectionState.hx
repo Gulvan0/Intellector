@@ -5,6 +5,13 @@ import struct.Hex;
 
 class HexSelectionState extends BaseState
 {
+    public final occupiedOnly:Bool;
+
+    private function possibleLocation(location:Null<IntPoint>):Bool
+    {
+        return (location != null) && (!occupiedOnly || !boardInstance.shownSituation.get(location).isEmpty());
+    }
+
     public function onEntered()
     {
         //* Do nothing
@@ -17,13 +24,13 @@ class HexSelectionState extends BaseState
 
     public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
     {
-        if (location != null)
+        if (possibleLocation(location))
             boardInstance.behavior.onHexChosen(location);
     }
 
     public function reactsToHover(location:IntPoint):Bool
     {
-        return true;
+        return possibleLocation(location);
     }
     
     private function isHoverStrong():Bool
@@ -36,8 +43,8 @@ class HexSelectionState extends BaseState
         //* Do nothing
     }
 
-    public function new()
+    public function new(occupiedOnly:Bool)
     {
-        
+        this.occupiedOnly = occupiedOnly;
     }
 }

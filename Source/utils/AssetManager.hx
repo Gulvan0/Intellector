@@ -29,6 +29,15 @@ class AssetManager
         return "assets/pieces/" + type.getName() + "_" + color.getName() + ".svg";
     }
 
+    public static inline function editModeIconPath(mode:PosEditMode):String
+    {
+        return switch mode {
+            case Move: "assets/symbols/analysis/move.svg";
+            case Delete: "assets/symbols/analysis/delete.svg";
+            case Set(type, color): piecePath(type, color);
+        }
+    }
+
     private static inline function timeControlPath(type:TimeControlType):String
     {
         var filename = switch type 

@@ -23,6 +23,11 @@ class EditorSetBehavior extends EditorBehavior implements IBehavior
         //* Do nothing
     }
     
+    public function movePossible(from:IntPoint, to:IntPoint):Bool
+	{
+        return true;
+    }
+    
     public function onHexChosen(coords:IntPoint)
     {
         boardInstance.setHexDirectly(coords, prototypeHex);

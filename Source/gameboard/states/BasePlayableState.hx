@@ -22,22 +22,28 @@ abstract class BasePlayableState extends BaseState
         var chameleonPly:Ply = Ply.construct(from, to, destinationHex.type);
         var dominatorPromotionPly:Ply = Ply.construct(from, to, Dominator);
 
-        var onChameleonDecisionMade = (morph:Bool) -> {boardInstance.behavior.onMoveChosen(morph? chameleonPly : simplePly);};
-        var onPromotionSelected = (piece:PieceType) -> {boardInstance.behavior.onMoveChosen(Ply.construct(from, to, piece));};
+        var onChameleonDecisionMade = (morph:Bool) -> {onMoveChosen(morph? chameleonPly : simplePly);};
+        var onPromotionSelected = (piece:PieceType) -> {onMoveChosen(Ply.construct(from, to, piece));};
 
         if (promotionPossible)
             if (shiftPressed)
-                boardInstance.behavior.onMoveChosen(dominatorPromotionPly);
+                onMoveChosen(dominatorPromotionPly);
             else
                 Dialogs.promotionSelect(departureHex.color, onPromotionSelected);
         else if (chameleonPossible)
             if (ctrlPressed)
-                boardInstance.behavior.onMoveChosen(simplePly);
+                onMoveChosen(simplePly);
             else if (shiftPressed)
-                boardInstance.behavior.onMoveChosen(chameleonPly);
+                onMoveChosen(chameleonPly);
             else
                 Dialogs.chameleonConfirm(onChameleonDecisionMade);
         else
-            boardInstance.behavior.onMoveChosen(simplePly);
+            onMoveChosen(simplePly);
+    }
+
+    private function onMoveChosen(ply:Ply)
+    {
+        boardInstance.behavior.onMoveChosen(ply);
+        boardInstance.state.updateHoverEffects(); //We need to use boardInstance as the state may be different afterwards
     }
 }

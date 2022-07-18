@@ -1,7 +1,7 @@
 <vbox width="100%" height="100%">
     <style>
         .menubar-button {
-            font-size: 18;
+            font-size: 1.5vh;
             font-weight: 300;
         }
         .menubar-button:hover {
@@ -13,12 +13,12 @@
         }
         #siteName {
             pointer-events: true;
-            padding-left: 10;
-            padding-right: 10;
+            padding-left: 1vh;
+            padding-right: 1vh;
             white-space: nowrap;
             color: #333333;
             font-name: 'fonts/Futura.ttf';
-            font-size: 30;
+            font-size: 3vh;
             font-weight: 600;
             background-color: yellow;
             background-opacity: 0;
@@ -28,8 +28,8 @@
             color: #428fd8;
         }
     </style>
-    <menubar id="menubar" width="100%" height="50px">
+    <menubar id="menubar" width="100%" height="5%">
         <label id="siteName" text="intellector.info" verticalAlign="center" onClick="gfx.ScreenManager.toScreen(gfx.ScreenType.MainMenu);" />
     </menubar>
-    <box id="content" width="100%" height="100%" style="padding: 5 5 5 5"/>
+    <box id="content" width="100%" height="95%" style="padding: 5 5 5 5"/>
 </vbox>

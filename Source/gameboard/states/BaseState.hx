@@ -17,19 +17,23 @@ abstract class BaseState
 
     public abstract function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool):Void;
 
+    private final function updateHoverEffects()
+    {
+        var hoverLayer:HexagonSelectionState = isHoverStrong()? StrongHover : PaleHover;
+        
+        if (cursorLocation != null)
+            if (!boardInstance.behavior.hoverDisabled() && reactsToHover(cursorLocation))
+                boardInstance.getHex(cursorLocation).showLayer(hoverLayer);
+            else
+                boardInstance.getHex(cursorLocation).hideLayer(hoverLayer);
+    }
+
     public final function onMouseMoved(newCursorLocation:Null<IntPoint>)
     {
         var hoverLayer:HexagonSelectionState = isHoverStrong()? StrongHover : PaleHover;
 
         if (equal(cursorLocation, newCursorLocation))
-        {
-            if (newCursorLocation != null)
-                if (!boardInstance.behavior.hoverDisabled() && reactsToHover(newCursorLocation))
-                    boardInstance.getHex(newCursorLocation).showLayer(hoverLayer);
-                else
-                    boardInstance.getHex(newCursorLocation).hideLayer(hoverLayer);
             return;
-        }
         
         if (newCursorLocation != null && !boardInstance.behavior.hoverDisabled() && reactsToHover(newCursorLocation))
             boardInstance.getHex(newCursorLocation).showLayer(hoverLayer);
@@ -53,6 +57,6 @@ abstract class BaseState
         this.boardInstance = board;
         this.cursorLocation = cursorLocation;
         this.onEntered();
-        this.onMouseMoved(cursorLocation);
+        this.updateHoverEffects();
     }
 }

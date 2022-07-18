@@ -31,7 +31,7 @@ class AnalysisBehavior implements IBehavior
                 boardInstance.revertOrientation();
             case EditorLaunchRequested:
                 boardInstance.removeArrowsAndSelections();
-                boardInstance.highlightMove([]);
+                boardInstance.removeLastMoveHighlighting();
                 boardInstance.state = new NeutralState();
                 boardInstance.behavior = new EditorFreeMoveBehavior();
             case ScrollBtnPressed(type):

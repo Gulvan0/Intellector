@@ -1,5 +1,10 @@
 package gfx.analysis;
 
+import gameboard.Piece;
+import utils.AssetManager;
+import haxe.ui.util.Variant;
+import haxe.ui.components.Image;
+import haxe.ui.components.Button;
 import haxe.ui.events.UIEvent;
 import gfx.components.Dialogs;
 import gameboard.GameBoard.GameBoardEvent;
@@ -15,6 +20,12 @@ class PositionEditor extends VBox
 {
     private var eventHandler:PeripheralEvent->Void;
 
+    private var renderedForWidth:Float;
+    private var renderedForHeight:Float;
+
+    private var editModeBtns:Map<PosEditMode, Button>;
+    private var toolBtns:Array<Button>;
+
     private function getTurnColor():PieceColor
     {
         return turnColorStepper.selectedIndex == 0? White : Black;
@@ -25,11 +36,65 @@ class PositionEditor extends VBox
         turnColorStepper.selectedIndex = color == White? 0 : 1;
     }
 
+    public function updateLayout(availableWidth:Float, availableHeight:Float):Bool
+    {
+        if (renderedForWidth == availableWidth && renderedForHeight == availableHeight)
+            return false;
+
+        var spacing:Float = 5;
+        var padding:Float = 10;
+        var wideModeBtnHeight:Float = (availableWidth - spacing * (7 - 1)) / 7;
+        var wideModeFullHeight:Float = wideModeBtnHeight * 4 + spacing * (4 - 1) + padding * 2;
+
+        var btnSide:Float = wideModeFullHeight <= availableHeight? wideModeBtnHeight : (availableHeight - spacing * (4 - 1) - padding * 2) / 4;
+
+        for (mode => btn in editModeBtns)
+        {
+            var icon:Image = btn.findComponent(Image);
+            var iconMaxSide:Float = 0.7 * btnSide;
+
+            btn.width = btnSide;
+            btn.height = btnSide;
+
+            switch mode 
+            {
+                case Move, Delete:
+                    icon.width = iconMaxSide;
+                    icon.height = iconMaxSide;
+                case Set(Progressor, color):
+                    icon.width = Piece.pieceRelativeScale(Progressor) * iconMaxSide;
+                    icon.height = icon.width / Piece.pieceAspectRatio(Progressor, color);
+                case Set(type, color):
+                    icon.height = Piece.pieceRelativeScale(type) * iconMaxSide;
+                    icon.width = icon.height * Piece.pieceAspectRatio(type, color);
+            }
+        }
+
+        var additionalRowHeight:Float = btnSide * 0.8;
+
+        for (btn in toolBtns)
+        {
+            var icon:Image = btn.findComponent(Image);
+
+            btn.width = additionalRowHeight;
+            btn.height = additionalRowHeight;
+            icon.width = additionalRowHeight;
+            icon.height = additionalRowHeight;
+        }
+
+        otherOptionsHBox.width = btnSide * 7 + spacing * (7 - 1);
+        turnColorStepper.customStyle = {fontSize: additionalRowHeight / 3, textAlign: 'center'};
+        applyChangesBtn.customStyle = {fontSize: additionalRowHeight / 2};
+        discardChangesBtn.customStyle = {fontSize: additionalRowHeight / 2};
+
+        return true;
+    }
+
     @:bind(importBtn, MouseEvent.CLICK)
     private function onImportSIPPressed(e)
     {
         var deserializedSituation:Null<Situation> = null;
-        var response:Null<String> = Browser.window.prompt(dict.Dictionary.getPhrase(ANALYSIS_INPUT_SIP_PROMPT_TEXT));
+        var response:Null<String> = Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_INPUT_SIP_PROMPT_TEXT));
         if (response != null)
             deserializedSituation = Situation.fromSIP(response);
        
@@ -39,7 +104,7 @@ class PositionEditor extends VBox
             eventHandler(ConstructSituationRequested(deserializedSituation));
         }
         else
-            Dialogs.alert(dict.Dictionary.getPhrase(ANALYSIS_INVALID_SIP_WARNING_TEXT), dict.Dictionary.getPhrase(ANALYSIS_INVALID_SIP_WARNING_TITLE));
+            Dialogs.alert(Dictionary.getPhrase(ANALYSIS_INVALID_SIP_WARNING_TEXT), Dictionary.getPhrase(ANALYSIS_INVALID_SIP_WARNING_TITLE));
     }
 
     @:bind(turnColorStepper, UIEvent.CHANGE)
@@ -78,7 +143,6 @@ class PositionEditor extends VBox
         switch event
         {
             case ContinuationMove(_, _, performedBy):
-                trace(performedBy);
                 setTurnColor(opposite(performedBy));
             case SubsequentMove(_, performedBy):
                 setTurnColor(opposite(performedBy));
@@ -92,20 +156,26 @@ class PositionEditor extends VBox
         super();
         this.eventHandler = eventHandler;
 
-        moveModeBtn.onClick = e -> {eventHandler(EditModeChanged(Move));};
-        setProgWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Progressor, White)));};
-        setAgrWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Aggressor, White)));};
-        setDefWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Defensor, White)));};
-        setLibWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Liberator, White)));};
-        setDomWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Dominator, White)));};
-        setIntWhiteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Intellector, White)));};
-        deleteModeBtn.onClick = e -> {eventHandler(EditModeChanged(Delete));};
-        setProgBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Progressor, Black)));};
-        setAgrBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Aggressor, Black)));};
-        setDefBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Defensor, Black)));};
-        setLibBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Liberator, Black)));};
-        setDomBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Dominator, Black)));};
-        setIntBlackModeBtn.onClick = e -> {eventHandler(EditModeChanged(Set(Intellector, Black)));};
+        editModeBtns = [
+            Move => moveModeBtn,
+            Set(Progressor, White) => setProgWhiteModeBtn,
+            Set(Aggressor, White) => setAgrWhiteModeBtn,
+            Set(Defensor, White) => setDefWhiteModeBtn,
+            Set(Liberator, White) => setLibWhiteModeBtn,
+            Set(Dominator, White) => setDomWhiteModeBtn,
+            Set(Intellector, White) => setIntWhiteModeBtn,
+            Delete => deleteModeBtn,
+            Set(Progressor, Black) => setProgBlackModeBtn,
+            Set(Aggressor, Black) => setAgrBlackModeBtn,
+            Set(Defensor, Black) => setDefBlackModeBtn,
+            Set(Liberator, Black) => setLibBlackModeBtn,
+            Set(Dominator, Black) => setDomBlackModeBtn,
+            Set(Intellector, Black) => setIntBlackModeBtn
+        ];
+        toolBtns = [orientationBtn, importBtn, clearBtn, resetBtn, startBtn];
+
+        for (mode => btn in editModeBtns)
+            btn.onClick = e -> {eventHandler(EditModeChanged(mode));};
 
         clearBtn.onClick = e -> {eventHandler(ClearRequested);};
         resetBtn.onClick = e -> {eventHandler(ResetRequested);};

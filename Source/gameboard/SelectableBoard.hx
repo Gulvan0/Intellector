@@ -75,7 +75,7 @@ class SelectableBoard extends Board
         updateAllArrows();
     }
 
-    public function highlightMove(hexesCoords:Array<IntPoint>) 
+    private function highlightMove(hexesCoords:Array<IntPoint>) 
     {
         for (hex in lastMoveSelectedHexes)
             hex.hideLayer(LastMove);

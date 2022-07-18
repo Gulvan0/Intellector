@@ -25,6 +25,11 @@ class EditorDeleteBehavior extends EditorBehavior implements IBehavior
         boardInstance.setHexDirectly(coords, Hex.empty());
     }
     
+    public function movePossible(from:IntPoint, to:IntPoint):Bool
+	{
+        return true;
+    }
+    
     public function new()
     {
         

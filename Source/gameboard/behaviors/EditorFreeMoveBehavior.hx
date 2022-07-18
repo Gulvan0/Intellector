@@ -14,6 +14,11 @@ class EditorFreeMoveBehavior extends EditorBehavior implements IBehavior
         boardInstance.setShownSituation(situation);
     }
     
+    public function movePossible(from:IntPoint, to:IntPoint):Bool
+	{
+        return !equal(from, to);
+    }
+    
     public function onHexChosen(coords:IntPoint)
     {
         //* Do nothing
