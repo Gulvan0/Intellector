@@ -44,7 +44,7 @@ class VariantTree extends Sprite implements IVariantView
 
     private var variantRef:Variant;
     private var selectedBranch:VariantPath = [];
-    private var selectedMove:Int;
+    private var selectedMove:Int = 0;
 
     private var eventHandler:PeripheralEvent->Void;
 

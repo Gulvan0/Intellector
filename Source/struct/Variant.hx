@@ -21,6 +21,14 @@ abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
         return this;
     }
 
+    public function isMainLine():Bool
+    {
+        for (childNum in this)
+            if (childNum != 0)
+                return false;
+        return true;
+    }
+
     public function subpath(subLength:Int):VariantPath
     {
         return this.slice(0, subLength);
@@ -205,6 +213,26 @@ class Variant extends VariantNode
         var parent:VariantNode = getByPath(parent_path);
         var startNum = includeSpecifiedNode? nodeNum : nodeNum+1;
         return [for (i in startNum...parent.children.length) parent_path.child(i)];
+    }
+
+    public function getLastMainLineDescendantPath(nodePath:VariantPath):VariantPath
+    {
+        var currentPath:VariantPath = nodePath.copy();
+        while (pathExists(currentPath.child(0)))
+            currentPath = currentPath.child(0);
+        return currentPath;
+    }
+
+    public function getRightmostSiblingPath(nodePath:VariantPath):VariantPath
+    {
+        if (Lambda.empty(nodePath))
+            throw "Root cannot be passed as an argument";
+        return getRightmostChildPath(nodePath.parent());
+    }
+
+    public function getRightmostChildPath(nodePath:VariantPath):VariantPath
+    {
+        return nodePath.child(childCount(nodePath) - 1);
     }
 
     public function getFamilyPaths(nodePath:VariantPath):Array<VariantPath>

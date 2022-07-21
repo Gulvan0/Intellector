@@ -90,22 +90,20 @@ class ControlTabs extends TabView
             messageBox.show();
         };
 
-        var variantViewWrapper:SpriteWrapper = null;
-
         switch Preferences.branchingTabType.get() 
         {
             case Tree: 
                 var tree:VariantTree = new VariantTree(initialVariant);
-                variantViewWrapper = new SpriteWrapper(tree, false);
                 variantView = tree;
+                variantViewSV.addComponent(new SpriteWrapper(tree, false));
             case Outline: 
                 //TODO:
             case PlainText: 
-                //TODO:
+                var box:VariantPlainText = new VariantPlainText(initialVariant);
+                variantView = box;
+                variantViewSV.addComponent(box);
         };
 
         variantView.init(eventHandler);
-
-        variantViewSV.addComponent(variantViewWrapper);
     }
 }
