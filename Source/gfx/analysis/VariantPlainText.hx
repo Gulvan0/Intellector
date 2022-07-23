@@ -49,6 +49,7 @@ private class PlyNode extends Link
         var plyNum:Int = variantRef.startingSituation.turnColor == White? path.length : path.length + 1;
 
         text = plyNum + ". " + ply.toNotation(contextSituation, false);
+        verticalAlign = 'center';
         customStyle = DEFAULT_STYLE;
         onClick = e -> {
             if (e.ctrlKey)
@@ -135,6 +136,235 @@ class VariantPlainText extends HBox implements IVariantView
         };
     }
 
+    /**
+        Prevents the occurence of the lone brackets due to the line break by combining each of them with the nearest node into a single (non-continuous) HBox.
+        May only be called once. Breaks the connection between the child components and `items` array until the `unpack()` method is called.
+        Relevant only for the actual modification of the variant: `addChildNode()`, `removeNode()`
+    **/
+    private function pack()
+    {
+        #if debug
+        trace("Before pack(): ");
+        for (child in childComponents)
+            if (Std.isOfType(child, HBox))
+            {
+                trace("HBox [");
+                for (c in cast(child, HBox).childComponents)
+                    if (Std.isOfType(c, PlyNode))
+                        trace('PlyNode: ${cast(c, PlyNode).text}');
+                    else if (Std.isOfType(c, Label))
+                        trace('Label: ${cast(c, Label).text}');
+                    else
+                        trace('Unknown: ${Type.getClassName(Type.getClass(c))}');
+                trace("]");
+            }
+            else if (Std.isOfType(child, PlyNode))
+                trace('PlyNode: ${cast(child, PlyNode).text}');
+            else if (Std.isOfType(child, Label))
+                trace('Label: ${cast(child, Label).text}');
+            else
+                trace('Unknown: ${Type.getClassName(Type.getClass(child))}');
+        trace("-------");
+        #end
+
+        var itemsIndex:Int = 0;
+        var childIndex:Int = variantRef.startingSituation.turnColor == White? 0 : 1;
+        
+        var itemsLength:Int = items.length;
+
+        var lastHBox:HBox = null;
+        var lastNode:PlyNode = null;
+        var rbracesLabelText:String = "";
+
+        while (itemsIndex <= itemsLength)
+        {
+            var currentItem:Item = items[itemsIndex];
+
+            if (rbracesLabelText != "" && (itemsIndex == itemsLength || !currentItem.match(RBrace(_, _))))
+            {
+                var combinedLabel:Label = label(rbracesLabelText);
+
+                if (lastHBox != null)
+                    lastHBox.addComponent(combinedLabel);
+                else
+                {
+                    removeComponent(lastNode, false);
+
+                    var hbox:HBox = new HBox();
+                    hbox.verticalAlign = 'center';
+                    hbox.customStyle = {horizontalSpacing: 0};
+                    hbox.addComponent(lastNode);
+                    hbox.addComponent(combinedLabel);
+                    addComponentAt(hbox, childIndex - 1);
+                }
+
+                rbracesLabelText = "";
+            }
+
+            if (itemsIndex == itemsLength)
+                break;
+
+            switch currentItem
+            {
+                case LBrace(label):
+                    var braceOwner:Component = getComponentAt(childIndex + 1);
+
+                    removeComponent(label, false);
+                    removeComponent(braceOwner, false);
+
+                    var hbox:HBox = new HBox();
+                    hbox.verticalAlign = 'center';
+                    hbox.customStyle = {horizontalSpacing: 0};
+                    hbox.addComponent(label);
+                    hbox.addComponent(braceOwner);
+                    addComponentAt(hbox, childIndex);
+
+                    lastHBox = hbox;
+                    lastNode = null;
+
+                    childIndex++;
+                    itemsIndex += 2;
+                case RBrace(label, ownerInfo):
+                    removeComponent(label);
+                    rbracesLabelText += ")";
+
+                    itemsIndex++;
+                case Node(info):
+                    lastHBox = null;
+                    lastNode = info.node;
+
+                    childIndex++;
+                    itemsIndex++;
+            }
+        }
+
+        #if debug
+        trace("After pack(): ");
+        for (child in childComponents)
+            if (Std.isOfType(child, HBox))
+            {
+                trace("HBox [");
+                for (c in cast(child, HBox).childComponents)
+                    if (Std.isOfType(c, PlyNode))
+                        trace('PlyNode: ${cast(c, PlyNode).text}');
+                    else if (Std.isOfType(c, Label))
+                        trace('Label: ${cast(c, Label).text}');
+                    else
+                        trace('Unknown: ${Type.getClassName(Type.getClass(c))}');
+                trace("]");
+            }
+            else if (Std.isOfType(child, PlyNode))
+                trace('PlyNode: ${cast(child, PlyNode).text}');
+            else if (Std.isOfType(child, Label))
+                trace('Label: ${cast(child, Label).text}');
+            else
+                trace('Unknown: ${Type.getClassName(Type.getClass(child))}');
+        trace("----------------------------");
+        #end
+    }
+
+    /**
+        Reverts the effect of the `pack()` call, restoring the connection between the `items` array and the child components of `this`
+    **/
+    private function unpack()
+    {
+        #if debug
+        trace("Before unpack(): ");
+        for (child in childComponents)
+            if (Std.isOfType(child, HBox))
+            {
+                trace("HBox [");
+                for (c in cast(child, HBox).childComponents)
+                    if (Std.isOfType(c, PlyNode))
+                        trace('PlyNode: ${cast(c, PlyNode).text}');
+                    else if (Std.isOfType(c, Label))
+                        trace('Label: ${cast(c, Label).text}');
+                    else
+                        trace('Unknown: ${Type.getClassName(Type.getClass(c))}');
+                trace("]");
+            }
+            else if (Std.isOfType(child, PlyNode))
+                trace('PlyNode: ${cast(child, PlyNode).text}');
+            else if (Std.isOfType(child, Label))
+                trace('Label: ${cast(child, Label).text}');
+            else
+                trace('Unknown: ${Type.getClassName(Type.getClass(child))}');
+        trace("-------");
+        #end
+
+        var childIndex:Int = variantRef.startingSituation.turnColor == White? 0 : 1;
+
+        while (childIndex < numChildren)
+        {
+            var child:Component = getComponentAt(childIndex);
+            if (Std.isOfType(child, HBox))
+            {
+                var hbox:HBox = cast(child, HBox);
+                var member:Component = hbox.getComponentAt(0);
+
+                if (!Std.isOfType(member, PlyNode))
+                {
+                    hbox.removeComponent(member, false);
+                    addComponentAt(member, childIndex);
+                    childIndex++;
+                    member = hbox.getComponentAt(0);
+                }
+
+                hbox.removeComponent(member, false);
+                addComponentAt(member, childIndex);
+                childIndex++;
+                member = hbox.getComponentAt(0);
+
+                if (member != null)
+                {
+                    var rbraceCnt:Int = cast(member, Label).text.length;
+                    for (i in 0...rbraceCnt)
+                    {
+                        var label:Label = label(")");
+                        var itemIndex:Int = variantRef.startingSituation.turnColor == White? childIndex : childIndex - 1;
+                        switch items[itemIndex]
+                        {
+                            case RBrace(_, ownerInfo):
+                                items[itemIndex] = RBrace(label, ownerInfo);
+                            default:
+                                throw "Expected RBrace";
+                        }
+                        addComponentAt(label, childIndex);
+                        childIndex++;
+                    }
+                }
+
+                removeComponent(hbox);
+            }
+            else
+                childIndex++;
+        }
+
+        #if debug
+        trace("After unpack(): ");
+        for (child in childComponents)
+            if (Std.isOfType(child, HBox))
+            {
+                trace("HBox [");
+                for (c in cast(child, HBox).childComponents)
+                    if (Std.isOfType(c, PlyNode))
+                        trace('PlyNode: ${cast(c, PlyNode).text}');
+                    else if (Std.isOfType(c, Label))
+                        trace('Label: ${cast(c, Label).text}');
+                    else
+                        trace('Unknown: ${Type.getClassName(Type.getClass(c))}');
+                trace("]");
+            }
+            else if (Std.isOfType(child, PlyNode))
+                trace('PlyNode: ${cast(child, PlyNode).text}');
+            else if (Std.isOfType(child, Label))
+                trace('Label: ${cast(child, Label).text}');
+            else
+                trace('Unknown: ${Type.getClassName(Type.getClass(child))}');
+        trace("--------------");
+        #end
+    }
+
     public function clear(?newStartingSituation:Situation)
     {
         removeAllComponents();
@@ -197,6 +427,8 @@ class VariantPlainText extends HBox implements IVariantView
 
     public function addChildNode(parentPath:VariantPath, ply:Ply, selectChild:Bool)
     {
+        unpack();
+
         var nodeNum:Int = variantRef.childCount(parentPath);
         var nodePath:VariantPath = parentPath.child(nodeNum);
         var nodeCode:String = nodePath.code();
@@ -235,6 +467,8 @@ class VariantPlainText extends HBox implements IVariantView
 
         if (selectChild)
             selectBranchUnsafe(nodePath, nodePath.length);
+
+        pack();
     }
 
     public function addChildToSelectedNode(ply:Ply, selectChild:Bool)
@@ -247,6 +481,8 @@ class VariantPlainText extends HBox implements IVariantView
     {
         if (Lambda.empty(path))
             throw "Cannot remove root";
+
+        unpack();
 
         var nodeInfo:NodeInfo = nodeByCode.get(path.code());
         var parentPath = path.parent();
@@ -367,6 +603,8 @@ class VariantPlainText extends HBox implements IVariantView
         //After all the visual work has been done, update the variant itself
 
         variantRef.removeNode(path);
+
+        pack();
     }
 
     public function handlePlyScrolling(type:PlyScrollType)
@@ -397,6 +635,7 @@ class VariantPlainText extends HBox implements IVariantView
     {
         var b:Label = new Label();
         b.text = text;
+        b.verticalAlign = 'center';
         b.customStyle = DEFAULT_STYLE;
         return b;
     }
