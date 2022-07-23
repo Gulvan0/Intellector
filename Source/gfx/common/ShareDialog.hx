@@ -1,5 +1,6 @@
 package gfx.common;
 
+import haxe.ui.core.Screen;
 import openfl.geom.Matrix;
 import haxe.ui.events.FocusEvent;
 import haxe.ui.events.UIEvent;
@@ -114,11 +115,27 @@ class ShareDialog extends Dialog
     {
         mutedGameboard.suppressLMBHandler = true;
         mutedGameboard.suppressRMBHandler = true;
+
         onDialogClosed = e -> {
             mutedGameboard.suppressLMBHandler = false;
             mutedGameboard.suppressRMBHandler = false;
             boardContainer.removeComponent(boardWrapper);
         };
+
+        if (Screen.instance.width < 600 || Screen.instance.height < 500)
+        {
+            pngExportParamsBox.hidden = true;
+            boardContainer.percentWidth = 100;
+        }
+        else
+        {
+            pngExportParamsBox.hidden = false;
+            boardContainer.percentWidth = 50;
+        }
+
+        this.percentWidth = MathUtils.clamp(900 / Screen.instance.width, 0.5, 0.95) * 100;
+        this.percentHeight = MathUtils.clamp(500 / Screen.instance.height, 0.5, 0.95) * 100;
+
         showDialog(false);
         boardContainer.addComponent(boardWrapper);
     }
