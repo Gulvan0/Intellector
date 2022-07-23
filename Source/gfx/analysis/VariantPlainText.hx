@@ -52,9 +52,9 @@ private class PlyNode extends Link
         customStyle = DEFAULT_STYLE;
         onClick = e -> {
             if (e.ctrlKey)
-                onNodeSelectRequest(this.path);
-            else
                 onNodeRemoveRequest(this.path);
+            else
+                onNodeSelectRequest(this.path);
         }
 
         set_path(path);
@@ -93,7 +93,8 @@ class VariantPlainText extends HBox implements IVariantView
             throw "fullBranch isn't really full";
         #end
         
-        selectedNode.selected = false;
+        if (selectedNode != null)
+            selectedNode.selected = false;
 
         selectedBranch = fullBranch.copy();
 
@@ -218,8 +219,16 @@ class VariantPlainText extends HBox implements IVariantView
             insertNode(nodeInfo, 0);
         else
         {
-            var parentIndex:Int = nodeByCode.get(parentPath.code()).index;
-            insertNode(nodeInfo, parentIndex + 1);
+            var parentCode:String = parentPath.code();
+            var yongestAuntCode:String = variantRef.getRightmostSiblingPath(parentPath).code();
+
+            var insertAt:Int;
+            if (yongestAuntCode != parentCode)
+                insertAt = nodeByCode.get(yongestAuntCode).rbraceIndex + 1;
+            else
+                insertAt = nodeByCode.get(parentCode).index + 1;
+
+            insertNode(nodeInfo, insertAt);
         }
 
         variantRef.addChildToNode(ply, parentPath);
@@ -230,7 +239,8 @@ class VariantPlainText extends HBox implements IVariantView
 
     public function addChildToSelectedNode(ply:Ply, selectChild:Bool)
     {
-        addChildNode(selectedNode.path, ply, selectChild);
+        var selectedPath:VariantPath = selectedNode == null? [] : selectedNode.path;
+        addChildNode(selectedPath, ply, selectChild);
     }
 
     public function removeNode(path:VariantPath)
@@ -239,12 +249,15 @@ class VariantPlainText extends HBox implements IVariantView
             throw "Cannot remove root";
 
         var nodeInfo:NodeInfo = nodeByCode.get(path.code());
-        var removedItems:Array<Item> = [];
+        var parentPath = path.parent();
+        var totalSiblings = variantRef.childCount(parentPath);
 
-        if (nodeInfo.rbraceIndex != null)
-            removedItems = items.splice(nodeInfo.index - 1, nodeInfo.rbraceIndex - nodeInfo.index + 2);
+        if (nodeInfo.rbraceIndex != null) //Just remove the whole variation if it is identified by the move requested to be removed
+            for (item in items.splice(nodeInfo.index - 1, nodeInfo.rbraceIndex - nodeInfo.index + 2))
+                removeComponent(asComponent(item));
         else
         {
+            //Step 1. Remove all children (if any) of a node being removed
             if (variantRef.childCount(path) > 0)
             {
                 var firstbornPath:VariantPath = path.child(0);
@@ -256,32 +269,81 @@ class VariantPlainText extends HBox implements IVariantView
                 var minIndex:Int = minChild.rbraceIndex != null? minChild.index - 1 : minChild.index;
                 var maxIndex:Int = maxChild.rbraceIndex != null? maxChild.rbraceIndex : maxChild.index;
 
-                removedItems = items.splice(minIndex, maxIndex - minIndex + 1);
+                for (item in items.splice(minIndex, maxIndex - minIndex + 1))
+                    removeComponent(asComponent(item));
             }
 
-            if (path.lastNodeNum() == 0)
+            //If the node being removed is the main line and it has at least one alternative variation, the first of these variations will become the new main line.
+            //    This means that we will need to remove the braces associated with this variation, ...
+            if (path.lastNodeNum() == 0 && totalSiblings > 1)
             {
-                var rightSiblingPath:VariantPath = path.parent().child(1);
-                if (variantRef.pathExists(rightSiblingPath))
+                var closestSiblingPath:VariantPath = parentPath.child(1);
+                var closestSiblingInfo:NodeInfo = nodeByCode.get(closestSiblingPath.code());
+
+                //...moreover, if there are more alt. variations than just one, after the first one becomes the main line, others may become wrongly placed.
+                //    More precisely, this happens when the new main line consists of more than one move. The problem is that all the other alternative variations
+                //    will follow the LAST move of the first line while we need them to be placed right after the FIRST move of it.
+                if (totalSiblings > 2 && variantRef.childCount(closestSiblingPath) > 0)
                 {
-                    var rightSiblingInfo:NodeInfo = nodeByCode.get(rightSiblingPath.code());
-                    if (rightSiblingInfo.rbraceIndex != null)
+                    var firstRemainingSibling:NodeInfo = nodeByCode.get(parentPath.child(2).code());
+                    var lastRemainingSibling:NodeInfo = nodeByCode.get(parentPath.child(totalSiblings - 1).code());
+
+                    var shiftedPartStart:Int = firstRemainingSibling.index - 1;
+                    var shiftedPartEnd:Int = lastRemainingSibling.rbraceIndex;
+
+                    //Step 2. Remove the alternative variations for the node being removed 
+                    //    except for the very first one (which will become the main line after the removal is done).
+                    //    These variations will be attached to the first move of the new main line, so we keep them intact.
+
+                    var shiftedPart:Array<Item> = items.splice(shiftedPartStart, shiftedPartEnd - shiftedPartStart + 1);
+                    shiftedPart.reverse();
+
+                    for (item in shiftedPart)
+                        removeComponent(asComponent(item), false);
+
+                    //Step 3. Remove the right brace of the new main line
+
+                    for (item in items.splice(closestSiblingInfo.rbraceIndex, 1))
+                        removeComponent(asComponent(item));
+
+                    //Step 4. Insert the alternative variations after the first move of the new main line
+
+                    var insertShiftedPartAt:Int = closestSiblingInfo.index + 1;
+                    var componentInsertionPosition:Int = variantRef.startingSituation.turnColor == White? insertShiftedPartAt : insertShiftedPartAt + 1;
+
+                    for (item in shiftedPart)
                     {
-                        removedItems = removedItems.concat(items.splice(rightSiblingInfo.rbraceIndex, 1));
-                        removedItems = removedItems.concat(items.splice(rightSiblingInfo.index - 1, 1));
+                        items.insert(insertShiftedPartAt, item);
+                        addComponentAt(asComponent(item), componentInsertionPosition);
                     }
+
+                    //Step 5. Remove the left brace of the new main line
+
+                    for (item in items.splice(closestSiblingInfo.index - 1, 1))
+                        removeComponent(asComponent(item));
+                }
+                else //Otherwise, if the new main line is the only alternative variation, things become much simpler
+                {
+                    //Step 2-5. Remove the right brace and then the left brace of the new main line 
+                    for (item in items.splice(closestSiblingInfo.rbraceIndex, 1))
+                        removeComponent(asComponent(item));
+                    for (item in items.splice(closestSiblingInfo.index - 1, 1))
+                        removeComponent(asComponent(item));
                 }
             }
 
-            removedItems = removedItems.concat(items.splice(nodeInfo.index, 1));
+            //Step 6. Finally, remove the move requested to be removed
+            for (item in items.splice(nodeInfo.index, 1))
+                removeComponent(asComponent(item));
         }
 
-        for (item in removedItems)
-            removeComponent(asComponent(item));
+        //Now, just update the indexes starting from where the move requested to be removed was (-1 is to account for the possible left brace)
+        updateIndexes(MathUtils.maxInt(nodeInfo.index - 1, 0));
 
-        updateIndexes(nodeInfo.index - 1);
+        //And also update the code-to-node (equivalently, path-to-node) mappings (affects nodeByCode and selectedBranch)
 
         var newMap:Map<String, NodeInfo> = nodeByCode.copy();
+        var remapSelectedBranch:Bool = false;
 
         var rightSiblingsPaths = variantRef.getRightSiblingsPaths(path, false);
         for (rsPath in rightSiblingsPaths)
@@ -292,12 +354,19 @@ class VariantPlainText extends HBox implements IVariantView
                 newPath.asArray()[path.length - 1]--;
                 remappedMember.node.path = newPath;
                 newMap.set(newPath.code(), remappedMember);
+
+                if (selectedBranch.equals(oldPath))
+                    remapSelectedBranch = true;
             }
 
         nodeByCode = newMap;
 
-        if (selectedBranch.contains(path))
+        if (remapSelectedBranch)
             selectedBranch.asArray()[path.length - 1]--;
+
+        //After all the visual work has been done, update the variant itself
+
+        variantRef.removeNode(path);
     }
 
     public function handlePlyScrolling(type:PlyScrollType)
@@ -305,8 +374,8 @@ class VariantPlainText extends HBox implements IVariantView
         var plyNumber:Int = switch type 
         {
             case Home: 0;
-            case Prev: MathUtils.maxInt(selectedNode.path.length - 1, 0);
-            case Next: MathUtils.minInt(selectedNode.path.length + 1, selectedBranch.length);
+            case Prev: selectedNode == null? 0 : selectedNode.path.length - 1;
+            case Next: selectedNode == null? 1 : MathUtils.minInt(selectedNode.path.length + 1, selectedBranch.length);
             case End: selectedBranch.length;
             case Precise(plyNum): plyNum;
         }

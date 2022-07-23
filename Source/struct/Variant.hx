@@ -198,6 +198,7 @@ class Variant extends VariantNode
     {
         var extendedPath = path.copy();
         var node:VariantNode = getByPath(extendedPath);
+        
         while (!Lambda.empty(node.children))
         {
             node = node.children[0];

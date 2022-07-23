@@ -101,6 +101,7 @@ class ControlTabs extends TabView
             case PlainText: 
                 var box:VariantPlainText = new VariantPlainText(initialVariant);
                 variantView = box;
+                variantViewSV.percentContentWidth = 100;
                 variantViewSV.addComponent(box);
         };
 
