@@ -95,12 +95,17 @@ class ControlTabs extends TabView
             case Tree: 
                 var tree:VariantTree = new VariantTree(initialVariant);
                 variantView = tree;
+                variantViewSV.hidden = false;
                 variantViewSV.addComponent(new SpriteWrapper(tree, false));
             case Outline: 
-                //TODO:
+                var comp:VariantOutline = new VariantOutline(initialVariant);
+                variantView = comp;
+                variantViewSV.hidden = true;
+                branchingTabContentsBox.addComponent(comp);
             case PlainText: 
                 var box:VariantPlainText = new VariantPlainText(initialVariant);
                 variantView = box;
+                variantViewSV.hidden = false;
                 variantViewSV.percentContentWidth = 100;
                 variantViewSV.addComponent(box);
         };

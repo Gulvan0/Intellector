@@ -1,5 +1,6 @@
 package gfx.components;
 
+import haxe.ui.util.Variant;
 import openfl.display.Shape;
 import gameboard.Piece;
 import gfx.main.ChallengeParamsDialog;
@@ -96,16 +97,17 @@ class Dialogs
 
     private static function pieceBtn(type:PieceType, color:PieceColor, callback:Void->Void):Button
     {
-        var size:Float = 96;
+        var btnSize:Float = Math.min(100, Math.min(Screen.instance.height * 0.5, Screen.instance.width * 0.2));
+        var size:Float = 0.96 * btnSize;
         if (type == Progressor)
             size *= 0.7;
         else if (type == Liberator || type == Defensor)
             size *= 0.9;
 
         var btn:Button = new Button();
-        btn.icon = AssetManager.getSVGComponent(AssetManager.pieces[type][color], 0, 0, Math.round(size), Math.round(size));
-        btn.width = 100;
-        btn.height = 100;
+        btn.icon = Variant.fromComponent(AssetManager.getSVGComponent(AssetManager.pieces[type][color], 0, 0, Math.round(size), Math.round(size)));
+        btn.width = btnSize;
+        btn.height = btnSize;
         btn.onClick = (e) -> {callback();};
         return btn;
     }

@@ -435,7 +435,7 @@ class VariantPlainText extends HBox implements IVariantView
         var nodePath:VariantPath = parentPath.child(nodeNum);
         var nodeCode:String = nodePath.code();
 
-        var node:PlyNode = new PlyNode(nodePath, ply, onNodeSelectRequest, removeNode, variantRef);
+        var node:PlyNode = new PlyNode(nodePath, ply, onNodeSelectRequest, removeNodeByPath, variantRef);
         var nodeInfo:NodeInfo = {node: node, index: -1};
         nodeByCode.set(nodeCode, nodeInfo);
 
@@ -479,7 +479,7 @@ class VariantPlainText extends HBox implements IVariantView
         addChildNode(selectedPath, ply, selectChild);
     }
 
-    public function removeNode(path:VariantPath)
+    public function removeNodeByPath(path:VariantPath)
     {
         if (Lambda.empty(path))
             throw "Cannot remove root";
@@ -622,6 +622,13 @@ class VariantPlainText extends HBox implements IVariantView
         selectBranchUnsafe(selectedBranch, plyNumber);
     }
 
+    private function addRec(parentPath:VariantPath, childNum:Int, node:VariantNode)
+    {
+        addChildNode(parentPath, node.ply, false);
+        for (i => child in node.children.keyValueIterator())
+            addRec(parentPath.child(childNum), i, child);
+    }
+
     public function new(variant:Variant, ?selectedNodePath:VariantPath)
     {
         super();
@@ -631,6 +638,14 @@ class VariantPlainText extends HBox implements IVariantView
 
         if (variantRef.startingSituation.turnColor == Black)
             addComponent(label("..."));
+
+        for (i => child in variantRef.children.keyValueIterator())
+            addRec([], i, child);
+
+        if (selectedNodePath != null)
+            selectBranchUnsafe(variantRef.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
+        else
+            selectBranchUnsafe(variantRef.extendPathLeftmost([]), 0);
     }
 
     private function label(text:String):Label

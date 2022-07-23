@@ -100,7 +100,7 @@ class VariantTree extends Sprite implements IVariantView
         
         var path:VariantPath = VariantPath.fromCode(code);
 
-        removeNode(path);
+        removeNodeByPath(path);
     }
 
     private function deselectAll() 
@@ -165,7 +165,7 @@ class VariantTree extends Sprite implements IVariantView
         columnWidths = [];
     }
 
-    public function removeNode(path:VariantPath)
+    public function removeNodeByPath(path:VariantPath)
     {
         var parentPath = path.parent();
         var belongsToSelected:Bool = selectedBranch.contains(path);

@@ -60,7 +60,7 @@ class Dictionary
         CHATBOX_MESSAGE_PLACEHOLDER => ["Message text...", "Сообщение..."],
         PROMOTION_DIALOG_QUESTION => ["Select a piece to which you want to promote", "Выберите фигуру, в которую хотите превратиться"],
         PROMOTION_DIALOG_TITLE => ["Promotion selection", "Превращение"],
-        CHAMELEON_DIALOG_QUESTION => ["Morph into an eaten figure?", "Превратиться в съеденную фигуру?"],
+        CHAMELEON_DIALOG_QUESTION => ["Morph into an eaten piece?", "Превратиться в съеденную фигуру?"],
         CHAMELEON_DIALOG_TITLE => ["Chameleon confirmation", "Хамелеон"],
         CHOOSE_TIME_CONTROL => ["Time control:", "Контроль времени:"],
         CHOOSE_COLOR => ["Color:", "Цвет:"],
