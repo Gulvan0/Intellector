@@ -196,6 +196,7 @@ class VariantPlainText extends HBox implements IVariantView
                     hbox.addComponent(lastNode);
                     hbox.addComponent(combinedLabel);
                     addComponentAt(hbox, childIndex - 1);
+                    lastNode.validateComponentStyle();
                 }
 
                 rbracesLabelText = "";
@@ -218,6 +219,7 @@ class VariantPlainText extends HBox implements IVariantView
                     hbox.addComponent(label);
                     hbox.addComponent(braceOwner);
                     addComponentAt(hbox, childIndex);
+                    braceOwner.validateComponentStyle();
 
                     lastHBox = hbox;
                     lastNode = null;
@@ -455,7 +457,7 @@ class VariantPlainText extends HBox implements IVariantView
             var yongestAuntCode:String = variantRef.getRightmostSiblingPath(parentPath).code();
 
             var insertAt:Int;
-            if (yongestAuntCode != parentCode)
+            if (yongestAuntCode != parentCode && parentPath.lastNodeNum() == 0)
                 insertAt = nodeByCode.get(yongestAuntCode).rbraceIndex + 1;
             else
                 insertAt = nodeByCode.get(parentCode).index + 1;
