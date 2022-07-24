@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import haxe.ui.events.MouseEvent;
 import gfx.utils.PlyScrollType;
 import openfl.events.Event;
 import haxe.ui.core.Component;

@@ -73,6 +73,10 @@ class Main extends Sprite
 	private function init(callback:Void->Void) 
 	{
 		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
+		Browser.document.addEventListener('wheel', event -> {
+			if (event.ctrlKey)
+				event.preventDefault();
+		}, true);
 		OpeningTree.init();
 		Changes.initChangelog();
 		

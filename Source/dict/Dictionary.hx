@@ -26,7 +26,7 @@ class Dictionary
         ANALYSIS_INVALID_SIP_WARNING_TEXT => ["The SIP specified is invalid", "Введенная вами строка не является допустимым SIP"],
         ANALYSIS_BRANCHING_HELP_LINK_TEXT => ["Branching Help", "Справка по дереву вариантов"],
         ANALYSIS_BRANCHING_HELP_DIALOG_TITLE => ["Branching Help", "Справка (дерево вариантов)"],
-        ANALYSIS_BRANCHING_HELP_DIALOG_TEXT => ["<b>LMB (Click):</b> Switch to branch\n\n<b>CTRL + LMB (Click):</b> Remove branch\n\n<b>Mouse wheel:</b> Scroll vertically\n\n<b>CTRL + Mouse wheel:</b> Scroll horizontally\n\n<b>SHIFT + Mouse wheel:</b> Zoom in / out", "<b>ЛКМ (Клик):</b> Переключиться на ветвь\n\n<b>CTRL + ЛКМ (Клик):</b> Удалить ветвь\n\n<b>Колесико мыши:</b> Вертикальная прокрутка\n\n<b>CTRL + Колесико мыши:</b> Горизонтальная прокрутка\n\n<b>SHIFT + Колесико мыши:</b> Приблизить / отдалить"],
+        ANALYSIS_BRANCHING_HELP_DIALOG_TEXT => ["<p><u><b>General</b></u></p><br><p><em>Use branching tab to navigate between different variations of the study. You can change the mode in settings.</em></p><br><p><b>LMB (Click):</b> Switch to branch</p><br><p><b>CTRL + LMB (Click):</b> Remove branch</p><br><p><b>Mouse wheel:</b> Scroll vertically</p><br><p><b>SHIFT + Mouse wheel:</b> Scroll horizontally</p><br><p>Alternatively, <b>Click &amp; Hold LMB</b> while moving the mouse to drag</p><br><p><u><b>Tree Mode</b></u></p><br><p><b>CTRL + Mouse wheel:</b> Zoom in / out</p>", ""],
 
         SHARE_DIALOG_TITLE => ["Share", "Поделиться"],
         SHARE_POSITION_TAB_NAME => ["Share Position", "Поделиться позицией"],

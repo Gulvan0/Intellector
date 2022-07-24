@@ -1,5 +1,6 @@
 package gameboard;
 
+import gfx.components.Dialogs;
 import Preferences.Markup;
 import openfl.display.Graphics;
 import gfx.utils.Colors;
@@ -134,7 +135,7 @@ class SelectableBoard extends Board
 
     private function onClick(e:MouseEvent)
     {
-        if (suppressRMBHandler)
+        if (suppressRMBHandler || Dialogs.dialogActive)
             return;
 
         removeArrowsAndSelections();
@@ -142,7 +143,7 @@ class SelectableBoard extends Board
 
     private function onRightPress(e:MouseEvent)
     {
-        if (suppressRMBHandler)
+        if (suppressRMBHandler || Dialogs.dialogActive)
             return;
 
         arrowStartLocation = posToIndexes(e.stageX, e.stageY);

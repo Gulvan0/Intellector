@@ -1,5 +1,6 @@
 package gameboard;
 
+import gfx.components.Dialogs;
 import gfx.analysis.PeripheralEvent;
 import gameboard.states.StubState;
 import haxe.exceptions.PosException;
@@ -236,7 +237,7 @@ class GameBoard extends SelectableBoard implements INetObserver
 
     private function onLMBPressed(e:MouseEvent)
     {
-        if (suppressLMBHandler)
+        if (suppressLMBHandler || Dialogs.dialogActive)
             return;
 
         if (getBounds(stage).contains(e.stageX, e.stageY))
@@ -245,7 +246,7 @@ class GameBoard extends SelectableBoard implements INetObserver
 
     private function onMouseMoved(e:MouseEvent)
     {
-        if (suppressLMBHandler)
+        if (suppressLMBHandler || Dialogs.dialogActive)
             return;
 
         state.onMouseMoved(posToIndexes(e.stageX, e.stageY));
@@ -254,7 +255,7 @@ class GameBoard extends SelectableBoard implements INetObserver
 
     private function onLMBReleased(e:MouseEvent)
     {
-        if (suppressLMBHandler)
+        if (suppressLMBHandler || Dialogs.dialogActive)
             return;
 
         state.onLMBReleased(posToIndexes(e.stageX, e.stageY), e.shiftKey, e.ctrlKey);

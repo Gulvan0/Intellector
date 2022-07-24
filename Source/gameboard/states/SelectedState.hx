@@ -47,7 +47,7 @@ class SelectedState extends BasePlayableState
         var pressedDestinationHex:Null<Hex> = location == null? null : boardInstance.shownSituation.get(location);
         var selectedDepartureHex:Hex = boardInstance.shownSituation.get(selectedDepartureLocation);
 
-        if (pressedDestinationHex == null)
+        if (pressedDestinationHex == null || location.equals(selectedDepartureLocation))
             exit(ToNeutral);
         else if (boardInstance.behavior.movePossible(selectedDepartureLocation, location))
         {

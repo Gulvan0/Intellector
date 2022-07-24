@@ -1,9 +1,11 @@
 package gfx.analysis;
 
+import haxe.ui.core.Screen;
+import openfl.events.MouseEvent;
+import openfl.display.DisplayObject;
 import haxe.ui.containers.dialogs.MessageBox;
 import gfx.components.SpriteWrapper;
 import haxe.ui.events.UIEvent;
-import haxe.ui.events.MouseEvent;
 import gfx.components.Dialogs;
 import gameboard.GameBoard.IGameBoardObserver;
 import gameboard.GameBoard.GameBoardEvent;
@@ -70,6 +72,25 @@ class ControlTabs extends TabView
         variantView.clear(newStartingSituation);
     }
 
+    private function onWheel(obj:DisplayObject, e:MouseEvent)
+    {
+        if (e.ctrlKey)
+        {
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.delta > 0 && obj.scaleX < 8)
+            {
+                obj.scaleX *= 2;
+                obj.scaleY *= 2;
+            }
+            else if (e.delta < 0 && obj.scaleX > 0.125)
+            {
+                obj.scaleX /= 2;
+                obj.scaleY /= 2;
+            }
+        } 
+    }
+
     public function new(initialVariant:Variant, eventHandler:PeripheralEvent->Void)
     {
         super();
@@ -80,14 +101,7 @@ class ControlTabs extends TabView
         navigator.init(initialVariant.startingSituation.turnColor, btn -> {eventHandler(ScrollBtnPressed(btn));});
 
         branchingHelpLink.onClick = e -> {
-            var messageBox = new MessageBox();
-            messageBox.type = MessageBoxType.TYPE_INFO;
-            messageBox.title = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TITLE);
-            messageBox.messageLabel.htmlText = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TEXT);
-            messageBox.messageLabel.customStyle = {fontSize: 18};
-            messageBox.width = 500;
-            messageBox.modal = true;
-            messageBox.show();
+            Dialogs.branchingHelp();
         };
 
         switch Preferences.branchingTabType.get() 
@@ -97,6 +111,7 @@ class ControlTabs extends TabView
                 variantView = tree;
                 variantViewSV.hidden = false;
                 variantViewSV.addComponent(new SpriteWrapper(tree, false));
+                variantViewSV.addEventListener(MouseEvent.MOUSE_WHEEL, onWheel.bind(tree), false, 100);
             case Outline: 
                 var comp:VariantOutline = new VariantOutline(initialVariant);
                 variantView = comp;

@@ -1,5 +1,6 @@
 package gfx.components;
 
+import haxe.ui.containers.dialogs.MessageBox;
 import haxe.Timer;
 import haxe.ui.util.Variant;
 import openfl.display.Shape;
@@ -26,9 +27,13 @@ import haxe.ui.core.Screen;
 
 class Dialogs
 {
+    public static var dialogActive:Bool = false;
+
     public static function confirm(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)
     {
+        dialogActive = true;
         DialogManager.messageBox(message, title, MessageBoxType.TYPE_QUESTION, true, (btn:DialogButton) -> {
+            dialogActive = false;
             if (btn == DialogButton.YES)
                 onConfirmed();
             else
@@ -43,16 +48,37 @@ class Dialogs
 
     public static function alert(message:String, title:String)
     {
-        DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true);
+        dialogActive = true;
+        DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true)
+            .onDialogClosed = e -> {dialogActive = false;};
+
     }
 
     public static function info(message:String, title:String)
     {
-        DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true);
+        dialogActive = true;
+        DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true)
+            .onDialogClosed = e -> {dialogActive = false;};
+    }
+
+    public static function branchingHelp()
+    {
+        dialogActive = true;
+
+        var messageBox = new MessageBox();
+        messageBox.type = MessageBoxType.TYPE_INFO;
+        messageBox.title = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TITLE);
+        messageBox.messageLabel.htmlText = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TEXT);
+        messageBox.messageLabel.customStyle = {fontSize: Math.max(Screen.instance.height * 0.02, 12)};
+        messageBox.width = Math.min(500, Screen.instance.width * 0.95);
+        messageBox.onDialogClosed = e -> {dialogActive = false;};
+        messageBox.showDialog(true);
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void)
     {
+        dialogActive = true;
+        
         function cb(dialog:Dialog, type:PieceType) 
         {
             dialog.hideDialog(DialogButton.OK);
@@ -76,17 +102,20 @@ class Dialogs
         dialog.addComponent(body);
         dialog.title = Dictionary.getPhrase(PROMOTION_DIALOG_TITLE);
         dialog.buttons = DialogButton.CANCEL;
+        dialog.onDialogClosed = e -> {dialogActive = false;};
         dialog.showDialog(false);
     }
 
     public static function chameleonConfirm(onDecided:Bool->Void)
     {
+        dialogActive = true;
         DialogManager.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
             if (btn == DialogButton.YES)
                 onDecided(true);
             else if (btn == DialogButton.NO)
                 onDecided(false);
-        });
+        })
+            .onDialogClosed = e -> {dialogActive = false;};
     }
 
     public static function specifyChallengeParams(onConfirm:(startSecs:Int, bonusSecs:Int, callerColor:Null<PieceColor>)->Void, onCancel:Void->Void)
