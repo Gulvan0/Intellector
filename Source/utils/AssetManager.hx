@@ -24,7 +24,7 @@ class AssetManager
     private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length + TimeControlType.createAll().length;
     private static var onLoadedCallback:Void->Void;
 
-    private static inline function piecePath(type:PieceType, color:PieceColor):String
+    public static inline function piecePath(type:PieceType, color:PieceColor):String
     {
         return "assets/pieces/" + type.getName() + "_" + color.getName() + ".svg";
     }

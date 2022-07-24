@@ -1,5 +1,6 @@
 package gfx.components;
 
+import haxe.Timer;
 import haxe.ui.util.Variant;
 import openfl.display.Shape;
 import gameboard.Piece;
@@ -59,16 +60,15 @@ class Dialogs
         }
 
         var dialog:Dialog = new Dialog();
-        dialog.width = 430;
         var body:VBox = new VBox();
 
         var question:Label = new Label();
         question.text = Dictionary.getPhrase(PROMOTION_DIALOG_QUESTION);
-        question.width = 430;
         question.textAlign = "center";
         body.addComponent(question);
 
         var btns:HBox = new HBox();
+        btns.horizontalAlign = 'center';
         for (type in [Aggressor, Liberator, Defensor, Dominator])
             btns.addComponent(pieceBtn(type, color, cb.bind(dialog, type)));
         body.addComponent(btns);
@@ -95,19 +95,29 @@ class Dialogs
         dialog.showDialog(true);
     }
 
+    private static function onBtnAdded(btn:Button, type:PieceType, color:PieceColor, iconSize:Float, e) 
+    {
+        var icon:Image = btn.findComponent(Image);
+        switch type 
+        {
+            case Progressor:
+                icon.width = Piece.pieceRelativeScale(Progressor) * iconSize;
+                icon.height = icon.width / Piece.pieceAspectRatio(Progressor, color);
+            default:
+                icon.height = Piece.pieceRelativeScale(type) * iconSize;
+                icon.width = icon.height * Piece.pieceAspectRatio(type, color);
+        }
+    }
+
     private static function pieceBtn(type:PieceType, color:PieceColor, callback:Void->Void):Button
     {
         var btnSize:Float = Math.min(100, Math.min(Screen.instance.height * 0.5, Screen.instance.width * 0.2));
-        var size:Float = 0.96 * btnSize;
-        if (type == Progressor)
-            size *= 0.7;
-        else if (type == Liberator || type == Defensor)
-            size *= 0.9;
 
         var btn:Button = new Button();
-        btn.icon = Variant.fromComponent(AssetManager.getSVGComponent(AssetManager.pieces[type][color], 0, 0, Math.round(size), Math.round(size)));
+        btn.icon = AssetManager.piecePath(type, color);
         btn.width = btnSize;
         btn.height = btnSize;
+        btn.addEventListener(Event.ADDED_TO_STAGE, onBtnAdded.bind(btn, type, color, 0.8 * btnSize));
         btn.onClick = (e) -> {callback();};
         return btn;
     }

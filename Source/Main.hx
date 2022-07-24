@@ -1,5 +1,6 @@
 package;
 
+import gfx.components.Dialogs;
 import tests.ui.analysis.TAnalysisScreen;
 import haxe.ui.locale.LocaleManager;
 import tests.ui.game.TSidebox;
