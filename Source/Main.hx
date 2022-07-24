@@ -57,15 +57,12 @@ using StringTools;
 **/
 class Main extends Sprite
 {
-	private var languageSelectScreen:Sprite;
-
 	public function new()
 	{
 		super();
 		init(() -> {
 			ScreenManager.launch();
-			ScreenManager.toScreen(Analysis(null, null, null));
-			/*start();*/
+			start();
 		});
 		
 	}
@@ -91,21 +88,11 @@ class Main extends Sprite
 		if (langInitializedFromCookie)
 			onLanguageReady();
 		else
-		{
-			languageSelectScreen = new LanguageSelectIntro();
-			//TODO: Fill
-			addChild(languageSelectScreen);
-		}
+			ScreenManager.toScreen(LanguageSelectIntro(onLanguageReady));
 	}
 
 	private function onLanguageReady() 
 	{
-		if (languageSelectScreen != null)
-		{
-			removeChild(languageSelectScreen);
-			languageSelectScreen = null;
-		}
-
 		if (Preferences.language.get() == RU)
 			LocaleManager.instance.language = "ru";
 		else

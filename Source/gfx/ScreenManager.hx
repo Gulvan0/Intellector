@@ -62,8 +62,8 @@ class ScreenManager extends VBox implements INetObserver
                 new MainMenu();
             case Analysis(initialVariantStr, _, _):
                 new Analysis(initialVariantStr);
-            case LanguageSelectIntro:
-                new LanguageSelectIntro();
+            case LanguageSelectIntro(languageReadyCallback):
+                new LanguageSelectIntro(languageReadyCallback);
             case StartedPlayableGame(_, whiteLogin, blackLogin, timeControl, playerColor):
                 LiveGame.constructFromParams(whiteLogin, blackLogin, playerColor, timeControl, playerColor);
             case ReconnectedPlayableGame(_, actualizationData):
