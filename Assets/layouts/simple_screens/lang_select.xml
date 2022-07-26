@@ -1,7 +1,7 @@
-<vbox style="spacing:8vh;padding-top:8vh" horizontalAlign="center">
-    <label id="headerLabel" text="Language/Язык:" horizontalAlign="center" style="font-size:12vh" />
-    <hbox id="btnBox" horizontalAlign="center" style="spacing:10vh">
-        <image id="enBtn" style="width: 30vh; height: 20vh; pointer-events: true" resource="assets/symbols/flags/en.svg" />
-        <image id="ruBtn" style="width: 30vh; height: 20vh; pointer-events: true" resource="assets/symbols/flags/ru.svg" />
+<vbox style="spacing:max(8vw,8vh);padding-top:min(8vw,8vh)" horizontalAlign="center">
+    <label id="headerLabel" text="Language/Язык:" horizontalAlign="center" style="font-size:min(12vw,12vh)" />
+    <hbox id="btnBox" horizontalAlign="center" style="spacing:min(10vw,10vh)">
+        <image id="enBtn" style="width: min(30vw,30vh); height: min(20vw,20vh); pointer-events: true" resource="assets/symbols/flags/en.svg" />
+        <image id="ruBtn" style="width: min(30vw,30vh); height: min(20vw,20vh); pointer-events: true" resource="assets/symbols/flags/ru.svg" />
     </hbox>
 </vbox>

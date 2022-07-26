@@ -38,7 +38,7 @@ class AssetManager
         }
     }
 
-    private static inline function timeControlPath(type:TimeControlType):String
+    public static inline function timeControlPath(type:TimeControlType):String
     {
         var filename = switch type 
         {

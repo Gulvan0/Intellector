@@ -1,0 +1,53 @@
+<vbox width="100%" height="100%">
+    <style>
+        .mainMenuTableHeader {
+            color: #333333;
+            font-name: 'fonts/FuturaItalic.ttf';
+            font-size: 2.5vh;
+            font-weight: 400;
+        }
+    </style>
+    <button text="Create Game [P]" horizontalAlign="center" style="font-size:5vh" />
+    <hbox horizontalAlign="center" width="90%" style="spacing: 10vw">
+        <vbox width="50%" height="100%">
+            <label text="Open Challenges [P]" styleName="mainMenuTableHeader" />
+            <tableview id="challengesTable">
+                <headerr width="100%">
+                    <column id="colChallengesMode" width="13%" text="Mode [P]" style="text-align:center;" />
+                    <column id="colChallengesTime" width="20%" text="Time [P]" style="text-align:center;" />
+                    <column id="colChallengesPlayer" width="47%" text="Player [P]" style="text-align:center;" />
+                    <column id="colChallengesBracket" width="20%" text="Bracket [P]" style="text-align:center;" />
+                </header>
+                <item-renderer verticalAlign="center">
+                    <label id="colChallengesTime" width="100%" />
+                </item-renderer>
+                <item-renderer verticalAlign="center">
+                    <label id="colChallengesPlayer" width="100%" />
+                </item-renderer>
+                <item-renderer verticalAlign="center">
+                    <label id="colChallengesBracket" width="100%" />
+                </item-renderer>
+            </tableview>
+        </vbox>
+        <vbox width="50%" height="100%">
+            <label text="Past Games [P]" styleName="mainMenuTableHeader" />
+            <tableview id="pastgamesTable">
+                <headerr width="100%">
+                    <column id="colPastgamesTime" width="18%" text="Time [P]" style="text-align:center;" />
+                    <column id="colPastgamesPlayers" width="50%" text="Players [P]" style="text-align:center;" />
+                    <column id="colPastgamesBracket" width="14%" text="Bracket [P]" style="text-align:center;" />
+                    <column id="colPastgamesDate" width="18%" text="Date [P]" style="text-align:center;" />
+                </header>
+                <item-renderer verticalAlign="center">
+                    <label id="colPastgamesPlayers" width="100%" />
+                </item-renderer>
+                <item-renderer verticalAlign="center">
+                    <label id="colChallengesBracket" width="100%" />
+                </item-renderer>
+                <item-renderer verticalAlign="center">
+                    <label id="colChallengesDate" width="100%" style="font-style:italic;" />
+                </item-renderer>
+            </tableview>
+        </vbox>
+    </hbox>
+</vbox>

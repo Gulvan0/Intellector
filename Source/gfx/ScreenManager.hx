@@ -1,5 +1,7 @@
 package gfx;
 
+import haxe.Timer;
+import haxe.ui.Toolkit;
 import js.html.VisualViewport;
 import haxe.ui.containers.VBox;
 import js.html.Element;
@@ -184,9 +186,7 @@ class ScreenManager extends VBox implements INetObserver
             lastResizeTimestamp = timestamp;
 
             for (handler in resizeHandlers)
-                handler();
-            
-            trace(innerWidthStr, innerHeightStr);
+                Timer.delay(handler, 50);
         }
     }
 

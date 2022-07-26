@@ -57,6 +57,14 @@ class Dictionary
 
         LIVE_SHARE_BTN_TOOLTIP => ["Share", "Поделиться"], 
 
+        OPENJOIN_CHALLENGE_BY_HEADER => ["Challenge by $0", "Вызов $0"],
+        OPENJOIN_COLOR_WHITE_OWNER => ["$0 will play as White", "$0 играет белыми"],
+        OPENJOIN_COLOR_BLACK_OWNER => ["$0 will play as Black", "$0 играет черными"],
+        OPENJOIN_COLOR_RANDOM => ["Random color", "Случайный цвет"],
+        OPENJOIN_RATED => ["Rated", "Рейтинговая"],
+        OPENJOIN_UNRATED => ["Unrated", "Товарищеская"],
+        OPENJOIN_ACCEPT_BTN_TEXT => ["Accept Challenge", "Принять вызов"],
+
         CHATBOX_MESSAGE_PLACEHOLDER => ["Message text...", "Сообщение..."],
         PROMOTION_DIALOG_QUESTION => ["Select a piece to which you want to promote", "Выберите фигуру, в которую хотите превратиться"],
         PROMOTION_DIALOG_TITLE => ["Promotion selection", "Превращение"],

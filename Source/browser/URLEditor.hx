@@ -34,7 +34,7 @@ class URLEditor
         {
             case MainMenu: "home";
             case Analysis(_, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
-            case LanguageSelectIntro: "";
+            case LanguageSelectIntro(_): "";
             case StartedPlayableGame(gameID, _, _, _, _): 'live/$gameID';
             case ReconnectedPlayableGame(gameID, _): 'live/$gameID';
             case SpectatedGame(gameID, _, _): 'live/$gameID';

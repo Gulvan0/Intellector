@@ -1,5 +1,6 @@
 package;
 
+import gfx.screens.OpenChallengeJoining;
 import gfx.components.Dialogs;
 import tests.ui.analysis.TAnalysisScreen;
 import haxe.ui.locale.LocaleManager;
@@ -62,7 +63,7 @@ class Main extends Sprite
 		super();
 		init(() -> {
 			ScreenManager.launch();
-			start();
+			ScreenManager.toScreen(ChallengeJoining("Gulvan", new TimeControl(3*60, 2), Black));//start();
 		});
 		
 	}

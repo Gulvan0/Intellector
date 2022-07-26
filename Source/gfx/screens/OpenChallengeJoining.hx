@@ -2,9 +2,9 @@ package gfx.screens;
 
 import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
+import haxe.ui.events.MouseEvent;
 import utils.TimeControl;
 import struct.PieceColor;
-import net.LoginManager;
 import haxe.ui.components.Button;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.VBox;
@@ -12,11 +12,12 @@ import dict.Dictionary;
 import js.Browser;
 import dict.Utils;
 import openfl.display.Sprite;
+import utils.AssetManager;
 
-//TODO: Needs total revamp (also XML-ize)
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/simple_screens/join_challenge.xml'))
 class OpenChallengeJoining extends VBox implements IScreen
 {
-	private static var boxWidth:Float = 800;
+	private final challengeOwner:String;
 
 	public function onEntered()
     {
@@ -36,37 +37,27 @@ class OpenChallengeJoining extends VBox implements IScreen
     public function asComponent():Component
     {
         return this;
-    }
+	}
+	
+	@:bind(acceptBtn, MouseEvent.CLICK)
+	private function onAccepted(e)
+	{
+		Networker.emitEvent(AcceptOpenChallenge(challengeOwner));
+	}
 
-    public function new(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>)
+    public function new(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>, rated:Bool = false)
     {
 		super();
-        var joinMenu = new VBox();
-		joinMenu.width = boxWidth;
+		this.challengeOwner = challengeOwner;
 
-		var label = new haxe.ui.components.Label();
-		label.width = boxWidth;
-		label.text = Utils.isHostingAChallengeText(challengeOwner, timeControl, color);
-		if (LoginManager.login == null)
-			label.text += Dictionary.getPhrase(WILL_BE_GUEST);
-		else
-			label.text += Dictionary.getPhrase(JOINING_AS) + LoginManager.login;
-		label.customStyle = {fontSize: 16};
-		label.textAlign = 'center';
-		joinMenu.addComponent(label);
-
-		var joinButton = new haxe.ui.components.Button();
-		joinButton.width = 200;
-		joinButton.horizontalAlign = 'center';
-		joinButton.text = Dictionary.getPhrase(ACCEPT_CHALLENGE);
-		joinMenu.addComponent(joinButton);
-
-		joinButton.onClick = (e) -> {
-			Networker.emitEvent(AcceptOpenChallenge(challengeOwner));
-		}
-
-		joinMenu.x = (Screen.instance.width - boxWidth) / 2;
-		joinMenu.y = 100;
-		addComponent(joinMenu);
+		challengeByLabel.text = Dictionary.getPhrase(OPENJOIN_CHALLENGE_BY_HEADER, [challengeOwner]);
+		tcIcon.resource = AssetManager.timeControlPath(timeControl.getType());
+		tcLabel.text = timeControl.toString();
+		bracketLabel.text = Dictionary.getPhrase(rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
+		colorLabel.text = switch color {
+			case White: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [challengeOwner]);
+			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [challengeOwner]);
+			case null: Dictionary.getPhrase(OPENJOIN_COLOR_RANDOM);
+		};
     }
 }

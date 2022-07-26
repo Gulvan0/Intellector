@@ -226,16 +226,6 @@ class Utils
         }
     }
 
-    public static function isHostingAChallengeText(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>):String
-    {
-        var colorSuffix:String = color == null? "" : ", " + getColorName(color);
-        var detailsStr = timeControl.toString() + colorSuffix;
-        return switch Preferences.language.get() {
-            case EN: '$challengeOwner is hosting a challenge ($detailsStr). First one to accept it will become an opponent\n';
-            case RU: '$challengeOwner вызывает на бой ($detailsStr). Первый, кто примет вызов, станет противником\n';
-        }
-    }
-
     public static function getAnalysisTurnColorSelectLabel(color:PieceColor):String 
     {
 		return switch Preferences.language.get() {

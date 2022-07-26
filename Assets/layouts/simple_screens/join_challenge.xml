@@ -1,0 +1,16 @@
+<vbox width="100%" height="100%">
+    <vbox horizontalAlign="center">
+        <label id="challengeByLabel" style="font-size:min(8vw, 8vh)" horizontalAlign="center" />
+        <spacer style="height:min(5vw, 5vh)" />
+        <hbox>
+            <image id="tcIcon" style="width: min(16vw, 16vh);height: min(16vw, 16vh)" verticalAlign="center" horizontalAlign="center"/>
+            <vbox verticalAlign="center">
+                <label id="tcLabel" style="font-size: min(5vw, 5vh)" />
+                <label id="bracketLabel" style="font-size: min(5vw, 5vh)" />
+                <label id="colorLabel" style="font-size: min(5vw, 5vh)" />
+            </vbox>
+        </hbox>
+        <spacer style="height:min(3.5vw, 3.5vh)" />
+        <button id="acceptBtn" text="${Dictionary.getPhrase(OPENJOIN_ACCEPT_BTN_TEXT)}" style="font-size: min(6vw, 6vh)" horizontalAlign="center"/>
+    </vbox>
+</vbox>
