@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import gfx.components.Dialogs;
 import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;

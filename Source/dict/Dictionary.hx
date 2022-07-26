@@ -65,6 +65,8 @@ class Dictionary
         OPENJOIN_UNRATED => ["Unrated", "Товарищеская"],
         OPENJOIN_ACCEPT_BTN_TEXT => ["Accept Challenge", "Принять вызов"],
 
+        CHANGELOG_DIALOG_TITLE => ["Changelog", "Список изменений"],
+
         CHATBOX_MESSAGE_PLACEHOLDER => ["Message text...", "Сообщение..."],
         PROMOTION_DIALOG_QUESTION => ["Select a piece to which you want to promote", "Выберите фигуру, в которую хотите превратиться"],
         PROMOTION_DIALOG_TITLE => ["Promotion selection", "Превращение"],

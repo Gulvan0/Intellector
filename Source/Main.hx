@@ -1,5 +1,6 @@
 package;
 
+import utils.Changelog;
 import gfx.screens.OpenChallengeJoining;
 import gfx.components.Dialogs;
 import tests.ui.analysis.TAnalysisScreen;
@@ -76,7 +77,7 @@ class Main extends Sprite
 				event.preventDefault();
 		}, true);
 		OpeningTree.init();
-		Changes.initChangelog();
+		Changelog.init();
 		
 		Toolkit.init({container: stage});
 		AssetManager.load(callback);

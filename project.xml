@@ -24,6 +24,7 @@
 	</section>
 
 	<haxeflag name="--resource" value="./Source/tests/ui/test_case_infos.json@test_case_infos" if="localtests" />
+	<haxeflag name="--resource" value="./Assets/resources/changelog.json@changelog" />
 	
 	<assets path="Assets/sounds" rename="sounds" />
 	<assets path="Assets" rename="assets" />

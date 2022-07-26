@@ -1,5 +1,8 @@
 package gfx.components;
 
+import utils.MathUtils;
+import haxe.ui.containers.ScrollView;
+import utils.Changelog;
 import haxe.ui.containers.dialogs.MessageBox;
 import haxe.Timer;
 import haxe.ui.util.Variant;
@@ -73,6 +76,32 @@ class Dialogs
         messageBox.width = Math.min(500, Screen.instance.width * 0.95);
         messageBox.onDialogClosed = e -> {dialogActive = false;};
         messageBox.showDialog(true);
+    }
+
+    public static function changelog()
+    {
+        dialogActive = true;
+
+        var changesLabel:Label = new Label();
+        changesLabel.htmlText = Changelog.getAll();
+        changesLabel.customStyle = {fontSize: MathUtils.clamp(0.025 * Screen.instance.height, 12, 36)};
+
+        var changesSV:ScrollView = new ScrollView();
+        changesSV.width = Math.min(1000, 0.9 * Screen.instance.width);
+        changesSV.height = Math.min(450, 0.7 * Screen.instance.height);
+        changesSV.horizontalAlign = 'center';
+        changesSV.verticalAlign = 'center';
+        changesSV.addComponent(changesLabel);
+
+        var dialog:Dialog = new Dialog();
+        dialog.title = Dictionary.getPhrase(CHANGELOG_DIALOG_TITLE);
+        dialog.addComponent(changesSV);
+
+        dialog.onDialogClosed = e -> {
+            dialogActive = false;
+        };
+
+        dialog.showDialog(false);
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void)
