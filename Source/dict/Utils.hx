@@ -36,17 +36,6 @@ class Utils
         return Dictionary.getPhrase(phrase);
     }
 
-    public static function getMarkupOptionText(type:Markup):String
-    {
-        var phrase:Phrase = switch type 
-        {
-            case None: SETTINGS_MARKUP_TYPE_NONE;
-            case Side: SETTINGS_MARKUP_TYPE_SIDE;
-            case Over: SETTINGS_MARKUP_TYPE_OVER;
-        }
-        return Dictionary.getPhrase(phrase);
-    }
-
     public static function getGameOverExplanation(reason:Outcome):String
     {
         var phrase:Phrase = switch reason

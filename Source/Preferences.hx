@@ -97,4 +97,5 @@ class Preferences
     public static final premoveEnabled:Preference<Bool> = new Preference("premoveEnabled", false);
     public static final branchingTabType:Preference<BranchingTabType> = new Preference("branchingTabType", Tree);
     public static final branchingTurnColorIndicators:Preference<Bool> = new Preference("branchingTurnColorIndicators", true);
+    public static final silentChallenges:Preference<Bool> = new Preference("silentChallenges", false);
 }

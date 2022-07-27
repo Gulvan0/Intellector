@@ -67,6 +67,30 @@ class Dictionary
 
         CHANGELOG_DIALOG_TITLE => ["Changelog", "Список изменений"],
 
+        SETTINGS_DIALOG_TITLE => ["Settings", "Настройки"],
+        SETTINGS_GENERAL_TAB_TITLE => ["General", "Основные"],
+        SETTINGS_APPEARANCE_TAB_TITLE => ["Appearance", "Внешний вид"],
+        SETTINGS_CONTROLS_TAB_TITLE => ["Controls", "Управление"],
+        SETTINGS_INTEGRATIONS_TAB_TITLE => ["Integrations", "Интеграции"],
+
+        SETTINGS_LANGUAGE_OPTION_NAME => ["Language", "Язык"],
+        SETTINGS_MARKUP_OPTION_NAME => ["Coordinates", "Координаты"],
+        SETTINGS_PREMOVES_OPTION_NAME => ["Premoves", "Предходы"],
+        SETTINGS_BRANCHING_TYPE_OPTION_NAME => ["Display branches as", "Вид ветвей"],
+        SETTINGS_BRANCHING_SHOW_TURN_COLOR_OPTION_NAME => ["Unrated", "Товарищеская"],
+        SETTINGS_SILENT_CHALLENGES_OPTION_NAME => ["Unrated", "Товарищеская"],
+
+        SETTINGS_MARKUP_ALL_OPTION_VALUE => ["All", "Все"],
+        SETTINGS_MARKUP_LETTERS_OPTION_VALUE => ["Files only", "Только вертикали"],
+        SETTINGS_MARKUP_NONE_OPTION_VALUE => ["None", "Нет"],
+
+        SETTINGS_BRANCHING_TYPE_TREE_OPTION_VALUE => ["Tree", "Дерево"],
+        SETTINGS_BRANCHING_TYPE_OUTLINE_OPTION_VALUE => ["Outline", "Список"],
+        SETTINGS_BRANCHING_TYPE_PLAIN_OPTION_VALUE => ["Plain text", "Текст"],
+
+        SETTINGS_DISABLED_OPTION_VALUE => ["Disabled", "Нет"],
+        SETTINGS_ENABLED_OPTION_VALUE => ["Enabled", "Да"],
+
         CHATBOX_MESSAGE_PLACEHOLDER => ["Message text...", "Сообщение..."],
         PROMOTION_DIALOG_QUESTION => ["Select a piece to which you want to promote", "Выберите фигуру, в которую хотите превратиться"],
         PROMOTION_DIALOG_TITLE => ["Promotion selection", "Превращение"],
@@ -98,12 +122,6 @@ class Dictionary
         SPECTATE_BTN => ["Spectate", "Наблюдать"],
         PROFILE_BTN => ["Visit player's profile", "Открыть профиль игрока"],
         ENTER_SPECTATED => ["Enter the username of a player whose game you want to spectate", "За чьей игрой наблюдать?"],
-        SETTINGS_MARKUP_TITLE => ["Markup: ", "Метки: "],
-        SETTINGS_MARKUP_TYPE_NONE => ["None", "Нет"],
-        SETTINGS_MARKUP_TYPE_SIDE => ["On the side", "Сбоку доски"],
-        SETTINGS_MARKUP_TYPE_OVER => ["Overboard", "На доске"],
-        SETTINGS_LANGUAGE_TITLE => ["Language: ", "Язык: "],
-        SETTINGS_TITLE => ["Setings", "Настройки"],
         WIN_MESSAGE_PREAMBLE => ["You won", "Вы победили"],
         LOSS_MESSAGE_PREAMBLE => ["You lost", "Вы проиграли"],
         GAME_OVER_REASON_MATE => [".", "."],

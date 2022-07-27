@@ -1,5 +1,6 @@
 package gfx.components;
 
+import gfx.popups.Settings;
 import utils.MathUtils;
 import haxe.ui.containers.ScrollView;
 import utils.Changelog;
@@ -101,6 +102,18 @@ class Dialogs
             dialogActive = false;
         };
 
+        dialog.showDialog(false);
+    }
+
+    public static function settings()
+    {
+        dialogActive = true;
+
+        var dialog:Settings = new Settings();
+        dialog.onDialogClosed = e -> {
+            dialogActive = false;
+        };
+        
         dialog.showDialog(false);
     }
 
