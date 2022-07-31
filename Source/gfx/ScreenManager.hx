@@ -11,7 +11,6 @@ import gfx.screens.Analysis;
 import gfx.screens.LanguageSelectIntro;
 import gfx.screens.LiveGame;
 import gfx.screens.MainMenu;
-import gfx.screens.OpenChallengeHosting;
 import gfx.screens.OpenChallengeJoining;
 import gfx.screens.PlayerProfile;
 import js.Browser;
@@ -78,8 +77,6 @@ class ScreenManager extends VBox implements INetObserver
                 new PlayerProfile(ownerLogin);
             case LoginRegister:
                 new MainMenu(); //TODO: Change
-            case ChallengeHosting(timeControl, color):
-                new OpenChallengeHosting(timeControl, color);
             case ChallengeJoining(challengeOwner, timeControl, color):
                 new OpenChallengeJoining(challengeOwner, timeControl, color);
         };

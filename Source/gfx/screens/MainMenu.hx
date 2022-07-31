@@ -49,6 +49,8 @@ class MainMenu extends VBox implements IScreen
         return this;
     }
 
+    //TODO: Change the body of the following two functions and the logic behind their usage
+
     private function onDirectChallengeParamsSpecified(callee:String, startSecs:Int, bonusSecs:Int, color:PieceColor)
     {
         var colorName = color.getName();
@@ -59,7 +61,6 @@ class MainMenu extends VBox implements IScreen
     {
         var colorName = color.getName();
         Networker.emitEvent(CreateOpenChallenge(startSecs, bonusSecs, colorName));
-        //TODO: Rewrite ||| ScreenManager.toScreen(new OpenChallengeHosting(startSecs, bonusSecs, color));
     }
 
     private function onSendChallenge(e) 

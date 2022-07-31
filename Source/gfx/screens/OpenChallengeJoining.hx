@@ -22,13 +22,18 @@ class OpenChallengeJoining extends VBox implements IScreen
 
 	public function onEntered()
     {
-        //* Do nothing
+        ScreenManager.addResizeHandler(redraw);
     }
 
     public function onClosed()
     {
-        //* Do nothing
-    }
+        ScreenManager.removeResizeHandler(redraw);
+	}
+	
+	private function redraw()
+	{
+		//TODO: Fill
+	}
 
     public function menuHidden():Bool
     {
@@ -43,7 +48,8 @@ class OpenChallengeJoining extends VBox implements IScreen
 	@:bind(acceptBtn, MouseEvent.CLICK)
 	private function onAccepted(e)
 	{
-		Networker.emitEvent(AcceptOpenChallenge(challengeOwner));
+		Dialogs.settings();
+		//Networker.emitEvent(AcceptOpenChallenge(challengeOwner));
 	}
 
     public function new(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>, rated:Bool = false)

@@ -1,0 +1,16 @@
+<dialog width="400" title="${Dictionary.getPhrase(LOGIN_DIALOG_TITLE)}">
+    <vbox style="border: 1px solid $normal-border-color;padding-top:1px;padding-bottom:1px;padding-right: 1px;" width="100%" height="100%">
+        <button-bar width="100%" styleName="top-menu" selectedIndex="0">
+            <button id="loginModeBtn" text="${Dictionary.getPhrase(LOGIN_LOG_IN_MODE_TITLE)}" />
+            <button id="registerModeBtn" text="${Dictionary.getPhrase(LOGIN_REGISTER_MODE_TITLE)}" />
+        </button-bar>
+        <grid width="100%">
+            <label text="${Dictionary.getPhrase(LOGIN_LOGIN_FIELD_NAME)}" verticalAlign="center" />
+            <textfield id="loginField" restrictChars="A-Za-z0-9" width="100%" />
+            
+            <label text="${Dictionary.getPhrase(LOGIN_PASSWORD_FIELD_NAME)}" verticalAlign="center" />
+            <textfield id="passwordField" restrictChars="A-Za-z0-9" password="true" width="100%" />
+        </grid>
+        <checkbox id="rememberMeCheckbox" text="${Dictionary.getPhrase(LOGIN_REMEMBER_ME)}" selected="false" horizontalAlign='center'/>
+    </vbox>
+</dialog>

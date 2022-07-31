@@ -86,7 +86,7 @@ class StringUtils
         return converted;
     }
 
-    public static inline function clean(orig:String, ?maxChars:Int):String
+    public static inline function clean(orig:String, ?maxChars:Int, ?isLegalChar:String->Bool):String
     {
         var formerText = orig.trim();
         var text = "";
@@ -96,13 +96,22 @@ class StringUtils
             newLength = maxChars;
 
         for (index in 0...newLength)
-            if (isLegalChar(formerText.charCodeAt(index)))
-                text += formerText.charAt(index);
+            if (isLegalChar == null)
+            {
+                if (isLegalForChat(formerText.charCodeAt(index)))
+                    text += formerText.charAt(index);
+            }
+            else
+            {
+                if (isLegalChar(formerText.charAt(index)))
+                    text += formerText.charAt(index);
+            }
+                
 
         return text;    
     }
 
-    private static function isLegalChar(code:Int) 
+    private static function isLegalForChat(code:Int) 
     {
         if (code == "#".code || code == ";".code || code == "/".code || code == "\\".code || code == "|".code)
             return false;
