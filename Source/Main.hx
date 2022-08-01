@@ -62,11 +62,7 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
-		init(() -> {
-			ScreenManager.launch();
-			ScreenManager.toScreen(ChallengeJoining("Gulvan", new TimeControl(3*60, 2), Black));//start();
-		});
-		
+		init(start);
 	}
 
 	private function init(callback:Void->Void) 
@@ -80,7 +76,10 @@ class Main extends Sprite
 		Changelog.init();
 		
 		Toolkit.init({container: stage});
-		AssetManager.load(callback);
+		AssetManager.load(() -> {
+			ScreenManager.launch();
+			callback();
+		});
 	}
 
 	private function start() 
@@ -102,7 +101,8 @@ class Main extends Sprite
 
 		Networker.onConnectionEstabilished = onConnected;
 		Networker.onConnectionFailed = onConnectionFailed;
-		Networker.launch();
+		//Networker.launch();
+		ScreenManager.toScreen(ChallengeJoining("Gulvan", new TimeControl(3*60, 2), Black));
 	}
 
 	private function onConnectionFailed(e)

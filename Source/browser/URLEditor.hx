@@ -41,7 +41,6 @@ class URLEditor
             case RevisitedGame(gameID, _, _): 'live/$gameID';
             case PlayerProfile(ownerLogin): 'player/$ownerLogin';
             case LoginRegister: 'login';
-            case ChallengeHosting(_, _): "challenge";
             case ChallengeJoining(challengeOwner, timeControl, color): 'join/$challengeOwner';
         }
     }

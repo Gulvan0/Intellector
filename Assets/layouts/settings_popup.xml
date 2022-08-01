@@ -1,12 +1,6 @@
 <dialog title="${Dictionary.getPhrase(SETTINGS_DIALOG_TITLE)}" width="95%" height="95%">
 <vbox style="border: 1px solid $normal-border-color;padding-top:1px;padding-bottom:1px;padding-right: 1px;" width="100%" height="100%">
-    <button-bar width="100%" styleName="top-menu" selectedIndex="0" onchange="stack3.selectedIndex = this.selectedIndex">
-        <style>
-            .settings-tab-button .icon {
-                width: 50;
-                height: 50;
-            }
-        </style>
+    <button-bar id="tabBar" width="100%" styleName="top-menu" selectedIndex="0" onchange="stack3.selectedIndex = this.selectedIndex">
         <button text="${Dictionary.getPhrase(SETTINGS_GENERAL_TAB_TITLE)}" styleName="settings-tab-button" icon="assets/symbols/settings/tab_icons/general.svg" />
         <button disabled="true" text="${Dictionary.getPhrase(SETTINGS_APPEARANCE_TAB_TITLE)}" styleName="settings-tab-button" icon="assets/symbols/settings/tab_icons/appearance.svg" />
         <button disabled="true" text="${Dictionary.getPhrase(SETTINGS_CONTROLS_TAB_TITLE)}" styleName="settings-tab-button" icon="assets/symbols/settings/tab_icons/controls.svg" />
@@ -15,49 +9,37 @@
     
     <stack id="stack3" width="100%" height="100%">
         <vbox width="100%" height="100%">
-            <hbox width="100%">
-                <label width="50%" text="${Dictionary.getPhrase(SETTINGS_LANGUAGE_OPTION_NAME)}" verticalAlign="center" style="font-size: 1rem;text-align:center"/>
-                <buttonbar width="50%" verticalAlign="center">
-                    <button width="50%" text="${Dictionary.getLanguageName(EN)}" onClick="Preferences.language.set(EN)" style="font-size: 1rem;text-align:center" />
-                    <button width="50%" text="${Dictionary.getLanguageName(RU)}" onClick="Preferences.language.set(RU)" style="font-size: 1rem;text-align:center" />
-                </buttonbar>
+            <section-header text="${Dictionary.getPhrase(SETTINGS_LANGUAGE_OPTION_NAME)}" />
+            <buttonbar horizontalAlign="center">
+                <button id="langBtnEN" text="${Dictionary.getLanguageName(EN)}" onClick="Preferences.language.set(EN)" />
+                <button id="langBtnRU" text="${Dictionary.getLanguageName(RU)}" onClick="Preferences.language.set(RU)" />
+            </buttonbar>
+            <section-header text="${Dictionary.getPhrase(SETTINGS_MARKUP_OPTION_NAME)}" />
+            <buttonbar horizontalAlign="center">
+                <button id="markupBtnOver" text="${Dictionary.getPhrase(SETTINGS_MARKUP_ALL_OPTION_VALUE)}" onClick="Preferences.markup.set(Over)" />
+                <button id="markupBtnSide" text="${Dictionary.getPhrase(SETTINGS_MARKUP_LETTERS_OPTION_VALUE)}" onClick="Preferences.markup.set(Side)" />
+                <button id="markupBtnNone" text="${Dictionary.getPhrase(SETTINGS_MARKUP_NONE_OPTION_VALUE)}" onClick="Preferences.markup.set(None)" />
+            </buttonbar>
+            <section-header text="${Dictionary.getPhrase(SETTINGS_PREMOVES_OPTION_NAME)}" />
+            <hbox horizontalAlign="center">
+                <switch id="premovesPill" styleName="pill-switch" onClick="Preferences.premoveEnabled.set(this.selected);premovesLabel.text = Dictionary.getPhrase(this.selected? SETTINGS_ENABLED_OPTION_VALUE : SETTINGS_DISABLED_OPTION_VALUE)" />
+                <label id="premovesLabel" style="pill-label" />
             </hbox>
-            <hbox width="100%">
-                <label width="50%" text="${Dictionary.getPhrase(SETTINGS_MARKUP_OPTION_NAME)}" verticalAlign="center" style="font-size: 1rem;text-align:center"/>
-                <buttonbar width="50%" verticalAlign="center">
-                    <button width="33.33%" text="${Dictionary.getPhrase(SETTINGS_MARKUP_ALL_OPTION_VALUE)}" onClick="Preferences.markup.set(Over)" style="font-size: 1rem;text-align:center" />
-                    <button width="33.33%" text="${Dictionary.getPhrase(SETTINGS_MARKUP_LETTERS_OPTION_VALUE)}" onClick="Preferences.markup.set(Side)" style="font-size: 1rem;text-align:center" />
-                    <button width="33.33%" text="${Dictionary.getPhrase(SETTINGS_MARKUP_NONE_OPTION_VALUE)}" onClick="Preferences.markup.set(None)" style="font-size: 1rem;text-align:center" />
-                </buttonbar>
+            <section-header text="${Dictionary.getPhrase(SETTINGS_SILENT_CHALLENGES_OPTION_NAME)}" />
+            <hbox horizontalAlign="center">
+                <switch id="silentChallengesPill" styleName="pill-switch" onClick="Preferences.silentChallenges.set(this.selected);silentChallengesLabel.text = Dictionary.getPhrase(this.selected? SETTINGS_ENABLED_OPTION_VALUE : SETTINGS_DISABLED_OPTION_VALUE)" />
+                <label id="silentChallengesLabel" style="pill-label" />
             </hbox>
-            <hbox width="100%">
-                <label width="50%" text="${Dictionary.getPhrase(SETTINGS_PREMOVES_OPTION_NAME)}" verticalAlign="center" style="font-size: 1rem;text-align:center"/>
-                <buttonbar width="50%" verticalAlign="center">
-                    <button width="50%" text="${Dictionary.getPhrase(SETTINGS_DISABLED_OPTION_VALUE)}" onClick="Preferences.premoveEnabled.set(false)" style="font-size: 1rem;text-align:center" />
-                    <button width="50%" text="${Dictionary.getPhrase(SETTINGS_ENABLED_OPTION_VALUE)}" onClick="Preferences.premoveEnabled.set(true)" style="font-size: 1rem;text-align:center" />
-                </buttonbar>
-            </hbox>
-            <hbox width="100%">
-                <label width="50%" text="${Dictionary.getPhrase(SETTINGS_BRANCHING_TYPE_OPTION_NAME)}" verticalAlign="center" style="font-size: 1rem;text-align:center"/>
-                <buttonbar width="50%" verticalAlign="center">
-                    <button width="33.33%" text="${Dictionary.getPhrase(SETTINGS_BRANCHING_TYPE_TREE_OPTION_VALUE)}" onClick="Preferences.branchingTabType.set(Tree)" style="font-size: 1rem;text-align:center" />
-                    <button width="33.33%" text="${Dictionary.getPhrase(SETTINGS_BRANCHING_TYPE_OUTLINE_OPTION_VALUE)}" onClick="Preferences.branchingTabType.set(Outline)" style="font-size: 1rem;text-align:center" />
-                    <button width="33.33%" text="${Dictionary.getPhrase(SETTINGS_BRANCHING_TYPE_PLAIN_OPTION_VALUE)}" onClick="Preferences.branchingTabType.set(PlainText)" style="font-size: 1rem;text-align:center" />
-                </buttonbar>
-            </hbox>
-            <hbox width="100%">
-                <label width="50%" text="${Dictionary.getPhrase(SETTINGS_BRANCHING_SHOW_TURN_COLOR_OPTION_NAME)}" verticalAlign="center" style="font-size: 1rem;text-align:center"/>
-                <buttonbar width="50%" verticalAlign="center">
-                    <button width="50%" text="${Dictionary.getPhrase(SETTINGS_DISABLED_OPTION_VALUE)}" onClick="Preferences.branchingTurnColorIndicators.set(false)" style="font-size: 1rem;text-align:center" />
-                    <button width="50%" text="${Dictionary.getPhrase(SETTINGS_ENABLED_OPTION_VALUE)}" onClick="Preferences.branchingTurnColorIndicators.set(true)" style="font-size: 1rem;text-align:center" />
-                </buttonbar>
-            </hbox>
-            <hbox width="100%">
-                <label width="50%" text="${Dictionary.getPhrase(SETTINGS_SILENT_CHALLENGES_OPTION_NAME)}" verticalAlign="center" style="font-size: 1rem;text-align:center"/>
-                <buttonbar width="50%" verticalAlign="center">
-                    <button width="50%" text="${Dictionary.getPhrase(SETTINGS_DISABLED_OPTION_VALUE)}" onClick="Preferences.silentChallenges.set(false)" style="font-size: 1rem;text-align:center" />
-                    <button width="50%" text="${Dictionary.getPhrase(SETTINGS_ENABLED_OPTION_VALUE)}" onClick="Preferences.silentChallenges.set(true)" style="font-size: 1rem;text-align:center" />
-                </buttonbar>
+            <section-header text="${Dictionary.getPhrase(SETTINGS_BRANCHING_TYPE_OPTION_NAME)}" />
+            <buttonbar horizontalAlign="center">
+                <button id="branchingBtnTree" text="${Dictionary.getPhrase(SETTINGS_BRANCHING_TYPE_TREE_OPTION_VALUE)}" onClick="Preferences.branchingTabType.set(Tree)" />
+                <button id="branchingBtnOutline" text="${Dictionary.getPhrase(SETTINGS_BRANCHING_TYPE_OUTLINE_OPTION_VALUE)}" onClick="Preferences.branchingTabType.set(Outline)" />
+                <button id="branchingBtnPlain" text="${Dictionary.getPhrase(SETTINGS_BRANCHING_TYPE_PLAIN_OPTION_VALUE)}" onClick="Preferences.branchingTabType.set(PlainText)" />
+            </buttonbar>
+            <section-header text="${Dictionary.getPhrase(SETTINGS_BRANCHING_SHOW_TURN_COLOR_OPTION_NAME)}" />
+            <hbox horizontalAlign="center">
+                <switch id="branchingTurnColorPill" styleName="pill-switch" onClick="Preferences.branchingTurnColorIndicators.set(this.selected);branchingTurnColorLabel.text = Dictionary.getPhrase(this.selected? SETTINGS_ENABLED_OPTION_VALUE : SETTINGS_DISABLED_OPTION_VALUE)" />
+                <label id="branchingTurnColorLabel" style="pill-label" />
             </hbox>
         </vbox>
         <vbox width="100%" height="100%">

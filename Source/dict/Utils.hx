@@ -109,9 +109,6 @@ class Utils
                 translations = [ownerLogin, ownerLogin];
             case LoginRegister:
                 translations = ['Sign in', 'Войти'];
-            case ChallengeHosting(timeControl, color):
-                var tcStr = timeControl.toString();
-                translations = ['$tcStr challenge', 'Вызов $tcStr'];
             case ChallengeJoining(challengeOwner, _, _):
                 translations = ['Challenge by $challengeOwner', 'Вызов $challengeOwner'];
             default:
