@@ -1,0 +1,88 @@
+<vbox width="100%" height="100%">
+    <style>
+        .menubar-button {
+            font-size: 1.5vh;
+            font-weight: 300;
+        }
+        .menubar-button:hover {
+            background-color: $solid-background-color;
+        }
+        .menubar-button:active {
+            background-color: $solid-background-color;
+            color: $normal-text-color;
+        }
+        #siteName {
+            pointer-events: true;
+            padding-left: 1vh;
+            padding-right: 1vh;
+            white-space: nowrap;
+            color: #333333;
+            font-name: 'fonts/Futura.ttf';
+            font-size: 3vh;
+            font-weight: 600;
+            background-color: yellow;
+            background-opacity: 0;
+        }
+
+        #siteName:hover {
+            color: #428fd8;
+        }
+
+        #mobileMenuButton {
+            pointer-events: true;
+        }
+
+        #mobileMenuButton .icon {
+            width: 25px;
+            height: 25px;
+        }
+
+        #challengesButton .icon {
+            width: 25px;
+            height: 25px;
+        }
+
+        .account-menu-item .icon {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+    <menubar id="menubar" width="100%" height="5%">
+        <image resource="assets/symbols/upper_menu/open_sidebar_btn.svg" id="mobileMenuButton" onClick="invokeSideMenu();" />
+
+        <label id="siteName" text="intellector.info" verticalAlign="center" onClick="toScreen(MainMenu);" />
+
+        <menu id="playMenu" text="Играть">
+            <menuitem id="createChallengeBtn" text="Создать вызов" icon="assets/symbols/upper_menu/basic/new_game.svg" />
+            <menuitem id="openChallengesBtn" text="Открытые вызовы" icon="assets/symbols/upper_menu/basic/open_challenges.svg" />
+        </menu>
+
+        <menu id="watchMenu" text="Смотреть">
+            <menuitem id="currentGamesBtn" text="Текущие партии" icon="assets/symbols/upper_menu/basic/current_games.svg" />
+            <menuitem id="watchPlayerBtn" text="Наблюдать за игроком" icon="assets/symbols/upper_menu/basic/watch_player.svg" />
+        </menu>
+
+        <menu id="learnMenu" text="Учёба">
+            <menuitem id="analysisBoardBtn" text="Доска анализа" icon="assets/symbols/upper_menu/basic/analysis_board.svg" />
+        </menu>
+
+        <menu id="socialMenu" text="Сообщество">
+            <menuitem id="playerProfileBtn" text="Профиль игрока" icon="assets/symbols/upper_menu/basic/player_profile.svg" />
+        </menu>
+
+        <spacer width="100%" />
+
+        <menu id="challengesButton" icon="assets/symbols/upper_menu/basic/challenges/button_icon/none.svg">
+            <scrollview id="challengeList" width="100%" height="170px" contentLayoutName="vertical" contentWidth="100%" />
+        </menu>
+
+        <menu id="accountMenu" text="Гость">
+            <menuitem id="logInBtn" text="Войти" icon="assets/symbols/upper_menu/basic/account/log_in.svg" styleName="account-menu-item" />
+            <menuitem id="myProfileBtn" text="Мой профиль" icon="assets/symbols/upper_menu/basic/account/my_profile.svg" styleName="account-menu-item" />
+            <menuitem id="settingsBtn" text="Настройки" icon="assets/symbols/upper_menu/basic/account/settings.svg" styleName="account-menu-item" />
+            <menuitem id="logOutBtn" text="Выйти" icon="assets/symbols/upper_menu/basic/account/log_out.svg" styleName="account-menu-item" />
+        </menu>
+    </menubar>
+
+    <box id="content" width="100%" height="95%" style="padding: 5 5 5 5"/>
+</vbox>

@@ -30,7 +30,7 @@ using StringTools;
 /**
     Manages screen transitions (components+URL) and resizing
 **/
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/screen_template.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/basic/screen_template.xml'))
 class ScreenManager extends VBox implements INetObserver
 {
     public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event (Rework via Requests.hx?)

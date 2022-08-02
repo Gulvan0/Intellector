@@ -6,7 +6,7 @@ import net.LoginManager;
 import dict.Dictionary;
 import haxe.ui.containers.dialogs.Dialog;
 
-@:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/login_popup.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/basic/popups/login_popup.xml"))
 class LogIn extends Dialog 
 {
     public function new() 

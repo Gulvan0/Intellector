@@ -11,7 +11,7 @@ import Preferences.Markup;
 import Preferences.BranchingTabType;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/settings_popup.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/basic/popups/settings_popup.xml'))
 class Settings extends Dialog
 {
     private function resize()
@@ -41,8 +41,10 @@ class Settings extends Dialog
         switch Preferences.language.get() 
         {
             case EN:
+                langBtnRU.selected = false;
                 langBtnEN.selected = true;
             case RU:
+                langBtnEN.selected = false;
                 langBtnRU.selected = true;
         }
 
