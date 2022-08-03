@@ -1,7 +1,6 @@
 package gfx.screens;
 
 import gfx.components.Dialogs;
-import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
 import utils.TimeControl;
@@ -16,34 +15,9 @@ import openfl.display.Sprite;
 import utils.AssetManager;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/simple_screens/join_challenge.xml'))
-class OpenChallengeJoining extends VBox implements IScreen
+class OpenChallengeJoining extends Screen
 {
 	private final challengeOwner:String;
-
-	public function onEntered()
-    {
-        ScreenManager.addResizeHandler(redraw);
-    }
-
-    public function onClosed()
-    {
-        ScreenManager.removeResizeHandler(redraw);
-	}
-	
-	private function redraw()
-	{
-		//TODO: Fill
-	}
-
-    public function menuHidden():Bool
-    {
-        return false;
-    }
-
-    public function asComponent():Component
-    {
-        return this;
-	}
 	
 	@:bind(acceptBtn, MouseEvent.CLICK)
 	private function onAccepted(e)
@@ -66,5 +40,16 @@ class OpenChallengeJoining extends VBox implements IScreen
 			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [challengeOwner]);
 			case null: Dictionary.getPhrase(OPENJOIN_COLOR_RANDOM);
 		};
+
+		responsiveComponents = [
+			challengeByLabel => [StyleProp(FontSize) => VMIN(8)],
+			firstSpacer => [Height => VMIN(5)],
+			tcIcon => [Width => VMIN(16), Height => VMIN(16)],
+			tcLabel => [StyleProp(FontSize) => VMIN(5)],
+			bracketLabel => [StyleProp(FontSize) => VMIN(5)],
+			colorLabel => [StyleProp(FontSize) => VMIN(5)],
+			secondSpacer => [Height => VMIN(3.5)],
+			acceptBtn => [StyleProp(FontSize) => VMIN(6)]
+		];
     }
 }

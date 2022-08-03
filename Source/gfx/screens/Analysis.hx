@@ -1,7 +1,7 @@
 package gfx.screens;
 
 import haxe.Timer;
-import haxe.ui.core.Screen;
+import haxe.ui.core.Screen as HaxeUIScreen;
 import haxe.ui.Toolkit;
 import gfx.common.ShareDialog;
 import js.Browser;
@@ -19,7 +19,7 @@ import gfx.analysis.PeripheralEvent;
 import haxe.ui.containers.HBox;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/analysis/analysis_layout.xml'))
-class Analysis extends HBox implements IScreen implements IGameBoardObserver
+class Analysis extends Screen implements IGameBoardObserver
 {
     private var variant:Variant;
 
@@ -27,34 +27,14 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
     private var positionEditor:PositionEditor;
     private var controlTabs:ControlTabs;
 
-    public function onEntered()
-    {
-        //* Do nothing
-    }
-
-    public function onClosed()
-    {
-        //* Do nothing
-    }
-
-    public function menuHidden():Bool
-    {
-        return false;
-    }
-
-    public function asComponent():Component
-    {
-        return this;
-    }
-
     private function redrawPositionEditor()
     {
-        positionEditor.updateLayout(positionEditorContainer.width, Screen.instance.height * 0.3);
+        positionEditor.updateLayout(positionEditorContainer.width, HaxeUIScreen.instance.height * 0.3);
     }
 
     private override function validateComponentLayout():Bool 
     {
-        var compact:Bool = Screen.instance.width / Screen.instance.height < 1.2;
+        var compact:Bool = HaxeUIScreen.instance.width / HaxeUIScreen.instance.height < 1.2;
         var wasCompact:Bool = lControlTabsContainer.hidden;
 
         cCreepingLineContainer.hidden = !compact;
@@ -81,7 +61,7 @@ class Analysis extends HBox implements IScreen implements IGameBoardObserver
         };
 
         var shareDialog:ShareDialog = new ShareDialog();
-        switch ScreenManager.currentScreenType 
+        switch ScreenManager.getCurrentScreenType()
         {
             case Analysis(_, exploredStudyID, exploredStudyName):
                 if (exploredStudyID != null)

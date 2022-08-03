@@ -40,7 +40,6 @@ class URLEditor
             case SpectatedGame(gameID, _, _): 'live/$gameID';
             case RevisitedGame(gameID, _, _): 'live/$gameID';
             case PlayerProfile(ownerLogin): 'player/$ownerLogin';
-            case LoginRegister: 'login';
             case ChallengeJoining(challengeOwner, timeControl, color): 'join/$challengeOwner';
         }
     }

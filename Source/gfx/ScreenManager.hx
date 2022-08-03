@@ -23,25 +23,23 @@ import struct.ActualizationData;
 import struct.PieceColor;
 import browser.URLEditor;
 import utils.TimeControl;
-import haxe.ui.core.Screen;
+import haxe.ui.core.Screen as HaxeUIScreen;
 
 using StringTools;
 
-/**
-    Manages screen transitions (components+URL) and resizing
-**/
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/basic/screen_template.xml'))
-class ScreenManager extends VBox implements INetObserver
+class ScreenManager
 {
-    public static var spectatedPlayerLogin:String; //TODO: Set before sending Spectate event (Rework via Requests.hx?)
-    private static var instance:ScreenManager;
+    private static var scene:Scene;
+    private static var currentScreenType:Null<ScreenType> = null;
     private static var openflContent:Element;
 
-    private var lastResizeTimestamp:Float;
-    private var resizeHandlers:Array<Void->Void> = [];
+    private static var lastResizeTimestamp:Float;
+    private static var resizeHandlers:Array<Void->Void> = [];
 
-    private var current:Null<IScreen>;
-    public static var currentScreenType:Null<ScreenType>;
+    public static function getCurrentScreenType():Null<ScreenType>
+    {
+        return currentScreenType;
+    }
 
     public static function getViewedGameID():Null<Int>
     {
@@ -55,119 +53,41 @@ class ScreenManager extends VBox implements INetObserver
         }
     }
 
-    private static function buildScreen(type:ScreenType):IScreen
-    {
-        return switch type 
-        {
-            case MainMenu:
-                new MainMenu();
-            case Analysis(initialVariantStr, _, _):
-                new Analysis(initialVariantStr);
-            case LanguageSelectIntro(languageReadyCallback):
-                new LanguageSelectIntro(languageReadyCallback);
-            case StartedPlayableGame(_, whiteLogin, blackLogin, timeControl, playerColor):
-                LiveGame.constructFromParams(whiteLogin, blackLogin, playerColor, timeControl, playerColor);
-            case ReconnectedPlayableGame(_, actualizationData):
-                LiveGame.constructFromActualizationData(actualizationData);
-            case SpectatedGame(_, watchedColor, actualizationData):
-                LiveGame.constructFromActualizationData(actualizationData, watchedColor);
-            case RevisitedGame(_, watchedColor, data):
-                LiveGame.constructFromActualizationData(data, watchedColor);
-            case PlayerProfile(ownerLogin):
-                new PlayerProfile(ownerLogin);
-            case LoginRegister:
-                new MainMenu(); //TODO: Change
-            case ChallengeJoining(challengeOwner, timeControl, color):
-                new OpenChallengeJoining(challengeOwner, timeControl, color);
-        };
-    }
-
-    private function removeCurrentScreen()
-    {
-        if (current != null)
-        {
-            current.onClosed();
-            content.removeComponent(current.asComponent());
-        }
-    }
-
-    public static function toScreen(type:ScreenType)
-    {
-        instance.removeCurrentScreen();
-
-        currentScreenType = type;
-
-        URLEditor.setPath(URLEditor.getURLPath(type), Utils.getScreenTitle(type));
-        instance.current = buildScreen(type);
-        instance.menubar.hidden = instance.current.menuHidden();
-        instance.content.addComponent(instance.current.asComponent());
-        instance.current.onEntered();
-    }
-
-    public static function clearScreen()
-    {
-        instance.removeCurrentScreen();
-        URLEditor.clear();
-    }
-
     public static function disableMenu()
     {
-        instance.menubar.disabled = true;
+        scene.menubar.disabled = true;
     }
 
     public static function enableMenu()
     {
-        instance.menubar.disabled = false;
+        scene.menubar.disabled = false;
     }
 
-    public function handleNetEvent(event:ServerEvent)
+    public static function toScreen(type:ScreenType)
     {
-        switch event 
-        {
-            case GameStarted(match_id, enemy, colour, startSecs, bonusSecs):
-                var timeControl:TimeControl = new TimeControl(startSecs, bonusSecs);
-                var playerColor:PieceColor = PieceColor.createByName(colour);
-                var whiteLogin:String = playerColor == White? LoginManager.login : enemy;
-                var blackLogin:String = playerColor == Black? LoginManager.login : enemy;
-                toScreen(StartedPlayableGame(match_id, whiteLogin, blackLogin, timeControl, playerColor));
-            case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
-                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-                var watchedColor:Null<PieceColor> = actualizationData.getColor(spectatedPlayerLogin);
-                toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
-			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
-                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-                toScreen(ReconnectedPlayableGame(match_id, actualizationData));
-            case StudyCreated(studyID, studyName):
-                if (currentScreenType.match(Analysis(_, _, _)))
-                {
-                    //Only change URL and screen data, but do not touch displayed components
-                    var newScreenType:ScreenType = Analysis(null, studyID, studyName);
-                    URLEditor.setPath(URLEditor.getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
-                    currentScreenType = newScreenType;
-                }
-            default:
-        }
+        scene.toScreen(type);
+        currentScreenType = type;
+        URLEditor.setPath(URLEditor.getURLPath(type), Utils.getScreenTitle(type));
+    }
+
+    public static function clearScreen()
+    {
+        scene.toScreen(null);
+        currentScreenType = null;
+        URLEditor.clear();
     }
 
     public static function addResizeHandler(handler:Void->Void)
     {
-        if (instance == null)
-            throw "Not initialized";
-
-        instance.resizeHandlers.push(handler);
+        resizeHandlers.push(handler);
     }
 
     public static function removeResizeHandler(handler:Void->Void)
     {
-        if (instance == null)
-            throw "Not initialized";
-
-        instance.resizeHandlers.remove(handler);
+        resizeHandlers.remove(handler);
     }
 
-    private function onEnterFrame(e)
+    private static function onEnterFrame(e)
     {
         var timestamp:Float = Date.now().getTime();
         if (timestamp - lastResizeTimestamp > 100)
@@ -187,30 +107,53 @@ class ScreenManager extends VBox implements INetObserver
         }
     }
 
-    public static function launch()
+    private static function handleNetEvent(event:ServerEvent):Bool
     {
-        var screenManager:ScreenManager = new ScreenManager();
-        Screen.instance.addComponent(screenManager);
+        switch event 
+        {
+            case GameStarted(match_id, enemy, colour, startSecs, bonusSecs):
+                var timeControl:TimeControl = new TimeControl(startSecs, bonusSecs);
+                var playerColor:PieceColor = PieceColor.createByName(colour);
+                var whiteLogin:String = playerColor == White? LoginManager.login : enemy;
+                var blackLogin:String = playerColor == Black? LoginManager.login : enemy;
+                toScreen(StartedPlayableGame(match_id, whiteLogin, blackLogin, timeControl, playerColor));
+            case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
+                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
+                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
+                var watchedColor:Null<PieceColor> = White; //TODO: actualizationData.getColor(spectatedPlayerLogin) - Rework using Requests.hx
+                toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
+			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
+                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
+                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
+                toScreen(ReconnectedPlayableGame(match_id, actualizationData));
+            case StudyCreated(studyID, studyName):
+                if (currentScreenType.match(Analysis(_, _, _)))
+                {
+                    //Only change URL and screen data, but do not touch displayed components
+                    var newScreenType:ScreenType = Analysis(null, studyID, studyName);
+                    URLEditor.setPath(URLEditor.getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
+                    currentScreenType = newScreenType;
+                }
+            default:
+        }
+        return false;
     }
 
     public static function observeNetEvents()
     {
-        Networker.eventQueue.addObserver(instance);
+        Networker.eventQueue.addHandler(handleNetEvent);
     }
-    
-    private function new() 
-    {
-        super();
-        instance = this;
 
-        //mainPageLink.customStyle = {fontName: "fonts/Futura.ttf", ...}; //TODO: Rewrite
-        //mainPageLink.onClick = e -> {ScreenManager.toScreen(new MainMenu());};
+    public static function launch()
+    {
+        scene = new Scene();
+        HaxeUIScreen.instance.addComponent(scene);
 
 		openflContent = Browser.document.getElementById("openfl-content");
-		openflContent.style.width = '${Browser.window.innerWidth}px';
-        openflContent.style.height = '${Browser.window.innerHeight}px';
+		openflContent.style.width = '${Browser.document.documentElement.clientWidth}px';
+        openflContent.style.height = '${Browser.document.documentElement.clientHeight}px';
         lastResizeTimestamp = Date.now().getTime();
-        
-        addEventListener(Event.ENTER_FRAME, onEnterFrame);
+
+        scene.addEventListener(Event.ENTER_FRAME, onEnterFrame);
     }
 }

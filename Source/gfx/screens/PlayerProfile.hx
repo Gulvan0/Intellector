@@ -1,6 +1,6 @@
 package gfx.screens;
 
-import haxe.ui.core.Screen;
+import haxe.ui.core.Screen as HaxeUIScreen;
 import net.LoginManager;
 import net.EventProcessingQueue.INetObserver;
 import net.ServerEvent;
@@ -46,7 +46,7 @@ typedef StudyData =
 }
 
 //TODO: Needs total revamp (also XML-ize)
-class PlayerProfile extends VBox implements IScreen implements INetObserver
+class PlayerProfile extends Screen implements INetObserver
 {
     private var profileOwnerLogin:String;
 
@@ -89,26 +89,17 @@ class PlayerProfile extends VBox implements IScreen implements INetObserver
         }*/
     }
 
-    public function onEntered()
+    public function onEnter()
     {
         Networker.eventQueue.addObserver(this);
+        //TODO: Rewrite using Requests.hx
         Networker.emitEvent(GetPlayerGames(profileOwnerLogin, gamePaginationAfter, gamePaginationPageSize));
         Networker.emitEvent(GetPlayerStudies(profileOwnerLogin, studyPaginationAfter, studyPaginationPageSize));
     }
 
-    public function onClosed()
+    public function onClose()
     {
         Networker.eventQueue.removeObserser(this);
-    }
-
-    public function menuHidden():Bool
-    {
-        return false;
-    }
-
-    public function asComponent():Component
-    {
-        return this;
     }
 
     private function onGamesPrev(e) 
@@ -242,6 +233,9 @@ class PlayerProfile extends VBox implements IScreen implements INetObserver
     public function new(playerLogin:String) 
     {
         super();
+        customEnterHandler = onEnter;
+        customCloseHandler = onClose;
+
         profileOwnerLogin = playerLogin;
 
         var loginLabel:Label = new Label();
@@ -264,7 +258,7 @@ class PlayerProfile extends VBox implements IScreen implements INetObserver
         contentHBox.addComponent(studiesBox);
 
         var mainBox:VBox = new VBox();
-        mainBox.width = Screen.instance.width;
+        mainBox.width = HaxeUIScreen.instance.width;
         mainBox.addComponent(Shapes.vSpacer(25));
         mainBox.addComponent(loginLabel);
         mainBox.addComponent(Shapes.vSpacer(60));

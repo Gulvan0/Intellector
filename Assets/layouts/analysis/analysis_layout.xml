@@ -1,15 +1,17 @@
-<hbox style="padding-top:2px;padding-bottom:2px;padding-left:2px;padding-right:2px;spacing:15px" width="100%" height="100%" verticalAlign="center" horizontalAlign="center">
-    <vbox width="100%" height="100%">
-        <box id="cCreepingLineContainer" width="100%">
-            <creepingline id="creepingLine" width="100%" />
-        </box>
-        <hbox width="100%" height="100%">
-            <box id="boardContainer" width="100%" height="100%" verticalAlign="center" />
-        </hbox>
-        <box id="cActionBarContainer" width="100%">
-            <analysisactionbar id="actionBar" width="100%" />
-        </box>
-        <box id="positionEditorContainer" width="100%"/>
-    </vbox>
-    <box id="lControlTabsContainer" width="350px" height="100%" />
-</hbox>
+<component width="100%" height="100%">
+    <hbox style="padding-top:2px;padding-bottom:2px;padding-left:2px;padding-right:2px;spacing:15px" width="100%" height="100%">
+        <vbox width="100%" height="100%">
+            <box id="cCreepingLineContainer" width="100%">
+                <creepingline id="creepingLine" width="100%" />
+            </box>
+            <hbox width="100%" height="100%">
+                <box id="boardContainer" width="100%" height="100%" verticalAlign="center" />
+            </hbox>
+            <box id="cActionBarContainer" width="100%">
+                <analysisactionbar id="actionBar" width="100%" />
+            </box>
+            <box id="positionEditorContainer" width="100%"/>
+        </vbox>
+        <box id="lControlTabsContainer" width="350px" height="100%" />
+    </hbox>
+</component>

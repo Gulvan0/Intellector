@@ -4,7 +4,7 @@ import gfx.game.*;
 import haxe.ui.core.Component;
 import net.GeneralObserver;
 import utils.MathUtils;
-import haxe.ui.core.Screen;
+import haxe.ui.core.Screen as HaxeUIScreen;
 import browser.URLEditor;
 import struct.Outcome;
 import serialization.PortableIntellectorNotation;
@@ -40,7 +40,7 @@ import haxe.exceptions.NotImplementedException;
 import haxe.ui.containers.VBox;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/live_layout.xml"))
-class LiveGame extends HBox implements INetObserver implements IGameBoardObserver implements IScreen
+class LiveGame extends Screen implements INetObserver implements IGameBoardObserver
 {
     private var board:GameBoard;
     private var sidebox:Sidebox;
@@ -65,35 +65,25 @@ class LiveGame extends HBox implements INetObserver implements IGameBoardObserve
     private var renderedForWidth:Float = 0;
     private var renderedForHeight:Float = 0;
 
-    public function onEntered()
+    public function onEnter()
     {
         GeneralObserver.acceptsDirectChallenges = false;
         Networker.eventQueue.addObserver(this);
 		Assets.getSound("sounds/notify.mp3").play();
     }
 
-    public function onClosed()
+    public function onClose()
     {
         Networker.eventQueue.removeObserser(this);
         GeneralObserver.acceptsDirectChallenges = true;
     }
 
-    public function menuHidden():Bool
-    {
-        return false;
-    }
-
-    public function asComponent():Component
-    {
-        return this;
-    }
-
     //Please don't hate me for this. Responsive layout design is a pain
     private function performValidation()
     {
-        var compact:Bool = Screen.instance.width * 6 < Screen.instance.height * 7;
-        var largeBoardMaxWidth:Float = Screen.instance.height / boardWrapper.inverseAspectRatio();
-        var bothBarsVisible:Bool = Screen.instance.width < largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
+        var compact:Bool = HaxeUIScreen.instance.width * 6 < HaxeUIScreen.instance.height * 7;
+        var largeBoardMaxWidth:Float = HaxeUIScreen.instance.height / boardWrapper.inverseAspectRatio();
+        var bothBarsVisible:Bool = HaxeUIScreen.instance.width < largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
 
         cBlackPlayerHBox.hidden = !compact;
         cWhitePlayerHBox.hidden = !compact;
@@ -105,22 +95,22 @@ class LiveGame extends HBox implements INetObserver implements IGameBoardObserve
 
         if (bothBarsVisible)
         {
-            lLeftBox.width = Math.min(MAX_SIDEBARS_WIDTH, (Screen.instance.width - largeBoardMaxWidth) / 2);
-            lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, (Screen.instance.width - largeBoardMaxWidth) / 2);
+            lLeftBox.width = Math.min(MAX_SIDEBARS_WIDTH, (HaxeUIScreen.instance.width - largeBoardMaxWidth) / 2);
+            lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, (HaxeUIScreen.instance.width - largeBoardMaxWidth) / 2);
         }
         else
-            lRightBox.width = MathUtils.clamp(Screen.instance.width - largeBoardMaxWidth, MIN_SIDEBARS_WIDTH, MAX_SIDEBARS_WIDTH);
+            lRightBox.width = MathUtils.clamp(HaxeUIScreen.instance.width - largeBoardMaxWidth, MIN_SIDEBARS_WIDTH, MAX_SIDEBARS_WIDTH);
     }
 
     private override function validateComponentLayout():Bool 
     {
         var b = super.validateComponentLayout();
 
-        if (renderedForWidth != Screen.instance.width || renderedForHeight != Screen.instance.height)
+        if (renderedForWidth != HaxeUIScreen.instance.width || renderedForHeight != HaxeUIScreen.instance.height)
         {
             performValidation();
-            renderedForWidth = Screen.instance.width;
-            renderedForHeight = Screen.instance.height;
+            renderedForWidth = HaxeUIScreen.instance.width;
+            renderedForHeight = HaxeUIScreen.instance.height;
             return true;
         }
 
@@ -340,7 +330,9 @@ class LiveGame extends HBox implements INetObserver implements IGameBoardObserve
 
     private function new() 
     {
-        super(); 
+        super();
+        customEnterHandler = onEnter;
+        customCloseHandler = onClose;
         whiteClock.resize(30);
         blackClock.resize(30);
     }

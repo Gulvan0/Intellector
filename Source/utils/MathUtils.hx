@@ -59,4 +59,22 @@ class MathUtils
     {
         return a < b? a : b;
     }
+
+    public static function arrmax(arr:Array<Float>):Float
+    {
+        var max:Float = arr[0];
+        for (i in 1...arr.length)
+            if (arr[i] > max)
+                max = arr[i];
+        return max;
+    }
+
+    public static function arrmin(arr:Array<Float>):Float
+    {
+        var min:Float = arr[0];
+        for (i in 1...arr.length)
+            if (arr[i] < min)
+                min = arr[i];
+        return min;
+    }
 }

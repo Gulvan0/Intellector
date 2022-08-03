@@ -1,6 +1,6 @@
 package gfx.screens;
 
-import haxe.ui.core.Screen;
+import haxe.ui.core.Screen as HaxeUIScreen;
 import haxe.ui.core.Component;
 import net.GeneralObserver;
 import net.ServerEvent;
@@ -25,29 +25,9 @@ enum MainMenuButton
 }
 
 //TODO: Needs total revamp (also XML-ize)
-class MainMenu extends VBox implements IScreen
+class MainMenu extends Screen
 {
     private static var standardBtnWidth:Float = 200;
-
-    public function onEntered()
-    {
-        //* Do nothing
-    }
-
-    public function onClosed()
-    {
-        //* Do nothing
-    }
-
-    public function menuHidden():Bool
-    {
-        return false;
-    }
-
-    public function asComponent():Component
-    {
-        return this;
-    }
 
     //TODO: Change the body of the following two functions and the logic behind their usage
 
@@ -139,7 +119,7 @@ class MainMenu extends VBox implements IScreen
         for (type in MainMenuButton.createAll())
 		    mainMenu.addComponent(createBtn(type));
 
-		mainMenu.x = (Screen.instance.width - mainMenu.width) / 2;
+		mainMenu.x = (HaxeUIScreen.instance.width - mainMenu.width) / 2;
 		mainMenu.y = 100;
 		addComponent(mainMenu);
     }

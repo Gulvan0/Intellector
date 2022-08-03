@@ -23,6 +23,7 @@ class EventProcessingQueue
             obs.handleNetEvent(event);
     }
 
+    /**Should return true when ready to be removed**/
     public function addHandler(handler:ServerEvent->Bool)
     {
         handlers.push(handler);

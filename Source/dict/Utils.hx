@@ -107,8 +107,6 @@ class Utils
                 translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
             case PlayerProfile(ownerLogin): 
                 translations = [ownerLogin, ownerLogin];
-            case LoginRegister:
-                translations = ['Sign in', 'Войти'];
             case ChallengeJoining(challengeOwner, _, _):
                 translations = ['Challenge by $challengeOwner', 'Вызов $challengeOwner'];
             default:

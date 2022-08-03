@@ -14,6 +14,5 @@ enum ScreenType
     SpectatedGame(gameID:Int, watchedColor:PieceColor, actualizationData:ActualizationData);
     RevisitedGame(gameID:Int, watchedColor:PieceColor, actualizationData:ActualizationData);
     PlayerProfile(ownerLogin:String);
-    LoginRegister;
     ChallengeJoining(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>);
 }

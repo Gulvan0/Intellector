@@ -211,7 +211,7 @@ class Main extends Sprite
 	private function toOngoingGame(gameID:Int, data:ActualizationData) 
 	{
 		if (LoginManager.login == null)
-			ScreenManager.toScreen(LoginRegister); //TODO: Redirect to a game after logged in
+			ScreenManager.toScreen(MainMenu); //TODO: Redirect to a game after logged in or smth like that
 		else if (data.getPlayerColor() == null)
 			ScreenManager.toScreen(SpectatedGame(gameID, White, data));
 		else
