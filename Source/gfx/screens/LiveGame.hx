@@ -62,18 +62,20 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     public static var MIN_SIDEBARS_WIDTH:Float = 200;
     public static var MAX_SIDEBARS_WIDTH:Float = 350;
 
-    private var renderedForWidth:Float = 0;
-    private var renderedForHeight:Float = 0;
-
     public function onEnter()
     {
         GeneralObserver.acceptsDirectChallenges = false;
         Networker.eventQueue.addObserver(this);
-		Assets.getSound("sounds/notify.mp3").play();
+        Timer.delay(() -> {
+            performValidation();
+            ScreenManager.addResizeHandler(performValidation);
+            Assets.getSound("sounds/notify.mp3").play();
+        }, 25);
     }
 
     public function onClose()
     {
+        ScreenManager.removeResizeHandler(performValidation);
         Networker.eventQueue.removeObserser(this);
         GeneralObserver.acceptsDirectChallenges = true;
     }
@@ -81,40 +83,28 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     //Please don't hate me for this. Responsive layout design is a pain
     private function performValidation()
     {
-        var compact:Bool = HaxeUIScreen.instance.width * 6 < HaxeUIScreen.instance.height * 7;
-        var largeBoardMaxWidth:Float = HaxeUIScreen.instance.height / boardWrapper.inverseAspectRatio();
-        var bothBarsVisible:Bool = HaxeUIScreen.instance.width < largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
+        var compact:Bool = this.width * 6 < this.height * 7;
+        var largeBoardMaxWidth:Float = this.height / boardWrapper.inverseAspectRatio();
+        var bothBarsVisible:Bool = this.width >= largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
 
         cBlackPlayerHBox.hidden = !compact;
         cWhitePlayerHBox.hidden = !compact;
         cActionBar.hidden = !compact;
         cCreepingLine.hidden = !compact;
 
-        lLeftBox.hidden = compact || bothBarsVisible;
+        lLeftBox.hidden = compact || !bothBarsVisible;
         lRightBox.hidden = compact;
 
         if (bothBarsVisible)
         {
-            lLeftBox.width = Math.min(MAX_SIDEBARS_WIDTH, (HaxeUIScreen.instance.width - largeBoardMaxWidth) / 2);
-            lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, (HaxeUIScreen.instance.width - largeBoardMaxWidth) / 2);
+            lLeftBox.width = Math.min(MAX_SIDEBARS_WIDTH, (this.width - largeBoardMaxWidth) / 2);
+            lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, (this.width - largeBoardMaxWidth) / 2);
         }
         else
-            lRightBox.width = MathUtils.clamp(HaxeUIScreen.instance.width - largeBoardMaxWidth, MIN_SIDEBARS_WIDTH, MAX_SIDEBARS_WIDTH);
-    }
-
-    private override function validateComponentLayout():Bool 
-    {
-        var b = super.validateComponentLayout();
-
-        if (renderedForWidth != HaxeUIScreen.instance.width || renderedForHeight != HaxeUIScreen.instance.height)
         {
-            performValidation();
-            renderedForWidth = HaxeUIScreen.instance.width;
-            renderedForHeight = HaxeUIScreen.instance.height;
-            return true;
+            lLeftBox.width = 20;
+            lRightBox.width = MathUtils.clamp(this.width - largeBoardMaxWidth, MIN_SIDEBARS_WIDTH, MAX_SIDEBARS_WIDTH);
         }
-
-        return b;
     }
 
     //================================================================================================================================================================

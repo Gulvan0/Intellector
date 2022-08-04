@@ -6,8 +6,10 @@
     </hbox>
     <label id="resolution" style="font-size:14px;font-style:bold;text-align:left" />
     <hbox width="100%" horizontalAlign="center" style="margin-top:5px">
-        <box id="imagebox" width="70px" height="70px" style="padding:0 0 0 0" verticalAlign="center" />
-        <vbox id="opponentsBox" width="100%" style="spacing:0px;margin-left:5px">
+        <box id="imagebox" width="70px" height="70px" style="padding:0 0 0 0" verticalAlign="center">
+            <image id="timeControlIcon" verticalAlign="center" horizontalAlign="center" />
+        </box>
+        <vbox id="opponentsBox" width="100%" style="spacing:0px;margin-left:5px" verticalAlign="center">
             <label id="whiteLoginLabel" width="100%" verticalAlign="center" style="font-size:17px;text-align:center" />
             <label id="crossSign" width="100%" verticalAlign="center" text="⚔" style="font-size:20px;text-align:center;font-style:bold" />
             <label id="blackLoginLabel" width="100%" verticalAlign="center" style="font-size:17px;text-align:center" />

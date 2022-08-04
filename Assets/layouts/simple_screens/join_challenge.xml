@@ -3,8 +3,10 @@
         <vbox horizontalAlign="center">
             <label id="challengeByLabel" horizontalAlign="center" />
             <spacer id="firstSpacer" />
-            <hbox>
-                <image id="tcIcon" verticalAlign="center" horizontalAlign="center"/>
+            <hbox id="descriptionHBox">
+                <box id="tcIconBox" verticalAlign="center">
+                    <image id="tcIcon" verticalAlign="center" horizontalAlign="center" />
+                </box>
                 <vbox verticalAlign="center">
                     <label id="tcLabel" />
                     <label id="bracketLabel" />

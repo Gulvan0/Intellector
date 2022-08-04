@@ -1,5 +1,6 @@
 package gfx;
 
+import haxe.Timer;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
 import gfx.ResponsiveToolbox.ResponsiveProperty;
 import haxe.ui.core.Component;
@@ -11,12 +12,13 @@ class Screen extends Component
 {
     public final menuHidden:Bool;
     private var responsiveComponents:Map<Component, Map<ResponsiveProperty, ResponsivenessRule>> = [];
+    private var fittedComponents:Array<Component> = [];
     private var customEnterHandler:Null<Void->Void> = null;
     private var customCloseHandler:Null<Void->Void> = null;
 
     public function onEntered()
     {
-        if (!responsiveComponents.empty())
+        if (!responsiveComponents.empty() || !fittedComponents.empty())
         {
             resize();
             ScreenManager.addResizeHandler(resize);
@@ -37,24 +39,12 @@ class Screen extends Component
     private function resize()
     {
         for (comp => rules in responsiveComponents.keyValueIterator())
-        {
-            var newStyle:Style = comp.customStyle.clone();
+            ResponsiveToolbox.resizeComponent(comp, rules);
 
-            for (property => rule in rules.keyValueIterator())
-            {
-                switch property 
-                {
-                    case Width: 
-                        ResponsiveToolbox.recalcWidth(comp, rule);
-                    case Height:
-                        ResponsiveToolbox.recalcHeight(comp, rule);
-                    case StyleProp(prop):
-                        ResponsiveToolbox.recalcStyle(newStyle, prop, rule);
-                }
-            }
-
-            comp.customStyle = newStyle;
-        }
+        Timer.delay(() -> {
+            for (comp in fittedComponents)
+                ResponsiveToolbox.fitComponent(comp);
+        }, 50);
     }
     
     public static function build(type:ScreenType):Screen

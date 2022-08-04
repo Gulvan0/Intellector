@@ -42,7 +42,7 @@ class AssetManager
     {
         var filename = switch type 
         {
-            case Hyperbullet: 'bullet';
+            case Hyperbullet: 'hyperbullet';
             case Bullet: 'bullet';
             case Blitz: 'blitz';
             case Rapid: 'rapid';
@@ -62,13 +62,6 @@ class AssetManager
             Assets.getSound("sounds/move.mp3").play();
         else 
             Assets.getSound("sounds/capture.mp3").play();
-    }
-
-    public static function getSVGComponent(svg:SVG, x:Float = 0, y:Float = 0, ?width:Int = -1, ?height:Int = -1):SpriteWrapper
-    {
-        var sprite:Sprite = new Sprite();
-        svg.render(sprite.graphics, x, y, width, height);
-        return new SpriteWrapper(sprite);
     }
 
     private static function onResourceLoaded() 

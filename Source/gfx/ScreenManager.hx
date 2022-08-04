@@ -102,8 +102,9 @@ class ScreenManager
             openflContent.style.height = innerHeightStr;
             lastResizeTimestamp = timestamp;
 
+            Timer.delay(scene.resize, 40);
             for (handler in resizeHandlers)
-                Timer.delay(handler, 50);
+                Timer.delay(handler, 40);
         }
     }
 
@@ -154,6 +155,7 @@ class ScreenManager
         openflContent.style.height = '${Browser.document.documentElement.clientHeight}px';
         lastResizeTimestamp = Date.now().getTime();
 
+        Timer.delay(scene.resize, 40);
         scene.addEventListener(Event.ENTER_FRAME, onEnterFrame);
     }
 }

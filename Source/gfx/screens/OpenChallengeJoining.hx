@@ -34,6 +34,8 @@ class OpenChallengeJoining extends Screen
 		challengeByLabel.text = Dictionary.getPhrase(OPENJOIN_CHALLENGE_BY_HEADER, [challengeOwner]);
 		tcIcon.resource = AssetManager.timeControlPath(timeControl.getType());
 		tcLabel.text = timeControl.toString();
+		if (timeControl.getType() != Correspondence)
+			tcLabel.text += ' (${timeControl.getType().getName()})';
 		bracketLabel.text = Dictionary.getPhrase(rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
 		colorLabel.text = switch color {
 			case White: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [challengeOwner]);
@@ -44,12 +46,14 @@ class OpenChallengeJoining extends Screen
 		responsiveComponents = [
 			challengeByLabel => [StyleProp(FontSize) => VMIN(8)],
 			firstSpacer => [Height => VMIN(5)],
-			tcIcon => [Width => VMIN(16), Height => VMIN(16)],
+			descriptionHBox => [StyleProp(HorizontalSpacing) => VMIN(2)],
+			tcIconBox => [Width => VMIN(16), Height => VMIN(16)],
 			tcLabel => [StyleProp(FontSize) => VMIN(5)],
 			bracketLabel => [StyleProp(FontSize) => VMIN(5)],
 			colorLabel => [StyleProp(FontSize) => VMIN(5)],
 			secondSpacer => [Height => VMIN(3.5)],
 			acceptBtn => [StyleProp(FontSize) => VMIN(6)]
 		];
+		fittedComponents = [tcIcon];
     }
 }

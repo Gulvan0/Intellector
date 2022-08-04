@@ -1,26 +1,21 @@
 <vbox width="100%" height="100%">
     <style>
         .menubar-button {
-            pointer-events: true;
-            font-size: 1.5vh;
             font-weight: 300;
         }
         .menubar-button:hover {
-            background-color: $solid-background-color;
-            color: $normal-text-color;
+            background-color: #eeeeee;
+            color: #333333;
         }
         .menubar-button:active {
-            background-color: $solid-background-color;
+            background-color: #ffffff;
             color: $normal-text-color;
         }
         #siteName {
             pointer-events: true;
-            padding-left: 1vh;
-            padding-right: 1vh;
             white-space: nowrap;
             color: #333333;
             font-name: 'fonts/Futura.ttf';
-            font-size: 3vh;
             font-weight: 600;
             background-color: yellow;
             background-opacity: 0;
@@ -36,7 +31,7 @@
             background-opacity: 0;
         }
 
-        #challengesButton .icon {
+        .menubar-button .icon {
             width: 25px;
             height: 25px;
         }
@@ -47,7 +42,7 @@
         }
     </style>
     <menubar id="menubar" width="100%" height="5%">
-        <image width="25px" height="44%" verticalAlign="center" resource="assets/symbols/upper_menu/open_sidebar_btn.svg" id="mobileMenuButton" onClick="invokeSideMenu();" />
+        <image verticalAlign="center" resource="assets/symbols/upper_menu/open_sidebar_btn.svg" id="mobileMenuButton" onClick="sidemenu.show();" />
 
         <label id="siteName" text="Intellector.info" verticalAlign="center" onClick="toScreen(MainMenu);" />
 
@@ -71,7 +66,7 @@
 
         <spacer width="100%" />
 
-        <menu id="challengesButton" icon="assets/symbols/upper_menu/basic/challenges/button_icon/none.svg">
+        <menu id="challengesButton" icon="assets/symbols/upper_menu/challenges/button_icon/none.svg">
             <scrollview id="challengeList" width="100%" height="170px" contentLayoutName="vertical" contentWidth="100%" />
         </menu>
 

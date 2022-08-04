@@ -32,7 +32,6 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
     private var openingTree:OpeningTree;
     private var movesAfterTerminalOpeningNode:Int = 0;
 
-    private var timeControlIcon:SVG;
     private var renderedForWidth:Float = 0;
 
     public function handleNetEvent(event:ServerEvent)
@@ -145,14 +144,9 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         resStyle.fontSize = this.width / 25;
         resolution.customStyle = resStyle;
 
-        imagebox.removeAllComponents();
         imagebox.width = this.width / 5;
         imagebox.height = this.width / 5;
-
-        var tcIcon = AssetManager.getSVGComponent(timeControlIcon, 0, 0, Math.floor(imagebox.width), Math.floor(imagebox.height));
-        tcIcon.horizontalAlign = 'center';
-        tcIcon.verticalAlign = 'top';
-        imagebox.addComponent(tcIcon);
+        ResponsiveToolbox.fitComponent(timeControlIcon);
 
         var oppStyle = opponentsBox.customStyle.clone();
         oppStyle.marginLeft = this.width / 70;
@@ -192,6 +186,6 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         blackLoginLabel.text = blackLogin;
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
 
-        timeControlIcon = AssetManager.timeControlIcons[tcType];
+        timeControlIcon.resource = AssetManager.timeControlPath(tcType);
     }
 }

@@ -1,5 +1,6 @@
 package gfx;
 
+import haxe.ui.containers.Box;
 import haxe.ui.styles.Style;
 import haxe.ui.core.Component;
 import haxe.ui.core.Screen as HaxeUIScreen;
@@ -20,6 +21,8 @@ enum ResponsiveProperty
 {
     Width;
     Height;
+    PercentWidth;
+    PercentHeight;
     StyleProp(prop:ResponsiveStyleProperty);
 }
 
@@ -43,21 +46,65 @@ enum ResponsivenessRule
 
 class ResponsiveToolbox
 {
-    public static function recalcWidth(comp:Component, rule:ResponsivenessRule)
+    public static function resizeComponent(comp:Component, rules:Map<ResponsiveProperty, ResponsivenessRule>)
+    {
+        var newStyle:Style = comp.customStyle.clone();
+
+        for (property => rule in rules.keyValueIterator())
+        {
+            switch property 
+            {
+                case Width: 
+                    recalcWidth(comp, rule);
+                case Height:
+                    recalcHeight(comp, rule);
+                case PercentWidth:
+                    comp.percentWidth = evaluateRule(rule);
+                case PercentHeight:
+                    comp.percentHeight = evaluateRule(rule);
+                case StyleProp(prop):
+                    recalcStyle(newStyle, prop, rule);
+            }
+        }
+
+        comp.customStyle = newStyle;
+    }
+
+    public static function fitComponent(comp:Component) 
+    {
+        if (comp.parentComponent == null)
+            return;
+
+        var parentRatio = comp.parentComponent.layout.usableWidth / comp.parentComponent.layout.usableHeight;
+        var compRatio = comp.width / comp.height;
+        
+        if (parentRatio > compRatio)
+        {
+            comp.width = comp.parentComponent.layout.usableHeight * compRatio;
+            comp.height = comp.parentComponent.layout.usableHeight;
+        }
+        else
+        {
+            comp.width = comp.parentComponent.layout.usableWidth;
+            comp.height = comp.parentComponent.layout.usableWidth / compRatio;
+        }
+    }
+
+    private static function recalcWidth(comp:Component, rule:ResponsivenessRule)
     {
         var parent:Null<Component> = comp.parentComponent;
         var parentWidth:Null<Float> = parent != null? parent.width : null;
         comp.width = evaluateRule(rule, parentWidth);
     }
 
-    public static function recalcHeight(comp:Component, rule:ResponsivenessRule)
+    private static function recalcHeight(comp:Component, rule:ResponsivenessRule)
     {
         var parent:Null<Component> = comp.parentComponent;
         var parentHeight:Null<Float> = parent != null? parent.height : null;
         comp.height = evaluateRule(rule, parentHeight);
     }
 
-    public static function recalcStyle(style:Style, prop:ResponsiveStyleProperty, rule:ResponsivenessRule)
+    private static function recalcStyle(style:Style, prop:ResponsiveStyleProperty, rule:ResponsivenessRule)
     {
         switch prop 
         {
@@ -91,8 +138,11 @@ class ResponsiveToolbox
         }
     }
 
-    private static function evaluateDim(dim:Dimension, ?parentVal:Float)
+    private static function evaluateDim(dim:Dimension, ?parentVal:Float):Float
     {
+        if (parentVal == null && dim.match(Percent(_)))
+            throw "Percent dim may only be used for Width/Height properties";
+
         return switch dim 
         {
             case Exact(value): value;

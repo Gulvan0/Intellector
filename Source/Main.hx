@@ -102,7 +102,8 @@ class Main extends Sprite
 		Networker.onConnectionEstabilished = onConnected;
 		Networker.onConnectionFailed = onConnectionFailed;
 		//Networker.launch();
-		ScreenManager.toScreen(ChallengeJoining("Gulvan", new TimeControl(3*60, 2), Black));
+		//ScreenManager.toScreen(ChallengeJoining("Gulvan", new TimeControl(30, 0), Black));
+		ScreenManager.toScreen(StartedPlayableGame(1337, "Gulvan", "kartoved", new TimeControl(30, 0), White));
 	}
 
 	private function onConnectionFailed(e)
