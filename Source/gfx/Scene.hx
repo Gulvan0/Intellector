@@ -1,5 +1,7 @@
 package gfx;
 
+import net.Requests;
+import gfx.components.Dialogs;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
 import gfx.ResponsiveToolbox.ResponsiveProperty;
 import haxe.ui.components.Button;
@@ -13,7 +15,6 @@ class Scene extends VBox
 {
     private var currentScreen:Null<Screen> = null;
     private var sidemenu:SideMenu;
-    private var sidemenuShown:Bool = false;
 
     public function resize()
     {
@@ -67,12 +68,101 @@ class Scene extends VBox
         }
     }
 
+    private function onSiteNamePressed(e) 
+    {
+        toScreen(MainMenu);
+    }
+
+    private function onCreateChallengePressed(e)
+    {
+        Dialogs.specifyChallengeParams((_, _, _) -> {createChallenge();});
+    }
+
+    private function createChallenge() 
+    {
+        //TODO: Implement
+    }
+
+    private function onOpenChallengesPressed(e)
+    {
+        //TODO: toScreen
+    }
+
+    private function onCurrentGamesPressed(e)
+    {
+        //TODO: toScreen
+    }
+
+    private function onWatchPlayerPressed(e)
+    {
+        Dialogs.prompt("Введите ник игрока", All, startSpectating);
+    }
+
+    private function startSpectating(e)
+    {
+        //TODO: Implement (use Requests.hx)
+    }
+
+    private function onAnalysisBoardPressed(e)
+    {
+        toScreen(Analysis(null, null, null));
+    }
+
+    private function onPlayerProfilePressed(e)
+    {
+        Dialogs.prompt("Введите ник игрока", All, navigateToProfile);
+    }
+
+    private function navigateToProfile(requestedLogin:String)
+    {
+        //TODO: Implement properly (pass info)
+        Requests.getPlayerProfile(requestedLogin, toScreen.bind(PlayerProfile(requestedLogin)), Dialogs.alertCallback("Игрок не найден", "Ошибка"));
+    }
+
+    private function onLogInPressed(e)
+    {
+        Dialogs.login();
+    }
+
+    private function onMyProfilePressed(e)
+    {
+        navigateToProfile(LoginManager.login);
+    }
+
+    private function onSettingsPressed(e)
+    {
+        Dialogs.settings();
+    }
+
+    private function onLogOutPressed(e)
+    {
+        //TODO: Implement + design global event handling
+    }
+
     public function new()
     {
         super();
-        accountMenu.text = LoginManager.login != null? LoginManager.login : "Гость";
+        var logged:Bool = LoginManager.login != null;
+        accountMenu.text = logged? LoginManager.login : "Гость";
+        logInBtn.hidden = logged;
+        myProfileBtn.hidden = !logged;
+        logOutBtn.hidden = !logged;
+
+        //TODO: Challenges
         
         sidemenu = new SideMenu();
+        sidemenu.siteName.onClick = siteName.onClick = onSiteNamePressed;
+        sidemenu.createChallengeBtn.onClick = createChallengeBtn.onClick = onCreateChallengePressed;
+        sidemenu.openChallengesBtn.onClick = openChallengesBtn.onClick = onOpenChallengesPressed;
+        sidemenu.currentGamesBtn.onClick = currentGamesBtn.onClick = onCurrentGamesPressed;
+        sidemenu.watchPlayerBtn.onClick = watchPlayerBtn.onClick = onWatchPlayerPressed;
+        sidemenu.analysisBoardBtn.onClick = analysisBoardBtn.onClick = onAnalysisBoardPressed;
+        sidemenu.playerProfileBtn.onClick = playerProfileBtn.onClick = onPlayerProfilePressed;
+
+        logInBtn.onClick = onLogInPressed;
+        myProfileBtn.onClick = onMyProfilePressed;
+        settingsBtn.onClick = onSettingsPressed;
+        logOutBtn.onClick = onLogOutPressed;
     }
 
 }

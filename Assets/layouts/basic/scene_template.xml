@@ -44,7 +44,7 @@
     <menubar id="menubar" width="100%" height="5%">
         <image verticalAlign="center" resource="assets/symbols/upper_menu/open_sidebar_btn.svg" id="mobileMenuButton" onClick="sidemenu.show();" />
 
-        <label id="siteName" text="Intellector.info" verticalAlign="center" onClick="toScreen(MainMenu);" />
+        <label id="siteName" text="Intellector.info" verticalAlign="center" />
 
         <menu id="playMenu" text="Играть">
             <menuitem id="createChallengeBtn" text="Создать вызов" icon="assets/symbols/upper_menu/basic/new_game.svg" />
@@ -70,7 +70,7 @@
             <scrollview id="challengeList" width="100%" height="170px" contentLayoutName="vertical" contentWidth="100%" />
         </menu>
 
-        <menu id="accountMenu" text="Гость">
+        <menu id="accountMenu">
             <menuitem id="logInBtn" text="Войти" icon="assets/symbols/upper_menu/account/log_in.svg" />
             <menuitem id="myProfileBtn" text="Мой профиль" icon="assets/symbols/upper_menu/account/my_profile.svg" />
             <menuitem id="settingsBtn" text="Настройки" icon="assets/symbols/upper_menu/account/settings.svg" />

@@ -1,5 +1,7 @@
 package gfx.components;
 
+import js.Browser;
+import gfx.popups.LogIn;
 import gfx.popups.Settings;
 import utils.MathUtils;
 import haxe.ui.containers.ScrollView;
@@ -29,9 +31,16 @@ import haxe.ui.containers.dialogs.MessageBox.MessageBoxType;
 import haxe.ui.containers.dialogs.Dialogs as DialogManager;
 import haxe.ui.core.Screen;
 
+enum SpaceRemoval
+{
+    None;
+    Trim;
+    All;
+}
+
 class Dialogs
 {
-    public static var dialogActive:Bool = false;
+    public static var dialogActive:Bool = false; //TODO: Rewrite (account for multiple simultaneous dialogs)
 
     public static function confirm(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)
     {
@@ -45,6 +54,21 @@ class Dialogs
         });
     }
 
+    public static function prompt(message:String, removeSpaces:SpaceRemoval, onInput:String->Void, ?onCancel:Null<Void->Void>, ?emptyIsCancel:Bool = true) 
+    {
+        var res:Null<String> = Browser.window.prompt(message);
+
+        if (removeSpaces == Trim)
+            res = StringTools.trim(res);
+        else if (removeSpaces == All)
+            res = StringTools.replace(res, ' ', '');
+
+        if (res != null && (res != "" || !emptyIsCancel))
+            onInput(res);
+        else if (onCancel != null)
+            onCancel();
+    }
+
     public static function custom(dialog:Dialog, modal:Bool = true)
     {
         dialog.showDialog(modal);
@@ -55,7 +79,11 @@ class Dialogs
         dialogActive = true;
         DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true)
             .onDialogClosed = e -> {dialogActive = false;};
+    }
 
+    public static function alertCallback(message:String, title:String):Void->Void 
+    {
+        return alert.bind(message, title);
     }
 
     public static function info(message:String, title:String)
@@ -117,6 +145,18 @@ class Dialogs
         dialog.showDialog(false);
     }
 
+    public static function login()
+    {
+        dialogActive = true;
+
+        var dialog:LogIn = new LogIn();
+        dialog.onDialogClosed = e -> {
+            dialogActive = false;
+        };
+        
+        dialog.showDialog(false);
+    }
+
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void)
     {
         dialogActive = true;
@@ -160,8 +200,9 @@ class Dialogs
             .onDialogClosed = e -> {dialogActive = false;};
     }
 
-    public static function specifyChallengeParams(onConfirm:(startSecs:Int, bonusSecs:Int, callerColor:Null<PieceColor>)->Void, onCancel:Void->Void)
+    public static function specifyChallengeParams(onConfirm:(startSecs:Int, bonusSecs:Int, callerColor:Null<PieceColor>)->Void, ?onCancel:Null<Void->Void>)
     {
+        //TODO: Rewrite (and create a separate class for the challenge params)
         var dialog:Dialog = new ChallengeParamsDialog(onConfirm, onCancel);
         dialog.showDialog(true);
     }

@@ -121,7 +121,7 @@ class ScreenManager
             case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-                var watchedColor:Null<PieceColor> = White; //TODO: actualizationData.getColor(spectatedPlayerLogin) - Rework using Requests.hx
+                var watchedColor:Null<PieceColor> = White; //TODO: actualizationData.getColor(spectatedPlayerLogin) - Move to Requests.hx
                 toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
 			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
