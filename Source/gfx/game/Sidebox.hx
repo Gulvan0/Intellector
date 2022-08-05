@@ -114,9 +114,14 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     //========================================================================================================================================================================
 
-    public function makeMove(plyStr:String) 
+    public function makeMove(plyStr:String, ?dontUpdateTimers:Bool = false) 
     {
         move++;
+
+        actionBar.onMoveNumberUpdated(move);
+
+        if (dontUpdateTimers)
+            return;
 
         var justMovedColor:PieceColor = move % 2 == 1? White : Black;
         var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
@@ -131,8 +136,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
         if (move >= 3)
             justMovedPlayerClock.addTime(secsPerTurn);
-
-        actionBar.onMoveNumberUpdated(move);
     }
 
     private function revertPlys(cnt:Int) 
@@ -141,6 +144,9 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
             return;
         
         move -= cnt;
+
+        actionBar.shutAllTakebackRequests();
+        actionBar.onMoveNumberUpdated(move);
 
         var justMovedColor:PieceColor = move % 2 == 1? White : Black;
         var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
@@ -153,9 +159,6 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
             playerToMoveClock.setPlayerMove(true);
             playerToMoveClock.launchTimer();
         }
-
-        actionBar.shutAllTakebackRequests();
-        actionBar.onMoveNumberUpdated(move);
     }
 
     public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void):Sidebox
@@ -170,7 +173,9 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         var situation:Situation = Situation.starting();
         for (ply in data.logParserOutput.movesPlayed)
         {
-            sidebox.makeMove(ply.toNotation(situation));
+            var plyStr:String = ply.toNotation(situation);
+            sidebox.navigator.writePlyStr(plyStr, true);
+            sidebox.makeMove(plyStr, true);
             situation = situation.makeMove(ply);
         }
 

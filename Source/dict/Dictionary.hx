@@ -67,19 +67,24 @@ class Dictionary
 
         CHANGELOG_DIALOG_TITLE => ["Changelog", "Список изменений"],
 
-        LOGIN_DIALOG_TITLE => ["Log In", "Войти"],
+        LOGIN_DIALOG_TITLE => ["Authorization", "Авторизация"],
         LOGIN_LOG_IN_MODE_TITLE => ["Log In", "Вход"],
         LOGIN_REGISTER_MODE_TITLE => ["Sign Up", "Регистрация"],
         LOGIN_LOGIN_FIELD_NAME => ["Login", "Логин"],
         LOGIN_PASSWORD_FIELD_NAME => ["Password", "Пароль"],
+        LOGIN_REPEAT_PASSWORD_FIELD_NAME => ["Repeat password", "Повторите пароль"],
         LOGIN_REMEMBER_ME => ["Remember me", "Запомнить"],
+        LOGIN_REMAIN_LOGGED => ["Stay logged in", "Оставаться в сети"],
 
-        LOGIN_WARNING_MESSAGEBOX_TITLE => ["LogIn/SignUp failed", "Ошибка входа/регистрации"],
+        LOGIN_WARNING_MESSAGEBOX_TITLE => ["Authorization failed", "Ошибка авторизации"],
         LOGIN_INVALID_PASSWORD_WARNING_TEXT => ["Invalid login or password", "Неверный логин или пароль"],
+        LOGIN_PASSWORDS_DO_NOT_MATCH => ["Passwords do not match", "Введенные пароли не совпадают"],
         LOGIN_ALREADY_REGISTERED_WARNING_TEXT => ["An user with this login already exists", "Пользователь с таким логином уже существует"],
         LOGIN_LOGIN_NOT_SPECIFIED_WARNING_TEXT => ["Login is not specified!", "Не указан логин!"],
         LOGIN_PASSWORD_NOT_SPECIFIED_WARNING_TEXT => ["Password is not specified!", "Не указан пароль!"],
-        LOGIN_BAD_LOGIN_LENGTH_WARNING_TEXT => ["Login must contain between 2 and 16 symbols", "Длина логина должна быть в диапазоне 2-16 знаков"],
+        LOGIN_REPEATED_PASSWORD_NOT_SPECIFIED_WARNING_TEXT => ["\"Repeat Password\" field is empty!", "Поле \"Повторите пароль\" не заполнено!"],
+        LOGIN_BAD_LOGIN_LENGTH_WARNING_TEXT => ["Login must contain between 2 and 16 characters", "Длина логина должна быть в диапазоне 2-16 символов"],
+        LOGIN_BAD_PASSWORD_LENGTH_WARNING_TEXT => ["Password must contain at least 6 characters", "Длина пароля должна составлять не менее 6 символов"],
 
         SETTINGS_DIALOG_TITLE => ["Settings", "Настройки"],
         SETTINGS_GENERAL_TAB_TITLE => ["General", "Основные"],

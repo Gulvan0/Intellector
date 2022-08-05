@@ -46,7 +46,7 @@ class LoginManager
 
     public static function isPlayer(suspectedLogin:String)
     {
-        return login.toLowerCase() == suspectedLogin.toLowerCase();
+        return login != null && login.toLowerCase() == suspectedLogin.toLowerCase();
     }
 
     public static function isPlayerGuest():Bool

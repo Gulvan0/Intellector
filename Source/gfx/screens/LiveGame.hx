@@ -247,6 +247,15 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         screen.chatbox = Chatbox.constructFromActualizationData(playerColor == null, actualizationData);
         screen.gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
 
+        //TODO: Get rid of this abomination
+        var situation:Situation = Situation.starting(); //TODO: May be any situation
+        for (ply in parserOutput.movesPlayed)
+        {
+            var plyStr:String = ply.toNotation(situation);
+            screen.cCreepingLine.writePlyStr(plyStr, true);
+            situation.makeMove(ply, true);
+        }
+
         screen.performCommonInitSteps(parserOutput.whiteLogin, parserOutput.blackLogin, parserOutput.timeControl, playerColor);
 
         return screen;

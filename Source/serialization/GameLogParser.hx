@@ -21,7 +21,7 @@ enum ChatEntry
 
 class GameLogParserOutput
 {
-    public var timeControl:Null<TimeControl>;
+    public var timeControl:TimeControl;
     public var whiteLogin:Null<String>;
     public var blackLogin:Null<String>;
     public var outcome:Null<Outcome>;
@@ -64,6 +64,7 @@ class GameLogParserOutput
     public function new()
     {
         currentSituation = Situation.starting();
+        timeControl = new TimeControl(0, 0);
     }
 }
 
