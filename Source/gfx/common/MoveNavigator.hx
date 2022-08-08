@@ -205,6 +205,13 @@ class MoveNavigator extends VBox implements IPlyHistoryView
             writePlyStr(plyStr, false);
         setPointer(newPointerPos);
     }
+    
+    public function actualize(pastMovesNotation:Array<String>)
+    {
+        for (plyStr in pastMovesNotation)
+            writePlyStr(plyStr, false);
+        shiftPointer(End);
+    }
 
     public function init(firstColorToMove:PieceColor, onClickCallback:PlyScrollType->Void) 
     {

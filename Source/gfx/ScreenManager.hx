@@ -108,7 +108,7 @@ class ScreenManager
         }
     }
 
-    private static function handleNetEvent(event:ServerEvent):Bool
+    private static function handleNetEvent(event:ServerEvent):Bool //TODO: Update!!! Or even move away
     {
         switch event 
         {
@@ -123,7 +123,7 @@ class ScreenManager
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
                 var watchedColor:Null<PieceColor> = White; //TODO: actualizationData.getColor(spectatedPlayerLogin) - Move to Requests.hx
                 toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
-			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
+			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
                 var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
                 toScreen(ReconnectedPlayableGame(match_id, actualizationData));

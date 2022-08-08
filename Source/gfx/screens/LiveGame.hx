@@ -230,7 +230,6 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public static function constructFromActualizationData(actualizationData:ActualizationData, ?orientationColor:PieceColor):LiveGame
     {
-        var timeData:TimeCorrectionData = actualizationData.timeCorrectionData;
         var parserOutput:GameLogParserOutput = actualizationData.logParserOutput;
         var playerColor:Null<PieceColor> = actualizationData.logParserOutput.getPlayerColor();
 
@@ -246,15 +245,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         screen.sidebox = Sidebox.constructFromActualizationData(actualizationData, orientationColor, screen.handleActionBtnPress, screen.onPlyScrollRequested);
         screen.chatbox = Chatbox.constructFromActualizationData(playerColor == null, actualizationData);
         screen.gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
-
-        //TODO: Get rid of this abomination
-        var situation:Situation = Situation.starting(); //TODO: May be any situation
-        for (ply in parserOutput.movesPlayed)
-        {
-            var plyStr:String = ply.toNotation(situation);
-            screen.cCreepingLine.writePlyStr(plyStr, true);
-            situation.makeMove(ply, true);
-        }
+        screen.cCreepingLine.actualize(parserOutput.movesPlayedNotation);
 
         screen.performCommonInitSteps(parserOutput.whiteLogin, parserOutput.blackLogin, parserOutput.timeControl, playerColor);
 

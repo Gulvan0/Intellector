@@ -149,6 +149,13 @@ class CreepingLine extends VBox implements IPlyHistoryView
         this.firstColorToMove = firstColorToMove;
     }
 
+    public function actualize(pastMovesNotation:Array<String>)
+    {
+        for (plyStr in pastMovesNotation)
+            writePlyStr(plyStr, false);
+        shiftPointer(End);
+    }
+
     public function new() 
     {
         super();

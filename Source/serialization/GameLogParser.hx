@@ -21,15 +21,39 @@ enum ChatEntry
 
 class GameLogParserOutput
 {
-    public var timeControl:TimeControl;
+    public var timeControl:TimeControl = new TimeControl(0, 0);
     public var whiteLogin:Null<String>;
     public var blackLogin:Null<String>;
     public var outcome:Null<Outcome>;
     public var winnerColor:Null<PieceColor>;
+    public var msLeftWhenEnded:Null<Map<PieceColor, Int>>;
     public var movesPlayed:Array<Ply> = [];
     public var chatEntries:Array<ChatEntry> = [];
     public var datetime:Null<Date>;
+    public var startingSituation:Situation = Situation.starting();
+
+    public var movesPlayedNotation:Array<String>;
     public var currentSituation:Situation;
+    public var moveCount:Int;
+
+    public function computeDerived()
+    {
+        moveCount = 0;
+        movesPlayedNotation = [];
+        currentSituation = startingSituation.copy();
+
+        for (ply in movesPlayed)
+        {
+            moveCount++;
+            movesPlayedNotation.push(ply.toNotation(currentSituation));
+            currentSituation.makeMove(ply, true);
+        }
+    }
+
+    public function gameEnded():Bool
+    {
+        return outcome != null;
+    }
 
     public function getParticipantColor(participantLogin:String)
     {
@@ -63,8 +87,7 @@ class GameLogParserOutput
 
     public function new()
     {
-        currentSituation = Situation.starting();
-        timeControl = new TimeControl(0, 0);
+
     }
 }
 
@@ -73,6 +96,7 @@ class GameLogParser
     public static function parse(log:String):GameLogParserOutput
     {
         var parserOutput:GameLogParserOutput = new GameLogParserOutput();
+
         for (entry in log.split(";"))
         {
             var trimmedEntry = entry.trim();
@@ -82,9 +106,11 @@ class GameLogParser
             {
                 var ply:Ply = PlySerializer.deserialize(trimmedEntry);
                 parserOutput.movesPlayed.push(ply);
-                parserOutput.currentSituation = parserOutput.currentSituation.makeMove(ply);
             }
         }
+
+        parserOutput.computeDerived();
+
         return parserOutput;
     }
 
@@ -99,6 +125,8 @@ class GameLogParser
                 parserOutput.blackLogin = playerLogins[1];
             case "D":
                 parserOutput.datetime = Date.fromTime(Std.parseFloat(args[0]));
+            case "L":
+                parserOutput.msLeftWhenEnded = [White => Std.parseInt(args[0]), Black => Std.parseInt(args[1])];
             case "T":
                 parserOutput.timeControl = new TimeControl(Std.parseInt(args[0]), Std.parseInt(args[1]));
             case "C":

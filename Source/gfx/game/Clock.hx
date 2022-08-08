@@ -1,5 +1,7 @@
 package gfx.game;
 
+import struct.PieceColor;
+import net.LoginManager;
 import openfl.events.Event;
 import haxe.ui.containers.Box;
 import haxe.Timer;
@@ -13,12 +15,16 @@ import haxe.ui.macros.ComponentMacros;
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/clock.xml"))
 class Clock extends Card
 {
-    public var secondsLeft(default, null):Float;
-    public var playSoundOnOneMinuteLeft:Bool;
-    public var alertsEnabled:Bool;
+    private var playSoundOnOneMinuteLeft:Bool;
+    private var alertsEnabled:Bool;
 
-    private var lastUpdate:Float;
+    private var secondsLeftAtReliableTimestamp:Float;
+    private var reliableTimestamp:Float;
+    private var running:Bool = false;
+
+    private var active:Bool;
     private var playerMove:Bool;
+    private var moveNum:Int;
 
     private var copycats:Array<Clock> = [];
 
@@ -43,44 +49,32 @@ class Clock extends Card
         this.customStyle = newCardStyle;
     }
 
-    public function setPlayerMove(v:Bool) 
-    {
-        var changed:Bool = playerMove != v;
-        playerMove = v;
-        if (changed)
-            refreshColoring();
-        for (copycat in copycats)
-            copycat.setPlayerMove(v);
-    }
-
     private function refreshColoring()
     {
         var backgroundColor:Int = -1;
         var textColor:Int = -1;
         var lowTime:Bool = alertsEnabled && secondsLeft < 60;
 
-        if (playerMove && lowTime)
+        if (active && playerMove && lowTime)
         {
             backgroundColor = 0xffbbbb;
             textColor = 0xaa0000;
         }
-        else if (playerMove && !lowTime)
+        else if (active && playerMove && !lowTime)
         {
             backgroundColor = 0xd5e5d3;
             textColor = 0x000000;
         }
-        else if (!playerMove && lowTime)
+        else if (active && !playerMove && lowTime)
         {
             backgroundColor = 0xffdddd;
             textColor = 0x666666;
         }
-        else if (!playerMove && !lowTime)
+        else
         {
             backgroundColor = 0xffffff;
             textColor = 0x666666;
         }
-        else
-            throw "Impossible situation at Clock::refreshColoring()";
 
         var newLabelStyle = label.customStyle.clone();
         newLabelStyle.color = textColor;
@@ -91,26 +85,23 @@ class Clock extends Card
         this.customStyle = newCardStyle;
     }
 
-    private function onEnterFrame(e)
+    private function updateTimeLeft(?e) 
     {
-        var timestamp:Float = Date.now().getTime();
-        secondsLeft -= (timestamp - lastUpdate) / 1000;
-        onTimeUpdated();
-        lastUpdate = timestamp;
-    }
+        var secondsLeft:Float;
 
-    private function onTimeUpdated() 
-    {
-        if (secondsLeft <= 0)
-        {
-            pauseTimer();
-            secondsLeft = 0;
-            label.text = TimeControl.secsToString(0);
-            Networker.emitEvent(RequestTimeoutCheck);
-            return;
-        }
+        if (running)
+            secondsLeft = Math.max(secondsLeftAtReliableTimestamp - (Date.now().getTime() - reliableTimestamp) / 1000, 0);
+        else
+            secondsLeft = secondsLeftAtReliableTimestamp;
 
         label.text = TimeControl.secsToString(secondsLeft);
+
+        if (secondsLeft == 0)
+        {
+            removeEventListener(Event.ENTER_FRAME, updateTimeLeft);
+            running = false;
+            Networker.emitEvent(RequestTimeoutCheck);
+        }
 
         if (alertsEnabled)
         {
@@ -124,38 +115,34 @@ class Clock extends Card
         }
     }
 
-    public function launchTimer()
+    private function launchTimer()
     {
-        lastUpdate = Date.now().getTime();
-        addEventListener(Event.ENTER_FRAME, onEnterFrame);
-        refreshColoring();
-        for (copycat in copycats)
-            copycat.launchTimer();
+        addEventListener(Event.ENTER_FRAME, updateTimeLeft);
+        running = true;
     }
 
-    public function stopClockCompletely()
+    private function pauseTimer() 
     {
-        pauseTimer();
-        setPlayerMove(false);
-        for (copycat in copycats)
-            copycat.stopClockCompletely();
+        removeEventListener(Event.ENTER_FRAME, updateTimeLeft);
+        running = false;
     }
 
-    public function pauseTimer() 
+    public function deactivate()
     {
-        removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-
+        active = false;
+        if (running)
+            pauseTimer();
         refreshColoring();
 
         for (copycat in copycats)
-            copycat.pauseTimer();
+            copycat.deactivate();
     }
 
-    public function correctTime(secsLeft:Float, actualTimestamp:Float) 
+    public function correctTime(secsLeft:Float, validAt:Float) 
     {
-        secondsLeft = secsLeft;
-        lastUpdate = actualTimestamp;
-        onTimeUpdated();
+        secondsLeftAtReliableTimestamp = secsLeft;
+        reliableTimestamp = validAt;
+        updateTimeLeft();
 
         for (copycat in copycats)
             copycat.correctTime(secsLeft, actualTimestamp);
@@ -163,22 +150,77 @@ class Clock extends Card
 
     public function addTime(secs:Float) 
     {
-        secondsLeft += secs;
-        label.text = TimeControl.secsToString(secondsLeft);
-        refreshColoring();
-
-        for (copycat in copycats)
-            copycat.addTime(secs);
+        correctTime(secondsLeftAtReliableTimestamp + secs, reliableTimestamp);
     }
 
-    public function init(initialSeconds:Float, alertsEnabled:Bool, playSoundOnOneMinuteLeft:Bool, isOwnerToMove:Bool) 
+    public function onMoveMade(secsLeftAtMoment:Float, timestamp:Float)
     {
-        this.playSoundOnOneMinuteLeft = playSoundOnOneMinuteLeft;
-        this.alertsEnabled = alertsEnabled;
-        this.secondsLeft = initialSeconds;
+        correctTime(secsLeftAtMoment, timestamp);
+        playerMove = !playerMove;
+        moveNum++;
+        refreshColoring();
 
-        setPlayerMove(isOwnerToMove);
-        label.text = TimeControl.secsToString(initialSeconds);
+        if (moveNum >= 2)
+            if (playerMove)
+                launchTimer();
+            else
+                pauseTimer();
+        
+        for (copycat in copycats)
+            copycat.onMoveMade(secsLeftAtMoment, timestamp);
+    }
+
+    public function onReverted(ownerToMove:Bool, secsLeftAtMoment:Float, timestamp:Float)
+    {
+        if (playerMove == ownerToMove)
+            return;
+
+        correctTime(secsLeftAtMoment, timestamp);
+        playerMove = ownerToMove;
+        refreshColoring();
+
+        if (moveNum >= 2)
+            if (playerMove)
+                launchTimer();
+            else
+                pauseTimer();
+        
+        for (copycat in copycats)
+            copycat.onReverted(ownerToMove, secsLeftAtMoment, timestamp);
+    }
+
+    public function init(constructor:LiveGameConstructor, ownerColor:PieceColor)
+    {
+        switch constructor 
+        {
+            case New(whiteLogin, blackLogin, timeControl, startingSituation):
+                this.playSoundOnOneMinuteLeft = timeControl.startSecs >= 90;
+                this.alertsEnabled = LoginManager.isPlayer(ownerColor == White? whiteLogin : blackLogin);
+                this.secondsLeft = timeControl.startSecs;
+                this.active = true;
+                this.playerMove = startingSituation.turnColor == ownerColor;
+                this.moveNum = 0;
+
+                label.text = TimeControl.secsToString(initialSeconds);
+            case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp):
+                this.playSoundOnOneMinuteLeft = parsedData.timeControl.startSecs >= 90;
+                this.alertsEnabled = parsedData.getPlayerColor() == ownerColor;
+                this.secondsLeft = timeControl.startSecs;
+                this.active = true;
+                this.playerMove = parsedData.currentSituation.turnColor == ownerColor;
+                this.moveNum = parsedData.moveCount;
+
+                correctTime(ownerColor == White? whiteSeconds : blackSeconds, timeValidAtTimestamp);
+                if (playerMove && moveNum >= 2)
+                    launchTimer();  //TODO: Won't launch the timer if took back until move 1, then reconnected
+
+            case Past(parsedData):
+                this.active = false;
+                if (parsedData.msLeftWhenEnded != null)
+                    label.text = TimeControl.secsToString(parsedData.msLeftWhenEnded * 1000);
+                else
+                    hidden = true;
+        }
     }
     
     public function new()

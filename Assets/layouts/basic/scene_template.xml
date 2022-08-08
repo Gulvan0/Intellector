@@ -7,10 +7,6 @@
             background-color: #eeeeee;
             color: #333333;
         }
-        .menubar-button:active {
-            background-color: #ffffff;
-            color: $normal-text-color;
-        }
         #siteName {
             pointer-events: true;
             white-space: nowrap;

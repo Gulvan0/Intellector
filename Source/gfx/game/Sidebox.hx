@@ -29,30 +29,29 @@ import haxe.ui.containers.VBox;
 import haxe.ui.containers.TableView;
 import haxe.ui.components.Label;
 import openfl.display.Sprite;
-import struct.ActualizationData;
 import utils.TimeControl;
 using utils.CallbackTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/live/sidebox.xml'))
-class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
+class Sidebox extends VBox implements INetObserver implements IGameBoardObserver //TODO: Maybe get rid of this class at all? (Then maybe we can also remove clock copycat mechanic)
 {
     private var orientationColor:PieceColor;
-    private var move:Int;
+    private var move:Int;  //TODO: do we really need it?
 
-    private var secsPerTurn:Int;
-    private var lastMovetableEntry:Dynamic;
+    private var secsPerTurn:Int; //TODO: move to clock
+    private var lastMovetableEntry:Dynamic; //TODO: remove completely?
 
     public function handleNetEvent(event:ServerEvent)
     {
         actionBar.handleNetEvent(event);
-        navigator.handleNetEvent(event);
+        navigator.handleNetEvent(event); //TODO: Clock should be capable of handling such events as well
         switch event 
         {
-            case TimeCorrection(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide):
+            case TimeCorrection(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide): //TODO: Remove pingSubtractionSide
                 correctTime(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
             case GameEnded(_, _):
                 onGameEnded();
-            case Rollback(plysToUndo):
+            case Rollback(plysToUndo): //TODO: Add time data (also to move)
                 revertPlys(plysToUndo);
             default:
         }
@@ -63,7 +62,7 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         navigator.handleGameBoardEvent(event);
         switch event 
         {
-            case ContinuationMove(ply, plyStr, performedBy):
+            case ContinuationMove(ply, plyStr, performedBy): //TODO: Server should respond with tcdata
                 makeMove(plyStr);
             default:
         }
@@ -93,17 +92,25 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     public function revertOrientation()
     {
+        setOrientation(opposite(orientationColor));
+    }
+
+    private function setOrientation(newOrientationColor:PieceColor)
+    {
+        if (orientationColor == newOrientationColor)
+            return;
+
         removeComponent(whiteClock, false);
         removeComponent(blackClock, false);
         removeComponent(whiteLoginCard, false);
         removeComponent(blackLoginCard, false);
 
-        orientationColor = opposite(orientationColor);
+        orientationColor = newOrientationColor;
 
-        var upperClock:Clock = orientationColor == White? blackClock : whiteClock;
-        var bottomClock:Clock = orientationColor == White? whiteClock : blackClock;
-        var upperLogin:Card = orientationColor == White? blackLoginCard : whiteLoginCard;
-        var bottomLogin:Card = orientationColor == White? whiteLoginCard : blackLoginCard;
+        var upperClock:Clock = newOrientationColor == White? blackClock : whiteClock;
+        var bottomClock:Clock = newOrientationColor == White? whiteClock : blackClock;
+        var upperLogin:Card = newOrientationColor == White? blackLoginCard : whiteLoginCard;
+        var bottomLogin:Card = newOrientationColor == White? whiteLoginCard : blackLoginCard;
 
         addComponentAt(upperLogin, 0);
         addComponentAt(upperClock, 0);
@@ -114,28 +121,13 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
 
     //========================================================================================================================================================================
 
-    public function makeMove(plyStr:String, ?dontUpdateTimers:Bool = false) 
+    public function makeMove(plyStr:String) 
     {
         move++;
+        actionBar.onMoveNumberUpdated(move); //TODO: Why can't actionbar do it on its own?
 
-        actionBar.onMoveNumberUpdated(move);
-
-        if (dontUpdateTimers)
-            return;
-
-        var justMovedColor:PieceColor = move % 2 == 1? White : Black;
-        var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
-        var playerToMoveClock:Clock = justMovedColor == Black? whiteClock : blackClock;
-
-        justMovedPlayerClock.pauseTimer();
-        justMovedPlayerClock.setPlayerMove(false);
-        playerToMoveClock.setPlayerMove(true);
-
-        if (move >= 2)
-            playerToMoveClock.launchTimer();
-
-        if (move >= 3)
-            justMovedPlayerClock.addTime(secsPerTurn);
+        whiteClock.onMoveMade(); //TODO: provide args
+        blackClock.onMoveMade(); //TODO: provide args
     }
 
     private function revertPlys(cnt:Int) 
@@ -145,63 +137,39 @@ class Sidebox extends VBox implements INetObserver implements IGameBoardObserver
         
         move -= cnt;
 
-        actionBar.shutAllTakebackRequests();
-        actionBar.onMoveNumberUpdated(move);
+        actionBar.shutAllTakebackRequests(); //TODO: Why can't actionbar do it on its own?
+        actionBar.onMoveNumberUpdated(move); //TODO: Why can't actionbar do it on its own?
 
-        var justMovedColor:PieceColor = move % 2 == 1? White : Black;
-        var justMovedPlayerClock:Clock = justMovedColor == White? whiteClock : blackClock;
-        var playerToMoveClock:Clock = justMovedColor == Black? whiteClock : blackClock;
-
-        if (cnt % 2 == 1)
-        {
-            justMovedPlayerClock.pauseTimer();
-            justMovedPlayerClock.setPlayerMove(false);
-            playerToMoveClock.setPlayerMove(true);
-            playerToMoveClock.launchTimer();
-        }
+        whiteClock.onReverted(); //TODO: provide args
+        blackClock.onReverted(); //TODO: provide args
     }
 
-    public static function constructFromActualizationData(data:ActualizationData, orientationColor:PieceColor, onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void):Sidebox
-    {
-        var playingAs:Null<PieceColor> = data.logParserOutput.getPlayerColor();
-        var timeControl:TimeControl = data.logParserOutput.timeControl;
-        var whiteLogin:String = data.logParserOutput.whiteLogin;
-        var blackLogin:String = data.logParserOutput.blackLogin;
 
-        var sidebox:Sidebox = new Sidebox(playingAs, timeControl, whiteLogin, blackLogin, orientationColor, onActionBtnPressed, onPlyScrollBtnPressed);
-
-        var situation:Situation = Situation.starting();
-        for (ply in data.logParserOutput.movesPlayed)
-        {
-            var plyStr:String = ply.toNotation(situation);
-            sidebox.navigator.writePlyStr(plyStr, true);
-            sidebox.makeMove(plyStr, true);
-            situation = situation.makeMove(ply);
-        }
-
-        if (data.timeCorrectionData != null)
-            sidebox.correctTime(data.timeCorrectionData.whiteSeconds, data.timeCorrectionData.blackSeconds, data.timeCorrectionData.timestamp, data.timeCorrectionData.pingSubtractionSide);
-
-        return sidebox;
-    }
-
-    public function new(playingAs:Null<PieceColor>, timeControl:TimeControl, whiteLogin:String, blackLogin:String, orientationColor:PieceColor, onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void) 
+    public function new(constructor:LiveGameConstructor, onActionBtnPressed:ActionBtn->Void, onPlyScrollBtnPressed:PlyScrollType->Void, ?orientationColor:PieceColor = White) 
     {
         super();
-        this.secsPerTurn = timeControl.bonusSecs;
-        this.orientationColor = White;
-        this.move = 0;
-        
-        whiteClock.init(timeControl.startSecs, playingAs == White, timeControl.startSecs >= 90, true);
-        blackClock.init(timeControl.startSecs, playingAs == Black, timeControl.startSecs >= 90, false);
+        setOrientation(orientationColor);
+        whiteClock.init(constructor, White);
+        blackClock.init(constructor, Black);
+        navigator.init(startingSituation.turnColor, onPlyScrollBtnPressed);
 
-        whiteLoginLabel.text = whiteLogin;
-        blackLoginLabel.text = blackLogin;
-        
-        navigator.init(White, onPlyScrollBtnPressed);
-        actionBar.init(false, playingAs, onActionBtnPressed);
-
-        if (orientationColor == Black)
-            revertOrientation();
+        switch constructor 
+        {
+            case New(whiteLogin, blackLogin, timeControl, startingSituation):
+                var playerColor:Null<PieceColor> = LoginManager.isPlayer(whiteLogin)? White : LoginManager.isPlayer(blackLogin)? Black : null;
+                whiteLoginLabel.text = whiteLogin;
+                blackLoginLabel.text = blackLogin;
+                move = 0;
+                secsPerTurn = timeControl.bonusSecs;
+                actionBar.init(false, playerColor, onActionBtnPressed);
+            case Ongoing(parsedData, _), Past(parsedData):
+                whiteLoginLabel.text = parsedData.whiteLogin;
+                blackLoginLabel.text = parsedData.blackLogin;
+                move = parsedData.moveCount;
+                secsPerTurn = parsedData.timeControl.bonusSecs;
+                actionBar.init(false, parsedData.getPlayerColor(), onActionBtnPressed);
+                actionBar.onMoveNumberUpdated(move);
+                navigator.actualize(parserOutput.movesPlayedNotation);
+        }
     }
 }
