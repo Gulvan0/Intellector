@@ -1,8 +1,13 @@
 package gameboard;
 
+import net.LoginManager;
+import gameboard.behaviors.*;
+import gameboard.states.*;
+import gfx.common.ComponentConstructor;
+import gfx.game.LiveGameConstructor;
+import gfx.analysis.IAnalysisPeripheralEventObserver;
 import gfx.components.Dialogs;
 import gfx.analysis.PeripheralEvent;
-import gameboard.states.StubState;
 import haxe.exceptions.PosException;
 import utils.exceptions.AlreadyInitializedException;
 import openfl.geom.Point;
@@ -10,21 +15,14 @@ import struct.Variant;
 import net.EventProcessingQueue.INetObserver;
 import openfl.events.Event;
 import struct.ReversiblePly;
-import gameboard.behaviors.AnalysisBehavior;
-import gameboard.states.HexSelectionState;
-import gameboard.behaviors.EditorFreeMoveBehavior;
 import gfx.analysis.PosEditMode;
-import gameboard.states.NeutralState;
-import gameboard.states.BasePlayableState;
 import struct.Hex;
-import gameboard.behaviors.IBehavior;
 import struct.IntPoint;
 import struct.Ply;
 import net.ServerEvent;
 import struct.PieceColor;
 import gfx.utils.PlyScrollType;
 import openfl.events.MouseEvent;
-import gameboard.states.BaseState;
 import struct.Situation;
 using Lambda;
 
@@ -45,7 +43,7 @@ interface IGameBoardObserver
 **/
 @:allow(gameboard.behaviors.IBehavior)
 @:allow(gameboard.states.BaseState)
-class GameBoard extends SelectableBoard implements INetObserver
+class GameBoard extends SelectableBoard implements INetObserver implements IAnalysisPeripheralEventObserver
 {
     public var plyHistory:PlyHistory;
 
@@ -299,15 +297,79 @@ class GameBoard extends SelectableBoard implements INetObserver
             obs.handleGameBoardEvent(e);
     }
 
-    public function new(situation:Situation, orientationColor:PieceColor, startBehavior:IBehavior, stubState:Bool = false, hexSideLength:Float = 40) 
+    public function new(constructor:ComponentConstructor) 
     {
-        super(situation, Free, Free, orientationColor, hexSideLength);
-
         this.plyHistory = new PlyHistory();
-        this._currentSituation = situation.copy();
-        this._startingSituation = situation.copy();
-        this.state = stubState? new StubState() : new NeutralState();
-        this.behavior = startBehavior;
+
+        switch constructor 
+        {
+            case Analysis(initialVariant):
+                this._startingSituation = initialVariant.startingSituation.copy();
+                this._currentSituation = _startingSituation.copy();
+
+                super(_startingSituation, Free, Free, _startingSituation.turnColor);
+
+                for (ply in initialVariant.getMainLineBranch())
+                    makeMove(ply);
+
+                this.state = new NeutralState();
+                this.behavior = new AnalysisBehavior();
+
+            case Live(New(whiteLogin, blackLogin, _, startingSituation, _)):
+                this._startingSituation = startingSituation;
+                this._currentSituation = _startingSituation.copy();
+                
+                var playerColor:PieceColor = LoginManager.isPlayer(whiteLogin)? White : Black;
+
+                super(_startingSituation, Free, Free, playerColor);
+
+                this.state = new NeutralState();
+                this.behavior = _startingSituation.turnColor == playerColor? new PlayerMoveBehavior(playerColor) : new EnemyMoveBehavior(playerColor);
+
+            case Live(Ongoing(parsedData, _, _, _, spectatedLogin)):
+                this._startingSituation = parsedData.startingSituation.copy();
+                this._currentSituation = _startingSituation.copy();
+
+                var playerColor:PieceColor = parsedData.getPlayerColor();
+
+                if (spectatedLogin == null)
+                    super(_startingSituation, Free, Free, playerColor);
+                else
+                    super(_startingSituation, Free, Free, parsedData.getParticipantColor(spectatedLogin));
+                
+                for (ply in parsedData.movesPlayed)
+                    makeMove(ply);
+
+                if (spectatedLogin == null)
+                {
+
+                    if (_currentSituation.turnColor == playerColor || Preferences.premoveEnabled.get())
+                        this.state = new NeutralState();
+                    else
+                        this.state = new StubState();
+
+                    this.behavior = _currentSituation.turnColor == playerColor? new PlayerMoveBehavior(playerColor) : new EnemyMoveBehavior(playerColor);
+                }
+                else
+                {
+                    this.state = new StubState();
+                    this.behavior = new StubBehavior();
+                }
+
+            
+            case Live(Past(parsedData)):
+                this._startingSituation = parsedData.startingSituation.copy();
+                this._currentSituation = _startingSituation.copy();
+
+                super(_startingSituation, Free, Free, White);
+                
+                for (ply in parsedData.movesPlayed)
+                    makeMove(ply);
+
+                this.state = new StubState();
+                this.behavior = new StubBehavior();
+
+        }
 
         addEventListener(Event.ADDED_TO_STAGE, initLMB);
     }

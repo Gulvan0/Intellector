@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import gfx.common.PlyHistoryView;
+import gfx.analysis.IAnalysisPeripheralEventObserver;
 import haxe.Timer;
 import haxe.ui.core.Screen as HaxeUIScreen;
 import haxe.ui.Toolkit;
@@ -26,6 +28,10 @@ class Analysis extends Screen implements IGameBoardObserver
     private var board:GameBoard;
     private var positionEditor:PositionEditor;
     private var controlTabs:ControlTabs;
+
+    private var analysisPeripheryObservers:Array<IAnalysisPeripheralEventObserver>;
+    private var gameboardObservers:Array<IGameBoardObserver>;
+    private var plyHistoryViews:Array<PlyHistoryView>;
 
     private function redrawPositionEditor()
     {
@@ -77,23 +83,23 @@ class Analysis extends Screen implements IGameBoardObserver
 
     private function handlePeripheralEvent(event:PeripheralEvent)
     {
-        board.handleAnalysisPeripheralEvent(event);
-        controlTabs.handlePeripheralEvent(event);
-        positionEditor.handlePeripheralEvent(event);
-        creepingLine.handlePeripheralEvent(event);
-        actionBar.handlePeripheralEvent(event);
+        for (obs in analysisPeripheryObservers)
+            obs.handleAnalysisPeripheralEvent(event);
 
         if (event.match(ShareRequested))
             displayShareDialog();
-        else if (event.match(ApplyChangesRequested(_)))
+        else if (event.match(ApplyChangesRequested))
+        {
+            for (view in plyHistoryViews)
+                view.updateStartingSituation(board.startingSituation);
             controlTabs.clearBranching(board.startingSituation);
+        }
     }
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
-        controlTabs.handleGameBoardEvent(event);
-        positionEditor.handleGameBoardEvent(event);
-        creepingLine.handleGameBoardEvent(event);
+        for (obs in gameboardObservers)
+            obs.handleGameBoardEvent(event);
     }
 
     private override function onReady()
@@ -105,17 +111,23 @@ class Analysis extends Screen implements IGameBoardObserver
     public function new(?initialVariantStr:String)
     {
         super();
+        analysisPeripheryObservers = [board, controlTabs, controlTabs.navigator, positionEditor, creepingLine, actionBar];
+        gameboardObservers = [controlTabs, controlTabs.navigator, positionEditor, creepingLine];
+        plyHistoryViews = [controlTabs.navigator, creepingLine];
+
 
         variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.starting());
         var startingSituation:Situation = variant.startingSituation;
         var firstColorToMove:PieceColor = startingSituation.turnColor;
 
-        board = new GameBoard(startingSituation, firstColorToMove, new AnalysisBehavior(), false);
+        board = new GameBoard(Analysis(variant));
         controlTabs = new ControlTabs(variant, handlePeripheralEvent);
         positionEditor = new PositionEditor(handlePeripheralEvent);
         positionEditor.hidden = true;
 
-        creepingLine.init(i -> {handlePeripheralEvent(ScrollBtnPressed(Precise(i)));}, firstColorToMove);
+        for (view in plyHistoryViews)
+            view.init(type -> {handlePeripheralEvent(ScrollBtnPressed(type));}, Analysis(variant));
+
         actionBar.eventHandler = handlePeripheralEvent;
         
         var boardWrapper:BoardWrapper = new BoardWrapper(board);

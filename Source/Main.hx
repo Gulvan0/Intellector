@@ -1,14 +1,13 @@
 package;
 
+import serialization.GameLogParser;
 import utils.Changelog;
 import gfx.screens.OpenChallengeJoining;
 import gfx.components.Dialogs;
 import tests.ui.analysis.TAnalysisScreen;
 import haxe.ui.locale.LocaleManager;
-import tests.ui.game.TSidebox;
 import struct.PieceColor;
 import utils.TimeControl;
-import struct.ActualizationData;
 import net.Requests;
 import js.html.URLSearchParams;
 import browser.CredentialCookies;
@@ -103,7 +102,7 @@ class Main extends Sprite
 		Networker.onConnectionFailed = onConnectionFailed;
 		//Networker.launch();
 		//ScreenManager.toScreen(ChallengeJoining("Gulvan", new TimeControl(30, 0), Black));
-		ScreenManager.toScreen(RevisitedGame(1337, Black, new ActualizationData("#P|gulvan:kazvixx;
+		ScreenManager.toScreen(LiveGame(1337, Past(GameLogParser.parse("#P|gulvan:kazvixx;
 		4544;
 		2043;
 		4443;
@@ -119,7 +118,7 @@ class Main extends Sprite
 		4635;
 		6162;
 		2634;
-		#R|b/res")));
+		#R|b/res"))));
 	}
 
 	private function onConnectionFailed(e)
@@ -187,7 +186,10 @@ class Main extends Sprite
 	private function toOpenChallengeJoining(owner:String) 
 	{
 		var onInfo = (hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>) -> {ScreenManager.toScreen(ChallengeJoining(hostLogin, timeControl, color));};
-		var onBusy = (gameID:Int, data:ActualizationData) -> {ScreenManager.toScreen(SpectatedGame(gameID, data.getColor(owner), data));};
+		var onBusy = (match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String) -> {
+			var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
+			spectate(owner, match_id, whiteSeconds, blackSeconds, timestamp, parsedData);
+		}
 		var onNotFound = ScreenManager.toScreen.bind(MainMenu);
 		Requests.getOpenChallenge(owner, onInfo, onBusy, onNotFound);
 	}
@@ -217,21 +219,41 @@ class Main extends Sprite
 		var id:Null<Int> = Std.parseInt(idStr);
 		if (id != null)
 		{
-			var onOver = (data:ActualizationData) -> {ScreenManager.toScreen(RevisitedGame(id, White, data));};
+			var onOver = revisit.bind(id);
 			var onNotFound = ScreenManager.toScreen.bind(MainMenu);
-			Requests.getGame(id, onOver, toOngoingGame.bind(id), onNotFound);
+			var onOngoing = toOngoingGame;
+			Requests.getGame(id, onOver, onOngoing, onNotFound);
 		}
 		else
 			ScreenManager.toScreen(MainMenu);
 	}
 
-	private function toOngoingGame(gameID:Int, data:ActualizationData) 
+	private function toOngoingGame(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)
 	{
+		var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
 		if (LoginManager.login == null)
-			ScreenManager.toScreen(MainMenu); //TODO: Redirect to a game after logged in or smth like that
-		else if (data.getPlayerColor() == null)
-			ScreenManager.toScreen(SpectatedGame(gameID, White, data));
+			ScreenManager.toScreen(MainMenu);
+		else if (parsedData.getPlayerColor() == null)
+			spectate(null, match_id, whiteSeconds, blackSeconds, timestamp, parsedData);
 		else
-			ScreenManager.toScreen(ReconnectedPlayableGame(gameID, data));
+			rejoin(match_id, whiteSeconds, blackSeconds, timestamp, parsedData);
+	}
+
+	private function spectate(watchedPlayer:Null<String>, match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, parsedData:GameLogParserOutput)
+	{
+		if (watchedPlayer == null)
+			watchedPlayer = parsedData.whiteLogin;
+		ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, watchedPlayer)));
+	}
+
+	private function revisit(match_id:Int, log:String)
+	{
+		var parsedData:GameLogParserOutput = GameLogParser.parse(log);
+		ScreenManager.toScreen(LiveGame(match_id, Past(parsedData)));
+	}
+
+	private function rejoin(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, parsedData:GameLogParserOutput)
+	{
+		ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
 	}
 }

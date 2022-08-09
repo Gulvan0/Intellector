@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import gameboard.GameBoard.IGameBoardObserver;
 import gameboard.Piece;
 import utils.AssetManager;
 import haxe.ui.util.Variant;
@@ -16,7 +17,7 @@ import haxe.ui.containers.VBox;
 import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/analysis/position_editor.xml"))
-class PositionEditor extends VBox
+class PositionEditor extends VBox implements IGameBoardObserver implements IAnalysisPeripheralEventObserver
 {
     private var eventHandler:PeripheralEvent->Void;
 
@@ -117,7 +118,7 @@ class PositionEditor extends VBox
     private function onApplyChangesPressed(e)
     {
         hidden = true;
-        eventHandler(ApplyChangesRequested(getTurnColor()));
+        eventHandler(ApplyChangesRequested);
     }
 
     @:bind(discardChangesBtn, MouseEvent.CLICK)
@@ -127,7 +128,7 @@ class PositionEditor extends VBox
         eventHandler(DiscardChangesRequested);
     }
 
-    public function handlePeripheralEvent(event:PeripheralEvent)
+    public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
         switch event 
         {

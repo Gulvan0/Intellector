@@ -15,7 +15,7 @@ enum PeripheralEvent
     OrientationChangeRequested;
     ConstructSituationRequested(situation:Situation);
     TurnColorChanged(newTurnColor:PieceColor);
-    ApplyChangesRequested(turnColor:PieceColor);
+    ApplyChangesRequested;
     DiscardChangesRequested;
     EditModeChanged(newEditMode:PosEditMode);
     EditorLaunchRequested;

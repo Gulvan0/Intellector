@@ -1,21 +1,35 @@
 <component width="100%" height="100%">
     <hbox width="100%" height="100%" style="spacing:15px">
-        <vbox id="lLeftBox" style="spacing:10px" height="98%" />
+        <vbox id="lLeftBox" style="spacing:10px" height="98%">
+            <gameinfobox id="gameinfobox" />
+            <chatbox id="chatbox" />
+        </vbox>
         <vbox id="centerBox" width="100%" height="100%">
             <creepingline id="cCreepingLine" width="100%" />
             <hbox id="cBlackPlayerHBox" width="100%">
-                <label id="blackLoginLabel" style="color:#666666;font-size:24px" verticalAlign="center" />
+                <label id="cBlackLoginLabel" style="color:#666666;font-size:24px" verticalAlign="center" />
                 <spacer width="100%" />
-                <clock id="blackClock" />
+                <clock id="cBlackClock" />
             </hbox>
             <box id="boardContainer" width="100%" height="100%" />
             <hbox id="cWhitePlayerHBox" width="100%">
-                <label id="whiteLoginLabel" style="color:#666666;font-size:24px" verticalAlign="center" />
+                <label id="cWhiteLoginLabel" style="color:#666666;font-size:24px" verticalAlign="center" />
                 <spacer width="100%" />
-                <clock id="whiteClock" />
+                <clock id="cWhiteClock" />
             </hbox>
             <gameactionbar id="cActionBar" width="100%" />
         </vbox>
-        <box id="lRightBox" height="98%" />
+        <vbox id="lRightBox" height="98%">
+            <clock id="lBlackClock" />
+            <card id="lBlackLoginCard" style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px" width="100%" >
+                <label id="lBlackLoginLabel" text="player2" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
+            </card>
+            <movenavigator id="lNavigator" height="100%" />
+            <gameactionbar id="lActionBar" />
+            <card id="lWhiteLoginCard" style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px" width="100%" >
+                <label id="lWhiteLoginLabel" text="player1" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
+            </card>
+            <clock id="lWhiteClock" />
+        </vbox>
     </hbox>
 </component>

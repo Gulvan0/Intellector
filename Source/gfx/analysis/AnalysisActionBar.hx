@@ -5,15 +5,15 @@ import haxe.ui.containers.VBox;
 import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/analysis/action_bar.xml"))
-class AnalysisActionBar extends VBox
+class AnalysisActionBar extends VBox implements IAnalysisPeripheralEventObserver
 {
     public var eventHandler:PeripheralEvent->Void;
 
-    public function handlePeripheralEvent(event:PeripheralEvent)
+    public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
         switch event 
         {
-            case ApplyChangesRequested(turnColor):
+            case ApplyChangesRequested:
                 hidden = false;
             case DiscardChangesRequested:
                 hidden = false;

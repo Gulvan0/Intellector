@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import net.LoginManager;
+import haxe.ui.containers.Card;
 import gfx.game.*;
 import haxe.ui.core.Component;
 import net.GeneralObserver;
@@ -34,7 +36,6 @@ import gameboard.behaviors.StubBehavior;
 import gameboard.behaviors.IBehavior;
 import gameboard.GameBoard;
 import utils.TimeControl;
-import struct.ActualizationData;
 import struct.PieceColor;
 import haxe.exceptions.NotImplementedException;
 import haxe.ui.containers.VBox;
@@ -43,21 +44,22 @@ import haxe.ui.containers.VBox;
 class LiveGame extends Screen implements INetObserver implements IGameBoardObserver
 {
     private var board:GameBoard;
-    private var sidebox:Sidebox;
-    private var chatbox:Chatbox;
-    private var gameinfobox:GameInfoBox;
-
     private var boardWrapper:BoardWrapper;
     
     /**Attains null if a user doesn't participate in the game (is a spectator or browses a past game)**/
     private var playerColor:Null<PieceColor>;
     private var orientationColor:PieceColor = White;
 
+    private var gameID:Int;
     private var whiteLogin:String;
     private var blackLogin:String;
     private var timeControl:TimeControl;
+    private var datetime:Date;
     private var winnerColor:Null<PieceColor> = null;
     private var outcome:Null<Outcome> = null;
+
+    private var netObservers:Array<INetObserver>;
+    private var gameboardObservers:Array<IGameBoardObserver>;
 
     public static var MIN_SIDEBARS_WIDTH:Float = 200;
     public static var MAX_SIDEBARS_WIDTH:Float = 350;
@@ -111,19 +113,12 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function handleNetEvent(event:ServerEvent)
     {
-        board.handleNetEvent(event);
-        gameinfobox.handleNetEvent(event);
-        chatbox.handleNetEvent(event);
-        sidebox.handleNetEvent(event);
-        cActionBar.handleNetEvent(event);
-        cCreepingLine.handleNetEvent(event);
+        for (obs in netObservers)
+            obs.handleNetEvent(event);
 
         switch event 
         {
-            case Move(fromI, toI, fromJ, toJ, morphInto): //Located in LiveGame since we need board's currentSituation to construct an argument for sidebox
-                var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
-                sidebox.makeMove(ply.toNotation(board.currentSituation));
-            case GameEnded(winnerColorCode, outcomeCode):
+            case GameEnded(winnerColorCode, outcomeCode, _, _):
                 winnerColor = GameLogParser.decodeColor(winnerColorCode);
                 outcome = GameLogParser.decodeOutcome(outcomeCode);
                 Assets.getSound("sounds/notify.mp3").play();
@@ -134,8 +129,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
-        cCreepingLine.handleGameBoardEvent(event);
-        sidebox.handleGameBoardEvent(event);
+        for (obs in gameboardObservers)
+            obs.handleGameBoardEvent(event);
 
         switch event 
         {
@@ -145,6 +140,13 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         }
     }
 
+    private function onPlyScrollRequested(type:PlyScrollType)
+    {
+        cCreepingLine.performScroll(type);
+        lNavigator.performScroll(type);
+        board.applyScrolling(type);
+    }
+
     public function handleActionBtnPress(btn:ActionBtn)
     {
         switch btn 
@@ -152,9 +154,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case Resign:
                 Networker.emitEvent(Resign);
             case ChangeOrientation:
-                board.revertOrientation();
-                sidebox.revertOrientation();
-                revertCompactBarsOrientation();
+                setOrientation(opposite(orientationColor));
             case OfferDraw:
                 Networker.emitEvent(OfferDraw);
             case CancelDraw:
@@ -168,10 +168,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case Rematch:
                 Networker.emitEvent(Rematch);
             case Share:
-                var gameLink:String = URLEditor.getGameLink(ScreenManager.getViewedGameID());
+                var gameLink:String = URLEditor.getGameLink(gameID);
                 var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
-                //TODO: Pass DateTime instead of null
-                var pin:String = PortableIntellectorNotation.serialize(playedMoves, whiteLogin, blackLogin, timeControl, null, outcome, winnerColor);
+                var pin:String = PortableIntellectorNotation.serialize(playedMoves, whiteLogin, blackLogin, timeControl, datetime, outcome, winnerColor);
 
                 var shareDialog:ShareDialog = new ShareDialog();
                 shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, playedMoves);
@@ -208,70 +207,86 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     //================================================================================================================================================================
 
-    private function revertCompactBarsOrientation() 
+    private function setOrientation(newOrientationColor:PieceColor)
     {
+        if (orientationColor == newOrientationColor)
+            return;
+
+        board.setOrientation(newOrientationColor);
+
+        orientationColor = newOrientationColor;
+
+        //Compact bars
+
         centerBox.removeComponentAt(2, false);
         centerBox.removeComponentAt(0, false);
-
-        orientationColor = opposite(orientationColor);
 
         var upperBox:HBox = orientationColor == White? cBlackPlayerHBox : cWhitePlayerHBox;
         var lowerBox:HBox = orientationColor == White? cWhitePlayerHBox : cBlackPlayerHBox;
 
         centerBox.addComponentAt(upperBox, 0);
         centerBox.addComponentAt(lowerBox, 2);
+
+        //Large cards & clocks
+
+        lRightBox.removeComponent(lWhiteClock, false);
+        lRightBox.removeComponent(lBlackClock, false);
+        lRightBox.removeComponent(lWhiteLoginCard, false);
+        lRightBox.removeComponent(lBlackLoginCard, false);
+
+        var upperClock:Clock = newOrientationColor == White? lBlackClock : lWhiteClock;
+        var bottomClock:Clock = newOrientationColor == White? lWhiteClock : lBlackClock;
+        var upperLogin:Card = newOrientationColor == White? lBlackLoginCard : lWhiteLoginCard;
+        var bottomLogin:Card = newOrientationColor == White? lWhiteLoginCard : lBlackLoginCard;
+
+        lRightBox.addComponentAt(upperLogin, 0);
+        lRightBox.addComponentAt(upperClock, 0);
+
+        lRightBox.addComponent(bottomLogin);
+        lRightBox.addComponent(bottomClock);
     }
 
-    private function onPlyScrollRequested(type:PlyScrollType)
+    public function new(gameID:Int, constructor:LiveGameConstructor) 
     {
-        cCreepingLine.shiftPointer(type);
-        board.applyScrolling(type);
-    }
+        super();
+        this.gameID = gameID;
+        this.netObservers = [board, gameinfobox, chatbox, lActionBar, lNavigator, lBlackClock, lWhiteClock, cActionBar, cCreepingLine, cBlackClock, cWhiteClock];
+        this.gameboardObservers = [lActionBar, lNavigator, lBlackClock, lWhiteClock, cActionBar, cCreepingLine, cBlackClock, cWhiteClock];
 
-    public static function constructFromActualizationData(actualizationData:ActualizationData, ?orientationColor:PieceColor):LiveGame
-    {
-        var parserOutput:GameLogParserOutput = actualizationData.logParserOutput;
-        var playerColor:Null<PieceColor> = actualizationData.logParserOutput.getPlayerColor();
+        customEnterHandler = onEnter;
+        customCloseHandler = onClose;
+        //TODO: Resizeable components ...
 
-        if (orientationColor == null)
-            if (playerColor == null)
-                orientationColor = White;
-            else
-                orientationColor = playerColor;
+        switch constructor 
+        {
+            case New(whiteLogin, blackLogin, timeControl, startingSituation, _):
+                this.playerColor = LoginManager.isPlayer(blackLogin)? Black : White;
+                this.whiteLogin = whiteLogin;
+                this.blackLogin = blackLogin;
+                this.timeControl = timeControl;
 
-        var screen:LiveGame = new LiveGame();
+                setOrientation(playerColor);
 
-        screen.board = buildBoard(parserOutput.currentSituation, playerColor, orientationColor);
-        screen.sidebox = Sidebox.constructFromActualizationData(actualizationData, orientationColor, screen.handleActionBtnPress, screen.onPlyScrollRequested);
-        screen.chatbox = Chatbox.constructFromActualizationData(playerColor == null, actualizationData);
-        screen.gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
-        screen.cCreepingLine.actualize(parserOutput.movesPlayedNotation);
+            case Ongoing(parsedData, _, _, _, spectatedLogin):
+                this.playerColor = parsedData.getPlayerColor();
+                this.whiteLogin = parsedData.whiteLogin;
+                this.blackLogin = parsedData.blackLogin;
+                this.timeControl = parsedData.timeControl;
 
-        screen.performCommonInitSteps(parserOutput.whiteLogin, parserOutput.blackLogin, parserOutput.timeControl, playerColor);
+                setOrientation(spectatedLogin != null? parsedData.getParticipantColor(spectatedLogin) : playerColor);
 
-        return screen;
-    }
+            case Past(parsedData):
+                this.playerColor = null;
+                this.whiteLogin = parsedData.whiteLogin;
+                this.blackLogin = parsedData.blackLogin;
+                this.timeControl = parsedData.timeControl;
 
-    public static function constructFromParams(whiteLogin:String, blackLogin:String, orientationColor:PieceColor, timeControl:TimeControl, playerColor:Null<PieceColor>):LiveGame 
-    {
-        var screen:LiveGame = new LiveGame();
+                setOrientation(White);
+        }
 
-        screen.board = buildBoard(Situation.starting(), playerColor, orientationColor);
-        screen.sidebox = new Sidebox(playerColor, timeControl, whiteLogin, blackLogin, orientationColor, screen.handleActionBtnPress, screen.onPlyScrollRequested);
-        screen.chatbox = new Chatbox(playerColor == null);
-        screen.gameinfobox = new GameInfoBox(timeControl, whiteLogin, blackLogin);
-
-        screen.performCommonInitSteps(whiteLogin, blackLogin, timeControl, playerColor);
-
-        return screen;
-    }
-
-    private function performCommonInitSteps(whiteLogin:String, blackLogin:String, timeControl:TimeControl, playerColor:PieceColor)
-    {
-        this.playerColor = playerColor;
-        this.whiteLogin = whiteLogin;
-        this.blackLogin = blackLogin;
-        this.timeControl = timeControl;
+        board = new GameBoard(Live(constructor));
+        chatbox.init(constructor);
+        gameinfobox.init(constructor);
 
         board.addObserver(this);
 
@@ -280,50 +295,19 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         boardWrapper.verticalAlign = 'center';
         boardWrapper.percentHeight = 100;
         boardWrapper.maxPercentWidth = 100;
-
-        lLeftBox.addComponent(gameinfobox);
-        lLeftBox.addComponent(chatbox);
-        lRightBox.addComponent(sidebox);
         boardContainer.addComponent(boardWrapper);
 
-        whiteLoginLabel.text = whiteLogin;
-        blackLoginLabel.text = blackLogin;
+        cWhiteLoginLabel.text = lWhiteLoginLabel.text = whiteLogin;
+        cBlackLoginLabel.text = lBlackLoginLabel.text = blackLogin;
 
-        sidebox.whiteClock.addCopycat(whiteClock);
-        sidebox.blackClock.addCopycat(blackClock);
+        cWhiteClock.init(constructor, White);
+        cBlackClock.init(constructor, Black);
+        lWhiteClock.init(constructor, White);
+        lBlackClock.init(constructor, Black);
 
-        whiteClock.init(timeControl.startSecs, playerColor == White, timeControl.startSecs >= 90, true);
-        blackClock.init(timeControl.startSecs, playerColor == Black, timeControl.startSecs >= 90, false);
-        cCreepingLine.init(i -> {
-            board.applyScrolling(Precise(i));
-            cCreepingLine.setPointer(i);
-            sidebox.navigator.setPointer(i);
-        });
-        cActionBar.init(true, playerColor, handleActionBtnPress);
-
-        if (orientationColor == Black)
-            revertCompactBarsOrientation();
-    }
-
-    private static function buildBoard(currentSituation:Situation, playerColor:PieceColor, orientationColor:PieceColor)
-    {
-        var behavior:IBehavior;
-        if (playerColor == null)
-            behavior = new StubBehavior();
-        else if (currentSituation.turnColor == playerColor)
-            behavior = new PlayerMoveBehavior(playerColor);
-        else
-            behavior = new EnemyMoveBehavior(playerColor);
-
-        return new GameBoard(currentSituation, orientationColor, behavior, playerColor == null);
-    }
-
-    private function new() 
-    {
-        super();
-        customEnterHandler = onEnter;
-        customCloseHandler = onClose;
-        whiteClock.resize(30);
-        blackClock.resize(30);
+        lNavigator.init(onPlyScrollRequested, Live(constructor));
+        lActionBar.init(constructor, false, handleActionBtnPress);
+        cCreepingLine.init(onPlyScrollRequested, Live(constructor));
+        cActionBar.init(constructor, true, handleActionBtnPress);
     }
 }

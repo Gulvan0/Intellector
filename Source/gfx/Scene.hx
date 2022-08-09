@@ -1,5 +1,6 @@
 package gfx;
 
+import serialization.GameLogParser;
 import net.Requests;
 import gfx.components.Dialogs;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
@@ -98,9 +99,15 @@ class Scene extends VBox
         Dialogs.prompt("Введите ник игрока", All, startSpectating);
     }
 
-    private function startSpectating(e)
+    private function startSpectating(requestedLogin:String)
     {
-        //TODO: Implement (use Requests.hx)
+        Requests.watchPlayer(requestedLogin, onSpectationData.bind(requestedLogin), Dialogs.alertCallback("В настоящий момент игрок не участвует в партии", "Ошибка"), Dialogs.alertCallback("Игрок не в сети", "Ошибка"), Dialogs.alertCallback("Игрок не найден", "Ошибка"));
+    }
+
+    private function onSpectationData(watchedPlayer:String, match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)
+    {
+        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
+        toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, watchedPlayer)));
     }
 
     private function onAnalysisBoardPressed(e)

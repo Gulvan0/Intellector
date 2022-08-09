@@ -1,5 +1,6 @@
 package gfx;
 
+import serialization.GameLogParser;
 import haxe.Timer;
 import haxe.ui.Toolkit;
 import js.html.VisualViewport;
@@ -19,7 +20,6 @@ import net.EventProcessingQueue.INetObserver;
 import net.LoginManager;
 import net.ServerEvent;
 import openfl.display.Sprite;
-import struct.ActualizationData;
 import struct.PieceColor;
 import browser.URLEditor;
 import utils.TimeControl;
@@ -39,18 +39,6 @@ class ScreenManager
     public static function getCurrentScreenType():Null<ScreenType>
     {
         return currentScreenType;
-    }
-
-    public static function getViewedGameID():Null<Int>
-    {
-        return switch currentScreenType 
-        {
-            case StartedPlayableGame(gameID, _, _, _, _): gameID;
-            case ReconnectedPlayableGame(gameID, _): gameID;
-            case SpectatedGame(gameID, _, _): gameID;
-            case RevisitedGame(gameID, _, _): gameID;
-            default: null;
-        }
     }
 
     public static function disableMenu()
@@ -108,25 +96,16 @@ class ScreenManager
         }
     }
 
-    private static function handleNetEvent(event:ServerEvent):Bool //TODO: Update!!! Or even move away
+    private static function handleNetEvent(event:ServerEvent):Bool
     {
         switch event 
         {
-            case GameStarted(match_id, enemy, colour, startSecs, bonusSecs):
-                var timeControl:TimeControl = new TimeControl(startSecs, bonusSecs);
-                var playerColor:PieceColor = PieceColor.createByName(colour);
-                var whiteLogin:String = playerColor == White? LoginManager.login : enemy;
-                var blackLogin:String = playerColor == Black? LoginManager.login : enemy;
-                toScreen(StartedPlayableGame(match_id, whiteLogin, blackLogin, timeControl, playerColor));
-            case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
-                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-                var watchedColor:Null<PieceColor> = White; //TODO: actualizationData.getColor(spectatedPlayerLogin) - Move to Requests.hx
-                toScreen(SpectatedGame(match_id, watchedColor != null? watchedColor : White, actualizationData));
+            case GameStarted(match_id, logPreamble):
+                var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
+                toScreen(LiveGame(match_id, New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime)));
 			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
-                var timeCorrectionData:TimeCorrectionData = new TimeCorrectionData(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide);
-                var actualizationData:ActualizationData = new ActualizationData(currentLog, timeCorrectionData);
-                toScreen(ReconnectedPlayableGame(match_id, actualizationData));
+                var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
+                toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
             case StudyCreated(studyID, studyName):
                 if (currentScreenType.match(Analysis(_, _, _)))
                 {

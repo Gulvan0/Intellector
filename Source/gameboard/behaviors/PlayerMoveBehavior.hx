@@ -20,7 +20,7 @@ class PlayerMoveBehavior implements IBehavior
 	{
         switch event 
         {
-            case Rollback(plysToUndo):
+            case Rollback(plysToUndo, _, _, _):
                 boardInstance.state.exitToNeutral();
                 boardInstance.revertPlys(plysToUndo);
                 if (plysToUndo % 2 == 1)
@@ -29,7 +29,7 @@ class PlayerMoveBehavior implements IBehavior
                 if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 1)
                     boardInstance.state = new StubState();
                 
-            case GameEnded(winner_color, reason):
+            case GameEnded(winner_color, reason, _, _):
                 boardInstance.state.exitToNeutral();
                 boardInstance.state = new StubState();
             

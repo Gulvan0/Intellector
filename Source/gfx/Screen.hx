@@ -57,14 +57,8 @@ class Screen extends Component
                 new Analysis(initialVariantStr);
             case LanguageSelectIntro(languageReadyCallback):
                 new LanguageSelectIntro(languageReadyCallback);
-            case StartedPlayableGame(_, whiteLogin, blackLogin, timeControl, playerColor):
-                LiveGame.constructFromParams(whiteLogin, blackLogin, playerColor, timeControl, playerColor);
-            case ReconnectedPlayableGame(_, actualizationData):
-                LiveGame.constructFromActualizationData(actualizationData);
-            case SpectatedGame(_, watchedColor, actualizationData):
-                LiveGame.constructFromActualizationData(actualizationData, watchedColor);
-            case RevisitedGame(_, watchedColor, data):
-                LiveGame.constructFromActualizationData(data, watchedColor);
+            case LiveGame(id, constructor):
+                new LiveGame(id, constructor);
             case PlayerProfile(ownerLogin):
                 new PlayerProfile(ownerLogin);
             case ChallengeJoining(challengeOwner, timeControl, color):

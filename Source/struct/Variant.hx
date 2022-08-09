@@ -269,6 +269,11 @@ class Variant extends VariantNode
         return branch;
     }
 
+    public function getMainLineBranch():Array<Ply>
+    {
+        return getBranchByPath(extendPathLeftmost([]));
+    }
+
     public function pathExists(branchPath:VariantPath):Bool
     {
         var node:VariantNode = this;

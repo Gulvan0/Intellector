@@ -32,20 +32,17 @@ class GameLogParserOutput
     public var datetime:Null<Date>;
     public var startingSituation:Situation = Situation.starting();
 
-    public var movesPlayedNotation:Array<String>;
     public var currentSituation:Situation;
     public var moveCount:Int;
 
     public function computeDerived()
     {
         moveCount = 0;
-        movesPlayedNotation = [];
         currentSituation = startingSituation.copy();
 
         for (ply in movesPlayed)
         {
             moveCount++;
-            movesPlayedNotation.push(ply.toNotation(currentSituation));
             currentSituation.makeMove(ply, true);
         }
     }
@@ -127,6 +124,8 @@ class GameLogParser
                 parserOutput.datetime = Date.fromTime(Std.parseFloat(args[0]));
             case "L":
                 parserOutput.msLeftWhenEnded = [White => Std.parseInt(args[0]), Black => Std.parseInt(args[1])];
+            case "S":
+                parserOutput.startingSituation = Situation.fromSIP(args[0]);
             case "T":
                 parserOutput.timeControl = new TimeControl(Std.parseInt(args[0]), Std.parseInt(args[1]));
             case "C":

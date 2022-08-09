@@ -1,5 +1,6 @@
 package dict;
 
+import gfx.game.LiveGameConstructor;
 import utils.StringUtils;
 import utils.TimeControl;
 import serialization.GameLogParser;
@@ -9,6 +10,7 @@ import struct.Outcome;
 import Preferences.Markup;
 import gfx.screens.MainMenu.MainMenuButton;
 import struct.PieceColor;
+import net.LoginManager;
 
 class Utils
 {
@@ -75,6 +77,26 @@ class Utils
         return Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE, [getColorName(playerColor)]);
     }
 
+    private static function getLiveGameScreenTitle(id:Int, constructor:LiveGameConstructor):Array<String>
+    {
+        switch constructor 
+        {
+            case New(whiteLogin, blackLogin, timeControl, startingSituation, startDatetime):
+                var opponentLogin:String = LoginManager.isPlayer(whiteLogin)? blackLogin : whiteLogin;
+                return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
+            case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp, spectatedLogin):
+                if (spectatedLogin != null)
+                    return ['Spectating: ${parsedData.whiteLogin} vs ${parsedData.blackLogin}', 'Наблюдение: ${parsedData.whiteLogin} против ${parsedData.blackLogin}'];
+                else
+                {
+                    var opponentLogin:String = LoginManager.isPlayer(parsedData.whiteLogin)? parsedData.blackLogin : parsedData.whiteLogin;
+                    return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
+                }
+            case Past(parsedData):
+                return ['Game $id: ${parsedData.whiteLogin} vs ${parsedData.blackLogin}', 'Игра $id: ${parsedData.whiteLogin} против ${parsedData.blackLogin}'];
+        }
+    }
+
     public static function getScreenTitle(type:ScreenType):String
     {
         var translations = [null, null];
@@ -91,20 +113,8 @@ class Utils
                 }
                 else
                     translations = ["Analysis Board", "Доска анализа"];
-            case StartedPlayableGame(gameID, whiteLogin, blackLogin, timeControl, playerColor): 
-                var opponentLogin:String = playerColor == White? blackLogin : whiteLogin;
-                translations = ['Play $opponentLogin', 'Игра $opponentLogin'];
-            case ReconnectedPlayableGame(gameID, data): 
-                var opponentLogin:String = data.logParserOutput.getPlayerOpponentLogin();
-                translations = ['Play $opponentLogin', 'Игра $opponentLogin'];
-            case SpectatedGame(gameID, watchedColor, data):
-                var whiteLogin:String = data.logParserOutput.whiteLogin;
-                var blackLogin:String = data.logParserOutput.blackLogin;
-                translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
-            case RevisitedGame(gameID, watchedColor, data): 
-                var whiteLogin:String = data.logParserOutput.whiteLogin;
-                var blackLogin:String = data.logParserOutput.blackLogin;
-                translations = ['$whiteLogin vs $blackLogin', '$whiteLogin против $blackLogin'];
+            case LiveGame(gameID, constructor): 
+                translations = getLiveGameScreenTitle(gameID, constructor);
             case PlayerProfile(ownerLogin): 
                 translations = [ownerLogin, ownerLogin];
             case ChallengeJoining(challengeOwner, _, _):

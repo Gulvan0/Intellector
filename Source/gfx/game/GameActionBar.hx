@@ -1,5 +1,9 @@
 package gfx.game;
 
+import net.LoginManager;
+import gameboard.GameBoard.IGameBoardObserver;
+import net.EventProcessingQueue.INetObserver;
+import gameboard.GameBoard.GameBoardEvent;
 import haxe.ui.containers.VBox;
 import struct.PieceColor;
 import js.Browser;
@@ -34,9 +38,12 @@ enum ActionBtn
 }
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/action_bar.xml"))
-class GameActionBar extends VBox
+class GameActionBar extends VBox implements INetObserver implements IGameBoardObserver
 {
     private var mode:Mode;
+
+    private var move(default, set):Int;
+
     private var enableDrawAfterMove:Int;
     private var enableTakebackAfterMove:Int;
     private var changeAbortToResignAfterMove:Int;
@@ -52,7 +59,7 @@ class GameActionBar extends VBox
     {
         switch event 
         {
-            case GameEnded(_, _):
+            case GameEnded(_, _, _, _):
                 btnBar.hidden = false;
                 drawRequestBox.hidden = true;
                 takebackRequestBox.hidden = true;
@@ -85,14 +92,31 @@ class GameActionBar extends VBox
             case TakebackAccepted, TakebackDeclined:
                 cancelTakebackBtn.hidden = true;
                 offerTakebackBtn.hidden = false;
+            case Move(_, _, _, _, _, _, _, _):
+                move++;
+            case Rollback(plysToUndo, _, _, _):
+                shutAllTakebackRequests();
+                move -= plysToUndo;
             default:
         }
     }
 
-    public function onMoveNumberUpdated(move:Int) 
+    public function handleGameBoardEvent(event:GameBoardEvent) 
     {
+        switch event 
+        {
+            case ContinuationMove(_, _, _):
+                move++;
+            default:
+        }
+    }
+
+    private function set_move(value:Int):Int
+    {
+        move = value;
+
         if (mode != PlayerOngoingGame)
-            return;
+            return move;
 
         if (move < enableTakebackAfterMove)
             offerTakebackBtn.disabled = true;
@@ -116,9 +140,11 @@ class GameActionBar extends VBox
             resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_TOOLTIP);
             resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
         }
+
+        return move;
     }
 
-    public function shutAllTakebackRequests()
+    private function shutAllTakebackRequests()
     {
         if (mode != PlayerOngoingGame)
             return;
@@ -128,7 +154,7 @@ class GameActionBar extends VBox
         disableTakebackRequest();
     }
 
-    public function setMode(mode:Mode) 
+    private function setMode(mode:Mode) 
     {
         this.mode = mode;
         var shownButtons:Array<Button> = switch mode 
@@ -240,17 +266,32 @@ class GameActionBar extends VBox
         };
     }
 
-    public function init(compact:Bool, playingAs:Null<PieceColor>, onBtnPressed:ActionBtn->Void) 
+    public function init(constructor:LiveGameConstructor, compact:Bool, onBtnPressed:ActionBtn->Void) 
     {
         this.compact = compact;
         this.onBtnPressed = onBtnPressed;
+        
         this.enableDrawAfterMove = 2;
-        this.enableTakebackAfterMove = playingAs == White? 1 : 2;   
         this.changeAbortToResignAfterMove = 2;
-        this.resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
 
-        incomingDrawRequestPending = false;
-        incomingTakebackRequestPending = false;
+        this.incomingDrawRequestPending = false;
+        this.incomingTakebackRequestPending = false;
+
+        switch constructor 
+        {
+            case New(whiteLogin, blackLogin, timeControl, startingSituation, _):
+                setMode(PlayerOngoingGame);
+                this.enableTakebackAfterMove = startingSituation.turnColor == White? 1 : 2;
+                move = 0;
+
+            case Ongoing(parsedData, _, _, _, spectatedLogin):
+                setMode(spectatedLogin != null? Spectator : PlayerOngoingGame);
+                this.enableTakebackAfterMove = parsedData.startingSituation.turnColor == White? 1 : 2;
+                move = parsedData.moveCount;
+
+            case Past(parsedData):
+                setMode(Spectator);
+        }
 
         attachHandler(resignBtn, onResignPressed);
         attachHandler(changeOrientationBtn, ChangeOrientation);
@@ -266,8 +307,6 @@ class GameActionBar extends VBox
         attachHandler(rematchBtn, Rematch);
         attachHandler(shareBtn, Share);
         attachHandler(analyzeBtn, Analyze);
-
-        setMode(playingAs == null? Spectator : PlayerOngoingGame);
     }
 
     public function new() 

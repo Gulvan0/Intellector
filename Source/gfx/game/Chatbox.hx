@@ -22,14 +22,12 @@ import openfl.events.KeyboardEvent;
 import haxe.ui.components.TextField;
 import haxe.ui.containers.ScrollView;
 import openfl.display.Sprite;
-import struct.ActualizationData;
 using StringTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/live/chatbox.xml'))
 class Chatbox extends VBox implements INetObserver
 {
     private var isOwnerSpectator:Bool;
-    private var actualizationData:ActualizationData;
 
     public function handleNetEvent(event:ServerEvent)
     {
@@ -40,7 +38,7 @@ class Chatbox extends VBox implements INetObserver
             case SpectatorMessage(author, message):
                 if (isOwnerSpectator)
                     appendMessage(author, message, false);
-            case GameEnded(winner_color, reason): 
+            case GameEnded(winner_color, reason, _, _): 
                 onGameEnded(GameLogParser.decodeColor(winner_color), GameLogParser.decodeOutcome(reason));
             case PlayerDisconnected(color): 
                 appendLog(Utils.getPlayerDisconnectedMessage(PieceColor.createByName(color)));
@@ -159,7 +157,7 @@ class Chatbox extends VBox implements INetObserver
         appendLog(Utils.getGameOverChatMessage(winnerColor, outcome));
     }
 
-    private function actualize(parserOutput:GameLogParserOutput)
+    private function actualize(parserOutput:GameLogParserOutput, e)
     {
         for (entry in parserOutput.chatEntries)
         {
@@ -176,26 +174,25 @@ class Chatbox extends VBox implements INetObserver
             onGameEnded(parserOutput.winnerColor, parserOutput.outcome);
     }
 
-    private function init(e) 
+    public function init(constructor:LiveGameConstructor)
     {
-        removeEventListener(Event.ADDED_TO_STAGE, init);
+        switch constructor 
+        {
+            case New(_, _, _, _, _):
+                this.isOwnerSpectator = false;
+            case Ongoing(parsedData, _, _, _, spectatedLogin):
+                this.isOwnerSpectator = spectatedLogin != null;
+                addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
+            case Past(parsedData):
+                this.isOwnerSpectator = true;
+                addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
+        }
+
         addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-        if (actualizationData != null)
-            actualize(actualizationData.logParserOutput);
     }
 
-    public static function constructFromActualizationData(isOwnerSpectator:Bool, data:ActualizationData):Chatbox
-    {
-        var chatbox:Chatbox = new Chatbox(isOwnerSpectator);
-        chatbox.actualizationData = data;
-        return chatbox;
-    }
-
-    public function new(isOwnerSpectator:Bool) 
+    public function new() 
     {
         super();
-        this.isOwnerSpectator = isOwnerSpectator;
-
-        addEventListener(Event.ADDED_TO_STAGE, init);
     }
 }

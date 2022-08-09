@@ -1,5 +1,9 @@
 package gfx.game;
 
+import net.ServerEvent;
+import gameboard.GameBoard.GameBoardEvent;
+import gameboard.GameBoard.IGameBoardObserver;
+import net.EventProcessingQueue.INetObserver;
 import struct.PieceColor;
 import net.LoginManager;
 import openfl.events.Event;
@@ -13,7 +17,7 @@ import haxe.ui.components.Label;
 import haxe.ui.macros.ComponentMacros;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/clock.xml"))
-class Clock extends Card
+class Clock extends Card implements INetObserver implements IGameBoardObserver
 {
     private var playSoundOnOneMinuteLeft:Bool;
     private var alertsEnabled:Bool;
@@ -23,16 +27,12 @@ class Clock extends Card
     private var running:Bool = false;
 
     private var active:Bool;
-    private var playerMove:Bool;
+    private var ownerColor:PieceColor;
+    private var ownerToMove:Bool;
     private var moveNum:Int;
+    private var secondsLeft:Float;
 
-    private var copycats:Array<Clock> = [];
-
-    public function addCopycat(copycat:Clock) 
-    {
-        copycats.push(copycat);
-    }
-
+    //TODO: Do it properly
     public function resize(newHeight:Float)
     {
         var unit:Float = newHeight / 11;
@@ -49,23 +49,58 @@ class Clock extends Card
         this.customStyle = newCardStyle;
     }
 
+    public function handleNetEvent(event:ServerEvent)
+    {
+        switch event 
+        {
+            case TimeCorrection(whiteSeconds, blackSeconds, timestamp):
+                correctTime(whiteSeconds, blackSeconds, timestamp);
+            case Move(fromI, toI, fromJ, toJ, morphInto, whiteSeconds, blackSeconds, timestamp):
+                correctTime(whiteSeconds, blackSeconds, timestamp);
+                moveNum++;
+                toggleTurnColor();
+            case Rollback(plysToUndo, whiteSeconds, blackSeconds, timestamp):
+                correctTime(whiteSeconds, blackSeconds, timestamp);
+                moveNum -= plysToUndo;
+                if (plysToUndo % 2 == 1)
+                    toggleTurnColor();
+            case GameEnded(winner_color, reason, whiteSecondsRemainder, blackSecondsRemainder):
+                active = false;
+                pauseTimer();
+                correctTime(whiteSecondsRemainder, blackSecondsRemainder, Date.now().getTime());
+                refreshColoring();
+            default:
+        }
+    }
+
+    public function handleGameBoardEvent(event:GameBoardEvent)
+    {
+        switch event 
+        {
+            case ContinuationMove(_, _, _):
+                moveNum++;
+                toggleTurnColor();
+            default:
+        }
+    }
+
     private function refreshColoring()
     {
         var backgroundColor:Int = -1;
         var textColor:Int = -1;
         var lowTime:Bool = alertsEnabled && secondsLeft < 60;
 
-        if (active && playerMove && lowTime)
+        if (active && ownerToMove && lowTime)
         {
             backgroundColor = 0xffbbbb;
             textColor = 0xaa0000;
         }
-        else if (active && playerMove && !lowTime)
+        else if (active && ownerToMove && !lowTime)
         {
             backgroundColor = 0xd5e5d3;
             textColor = 0x000000;
         }
-        else if (active && !playerMove && lowTime)
+        else if (active && !ownerToMove && lowTime)
         {
             backgroundColor = 0xffdddd;
             textColor = 0x666666;
@@ -87,7 +122,6 @@ class Clock extends Card
 
     private function updateTimeLeft(?e) 
     {
-        var secondsLeft:Float;
 
         if (running)
             secondsLeft = Math.max(secondsLeftAtReliableTimestamp - (Date.now().getTime() - reliableTimestamp) / 1000, 0);
@@ -127,97 +161,55 @@ class Clock extends Card
         running = false;
     }
 
-    public function deactivate()
+    private function correctTime(whiteSeconds:Float, blackSeconds:Float, validAt:Float) 
     {
-        active = false;
-        if (running)
-            pauseTimer();
-        refreshColoring();
-
-        for (copycat in copycats)
-            copycat.deactivate();
-    }
-
-    public function correctTime(secsLeft:Float, validAt:Float) 
-    {
-        secondsLeftAtReliableTimestamp = secsLeft;
+        secondsLeftAtReliableTimestamp = ownerColor == White? whiteSeconds : blackSeconds;
         reliableTimestamp = validAt;
         updateTimeLeft();
-
-        for (copycat in copycats)
-            copycat.correctTime(secsLeft, actualTimestamp);
     }
 
-    public function addTime(secs:Float) 
+    private function toggleTurnColor()
     {
-        correctTime(secondsLeftAtReliableTimestamp + secs, reliableTimestamp);
-    }
-
-    public function onMoveMade(secsLeftAtMoment:Float, timestamp:Float)
-    {
-        correctTime(secsLeftAtMoment, timestamp);
-        playerMove = !playerMove;
-        moveNum++;
+        ownerToMove = !ownerToMove;
         refreshColoring();
 
-        if (moveNum >= 2)
-            if (playerMove)
-                launchTimer();
-            else
-                pauseTimer();
-        
-        for (copycat in copycats)
-            copycat.onMoveMade(secsLeftAtMoment, timestamp);
-    }
-
-    public function onReverted(ownerToMove:Bool, secsLeftAtMoment:Float, timestamp:Float)
-    {
-        if (playerMove == ownerToMove)
-            return;
-
-        correctTime(secsLeftAtMoment, timestamp);
-        playerMove = ownerToMove;
-        refreshColoring();
-
-        if (moveNum >= 2)
-            if (playerMove)
-                launchTimer();
-            else
-                pauseTimer();
-        
-        for (copycat in copycats)
-            copycat.onReverted(ownerToMove, secsLeftAtMoment, timestamp);
+        if (moveNum >= 2 && ownerToMove)
+            launchTimer();
+        else if (moveNum > 2 && !ownerToMove)
+            pauseTimer();
     }
 
     public function init(constructor:LiveGameConstructor, ownerColor:PieceColor)
     {
+        this.ownerColor = ownerColor;
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, timeControl, startingSituation):
+            case New(whiteLogin, blackLogin, timeControl, startingSituation, _):
                 this.playSoundOnOneMinuteLeft = timeControl.startSecs >= 90;
                 this.alertsEnabled = LoginManager.isPlayer(ownerColor == White? whiteLogin : blackLogin);
-                this.secondsLeft = timeControl.startSecs;
                 this.active = true;
-                this.playerMove = startingSituation.turnColor == ownerColor;
+                this.ownerToMove = startingSituation.turnColor == ownerColor;
                 this.moveNum = 0;
-
-                label.text = TimeControl.secsToString(initialSeconds);
-            case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp):
-                this.playSoundOnOneMinuteLeft = parsedData.timeControl.startSecs >= 90;
-                this.alertsEnabled = parsedData.getPlayerColor() == ownerColor;
                 this.secondsLeft = timeControl.startSecs;
+
+                label.text = TimeControl.secsToString(timeControl.startSecs);
+            case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp, _):
+                var startSecs:Int = parsedData.timeControl.startSecs;
+
+                this.playSoundOnOneMinuteLeft = startSecs >= 90;
+                this.alertsEnabled = parsedData.getPlayerColor() == ownerColor;
                 this.active = true;
-                this.playerMove = parsedData.currentSituation.turnColor == ownerColor;
+                this.ownerToMove = parsedData.currentSituation.turnColor == ownerColor;
                 this.moveNum = parsedData.moveCount;
 
-                correctTime(ownerColor == White? whiteSeconds : blackSeconds, timeValidAtTimestamp);
-                if (playerMove && moveNum >= 2)
-                    launchTimer();  //TODO: Won't launch the timer if took back until move 1, then reconnected
+                correctTime(whiteSeconds, blackSeconds, timeValidAtTimestamp);
+                if (ownerToMove && (moveNum >= 2 || secondsLeft != startSecs)) //The last condition is a somewhat (i. e., unless float ownerSecsLeft will miraclously match integer startSecs) reliable workaround for cases when the first two moves had been made, but then, due to takebacks, the total move count became less than 2 once again (and then the reconnection happened)
+                    launchTimer();
 
             case Past(parsedData):
                 this.active = false;
                 if (parsedData.msLeftWhenEnded != null)
-                    label.text = TimeControl.secsToString(parsedData.msLeftWhenEnded * 1000);
+                    label.text = TimeControl.secsToString(parsedData.msLeftWhenEnded[ownerColor] * 1000);
                 else
                     hidden = true;
         }

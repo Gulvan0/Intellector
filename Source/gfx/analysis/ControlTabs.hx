@@ -31,20 +31,17 @@ import gfx.analysis.PosEditMode;
 using utils.CallbackTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/analysis/control_tabs.xml"))
-class ControlTabs extends TabView
+class ControlTabs extends TabView implements IGameBoardObserver implements IAnalysisPeripheralEventObserver
 {
     private var variantView:IVariantView;
 
-    private var eventHandler:PeripheralEvent->Void;
-
-    public function handlePeripheralEvent(event:PeripheralEvent)
+    public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
-        navigator.handlePeripheralEvent(event);
         switch event 
         {
             case ScrollBtnPressed(type):
                 variantView.handlePlyScrolling(type);
-            case ApplyChangesRequested(turnColor):
+            case ApplyChangesRequested:
                 disabled = false;
             case DiscardChangesRequested:
                 disabled = false;
@@ -56,7 +53,6 @@ class ControlTabs extends TabView
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
-        navigator.handleGameBoardEvent(event);
         switch event
         {
             case ContinuationMove(ply, plyStr, performedBy):
@@ -94,11 +90,8 @@ class ControlTabs extends TabView
     public function new(initialVariant:Variant, eventHandler:PeripheralEvent->Void)
     {
         super();
-        this.eventHandler = eventHandler;
 
         actionBar.eventHandler = eventHandler;
-
-        navigator.init(initialVariant.startingSituation.turnColor, btn -> {eventHandler(ScrollBtnPressed(btn));});
 
         branchingHelpLink.onClick = e -> {
             Dialogs.branchingHelp();

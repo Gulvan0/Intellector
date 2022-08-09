@@ -39,7 +39,7 @@ abstract class EditorBehavior implements IBehavior
                 var updatedSituation = boardInstance.shownSituation;
                 updatedSituation.turnColor = newTurnColor;
                 boardInstance.setShownSituation(updatedSituation);
-            case ApplyChangesRequested(_):
+            case ApplyChangesRequested:
                 onChangesApplied();
             case DiscardChangesRequested:
                 onChangesDiscarded();

@@ -1,7 +1,6 @@
 package gfx.game;
 
 import format.SVG;
-import struct.ActualizationData;
 import openfl.display.Shape;
 import utils.AssetManager;
 import net.EventProcessingQueue.INetObserver;
@@ -38,15 +37,15 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
     {
         switch event 
         {
-            case Move(fromI, toI, fromJ, toJ, morphInto):
+            case Move(fromI, toI, fromJ, toJ, morphInto, _, _, _):
                 var ply:Ply = new Ply();
                 ply.from = new IntPoint(fromI, fromJ);
                 ply.to = new IntPoint(toI, toJ);
                 ply.morphInto = morphInto == null? null : PieceType.createByName(morphInto);
                 accountMove(ply);
-            case Rollback(plysToUndo):
+            case Rollback(plysToUndo, _, _, _):
                 revertPlys(plysToUndo);
-            case GameEnded(winner_color, reason):
+            case GameEnded(winner_color, reason, _, _):
                 changeResolution(GameLogParser.decodeOutcome(reason), GameLogParser.decodeColor(winner_color));
             default:
         }
@@ -102,24 +101,6 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
             movesAfterTerminalOpeningNode -= cnt;
     }
 
-    public static function constructFromActualizationData(data:ActualizationData):GameInfoBox
-    {
-        var infobox:GameInfoBox = new GameInfoBox(data.logParserOutput.timeControl, data.logParserOutput.whiteLogin, data.logParserOutput.blackLogin);
-
-        var parsedData = data.logParserOutput;
-
-        if (parsedData.outcome != null)
-            infobox.changeResolution(parsedData.outcome, parsedData.winnerColor);
-
-        if (parsedData.datetime != null)
-            infobox.datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
-
-        for (ply in parsedData.movesPlayed)
-            infobox.accountMove(ply);
-
-        return infobox;
-    }
-
     private override function validateComponentLayout():Bool 
     {
         var b = super.validateComponentLayout();
@@ -173,19 +154,54 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         return b;
     }
 
-    public function new(timeControl:TimeControl, whiteLogin:String, blackLogin:String) 
+    public function init(constructor:LiveGameConstructor)
     {
-        super();
         this.openingTree = new OpeningTree();
 
-        var tcType:TimeControlType = timeControl.getType();
+        switch constructor 
+        {
+            case New(whiteLogin, blackLogin, timeControl, startingSituation, startDatetime):
+                var tcType:TimeControlType = timeControl.getType();
 
-        resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
-        matchParameters.text = tcType == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : timeControl.toString() + " • " + tcType.getName();
-        whiteLoginLabel.text = whiteLogin;
-        blackLoginLabel.text = blackLogin;
-        opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+                if (tcType == Correspondence)
+                    matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
+                else
+                    matchParameters.text = timeControl.toString() + " • " + tcType.getName();
 
-        timeControlIcon.resource = AssetManager.timeControlPath(tcType);
+                datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
+                whiteLoginLabel.text = whiteLogin;
+                blackLoginLabel.text = blackLogin;
+                resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
+                opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+                timeControlIcon.resource = AssetManager.timeControlPath(tcType);
+
+            case Ongoing(parsedData, _, _, _, _), Past(parsedData):
+                var tcType:TimeControlType = parsedData.timeControl.getType();
+
+                if (tcType == Correspondence)
+                    matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
+                else
+                    matchParameters.text = parsedData.timeControl.toString() + " • " + tcType.getName();
+
+                whiteLoginLabel.text = parsedData.whiteLogin;
+                blackLoginLabel.text = parsedData.blackLogin;
+                resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
+                opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+                timeControlIcon.resource = AssetManager.timeControlPath(tcType);
+
+                if (parsedData.outcome != null)
+                    changeResolution(parsedData.outcome, parsedData.winnerColor);
+        
+                if (parsedData.datetime != null)
+                    datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+        
+                for (ply in parsedData.movesPlayed)
+                    accountMove(ply);
+        }
+    }
+
+    public function new() 
+    {
+        super();
     }
 }

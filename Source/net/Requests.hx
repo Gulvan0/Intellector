@@ -2,24 +2,23 @@ package net;
 
 import struct.PieceColor;
 import utils.TimeControl;
-import struct.ActualizationData;
 
 class Requests
 {
-    public static function getGame(id:Int, onOver:ActualizationData->Void, onCurrent:ActualizationData->Void, onNotFound:Void->Void)
+    public static function getGame(id:Int, onOver:(log:String)->Void, onCurrent:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotFound:Void->Void)
     {
-        Networker.eventQueue.addHandler(getGame_handler.bind(onOver, onCurrent, onNotFound));
+        Networker.eventQueue.addHandler(getGame_handler.bind(onOver, onCurrent.bind(id), onNotFound));
         Networker.emitEvent(GetGame(id));
     }
 
-    private static function getGame_handler(onOver:ActualizationData->Void, onCurrent:ActualizationData->Void, onNotFound:Void->Void, event:ServerEvent):Bool
+    private static function getGame_handler(onOver:(log:String)->Void, onCurrent:(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotFound:Void->Void, event:ServerEvent):Bool
     {
         switch event
         {
             case GameIsOver(log):
-                onOver(new ActualizationData(log));
-            case GameIsOngoing(whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-                onCurrent(ActualizationData.current(currentLog, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide));
+                onOver(log);
+            case GameIsOngoing(whiteSeconds, blackSeconds, timestamp, currentLog):
+                onCurrent(whiteSeconds, blackSeconds, timestamp, currentLog);
             case GameNotFound:
                 onNotFound();
             default:
@@ -28,13 +27,13 @@ class Requests
         return true;
     }
 
-    public static function getOpenChallenge(ownerLogin:String, onInfo:(hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>)->Void, onHostPlaying:(match_id:Int, data:ActualizationData)->Void, onNotFound:Void->Void) 
+    public static function getOpenChallenge(ownerLogin:String, onInfo:(hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>)->Void, onHostPlaying:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotFound:Void->Void) 
     {
         Networker.eventQueue.addHandler(getOpenChallenge_handler.bind(onInfo, onHostPlaying, onNotFound));
         Networker.emitEvent(GetOpenChallenge(ownerLogin));
     }
 
-    private static function getOpenChallenge_handler(onInfo:(hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>)->Void, onHostPlaying:(match_id:Int, data:ActualizationData)->Void, onNotFound:Void->Void, event:ServerEvent):Bool
+    private static function getOpenChallenge_handler(onInfo:(hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>)->Void, onHostPlaying:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotFound:Void->Void, event:ServerEvent):Bool
     {
         switch event
         {
@@ -42,8 +41,8 @@ class Requests
                 var timeControl:TimeControl = new TimeControl(secsStart, secsBonus);
                 var color:Null<PieceColor> = colorStr != null? PieceColor.createByName(colorStr) : null;
                 onInfo(hostLogin, timeControl, color);
-            case OpenChallengeHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide, currentLog):
-                onHostPlaying(match_id, ActualizationData.current(currentLog, whiteSeconds, blackSeconds, timestamp, pingSubtractionSide));
+            case OpenChallengeHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
+                onHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog);
             case OpenchallengeNotFound:
                 onNotFound();
             default:
@@ -85,6 +84,30 @@ class Requests
             case SingleStudy(name, variantStr):
                 onInfo(name, variantStr);
             case StudyNotFound:
+                onNotFound();
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    public static function watchPlayer(login:String, onData:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotPlaying:Void->Void, onOffline:Void->Void, onNotFound:Void->Void)
+    {
+        Networker.eventQueue.addHandler(watchPlayer_handler.bind(onData, onNotPlaying, onOffline, onNotFound));
+        Networker.emitEvent(Spectate(login));
+    }
+
+    private static function watchPlayer_handler(onData:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotPlaying:Void->Void, onOffline:Void->Void, onNotFound:Void->Void, event:ServerEvent)
+    {
+        switch event
+        {
+            case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
+                onData(match_id, whiteSeconds, blackSeconds, timestamp, currentLog);
+            case PlayerNotInGame:
+                onNotPlaying();
+            case PlayerOffline:
+                onOffline();
+            case PlayerNotFound:
                 onNotFound();
             default:
                 return false;
