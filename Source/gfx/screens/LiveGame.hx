@@ -86,6 +86,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     private function performValidation()
     {
         var compact:Bool = this.width * 6 < this.height * 7;
+        var compactBoardHeight:Float = this.width * boardWrapper.inverseAspectRatio();
         var largeBoardMaxWidth:Float = this.height / boardWrapper.inverseAspectRatio();
         var bothBarsVisible:Bool = this.width >= largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
 
@@ -93,9 +94,22 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         cWhitePlayerHBox.hidden = !compact;
         cActionBar.hidden = !compact;
         cCreepingLine.hidden = !compact;
+        cSpacer1.hidden = !compact;
+        cSpacer2.hidden = !compact;
 
         lLeftBox.hidden = compact || !bothBarsVisible;
         lRightBox.hidden = compact;
+        
+        if (compact)
+        {
+            boardContainer.percentHeight = null;
+            boardContainer.height = compactBoardHeight + 20;
+        }
+        else
+        {
+            boardContainer.height = null;
+            boardContainer.percentHeight = 100;
+        }
 
         if (bothBarsVisible)
         {
@@ -224,8 +238,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         var upperBox:HBox = orientationColor == White? cBlackPlayerHBox : cWhitePlayerHBox;
         var lowerBox:HBox = orientationColor == White? cWhitePlayerHBox : cBlackPlayerHBox;
 
-        centerBox.addComponentAt(upperBox, 1);
-        centerBox.addComponentAt(lowerBox, 3);
+        centerBox.addComponentAt(upperBox, 2);
+        centerBox.addComponentAt(lowerBox, 4);
 
         //Large cards & clocks
 
@@ -260,7 +274,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         customEnterHandler = onEnter;
         customCloseHandler = onClose;
-        //TODO: Resizeable components ...
+        
+        cWhiteClock.resize(30);
+        cBlackClock.resize(30);
 
         switch constructor 
         {

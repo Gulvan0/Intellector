@@ -47,7 +47,9 @@ class Scene extends VBox
                 btn.hidden = compact;
             
             if (btn.text != challengesButton.text)
-                ResponsiveToolbox.resizeComponent(btn, [StyleProp(FontSize) => VH(2)]);
+                ResponsiveToolbox.resizeComponent(btn, [StyleProp(FontSize) => VH(2), Height => VH(4)]);
+            else
+                ResponsiveToolbox.resizeComponent(btn, [Height => VH(4)]);
         }
     }
 
@@ -158,13 +160,21 @@ class Scene extends VBox
         //TODO: Challenges
         
         sidemenu = new SideMenu();
-        sidemenu.siteName.onClick = siteName.onClick = onSiteNamePressed;
-        sidemenu.createChallengeBtn.onClick = createChallengeBtn.onClick = onCreateChallengePressed;
-        sidemenu.openChallengesBtn.onClick = openChallengesBtn.onClick = onOpenChallengesPressed;
-        sidemenu.currentGamesBtn.onClick = currentGamesBtn.onClick = onCurrentGamesPressed;
-        sidemenu.watchPlayerBtn.onClick = watchPlayerBtn.onClick = onWatchPlayerPressed;
-        sidemenu.analysisBoardBtn.onClick = analysisBoardBtn.onClick = onAnalysisBoardPressed;
-        sidemenu.playerProfileBtn.onClick = playerProfileBtn.onClick = onPlayerProfilePressed;
+        siteName.onClick = onSiteNamePressed;
+        createChallengeBtn.onClick = onCreateChallengePressed;
+        openChallengesBtn.onClick = onOpenChallengesPressed;
+        currentGamesBtn.onClick = onCurrentGamesPressed;
+        watchPlayerBtn.onClick = onWatchPlayerPressed;
+        analysisBoardBtn.onClick = onAnalysisBoardPressed;
+        playerProfileBtn.onClick = onPlayerProfilePressed;
+
+        sidemenu.siteName.onClick = e -> {sidemenu.hide(); onSiteNamePressed(e);};
+        sidemenu.createChallengeBtn.onClick = e -> {sidemenu.hide(); onCreateChallengePressed(e);};
+        sidemenu.openChallengesBtn.onClick = e -> {sidemenu.hide(); onOpenChallengesPressed(e);};
+        sidemenu.currentGamesBtn.onClick = e -> {sidemenu.hide(); onCurrentGamesPressed(e);};
+        sidemenu.watchPlayerBtn.onClick = e -> {sidemenu.hide(); onWatchPlayerPressed(e);};
+        sidemenu.analysisBoardBtn.onClick = e -> {sidemenu.hide(); onAnalysisBoardPressed(e);};
+        sidemenu.playerProfileBtn.onClick = e -> {sidemenu.hide(); onPlayerProfilePressed(e);};
 
         logInBtn.onClick = onLogInPressed;
         myProfileBtn.onClick = onMyProfilePressed;
