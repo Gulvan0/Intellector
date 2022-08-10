@@ -32,7 +32,8 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
     private var moveNum:Int;
     private var secondsLeft:Float;
 
-    //TODO: Do it properly
+    private var invisible:Bool = false;
+
     public function resize(newHeight:Float)
     {
         var unit:Float = newHeight / 11;
@@ -51,6 +52,9 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
 
     public function handleNetEvent(event:ServerEvent)
     {
+        if (!active)
+            return;
+
         switch event 
         {
             case TimeCorrection(whiteSeconds, blackSeconds, timestamp):
@@ -75,6 +79,9 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
+        if (!active)
+            return;
+
         switch event 
         {
             case ContinuationMove(_, _, _):
@@ -185,6 +192,14 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         switch constructor 
         {
             case New(whiteLogin, blackLogin, timeControl, startingSituation, _):
+                if (timeControl.getType() == Correspondence)
+                {
+                    this.active = false;
+                    hidden = true;
+                    invisible = true;
+                    return;
+                }
+
                 this.playSoundOnOneMinuteLeft = timeControl.startSecs >= 90;
                 this.alertsEnabled = LoginManager.isPlayer(ownerColor == White? whiteLogin : blackLogin);
                 this.active = true;
@@ -194,6 +209,14 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
 
                 label.text = TimeControl.secsToString(timeControl.startSecs);
             case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp, _):
+                if (parsedData.timeControl.getType() == Correspondence)
+                {
+                    this.active = false;
+                    hidden = true;
+                    invisible = true;
+                    return;
+                }
+
                 var startSecs:Int = parsedData.timeControl.startSecs;
 
                 this.playSoundOnOneMinuteLeft = startSecs >= 90;
@@ -213,6 +236,14 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 else
                     hidden = true;
         }
+    }
+
+    public override function set_hidden(v:Bool):Bool
+    {
+        if (!invisible)
+            return super.set_hidden(v);
+        else
+            return v;
     }
     
     public function new()
