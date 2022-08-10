@@ -33,7 +33,7 @@ class URLEditor
         return switch type 
         {
             case MainMenu: "home";
-            case Analysis(_, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
+            case Analysis(_, _, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
             case LanguageSelectIntro(_): "";
             case LiveGame(gameID, _): 'live/$gameID';
             case PlayerProfile(ownerLogin): 'player/$ownerLogin';

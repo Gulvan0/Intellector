@@ -170,15 +170,15 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case Share:
                 var gameLink:String = URLEditor.getGameLink(gameID);
                 var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
-                var pin:String = PortableIntellectorNotation.serialize(playedMoves, whiteLogin, blackLogin, timeControl, datetime, outcome, winnerColor);
+                var pin:String = PortableIntellectorNotation.serialize(board.startingSituation, playedMoves, whiteLogin, blackLogin, timeControl, datetime, outcome, winnerColor);
 
                 var shareDialog:ShareDialog = new ShareDialog();
-                shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, playedMoves);
+                shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, board.startingSituation, playedMoves);
                 shareDialog.showShareDialog(board);
             case Analyze:
                 if (playerColor == null)
                     Networker.emitEvent(StopSpectate);
-                ScreenManager.toScreen(Analysis(getSerializedVariant(), null, null));
+                ScreenManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null, null));
             case AcceptDraw:
                 Networker.emitEvent(AcceptDraw);
             case DeclineDraw:
@@ -218,14 +218,14 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         //Compact bars
 
-        centerBox.removeComponentAt(2, false);
-        centerBox.removeComponentAt(0, false);
+        centerBox.removeComponent(cWhitePlayerHBox, false);
+        centerBox.removeComponent(cBlackPlayerHBox, false);
 
         var upperBox:HBox = orientationColor == White? cBlackPlayerHBox : cWhitePlayerHBox;
         var lowerBox:HBox = orientationColor == White? cWhitePlayerHBox : cBlackPlayerHBox;
 
-        centerBox.addComponentAt(upperBox, 0);
-        centerBox.addComponentAt(lowerBox, 2);
+        centerBox.addComponentAt(upperBox, 1);
+        centerBox.addComponentAt(lowerBox, 3);
 
         //Large cards & clocks
 
@@ -249,6 +249,11 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     public function new(gameID:Int, constructor:LiveGameConstructor) 
     {
         super();
+
+        board = new GameBoard(Live(constructor));
+        chatbox.init(constructor);
+        gameinfobox.init(constructor);
+
         this.gameID = gameID;
         this.netObservers = [board, gameinfobox, chatbox, lActionBar, lNavigator, lBlackClock, lWhiteClock, cActionBar, cCreepingLine, cBlackClock, cWhiteClock];
         this.gameboardObservers = [lActionBar, lNavigator, lBlackClock, lWhiteClock, cActionBar, cCreepingLine, cBlackClock, cWhiteClock];
@@ -259,11 +264,12 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, timeControl, startingSituation, _):
+            case New(whiteLogin, blackLogin, timeControl, _, startDatetime):
                 this.playerColor = LoginManager.isPlayer(blackLogin)? Black : White;
                 this.whiteLogin = whiteLogin;
                 this.blackLogin = blackLogin;
                 this.timeControl = timeControl;
+                this.datetime = startDatetime;
 
                 setOrientation(playerColor);
 
@@ -272,21 +278,19 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.whiteLogin = parsedData.whiteLogin;
                 this.blackLogin = parsedData.blackLogin;
                 this.timeControl = parsedData.timeControl;
+                this.datetime = parsedData.datetime;
 
                 setOrientation(spectatedLogin != null? parsedData.getParticipantColor(spectatedLogin) : playerColor);
 
-            case Past(parsedData):
+            case Past(parsedData, watchedPlyerLogin):
                 this.playerColor = null;
                 this.whiteLogin = parsedData.whiteLogin;
                 this.blackLogin = parsedData.blackLogin;
                 this.timeControl = parsedData.timeControl;
+                this.datetime = parsedData.datetime;
 
-                setOrientation(White);
+                setOrientation(watchedPlyerLogin != null? parsedData.getParticipantColor(watchedPlyerLogin) : White);
         }
-
-        board = new GameBoard(Live(constructor));
-        chatbox.init(constructor);
-        gameinfobox.init(constructor);
 
         board.addObserver(this);
 

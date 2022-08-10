@@ -92,7 +92,7 @@ class Utils
                     var opponentLogin:String = LoginManager.isPlayer(parsedData.whiteLogin)? parsedData.blackLogin : parsedData.whiteLogin;
                     return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
                 }
-            case Past(parsedData):
+            case Past(parsedData, _):
                 return ['Game $id: ${parsedData.whiteLogin} vs ${parsedData.blackLogin}', 'Игра $id: ${parsedData.whiteLogin} против ${parsedData.blackLogin}'];
         }
     }
@@ -105,7 +105,7 @@ class Utils
         {
             case MainMenu: 
                 translations = ["Home", "Главная"];
-            case Analysis(_, exploredStudyID, exploredStudyName):
+            case Analysis(_, _, exploredStudyID, exploredStudyName):
                 if (exploredStudyName != null)
                 {
                     var shortenedName:String = StringUtils.shorten(exploredStudyName);

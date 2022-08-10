@@ -1,5 +1,10 @@
 package gfx.game;
 
+import openfl.events.Event;
+import haxe.ui.events.FocusEvent;
+import haxe.ui.util.Color;
+import utils.MathUtils;
+import Preferences.Markup;
 import openfl.display.BitmapData;
 import gfx.components.BoardWrapper;
 import gameboard.Board;
@@ -17,6 +22,9 @@ import dict.Dictionary;
 class ShareGameTab extends Box
 {
     private var plySequence:Array<Ply>;
+    private var startingSituation:Situation;
+    
+    private var gifExportParams:{board:Board, gifWidth:Int, gifHeight:Int, gifInterval:Float, bgColor:Int};
 
     @:bind(copyLinkBtnTick, MouseEvent.CLICK)
     @:bind(copyLinkBtn, MouseEvent.CLICK)
@@ -53,29 +61,79 @@ class ShareGameTab extends Box
     @:bind(downloadGifBtn, MouseEvent.CLICK)
     private function onDownloadGIFPressed(e)
     {
-        var img:Gif = new Gif(720, 720, 1);
-        var board:Board = new Board(Situation.starting(), White, BoardWrapper.widthToHexSideLength(720), None);
+        var gifWidth:Int = Std.parseInt(gifWidthTF.text);
 
-        var bitmapData:BitmapData = new BitmapData(720, 720);
-        bitmapData.draw(board);
+        if (gifWidth != null)
+            gifWidth = MathUtils.clampI(gifWidth, 100, 2048);
+        else
+            gifWidth = 720;
+
+        var gifInterval:Float = Std.parseInt(intervalTF.text);
+
+        if (gifInterval != null)
+            gifInterval = MathUtils.clamp(gifInterval / 1000, 0.1, 10);
+        else
+            gifInterval = 1;
+
+        var gifHeight:Int = Math.ceil(BoardWrapper.invAspectRatio(addMarkupCheckbox.selected) * gifWidth);
+        var bgColor:Int = 0xFF000000 | cast(colorPicker.selectedItem, Color).toInt();
+        var hexSideLength:Float = BoardWrapper.widthToHexSideLength(gifWidth);
+        var markup:Markup = addMarkupCheckbox.selected? Over : None;
+
+        var board:Board = new Board(startingSituation, White, hexSideLength, markup);
+        gifExportParams = {board: board, gifWidth: gifWidth, gifHeight: gifHeight, gifInterval: gifInterval, bgColor: bgColor};
+
+        board.addEventListener(Event.EXIT_FRAME, onReadyForGIFExport);
+        stage.addChild(board);
+    }
+
+    private function onReadyForGIFExport(e)
+    {
+        gifExportParams.board.removeEventListener(Event.EXIT_FRAME, onReadyForGIFExport);
+        stage.removeChild(gifExportParams.board);
+
+        var img:Gif = new Gif(gifExportParams.gifWidth, gifExportParams.gifHeight, gifExportParams.gifInterval);
+        var bitmapData:BitmapData = new BitmapData(gifExportParams.gifWidth, gifExportParams.gifHeight, false, gifExportParams.bgColor);
+        bitmapData.draw(gifExportParams.board);
         img.addFrame(bitmapData);
 
         for (ply in plySequence)
         {
-            board.applyPremoveTransposition(ply);
-            bitmapData = new BitmapData(720, 720);
-            bitmapData.draw(board);
+            gifExportParams.board.applyPremoveTransposition(ply);
+            bitmapData = new BitmapData(gifExportParams.gifWidth, gifExportParams.gifHeight, false, gifExportParams.bgColor);
+            bitmapData.draw(gifExportParams.board);
             img.addFrame(bitmapData);
         }
 
         img.save("board.gif");
     }
 
-    public function init(gameLink:String, pin:String, plySequence:Array<Ply>)
+    @:bind(gifWidthTF, FocusEvent.FOCUS_OUT)
+    public function onWidthFocusLost(e) 
+    {
+        var value:Null<Int> = Std.parseInt(gifWidthTF.text);
+        if (value == null)
+            gifWidthTF.text = "720";
+        else
+            gifWidthTF.text = "" + MathUtils.clampI(value, 100, 2048);
+    }
+
+    @:bind(intervalTF, FocusEvent.FOCUS_OUT)
+    public function onIntervalFocusLost(e) 
+    {
+        var value:Null<Int> = Std.parseInt(intervalTF.text);
+        if (value == null)
+            intervalTF.text = "1000";
+        else
+            intervalTF.text = "" + MathUtils.clampI(value, 100, 10000);
+    }
+
+    public function init(gameLink:String, pin:String, startingSituation:Situation, plySequence:Array<Ply>)
     {
         linkTextField.text = gameLink;
         pinTextArea.text = pin;
         this.plySequence = plySequence;
+        this.startingSituation = startingSituation;
     }
 
     public function new()

@@ -92,6 +92,11 @@ abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
         return p.length == this.length && p.contains(this);
     }
 
+    public static function mainLine(length:Int):VariantPath
+    {
+        return [for (i in 0...length) 0];
+    }
+
     public inline function new(a:Array<Int>) 
     {
         this = a;

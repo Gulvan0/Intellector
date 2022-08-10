@@ -1,5 +1,6 @@
 package gfx;
 
+import utils.StringUtils;
 import serialization.GameLogParser;
 import net.Requests;
 import gfx.components.Dialogs;
@@ -71,7 +72,7 @@ class Scene extends VBox
 
     private function onSiteNamePressed(e) 
     {
-        toScreen(MainMenu);
+        ScreenManager.toScreen(MainMenu);
     }
 
     private function onCreateChallengePressed(e)
@@ -107,12 +108,12 @@ class Scene extends VBox
     private function onSpectationData(watchedPlayer:String, match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)
     {
         var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-        toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, watchedPlayer)));
+        ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, watchedPlayer)));
     }
 
     private function onAnalysisBoardPressed(e)
     {
-        toScreen(Analysis(null, null, null));
+        ScreenManager.toScreen(Analysis(null, null, null, null));
     }
 
     private function onPlayerProfilePressed(e)
@@ -149,7 +150,7 @@ class Scene extends VBox
     {
         super();
         var logged:Bool = LoginManager.login != null;
-        accountMenu.text = logged? LoginManager.login : "Гость";
+        accountMenu.text = logged? StringUtils.shorten(LoginManager.login, 8) : "Гость";
         logInBtn.hidden = logged;
         myProfileBtn.hidden = !logged;
         logOutBtn.hidden = !logged;

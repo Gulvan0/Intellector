@@ -35,5 +35,6 @@ class CreepingLinePly extends Card
         this.pointerPos = pointerPos;
         plyLabel.text = '$moveNum. $plyStr';
         onClick = e -> {onClicked(pointerPos);};
+        deselect();
     }
 }

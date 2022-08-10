@@ -113,6 +113,11 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
             pieceLayer.addChild(piece);
     }
 
+    public function revertOrientation()
+    {
+        setOrientation(opposite(orientationColor));
+    }
+
     public function revertPlys(cnt:Int) 
     {
         if (cnt < 1)
@@ -357,11 +362,11 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
                 }
 
             
-            case Live(Past(parsedData)):
+            case Live(Past(parsedData, watchedPlayerLogin)):
                 this._startingSituation = parsedData.startingSituation.copy();
                 this._currentSituation = _startingSituation.copy();
 
-                super(_startingSituation, Free, Free, White);
+                super(_startingSituation, Free, Free, watchedPlayerLogin != null? parsedData.getParticipantColor(watchedPlayerLogin) : White);
                 
                 for (ply in parsedData.movesPlayed)
                     makeMove(ply);

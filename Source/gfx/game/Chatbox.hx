@@ -183,7 +183,7 @@ class Chatbox extends VBox implements INetObserver
             case Ongoing(parsedData, _, _, _, spectatedLogin):
                 this.isOwnerSpectator = spectatedLogin != null;
                 addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
-            case Past(parsedData):
+            case Past(parsedData, _):
                 this.isOwnerSpectator = true;
                 addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
         }

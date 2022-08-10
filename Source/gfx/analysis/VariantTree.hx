@@ -235,7 +235,7 @@ class VariantTree extends Sprite implements IVariantView
             selectBranchUnsafe(nodePath, nodePath.length);
     }
 
-    private function refreshLayout()
+    public function refreshLayout()
     {
         var displacement:DisplacementInfo = buildOptimalDisplacement();
         
@@ -332,12 +332,6 @@ class VariantTree extends Sprite implements IVariantView
         this.eventHandler = eventHandler;
     }
 
-    private function onReady(e)
-    {
-        removeEventListener(Event.RENDER, onReady);
-        refreshLayout();
-    }
-
     public function new(variant:Variant, ?selectedNodePath:VariantPath) 
     {
         super();
@@ -367,7 +361,5 @@ class VariantTree extends Sprite implements IVariantView
             selectBranchUnsafe(variantRef.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
         else
             selectBranchUnsafe(variantRef.extendPathLeftmost([]), 0);
-
-        addEventListener(Event.RENDER, onReady);
     }
 }

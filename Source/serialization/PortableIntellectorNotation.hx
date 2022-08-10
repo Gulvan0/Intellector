@@ -9,7 +9,7 @@ using StringTools;
 
 class PortableIntellectorNotation 
 {
-    public static function serialize(movesPlayed:Array<Ply>, ?whiteLogin:String = "Anonymous", ?blackLogin:String = "Anonymous", ?timeControl:TimeControl, ?dateTime:Date, ?outcome:Outcome, ?winnerColor:PieceColor):String
+    public static function serialize(startingSituation:Situation, movesPlayed:Array<Ply>, ?whiteLogin:String = "Anonymous", ?blackLogin:String = "Anonymous", ?timeControl:TimeControl, ?datetime:Date, ?outcome:Outcome, ?winnerColor:PieceColor):String
     {
         var pin:String = "";
         if (whiteLogin.startsWith("guest_"))
@@ -19,11 +19,15 @@ class PortableIntellectorNotation
         pin += '#Players: $whiteLogin vs $blackLogin;\n';
         if (timeControl != null)
             pin += '#TimeControl: ${timeControl.toString()};\n';
-        if (dateTime != null)
-            pin += '#DateTime: ${dateTime.toString()};\n';
+        if (datetime != null)
+            pin += '#DateTime: ${datetime.toString()};\n';
+
+        var startingSIP:String = startingSituation.serialize();
+        if (startingSIP != Situation.starting().serialize())
+            pin += '#CustomStartPosSIP: $startingSIP;\n';
 
         var moveNum:Int = 1;
-        var situation:Situation = Situation.starting();
+        var situation:Situation = startingSituation;
         for (ply in movesPlayed)
         {
             var plyStr:String = ply.toNotation(situation, false);

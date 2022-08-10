@@ -75,11 +75,6 @@ class Board extends Sprite
         }
     }
 
-    public function revertOrientation()
-    {
-        setOrientation(opposite(orientationColor));
-    }
-
     public function setOrientation(val:PieceColor) 
     {
         if (val != orientationColor)
@@ -328,7 +323,6 @@ class Board extends Sprite
             var bottomHexLocation:IntPoint = new IntPoint(i, orientationColor == White? 6 - i % 2 : 0);
             var bottomHexCoords:Point = hexCoords(bottomHexLocation);
             var letter:Label = createLetter(Notation.getColumn(i), hexSideLength);
-            trace("hsl: " + hexSideLength);
             letter.width = 2 * hexSideLength;
             letter.x = bottomHexCoords.x - hexSideLength;
             letter.y = bottomHexCoords.y + Hexagon.sideToHeight(hexSideLength) / 2;

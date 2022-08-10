@@ -53,8 +53,8 @@ class Screen extends Component
         {
             case MainMenu:
                 new MainMenu();
-            case Analysis(initialVariantStr, _, _):
-                new Analysis(initialVariantStr);
+            case Analysis(initialVariantStr, selectedMainlineMove, _, _):
+                new Analysis(initialVariantStr, selectedMainlineMove);
             case LanguageSelectIntro(languageReadyCallback):
                 new LanguageSelectIntro(languageReadyCallback);
             case LiveGame(id, constructor):

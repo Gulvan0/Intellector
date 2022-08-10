@@ -110,7 +110,7 @@ class ScreenManager
                 if (currentScreenType.match(Analysis(_, _, _)))
                 {
                     //Only change URL and screen data, but do not touch displayed components
-                    var newScreenType:ScreenType = Analysis(null, studyID, studyName);
+                    var newScreenType:ScreenType = Analysis(null, null, studyID, studyName);
                     URLEditor.setPath(URLEditor.getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
                     currentScreenType = newScreenType;
                 }

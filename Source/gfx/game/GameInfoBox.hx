@@ -175,7 +175,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
                 opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
                 timeControlIcon.resource = AssetManager.timeControlPath(tcType);
 
-            case Ongoing(parsedData, _, _, _, _), Past(parsedData):
+            case Ongoing(parsedData, _, _, _, _), Past(parsedData, _):
                 var tcType:TimeControlType = parsedData.timeControl.getType();
 
                 if (tcType == Correspondence)

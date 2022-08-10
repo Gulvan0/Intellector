@@ -69,7 +69,7 @@ class Analysis extends Screen implements IGameBoardObserver
         var shareDialog:ShareDialog = new ShareDialog();
         switch ScreenManager.getCurrentScreenType()
         {
-            case Analysis(_, exploredStudyID, exploredStudyName):
+            case Analysis(_, _, exploredStudyID, exploredStudyName):
                 if (exploredStudyID != null)
                     shareDialog.initInAnalysis(board.shownSituation, board.orientationColor, exportNewCallback, overwriteCallback.bind(exploredStudyID), exploredStudyName);
                 else
@@ -108,22 +108,19 @@ class Analysis extends Screen implements IGameBoardObserver
         redrawPositionEditor();
     }
 
-    public function new(?initialVariantStr:String)
+    public function new(?initialVariantStr:String, ?selectedMainlineMove:Int)
     {
         super();
-        analysisPeripheryObservers = [board, controlTabs, controlTabs.navigator, positionEditor, creepingLine, actionBar];
-        gameboardObservers = [controlTabs, controlTabs.navigator, positionEditor, creepingLine];
-        plyHistoryViews = [controlTabs.navigator, creepingLine];
-
-
         variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.starting());
-        var startingSituation:Situation = variant.startingSituation;
-        var firstColorToMove:PieceColor = startingSituation.turnColor;
 
         board = new GameBoard(Analysis(variant));
         controlTabs = new ControlTabs(variant, handlePeripheralEvent);
         positionEditor = new PositionEditor(handlePeripheralEvent);
         positionEditor.hidden = true;
+
+        analysisPeripheryObservers = [board, controlTabs, controlTabs.navigator, positionEditor, creepingLine, actionBar];
+        gameboardObservers = [controlTabs, controlTabs.navigator, positionEditor, creepingLine];
+        plyHistoryViews = [controlTabs.navigator, creepingLine];
 
         for (view in plyHistoryViews)
             view.init(type -> {handlePeripheralEvent(ScrollBtnPressed(type));}, Analysis(variant));
@@ -139,7 +136,10 @@ class Analysis extends Screen implements IGameBoardObserver
         boardContainer.addComponent(boardWrapper);
         lControlTabsContainer.addComponent(controlTabs);
         positionEditorContainer.addComponent(positionEditor);
-        
+
         board.addObserver(this);
+
+        if (selectedMainlineMove != null)
+            handlePeripheralEvent(ScrollBtnPressed(Precise(selectedMainlineMove)));
     }
 }

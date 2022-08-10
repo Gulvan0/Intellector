@@ -23,7 +23,7 @@ class CreepingLine extends PlyHistoryView
     private function appendPlyStr(plyStr:String)
     {
         var moveNum:Int = moveHistory.length;
-        var plyCard:CreepingLinePly = new CreepingLinePly(moveNum, moveNum, plyStr, onPlySelectedManually);
+        var plyCard:CreepingLinePly = new CreepingLinePly(moveNum, moveNum + 1, plyStr, onPlySelectedManually);
 
         plyCards.push(plyCard);
         lineBox.addComponent(plyCard);
@@ -36,7 +36,7 @@ class CreepingLine extends PlyHistoryView
 
     private function setShownMove(value:Int)
     {
-        if (shownMove > 0)
+        if (shownMove > 0 && plyCards.length >= shownMove)
             plyCards[shownMove-1].deselect();
         shownMove = value;
         if (shownMove > 0)

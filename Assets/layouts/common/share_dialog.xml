@@ -29,8 +29,7 @@
                         <checkbox id="transparentBackgroundCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_TRANSPARENT_BG_CHECKBOX_TEXT)}" selected="true" horizontalAlign="center" />
                         <hbox id="bgColorBox" horizontalAlign="center" disabled="true" height="30px">
                             <label text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_BGCOLOR_LABEL_TEXT)}" verticalAlign="center" style="font-size: 16px" />
-                            <textfield id="bgColorTF" width="76px" restrictChars="0-9A-Fa-f" verticalAlign="center" />
-                            <box id="bgColorPreview" width="28px" height="28px" verticalAlign="center"/>
+                            <color-picker-popup id="colorPicker" selectedItem="#ffffff" verticalAlign="center" />
                         </hbox>
                         <spacer height="10px" />
                         <checkbox id="addMarkupCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_MARKUP_CHECKBOX_TEXT)}" selected="false" horizontalAlign="center" />

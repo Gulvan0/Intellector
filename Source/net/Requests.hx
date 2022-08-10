@@ -20,7 +20,7 @@ class Requests
         {
             case GameIsOver(log):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(log);
-		        ScreenManager.toScreen(LiveGame(id, Past(parsedData)));
+		        ScreenManager.toScreen(LiveGame(id, Past(parsedData, null)));
             case GameIsOngoing(whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
 		        if (LoginManager.login == null || parsedData.getPlayerColor() == null)
@@ -93,7 +93,7 @@ class Requests
         switch event
         {
             case SingleStudy(name, variantStr):
-                ScreenManager.toScreen(Analysis(variantStr, id, name));
+                ScreenManager.toScreen(Analysis(variantStr, 0, id, name));
             case StudyNotFound:
                 ScreenManager.toScreen(MainMenu);
                 Dialogs.alert("Студия не найдена", "Ошибка");

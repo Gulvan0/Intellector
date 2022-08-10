@@ -150,8 +150,11 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
             case Analysis(initialVariant):
                 this.startingSituation = initialVariant.startingSituation;
                 this.currentSituation = startingSituation.copy();
+                for (ply in initialVariant.getMainLineBranch())
+                    appendPly(ply, false);
+                performScroll(End);
 
-            case Live(Ongoing(parsedData, _, _, _, _)), Live(Past(parsedData)):
+            case Live(Ongoing(parsedData, _, _, _, _)), Live(Past(parsedData, _)):
                 this.startingSituation = parsedData.startingSituation;
                 this.currentSituation = startingSituation.copy();
                 for (ply in parsedData.movesPlayed)

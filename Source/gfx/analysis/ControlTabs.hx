@@ -105,6 +105,10 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
                 variantViewSV.hidden = false;
                 variantViewSV.addComponent(new SpriteWrapper(tree, false));
                 variantViewSV.addEventListener(MouseEvent.MOUSE_WHEEL, onWheel.bind(tree), false, 100);
+                onChange = e -> {
+                    if (selectedPage == branchingTab)
+                        tree.refreshLayout();
+                };
             case Outline: 
                 var comp:VariantOutline = new VariantOutline(initialVariant);
                 variantView = comp;
@@ -117,7 +121,6 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
                 variantViewSV.percentContentWidth = 100;
                 variantViewSV.addComponent(box);
         };
-
         variantView.init(eventHandler);
     }
 }

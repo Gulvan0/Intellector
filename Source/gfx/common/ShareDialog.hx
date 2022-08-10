@@ -1,5 +1,6 @@
 package gfx.common;
 
+import haxe.ui.util.Color;
 import haxe.ui.core.Screen;
 import openfl.geom.Matrix;
 import haxe.ui.events.FocusEvent;
@@ -40,7 +41,7 @@ class ImageExportData
         this.board = board;
         this.pngWidth = pngWidth;
         this.pngHeight = pngHeight;
-        this.backgroundColor = 0xFF000000 | backgroundColor;
+        this.backgroundColor = backgroundColor;
         this.transform = new Matrix();
         this.transform.translate(Math.round((pngWidth - boardWidth)/2), Math.round((pngHeight - boardHeight)/2));
     }
@@ -102,7 +103,7 @@ class ShareDialog extends Dialog
             boardHeight = Math.floor(boardWidth * BoardWrapper.invAspectRatio(addMarkupCheckbox.selected));
 
         var hexSideLength:Float = BoardWrapper.widthToHexSideLength(boardWidth);
-        var backgroundColor:Int = transparentBackgroundCheckbox.selected? 0x00FFFFFF : bgColorPreview.customStyle.backgroundColor;
+        var backgroundColor:Int = transparentBackgroundCheckbox.selected? 0x00000000 : 0xFF000000 | cast(colorPicker.selectedItem, Color).toInt();
         
         var board:Board = new Board(situation, orientation, hexSideLength, addMarkupCheckbox.selected? Over : None);
         pngExportData = new ImageExportData(board, pngWidth, pngHeight, boardWidth, boardHeight, backgroundColor);
@@ -134,7 +135,7 @@ class ShareDialog extends Dialog
         }
 
         this.percentWidth = MathUtils.clamp(900 / Screen.instance.width, 0.5, 0.95) * 100;
-        this.percentHeight = MathUtils.clamp(500 / Screen.instance.height, 0.5, 0.95) * 100;
+        this.percentHeight = MathUtils.clamp(600 / Screen.instance.height, 0.5, 0.95) * 100;
 
         showDialog(false);
         boardContainer.addComponent(boardWrapper);
@@ -194,22 +195,11 @@ class ShareDialog extends Dialog
             pngHeightTF.text = "" + clampedValue;
         }
     }
-    
-    @:bind(bgColorTF, FocusEvent.FOCUS_OUT)
-    @:bind(bgColorTF, UIEvent.CHANGE)
-    public function onBGColorFocusLost(e) 
-    {
-        var value:Null<Int> = Std.parseInt("0x" + bgColorTF.text);
-        if (value == null)
-            bgColorTF.text = StringTools.hex(bgColorPreview.customStyle.backgroundColor, 6);
-        else
-            bgColorPreview.customStyle = {backgroundColor: value};
-    }
 
-    public function initInGame(situation:Situation, orientation:PieceColor, gameLink:String, pin:String, plySequence:Array<Ply>)
+    public function initInGame(situation:Situation, orientation:PieceColor, gameLink:String, pin:String, startingSituation:Situation, plySequence:Array<Ply>)
     {
         init(situation, orientation);
-        shareGameTab.init(gameLink, pin, plySequence);
+        shareGameTab.init(gameLink, pin, startingSituation, plySequence);
         tabView.removeComponent(shareExportTab);
     }
 
@@ -232,8 +222,6 @@ class ShareDialog extends Dialog
         boardWrapper.horizontalAlign = 'center';
         boardWrapper.verticalAlign = 'center';
 
-        bgColorTF.text = "BBBBBB";
-        bgColorPreview.customStyle = {backgroundColor: 0xBBBBBB};
         pngWidthTF.text = "720";
         pngHeightTF.text = "" + Math.ceil(BoardWrapper.invAspectRatio(addMarkupCheckbox.selected) * 720);
 

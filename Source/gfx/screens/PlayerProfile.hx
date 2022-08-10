@@ -283,7 +283,7 @@ class PlayerProfile extends Screen implements INetObserver
             exploredStudyID = overview.id;
 
         var link:Link = haxeuiLink(text);
-        link.onClick = (e) -> {ScreenManager.toScreen(Analysis(overview.data.variantStr, exploredStudyID, null));}; //Wrong way to do things (use name from overview)
+        link.onClick = (e) -> {ScreenManager.toScreen(Analysis(overview.data.variantStr, 0, exploredStudyID, null));}; //Wrong way to do things (use name from overview)
         return link;
     }
 

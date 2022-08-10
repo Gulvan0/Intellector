@@ -33,7 +33,7 @@ class MoveNavigator extends PlyHistoryView
 
     private function appendPlyStr(plyStr:String)
     {   
-        if (currentSituation.turnColor == startingSituation.turnColor)
+        if (currentSituation.turnColor == White)
         {
             lastMovetableEntry = {"num": '${moveHistory.length + 1}', "white_move": plyStr, "black_move": " "};
             movetable.dataSource.add(lastMovetableEntry);

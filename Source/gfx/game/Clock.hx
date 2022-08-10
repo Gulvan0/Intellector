@@ -206,10 +206,10 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 if (ownerToMove && (moveNum >= 2 || secondsLeft != startSecs)) //The last condition is a somewhat (i. e., unless float ownerSecsLeft will miraclously match integer startSecs) reliable workaround for cases when the first two moves had been made, but then, due to takebacks, the total move count became less than 2 once again (and then the reconnection happened)
                     launchTimer();
 
-            case Past(parsedData):
+            case Past(parsedData, _):
                 this.active = false;
                 if (parsedData.msLeftWhenEnded != null)
-                    label.text = TimeControl.secsToString(parsedData.msLeftWhenEnded[ownerColor] * 1000);
+                    label.text = TimeControl.secsToString(parsedData.msLeftWhenEnded[ownerColor] / 1000);
                 else
                     hidden = true;
         }

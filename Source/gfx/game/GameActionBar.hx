@@ -289,7 +289,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                 this.enableTakebackAfterMove = parsedData.startingSituation.turnColor == White? 1 : 2;
                 move = parsedData.moveCount;
 
-            case Past(parsedData):
+            case Past(parsedData, _):
                 setMode(Spectator);
         }
 

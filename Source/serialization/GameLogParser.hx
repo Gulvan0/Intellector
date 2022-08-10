@@ -121,7 +121,7 @@ class GameLogParser
                 parserOutput.whiteLogin = playerLogins[0];
                 parserOutput.blackLogin = playerLogins[1];
             case "D":
-                parserOutput.datetime = Date.fromTime(Std.parseFloat(args[0]));
+                parserOutput.datetime = Date.fromTime(Std.parseInt(args[0]) * 1000);
             case "L":
                 parserOutput.msLeftWhenEnded = [White => Std.parseInt(args[0]), Black => Std.parseInt(args[1])];
             case "S":
