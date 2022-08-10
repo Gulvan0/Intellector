@@ -138,7 +138,6 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
     public function init(onScrollRequested:PlyScrollType->Void, constructor:ComponentConstructor)
     {
         this.onScrollRequested = onScrollRequested;
-        this.currentSituation = startingSituation.copy();
         this.moveHistory = [];
         this.shownMove = 0;
 
@@ -146,12 +145,15 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
         {
             case Live(New(_, _, _, startingSituation, _)):
                 this.startingSituation = startingSituation;
+                this.currentSituation = startingSituation.copy();
 
             case Analysis(initialVariant):
                 this.startingSituation = initialVariant.startingSituation;
+                this.currentSituation = startingSituation.copy();
 
             case Live(Ongoing(parsedData, _, _, _, _)), Live(Past(parsedData)):
                 this.startingSituation = parsedData.startingSituation;
+                this.currentSituation = startingSituation.copy();
                 for (ply in parsedData.movesPlayed)
                     appendPly(ply, false);
                 performScroll(End);

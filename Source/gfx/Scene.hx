@@ -101,7 +101,7 @@ class Scene extends VBox
 
     private function startSpectating(requestedLogin:String)
     {
-        Requests.watchPlayer(requestedLogin, onSpectationData.bind(requestedLogin), Dialogs.alertCallback("В настоящий момент игрок не участвует в партии", "Ошибка"), Dialogs.alertCallback("Игрок не в сети", "Ошибка"), Dialogs.alertCallback("Игрок не найден", "Ошибка"));
+        Requests.watchPlayer(requestedLogin);
     }
 
     private function onSpectationData(watchedPlayer:String, match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)
@@ -122,8 +122,7 @@ class Scene extends VBox
 
     private function navigateToProfile(requestedLogin:String)
     {
-        //TODO: Implement properly (pass info)
-        Requests.getPlayerProfile(requestedLogin, toScreen.bind(PlayerProfile(requestedLogin)), Dialogs.alertCallback("Игрок не найден", "Ошибка"));
+        Requests.getPlayerProfile(requestedLogin);
     }
 
     private function onLogInPressed(e)

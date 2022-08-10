@@ -185,31 +185,19 @@ class Main extends Sprite
 
 	private function toOpenChallengeJoining(owner:String) 
 	{
-		var onInfo = (hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>) -> {ScreenManager.toScreen(ChallengeJoining(hostLogin, timeControl, color));};
-		var onBusy = (match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String) -> {
-			var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-			spectate(owner, match_id, whiteSeconds, blackSeconds, timestamp, parsedData);
-		}
-		var onNotFound = ScreenManager.toScreen.bind(MainMenu);
-		Requests.getOpenChallenge(owner, onInfo, onBusy, onNotFound);
+		Requests.getOpenChallenge(owner);
 	}
 
 	private function toProfile(login:String) 
 	{
-		var onInfo = () -> {}; //TODO: Implement
-		var onNotFound = ScreenManager.toScreen.bind(MainMenu);
-		Requests.getPlayerProfile(login, onInfo, onNotFound);
+		Requests.getPlayerProfile(login);
 	}
 
 	private function toStudy(idStr:String) 
 	{
 		var id:Null<Int> = Std.parseInt(idStr);
 		if (id != null)
-		{
-			var onInfo = (name:String, variantStr:String) -> {ScreenManager.toScreen(Analysis(variantStr, id, name));};
-			var onNotFound = ScreenManager.toScreen.bind(MainMenu);
-			Requests.getStudy(id, onInfo, onNotFound);
-		}
+			Requests.getStudy(id);
 		else
 			ScreenManager.toScreen(MainMenu);
 	}
@@ -218,42 +206,8 @@ class Main extends Sprite
 	{
 		var id:Null<Int> = Std.parseInt(idStr);
 		if (id != null)
-		{
-			var onOver = revisit.bind(id);
-			var onNotFound = ScreenManager.toScreen.bind(MainMenu);
-			var onOngoing = toOngoingGame;
-			Requests.getGame(id, onOver, onOngoing, onNotFound);
-		}
+			Requests.getGame(id);
 		else
 			ScreenManager.toScreen(MainMenu);
-	}
-
-	private function toOngoingGame(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)
-	{
-		var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-		if (LoginManager.login == null)
-			ScreenManager.toScreen(MainMenu);
-		else if (parsedData.getPlayerColor() == null)
-			spectate(null, match_id, whiteSeconds, blackSeconds, timestamp, parsedData);
-		else
-			rejoin(match_id, whiteSeconds, blackSeconds, timestamp, parsedData);
-	}
-
-	private function spectate(watchedPlayer:Null<String>, match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, parsedData:GameLogParserOutput)
-	{
-		if (watchedPlayer == null)
-			watchedPlayer = parsedData.whiteLogin;
-		ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, watchedPlayer)));
-	}
-
-	private function revisit(match_id:Int, log:String)
-	{
-		var parsedData:GameLogParserOutput = GameLogParser.parse(log);
-		ScreenManager.toScreen(LiveGame(match_id, Past(parsedData)));
-	}
-
-	private function rejoin(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, parsedData:GameLogParserOutput)
-	{
-		ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
 	}
 }

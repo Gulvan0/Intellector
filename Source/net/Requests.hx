@@ -1,114 +1,127 @@
 package net;
 
+import gfx.components.Dialogs;
+import gfx.ScreenManager;
+import serialization.GameLogParser;
 import struct.PieceColor;
 import utils.TimeControl;
 
 class Requests
 {
-    public static function getGame(id:Int, onOver:(log:String)->Void, onCurrent:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotFound:Void->Void)
+    public static function getGame(id:Int)
     {
-        Networker.eventQueue.addHandler(getGame_handler.bind(onOver, onCurrent.bind(id), onNotFound));
+        Networker.eventQueue.addHandler(getGame_handler.bind(id));
         Networker.emitEvent(GetGame(id));
     }
 
-    private static function getGame_handler(onOver:(log:String)->Void, onCurrent:(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotFound:Void->Void, event:ServerEvent):Bool
+    private static function getGame_handler(id:Int, event:ServerEvent):Bool
     {
         switch event
         {
             case GameIsOver(log):
-                onOver(log);
+                var parsedData:GameLogParserOutput = GameLogParser.parse(log);
+		        ScreenManager.toScreen(LiveGame(id, Past(parsedData)));
             case GameIsOngoing(whiteSeconds, blackSeconds, timestamp, currentLog):
-                onCurrent(whiteSeconds, blackSeconds, timestamp, currentLog);
+                var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
+		        if (LoginManager.login == null || parsedData.getPlayerColor() == null)
+			        ScreenManager.toScreen(LiveGame(id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, parsedData.whiteLogin)));
+		        else
+			        ScreenManager.toScreen(LiveGame(id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
             case GameNotFound:
-                onNotFound();
+                ScreenManager.toScreen(MainMenu);
             default:
                 return false;
         }
         return true;
     }
 
-    public static function getOpenChallenge(ownerLogin:String, onInfo:(hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>)->Void, onHostPlaying:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotFound:Void->Void) 
+    public static function getOpenChallenge(ownerLogin:String) 
     {
-        Networker.eventQueue.addHandler(getOpenChallenge_handler.bind(onInfo, onHostPlaying, onNotFound));
+        Networker.eventQueue.addHandler(getOpenChallenge_handler.bind(ownerLogin));
         Networker.emitEvent(GetOpenChallenge(ownerLogin));
     }
 
-    private static function getOpenChallenge_handler(onInfo:(hostLogin:String, timeControl:TimeControl, color:Null<PieceColor>)->Void, onHostPlaying:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotFound:Void->Void, event:ServerEvent):Bool
+    private static function getOpenChallenge_handler(ownerLogin:String, event:ServerEvent):Bool
     {
         switch event
         {
             case OpenChallengeInfo(hostLogin, secsStart, secsBonus, colorStr):
                 var timeControl:TimeControl = new TimeControl(secsStart, secsBonus);
                 var color:Null<PieceColor> = colorStr != null? PieceColor.createByName(colorStr) : null;
-                onInfo(hostLogin, timeControl, color);
+                ScreenManager.toScreen(ChallengeJoining(hostLogin, timeControl, color));
             case OpenChallengeHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
-                onHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog);
+                var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
+                ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, ownerLogin)));
             case OpenchallengeNotFound:
-                onNotFound();
+                ScreenManager.toScreen(MainMenu);
+                Dialogs.alert("Вызов не найден", "Ошибка");
             default:
                 return false;
         }
         return true;
     }
 
-    public static function getPlayerProfile(login:String, onInfo:Void->Void, onNotFound:Void->Void) 
+    public static function getPlayerProfile(login:String) 
     {
-        Networker.eventQueue.addHandler(getPlayerProfile_handler.bind(onInfo, onNotFound));
+        Networker.eventQueue.addHandler(getPlayerProfile_handler.bind(login));
         Networker.emitEvent(GetPlayerProfile(login));
     }
 
-    private static function getPlayerProfile_handler(onInfo:Void->Void, onNotFound:Void->Void, event:ServerEvent) 
+    private static function getPlayerProfile_handler(login:String, event:ServerEvent) 
     {
         switch event
         {
             case PlayerProfile(recentGamesStr, recentStudiesStr, hasMoreGames, hasMoreStudies):
-                onInfo(); //TODO: Implement properly
+                //TODO: Implement properly
             case PlayerNotFound:
-                onNotFound();
+                ScreenManager.toScreen(MainMenu);
+                Dialogs.alert("Игрок не найден", "Ошибка");
             default:
                 return false;
         }
         return true;
     }
 
-    public static function getStudy(id:Int, onInfo:(name:String, variantStr:String)->Void, onNotFound:Void->Void) 
+    public static function getStudy(id:Int) 
     {
-        Networker.eventQueue.addHandler(getStudy_handler.bind(onInfo, onNotFound));
+        Networker.eventQueue.addHandler(getStudy_handler.bind(id));
         Networker.emitEvent(GetStudy(id));
     }
 
-    private static function getStudy_handler(onInfo:(name:String, variantStr:String)->Void, onNotFound:Void->Void, event:ServerEvent) 
+    private static function getStudy_handler(id:Int,  event:ServerEvent) 
     {
         switch event
         {
             case SingleStudy(name, variantStr):
-                onInfo(name, variantStr);
+                ScreenManager.toScreen(Analysis(variantStr, id, name));
             case StudyNotFound:
-                onNotFound();
+                ScreenManager.toScreen(MainMenu);
+                Dialogs.alert("Студия не найдена", "Ошибка");
             default:
                 return false;
         }
         return true;
     }
 
-    public static function watchPlayer(login:String, onData:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotPlaying:Void->Void, onOffline:Void->Void, onNotFound:Void->Void)
+    public static function watchPlayer(login:String)
     {
-        Networker.eventQueue.addHandler(watchPlayer_handler.bind(onData, onNotPlaying, onOffline, onNotFound));
+        Networker.eventQueue.addHandler(watchPlayer_handler.bind(login));
         Networker.emitEvent(Spectate(login));
     }
 
-    private static function watchPlayer_handler(onData:(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)->Void, onNotPlaying:Void->Void, onOffline:Void->Void, onNotFound:Void->Void, event:ServerEvent)
+    private static function watchPlayer_handler(login:String, event:ServerEvent)
     {
         switch event
         {
-            case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
-                onData(match_id, whiteSeconds, blackSeconds, timestamp, currentLog);
+            case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, currentLog): 
+		        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
+                ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, login)));
             case PlayerNotInGame:
-                onNotPlaying();
+                Dialogs.alert("В настоящий момент игрок не участвует в партии", "Ошибка");
             case PlayerOffline:
-                onOffline();
+                Dialogs.alertCallback("Игрок не в сети", "Ошибка");
             case PlayerNotFound:
-                onNotFound();
+                Dialogs.alertCallback("Игрок не найден", "Ошибка");
             default:
                 return false;
         }
