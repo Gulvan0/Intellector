@@ -97,8 +97,8 @@ class Dictionary
         SETTINGS_LANGUAGE_OPTION_NAME => ["Language", "Язык"],
         SETTINGS_MARKUP_OPTION_NAME => ["Coordinates", "Координаты"],
         SETTINGS_PREMOVES_OPTION_NAME => ["Premoves", "Предходы"],
-        SETTINGS_BRANCHING_TYPE_OPTION_NAME => ["Display branches as", "Вид ветвей"],
-        SETTINGS_BRANCHING_SHOW_TURN_COLOR_OPTION_NAME => ["Display turn color in Tree mode (Branches Tab)", "Отображать цвет хода в режиме дерева (Вкладка \"Ветви\")"],
+        SETTINGS_BRANCHING_TYPE_OPTION_NAME => ["Branching mode", "Вид ветвей"],
+        SETTINGS_BRANCHING_SHOW_TURN_COLOR_OPTION_NAME => ["Display turn color in Tree mode", "Отображать цвет хода в режиме Дерева"],
         SETTINGS_SILENT_CHALLENGES_OPTION_NAME => ["Ignore incoming challenges", "Не уведомлять о входящих вызовах"],
 
         SETTINGS_MARKUP_ALL_OPTION_VALUE => ["All", "Все"],
