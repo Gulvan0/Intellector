@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.components.Dialogs;
 import serialization.GameLogParser;
 import haxe.Timer;
 import haxe.ui.Toolkit;
@@ -93,6 +94,7 @@ class ScreenManager
             Timer.delay(scene.resize, 40);
             for (handler in resizeHandlers)
                 Timer.delay(handler, 40);
+            Timer.delay(Dialogs.onScreenResized, 40);
         }
     }
 

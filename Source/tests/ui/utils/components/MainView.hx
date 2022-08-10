@@ -78,7 +78,7 @@ class MainView extends HBox
     private function addMacro(e)
     {
         if (!Lambda.empty(UITest.getHistory()))
-            Dialogs.custom(new AddMacroDialog(addMacroWidget.bind(_, false)));
+            new AddMacroDialog(addMacroWidget.bind(_, false)).showDialog(true);
         else
             Dialogs.alert("History is empty", "TestEnv Warning");
     }
@@ -89,7 +89,7 @@ class MainView extends HBox
         var untrackedMacroNames = DataKeeper.getUntrackedMacroNames();
 
         if (!Lambda.empty(untrackedMacroNames))
-            Dialogs.custom(new ProposeMacrosDialog(untrackedMacroNames));
+            new ProposeMacrosDialog(untrackedMacroNames).showDialog(true);
         else
             Dialogs.alert("No untracked macros detected", "TestEnv Warning");
     }

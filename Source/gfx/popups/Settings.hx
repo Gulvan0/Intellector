@@ -16,6 +16,8 @@ class Settings extends Dialog
 {
     private function resize()
     {
+        width = Math.min(600, Screen.instance.width * 0.98);
+
         for (bar in stack3.findComponents(ButtonBar))
             bar.customStyle = {fontSize: Math.min(16, Screen.instance.width * 0.02), horizontalAlign: "center"};
 

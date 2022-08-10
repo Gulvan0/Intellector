@@ -40,14 +40,68 @@ enum SpaceRemoval
 
 class Dialogs
 {
-    public static var dialogActive:Bool = false; //TODO: Rewrite (account for multiple simultaneous dialogs)
+    private static var shownDialogs:Array<Dialog> = [];
+
+    private static function correctDialogPosition(dialog:Dialog)
+    {
+        dialog.x = (Screen.instance.width - dialog.width) / 2;
+        dialog.y = (Screen.instance.height - dialog.height) / 2;
+    }
+
+    public static function onScreenResized() 
+    {
+        Timer.delay(() -> {
+            for (dialog in shownDialogs)
+                correctDialogPosition(dialog);
+        }, 40);
+    }
+
+    public static function hasActiveDialog():Bool
+    {
+        return !Lambda.empty(shownDialogs);
+    }
+
+    private static function onDialogClosed(e:DialogEvent, dialog:Dialog, ?customCloseHandler:DialogEvent->Void)
+    {
+        shownDialogs.remove(dialog);
+        if (customCloseHandler != null)
+            customCloseHandler(e);
+        if (hasActiveDialog())
+            shownDialogs[0].disabled = false;
+    }
+
+    private static function addDialog(dialog:Dialog, show:Bool, ?customCloseHandler:DialogEvent->Void, ?modal:Bool)
+    {
+        if (hasActiveDialog())
+            shownDialogs[0].disabled = true;
+        shownDialogs.unshift(dialog);
+        dialog.onDialogClosed = onDialogClosed.bind(_, dialog, customCloseHandler);
+        if (show)
+            dialog.showDialog(modal);
+        Timer.delay(correctDialogPosition.bind(dialog), 40);
+    }
+
+    public static function alertCallback(message:String, title:String):Void->Void 
+    {
+        return alert.bind(message, title);
+    }
+
+    public static function alert(message:String, title:String)
+    {
+        addDialog(DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true), false);
+    }
+
+    public static function info(message:String, title:String)
+    {
+        addDialog(DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true), false);
+    }
 
     public static function confirm(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)
     {
-        dialogActive = true;
-        DialogManager.messageBox(message, title, MessageBoxType.TYPE_QUESTION, true, (btn:DialogButton) -> {
-            dialogActive = false;
-            if (btn == DialogButton.YES)
+        var dialog = DialogManager.messageBox(message, title, MessageBoxType.TYPE_QUESTION, true);
+
+        addDialog(dialog, false, (e:DialogEvent) -> {
+            if (e.button == DialogButton.YES)
                 onConfirmed();
             else
                 onDeclined();
@@ -69,48 +123,24 @@ class Dialogs
             onCancel();
     }
 
-    public static function custom(dialog:Dialog, modal:Bool = true)
+    public static function custom(dialog:Dialog, modal:Bool = true, ?onClosed:DialogEvent->Void)
     {
-        dialog.showDialog(modal);
-    }
-
-    public static function alert(message:String, title:String)
-    {
-        dialogActive = true;
-        DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true)
-            .onDialogClosed = e -> {dialogActive = false;};
-    }
-
-    public static function alertCallback(message:String, title:String):Void->Void 
-    {
-        return alert.bind(message, title);
-    }
-
-    public static function info(message:String, title:String)
-    {
-        dialogActive = true;
-        DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true)
-            .onDialogClosed = e -> {dialogActive = false;};
+        addDialog(dialog, true, onClosed, modal);
     }
 
     public static function branchingHelp()
     {
-        dialogActive = true;
-
         var messageBox = new MessageBox();
         messageBox.type = MessageBoxType.TYPE_INFO;
         messageBox.title = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TITLE);
         messageBox.messageLabel.htmlText = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TEXT);
         messageBox.messageLabel.customStyle = {fontSize: Math.max(Screen.instance.height * 0.02, 12)};
         messageBox.width = Math.min(500, Screen.instance.width * 0.95);
-        messageBox.onDialogClosed = e -> {dialogActive = false;};
-        messageBox.showDialog(true);
+        addDialog(messageBox, true, null, true);
     }
 
     public static function changelog()
     {
-        dialogActive = true;
-
         var changesLabel:Label = new Label();
         changesLabel.htmlText = Changelog.getAll();
         changesLabel.customStyle = {fontSize: MathUtils.clamp(0.025 * Screen.instance.height, 12, 36)};
@@ -126,41 +156,23 @@ class Dialogs
         dialog.title = Dictionary.getPhrase(CHANGELOG_DIALOG_TITLE);
         dialog.addComponent(changesSV);
 
-        dialog.onDialogClosed = e -> {
-            dialogActive = false;
-        };
-
-        dialog.showDialog(false);
+        addDialog(dialog, true, null, false);
     }
 
     public static function settings()
     {
-        dialogActive = true;
-
         var dialog:Settings = new Settings();
-        dialog.onDialogClosed = e -> {
-            dialogActive = false;
-        };
-        
-        dialog.showDialog(false);
+        addDialog(dialog, true, null, false);
     }
 
     public static function login()
     {
-        dialogActive = true;
-
         var dialog:LogIn = new LogIn();
-        dialog.onDialogClosed = e -> {
-            dialogActive = false;
-        };
-        
-        dialog.showDialog(false);
+        addDialog(dialog, true, null, false);
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void)
     {
-        dialogActive = true;
-        
         function cb(dialog:Dialog, type:PieceType) 
         {
             dialog.hideDialog(DialogButton.OK);
@@ -184,27 +196,25 @@ class Dialogs
         dialog.addComponent(body);
         dialog.title = Dictionary.getPhrase(PROMOTION_DIALOG_TITLE);
         dialog.buttons = DialogButton.CANCEL;
-        dialog.onDialogClosed = e -> {dialogActive = false;};
-        dialog.showDialog(false);
+        addDialog(dialog, true, null, false);
     }
 
     public static function chameleonConfirm(onDecided:Bool->Void)
     {
-        dialogActive = true;
-        DialogManager.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false, (btn:DialogButton) -> {
-            if (btn == DialogButton.YES)
+        var dialog = DialogManager.messageBox(Dictionary.getPhrase(CHAMELEON_DIALOG_QUESTION), Dictionary.getPhrase(CHAMELEON_DIALOG_TITLE), MessageBoxType.TYPE_QUESTION, false);
+        addDialog(dialog, false, e -> {
+            if (e.button == DialogButton.YES)
                 onDecided(true);
-            else if (btn == DialogButton.NO)
+            else if (e.button == DialogButton.NO)
                 onDecided(false);
-        })
-            .onDialogClosed = e -> {dialogActive = false;};
+        });
     }
 
     public static function specifyChallengeParams(onConfirm:(startSecs:Int, bonusSecs:Int, callerColor:Null<PieceColor>)->Void, ?onCancel:Null<Void->Void>)
     {
         //TODO: Rewrite (and create a separate class for the challenge params)
         var dialog:Dialog = new ChallengeParamsDialog(onConfirm, onCancel);
-        dialog.showDialog(true);
+        addDialog(dialog, true, null, true);
     }
 
     private static function onBtnAdded(btn:Button, type:PieceType, color:PieceColor, iconSize:Float, e) 
