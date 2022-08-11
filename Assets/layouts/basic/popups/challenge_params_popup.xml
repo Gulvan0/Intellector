@@ -1,0 +1,103 @@
+<dialog title="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIALOG_TITLE)}">
+    <hbox width="100%">
+        <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TYPE_OPTION_NAME)}" verticalAlign="center" width="50%" />
+        <option-stepper id="typeStepper" width="50%" verticalAlign="center">
+            <data>
+                <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TYPE_DIRECT)}" />
+                <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TYPE_OPEN)}" />
+            </data>
+        </option-stepper>
+    </hbox>
+
+    <stack id="typeSpecificStack">
+        <hbox width="100%">
+            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIRECT_USERNAME_OPTION_NAME)}" verticalAlign="center" width="50%" />
+            <textfield id="usernameTF" width="50%" verticalAlign="center" />
+        </hbox>
+        <vbox width="100%">
+            <hbox width="100%">
+                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY)}" width="50%" verticalAlign="center" />
+                <dropdown id="visibilityDropdown" selectedIndex="0" verticalAlign="center" width="50%">
+                    <data>
+                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY_ALL)}" />
+                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY_BY_LINK)}" />
+                    </data>
+                </dropdown>
+            </grid>
+                
+            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_LINK_HEADER)}" />
+            <hbox width="100%">
+                <textfield id="linkTF" text="${browser.URLEditor.getChallengeLink(net.LoginManager.login)}" width="100%" height="30px" verticalAlign="center" />
+                <button id="copyLinkBtn" width="30px" height="30px" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_TOOLTIP)}" icon="assets/symbols/common/copy.svg" styleName="tool-button" />
+                <button id="copyLinkBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_SUCCESS_TOOLTIP)}" icon="assets/symbols/common/tick.svg" styleName="tool-button" />
+            </hbox>
+
+        </vbox>
+    </stack>
+    
+    <vbox width="100%">
+        <hbox width="100%">
+            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIRECT_USERNAME_OPTION_NAME)}" verticalAlign="center" width="50%" />
+            <hbox width="45%" customStyle="border: 1px solid $normal-border-color;padding: 5px;" verticalAlign="center">
+                <image id="tcIcon" verticalAlign="center" />
+                <label id="tcLabel" verticalAlign="center" />
+            </hbox>
+            <button styleName="tool-button" icon="assets/symbols/common/edit.svg" />
+        </hbox>
+        <vbox id="tcParamsBox" width="100%" hidden="true">
+            <hbox width="100%">
+                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_START_OPTION_NAME)}" verticalAlign="center" width="50%" />
+                <hbox width="50%">
+                    <textfield id="startMinsTF" width="50%" verticalAlign="center" />
+                    <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_MINS_APPENDIX)}" verticalAlign="bottom" />
+                    <textfield id="startSecsTF" width="50%" verticalAlign="center" /> 
+                    <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_SECS_APPENDIX)}" verticalAlign="bottom" />
+                </hbox> 
+            </hbox>
+            <hbox width="100%">
+                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_INCREMENT_OPTION_NAME)}" verticalAlign="center" />
+                <textfield id="bonusSecsTF" width="100%" verticalAlign="center" /> 
+                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_SECS_APPENDIX)}" verticalAlign="bottom" />
+            </hbox>
+            <checkbox id="correspondenceCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_CORRESPONDENCE_CHECK_NAME)}" selected="false" />
+            <button id="applyTcParamsBtn" text="OK" horizontalAlign="center" />
+        </vbox>
+        <checkbox id="rankedCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_RANKED_CHECK_NAME)}" selected="false" />
+        <vbox id="rankedParamsBox" width="100%" hidden="true">
+            <checkbox id="anyEloCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_RATED_ANY_ELO_CHECK_NAME)}" selected="true" />
+            <hbox id="maxEloDiffBox" width="100%" disabled="true">
+                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_RATED_MAXDIFF_OPTION_NAME)}" verticalAlign="center" width="70%" />
+                <textfield id="maxEloDiffTF" width="30%" verticalAlign="center" text="0" /> 
+            </hbox>
+        </vbox>
+        <vbox id="unrankedParamsBox" width="100%">
+            <hbox width="100%">
+                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_COLOR_OPTION_NAME)}" verticalAlign="center" width="50%" />
+                <dropdown id="colorDropdown" selectedIndex="0" verticalAlign="center" width="50%">
+                    <data>
+                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_COLOR_RANDOM)}" />
+                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_COLOR_WHITE)}" />
+                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_COLOR_BLACK)}" />
+                    </data>
+                </dropdown>
+            </hbox>
+            <hbox width="100%">
+                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_STARTPOS_OPTION_NAME)}" verticalAlign="center" width="50%" />
+                <dropdown id="startposDropdown" selectedIndex="0" verticalAlign="center" width="50%">
+                    <data>
+                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_STARTPOS_DEFAULT)}" />
+                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_STARTPOS_CUSTOM)}" />
+                    </data>
+                </dropdown>
+            </hbox>
+            <vbox id="customStartposBox" hidden="true" width="100%">
+                <hbox width="100%">
+                    <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_STARTPOS_SIP_OPTION_NAME)}" verticalAlign="center" />
+                    <textfield id="sipTF" width="100%" verticalAlign="center" />
+                </hbox>
+                <box id="customStartposBoardContainer" width="100%" horizontalAlign="center" />
+            </vbox>
+        </vbox>
+        <button id="confirmBtn" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIRECT_CONFIRM_BTN_TEXT)}" horizontalAlign="center" />
+    </vbox>
+</dialog>

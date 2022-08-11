@@ -20,7 +20,7 @@ class URLEditor
 
     public static function getChallengeLink(login:String):String
     {
-        return Browser.location.host + ingameToUrlPath('challenge/$login');
+        return Browser.location.host + ingameToUrlPath('join/$login');
     }
 
     public static function getGameLink(id:Int):String
