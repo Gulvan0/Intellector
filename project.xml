@@ -17,6 +17,8 @@
 	<haxelib name="FileSaver" />
 	<haxelib name="gif" />
 	<haxelib name="format" />
+	
+	<template path="template.html" rename="index.html" />
 
 	<section if="unit">
 		<haxelib name="utest" />
