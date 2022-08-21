@@ -51,6 +51,11 @@ class VariantTree extends Sprite implements IVariantView
 
     private var indicateColors:Bool = true;
 
+    public function getSelectedNode():VariantPath
+    {
+        return selectedBranch.subpath(selectedMove);
+    }
+    
     private function columnX(column:Int):Float
     {
         var s:Float = 0;

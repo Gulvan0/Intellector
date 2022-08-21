@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import Preferences.BranchingTabType;
 import haxe.ui.core.Screen;
 import openfl.events.MouseEvent;
 import openfl.display.DisplayObject;
@@ -33,7 +34,10 @@ using utils.CallbackTools;
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/analysis/control_tabs.xml"))
 class ControlTabs extends TabView implements IGameBoardObserver implements IAnalysisPeripheralEventObserver
 {
+    public var branchingTabType(default, null):BranchingTabType;
+
     private var variantView:IVariantView;
+    private var eventHandler:PeripheralEvent->Void;
 
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
@@ -87,20 +91,20 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
         } 
     }
 
-    public function new(initialVariant:Variant, eventHandler:PeripheralEvent->Void)
+    public function redrawBranchingTab(variant:Variant)
     {
-        super();
+        var selectedNode:VariantPath = variantView.getSelectedNode();
+        variantViewSV.removeAllComponents();
+        drawBranchingTab(variant, selectedNode);
+    }
 
-        actionBar.eventHandler = eventHandler;
-
-        branchingHelpLink.onClick = e -> {
-            Dialogs.branchingHelp();
-        };
-
-        switch Preferences.branchingTabType.get() 
+    private function drawBranchingTab(initialVariant:Variant, ?selectedNode:VariantPath)
+    {
+        branchingTabType = Preferences.branchingTabType.get();
+        switch branchingTabType
         {
             case Tree: 
-                var tree:VariantTree = new VariantTree(initialVariant);
+                var tree:VariantTree = new VariantTree(initialVariant, selectedNode);
                 variantView = tree;
                 variantViewSV.hidden = false;
                 variantViewSV.addComponent(new SpriteWrapper(tree, false));
@@ -110,17 +114,31 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
                         tree.refreshLayout();
                 };
             case Outline: 
-                var comp:VariantOutline = new VariantOutline(initialVariant);
+                var comp:VariantOutline = new VariantOutline(initialVariant, selectedNode);
                 variantView = comp;
                 variantViewSV.hidden = true;
                 branchingTabContentsBox.addComponent(comp);
             case PlainText: 
-                var box:VariantPlainText = new VariantPlainText(initialVariant);
+                var box:VariantPlainText = new VariantPlainText(initialVariant, selectedNode);
                 variantView = box;
                 variantViewSV.hidden = false;
                 variantViewSV.percentContentWidth = 100;
                 variantViewSV.addComponent(box);
         };
         variantView.init(eventHandler);
+    }
+
+    public function new(initialVariant:Variant, eventHandler:PeripheralEvent->Void)
+    {
+        super();
+
+        this.eventHandler = eventHandler;
+        actionBar.eventHandler = eventHandler;
+
+        branchingHelpLink.onClick = e -> {
+            Dialogs.branchingHelp();
+        };
+
+        drawBranchingTab(initialVariant);
     }
 }

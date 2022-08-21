@@ -19,4 +19,5 @@ interface IBehavior
     public function markersDisabled():Bool;
     public function hoverDisabled():Bool;
     public function onVoidClick():Void;
+    public function onPremovePreferenceUpdated():Void;
 }

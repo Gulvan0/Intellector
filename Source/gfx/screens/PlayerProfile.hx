@@ -99,7 +99,7 @@ class PlayerProfile extends Screen implements INetObserver
 
     public function onClose()
     {
-        Networker.eventQueue.removeObserser(this);
+        Networker.eventQueue.removeObserver(this);
     }
 
     private function onGamesPrev(e) 

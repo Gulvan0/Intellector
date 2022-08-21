@@ -19,6 +19,11 @@ class AnalysisBehavior implements IBehavior
         //* Do nothing
     }
 
+    public function onPremovePreferenceUpdated()
+    {
+        //* Do nothing
+    }
+
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
         switch event 

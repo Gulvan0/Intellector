@@ -1,5 +1,6 @@
 package;
 
+import utils.StringUtils;
 import js.Cookie;
 import dict.Language;
 
@@ -17,11 +18,12 @@ enum BranchingTabType
     PlainText;
 }
 
-class Preference<T>
+private class Preference<T>
 {
     private static var FIVE_YEARS = 60 * 60 * 24 * 365 * 5;
 
-    private var name:String;
+    private var name:PreferenceName;
+    private var cookieName:String;
     private var kind:String;
     private var defaultValue:T;
     private var value:T;
@@ -34,7 +36,8 @@ class Preference<T>
     public function set(v:T) 
     {
         value = v;
-        Cookie.set(name, Std.string(value), FIVE_YEARS);
+        Cookie.set(cookieName, Std.string(value), FIVE_YEARS);
+        GlobalBroadcaster.broadcast(PreferenceUpdated(name));
     }
 
     public function resetToDefault()
@@ -44,10 +47,10 @@ class Preference<T>
 
     public function load():Bool
     {
-        if (!Cookie.exists(name))
+        if (!Cookie.exists(cookieName))
             return false;
 
-        var rawValue:String = Cookie.get(name);
+        var rawValue:String = Cookie.get(cookieName);
 
         if (kind == 'int')
             value = cast(Std.parseInt(rawValue))
@@ -65,9 +68,14 @@ class Preference<T>
         return true;
     }
 
-    public function new(name:String, defaultValue:T, ?delayLoading:Bool = false) 
+    public function new(name:PreferenceName, defaultValue:T, ?delayLoading:Bool = false) 
     {
         this.name = name;
+        this.cookieName = switch name {
+            case Language: "lang";
+            case Markup: "markup";
+            default: name.getName();
+        }
         this.defaultValue = defaultValue;
         this.value = defaultValue;
 
@@ -89,13 +97,23 @@ class Preference<T>
     }
 }
 
+enum PreferenceName
+{
+    Language;
+    Markup;
+    Premoves;
+    BranchingType;
+    BranchingShowTurnColor;
+    SilentChallenges;
+}
+
 class Preferences
 {
-    public static final language:Preference<Language> = new Preference("lang", EN, true);
+    public static final language:Preference<Language> = new Preference(Language, EN, true);
     
-    public static final markup:Preference<Markup> = new Preference("markup", Over);
-    public static final premoveEnabled:Preference<Bool> = new Preference("premoveEnabled", false);
-    public static final branchingTabType:Preference<BranchingTabType> = new Preference("branchingTabType", Tree);
-    public static final branchingTurnColorIndicators:Preference<Bool> = new Preference("branchingTurnColorIndicators", true);
-    public static final silentChallenges:Preference<Bool> = new Preference("silentChallenges", false);
+    public static final markup:Preference<Markup> = new Preference(Markup, Over);
+    public static final premoveEnabled:Preference<Bool> = new Preference(Premoves, false);
+    public static final branchingTabType:Preference<BranchingTabType> = new Preference(BranchingType, Tree);
+    public static final branchingTurnColorIndicators:Preference<Bool> = new Preference(BranchingShowTurnColor, true);
+    public static final silentChallenges:Preference<Bool> = new Preference(SilentChallenges, false);
 }

@@ -34,7 +34,7 @@ class EventProcessingQueue
         handlers.remove(handler);
     }
 
-    public function removeObserser(observer:INetObserver)
+    public function removeObserver(observer:INetObserver)
     {
         observers.remove(observer);
     }

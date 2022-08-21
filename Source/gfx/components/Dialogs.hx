@@ -162,7 +162,7 @@ class Dialogs
     public static function settings()
     {
         var dialog:Settings = new Settings();
-        addDialog(dialog, true, null, false);
+        addDialog(dialog, true, dialog.onClose, false);
     }
 
     public static function login()

@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import GlobalBroadcaster;
 import gfx.common.PlyHistoryView;
 import gfx.analysis.IAnalysisPeripheralEventObserver;
 import haxe.Timer;
@@ -21,7 +22,7 @@ import gfx.analysis.PeripheralEvent;
 import haxe.ui.containers.HBox;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/analysis/analysis_layout.xml'))
-class Analysis extends Screen implements IGameBoardObserver
+class Analysis extends Screen implements IGameBoardObserver implements IGlobalEventObserver
 {
     private var variant:Variant;
 
@@ -29,9 +30,38 @@ class Analysis extends Screen implements IGameBoardObserver
     private var positionEditor:PositionEditor;
     private var controlTabs:ControlTabs;
 
+    private var boardWrapper:BoardWrapper;
+
     private var analysisPeripheryObservers:Array<IAnalysisPeripheralEventObserver>;
     private var gameboardObservers:Array<IGameBoardObserver>;
     private var plyHistoryViews:Array<PlyHistoryView>;
+
+    public function onEnter()
+    {
+        GlobalBroadcaster.addObserver(this);
+    }
+
+    public function onClose()
+    {
+        GlobalBroadcaster.removeObserver(this);
+    }
+
+    public function handleGlobalEvent(event:GlobalEvent)
+    {
+        board.handleGlobalEvent(event);
+
+        switch event 
+        {
+            case PreferenceUpdated(Markup):
+                Timer.delay(boardWrapper.invalidateComponentLayout.bind(true), 40);
+            case PreferenceUpdated(BranchingType):
+                controlTabs.redrawBranchingTab(variant);
+            case PreferenceUpdated(BranchingShowTurnColor):
+                if (controlTabs.branchingTabType == Tree)
+                    controlTabs.redrawBranchingTab(variant);
+            default:
+        }
+    }
 
     private function redrawPositionEditor()
     {
@@ -111,6 +141,9 @@ class Analysis extends Screen implements IGameBoardObserver
     public function new(?initialVariantStr:String, ?selectedMainlineMove:Int)
     {
         super();
+        customEnterHandler = onEnter;
+        customCloseHandler = onClose;
+
         variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.starting());
 
         board = new GameBoard(Analysis(variant));
@@ -127,7 +160,7 @@ class Analysis extends Screen implements IGameBoardObserver
 
         actionBar.eventHandler = handlePeripheralEvent;
         
-        var boardWrapper:BoardWrapper = new BoardWrapper(board);
+        boardWrapper = new BoardWrapper(board);
         boardWrapper.percentHeight = 100;
         boardWrapper.maxPercentWidth = 100;
         boardWrapper.horizontalAlign = 'center';

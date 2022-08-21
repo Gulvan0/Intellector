@@ -20,6 +20,13 @@ class LoginManager
         Networker.emitEvent(Register(login, password));
     }
 
+    public static function logout()
+    {
+        CredentialCookies.removeLoginDetails();
+        Networker.emitEvent(LogOut);
+        GlobalBroadcaster.broadcast(LoggedOut);
+    }
+
     private static function responseHandler(login:String, password:String, remember:Null<Bool>, onSuccess:Void->Void, onFail:Void->Void, event:ServerEvent) 
     {
         switch event
@@ -31,6 +38,7 @@ class LoginManager
                     LoginManager.password = password;
                     if (remember != null)
                         CredentialCookies.saveLoginDetails(login, password, !remember);
+                    GlobalBroadcaster.broadcast(LoggedIn);
                     onSuccess();
                 }
                 else

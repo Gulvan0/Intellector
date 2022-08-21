@@ -1,0 +1,6 @@
+<item-renderer>
+    <hbox horizontalAlign="center">
+        <image id="colorIcon" />
+        <image id="timeControlIcon" />
+    </hbox>
+</item-renderer>

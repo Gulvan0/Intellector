@@ -41,6 +41,11 @@ class PlayerMoveBehavior implements IBehavior
     {
         //* Do nothing
     }
+
+    public function onPremovePreferenceUpdated()
+    {
+        //* Do nothing
+    }
     
     public function movePossible(from:IntPoint, to:IntPoint):Bool
 	{

@@ -21,6 +21,11 @@ class VariantOutline extends TreeView implements IVariantView
     private var selectedBranch:VariantPath = [];
     private var selectedMove:Int = 0;
 
+    public function getSelectedNode():VariantPath
+    {
+        return selectedBranch.subpath(selectedMove);
+    }
+
     private function addRec(parentTreeNode:TreeViewNode, node:VariantNode)
     {
         var childNode = addChildToSpecificNode(parentTreeNode, node.ply, false);

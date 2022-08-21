@@ -105,7 +105,7 @@ class ScreenManager
             case GameStarted(match_id, logPreamble):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
                 toScreen(LiveGame(match_id, New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime)));
-			case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
+            case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
             case StudyCreated(studyID, studyName):
@@ -124,12 +124,14 @@ class ScreenManager
     public static function observeNetEvents()
     {
         Networker.eventQueue.addHandler(handleNetEvent);
+        Networker.eventQueue.addObserver(scene);
     }
 
     public static function launch()
     {
         scene = new Scene();
         HaxeUIScreen.instance.addComponent(scene);
+        GlobalBroadcaster.addObserver(scene);
 
 		openflContent = Browser.document.getElementById("openfl-content");
 		openflContent.style.width = '${Browser.document.documentElement.clientWidth}px';

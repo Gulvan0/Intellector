@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import GlobalBroadcaster;
 import net.LoginManager;
 import haxe.ui.containers.Card;
 import gfx.game.*;
@@ -41,7 +42,7 @@ import haxe.exceptions.NotImplementedException;
 import haxe.ui.containers.VBox;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/live_layout.xml"))
-class LiveGame extends Screen implements INetObserver implements IGameBoardObserver
+class LiveGame extends Screen implements INetObserver implements IGameBoardObserver implements IGlobalEventObserver
 {
     private var board:GameBoard;
     private var boardWrapper:BoardWrapper;
@@ -68,6 +69,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     {
         GeneralObserver.acceptsDirectChallenges = false;
         Networker.eventQueue.addObserver(this);
+        GlobalBroadcaster.addObserver(this);
         Timer.delay(() -> {
             performValidation();
             ScreenManager.addResizeHandler(performValidation);
@@ -78,7 +80,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     public function onClose()
     {
         ScreenManager.removeResizeHandler(performValidation);
-        Networker.eventQueue.removeObserser(this);
+        Networker.eventQueue.removeObserver(this);
+        GlobalBroadcaster.removeObserver(this);
         GeneralObserver.acceptsDirectChallenges = true;
     }
 
@@ -152,6 +155,13 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 Networker.emitEvent(Move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto.getName()));
             default:
         }
+    }
+
+    public function handleGlobalEvent(event:GlobalEvent)
+    {
+        board.handleGlobalEvent(event);
+        if (event.match(PreferenceUpdated(Markup)))
+            Timer.delay(boardWrapper.invalidateComponentLayout.bind(true), 40);
     }
 
     private function onPlyScrollRequested(type:PlyScrollType)

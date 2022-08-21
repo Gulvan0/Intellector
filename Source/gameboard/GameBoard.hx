@@ -1,5 +1,7 @@
 package gameboard;
 
+import GlobalBroadcaster;
+import GlobalBroadcaster.IGlobalEventObserver;
 import net.LoginManager;
 import gameboard.behaviors.*;
 import gameboard.states.*;
@@ -43,7 +45,7 @@ interface IGameBoardObserver
 **/
 @:allow(gameboard.behaviors.IBehavior)
 @:allow(gameboard.states.BaseState)
-class GameBoard extends SelectableBoard implements INetObserver implements IAnalysisPeripheralEventObserver
+class GameBoard extends SelectableBoard implements INetObserver implements IAnalysisPeripheralEventObserver implements IGlobalEventObserver
 {
     public var plyHistory:PlyHistory;
 
@@ -272,6 +274,18 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
         behavior.handleAnalysisPeripheralEvent(event);
+    }
+
+    public function handleGlobalEvent(event:GlobalEvent)
+    {
+        switch event
+        {
+            case PreferenceUpdated(Markup):
+                updateMarkup();
+            case PreferenceUpdated(Premoves):
+                behavior.onPremovePreferenceUpdated();
+            default:
+        }
     }
 
     private function initLMB(e)

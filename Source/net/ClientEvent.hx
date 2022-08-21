@@ -4,6 +4,7 @@ enum ClientEvent
 {
     Login(login:String, password:String);
     Register(login:String, password:String);
+    LogOut;
     CreateDirectChallenge(calleeLogin:String, secsStart:Int, secsBonus:Int, color:Null<String>); 
     AcceptDirectChallenge(callerLogin:String); 
     DeclineDirectChallenge(callerLogin:String); 

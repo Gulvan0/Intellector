@@ -1,5 +1,9 @@
 package gfx;
 
+import GlobalBroadcaster.IGlobalEventObserver;
+import GlobalBroadcaster.GlobalEvent;
+import net.EventProcessingQueue.INetObserver;
+import net.ServerEvent;
 import utils.StringUtils;
 import serialization.GameLogParser;
 import net.Requests;
@@ -13,7 +17,7 @@ import haxe.ui.containers.VBox;
 import net.LoginManager;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/basic/scene_template.xml'))
-class Scene extends VBox
+class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 {
     private var currentScreen:Null<Screen> = null;
     private var sidemenu:SideMenu;
@@ -50,6 +54,42 @@ class Scene extends VBox
                 ResponsiveToolbox.resizeComponent(btn, [StyleProp(FontSize) => VH(2), Height => VH(4)]);
             else
                 ResponsiveToolbox.resizeComponent(btn, [Height => VH(4)]);
+        }
+    }
+
+    private function setIngameStatus(ingame:Bool)
+    {
+        mobileMenuButton.disabled = ingame;
+        siteName.disabled = ingame;
+        playMenu.disabled = ingame;
+        watchMenu.disabled = ingame;
+        learnMenu.disabled = ingame;
+        socialMenu.disabled = ingame;
+        challengesButton.disabled = ingame;
+        logInBtn.disabled = ingame;
+        myProfileBtn.disabled = ingame;
+        logOutBtn.disabled = ingame;
+    }
+
+    public function handleNetEvent(event:ServerEvent)
+    {
+        switch event
+        {
+            case GameStarted(_, _):
+                setIngameStatus(true);
+            case GameEnded(_, _):
+                setIngameStatus(false);
+            default:
+        }
+    }
+
+    public function handleGlobalEvent(event:GlobalEvent)
+    {
+        switch event 
+        {
+            case LoggedIn, LoggedOut:
+                refreshAccountElements();
+            default:
         }
     }
 
@@ -145,17 +185,23 @@ class Scene extends VBox
 
     private function onLogOutPressed(e)
     {
-        //TODO: Implement + design global event handling
+        LoginManager.logout();
     }
 
-    public function new()
+    private function refreshAccountElements()
     {
-        super();
         var logged:Bool = LoginManager.login != null;
         accountMenu.text = logged? StringUtils.shorten(LoginManager.login, 8) : "Гость";
         logInBtn.hidden = logged;
         myProfileBtn.hidden = !logged;
         logOutBtn.hidden = !logged;
+    }
+
+    public function new()
+    {
+        super();
+
+        refreshAccountElements();
 
         //TODO: Challenges
         

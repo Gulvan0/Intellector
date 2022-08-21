@@ -106,6 +106,17 @@ class EnemyMoveBehavior implements IBehavior
         }
     }
 
+    public function onPremovePreferenceUpdated()
+    {
+        if (Preferences.premoveEnabled.get())
+            boardInstance.state = new NeutralState();
+        else
+        {
+            resetPremoves();
+            boardInstance.state = new StubState();
+        }
+    }
+
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
         //* Do nothing

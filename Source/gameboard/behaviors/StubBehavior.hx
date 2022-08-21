@@ -10,6 +10,7 @@ class StubBehavior implements IBehavior
     public function init(board:GameBoard) {}
     public function handleNetEvent(event:ServerEvent) {}
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent) {}
+    public function onPremovePreferenceUpdated() {}
     public function onMoveChosen(ply:Ply) {}
     public function onHexChosen(coords:IntPoint) {}
     public function onAboutToScrollAway() {}

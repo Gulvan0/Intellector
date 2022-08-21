@@ -47,7 +47,6 @@ class Board extends Sprite
     
     public function resize(newHexSideLength:Float)
     {
-        trace(hexSideLength, newHexSideLength);
         this.hexSideLength = newHexSideLength;
         for (s in 0...IntPoint.hexCount)
         {
@@ -68,9 +67,7 @@ class Board extends Sprite
         }
         if (lettersEnabled)
         {
-            for (letter in letters)
-                hexagonLayer.removeChild(letter);
-            letters = [];
+            removeLetters();
             drawLetters();
         }
     }
@@ -331,12 +328,37 @@ class Board extends Sprite
         }
     }
 
+    private function removeLetters()
+    {
+        for (letter in letters)
+            hexagonLayer.removeChild(letter);
+        letters = [];
+    }
+
     private function createLetter(letter:String, hexSideLength:Float):Label 
     {
         var tf = new Label();
         tf.customStyle = {fontSize: MathUtils.intScaleLike(28, 40, hexSideLength), color: Colors.border, fontBold: true, textAlign: "center"};
         tf.text = letter;
         return tf;
+    }
+
+    private function updateMarkup()
+    {
+        var markup:Markup = Preferences.markup.get();
+
+        var lettersWerePresent:Bool = this.lettersEnabled;
+        var lettersWillBePresent:Bool = markup != None;
+
+        if (lettersWerePresent && !lettersWillBePresent)
+            removeLetters();
+        else if (!lettersWerePresent && lettersWillBePresent)
+            drawLetters();
+
+        for (hexagon in hexagons)
+            hexagon.setNumberVisibility(markup == Over);
+
+        this.lettersEnabled = lettersWillBePresent;
     }
 
     public function new(situation:Situation, orientationColor:PieceColor = White, hexSideLength:Float = 40, enforcedMarkup:Null<Markup> = null) 

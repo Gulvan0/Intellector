@@ -1,5 +1,7 @@
 package gfx.popups;
 
+import dict.Language;
+import js.Browser;
 import haxe.ui.components.SectionHeader;
 import haxe.ui.containers.ButtonBar;
 import haxe.ui.components.Image;
@@ -14,6 +16,8 @@ import dict.Dictionary;
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/basic/popups/settings_popup.xml'))
 class Settings extends Dialog
 {
+    private var oldLanguage:Language;
+
     private function resize()
     {
         width = Math.min(600, Screen.instance.width * 0.98);
@@ -36,28 +40,35 @@ class Settings extends Dialog
         }
     }
 
+    public function onClose(?e)
+    {
+        if (Preferences.language.get() != oldLanguage)
+            Browser.location.reload();
+        else
+            ScreenManager.removeResizeHandler(resize);
+    }
+
     public function new()
     {
         super();
 
-        switch Preferences.language.get() 
+        oldLanguage = Preferences.language.get();
+        switch oldLanguage
         {
             case EN:
-                langBtnRU.selected = false;
-                langBtnEN.selected = true;
+                langBar.selectedButton = langBtnEN;
             case RU:
-                langBtnEN.selected = false;
-                langBtnRU.selected = true;
+                langBar.selectedButton = langBtnRU;
         }
 
         switch Preferences.markup.get() 
         {
             case None:
-                markupBtnNone.selected = true;
+                markupBar.selectedButton = markupBtnNone;
             case Side:
-                markupBtnSide.selected = true;
+                markupBar.selectedButton = markupBtnSide;
             case Over:
-                markupBtnOver.selected = true;
+                markupBar.selectedButton = markupBtnOver;
         }
 
         premovesPill.selected = Preferences.premoveEnabled.get();
@@ -69,18 +80,17 @@ class Settings extends Dialog
         switch Preferences.branchingTabType.get() 
         {
             case Tree:
-                branchingBtnTree.selected = true;
+                branchingBar.selectedButton = branchingBtnTree;
             case Outline:
-                branchingBtnOutline.selected = true;
+                branchingBar.selectedButton = branchingBtnOutline;
             case PlainText:
-                branchingBtnPlain.selected = true;
+                branchingBar.selectedButton = branchingBtnPlain;
         }
 
         branchingTurnColorPill.selected = Preferences.branchingTurnColorIndicators.get();
         branchingTurnColorLabel.text = Dictionary.getPhrase(branchingTurnColorPill.selected? SETTINGS_ENABLED_OPTION_VALUE : SETTINGS_DISABLED_OPTION_VALUE);
 
         ScreenManager.addResizeHandler(resize);
-        onDialogClosed = btn -> {ScreenManager.removeResizeHandler(resize);};
         Timer.delay(resize, 50);
     }
 }

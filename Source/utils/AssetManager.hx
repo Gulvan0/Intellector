@@ -53,6 +53,18 @@ class AssetManager
         return 'assets/symbols/time_controls/$filename.svg';
     }
 
+    public static inline function challengeColorPath(ownerOpponentColor:Null<PieceColor>):String
+    {
+        var filename = switch ownerOpponentColor 
+        {
+            case White: 'white';
+            case Black: 'black';
+            case null: 'random';
+        };
+
+        return 'assets/symbols/main_menu/challenge_colors/$filename.svg';
+    }
+
     public static function playPlySound(ply:Ply, situation:Situation)
     {
         var isCastle:Bool = Rules.isCastle(ply, situation);

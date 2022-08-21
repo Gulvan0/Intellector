@@ -49,6 +49,11 @@ class Hexagon extends Sprite
         return h / Math.sqrt(3);
     }
 
+    public function setNumberVisibility(isVisible:Bool)
+    {
+        number.visible = isVisible;
+    }
+
     public function showLayer(state:HexagonSelectionState)
     {
         sprites[state].visible = true;

@@ -82,6 +82,11 @@ class VariantPlainText extends HBox implements IVariantView
     private var nodeByCode:Map<String, NodeInfo> = [];
     private var items:Array<Item> = [];
 
+    public function getSelectedNode():VariantPath
+    {
+        return selectedNode.path;
+    }
+
     public function init(eventHandler:PeripheralEvent->Void)
     {
         this.eventHandler = eventHandler;
