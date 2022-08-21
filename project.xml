@@ -3,7 +3,7 @@
 	<icon path="Assets/favicon.png" />
 	
 	<meta title="Intellector" package="com.sample.intellector" version="1.0.0" company="Company Name" />
-	<app main="Main" path="Export" file="1646787907" />
+	<app main="Main" path="Export" file="1646787907" preloader="Preloader" />
 	<window background="#EEEEEE" />
 	
 	<source path="Source" />
@@ -19,6 +19,7 @@
 	<haxelib name="format" />
 	
 	<template path="template.html" rename="index.html" />
+	<library path="Assets/preloader.swf" generate="true"  id="preloader" preload="true" embed="false" />
 
 	<section if="unit">
 		<haxelib name="utest" />
