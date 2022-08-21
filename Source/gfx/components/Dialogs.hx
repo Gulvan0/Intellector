@@ -165,10 +165,13 @@ class Dialogs
         addDialog(dialog, true, dialog.onClose, false);
     }
 
-    public static function login()
+    public static function login(?onLoggedIn:Void->Void)
     {
         var dialog:LogIn = new LogIn();
-        addDialog(dialog, true, null, false);
+        addDialog(dialog, true, event -> {
+            if (onLoggedIn != null && event.button == DialogButton.OK)
+                onLoggedIn();
+        }, false);
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void)

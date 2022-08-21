@@ -119,6 +119,14 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onCreateChallengePressed(e)
     {
+        if (LoginManager.login == null)
+            Dialogs.login(displayChallengeParamsDialog);
+        else
+            displayChallengeParamsDialog();
+    }
+
+    private function displayChallengeParamsDialog()
+    {
         Dialogs.specifyChallengeParams((_, _, _) -> {createChallenge();});
     }
 
@@ -195,6 +203,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logInBtn.hidden = logged;
         myProfileBtn.hidden = !logged;
         logOutBtn.hidden = !logged;
+        //TODO: Clear or populate challenge list
     }
 
     public function new()
