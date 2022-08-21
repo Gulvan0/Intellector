@@ -84,7 +84,10 @@ class VariantPlainText extends HBox implements IVariantView
 
     public function getSelectedNode():VariantPath
     {
-        return selectedNode.path;
+        if (selectedNode == null)
+            return [];
+        else
+            return selectedNode.path;
     }
 
     public function init(eventHandler:PeripheralEvent->Void)
@@ -637,20 +640,22 @@ class VariantPlainText extends HBox implements IVariantView
     public function new(variant:Variant, ?selectedNodePath:VariantPath)
     {
         super();
-        this.variantRef = variant;
+        this.variantRef = new Variant(variant.startingSituation);
         this.percentWidth = 100;
         this.continuous = true;
 
-        if (variantRef.startingSituation.turnColor == Black)
+        if (variant.startingSituation.turnColor == Black)
             addComponent(label("..."));
 
-        for (i => child in variantRef.children.keyValueIterator())
+        for (i => child in variant.children.keyValueIterator())
             addRec([], i, child);
 
         if (selectedNodePath != null)
-            selectBranchUnsafe(variantRef.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
+            selectBranchUnsafe(variant.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
         else
-            selectBranchUnsafe(variantRef.extendPathLeftmost([]), 0);
+            selectBranchUnsafe(variant.extendPathLeftmost([]), 0);
+
+        this.variantRef = variant;
     }
 
     private function label(text:String):Label

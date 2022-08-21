@@ -53,7 +53,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
         switch event 
         {
             case PreferenceUpdated(Markup):
-                Timer.delay(boardWrapper.invalidateComponentLayout.bind(true), 40);
+                boardContainer.invalidateComponentLayout(true);
             case PreferenceUpdated(BranchingType):
                 controlTabs.redrawBranchingTab(variant);
             case PreferenceUpdated(BranchingShowTurnColor):

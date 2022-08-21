@@ -160,8 +160,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     public function handleGlobalEvent(event:GlobalEvent)
     {
         board.handleGlobalEvent(event);
+
         if (event.match(PreferenceUpdated(Markup)))
-            Timer.delay(boardWrapper.invalidateComponentLayout.bind(true), 40);
+            boardContainer.invalidateComponentLayout(true);
     }
 
     private function onPlyScrollRequested(type:PlyScrollType)

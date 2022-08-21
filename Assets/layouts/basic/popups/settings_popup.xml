@@ -1,4 +1,4 @@
-<dialog title="${Dictionary.getPhrase(SETTINGS_DIALOG_TITLE)}" width="95%" height="95%">
+<dialog title="${Dictionary.getPhrase(SETTINGS_DIALOG_TITLE)}" width="600px" height="95%">
 <vbox style="border: 1px solid $normal-border-color;padding-top:1px;padding-bottom:1px;padding-right: 1px;" width="100%" height="100%">
     <button-bar id="tabBar" width="100%" styleName="top-menu" selectedIndex="0" onchange="stack3.selectedIndex = this.selectedIndex">
         <button text="${Dictionary.getPhrase(SETTINGS_GENERAL_TAB_TITLE)}" styleName="settings-tab-button" icon="assets/symbols/settings/tab_icons/general.svg" />

@@ -36,20 +36,22 @@ class VariantOutline extends TreeView implements IVariantView
     public function new(variant:Variant, ?selectedNodePath:VariantPath)
     {
         super();
-        this.variantRef = variant;
+        this.variantRef = new Variant(variant.startingSituation);
         this.percentWidth = 100;
         this.percentHeight = 100;
 
         rootNode = addNode({text: Dictionary.getPhrase(OPENING_STARTING_POSITION), code: ""});
         rootNode.onClick = e -> {Timer.delay(onNodeChanged.bind(rootNode), 50);};
 
-        for (i => child in variantRef.children.keyValueIterator())
+        for (i => child in variant.children.keyValueIterator())
             addRec(rootNode, child);
 
         if (selectedNodePath != null)
-            selectBranchUnsafe(variantRef.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
+            selectBranchUnsafe(variant.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
         else
-            selectBranchUnsafe(variantRef.extendPathLeftmost([]), 0);
+            selectBranchUnsafe(variant.extendPathLeftmost([]), 0);
+
+        this.variantRef = variant;
     }
 
     private function selectBranchUnsafe(fullBranch:VariantPath, selectUpToMove:Int)

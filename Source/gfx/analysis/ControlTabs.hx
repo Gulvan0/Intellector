@@ -94,7 +94,14 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
     public function redrawBranchingTab(variant:Variant)
     {
         var selectedNode:VariantPath = variantView.getSelectedNode();
-        variantViewSV.removeAllComponents();
+
+        switch branchingTabType 
+        {
+            case Tree, PlainText:
+                variantViewSV.removeAllComponents();
+            case Outline:
+                branchingTabContentsBox.removeComponentAt(2);
+        }
         drawBranchingTab(variant, selectedNode);
     }
 
@@ -107,16 +114,19 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
                 var tree:VariantTree = new VariantTree(initialVariant, selectedNode);
                 variantView = tree;
                 variantViewSV.hidden = false;
+                variantViewSV.percentContentWidth = null;
                 variantViewSV.addComponent(new SpriteWrapper(tree, false));
                 variantViewSV.addEventListener(MouseEvent.MOUSE_WHEEL, onWheel.bind(tree), false, 100);
                 onChange = e -> {
                     if (selectedPage == branchingTab)
                         tree.refreshLayout();
                 };
+                tree.refreshLayout();
             case Outline: 
                 var comp:VariantOutline = new VariantOutline(initialVariant, selectedNode);
                 variantView = comp;
                 variantViewSV.hidden = true;
+                variantViewSV.percentContentWidth = null;
                 branchingTabContentsBox.addComponent(comp);
             case PlainText: 
                 var box:VariantPlainText = new VariantPlainText(initialVariant, selectedNode);

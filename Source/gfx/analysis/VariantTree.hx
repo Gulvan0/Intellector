@@ -347,7 +347,7 @@ class VariantTree extends Sprite implements IVariantView
         nodes.set('', startingNode);
         addChild(startingNode);
 
-        for (code => nodeInfo in variantRef.getAllNodes())
+        for (code => nodeInfo in variant.getAllNodes())
         {
             if (code == '')
                 continue;
@@ -363,8 +363,8 @@ class VariantTree extends Sprite implements IVariantView
         }
 
         if (selectedNodePath != null)
-            selectBranchUnsafe(variantRef.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
+            selectBranchUnsafe(variant.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
         else
-            selectBranchUnsafe(variantRef.extendPathLeftmost([]), 0);
+            selectBranchUnsafe(variant.extendPathLeftmost([]), 0);
     }
 }
