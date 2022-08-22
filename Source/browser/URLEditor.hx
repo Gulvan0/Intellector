@@ -1,5 +1,6 @@
 package browser;
 
+import js.html.URLSearchParams;
 import gfx.ScreenType;
 import js.Browser;
 
@@ -15,7 +16,9 @@ class URLEditor
         if (StringTools.startsWith(path, "/"))
             path = path.substr(1);
         var fullTitle:String = title != null? title + " - Intellector" : "Intellector";
-        Browser.window.history.pushState({}, fullTitle, ingameToUrlPath(path));
+        if (new URLSearchParams(Browser.location.search).get("p") != path)
+            Browser.window.history.pushState({}, fullTitle, ingameToUrlPath(path));
+        Browser.document.title = fullTitle;
     }
 
     public static function getChallengeLink(login:String):String

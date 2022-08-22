@@ -1,5 +1,6 @@
 package gfx.components;
 
+import openfl.display.DisplayObjectContainer;
 import openfl.events.Event;
 import haxe.Timer;
 import openfl.display.Sprite;
@@ -7,7 +8,7 @@ import haxe.ui.core.Component;
 
 class SpriteWrapper extends Component 
 {
-    private var sprite:Sprite;
+    private var sprite:DisplayObjectContainer;
 
     public function syncDimensionsUpstream(?e)
     {
@@ -28,7 +29,7 @@ class SpriteWrapper extends Component
         sprite.removeEventListener(Event.ENTER_FRAME, syncDimensionsUpstream);
     }
 
-    public function new(sprite:Sprite, ?constantSize:Bool = true) 
+    public function new(sprite:DisplayObjectContainer, ?constantSize:Bool = true) 
     {
         super();
         this.sprite = sprite;

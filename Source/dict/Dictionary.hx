@@ -120,10 +120,7 @@ class Dictionary
         CHOOSE_TIME_CONTROL => ["Time control:", "Контроль времени:"],
         CHOOSE_COLOR => ["Color:", "Цвет:"],
         COLOR_RANDOM => ["Random", "Случайно"],
-        CONFIRM => ["Confirm", "ОК"],
-        CANCEL => ["Cancel", "Отмена"],
         CHALLENGE_PARAMS_TITLE => ["Challenge parameters", "Параметры вызова"],
-        RETURN => ["Return", "Назад"],
         SEND_CHALLENGE => ["Send challenge", "Отправить вызов"],
         ENTER_CALLEE => ["Enter the callee's username", "Кого вызвать?"],
         OPEN_CHALLENGE_BTN => ["Host open challenge", "Создать открытый вызов"],
@@ -217,6 +214,9 @@ class Dictionary
 
         SESSION_CLOSED_ALERT_TITLE => ["Connection Closed", "Соединение закрыто"],
         SESSION_CLOSED_ALERT_TEXT => ["Connection was closed. Either you logged from another tab, browser or device or you were inactive for too long. Reload the page to reconnect", "Соединение было разорвано. Либо вы подключились из другой вкладки, из другого браузера или с другого устройства, либо же вы были неактивны слишком долго. Перезагрузите страницу для переподключения"],
+        RECONNECTION_POP_UP_TEXT => ["Reconnecting...", "Восстанавливаем соединение..."],
+        RECONNECTION_POP_UP_TITLE => ["Connection lost", "Потеряно соединение"],
+
         CLIPBOARD_ERROR_ALERT_TITLE => ["Clipboard Error", "Ошибка буфера обмена"],
         CLIPBOARD_ERROR_ALERT_TEXT => ["Failed to copy: $0", "Копирование не удалось: $0"],
     ];

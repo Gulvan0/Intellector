@@ -86,7 +86,7 @@ class Networker
             trace("Unexpected event: " + rawEvent.name);
     }
 
-    private static function onConnectionClosed()
+    private static function onConnectionClosed() //TODO: Check logic
     {
         ScreenManager.clearScreen();
         if (suppressAlert)
@@ -103,6 +103,7 @@ class Networker
     private static function onConnectionError(err:Event)
     {
         trace("Connection error: " + err.type);
+        ScreenManager.onConnectionError();
     }
 
     public static function startReconnectAttempts(onConnected:Void->Void)

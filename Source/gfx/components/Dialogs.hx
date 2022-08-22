@@ -1,5 +1,7 @@
 package gfx.components;
 
+import haxe.ui.containers.Box;
+import openfl.Assets;
 import js.Browser;
 import gfx.popups.LogIn;
 import gfx.popups.Settings;
@@ -126,6 +128,40 @@ class Dialogs
     public static function custom(dialog:Dialog, modal:Bool = true, ?onClosed:DialogEvent->Void)
     {
         addDialog(dialog, true, onClosed, modal);
+    }
+
+    /**
+        Displays non-closable reconnection pop-up
+        @returns Callback closing the dialog
+    **/
+    public static function reconnectionDialog():Void->Void
+    {
+        var loadingAnimation:SpriteWrapper = new SpriteWrapper(Assets.getMovieClip("preloader:LogoPreloader"), false);
+        loadingAnimation.x = 120;
+        loadingAnimation.y = 132;
+
+        var box:Box = new Box();
+        box.width = 240;
+        box.height = 264;
+        box.horizontalAlign = 'center';
+        box.addComponent(loadingAnimation);
+
+        var label:Label = new Label();
+        label.customStyle = {fontSize: 14, fontItalic: true};
+        label.text = Dictionary.getPhrase(RECONNECTION_POP_UP_TEXT);
+        label.horizontalAlign = 'center';
+
+        var vbox:VBox = new VBox();
+        vbox.verticalAlign = 'center';
+        vbox.addComponent(box);
+        vbox.addComponent(label);
+
+        var dialog:Dialog = new Dialog();
+        dialog.title = Dictionary.getPhrase(RECONNECTION_POP_UP_TITLE);
+        dialog.closable = false;
+        dialog.addComponent(vbox);
+        addDialog(dialog, true, null, true);
+        return () -> {dialog.hideDialog(null);};
     }
 
     public static function branchingHelp()

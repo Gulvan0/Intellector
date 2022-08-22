@@ -129,13 +129,7 @@ class Main extends Sprite
 
 	private function onConnectionFailed(e)
 	{
-		ScreenManager.disableMenu();
-		toAnalysis();
-		Networker.startReconnectAttempts(() -> {
-			ScreenManager.enableMenu();
-			if (CredentialCookies.hasLoginDetails())
-				LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), null, ()->{}, ()->{});
-		});
+		ScreenManager.onConnectionError();
 	}
 
 	private function onConnected()

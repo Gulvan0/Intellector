@@ -1,5 +1,6 @@
 package gfx;
 
+import browser.CredentialCookies;
 import gfx.components.Dialogs;
 import serialization.GameLogParser;
 import haxe.Timer;
@@ -42,14 +43,32 @@ class ScreenManager
         return currentScreenType;
     }
 
-    public static function disableMenu()
+    public static function onConnectionError()
     {
         scene.menubar.disabled = true;
+
+        var cleanupCallback:Null<Void->Void> = null;
+
+        switch currentScreenType 
+        {
+            case MainMenu, LiveGame(_, _), PlayerProfile(_), ChallengeJoining(_, _, _):
+                cleanupCallback = Dialogs.reconnectionDialog();
+            case Analysis(_, _, _, _):
+                //* Do nothing
+            case LanguageSelectIntro(_), null:
+                toScreen(Analysis(null, null, null, null));
+        }
+		
+		Networker.startReconnectAttempts(onReconnected.bind(cleanupCallback));
     }
 
-    public static function enableMenu()
+    private static function onReconnected(cleanupCallback:Null<Void->Void>)
     {
+        if (cleanupCallback != null)
+            cleanupCallback();
         scene.menubar.disabled = false;
+        if (CredentialCookies.hasLoginDetails())
+            LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), null, ()->{}, ()->{});
     }
 
     public static function toScreen(type:ScreenType)

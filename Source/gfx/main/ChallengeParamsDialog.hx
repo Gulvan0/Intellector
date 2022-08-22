@@ -62,8 +62,8 @@ class ChallengeParamsDialog extends Dialog
         body.addComponent(challengeColorOptionbox(Black, false));
 
         var btns:HBox = new HBox();
-        btns.addComponent(confirmationBtn(CONFIRM, onConfirmed));
-        btns.addComponent(confirmationBtn(CANCEL, hideDialog.bind(DialogButton.CANCEL)));
+        //btns.addComponent(confirmationBtn(CONFIRM, onConfirmed));
+        //btns.addComponent(confirmationBtn(CANCEL, hideDialog.bind(DialogButton.CANCEL)));
         body.addComponent(btns);
 
         addComponent(body);
