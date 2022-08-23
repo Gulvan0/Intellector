@@ -8,7 +8,6 @@ import serialization.GameLogParser.GameLogParserOutput;
 import gfx.ScreenType;
 import struct.Outcome;
 import Preferences.Markup;
-import gfx.screens.MainMenu.MainMenuButton;
 import struct.PieceColor;
 import net.LoginManager;
 
@@ -21,21 +20,6 @@ class Utils
             case EN: color.getName();
             case RU: color == White? "Белые" : "Черные";
         }
-    }
-    
-    public static function getMainMenuBtnText(type:MainMenuButton):String
-    {
-        var phrase:Phrase = switch type 
-        {
-            case SendChallenge: SEND_CHALLENGE;
-            case OpenChallenge: OPEN_CHALLENGE_BTN;
-            case AnalysisBoard: ANALYSIS_BTN;
-            case Spectate: SPECTATE_BTN;
-            case Profile: PROFILE_BTN;
-            case Settings: SETTINGS_BTN;
-            case LogOut: LOG_OUT_BTN;
-        }
-        return Dictionary.getPhrase(phrase);
     }
 
     public static function getGameOverExplanation(reason:Outcome):String
@@ -84,8 +68,8 @@ class Utils
             case New(whiteLogin, blackLogin, timeControl, startingSituation, startDatetime):
                 var opponentLogin:String = LoginManager.isPlayer(whiteLogin)? blackLogin : whiteLogin;
                 return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
-            case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp, spectatedLogin):
-                if (spectatedLogin != null)
+            case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp, followedPlayerLogin):
+                if (followedPlayerLogin != null)
                     return ['Spectating: ${parsedData.whiteLogin} vs ${parsedData.blackLogin}', 'Наблюдение: ${parsedData.whiteLogin} против ${parsedData.blackLogin}'];
                 else
                 {

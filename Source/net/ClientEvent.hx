@@ -16,9 +16,9 @@ enum ClientEvent
     CreateOpenChallenge(secsStart:Int, secsBonus:Int, color:Null<String>); 
     AcceptOpenChallenge(callerLogin:String); 
     CancelOpenChallenge; 
-    Spectate(watchedLogin:String); 
-    StopSpectate; 
-    Rematch; //TODO: new event, process accordingly
+    FollowPlayer(login:String); //TODO: Ensure this also includes an effect of StopSpectating
+    StopSpectating; //Used both to stop spectating a game AND to stop following a player
+    Rematch;
     Resign; 
     OfferDraw; 
     CancelDraw; 
@@ -30,7 +30,7 @@ enum ClientEvent
     DeclineTakeback;
     SetStudy(name:String, variantStr:String, overwriteID:Null<Int>);
     AddTime; 
-    GetGame(id:Int);
+    GetGame(id:Int); //TODO: Ensure this also includes an effect of StopSpectating IN CASE THIS IS AN ONGOING GAME
     GetStudy(id:Int);
     GetPlayerProfile(login:String);
     GetPlayerGames(login:String, after:Int, pageSize:Int);

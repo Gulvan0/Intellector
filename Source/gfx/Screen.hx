@@ -52,7 +52,7 @@ class Screen extends Component
         return switch type 
         {
             case MainMenu:
-                new MainMenu();
+                new Analysis(null, null); //TODO: Replace
             case Analysis(initialVariantStr, selectedMainlineMove, _, _):
                 new Analysis(initialVariantStr, selectedMainlineMove);
             case LanguageSelectIntro(languageReadyCallback):

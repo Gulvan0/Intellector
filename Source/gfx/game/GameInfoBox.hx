@@ -154,49 +154,74 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         return b;
     }
 
+    private function initNewGame(whiteLogin:String, blackLogin:String, timeControl:TimeControl, startDatetime:Date)
+    {
+        var tcType:TimeControlType = timeControl.getType();
+
+        if (tcType == Correspondence)
+            matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
+        else
+            matchParameters.text = timeControl.toString() + " • " + tcType.getName();
+
+        datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
+        whiteLoginLabel.text = whiteLogin;
+        blackLoginLabel.text = blackLogin;
+        resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
+        opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+        timeControlIcon.resource = AssetManager.timeControlPath(tcType);
+    }
+
+    private function initActualizedGame(parsedData:GameLogParserOutput)
+    {
+        var tcType:TimeControlType = parsedData.timeControl.getType();
+
+        if (tcType == Correspondence)
+            matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
+        else
+            matchParameters.text = parsedData.timeControl.toString() + " • " + tcType.getName();
+
+        whiteLoginLabel.text = parsedData.whiteLogin;
+        blackLoginLabel.text = parsedData.blackLogin;
+        resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
+        opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+        timeControlIcon.resource = AssetManager.timeControlPath(tcType);
+
+        if (parsedData.outcome != null)
+            changeResolution(parsedData.outcome, parsedData.winnerColor);
+
+        if (parsedData.datetime != null)
+            datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+
+        for (ply in parsedData.movesPlayed)
+            accountMove(ply);
+    }
+
+    private function markFollowedPlayer(color:PieceColor)
+    {
+        var label:Label = color == White? whiteLoginLabel : blackLoginLabel;
+
+        label.text = "👁 " + label.text;
+        label.tooltip = Dictionary.getPhrase(FOLLOWED_PLAYER_LABEL_GAMEINFOBOX_TOOLTIP);
+
+        var newStyle:Style = label.customStyle.clone();
+        newStyle.pointerEvents = "true";
+        label.customStyle = newStyle;
+    }
+
     public function init(constructor:LiveGameConstructor)
     {
         this.openingTree = new OpeningTree();
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, timeControl, startingSituation, startDatetime):
-                var tcType:TimeControlType = timeControl.getType();
-
-                if (tcType == Correspondence)
-                    matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
-                else
-                    matchParameters.text = timeControl.toString() + " • " + tcType.getName();
-
-                datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
-                whiteLoginLabel.text = whiteLogin;
-                blackLoginLabel.text = blackLogin;
-                resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
-                opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
-                timeControlIcon.resource = AssetManager.timeControlPath(tcType);
-
-            case Ongoing(parsedData, _, _, _, _), Past(parsedData, _):
-                var tcType:TimeControlType = parsedData.timeControl.getType();
-
-                if (tcType == Correspondence)
-                    matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
-                else
-                    matchParameters.text = parsedData.timeControl.toString() + " • " + tcType.getName();
-
-                whiteLoginLabel.text = parsedData.whiteLogin;
-                blackLoginLabel.text = parsedData.blackLogin;
-                resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
-                opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
-                timeControlIcon.resource = AssetManager.timeControlPath(tcType);
-
-                if (parsedData.outcome != null)
-                    changeResolution(parsedData.outcome, parsedData.winnerColor);
-        
-                if (parsedData.datetime != null)
-                    datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
-        
-                for (ply in parsedData.movesPlayed)
-                    accountMove(ply);
+            case New(whiteLogin, blackLogin, timeControl, _, startDatetime):
+                initNewGame(whiteLogin, blackLogin, timeControl, startDatetime);
+            case Ongoing(parsedData, _, _, _, followedPlayerLogin):
+                initActualizedGame(parsedData);
+                if (followedPlayerLogin != null)
+                    markFollowedPlayer(parsedData.getParticipantColor(followedPlayerLogin));
+            case Past(parsedData, _):
+                initActualizedGame(parsedData);
         }
     }
 

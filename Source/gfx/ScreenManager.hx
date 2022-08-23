@@ -10,12 +10,6 @@ import haxe.ui.containers.VBox;
 import js.html.Element;
 import openfl.events.Event;
 import dict.Utils;
-import gfx.screens.Analysis;
-import gfx.screens.LanguageSelectIntro;
-import gfx.screens.LiveGame;
-import gfx.screens.MainMenu;
-import gfx.screens.OpenChallengeJoining;
-import gfx.screens.PlayerProfile;
 import js.Browser;
 import js.html.URLSearchParams;
 import net.EventProcessingQueue.INetObserver;
@@ -124,6 +118,9 @@ class ScreenManager
             case GameStarted(match_id, logPreamble):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
                 toScreen(LiveGame(match_id, New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime)));
+            case FollowPlayerGameStarted(match_id, followedPlayerLogin, logPreamble):
+                var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
+                toScreen(LiveGame(match_id, Ongoing(parsedData, parsedData.timeControl.startSecs, parsedData.timeControl.startSecs, Date.now().getTime(), followedPlayerLogin)));
             case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));

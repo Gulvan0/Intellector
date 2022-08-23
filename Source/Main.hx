@@ -105,7 +105,7 @@ class Main extends Sprite
 		//ScreenManager.toScreen(ChallengeJoining("Gulvan", new TimeControl(30, 0), Black));
 		Networker.ignoreEmitCalls = true;
 		LoginManager.login = "gulvan";
-		ScreenManager.toScreen(LiveGame(1337, Past(GameLogParser.parse("#P|gulvan:kazvixx;
+		ScreenManager.toScreen(LiveGame(1337, Ongoing(GameLogParser.parse("#P|gulvan:kazvixx;
 		#D|1659990040;
 		#T|600/0;
 		#S|bfrmrnrprqrriseteuivowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr;
@@ -122,9 +122,7 @@ class Main extends Sprite
 		3334/400000;
 		4635/450000;
 		6162/350000;
-		2634/420000;
-		#L|420000/325000;
-		#R|b/res"), "kazvixx")));
+		2634/420000;"), 420, 325, Date.now().getTime(), "kazvixx")));
 	}
 
 	private function onConnectionFailed(e)

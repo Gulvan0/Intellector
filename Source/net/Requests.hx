@@ -106,7 +106,7 @@ class Requests
     public static function watchPlayer(login:String)
     {
         Networker.eventQueue.addHandler(watchPlayer_handler.bind(login));
-        Networker.emitEvent(Spectate(login));
+        Networker.emitEvent(FollowPlayer(login));
     }
 
     private static function watchPlayer_handler(login:String, event:ServerEvent)

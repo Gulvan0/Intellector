@@ -345,23 +345,22 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
                 this.state = new NeutralState();
                 this.behavior = _startingSituation.turnColor == playerColor? new PlayerMoveBehavior(playerColor) : new EnemyMoveBehavior(playerColor);
 
-            case Live(Ongoing(parsedData, _, _, _, spectatedLogin)):
+            case Live(Ongoing(parsedData, _, _, _, followedPlayerLogin)):
                 this._startingSituation = parsedData.startingSituation.copy();
                 this._currentSituation = _startingSituation.copy();
 
                 var playerColor:PieceColor = parsedData.getPlayerColor();
 
-                if (spectatedLogin == null)
+                if (followedPlayerLogin == null)
                     super(_startingSituation, Free, Free, playerColor);
                 else
-                    super(_startingSituation, Free, Free, parsedData.getParticipantColor(spectatedLogin));
+                    super(_startingSituation, Free, Free, parsedData.getParticipantColor(followedPlayerLogin));
                 
                 for (ply in parsedData.movesPlayed)
                     makeMove(ply);
 
-                if (spectatedLogin == null)
+                if (followedPlayerLogin == null)
                 {
-
                     if (_currentSituation.turnColor == playerColor || Preferences.premoveEnabled.get())
                         this.state = new NeutralState();
                     else

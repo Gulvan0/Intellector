@@ -51,6 +51,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     private var playerColor:Null<PieceColor>;
     private var orientationColor:PieceColor = White;
 
+    private var isPastGame:Bool;
     private var gameID:Int;
     private var whiteLogin:String;
     private var blackLogin:String;
@@ -80,6 +81,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function onClose()
     {
+        if (playerColor == null && !isPastGame)
+            Networker.emitEvent(StopSpectating);
+
         ScreenManager.removeResizeHandler(performValidation);
         Networker.eventQueue.removeObserver(this);
         GlobalBroadcaster.removeObserver(this);
@@ -209,8 +213,6 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, board.startingSituation, playedMoves);
                 shareDialog.showShareDialog(board);
             case Analyze:
-                if (playerColor == null)
-                    Networker.emitEvent(StopSpectate);
                 ScreenManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null, null));
             case AcceptDraw:
                 Networker.emitEvent(AcceptDraw);
@@ -300,6 +302,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         switch constructor 
         {
             case New(whiteLogin, blackLogin, timeControl, _, startDatetime):
+                this.isPastGame = false;
                 this.playerColor = LoginManager.isPlayer(blackLogin)? Black : White;
                 this.whiteLogin = whiteLogin;
                 this.blackLogin = blackLogin;
@@ -309,7 +312,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
                 setOrientation(playerColor);
 
-            case Ongoing(parsedData, _, _, _, spectatedLogin):
+            case Ongoing(parsedData, _, _, _, followedPlayerLogin):
+                this.isPastGame = false;
                 this.playerColor = parsedData.getPlayerColor();
                 this.whiteLogin = parsedData.whiteLogin;
                 this.blackLogin = parsedData.blackLogin;
@@ -317,9 +321,10 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.datetime = parsedData.datetime;
                 this.getSecsLeftAfterMove = null;
 
-                setOrientation(spectatedLogin != null? parsedData.getParticipantColor(spectatedLogin) : playerColor);
+                setOrientation(followedPlayerLogin != null? parsedData.getParticipantColor(followedPlayerLogin) : playerColor);
 
             case Past(parsedData, watchedPlyerLogin):
+                this.isPastGame = true;
                 this.playerColor = null;
                 this.whiteLogin = parsedData.whiteLogin;
                 this.blackLogin = parsedData.blackLogin;
