@@ -21,7 +21,7 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
     private var startingSituation:Situation;
     private var currentSituation:Situation;
     private var moveHistory:Array<Ply>;
-    private var shownMove:Int;
+    public var shownMove(default, null):Int;
 
     private abstract function postInit():Void;
     private abstract function appendPlyStr(plyStr:String):Void;

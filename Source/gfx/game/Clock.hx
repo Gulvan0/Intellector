@@ -50,6 +50,14 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         this.customStyle = newCardStyle;
     }
 
+    public function setTimeManually(secondsLeft:Float)
+    {
+        if (active)
+            throw "You can only set time manually for inactive clocks. For active clocks, it is set as a result of processing the corresponding events";
+
+        label.text = TimeControl.secsToString(secondsLeft);
+    }
+
     public function handleNetEvent(event:ServerEvent)
     {
         if (!active)
@@ -129,7 +137,6 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
 
     private function updateTimeLeft(?e) 
     {
-
         if (running)
             secondsLeft = Math.max(secondsLeftAtReliableTimestamp - (Date.now().getTime() - reliableTimestamp) / 1000, 0);
         else

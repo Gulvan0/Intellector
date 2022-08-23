@@ -58,6 +58,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     private var datetime:Date;
     private var winnerColor:Null<PieceColor> = null;
     private var outcome:Null<Outcome> = null;
+    private var getSecsLeftAfterMove:Null<(side:PieceColor, plyNum:Int)->Null<Float>>;
 
     private var netObservers:Array<INetObserver>;
     private var gameboardObservers:Array<IGameBoardObserver>;
@@ -170,6 +171,13 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         cCreepingLine.performScroll(type);
         lNavigator.performScroll(type);
         board.applyScrolling(type);
+        if (getSecsLeftAfterMove != null)
+        {
+            cWhiteClock.setTimeManually(getSecsLeftAfterMove(White, lNavigator.shownMove));
+            cBlackClock.setTimeManually(getSecsLeftAfterMove(Black, lNavigator.shownMove));
+            lWhiteClock.setTimeManually(getSecsLeftAfterMove(White, lNavigator.shownMove));
+            lBlackClock.setTimeManually(getSecsLeftAfterMove(Black, lNavigator.shownMove));
+        }
     }
 
     public function handleActionBtnPress(btn:ActionBtn)
@@ -297,6 +305,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.blackLogin = blackLogin;
                 this.timeControl = timeControl;
                 this.datetime = startDatetime;
+                this.getSecsLeftAfterMove = null;
 
                 setOrientation(playerColor);
 
@@ -306,6 +315,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.blackLogin = parsedData.blackLogin;
                 this.timeControl = parsedData.timeControl;
                 this.datetime = parsedData.datetime;
+                this.getSecsLeftAfterMove = null;
 
                 setOrientation(spectatedLogin != null? parsedData.getParticipantColor(spectatedLogin) : playerColor);
 
@@ -315,6 +325,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.blackLogin = parsedData.blackLogin;
                 this.timeControl = parsedData.timeControl;
                 this.datetime = parsedData.datetime;
+                this.getSecsLeftAfterMove = parsedData.msPerMoveDataAvailable? parsedData.getSecsLeftAfterMove : null;
 
                 setOrientation(watchedPlyerLogin != null? parsedData.getParticipantColor(watchedPlyerLogin) : White);
         }
