@@ -9,6 +9,8 @@
         <component class="gfx.game.ShareGameTab" alias="sharegametab" />
         <component class="gfx.analysis.ShareExportTab" alias="shareexporttab" />
         <component class="gfx.analysis.AnalysisActionBar" alias="analysisactionbar" />
+        <component class="gfx.main.ChallengeModeRenderer" alias="challengemoderenderer" />
+        <component class="gfx.components.ARPImage" alias="arpimage" />
     </components>
     <themes>
         <global>

@@ -21,8 +21,8 @@
         <box width="100%" verticalAlign="center">
             <dropdown id="turnColorStepper" width="100%">
                 <data>
-                    <item text="${Dictionary.getPhrase(ANALYSIS_WHITE_TO_MOVE_OPTION_TEXT)}" />
-                    <item text="${Dictionary.getPhrase(ANALYSIS_BLACK_TO_MOVE_OPTION_TEXT)}" />
+                    <item text="${Dictionary.getPhrase(TURN_COLOR(struct.PieceColor.White))}" />
+                    <item text="${Dictionary.getPhrase(TURN_COLOR(struct.PieceColor.Black))}" />
                 </data>
             </dropdown>
         </box>

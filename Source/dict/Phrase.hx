@@ -1,5 +1,7 @@
 package dict;
 
+import struct.PieceColor;
+
 enum Phrase
 {
     LANGUAGE_NAME;
@@ -100,7 +102,7 @@ enum Phrase
     OPENJOIN_UNRATED;
     OPENJOIN_ACCEPT_BTN_TEXT;
 
-    //Main menu dialogs
+    //Menubar dialogs
 
     CHANGELOG_DIALOG_TITLE;
 
@@ -158,6 +160,26 @@ enum Phrase
     ENTER_PROFILE_OWNER;
     GAMES;
     STUDIES;
+
+    //Main menu
+
+    TABLEVIEW_RELOAD_BTN_TEXT;
+
+    CURRENT_GAMES_TABLE_HEADER;
+
+    PAST_GAMES_TABLE_HEADER;
+
+    OPEN_CHALLENGES_TABLE_HEADER;
+    OPEN_CHALLENGES_MODE_COLUMN_NAME;
+    OPEN_CHALLENGES_TIME_COLUMN_NAME;
+    OPEN_CHALLENGES_PLAYER_COLUMN_NAME;
+    OPEN_CHALLENGES_BRACKET_COLUMN_NAME;
+    OPEN_CHALLENGES_BRACKET_RANKED(rated:Bool);
+    CHALLENGE_COLOR_ICON_TOOLTIP(color:Null<PieceColor>);
+
+    //Common
+
+    TURN_COLOR(color:PieceColor);
 
 
     CHATBOX_MESSAGE_PLACEHOLDER;

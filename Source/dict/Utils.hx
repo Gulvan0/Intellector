@@ -203,12 +203,4 @@ class Utils
             case RU: 'Вызов $login\n$timeControlStr (Цвет $login: $colorStr)\nОтправьте эту ссылку-приглашение противнику:';
         }
     }
-
-    public static function getAnalysisTurnColorSelectLabel(color:PieceColor):String 
-    {
-		return switch Preferences.language.get() {
-            case EN: color == White? "White to move" : "Black to move";
-            case RU: color == White? "Ход белых" : "Ход черных";
-        }
-	}
 }

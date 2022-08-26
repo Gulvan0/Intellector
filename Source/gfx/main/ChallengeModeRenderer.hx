@@ -1,5 +1,9 @@
 package gfx.main;
 
+import dict.Dictionary;
+import haxe.ui.tooltips.ToolTipManager;
+import gfx.common.SituationTooltipRenderer;
+import struct.Situation;
 import utils.AssetManager;
 import struct.PieceColor;
 import utils.TimeControl;
@@ -13,12 +17,20 @@ class ChallengeModeRenderer extends ItemRenderer
         super.onDataChanged(data);
         if (data != null) 
         {
-            var color:Null<PieceColor> = data.ownerOpponentColor;
-            var timeControlType:TimeControlType = new TimeControl(data.startSecs, data.bonusSecs).getType();
-            timeControlIcon.resource = AssetManager.timeControlPath(timeControlType);
-            timeControlIcon.tooltip = timeControlType.getName();
+            var color:Null<PieceColor> = data.color;
+            var customStartingSituation:Null<Situation> = data.situation;
             colorIcon.resource = AssetManager.challengeColorPath(color);
-            //TODO: Dict for colorIcon tooltip
+            colorIcon.tooltip = Dictionary.getPhrase(CHALLENGE_COLOR_ICON_TOOLTIP(color));
+            if (customStartingSituation != null)
+            {
+                customStartPosIcon.hidden = false;
+                var renderer:SituationTooltipRenderer = new SituationTooltipRenderer(customStartingSituation);
+                ToolTipManager.instance.registerTooltip(customStartPosIcon, {
+                    renderer: renderer
+                });
+            }
+            else
+                customStartPosIcon.hidden = true;
         }
     }
 }

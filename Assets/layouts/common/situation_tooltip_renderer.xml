@@ -1,0 +1,6 @@
+<item-renderer width="200px" height="200px">
+    <vbox width="100%" height="100%">
+        <box id="boardContainer" width="100%" height="100%" horizontalAlign="center" />
+        <label id="turnColorLabel" horizontalAlign="center" />
+    </vbox>
+</item-renderer>

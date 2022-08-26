@@ -62,7 +62,7 @@ class AssetManager
             case null: 'random';
         };
 
-        return 'assets/symbols/main_menu/challenge_colors/$filename.svg';
+        return 'assets/symbols/main_menu/challenge_modes/$filename.svg';
     }
 
     public static function playPlySound(ply:Ply, situation:Situation)
