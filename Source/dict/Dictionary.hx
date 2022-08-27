@@ -67,6 +67,26 @@ class Dictionary
         OPENJOIN_UNRATED => ["Unrated", "Товарищеская"],
         OPENJOIN_ACCEPT_BTN_TEXT => ["Accept Challenge", "Принять вызов"],
 
+        MENUBAR_PLAY_MENU_TITLE => ["Play", "Играть"],
+        MENUBAR_PLAY_MENU_CREATE_GAME_ITEM => ["Create Game", "Создать игру"],
+        MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM => ["Open Challenges", "Открытые вызовы"],
+        
+        MENUBAR_SPECTATE_MENU_TITLE => ["Spectate", "Смотреть"],
+        MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM => ["Current Games", "Текущие партии"],
+        MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM => ["Follow Player", "Наблюдать за игроком"],
+        
+        MENUBAR_LEARN_MENU_TITLE => ["Learn", "Учёба"],
+        MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM => ["Analysis Board", "Доска анализа"],
+        
+        MENUBAR_SOCIAL_MENU_TITLE => ["Social", "Сообщество"],
+        MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM => ["Player Profile", "Профиль игрока"],
+
+        MENUBAR_ACCOUNT_MENU_LOGIN_ITEM => ["Log In", "Войти"],
+        MENUBAR_ACCOUNT_MENU_MY_PROFILE_ITEM => ["My Profile", "Мой профиль"],
+        MENUBAR_ACCOUNT_MENU_SETTINGS_ITEM => ["Settings", "Настройки"],
+        MENUBAR_ACCOUNT_MENU_LOGOUT_ITEM => ["Log Out", "Выйти"],
+        MENUBAR_ACCOUNT_MENU_GUEST_DISPLAY_NAME => ["Guest", "Гость"],
+
         CHANGELOG_DIALOG_TITLE => ["Changelog", "Список изменений"],
 
         LOGIN_DIALOG_TITLE => ["Authorization", "Авторизация"],
@@ -114,6 +134,9 @@ class Dictionary
 
         FOLLOWED_PLAYER_LABEL_GAMEINFOBOX_TOOLTIP => ["You follow this player. Each time he/she starts a new game, you'll be automatically redirected to watch it. To unfollow, simply leave this screen.", "Вы наблюдаете за этим игроком. Если игрок начнет новую игру, вы автоматически последуете за ним. Чтобы прекратить наблюдение, просто покиньте этот экран"],
 
+        MAIN_MENU_CREATE_GAME_BTN_TEXT => ["Create Game", "Создать игру"],
+        READ_FULL_CHANGELOG_TOOLTIP => ["Read full changelog", "Полный список изменений"],
+
         TABLEVIEW_RELOAD_BTN_TEXT => ["Reload", "Обновить"],
         TABLEVIEW_MODE_COLUMN_NAME => ["Mode", "Режим"],
         TABLEVIEW_TIME_COLUMN_NAME => ["Time", "Контроль"],
@@ -130,6 +153,15 @@ class Dictionary
         CHALLENGE_COLOR_ICON_TOOLTIP(null) => ["Your color will be selected randomly", "Цвет будет выбран случайным образом"],
         CHALLENGE_COLOR_ICON_TOOLTIP(White) => ["You will play as White", "Вы будете играть за белых"],
         CHALLENGE_COLOR_ICON_TOOLTIP(Black) => ["You will play as Black", "Вы будете играть за черных"],
+
+        INPUT_PLAYER_LOGIN => ["Input player's username", "Введите ник игрока"],
+
+        REQUESTS_ERROR_DIALOG_TITLE => ["Error", "Ошибка"],
+        REQUESTS_ERROR_CHALLENGE_NOT_FOUND => ["Challenge not found", "Вызов не найден"],
+        REQUESTS_ERROR_PLAYER_NOT_FOUND => ["Player not found", "Игрок не найден"],
+        REQUESTS_ERROR_STUDY_NOT_FOUND => ["Study not found", "Студия не найдена"],
+        REQUESTS_ERROR_PLAYER_OFFLINE => ["This player is offline", "Игрок не в сети"],
+        REQUESTS_ERROR_PLAYER_NOT_IN_GAME => ["This player is not in the game", "В настоящий момент игрок не участвует в партии"],
 
         TURN_COLOR(White) => ["White to move", "Ход белых"],
         TURN_COLOR(Black) => ["Black to move", "Ход черных"],

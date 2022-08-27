@@ -1,6 +1,9 @@
 package gfx.screens;
 
+import gfx.components.Dialogs;
 import haxe.ui.events.MouseEvent;
+import dict.Dictionary;
+import utils.Changelog;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main_menu/main_menu.xml"))
@@ -12,7 +15,11 @@ class MainMenu extends Screen
         //TODO: same as for menuBar
     }
 
-    //TODO: Changelog
+    @:bind(changelogLabel, MouseEvent.CLICK)
+    private function onChangelogRequested(?e)
+    {
+        Dialogs.changelog();
+    }
 
     private override function validateComponentLayout():Bool 
     {

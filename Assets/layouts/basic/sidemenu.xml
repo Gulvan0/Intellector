@@ -41,18 +41,18 @@
             <label id="siteName" text="Intellector.info" verticalAlign="center" />
         </hbox>
         <spacer id="mainSpacer" />
-        <label text="Играть" styleName="mobileMenuHeader" />
-            <label id="createChallengeBtn" text="Создать вызов" styleName="mobileMenuItem" />
-            <label id="openChallengesBtn" text="Открытые вызовы" styleName="mobileMenuItem" />
+        <label text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_TITLE)}" styleName="mobileMenuHeader" />
+            <label id="createChallengeBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM)}" styleName="mobileMenuItem" />
+            <label id="openChallengesBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM)}" styleName="mobileMenuItem" />
         <spacer styleName="sectionSpacer" />
-        <label text="Смотреть" styleName="mobileMenuHeader" />
-            <label id="currentGamesBtn" text="Текущие партии" styleName="mobileMenuItem" />
-            <label id="watchPlayerBtn" text="Наблюдать за игроком" styleName="mobileMenuItem" />
+        <label text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_TITLE)}" styleName="mobileMenuHeader" />
+            <label id="currentGamesBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM)}" styleName="mobileMenuItem" />
+            <label id="watchPlayerBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM)}" styleName="mobileMenuItem" />
         <spacer styleName="sectionSpacer" />
-        <label text="Учёба" styleName="mobileMenuHeader" />
-            <label id="analysisBoardBtn" text="Доска анализа" styleName="mobileMenuItem" />
+        <label text="${Dictionary.getPhrase(MENUBAR_LEARN_MENU_TITLE)}" styleName="mobileMenuHeader" />
+            <label id="analysisBoardBtn" text="${Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM)}" styleName="mobileMenuItem" />
         <spacer styleName="sectionSpacer" />
-        <label text="Сообщество" styleName="mobileMenuHeader" />
-            <label id="playerProfileBtn" text="Профиль игрока" styleName="mobileMenuItem" />
+        <label text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_TITLE)}" styleName="mobileMenuHeader" />
+            <label id="playerProfileBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM)}" styleName="mobileMenuItem" />
     </vbox>
 </sidebar>

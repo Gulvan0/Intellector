@@ -1,5 +1,6 @@
 package net;
 
+import dict.Dictionary;
 import gfx.components.Dialogs;
 import gfx.ScreenManager;
 import serialization.GameLogParser;
@@ -54,7 +55,7 @@ class Requests
                 ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, ownerLogin)));
             case OpenchallengeNotFound:
                 ScreenManager.toScreen(MainMenu);
-                Dialogs.alert("Вызов не найден", "Ошибка");
+                Dialogs.alert(Dictionary.getPhrase(REQUESTS_ERROR_CHALLENGE_NOT_FOUND), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
             default:
                 return false;
         }
@@ -75,7 +76,7 @@ class Requests
                 //TODO: Implement properly
             case PlayerNotFound:
                 ScreenManager.toScreen(MainMenu);
-                Dialogs.alert("Игрок не найден", "Ошибка");
+                Dialogs.alert(Dictionary.getPhrase(REQUESTS_ERROR_PLAYER_NOT_FOUND), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
             default:
                 return false;
         }
@@ -96,7 +97,7 @@ class Requests
                 ScreenManager.toScreen(Analysis(variantStr, 0, id, name));
             case StudyNotFound:
                 ScreenManager.toScreen(MainMenu);
-                Dialogs.alert("Студия не найдена", "Ошибка");
+                Dialogs.alert(Dictionary.getPhrase(REQUESTS_ERROR_STUDY_NOT_FOUND), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
             default:
                 return false;
         }
@@ -117,11 +118,11 @@ class Requests
 		        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, login)));
             case PlayerNotInGame:
-                Dialogs.alert("В настоящий момент игрок не участвует в партии", "Ошибка");
+                Dialogs.alertCallback(Dictionary.getPhrase(REQUESTS_ERROR_PLAYER_NOT_IN_GAME), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
             case PlayerOffline:
-                Dialogs.alertCallback("Игрок не в сети", "Ошибка");
+                Dialogs.alertCallback(Dictionary.getPhrase(REQUESTS_ERROR_PLAYER_OFFLINE), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
             case PlayerNotFound:
-                Dialogs.alertCallback("Игрок не найден", "Ошибка");
+                Dialogs.alertCallback(Dictionary.getPhrase(REQUESTS_ERROR_PLAYER_NOT_FOUND), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
             default:
                 return false;
         }

@@ -42,22 +42,22 @@
 
         <label id="siteName" text="Intellector.info" verticalAlign="center" />
 
-        <menu id="playMenu" text="Играть">
-            <menuitem id="createChallengeBtn" text="Создать вызов" icon="assets/symbols/upper_menu/basic/new_game.svg" />
-            <menuitem id="openChallengesBtn" text="Открытые вызовы" icon="assets/symbols/upper_menu/basic/open_challenges.svg" />
+        <menu id="playMenu" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_TITLE)}">
+            <menuitem id="createChallengeBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM)}" icon="assets/symbols/upper_menu/basic/new_game.svg" />
+            <menuitem id="openChallengesBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM)}" icon="assets/symbols/upper_menu/basic/open_challenges.svg" />
         </menu>
 
-        <menu id="watchMenu" text="Смотреть">
-            <menuitem id="currentGamesBtn" text="Текущие партии" icon="assets/symbols/upper_menu/basic/current_games.svg" />
-            <menuitem id="watchPlayerBtn" text="Наблюдать за игроком" icon="assets/symbols/upper_menu/basic/watch_player.svg" />
+        <menu id="watchMenu" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_TITLE)}">
+            <menuitem id="currentGamesBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM)}" icon="assets/symbols/upper_menu/basic/current_games.svg" />
+            <menuitem id="watchPlayerBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM)}" icon="assets/symbols/upper_menu/basic/watch_player.svg" />
         </menu>
 
-        <menu id="learnMenu" text="Учёба">
-            <menuitem id="analysisBoardBtn" text="Доска анализа" icon="assets/symbols/upper_menu/basic/analysis_board.svg" />
+        <menu id="learnMenu" text="${Dictionary.getPhrase(MENUBAR_LEARN_MENU_TITLE)}">
+            <menuitem id="analysisBoardBtn" text="${Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM)}" icon="assets/symbols/upper_menu/basic/analysis_board.svg" />
         </menu>
 
-        <menu id="socialMenu" text="Сообщество">
-            <menuitem id="playerProfileBtn" text="Профиль игрока" icon="assets/symbols/upper_menu/basic/player_profile.svg" />
+        <menu id="socialMenu" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_TITLE)}">
+            <menuitem id="playerProfileBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM)}" icon="assets/symbols/upper_menu/basic/player_profile.svg" />
         </menu>
 
         <spacer width="100%" />
@@ -67,10 +67,10 @@
         </menu>
 
         <menu id="accountMenu">
-            <menuitem id="logInBtn" text="Войти" icon="assets/symbols/upper_menu/account/log_in.svg" />
-            <menuitem id="myProfileBtn" text="Мой профиль" icon="assets/symbols/upper_menu/account/my_profile.svg" />
-            <menuitem id="settingsBtn" text="Настройки" icon="assets/symbols/upper_menu/account/settings.svg" />
-            <menuitem id="logOutBtn" text="Выйти" icon="assets/symbols/upper_menu/account/log_out.svg" />
+            <menuitem id="logInBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGIN_ITEM)}" icon="assets/symbols/upper_menu/account/log_in.svg" />
+            <menuitem id="myProfileBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_MY_PROFILE_ITEM)}" icon="assets/symbols/upper_menu/account/my_profile.svg" />
+            <menuitem id="settingsBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_SETTINGS_ITEM)}" icon="assets/symbols/upper_menu/account/settings.svg" />
+            <menuitem id="logOutBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGOUT_ITEM)}" icon="assets/symbols/upper_menu/account/log_out.svg" />
         </menu>
     </menubar>
 

@@ -76,15 +76,14 @@ class Main extends Sprite
 		Changelog.init();
 		
 		Toolkit.init({container: stage});
-		AssetManager.load(() -> {
-			ScreenManager.launch();
-			callback();
-		});
+		AssetManager.load(callback);
 	}
 
 	private function start() 
 	{
 		var langInitializedFromCookie:Bool = Preferences.language.load();
+
+		ScreenManager.launch();
 
 		if (langInitializedFromCookie)
 			onLanguageReady();

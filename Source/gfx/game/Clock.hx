@@ -142,7 +142,10 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         else
             secondsLeft = secondsLeftAtReliableTimestamp;
 
-        label.text = TimeControl.secsToString(secondsLeft);
+        if (label != null)
+            label.text = TimeControl.secsToString(secondsLeft);
+        else
+            return;
 
         if (secondsLeft == 0)
         {
@@ -173,6 +176,12 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
     {
         removeEventListener(Event.ENTER_FRAME, updateTimeLeft);
         running = false;
+    }
+
+    public function deactivate()
+    {
+        active = false;
+        pauseTimer();
     }
 
     private function correctTime(whiteSeconds:Float, blackSeconds:Float, validAt:Float) 

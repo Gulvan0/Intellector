@@ -84,6 +84,11 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         if (playerColor == null && !isPastGame)
             Networker.emitEvent(StopSpectating);
 
+        cWhiteClock.deactivate();
+        cBlackClock.deactivate();
+        lWhiteClock.deactivate();
+        lBlackClock.deactivate();
+
         ScreenManager.removeResizeHandler(performValidation);
         Networker.eventQueue.removeObserver(this);
         GlobalBroadcaster.removeObserver(this);

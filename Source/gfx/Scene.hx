@@ -1,5 +1,6 @@
 package gfx;
 
+import dict.Dictionary;
 import GlobalBroadcaster.IGlobalEventObserver;
 import GlobalBroadcaster.GlobalEvent;
 import net.EventProcessingQueue.INetObserver;
@@ -147,7 +148,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onWatchPlayerPressed(e)
     {
-        Dialogs.prompt("Введите ник игрока", All, startSpectating);
+        Dialogs.prompt(Dictionary.getPhrase(INPUT_PLAYER_LOGIN), All, startSpectating);
     }
 
     private function startSpectating(requestedLogin:String)
@@ -168,7 +169,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onPlayerProfilePressed(e)
     {
-        Dialogs.prompt("Введите ник игрока", All, navigateToProfile);
+        Dialogs.prompt(Dictionary.getPhrase(INPUT_PLAYER_LOGIN), All, navigateToProfile);
     }
 
     private function navigateToProfile(requestedLogin:String)
@@ -199,7 +200,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     private function refreshAccountElements()
     {
         var logged:Bool = LoginManager.login != null;
-        accountMenu.text = logged? StringUtils.shorten(LoginManager.login, 8) : "Гость";
+        accountMenu.text = logged? StringUtils.shorten(LoginManager.login, 8) : Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_GUEST_DISPLAY_NAME);
         logInBtn.hidden = logged;
         myProfileBtn.hidden = !logged;
         logOutBtn.hidden = !logged;
