@@ -35,4 +35,6 @@ enum ClientEvent
     GetPlayerProfile(login:String);
     GetPlayerGames(login:String, after:Int, pageSize:Int);
     GetPlayerStudies(login:String, after:Int, pageSize:Int);
+    GetOpenChallenges;
+    GetCurrentGames;
 }

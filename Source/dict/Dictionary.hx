@@ -115,24 +115,26 @@ class Dictionary
         FOLLOWED_PLAYER_LABEL_GAMEINFOBOX_TOOLTIP => ["You follow this player. Each time he/she starts a new game, you'll be automatically redirected to watch it. To unfollow, simply leave this screen.", "Вы наблюдаете за этим игроком. Если игрок начнет новую игру, вы автоматически последуете за ним. Чтобы прекратить наблюдение, просто покиньте этот экран"],
 
         TABLEVIEW_RELOAD_BTN_TEXT => ["Reload", "Обновить"],
+        TABLEVIEW_MODE_COLUMN_NAME => ["Mode", "Режим"],
+        TABLEVIEW_TIME_COLUMN_NAME => ["Time", "Контроль"],
+        TABLEVIEW_PLAYER_COLUMN_NAME => ["Player", "Игрок"],
+        TABLEVIEW_PLAYERS_COLUMN_NAME => ["Players", "Игроки"],
+        TABLEVIEW_BRACKET_COLUMN_NAME => ["Bracket", "Тип"],
+        TABLEVIEW_BRACKET_RANKED(false) => ["Rated", "На рейтинг"],
+        TABLEVIEW_BRACKET_RANKED(true) => ["Unrated", "Товарищеская"],
 
         CURRENT_GAMES_TABLE_HEADER => ["Now Playing", "Текущие игры"],
-
         PAST_GAMES_TABLE_HEADER => ["Recent Games", "Недавние партии"],
-
         OPEN_CHALLENGES_TABLE_HEADER => ["Open Challenges", "Открытые вызовы"],
-        OPEN_CHALLENGES_MODE_COLUMN_NAME => ["Mode", "Режим"],
-        OPEN_CHALLENGES_TIME_COLUMN_NAME => ["Time", "Контроль"],
-        OPEN_CHALLENGES_PLAYER_COLUMN_NAME => ["Player", "Игрок"],
-        OPEN_CHALLENGES_BRACKET_COLUMN_NAME => ["Bracket", "Тип"],
-        OPEN_CHALLENGES_BRACKET_RANKED(false) => ["Rated", "На рейтинг"],
-        OPEN_CHALLENGES_BRACKET_RANKED(true) => ["Unrated", "Товарищеская"],
+
         CHALLENGE_COLOR_ICON_TOOLTIP(null) => ["Your color will be selected randomly", "Цвет будет выбран случайным образом"],
         CHALLENGE_COLOR_ICON_TOOLTIP(White) => ["You will play as White", "Вы будете играть за белых"],
         CHALLENGE_COLOR_ICON_TOOLTIP(Black) => ["You will play as Black", "Вы будете играть за черных"],
 
         TURN_COLOR(White) => ["White to move", "Ход белых"],
         TURN_COLOR(Black) => ["Black to move", "Ход черных"],
+
+        CUSTOM_STARTING_POSITION => ["Custom starting position", "Нестандартная начальная расстановка"],
 
         CHATBOX_MESSAGE_PLACEHOLDER => ["Message text...", "Сообщение..."],
         PROMOTION_DIALOG_QUESTION => ["Select a piece to which you want to promote", "Выберите фигуру, в которую хотите превратиться"],

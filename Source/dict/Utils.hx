@@ -127,6 +127,22 @@ class Utils
         return Dictionary.getPhrase(GAME_OVER) + result + explanation;
     }
 
+    public static function getResolution(outcome:Outcome, winner:Null<PieceColor>) 
+    {
+        return switch outcome 
+        {
+            case Mate: Dictionary.getPhrase(RESOLUTION_MATE) + ' • ' + getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
+            case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH) + ' • ' + getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
+            case Resign: getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_RESIGN);
+            case Abort: Dictionary.getPhrase(RESOLUTION_ABORT);
+            case Abandon: getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_DISCONNECT);
+            case DrawAgreement: Dictionary.getPhrase(RESOLUTION_AGREEMENT);
+            case Repetition: Dictionary.getPhrase(RESOLUTION_REPETITON);
+            case NoProgress: Dictionary.getPhrase(RESOLUTION_HUNDRED);
+            case Timeout: Dictionary.getPhrase(RESOLUTION_TIMEOUT) + ' • ' + getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
+        }
+    }
+
     //TODO: Rewrite functions below this comment
 
     private static function getMatchlistWinnerText(color:Null<PieceColor>) 

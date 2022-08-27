@@ -1,5 +1,6 @@
 package gfx.game;
 
+import dict.Utils;
 import format.SVG;
 import openfl.display.Shape;
 import utils.AssetManager;
@@ -46,7 +47,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
             case Rollback(plysToUndo, _, _, _):
                 revertPlys(plysToUndo);
             case GameEnded(winner_color, reason, _, _):
-                changeResolution(GameLogParser.decodeOutcome(reason), GameLogParser.decodeColor(winner_color));
+                resolution.text = Utils.getResolution(GameLogParser.decodeOutcome(reason), GameLogParser.decodeColor(winner_color));
             default:
         }
     }
@@ -59,23 +60,6 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
                 accountMove(ply);
             default:
         }
-    }
-
-    private function changeResolution(outcome:Outcome, winner:Null<PieceColor>) 
-    {
-        var outcomeStr:String = switch outcome 
-        {
-            case Mate: Dictionary.getPhrase(RESOLUTION_MATE) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
-            case Breakthrough: Dictionary.getPhrase(RESOLUTION_BREAKTHROUGH) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
-            case Resign: dict.Utils.getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_RESIGN);
-            case Abort: Dictionary.getPhrase(RESOLUTION_ABORT);
-            case Abandon: dict.Utils.getColorName(opposite(winner)) + Dictionary.getPhrase(RESOLUTION_DISCONNECT);
-            case DrawAgreement: Dictionary.getPhrase(RESOLUTION_AGREEMENT);
-            case Repetition: Dictionary.getPhrase(RESOLUTION_REPETITON);
-            case NoProgress: Dictionary.getPhrase(RESOLUTION_HUNDRED);
-            case Timeout: Dictionary.getPhrase(RESOLUTION_TIMEOUT) + ' • ' + dict.Utils.getColorName(winner) + Dictionary.getPhrase(RESOLUTION_WINNER_POSTFIX);
-        }
-        resolution.text = outcomeStr;
     }
 
     private function accountMove(ply:Ply)
@@ -187,7 +171,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
 
         if (parsedData.outcome != null)
-            changeResolution(parsedData.outcome, parsedData.winnerColor);
+            resolution.text = Utils.getResolution(parsedData.outcome, parsedData.winnerColor);
 
         if (parsedData.datetime != null)
             datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");

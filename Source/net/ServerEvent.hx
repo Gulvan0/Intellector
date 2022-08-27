@@ -65,5 +65,8 @@ enum ServerEvent
     PlayerOffline; //Answer to Spectate: no game to spectate with a requested player
     PlayerNotInGame; //Answer to Spectate: no game to spectate with a requested player
 
+    OpenChallenges(data:Array<String>); //Answer to GetOpenChallenges
+    CurrentGames(data:Array<{id:Int, currentLog:String}>); //Answer to GetCurrentGames
+
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created
 }

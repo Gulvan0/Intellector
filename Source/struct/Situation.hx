@@ -10,6 +10,8 @@ class Situation
     public var turnColor:PieceColor;
     public var intellectorPos(default, null):Map<PieceColor, Null<IntPoint>>;
 
+    private static var defaultStartingSIP:String = starting().serialize();
+
     public static function starting():Situation
     {
         var situation = new Situation();
@@ -208,6 +210,11 @@ class Situation
         }
         
         return plys;
+    }
+
+    public function isDefaultStarting():Bool
+    {
+        return serialize() == defaultStartingSIP;
     }
 
     public function collectOccupiedHexes():Map<IntPoint, Hex>

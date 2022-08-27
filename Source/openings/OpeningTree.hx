@@ -1,5 +1,6 @@
 package openings;
 
+import struct.Ply;
 import dict.Dictionary;
 import struct.PieceType;
 
@@ -37,6 +38,18 @@ class OpeningTree
     public var currentNode:Branch;
     public var isMirrored:Null<Bool>;
     private var prevNodes:Array<Branch>;
+
+    public static function getOpening(moves:Array<Ply>):String
+    {
+        var tree:OpeningTree = new OpeningTree();
+        for (ply in moves)
+        {
+            if (tree.currentNode.terminal)
+                break;
+            tree.makeMove(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
+        }
+        return tree.currentNode.name;
+    }
 
     public function makeMove(fromI:Int, fromJ:Int, toI:Int, toJ:Int, ?morphInto:PieceType) 
     {

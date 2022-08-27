@@ -1,0 +1,19 @@
+<vbox width="600px" height="400px">
+    <hbox width="100%" height="40px">
+        <label id="title" text="${Dictionary.getPhrase(CURRENT_GAMES_TABLE_HEADER)}" style="font-size: 30px;font-name: 'fonts/FuturaItalic.ttf'" verticalAlign="bottom" />
+        <spacer width="100%" />
+        <button id="reloadBtn" icon="assets/symbols/main_menu/reload.svg" iconPosition="left" text="${Dictionary.getPhrase(TABLEVIEW_RELOAD_BTN_TEXT)}" height="100%" style="font-size: 20px" />
+    </hbox>
+    <tableview id="table" width="100%" height="100%" itemHeight="20px">
+        <header width="100%" height="20px">
+            <column id="time" text="${Dictionary.getPhrase(TABLEVIEW_TIME_COLUMN_NAME)}" width="20%" />
+            <column id="players" text="${Dictionary.getPhrase(TABLEVIEW_PLAYERS_COLUMN_NAME)}" width="60%" style="text-align:center;" />
+            <column id="bracket" text="${Dictionary.getPhrase(TABLEVIEW_BRACKET_COLUMN_NAME)}" width="20%" style="text-align:center;" />
+        </header>
+        
+        <time-control-renderer id="time" />
+        
+        <data>
+        </data>
+    </tableview>
+</vbox>

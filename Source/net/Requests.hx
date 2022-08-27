@@ -127,4 +127,40 @@ class Requests
         }
         return true;
     }
+
+    public static function getCurrentGames(callback:Array<{id:Int, currentLog:String}>->Void)
+    {
+        Networker.eventQueue.addHandler(getCurrentGames_handler.bind(callback));
+        Networker.emitEvent(GetCurrentGames);
+    }
+
+    private static function getCurrentGames_handler(callback:Array<{id:Int, currentLog:String}>->Void, event:ServerEvent)
+    {
+        switch event
+        {
+            case CurrentGames(data):
+                callback(data);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static function getOpenChallenges(callback:Array<String>->Void)
+    {
+        Networker.eventQueue.addHandler(getOpenChallenges_handler.bind(callback));
+        Networker.emitEvent(GetOpenChallenges);
+    }
+
+    private static function getOpenChallenges_handler(callback:Array<String>->Void, event:ServerEvent)
+    {
+        switch event
+        {
+            case OpenChallenges(data):
+                callback(data);
+                return true;
+            default:
+                return false;
+        }
+    }
 }

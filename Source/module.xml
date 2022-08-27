@@ -2,6 +2,7 @@
     <components>
         <component class="gfx.common.MoveNavigator" alias="movenavigator" />
         <component class="gfx.common.CreepingLine" alias="creepingline" />
+        <component class="gfx.common.PastGameWidget" alias="pastgamewidget" />
         <component class="gfx.game.Clock" alias="clock" />
         <component class="gfx.game.GameActionBar" alias="gameactionbar" />
         <component class="gfx.game.GameInfoBox" alias="gameinfobox" />
@@ -10,6 +11,10 @@
         <component class="gfx.analysis.ShareExportTab" alias="shareexporttab" />
         <component class="gfx.analysis.AnalysisActionBar" alias="analysisactionbar" />
         <component class="gfx.main.ChallengeModeRenderer" alias="challengemoderenderer" />
+        <component class="gfx.main.TimeControlRenderer" alias="timecontrolrenderer" />
+        <component class="gfx.main.OpenChallengesTable" alias="openchallengestable" />
+        <component class="gfx.main.CurrentGamesTable" alias="currentgamestable" />
+        <component class="gfx.main.PastGamesList" alias="pastgameslist" />
         <component class="gfx.components.ARPImage" alias="arpimage" />
     </components>
     <themes>

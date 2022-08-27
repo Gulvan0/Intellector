@@ -6,15 +6,16 @@
     </hbox>
     <tableview id="table" width="100%" height="100%" itemHeight="20px">
         <header width="100%" height="20px">
-            <column id="mode" text="${Dictionary.getPhrase(OPEN_CHALLENGES_MODE_COLUMN_NAME)}" width="12%" />
-            <column id="time" text="${Dictionary.getPhrase(OPEN_CHALLENGES_TIME_COLUMN_NAME)}" width="22%" />
-            <column id="player" text="${Dictionary.getPhrase(OPEN_CHALLENGES_PLAYER_COLUMN_NAME)}" width="44%" style="text-align:center;" />
-            <column id="lobby" text="${Dictionary.getPhrase(OPEN_CHALLENGES_BRACKET_COLUMN_NAME)}" width="22%" style="text-align:center;" />
+            <column id="mode" text="${Dictionary.getPhrase(TABLEVIEW_MODE_COLUMN_NAME)}" width="12%" />
+            <column id="time" text="${Dictionary.getPhrase(TABLEVIEW_TIME_COLUMN_NAME)}" width="22%" />
+            <column id="player" text="${Dictionary.getPhrase(TABLEVIEW_PLAYER_COLUMN_NAME)}" width="44%" style="text-align:center;" />
+            <column id="bracket" text="${Dictionary.getPhrase(TABLEVIEW_BRACKET_COLUMN_NAME)}" width="22%" style="text-align:center;" />
         </header>
         
         <challenge-mode-renderer id="mode" />
         <time-control-renderer id="time" />
         
-        <data />
+        <data>
+        </data>
     </tableview>
 </vbox>
