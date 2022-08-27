@@ -1,5 +1,6 @@
 package gfx;
 
+import haxe.ui.components.Image;
 import haxe.ui.containers.Box;
 import haxe.ui.styles.Style;
 import haxe.ui.core.Component;
@@ -24,6 +25,8 @@ enum ResponsiveProperty
     PercentWidth;
     PercentHeight;
     StyleProp(prop:ResponsiveStyleProperty);
+    IconWidth;
+    IconHeight;
 }
 
 enum Dimension
@@ -64,6 +67,10 @@ class ResponsiveToolbox
                     comp.percentHeight = evaluateRule(rule);
                 case StyleProp(prop):
                     recalcStyle(newStyle, prop, rule);
+                case IconWidth:
+                    comp.findComponent(Image).width = evaluateRule(rule);
+                case IconHeight:
+                    comp.findComponent(Image).height = evaluateRule(rule);
             }
         }
 

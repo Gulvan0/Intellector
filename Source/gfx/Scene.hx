@@ -128,22 +128,17 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function displayChallengeParamsDialog()
     {
-        Dialogs.specifyChallengeParams((_, _, _) -> {createChallenge();});
-    }
-
-    private function createChallenge() 
-    {
-        //TODO: Implement
+        Dialogs.specifyChallengeParams();
     }
 
     private function onOpenChallengesPressed(e)
     {
-        //TODO: toScreen
+        ScreenManager.toScreen(MainMenu);
     }
 
     private function onCurrentGamesPressed(e)
     {
-        //TODO: toScreen
+        ScreenManager.toScreen(MainMenu);
     }
 
     private function onWatchPlayerPressed(e)

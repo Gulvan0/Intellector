@@ -36,6 +36,11 @@ class ChallengeParams
         return rated = value;
     }
 
+    public function createChallenge()
+    {
+        //TODO: Fill
+    }
+
     public static function loadFromCookies():ChallengeParams
     {
         if (Cookie.exists(cookieName))

@@ -249,11 +249,9 @@ class Dialogs
         });
     }
 
-    public static function specifyChallengeParams(onConfirm:(startSecs:Int, bonusSecs:Int, callerColor:Null<PieceColor>)->Void, ?onCancel:Null<Void->Void>)
+    public static function specifyChallengeParams()
     {
-        //TODO: Rewrite (and create a separate class for the challenge params)
-        var dialog:Dialog = new ChallengeParamsDialog(onConfirm, onCancel);
-        addDialog(dialog, true, null, true);
+        //TODO: Fill
     }
 
     private static function onBtnAdded(btn:Button, type:PieceType, color:PieceColor, iconSize:Float, e) 
