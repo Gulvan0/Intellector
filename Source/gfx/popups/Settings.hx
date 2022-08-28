@@ -20,23 +20,23 @@ class Settings extends Dialog
 
     private function resize()
     {
-        width = Math.min(600, Screen.instance.width * 0.98);
+        width = Math.min(600, Screen.instance.actualWidth * 0.98);
 
         for (bar in stack3.findComponents(ButtonBar))
-            bar.customStyle = {fontSize: Math.min(16, Screen.instance.width * 0.02), horizontalAlign: "center"};
+            bar.customStyle = {fontSize: Math.min(16, Screen.instance.actualWidth * 0.02), horizontalAlign: "center"};
 
         for (header in stack3.findComponents(SectionHeader))
-            header.customStyle = {fontSize: Math.min(16, Screen.instance.width * 0.02)};
+            header.customStyle = {fontSize: Math.min(16, Screen.instance.actualWidth * 0.02)};
 
         for (label in stack3.findComponents('pill-label'))
-            label.customStyle = {fontSize: Math.min(16, Screen.instance.width * 0.02)};
+            label.customStyle = {fontSize: Math.min(16, Screen.instance.actualWidth * 0.02)};
         
         for (btn in tabBar.findComponents(Button))
         {
             var icon:Image = btn.findComponent(Image);
-            icon.width = Math.min(50, Screen.instance.width * 0.08);
-            icon.height = Math.min(50, Screen.instance.width * 0.08);
-            btn.customStyle = {width: Math.floor(Math.min(120, Screen.instance.width * 0.2)), height: Math.min(100, Screen.instance.width * 0.16), fontSize: Math.min(12, Screen.instance.width * 0.02)};
+            icon.width = Math.min(50, Screen.instance.actualWidth * 0.08);
+            icon.height = Math.min(50, Screen.instance.actualWidth * 0.08);
+            btn.customStyle = {width: Math.floor(Math.min(120, Screen.instance.actualWidth * 0.2)), height: Math.min(100, Screen.instance.actualWidth * 0.16), fontSize: Math.min(12, Screen.instance.actualWidth * 0.02)};
         }
     }
 

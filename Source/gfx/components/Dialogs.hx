@@ -46,8 +46,8 @@ class Dialogs
 
     private static function correctDialogPosition(dialog:Dialog)
     {
-        dialog.x = (Screen.instance.width - dialog.width) / 2;
-        dialog.y = (Screen.instance.height - dialog.height) / 2;
+        dialog.x = (Screen.instance.actualWidth - dialog.width) / 2;
+        dialog.y = (Screen.instance.actualHeight - dialog.height) / 2;
     }
 
     public static function onScreenResized() 
@@ -170,8 +170,8 @@ class Dialogs
         messageBox.type = MessageBoxType.TYPE_INFO;
         messageBox.title = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TITLE);
         messageBox.messageLabel.htmlText = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TEXT);
-        messageBox.messageLabel.customStyle = {fontSize: Math.max(Screen.instance.height * 0.02, 12)};
-        messageBox.width = Math.min(500, Screen.instance.width * 0.95);
+        messageBox.messageLabel.customStyle = {fontSize: Math.max(Screen.instance.actualHeight * 0.02, 12)};
+        messageBox.width = Math.min(500, Screen.instance.actualWidth * 0.95);
         addDialog(messageBox, true, null, true);
     }
 
@@ -179,11 +179,11 @@ class Dialogs
     {
         var changesLabel:Label = new Label();
         changesLabel.htmlText = Changelog.getAll();
-        changesLabel.customStyle = {fontSize: MathUtils.clamp(0.025 * Screen.instance.height, 12, 36)};
+        changesLabel.customStyle = {fontSize: MathUtils.clamp(0.025 * Screen.instance.actualHeight, 12, 36)};
 
         var changesSV:ScrollView = new ScrollView();
-        changesSV.width = Math.min(1000, 0.9 * Screen.instance.width);
-        changesSV.height = Math.min(450, 0.7 * Screen.instance.height);
+        changesSV.width = Math.min(1000, 0.9 * Screen.instance.actualWidth);
+        changesSV.height = Math.min(450, 0.7 * Screen.instance.actualHeight);
         changesSV.horizontalAlign = 'center';
         changesSV.verticalAlign = 'center';
         changesSV.addComponent(changesLabel);
@@ -270,7 +270,7 @@ class Dialogs
 
     private static function pieceBtn(type:PieceType, color:PieceColor, callback:Void->Void):Button
     {
-        var btnSize:Float = Math.min(100, Math.min(Screen.instance.height * 0.5, Screen.instance.width * 0.2));
+        var btnSize:Float = Math.min(100, Math.min(Screen.instance.actualHeight * 0.5, Screen.instance.actualWidth * 0.2));
 
         var btn:Button = new Button();
         btn.icon = AssetManager.piecePath(type, color);

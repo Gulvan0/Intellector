@@ -24,7 +24,7 @@ class MainMenu extends Screen
 
     private override function validateComponentLayout():Bool 
     {
-        var compact:Bool = HaxeUIScreen.instance.width / HaxeUIScreen.instance.height < 1.2;
+        var compact:Bool = HaxeUIScreen.instance.actualWidth / HaxeUIScreen.instance.actualHeight < 1.2;
         var wasCompact:Bool = tablesBox.percentWidth == 100;
 
         contentHBox.percentWidth = compact? 100 : 90;

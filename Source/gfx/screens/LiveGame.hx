@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.validation.InvalidationFlags;
 import GlobalBroadcaster;
 import net.LoginManager;
 import haxe.ui.containers.Card;
@@ -72,11 +73,10 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         GeneralObserver.acceptsDirectChallenges = false;
         Networker.eventQueue.addObserver(this);
         GlobalBroadcaster.addObserver(this);
-        Timer.delay(() -> {
-            performValidation();
-            ScreenManager.addResizeHandler(performValidation);
-            Assets.getSound("sounds/notify.mp3").play();
-        }, 25);
+        ScreenManager.addResizeHandler(performValidation);
+        Assets.getSound("sounds/notify.mp3").play();
+        performValidation();
+        Timer.delay(boardContainer.validateNow, 25);
     }
 
     public function onClose()
@@ -95,13 +95,15 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         GeneralObserver.acceptsDirectChallenges = true;
     }
 
-    //Please don't hate me for this. Responsive layout design is a pain
-    private function performValidation()
+    private function performValidation() 
     {
-        var compact:Bool = this.width * 6 < this.height * 7;
-        var compactBoardHeight:Float = this.width * boardWrapper.inverseAspectRatio();
-        var largeBoardMaxWidth:Float = this.height / boardWrapper.inverseAspectRatio();
-        var bothBarsVisible:Bool = this.width >= largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
+        var availableWidth:Float = HaxeUIScreen.instance.actualWidth;
+        var availableHeight:Float = HaxeUIScreen.instance.actualHeight * 0.95;
+
+        var compact:Bool = availableWidth / availableHeight < 1.16;
+        var compactBoardHeight:Float = availableWidth * boardWrapper.inverseAspectRatio();
+        var largeBoardMaxWidth:Float = availableHeight / boardWrapper.inverseAspectRatio();
+        var bothBarsVisible:Bool = availableWidth >= largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
 
         cBlackPlayerHBox.hidden = !compact;
         cWhitePlayerHBox.hidden = !compact;
@@ -126,13 +128,13 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         if (bothBarsVisible)
         {
-            lLeftBox.width = Math.min(MAX_SIDEBARS_WIDTH, (this.width - largeBoardMaxWidth) / 2);
-            lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, (this.width - largeBoardMaxWidth) / 2);
+            lLeftBox.width = Math.min(MAX_SIDEBARS_WIDTH, (availableWidth - largeBoardMaxWidth) / 2);
+            lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, (availableWidth - largeBoardMaxWidth) / 2);
         }
         else
         {
             lLeftBox.width = 20;
-            lRightBox.width = MathUtils.clamp(this.width - largeBoardMaxWidth, MIN_SIDEBARS_WIDTH, MAX_SIDEBARS_WIDTH);
+            lRightBox.width = MathUtils.clamp(availableWidth - largeBoardMaxWidth, MIN_SIDEBARS_WIDTH, MAX_SIDEBARS_WIDTH);
         }
     }
 
@@ -347,6 +349,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         boardWrapper.verticalAlign = 'center';
         boardWrapper.percentHeight = 100;
         boardWrapper.maxPercentWidth = 100;
+
+        boardContainer.percentHeight = 100;
         boardContainer.addComponent(boardWrapper);
 
         cWhiteLoginLabel.text = lWhiteLoginLabel.text = whiteLogin;

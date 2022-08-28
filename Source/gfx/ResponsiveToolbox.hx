@@ -154,8 +154,8 @@ class ResponsiveToolbox
         {
             case Exact(value): value;
             case Percent(value): parentVal * value / 100;
-            case VW(value): HaxeUIScreen.instance.width * value / 100;
-            case VH(value): HaxeUIScreen.instance.height * value / 100;
+            case VW(value): HaxeUIScreen.instance.actualWidth * value / 100;
+            case VH(value): HaxeUIScreen.instance.actualHeight * value / 100;
         }
     }
 }

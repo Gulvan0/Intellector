@@ -258,7 +258,7 @@ class PlayerProfile extends Screen implements INetObserver
         contentHBox.addComponent(studiesBox);
 
         var mainBox:VBox = new VBox();
-        mainBox.width = HaxeUIScreen.instance.width;
+        mainBox.width = HaxeUIScreen.instance.actualWidth;
         mainBox.addComponent(Shapes.vSpacer(25));
         mainBox.addComponent(loginLabel);
         mainBox.addComponent(Shapes.vSpacer(60));

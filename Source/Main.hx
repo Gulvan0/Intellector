@@ -76,6 +76,7 @@ class Main extends Sprite
 		Changelog.init();
 		
 		Toolkit.init({container: stage});
+		Toolkit.scale = 1;
 		AssetManager.load(callback);
 	}
 

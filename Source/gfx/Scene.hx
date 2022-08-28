@@ -30,7 +30,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         var mobileMenuHeaderRules:Map<ResponsiveProperty, ResponsivenessRule> = [StyleProp(FontSize) => VH(1.75)];
         var mobileMenuItemRules:Map<ResponsiveProperty, ResponsivenessRule> = [StyleProp(FontSize) => VH(1.5)];
 
-        var compact:Bool = HaxeUIScreen.instance.width < HaxeUIScreen.instance.height * 0.7;
+        var compact:Bool = HaxeUIScreen.instance.actualWidth < HaxeUIScreen.instance.actualHeight * 0.7;
 
         ResponsiveToolbox.resizeComponent(sidemenu.siteName, siteNameRules);
         ResponsiveToolbox.resizeComponent(sidemenu.mobileMenuButton, mobileMenuButtonRules);

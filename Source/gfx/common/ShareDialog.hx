@@ -123,7 +123,7 @@ class ShareDialog extends Dialog
             boardContainer.removeComponent(boardWrapper);
         };
 
-        if (Screen.instance.width < 600 || Screen.instance.height < 500)
+        if (Screen.instance.actualWidth < 600 || Screen.instance.actualHeight < 500)
         {
             pngExportParamsBox.hidden = true;
             boardContainer.percentWidth = 100;
@@ -134,8 +134,8 @@ class ShareDialog extends Dialog
             boardContainer.percentWidth = 50;
         }
 
-        this.percentWidth = MathUtils.clamp(900 / Screen.instance.width, 0.5, 0.95) * 100;
-        this.percentHeight = MathUtils.clamp(600 / Screen.instance.height, 0.5, 0.95) * 100;
+        this.percentWidth = MathUtils.clamp(900 / Screen.instance.actualWidth, 0.5, 0.95) * 100;
+        this.percentHeight = MathUtils.clamp(600 / Screen.instance.actualHeight, 0.5, 0.95) * 100;
 
         showDialog(false);
         boardContainer.addComponent(boardWrapper);

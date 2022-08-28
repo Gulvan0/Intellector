@@ -65,12 +65,12 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
 
     private function redrawPositionEditor()
     {
-        positionEditor.updateLayout(positionEditorContainer.width, HaxeUIScreen.instance.height * 0.3);
+        positionEditor.updateLayout(positionEditorContainer.width, HaxeUIScreen.instance.actualHeight * 0.3);
     }
 
     private override function validateComponentLayout():Bool 
     {
-        var compact:Bool = HaxeUIScreen.instance.width / HaxeUIScreen.instance.height < 1.2;
+        var compact:Bool = HaxeUIScreen.instance.actualWidth / HaxeUIScreen.instance.actualHeight < 1.2;
         var wasCompact:Bool = lControlTabsContainer.hidden;
 
         cCreepingLineContainer.hidden = !compact;

@@ -108,6 +108,11 @@ class ScreenManager
             for (handler in resizeHandlers)
                 Timer.delay(handler, 40);
             Timer.delay(Dialogs.onScreenResized, 40);
+            Timer.delay(()->{
+                trace('Client: ${Browser.document.documentElement.clientWidth}x${Browser.document.documentElement.clientHeight}');
+                trace('Inner: ${Browser.window.innerWidth}x${Browser.window.innerHeight}');
+                trace('Screen: ${HaxeUIScreen.instance.actualWidth}x${HaxeUIScreen.instance.actualHeight}');
+            }, 40);
         }
     }
 
