@@ -29,11 +29,11 @@ class CreepingLinePly extends Card
         plyLabel.customStyle = labelStyle;
     }
 
-    public function new(pointerPos:Int, moveNum:Int, plyStr:String, onClicked:Int->Void) 
+    public function new(pointerPos:Int, plyStr:String, onClicked:Int->Void) 
     {
         super();
         this.pointerPos = pointerPos;
-        plyLabel.text = '$moveNum. $plyStr';
+        plyLabel.text = '$pointerPos. $plyStr';
         onClick = e -> {onClicked(pointerPos);};
         deselect();
     }
