@@ -2,7 +2,7 @@ package gfx.common;
 
 import haxe.Timer;
 import haxe.ui.components.HorizontalScroll;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import gfx.analysis.PeripheralEvent;
 import struct.PieceColor;

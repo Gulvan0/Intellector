@@ -1,23 +1,52 @@
-package net;
+package;
 
+import net.shared.ServerEvent;
+import haxe.crypto.Md5;
 import browser.CredentialCookies;
 using StringTools;
 
 class LoginManager
 {
-    public static var login:Null<String>;
-    public static var password:Null<String>;
+    private static inline final onetimeLoginPrefix:String = "guest_";
+
+    private static var login:Null<String>;
+    private static var password:Null<String>;
+
+    public static function getLogin():String
+    {
+        return login;
+    }
+
+    public static function getPassword():Null<String>
+    {
+        return password;
+    }
+
+    public static function imitateLoggedState(?assumedLogin:String = "Tester")
+    {
+        login = assumedLogin;
+    }
 
     public static function signin(login:String, password:String, remember:Null<Bool>, onSuccess:Void->Void, onFail:Void->Void) 
     {
-        Networker.eventQueue.addHandler(responseHandler.bind(login, password, remember, onSuccess, onFail));
+        Networker.addHandler(responseHandler.bind(login, password, remember, onSuccess, onFail));
         Networker.emitEvent(Login(login, password));
     }
 
     public static function register(login:String, password:String, remember:Null<Bool>, onSuccess:Void->Void, onFail:Void->Void) 
     {
-        Networker.eventQueue.addHandler(responseHandler.bind(login, password, remember, onSuccess, onFail));
+        Networker.addHandler(responseHandler.bind(login, password, remember, onSuccess, onFail));
         Networker.emitEvent(Register(login, password));
+    }
+
+    public static function generateOneTimeCredentials()
+    {
+        if (isLogged())
+            throw "Already logged, but trying to generate credentials";
+
+        login = onetimeLoginPrefix + Math.ceil(Math.random() * 100000);
+        password = Md5.encode(Std.string(Math.random()));
+        CredentialCookies.saveLoginDetails(login, password, true);
     }
 
     public static function logout()
@@ -52,6 +81,11 @@ class LoginManager
         }
     }
 
+    public static function isLogged():Bool
+    {
+        return login != null;
+    }
+
     public static function isPlayer(suspectedLogin:String)
     {
         return login != null && login.toLowerCase() == suspectedLogin.toLowerCase();
@@ -59,6 +93,6 @@ class LoginManager
 
     public static function isPlayerGuest():Bool
     {
-        return login.startsWith("guest_");
+        return login.startsWith(onetimeLoginPrefix);
     }
 }

@@ -2,7 +2,7 @@ package gfx.common;
 
 import gfx.analysis.PeripheralEvent;
 import gameboard.GameBoard.GameBoardEvent;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import haxe.ui.styles.Style;
 import struct.PieceColor;
 import gfx.utils.PlyScrollType;

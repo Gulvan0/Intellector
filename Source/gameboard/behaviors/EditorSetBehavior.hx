@@ -9,7 +9,7 @@ import gfx.analysis.PeripheralEvent;
 import utils.exceptions.AlreadyInitializedException;
 import struct.Ply;
 import struct.IntPoint;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;
 import utils.AssetManager;

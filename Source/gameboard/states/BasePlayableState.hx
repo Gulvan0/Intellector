@@ -1,11 +1,11 @@
 package gameboard.states;
 
 import struct.PieceType;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import struct.Hex;
 import struct.Ply;
 import struct.IntPoint;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 
 abstract class BasePlayableState extends BaseState
 {

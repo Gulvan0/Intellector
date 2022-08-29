@@ -4,7 +4,7 @@ import gameboard.Hexagon.HexagonSelectionState;
 import utils.exceptions.AlreadyInitializedException;
 import struct.Hex;
 import struct.IntPoint;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 
 abstract class BaseState
 {

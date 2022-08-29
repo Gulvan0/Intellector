@@ -1,6 +1,6 @@
 package tests.ui.utils.components;
 
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import haxe.ui.events.MouseEvent;
 import tests.ui.utils.data.Macro;
 import haxe.ui.containers.dialogs.Dialog;

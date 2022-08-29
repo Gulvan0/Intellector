@@ -1,6 +1,6 @@
 package gameboard;
 
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import Preferences.Markup;
 import openfl.display.Graphics;
 import gfx.utils.Colors;

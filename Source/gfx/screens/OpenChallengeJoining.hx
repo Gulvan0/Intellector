@@ -1,6 +1,6 @@
 package gfx.screens;
 
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
 import utils.TimeControl;
@@ -22,8 +22,13 @@ class OpenChallengeJoining extends Screen
 	@:bind(acceptBtn, MouseEvent.CLICK)
 	private function onAccepted(e)
 	{
-		Dialogs.settings();
-		//Networker.emitEvent(AcceptOpenChallenge(challengeOwner));
+		if (LoginManager.isLogged())
+			Networker.emitEvent(AcceptOpenChallenge(challengeOwner, null, null));
+		else
+		{
+			LoginManager.generateOneTimeCredentials();
+			Networker.emitEvent(AcceptOpenChallenge(challengeOwner, LoginManager.getLogin(), LoginManager.getPassword()));
+		}
 	}
 
     public function new(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>, rated:Bool = false)

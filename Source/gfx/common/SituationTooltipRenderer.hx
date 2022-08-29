@@ -1,7 +1,7 @@
 package gfx.common;
 
 import struct.PieceColor;
-import gfx.components.BoardWrapper;
+import gfx.basic_components.BoardWrapper;
 import dict.Dictionary;
 import gameboard.Board;
 import struct.Situation;

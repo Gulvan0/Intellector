@@ -1,4 +1,4 @@
-package gfx.components;
+package gfx.basic_components;
 
 import haxe.ui.components.Image;
 

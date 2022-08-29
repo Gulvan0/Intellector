@@ -1,11 +1,10 @@
 package;
 
 import js.html.Event;
-import net.GeneralObserver;
-import net.ClientEvent;
-import net.ServerEvent;
+import net.shared.ClientEvent;
+import net.shared.ServerEvent;
 import net.EventProcessingQueue;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import gfx.ScreenManager;
 import struct.PieceColor;
 import dict.Dictionary;
@@ -34,15 +33,14 @@ class Networker
     public static var onConnectionEstabilished:Void->Void;
     public static var onConnectionFailed:Event->Void;
 
-    public static var suppressAlert:Bool;
+    private static var suppressAlert:Bool;
     private static var backoffDelay:Float;
-    public static var doNotReconnect:Bool = false;
+    private static var doNotReconnect:Bool = false;
     public static var ignoreEmitCalls:Bool = false; 
 
     public static function launch() 
     {
         eventQueue.flush();
-        eventQueue.addObserver(new GeneralObserver());
 
         #if prod
         _ws = new WebSocket("wss://play-intellector.ru:5000");
@@ -80,7 +78,10 @@ class Networker
         if (ServerEvent.getConstructors().has(rawEvent.name))
         {
             var event:ServerEvent = ServerEvent.createByName(rawEvent.name, rawEvent.data);
-            eventQueue.processEvent(event);
+            if (event == DontReconnect)
+                onReconnectionForbidden();
+            else
+                eventQueue.processEvent(event);
         }
         else
             trace("Unexpected event: " + rawEvent.name);
@@ -93,7 +94,7 @@ class Networker
             trace("Connection closed");
         else
         {
-            Dialogs.alert(Dictionary.getPhrase(CONNECTION_LOST_ERROR), "Alert");
+            Dialogs.alert(CONNECTION_LOST_ERROR, CONNECTION_ERROR_DIALOG_TITLE);
             suppressAlert = true;
         }
         if (!doNotReconnect)
@@ -120,20 +121,33 @@ class Networker
         _ws.open();
     }
 
+    private static function onReconnectionForbidden() 
+    {
+        doNotReconnect = true;
+        Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
+    }
+
     //------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    //TODO: Move to ChallengeManager (or smth like that)
-
-    /*public static function acceptOpen(caller:String) 
+    public static function addHandler(handler:ServerEvent->Bool)
     {
-        if (Networker.login == null)
-            Networker.login = "guest_" + Math.ceil(Math.random() * 100000);
-        once("one_time_login_details", (data) ->
-        {
-            Utils.saveLoginDetails(login, data.password);
-        });
-        emit('accept_open_challenge', {caller_login: caller, callee_login: Networker.login});
-    }*/
+        eventQueue.addHandler(handler);
+    }
+
+    public static function removeHandler(handler:ServerEvent->Bool)
+    {
+        eventQueue.removeHandler(handler);
+    }
+
+    public static function removeObserver(observer:INetObserver)
+    {
+        eventQueue.removeObserver(observer);
+    }
+
+    public static function addObserver(observer:INetObserver)
+    {
+        eventQueue.addObserver(observer);
+    }
 
     //=======================================================================================================================
 

@@ -1,6 +1,6 @@
 package tests.ui.utils.components;
 
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import haxe.Timer;
 import js.Browser;
 import haxe.ui.events.UIEvent;
@@ -87,7 +87,7 @@ class SequenceWidget extends VBox
         if (response != null && response != "")
         {
             if (DataKeeper.getAllMacroNames().contains(response))
-                Dialogs.alert("Failed to add macro: a macro with this name already exists", "TestEnv Warning");
+                Dialogs.alertRaw("Failed to add macro: a macro with this name already exists", "TestEnv Warning");
             else
             {
                 macroNameLabel.text = response;

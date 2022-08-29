@@ -5,7 +5,7 @@ import gameboard.states.NeutralState;
 import utils.exceptions.AlreadyInitializedException;
 import struct.IntPoint;
 import struct.Ply;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;
 import utils.AssetManager;

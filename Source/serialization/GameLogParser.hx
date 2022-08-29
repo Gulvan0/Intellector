@@ -1,6 +1,5 @@
 package serialization;
 
-import net.LoginManager;
 import utils.TimeControl;
 import struct.Outcome;
 import struct.PieceColor;

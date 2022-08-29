@@ -3,7 +3,7 @@ package gameboard.behaviors;
 import gfx.analysis.PeripheralEvent;
 import struct.Ply;
 import struct.IntPoint;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 
 interface IBehavior
 {

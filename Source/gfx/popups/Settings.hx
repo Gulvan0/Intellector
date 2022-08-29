@@ -13,7 +13,7 @@ import Preferences.Markup;
 import Preferences.BranchingTabType;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/basic/popups/settings_popup.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/menubar/popups/settings_popup.xml'))
 class Settings extends Dialog
 {
     private var oldLanguage:Language;

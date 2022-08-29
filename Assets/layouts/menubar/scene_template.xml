@@ -43,21 +43,21 @@
         <label id="siteName" text="Intellector.info" verticalAlign="center" />
 
         <menu id="playMenu" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_TITLE)}">
-            <menuitem id="createChallengeBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM)}" icon="assets/symbols/upper_menu/basic/new_game.svg" />
-            <menuitem id="openChallengesBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM)}" icon="assets/symbols/upper_menu/basic/open_challenges.svg" />
+            <menuitem id="createChallengeBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM)}" icon="assets/symbols/upper_menu/menu_items/new_game.svg" />
+            <menuitem id="openChallengesBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM)}" icon="assets/symbols/upper_menu/menu_items/open_challenges.svg" />
         </menu>
 
         <menu id="watchMenu" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_TITLE)}">
-            <menuitem id="currentGamesBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM)}" icon="assets/symbols/upper_menu/basic/current_games.svg" />
-            <menuitem id="watchPlayerBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM)}" icon="assets/symbols/upper_menu/basic/watch_player.svg" />
+            <menuitem id="currentGamesBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM)}" icon="assets/symbols/upper_menu/menu_items/current_games.svg" />
+            <menuitem id="watchPlayerBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM)}" icon="assets/symbols/upper_menu/menu_items/watch_player.svg" />
         </menu>
 
         <menu id="learnMenu" text="${Dictionary.getPhrase(MENUBAR_LEARN_MENU_TITLE)}">
-            <menuitem id="analysisBoardBtn" text="${Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM)}" icon="assets/symbols/upper_menu/basic/analysis_board.svg" />
+            <menuitem id="analysisBoardBtn" text="${Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM)}" icon="assets/symbols/upper_menu/menu_items/analysis_board.svg" />
         </menu>
 
         <menu id="socialMenu" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_TITLE)}">
-            <menuitem id="playerProfileBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM)}" icon="assets/symbols/upper_menu/basic/player_profile.svg" />
+            <menuitem id="playerProfileBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM)}" icon="assets/symbols/upper_menu/menu_items/player_profile.svg" />
         </menu>
 
         <spacer width="100%" />

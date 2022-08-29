@@ -7,7 +7,7 @@ import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.events.KeyboardEvent;
 import gfx.game.GameActionBar.ActionBtn;
 import struct.ActualizationData;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import gfx.game.Chatbox;
 import openfl.display.Sprite;
 import serialization.GameLogParser.GameLogParserOutput;

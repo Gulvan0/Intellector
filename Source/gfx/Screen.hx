@@ -60,7 +60,7 @@ class Screen extends Component
             case LiveGame(id, constructor):
                 new LiveGame(id, constructor);
             case PlayerProfile(ownerLogin):
-                new PlayerProfile(ownerLogin);
+                new MainMenu(); //TODO: Replace
             case ChallengeJoining(challengeOwner, timeControl, color):
                 new OpenChallengeJoining(challengeOwner, timeControl, color);
         };

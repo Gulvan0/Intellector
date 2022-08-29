@@ -1,11 +1,10 @@
 package gfx.game;
 
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import gameboard.GameBoard.IGameBoardObserver;
 import net.EventProcessingQueue.INetObserver;
 import struct.PieceColor;
-import net.LoginManager;
 import openfl.events.Event;
 import haxe.ui.containers.Box;
 import haxe.Timer;

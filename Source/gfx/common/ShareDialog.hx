@@ -18,11 +18,11 @@ import openfl.display.BitmapData;
 import js.html.Blob;
 import js.html.FileSaver;
 import haxe.Timer;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import js.Browser;
 import struct.PieceColor;
 import gameboard.Board;
-import gfx.components.BoardWrapper;
+import gfx.basic_components.BoardWrapper;
 import struct.Situation;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.dialogs.Dialog;
@@ -62,7 +62,7 @@ class ShareDialog extends Dialog
     public function onCopySIPPressed(e) 
     {
         Browser.navigator.clipboard.writeText(sipTextField.text)
-            .catchError(e -> {Dialogs.alert('Failed to copy: $e', "Clipboard Error");})
+            .catchError(e -> {Dialogs.alert(CLIPBOARD_ERROR_ALERT_TEXT, CLIPBOARD_ERROR_ALERT_TITLE, ['$e']);})
             .finally(() -> {
                 copySIPBtn.hidden = true;
                 copySIPBtnTick.hidden = false;

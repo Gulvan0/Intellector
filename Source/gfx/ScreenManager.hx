@@ -1,7 +1,7 @@
 package gfx;
 
 import browser.CredentialCookies;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import serialization.GameLogParser;
 import haxe.Timer;
 import haxe.ui.Toolkit;
@@ -13,8 +13,7 @@ import dict.Utils;
 import js.Browser;
 import js.html.URLSearchParams;
 import net.EventProcessingQueue.INetObserver;
-import net.LoginManager;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import openfl.display.Sprite;
 import struct.PieceColor;
 import browser.URLEditor;
@@ -108,11 +107,6 @@ class ScreenManager
             for (handler in resizeHandlers)
                 Timer.delay(handler, 40);
             Timer.delay(Dialogs.onScreenResized, 40);
-            Timer.delay(()->{
-                trace('Client: ${Browser.document.documentElement.clientWidth}x${Browser.document.documentElement.clientHeight}');
-                trace('Inner: ${Browser.window.innerWidth}x${Browser.window.innerHeight}');
-                trace('Screen: ${HaxeUIScreen.instance.actualWidth}x${HaxeUIScreen.instance.actualHeight}');
-            }, 40);
         }
     }
 
@@ -144,8 +138,8 @@ class ScreenManager
 
     public static function observeNetEvents()
     {
-        Networker.eventQueue.addHandler(handleNetEvent);
-        Networker.eventQueue.addObserver(scene);
+        Networker.addHandler(handleNetEvent);
+        Networker.addObserver(scene);
     }
 
     public static function launch()

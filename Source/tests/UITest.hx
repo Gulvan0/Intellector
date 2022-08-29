@@ -12,7 +12,6 @@ import haxe.ui.core.Screen;
 import tests.ui.utils.components.MainView;
 import tests.ui.TestedComponent;
 import browser.CredentialCookies;
-import net.LoginManager;
 using StringTools;
 
 class UITest
@@ -51,9 +50,7 @@ class UITest
     private static function initSinks()
     {
         Networker.ignoreEmitCalls = true;
-        LoginManager.login = CredentialCookies.getLogin();
-        if (LoginManager.login == null)
-            LoginManager.login = "TesterPlayer";
+        LoginManager.imitateLoggedState();
     }
 
     private static function onDataReady(component:TestedComponent) 

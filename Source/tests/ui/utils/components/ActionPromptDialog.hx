@@ -1,10 +1,10 @@
 package tests.ui.utils.components;
 
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import haxe.ui.core.Screen;
 import struct.Ply;
 import haxe.exceptions.NotImplementedException;
-import gfx.components.BoardWrapper;
+import gfx.basic_components.BoardWrapper;
 import struct.Situation;
 import gameboard.SelectableBoard;
 import haxe.ui.components.Label;
@@ -208,7 +208,7 @@ class ActionPromptDialog extends Dialog
                 if (args != null)
                     onConfirmed(args);
                 else 
-                    Dialogs.alert("Action execution aborted with reason 'Failed to collect arguments: some values are not provided or invalid'", "TestEnv Warning");
+                    Dialogs.alertRaw("Action execution aborted with reason 'Failed to collect arguments: some values are not provided or invalid'", "TestEnv Warning");
             }
                 
         }

@@ -6,7 +6,7 @@ import struct.Hex;
 import struct.Ply;
 import struct.IntPoint;
 import gameboard.states.StubState;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import struct.ReversiblePly;
 import struct.PieceColor;
 import utils.AssetManager;

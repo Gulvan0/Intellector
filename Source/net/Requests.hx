@@ -1,17 +1,19 @@
 package net;
 
 import dict.Dictionary;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import gfx.ScreenManager;
 import serialization.GameLogParser;
 import struct.PieceColor;
 import utils.TimeControl;
+import net.shared.ClientEvent;
+import net.shared.ServerEvent;
 
 class Requests
 {
     public static function getGame(id:Int)
     {
-        Networker.eventQueue.addHandler(getGame_handler.bind(id));
+        Networker.addHandler(getGame_handler.bind(id));
         Networker.emitEvent(GetGame(id));
     }
 
@@ -24,7 +26,7 @@ class Requests
 		        ScreenManager.toScreen(LiveGame(id, Past(parsedData, null)));
             case GameIsOngoing(whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-		        if (LoginManager.login == null || parsedData.getPlayerColor() == null)
+		        if (LoginManager.isLogged() || parsedData.getPlayerColor() == null)
 			        ScreenManager.toScreen(LiveGame(id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, parsedData.whiteLogin)));
 		        else
 			        ScreenManager.toScreen(LiveGame(id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
@@ -38,7 +40,7 @@ class Requests
 
     public static function getOpenChallenge(ownerLogin:String) 
     {
-        Networker.eventQueue.addHandler(getOpenChallenge_handler.bind(ownerLogin));
+        Networker.addHandler(getOpenChallenge_handler.bind(ownerLogin));
         Networker.emitEvent(GetOpenChallenge(ownerLogin));
     }
 
@@ -55,7 +57,7 @@ class Requests
                 ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, ownerLogin)));
             case OpenchallengeNotFound:
                 ScreenManager.toScreen(MainMenu);
-                Dialogs.alert(Dictionary.getPhrase(REQUESTS_ERROR_CHALLENGE_NOT_FOUND), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
+                Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
         }
@@ -64,7 +66,7 @@ class Requests
 
     public static function getPlayerProfile(login:String) 
     {
-        Networker.eventQueue.addHandler(getPlayerProfile_handler.bind(login));
+        Networker.addHandler(getPlayerProfile_handler.bind(login));
         Networker.emitEvent(GetPlayerProfile(login));
     }
 
@@ -76,7 +78,7 @@ class Requests
                 //TODO: Implement properly
             case PlayerNotFound:
                 ScreenManager.toScreen(MainMenu);
-                Dialogs.alert(Dictionary.getPhrase(REQUESTS_ERROR_PLAYER_NOT_FOUND), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
+                Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
         }
@@ -85,7 +87,7 @@ class Requests
 
     public static function getStudy(id:Int) 
     {
-        Networker.eventQueue.addHandler(getStudy_handler.bind(id));
+        Networker.addHandler(getStudy_handler.bind(id));
         Networker.emitEvent(GetStudy(id));
     }
 
@@ -97,7 +99,7 @@ class Requests
                 ScreenManager.toScreen(Analysis(variantStr, 0, id, name));
             case StudyNotFound:
                 ScreenManager.toScreen(MainMenu);
-                Dialogs.alert(Dictionary.getPhrase(REQUESTS_ERROR_STUDY_NOT_FOUND), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
+                Dialogs.alert(REQUESTS_ERROR_STUDY_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
         }
@@ -106,7 +108,7 @@ class Requests
 
     public static function watchPlayer(login:String)
     {
-        Networker.eventQueue.addHandler(watchPlayer_handler.bind(login));
+        Networker.addHandler(watchPlayer_handler.bind(login));
         Networker.emitEvent(FollowPlayer(login));
     }
 
@@ -118,11 +120,11 @@ class Requests
 		        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, login)));
             case PlayerNotInGame:
-                Dialogs.alertCallback(Dictionary.getPhrase(REQUESTS_ERROR_PLAYER_NOT_IN_GAME), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
+                Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_IN_GAME, REQUESTS_ERROR_DIALOG_TITLE);
             case PlayerOffline:
-                Dialogs.alertCallback(Dictionary.getPhrase(REQUESTS_ERROR_PLAYER_OFFLINE), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
+                Dialogs.alert(REQUESTS_ERROR_PLAYER_OFFLINE, REQUESTS_ERROR_DIALOG_TITLE);
             case PlayerNotFound:
-                Dialogs.alertCallback(Dictionary.getPhrase(REQUESTS_ERROR_PLAYER_NOT_FOUND), Dictionary.getPhrase(REQUESTS_ERROR_DIALOG_TITLE));
+                Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
         }
@@ -131,7 +133,7 @@ class Requests
 
     public static function getCurrentGames(callback:Array<{id:Int, currentLog:String}>->Void)
     {
-        Networker.eventQueue.addHandler(getCurrentGames_handler.bind(callback));
+        Networker.addHandler(getCurrentGames_handler.bind(callback));
         Networker.emitEvent(GetCurrentGames);
     }
 
@@ -149,7 +151,7 @@ class Requests
 
     public static function getOpenChallenges(callback:Array<String>->Void)
     {
-        Networker.eventQueue.addHandler(getOpenChallenges_handler.bind(callback));
+        Networker.addHandler(getOpenChallenges_handler.bind(callback));
         Networker.emitEvent(GetOpenChallenges);
     }
 

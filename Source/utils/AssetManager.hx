@@ -2,7 +2,7 @@ package utils;
 
 import haxe.CallStack;
 import openfl.display.Sprite;
-import gfx.components.SpriteWrapper;
+import gfx.basic_components.SpriteWrapper;
 import utils.TimeControl.TimeControlType;
 import format.SVG;
 import gfx.analysis.PosEditMode;

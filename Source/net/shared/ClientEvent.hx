@@ -1,4 +1,4 @@
-package net;
+package net.shared;
 
 enum ClientEvent
 {
@@ -14,7 +14,7 @@ enum ClientEvent
     Message(text:String); 
     GetOpenChallenge(hostLogin:String); 
     CreateOpenChallenge(secsStart:Int, secsBonus:Int, color:Null<String>); 
-    AcceptOpenChallenge(callerLogin:String); 
+    AcceptOpenChallenge(callerLogin:String, guestLogin:Null<String>, guestPassword:Null<String>); 
     CancelOpenChallenge; 
     FollowPlayer(login:String); //TODO: Ensure this also includes an effect of StopSpectating
     StopSpectating; //Used both to stop spectating a game AND to stop following a player

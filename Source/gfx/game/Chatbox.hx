@@ -7,8 +7,7 @@ import struct.Outcome;
 import serialization.GameLogParser;
 import net.EventProcessingQueue.INetObserver;
 import haxe.ui.containers.VBox;
-import net.LoginManager;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import struct.PieceColor;
 import dict.Dictionary;
 import dict.Utils;
@@ -144,9 +143,9 @@ class Chatbox extends VBox implements INetObserver
         {
             Networker.emitEvent(Message(text));
             if (isOwnerSpectator)
-                appendMessage(LoginManager.login, text, false);
+                appendMessage(LoginManager.getLogin(), text, false);
             else 
-                appendMessage(LoginManager.login, text, true);
+                appendMessage(LoginManager.getLogin(), text, true);
         }
     }
 
@@ -154,7 +153,7 @@ class Chatbox extends VBox implements INetObserver
     {
         messageInput.disabled = true;
         removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-        appendLog(Utils.getGameOverChatMessage(winnerColor, outcome));
+        appendLog(Dictionary.getPhrase(GAME_CHATBOX_GAME_OVER_MESSAGE(outcome, winnerColor)));
     }
 
     private function actualize(parserOutput:GameLogParserOutput, e)

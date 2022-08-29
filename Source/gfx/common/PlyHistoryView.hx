@@ -8,7 +8,7 @@ import haxe.Timer;
 import gfx.game.LiveGameConstructor;
 import gfx.analysis.PeripheralEvent;
 import gameboard.GameBoard.GameBoardEvent;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import gfx.utils.PlyScrollType;
 import struct.Ply;
 import struct.Situation;

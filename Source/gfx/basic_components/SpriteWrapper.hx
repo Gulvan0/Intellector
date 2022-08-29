@@ -1,4 +1,4 @@
-package gfx.components;
+package gfx.basic_components;
 
 import openfl.display.DisplayObjectContainer;
 import openfl.events.Event;

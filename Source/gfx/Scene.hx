@@ -1,27 +1,34 @@
 package gfx;
 
+import openfl.Assets;
+import struct.ChallengeParams;
+import haxe.ui.containers.SideBar;
 import dict.Dictionary;
 import GlobalBroadcaster.IGlobalEventObserver;
 import GlobalBroadcaster.GlobalEvent;
 import net.EventProcessingQueue.INetObserver;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import utils.StringUtils;
 import serialization.GameLogParser;
 import net.Requests;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
 import gfx.ResponsiveToolbox.ResponsiveProperty;
 import haxe.ui.components.Button;
 import haxe.ui.core.Screen as HaxeUIScreen;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
-import net.LoginManager;
 
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/basic/scene_template.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/menubar/sidemenu.xml'))
+class SideMenu extends SideBar {}
+
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/menubar/scene_template.xml'))
 class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 {
     private var currentScreen:Null<Screen> = null;
     private var sidemenu:SideMenu;
+
+    private static var isPlayerInGame:Bool = false;
 
     public function resize()
     {
@@ -60,6 +67,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function setIngameStatus(ingame:Bool)
     {
+        isPlayerInGame = ingame;
+
         mobileMenuButton.disabled = ingame;
         siteName.disabled = ingame;
         playMenu.disabled = ingame;
@@ -72,14 +81,48 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logOutBtn.disabled = ingame;
     }
 
+    private function appendIncomingChallenge(params:ChallengeParams)
+    {
+        //TODO: Fill
+    }
+
+    private function appendOutgoingChallenge(params:ChallengeParams)
+    {
+        //TODO: Fill
+    }
+
+    private function displayIncomingChallengeDialog(caller:String)
+    {
+        var onConfirmed = Networker.emitEvent.bind(AcceptDirectChallenge(caller));
+        var onDeclined = Networker.emitEvent.bind(DeclineDirectChallenge(caller));
+
+        Assets.getSound("sounds/social.mp3").play();
+        Dialogs.confirm(INCOMING_CHALLENGE_TEXT, INCOMING_CHALLENGE_TITLE, onConfirmed, onDeclined); //TODO: Rewrite (make more specific)
+    }
+
     public function handleNetEvent(event:ServerEvent)
     {
         switch event
         {
             case GameStarted(_, _):
-                setIngameStatus(true);
+                setIngameStatus(true); //TODO: Also drop challenge from/to the opponent from the challenge list
             case GameEnded(_, _):
                 setIngameStatus(false);
+            case IncomingDirectChallenge(param1, param2, param3, param4): //TODO: change
+                if (isPlayerInGame || Preferences.silentChallenges.get())
+                    appendIncomingChallenge(null); //TODO: change
+                else
+                    displayIncomingChallengeDialog(null); //TODO: change
+            case SendDirectChallengeResult(result):
+                //TODO: Display dialog + maybe play sounds/challenge_sent.mp3
+            case DirectChallengeDeclined(callee):
+                //TODO: Drop from list
+            case DirectChallengeCancelled(callee):
+                //TODO: Drop from list
+            case DirectChallengeCallerOffline(caller):
+                //TODO: Display dialog
+            case DirectChallengeCallerInGame(caller):
+                //TODO: Display dialog
             default:
         }
     }
@@ -120,7 +163,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onCreateChallengePressed(e)
     {
-        if (LoginManager.login == null)
+        if (LoginManager.isLogged())
             Dialogs.login(displayChallengeParamsDialog);
         else
             displayChallengeParamsDialog();
@@ -143,7 +186,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onWatchPlayerPressed(e)
     {
-        Dialogs.prompt(Dictionary.getPhrase(INPUT_PLAYER_LOGIN), All, startSpectating);
+        Dialogs.prompt(INPUT_PLAYER_LOGIN, All, startSpectating);
     }
 
     private function startSpectating(requestedLogin:String)
@@ -164,7 +207,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onPlayerProfilePressed(e)
     {
-        Dialogs.prompt(Dictionary.getPhrase(INPUT_PLAYER_LOGIN), All, navigateToProfile);
+        Dialogs.prompt(INPUT_PLAYER_LOGIN, All, navigateToProfile);
     }
 
     private function navigateToProfile(requestedLogin:String)
@@ -179,7 +222,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onMyProfilePressed(e)
     {
-        navigateToProfile(LoginManager.login);
+        navigateToProfile(LoginManager.getLogin());
     }
 
     private function onSettingsPressed(e)
@@ -194,8 +237,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function refreshAccountElements()
     {
-        var logged:Bool = LoginManager.login != null;
-        accountMenu.text = logged? StringUtils.shorten(LoginManager.login, 8) : Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_GUEST_DISPLAY_NAME);
+        var logged:Bool = LoginManager.isLogged();
+        accountMenu.text = logged? StringUtils.shorten(LoginManager.getLogin(), 8) : Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_GUEST_DISPLAY_NAME);
         logInBtn.hidden = logged;
         myProfileBtn.hidden = !logged;
         logOutBtn.hidden = !logged;

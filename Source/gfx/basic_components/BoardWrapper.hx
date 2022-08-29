@@ -1,4 +1,4 @@
-package gfx.components;
+package gfx.basic_components;
 
 import haxe.Timer;
 import haxe.ui.Toolkit;

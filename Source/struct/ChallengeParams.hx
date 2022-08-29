@@ -1,6 +1,5 @@
 package struct;
 
-import net.LoginManager;
 import utils.TimeControl;
 import js.Cookie;
 
@@ -97,6 +96,6 @@ class ChallengeParams
         this.acceptorColor = acceptorColor;
         this.customStartingSituation = customStartingSituation;
         this.rated = rated;
-        this.ownerLogin = ownerLogin == null? LoginManager.login : ownerLogin;
+        this.ownerLogin = ownerLogin == null? LoginManager.getLogin() : ownerLogin;
     }
 }

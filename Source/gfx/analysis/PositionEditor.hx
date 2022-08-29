@@ -7,7 +7,7 @@ import haxe.ui.util.Variant;
 import haxe.ui.components.Image;
 import haxe.ui.components.Button;
 import haxe.ui.events.UIEvent;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import gameboard.GameBoard.GameBoardEvent;
 import struct.Situation;
 import struct.PieceColor;
@@ -105,7 +105,7 @@ class PositionEditor extends VBox implements IGameBoardObserver implements IAnal
             eventHandler(ConstructSituationRequested(deserializedSituation));
         }
         else
-            Dialogs.alert(Dictionary.getPhrase(ANALYSIS_INVALID_SIP_WARNING_TEXT), Dictionary.getPhrase(ANALYSIS_INVALID_SIP_WARNING_TITLE));
+            Dialogs.alert(ANALYSIS_INVALID_SIP_WARNING_TEXT, ANALYSIS_INVALID_SIP_WARNING_TITLE);
     }
 
     @:bind(turnColorStepper, UIEvent.CHANGE)

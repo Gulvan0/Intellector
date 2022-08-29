@@ -1,4 +1,4 @@
-package gfx.components;
+package gfx;
 
 import haxe.ui.containers.Box;
 import openfl.Assets;
@@ -13,7 +13,6 @@ import haxe.Timer;
 import haxe.ui.util.Variant;
 import openfl.display.Shape;
 import gameboard.Piece;
-import gfx.main.ChallengeParamsDialog;
 import haxe.ui.components.Image;
 import openfl.events.Event;
 import utils.AssetManager;
@@ -32,6 +31,7 @@ import haxe.ui.containers.dialogs.Dialog.DialogButton;
 import haxe.ui.containers.dialogs.MessageBox.MessageBoxType;
 import haxe.ui.containers.dialogs.Dialogs as DialogManager;
 import haxe.ui.core.Screen;
+import gfx.basic_components.SpriteWrapper;
 
 enum SpaceRemoval
 {
@@ -83,22 +83,29 @@ class Dialogs
         Timer.delay(correctDialogPosition.bind(dialog), 40);
     }
 
-    public static function alertCallback(message:String, title:String):Void->Void 
-    {
-        return alert.bind(message, title);
-    }
-
-    public static function alert(message:String, title:String)
+    public static function alertRaw(message:String, ?title:String = "Raw alert")
     {
         addDialog(DialogManager.messageBox(message, title, MessageBoxType.TYPE_WARNING, true), false);
     }
 
-    public static function info(message:String, title:String)
+    public static function alert(message:Phrase, title:Phrase, ?messageSubstitutions:Array<String>)
     {
-        addDialog(DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true), false);
+        var messageStr:String = Dictionary.getPhrase(message, messageSubstitutions);
+        var titleStr:String = Dictionary.getPhrase(title);
+        addDialog(DialogManager.messageBox(messageStr, titleStr, MessageBoxType.TYPE_WARNING, true), false);
     }
 
-    public static function confirm(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)
+    public static function alertCallback(message:Phrase, title:Phrase):Void->Void 
+    {
+        return alert.bind(message, title);
+    }
+
+    public static function info(message:Phrase, title:Phrase, ?messageSubstitutions:Array<String>)
+    {
+        addDialog(DialogManager.messageBox(Dictionary.getPhrase(message, messageSubstitutions), Dictionary.getPhrase(title), MessageBoxType.TYPE_INFO, true), false);
+    }
+
+    public static function confirmRaw(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)
     {
         var dialog = DialogManager.messageBox(message, title, MessageBoxType.TYPE_QUESTION, true);
 
@@ -110,9 +117,14 @@ class Dialogs
         });
     }
 
-    public static function prompt(message:String, removeSpaces:SpaceRemoval, onInput:String->Void, ?onCancel:Null<Void->Void>, ?emptyIsCancel:Bool = true) 
+    public static function confirm(message:Phrase, title:Phrase, onConfirmed:Void->Void, onDeclined:Void->Void)
     {
-        var res:Null<String> = Browser.window.prompt(message);
+        confirmRaw(Dictionary.getPhrase(message), Dictionary.getPhrase(title), onConfirmed, onDeclined);
+    }
+
+    public static function prompt(message:Phrase, removeSpaces:SpaceRemoval, onInput:String->Void, ?onCancel:Null<Void->Void>, ?emptyIsCancel:Bool = true) 
+    {
+        var res:Null<String> = Browser.window.prompt(Dictionary.getPhrase(message));
 
         if (removeSpaces == Trim)
             res = StringTools.trim(res);

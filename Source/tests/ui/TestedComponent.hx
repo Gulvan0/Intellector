@@ -6,14 +6,13 @@ import haxe.ui.components.Label;
 import haxe.ui.events.UIEvent;
 import haxe.ui.components.HorizontalSlider;
 import haxe.ui.components.Slider;
-import gfx.components.Shapes;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
-import gfx.components.BoardWrapper;
-import gfx.components.SpriteWrapper;
+import gfx.basic_components.BoardWrapper;
+import gfx.basic_components.SpriteWrapper;
 import haxe.ui.containers.Box;
 import gameboard.Board;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import haxe.ui.core.Component;
 import struct.Situation;
 import openfl.display.Sprite;
@@ -69,7 +68,7 @@ class TestedComponent extends Box
 
     private function output(message:String) 
     {
-        Dialogs.info(message, 'output');
+        Dialogs.alertRaw(message, 'output');
     }
 
     public function update()

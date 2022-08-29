@@ -10,7 +10,7 @@ import struct.IntPoint;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
 import gameboard.GameBoard.GameBoardEvent;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import utils.TimeControl;
 import haxe.ui.containers.Card;
 import haxe.ui.containers.VBox;
@@ -150,7 +150,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;
-        resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
+        resolution.text = Utils.getResolution(null, null);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
     }
@@ -166,12 +166,9 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         whiteLoginLabel.text = parsedData.whiteLogin;
         blackLoginLabel.text = parsedData.blackLogin;
-        resolution.text = Dictionary.getPhrase(RESOLUTION_NONE);
+        resolution.text = Utils.getResolution(parsedData.outcome, parsedData.winnerColor);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
-
-        if (parsedData.outcome != null)
-            resolution.text = Utils.getResolution(parsedData.outcome, parsedData.winnerColor);
 
         if (parsedData.datetime != null)
             datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");

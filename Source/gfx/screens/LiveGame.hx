@@ -2,11 +2,9 @@ package gfx.screens;
 
 import haxe.ui.validation.InvalidationFlags;
 import GlobalBroadcaster;
-import net.LoginManager;
 import haxe.ui.containers.Card;
 import gfx.game.*;
 import haxe.ui.core.Component;
-import net.GeneralObserver;
 import utils.MathUtils;
 import haxe.ui.core.Screen as HaxeUIScreen;
 import browser.URLEditor;
@@ -17,10 +15,10 @@ import openfl.events.Event;
 import haxe.Timer;
 import serialization.GameLogParser;
 import dict.Utils;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import openfl.Assets;
 import struct.IntPoint;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import js.Browser;
 import dict.Dictionary;
 import net.EventProcessingQueue.INetObserver;
@@ -30,7 +28,7 @@ import struct.Ply;
 import gfx.utils.PlyScrollType;
 import gfx.game.GameActionBar.ActionBtn;
 import haxe.ui.containers.HBox;
-import gfx.components.BoardWrapper;
+import gfx.basic_components.BoardWrapper;
 import struct.Situation;
 import gameboard.behaviors.EnemyMoveBehavior;
 import gameboard.behaviors.PlayerMoveBehavior;
@@ -70,8 +68,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function onEnter()
     {
-        GeneralObserver.acceptsDirectChallenges = false;
-        Networker.eventQueue.addObserver(this);
+        Networker.addObserver(this);
         GlobalBroadcaster.addObserver(this);
         ScreenManager.addResizeHandler(performValidation);
         Assets.getSound("sounds/notify.mp3").play();
@@ -90,9 +87,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         lBlackClock.deactivate();
 
         ScreenManager.removeResizeHandler(performValidation);
-        Networker.eventQueue.removeObserver(this);
+        Networker.removeObserver(this);
         GlobalBroadcaster.removeObserver(this);
-        GeneralObserver.acceptsDirectChallenges = true;
     }
 
     private function performValidation() 
@@ -151,7 +147,16 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 winnerColor = GameLogParser.decodeColor(winnerColorCode);
                 outcome = GameLogParser.decodeOutcome(outcomeCode);
                 Assets.getSound("sounds/notify.mp3").play();
-                Dialogs.info(Utils.getGameOverPopUpMessage(outcome, winnerColor, playerColor), Dictionary.getPhrase(GAME_ENDED));
+                if (winnerColor == null)
+                    Dialogs.info(GAME_ENDED_DRAW_DIALOG_MESSAGE(outcome), GAME_ENDED_DIALOG_TITLE);
+                else if (playerColor == null)
+                {
+                    var winnerLogin:String = winnerColor == White? whiteLogin : blackLogin;
+                    var loserLogin:String = winnerColor == Black? whiteLogin : blackLogin;
+                    Dialogs.info(GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(outcome), GAME_ENDED_DIALOG_TITLE, [winnerLogin, loserLogin]);
+                }
+                else
+                    Dialogs.info(GAME_ENDED_PLAYER_DIALOG_MESSAGE(outcome, winnerColor == playerColor), GAME_ENDED_DIALOG_TITLE);
             default:
         }
     }

@@ -1,7 +1,7 @@
 package tests.ui.utils.components;
 
 import js.Cookie;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import tests.ui.utils.data.Macro;
 import utils.StringUtils;
 import haxe.ui.core.Screen;
@@ -25,7 +25,7 @@ import haxe.ui.components.Label;
 import tests.ui.utils.data.MaterializedInitParameter;
 import haxe.ui.events.MouseEvent;
 import gameboard.SelectableBoard;
-import gfx.components.BoardWrapper;
+import gfx.basic_components.BoardWrapper;
 import tests.ui.utils.data.MacroStep;
 import haxe.ui.containers.HBox;
 
@@ -80,7 +80,7 @@ class MainView extends HBox
         if (!Lambda.empty(UITest.getHistory()))
             new AddMacroDialog(addMacroWidget.bind(_, false)).showDialog(true);
         else
-            Dialogs.alert("History is empty", "TestEnv Warning");
+            Dialogs.alertRaw("History is empty", "TestEnv Warning");
     }
 
     @:bind(proposeMacrosBtn, MouseEvent.CLICK)
@@ -91,7 +91,7 @@ class MainView extends HBox
         if (!Lambda.empty(untrackedMacroNames))
             new ProposeMacrosDialog(untrackedMacroNames).showDialog(true);
         else
-            Dialogs.alert("No untracked macros detected", "TestEnv Warning");
+            Dialogs.alertRaw("No untracked macros detected", "TestEnv Warning");
     }
 
     private function timerRun()

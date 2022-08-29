@@ -6,13 +6,13 @@ import haxe.ui.util.Color;
 import utils.MathUtils;
 import Preferences.Markup;
 import openfl.display.BitmapData;
-import gfx.components.BoardWrapper;
+import gfx.basic_components.BoardWrapper;
 import gameboard.Board;
 import struct.Situation;
 import struct.Ply;
 import gif.Gif;
 import haxe.Timer;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import js.Browser;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.Box;
@@ -31,7 +31,7 @@ class ShareGameTab extends Box
     private function onCopyLinkPressed(e)
     {
         Browser.navigator.clipboard.writeText(linkTextField.text)
-            .catchError(e -> {Dialogs.alert(Dictionary.getPhrase(CLIPBOARD_ERROR_ALERT_TEXT, ['$e']), Dictionary.getPhrase(CLIPBOARD_ERROR_ALERT_TITLE));})
+            .catchError(e -> {Dialogs.alert(CLIPBOARD_ERROR_ALERT_TEXT, CLIPBOARD_ERROR_ALERT_TITLE, ['$e']);})
             .finally(() -> {
                 copyLinkBtn.hidden = true;
                 copyLinkBtnTick.hidden = false;
@@ -47,7 +47,7 @@ class ShareGameTab extends Box
     private function onCopyPINPressed(e)
     {
         Browser.navigator.clipboard.writeText(pinTextArea.text)
-            .catchError(e -> {Dialogs.alert(Dictionary.getPhrase(CLIPBOARD_ERROR_ALERT_TEXT, ['$e']), Dictionary.getPhrase(CLIPBOARD_ERROR_ALERT_TITLE));})
+            .catchError(e -> {Dialogs.alert(CLIPBOARD_ERROR_ALERT_TEXT, CLIPBOARD_ERROR_ALERT_TITLE, ['$e']);})
             .finally(() -> {
                 copyPINBtn.hidden = true;
                 copyPINBtnTick.hidden = false;

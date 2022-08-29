@@ -1,13 +1,12 @@
 package gfx.game;
 
-import net.LoginManager;
 import gameboard.GameBoard.IGameBoardObserver;
 import net.EventProcessingQueue.INetObserver;
 import gameboard.GameBoard.GameBoardEvent;
 import haxe.ui.containers.VBox;
 import struct.PieceColor;
 import js.Browser;
-import net.ServerEvent;
+import net.shared.ServerEvent;
 import haxe.ui.components.Button;
 import haxe.ui.containers.ButtonBar;
 import dict.Dictionary;

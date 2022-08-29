@@ -1,7 +1,7 @@
 package gfx.screens;
 
 import gfx.ResponsiveToolbox;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
 import utils.Changelog;

@@ -1,4 +1,6 @@
-package net;
+package net.shared;
+
+import net.shared.SendChallengeResult;
 
 //TODO: Change the implementation on the server
 enum ServerEvent
@@ -11,15 +13,10 @@ enum ServerEvent
     GameIsOngoing(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetGame: game is in process. Player should either spectate or reconnect based on whether the log contains their login
     GameNotFound; //Answer to GetGame: no such game exists
 
-    DirectChallengeCalleeIsCaller(callee:String); //Answer to CreateDirectChallenge: a player has tried to challenge themselves
-    DirectChallengeCalleeOffline(callee:String); //Answer to CreateDirectChallenge: recipient is offline //! TODO: new event, add logic to both server & client
-    DirectChallengeCalleeNotFound(callee:String); //Answer to CreateDirectChallenge: there is no such player as recipient
-    DirectChallengeCalleeInGame(callee:String); //Answer to CreateDirectChallenge: recipient is offline
-    DirectChallengeRepeated(callee:String); //Answer to CreateDirectChallenge: the challenge to this recipient has already been sent
-    DirectChallengeSent(callee:String); //Answer to CreateDirectChallenge: direct challenge is sent successfully
+    SendDirectChallengeResult(result:SendChallengeResult); //Answer to CreateDirectChallenge
     IncomingDirectChallenge(enemy:String, colour:String, startSecs:Int, bonusSecs:Int); //Invoked on recipient side by CreateDirectChallenge
-    DirectChallengeDeclined(callee:String); //Answer to CreateDirectChallenge: recipient has declined the challenge
-    DirectChallengeWasCancelled(callee:String); //Answer to accepting direct challenge: it was cancelled before the recipient answered //! TODO: new event, add logic to both server & client
+    DirectChallengeDeclined(callee:String); //Recipient has declined the challenge
+    DirectChallengeCancelled(callee:String); //Answer to accepting direct challenge: it was cancelled before the recipient answered //! TODO: new event, add logic to both server & client
     DirectChallengeCallerOffline(caller:String); //Answer to accepting direct challenge: caller went offline before the recipient answered //! TODO: new event, add logic to both server & client
     DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered //! TODO: new event, add logic to both server & client
     

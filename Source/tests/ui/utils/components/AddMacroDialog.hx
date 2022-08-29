@@ -1,6 +1,6 @@
 package tests.ui.utils.components;
 
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import tests.ui.utils.data.Macro;
 import tests.ui.utils.data.MacroStep;
 import haxe.ui.containers.dialogs.Dialog;
@@ -78,14 +78,14 @@ class AddMacroDialog extends Dialog
         onDialogClosed = e -> {
             if (e.button == DialogButton.APPLY)
                 if (nameInputField.text == "")
-                    Dialogs.alert("Failed to add macro: name not specified", "TestEnv Warning");
+                    Dialogs.alertRaw("Failed to add macro: name not specified", "TestEnv Warning");
                 else if (DataKeeper.getAllMacroNames().contains(nameInputField.text))
-                    Dialogs.alert("Failed to add macro: a macro with this name already exists", "TestEnv Warning");
+                    Dialogs.alertRaw("Failed to add macro: a macro with this name already exists", "TestEnv Warning");
                 else
                 {
                     var historySliceState = checkHistorySliceConsistensy();
                     if (historySliceState != Consistent)
-                        Dialogs.confirm("Slice is inconsistent: " + historySliceState.getName() + ", save macro anyway?", "Warning: Inconsistensy Detected", addMacro.bind(nameInputField.text, historySlice, onMacroAdded), ()->{});
+                        Dialogs.confirmRaw("Slice is inconsistent: " + historySliceState.getName() + ", save macro anyway?", "Warning: Inconsistensy Detected", addMacro.bind(nameInputField.text, historySlice, onMacroAdded), ()->{});
                     else
                         addMacro(nameInputField.text, historySlice, onMacroAdded);
                 }

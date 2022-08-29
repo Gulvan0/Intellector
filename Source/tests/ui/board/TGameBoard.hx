@@ -3,7 +3,7 @@ package tests.ui.board;
 import tests.ui.TestedComponent;
 import struct.IntPoint;
 import openfl.events.MouseEvent;
-import gfx.components.Dialogs;
+import gfx.Dialogs;
 import gfx.utils.PlyScrollType;
 import tests.ui.ArgumentType;
 import struct.Situation;
