@@ -1,5 +1,7 @@
 package;
 
+import haxe.Unserializer;
+import haxe.Serializer;
 import js.html.Event;
 import net.shared.ClientEvent;
 import net.shared.ServerEvent;
@@ -11,19 +13,12 @@ import dict.Dictionary;
 import struct.PieceType;
 import openfl.utils.Assets;
 import js.Browser;
-import haxe.Json;
 import hx.ws.WebSocket;
 import haxe.Timer;
 
 using utils.CallbackTools;
 using StringTools;
 using Lambda;
-
-typedef RawNetEvent =
-{
-    var name:String;
-    var data:Dynamic;
-}
 
 class Networker
 {
@@ -40,6 +35,8 @@ class Networker
 
     public static function launch() 
     {
+        Serializer.USE_ENUM_INDEX = true;
+
         eventQueue.flush();
 
         #if prod
@@ -72,24 +69,22 @@ class Networker
 
     private static function onMessageRecieved(msg)
     {
-        var str:String = msg.toString();
-        var rawEvent:RawNetEvent = Json.parse(str.substring(11, str.length - 1));
-
-        if (ServerEvent.getConstructors().has(rawEvent.name))
+        try
         {
-            var event:ServerEvent = ServerEvent.createByName(rawEvent.name, rawEvent.data);
+            var event:ServerEvent = Unserializer.run(msg);
             if (event == DontReconnect)
                 onReconnectionForbidden();
             else
                 eventQueue.processEvent(event);
         }
-        else
-            trace("Unexpected event: " + rawEvent.name);
+        catch (e)
+            trace("Unexpected message: " + msg);
     }
 
-    private static function onConnectionClosed() //TODO: Check logic
+    private static function onConnectionClosed()
     {
         SceneManager.clearScreen();
+
         if (suppressAlert)
             trace("Connection closed");
         else
@@ -97,6 +92,7 @@ class Networker
             Dialogs.alert(CONNECTION_LOST_ERROR, CONNECTION_ERROR_DIALOG_TITLE);
             suppressAlert = true;
         }
+        
         if (!doNotReconnect)
             startReconnectAttempts(onConnectionOpen);
     }
@@ -124,6 +120,7 @@ class Networker
     private static function onReconnectionForbidden() 
     {
         doNotReconnect = true;
+        suppressAlert = true;
         Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
     }
 
@@ -156,12 +153,6 @@ class Networker
         if (ignoreEmitCalls)
             trace(event.getName(), event.getParameters());
         else
-            emit(event.getName(), event.getParameters());
-    }
-
-    private static function emit(eventName:String, data:Dynamic) 
-    {
-        var event:RawNetEvent = {name: eventName, data: data};
-        _ws.send(Json.stringify(event));
+            _ws.send(Serializer.run(event));
     }
 }
