@@ -33,11 +33,12 @@ private class Preference<T>
         return value;    
     }
 
-    public function set(v:T) 
+    public function set(v:T, ?suppressBroadcasting:Bool = false) 
     {
         value = v;
         Cookie.set(cookieName, Std.string(value), FIVE_YEARS);
-        GlobalBroadcaster.broadcast(PreferenceUpdated(name));
+        if (!suppressBroadcasting)
+            GlobalBroadcaster.broadcast(PreferenceUpdated(name));
     }
 
     public function resetToDefault()

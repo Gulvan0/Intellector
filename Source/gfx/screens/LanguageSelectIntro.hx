@@ -13,14 +13,14 @@ class LanguageSelectIntro extends Screen
     @:bind(ruBtn, MouseEvent.CLICK)
     private function onRuPressed(e)
     {
-        Preferences.language.set(RU);
+        Preferences.language.set(RU, true);
         onLangSelected();
     }
 
     @:bind(ruBtn, MouseEvent.CLICK)
     private function onEnPressed(e)
     {
-        Preferences.language.set(EN);
+        Preferences.language.set(EN, true);
         onLangSelected();
     }
 

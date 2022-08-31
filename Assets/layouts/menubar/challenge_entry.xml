@@ -1,0 +1,36 @@
+<item-renderer width="100%" height="50px">
+    <hbox id="thisBox" width="100%" height="100%">
+        <style>
+            #thisBox {
+                background-color: #ffffff;
+            }
+            #thisBox:hover {
+                background-color: #dddddd;
+            }
+            #headerLabel {
+                font-color: #333333;
+                font-bold: true;
+            }
+        </style>
+        <arp-image id="incomingIcon" height="95%" verticalAlign="center" />
+        <vbox width="100%" height="100%">
+            <label id="headerLabel" horizontalAlign="center" />
+            <stack id="opponentOrLinkStack" width="100%" height="25%">
+                <label id="opponentLabel" />
+                <copyable-text id="linkText" />
+            </stack>
+            <hbox height="25%" horizontalAlign="center">
+                <arp-image id="timeControlIcon" height="100%" />
+                <label id="paramsLabel" height="100%" />
+                <arp-image id="colorIcon" height="100%" />
+                <arp-image id="customStartPosIcon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" height="100%" />
+            </hbox>
+            <hbox height="25%" horizontalAlign="center">
+                <button id="acceptBtn" verticalAlign="center" height="100%" text="" />
+                <button id="declineBtn" verticalAlign="center" height="100%" text="" />
+                <button id="cancelBtn" verticalAlign="center" height="100%" text="" />
+            </hbox>
+        </vbox>
+        
+    </hbox>
+</item-renderer>

@@ -2,7 +2,7 @@ package net;
 
 import dict.Dictionary;
 import gfx.Dialogs;
-import gfx.ScreenManager;
+import gfx.SceneManager;
 import serialization.GameLogParser;
 import struct.PieceColor;
 import utils.TimeControl;
@@ -23,15 +23,15 @@ class Requests
         {
             case GameIsOver(log):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(log);
-		        ScreenManager.toScreen(LiveGame(id, Past(parsedData, null)));
+		        SceneManager.toScreen(LiveGame(id, Past(parsedData, null)));
             case GameIsOngoing(whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
 		        if (LoginManager.isLogged() || parsedData.getPlayerColor() == null)
-			        ScreenManager.toScreen(LiveGame(id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, parsedData.whiteLogin)));
+			        SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, parsedData.whiteLogin)));
 		        else
-			        ScreenManager.toScreen(LiveGame(id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
+			        SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
             case GameNotFound:
-                ScreenManager.toScreen(MainMenu);
+                SceneManager.toScreen(MainMenu);
             default:
                 return false;
         }
@@ -51,12 +51,12 @@ class Requests
             case OpenChallengeInfo(hostLogin, secsStart, secsBonus, colorStr):
                 var timeControl:TimeControl = new TimeControl(secsStart, secsBonus);
                 var color:Null<PieceColor> = colorStr != null? PieceColor.createByName(colorStr) : null;
-                ScreenManager.toScreen(ChallengeJoining(hostLogin, timeControl, color));
+                SceneManager.toScreen(ChallengeJoining(hostLogin, timeControl, color));
             case OpenChallengeHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, ownerLogin)));
+                SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, ownerLogin)));
             case OpenchallengeNotFound:
-                ScreenManager.toScreen(MainMenu);
+                SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
@@ -77,7 +77,7 @@ class Requests
             case PlayerProfile(recentGamesStr, recentStudiesStr, hasMoreGames, hasMoreStudies):
                 //TODO: Implement properly
             case PlayerNotFound:
-                ScreenManager.toScreen(MainMenu);
+                SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
@@ -96,9 +96,9 @@ class Requests
         switch event
         {
             case SingleStudy(name, variantStr):
-                ScreenManager.toScreen(Analysis(variantStr, 0, id, name));
+                SceneManager.toScreen(Analysis(variantStr, 0, id, name));
             case StudyNotFound:
-                ScreenManager.toScreen(MainMenu);
+                SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_STUDY_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
@@ -118,7 +118,7 @@ class Requests
         {
             case SpectationData(match_id, whiteSeconds, blackSeconds, timestamp, currentLog): 
 		        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, login)));
+                SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, login)));
             case PlayerNotInGame:
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_IN_GAME, REQUESTS_ERROR_DIALOG_TITLE);
             case PlayerOffline:

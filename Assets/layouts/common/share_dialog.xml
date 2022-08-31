@@ -9,11 +9,7 @@
         <box width="100%" height="100%" text="${Dictionary.getPhrase(SHARE_POSITION_TAB_NAME)}">
             <vbox width="100%" height="100%">
                 <section-header  width="100%" text="${Dictionary.getPhrase(SHARE_SIP_HEADER)}" />
-                <hbox width="100%">
-                    <textfield id="sipTextField" width="100%" height="30px" verticalAlign="center" />
-                    <button id="copySIPBtn" width="30px" height="30px" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_TOOLTIP)}" icon="assets/symbols/common/copy.svg" styleName="tool-button" />
-                    <button id="copySIPBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_SUCCESS_TOOLTIP)}" icon="assets/symbols/common/tick.svg" styleName="tool-button" />
-                </hbox>
+                <copyable-text id="sipText" width="100%" height="30px" />
                 <section-header width="100%" text="${Dictionary.getPhrase(SHARE_IMAGE_HEADER)}" />
                 <hbox width="100%" height="100%">
                     <box id="boardContainer" width="50%" height="100%" />

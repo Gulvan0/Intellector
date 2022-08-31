@@ -5,7 +5,7 @@ import net.shared.ClientEvent;
 import net.shared.ServerEvent;
 import net.EventProcessingQueue;
 import gfx.Dialogs;
-import gfx.ScreenManager;
+import gfx.SceneManager;
 import struct.PieceColor;
 import dict.Dictionary;
 import struct.PieceType;
@@ -89,7 +89,7 @@ class Networker
 
     private static function onConnectionClosed() //TODO: Check logic
     {
-        ScreenManager.clearScreen();
+        SceneManager.clearScreen();
         if (suppressAlert)
             trace("Connection closed");
         else
@@ -104,7 +104,7 @@ class Networker
     private static function onConnectionError(err:Event)
     {
         trace("Connection error: " + err.type);
-        ScreenManager.onConnectionError();
+        SceneManager.onConnectionError();
     }
 
     public static function startReconnectAttempts(onConnected:Void->Void)

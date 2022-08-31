@@ -46,7 +46,7 @@ class PastGameWidget extends ItemRenderer
                 openingLabel.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);
 
             onClick = e -> {
-                ScreenManager.toScreen(LiveGame(widgetData.id, Past(parsedData, widgetData.watchedLogin)));
+                SceneManager.toScreen(LiveGame(widgetData.id, Past(parsedData, widgetData.watchedLogin)));
             };
         }
     }

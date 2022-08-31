@@ -49,12 +49,12 @@ class BoardWrapper extends Component
     private override function get_componentWidth():Null<Float>
     {
         if (widthBased)
-            if (maxPercentHeight != null)
+            if (maxPercentHeight != null && parentComponent != null)
                 return Math.min(super.get_componentWidth(), (maxPercentHeight / 100) * parentComponent.componentHeight / inverseAspectRatio());
             else
                 return super.get_componentWidth();
         else
-            if (maxPercentWidth != null)
+            if (maxPercentWidth != null && parentComponent != null)
                 return Math.min(super.get_componentHeight() / inverseAspectRatio(), (maxPercentWidth / 100) * parentComponent.componentWidth);
             else
                 return super.get_componentHeight() / inverseAspectRatio();
@@ -63,12 +63,12 @@ class BoardWrapper extends Component
     private override function get_componentHeight():Null<Float>
     {
         if (widthBased)
-            if (maxPercentHeight != null)
+            if (maxPercentHeight != null && parentComponent != null)
                 return Math.min(super.get_componentWidth() * inverseAspectRatio(), (maxPercentHeight / 100) * parentComponent.componentHeight);
             else
                 return super.get_componentWidth() * inverseAspectRatio();
         else
-            if (maxPercentWidth != null)
+            if (maxPercentWidth != null && parentComponent != null)
                 return Math.min(super.get_componentHeight(), (maxPercentWidth / 100) * parentComponent.componentWidth * inverseAspectRatio());
             else
                 return super.get_componentHeight();
@@ -131,14 +131,14 @@ class BoardWrapper extends Component
     private function onAdded(e)
     {
         removeEventListener(Event.ADDED_TO_STAGE, onAdded);
-        ScreenManager.addResizeHandler(updateBoardSizeLater);
+        SceneManager.addResizeHandler(updateBoardSizeLater);
         addEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
     }
 
     private function onRemoved(e)
     {
         removeEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
-        ScreenManager.removeResizeHandler(updateBoardSizeLater);
+        SceneManager.removeResizeHandler(updateBoardSizeLater);
     }
 
     public function new(board:Board) 

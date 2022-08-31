@@ -57,22 +57,6 @@ class ShareDialog extends Dialog
 
     private var boardWrapper:BoardWrapper;
 
-    @:bind(copySIPBtn, MouseEvent.CLICK)
-    @:bind(copySIPBtnTick, MouseEvent.CLICK)
-    public function onCopySIPPressed(e) 
-    {
-        Browser.navigator.clipboard.writeText(sipTextField.text)
-            .catchError(e -> {Dialogs.alert(CLIPBOARD_ERROR_ALERT_TEXT, CLIPBOARD_ERROR_ALERT_TITLE, ['$e']);})
-            .finally(() -> {
-                copySIPBtn.hidden = true;
-                copySIPBtnTick.hidden = false;
-                Timer.delay(() -> {
-                    copySIPBtnTick.hidden = true;
-                    copySIPBtn.hidden = false;
-                }, 500);
-            });
-    }
-
     private function onReadyForPNGExport(e)
     {
         pngExportData.board.removeEventListener(Event.EXIT_FRAME, onReadyForPNGExport);
@@ -214,7 +198,7 @@ class ShareDialog extends Dialog
     {
         var board:Board = new Board(situation, orientation, 40, None);
 
-        sipTextField.text = situation.serialize();
+        sipText.copiedText = situation.serialize();
 
         boardWrapper = new BoardWrapper(board);
         boardWrapper.percentWidth = 100;

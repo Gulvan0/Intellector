@@ -48,6 +48,7 @@ class Dialogs
     {
         dialog.x = (Screen.instance.actualWidth - dialog.width) / 2;
         dialog.y = (Screen.instance.actualHeight - dialog.height) / 2;
+        trace(Screen.instance.actualWidth, Screen.instance.actualHeight, dialog.width, dialog.height, dialog.x, dialog.y);
     }
 
     public static function onScreenResized() 

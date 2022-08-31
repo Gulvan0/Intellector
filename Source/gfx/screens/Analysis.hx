@@ -97,7 +97,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
         };
 
         var shareDialog:ShareDialog = new ShareDialog();
-        switch ScreenManager.getCurrentScreenType()
+        switch SceneManager.getCurrentScreenType()
         {
             case Analysis(_, _, exploredStudyID, exploredStudyName):
                 if (exploredStudyID != null)

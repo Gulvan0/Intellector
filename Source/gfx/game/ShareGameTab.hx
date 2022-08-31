@@ -26,22 +26,6 @@ class ShareGameTab extends Box
     
     private var gifExportParams:{board:Board, gifWidth:Int, gifHeight:Int, gifInterval:Float, bgColor:Int};
 
-    @:bind(copyLinkBtnTick, MouseEvent.CLICK)
-    @:bind(copyLinkBtn, MouseEvent.CLICK)
-    private function onCopyLinkPressed(e)
-    {
-        Browser.navigator.clipboard.writeText(linkTextField.text)
-            .catchError(e -> {Dialogs.alert(CLIPBOARD_ERROR_ALERT_TEXT, CLIPBOARD_ERROR_ALERT_TITLE, ['$e']);})
-            .finally(() -> {
-                copyLinkBtn.hidden = true;
-                copyLinkBtnTick.hidden = false;
-                Timer.delay(() -> {
-                    copyLinkBtnTick.hidden = true;
-                    copyLinkBtn.hidden = false;
-                }, 500);
-            });
-    }
-
     @:bind(copyPINBtnTick, MouseEvent.CLICK)
     @:bind(copyPINBtn, MouseEvent.CLICK)
     private function onCopyPINPressed(e)
@@ -130,7 +114,7 @@ class ShareGameTab extends Box
 
     public function init(gameLink:String, pin:String, startingSituation:Situation, plySequence:Array<Ply>)
     {
-        linkTextField.text = gameLink;
+        linkText.copiedText = gameLink;
         pinTextArea.text = pin;
         this.plySequence = plySequence;
         this.startingSituation = startingSituation;

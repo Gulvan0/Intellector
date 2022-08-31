@@ -21,7 +21,7 @@ class Screen extends Component
         if (!responsiveComponents.empty() || !fittedComponents.empty())
         {
             resize();
-            ScreenManager.addResizeHandler(resize);
+            SceneManager.addResizeHandler(resize);
         }
 
         if (customEnterHandler != null)
@@ -30,7 +30,7 @@ class Screen extends Component
 
     public function onClosed()
     {
-        ScreenManager.removeResizeHandler(resize);
+        SceneManager.removeResizeHandler(resize);
 
         if (customCloseHandler != null)
             customCloseHandler();

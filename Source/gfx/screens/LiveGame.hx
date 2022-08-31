@@ -70,7 +70,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     {
         Networker.addObserver(this);
         GlobalBroadcaster.addObserver(this);
-        ScreenManager.addResizeHandler(performValidation);
+        SceneManager.addResizeHandler(performValidation);
         Assets.getSound("sounds/notify.mp3").play();
         performValidation();
         Timer.delay(boardContainer.validateNow, 25);
@@ -86,7 +86,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         lWhiteClock.deactivate();
         lBlackClock.deactivate();
 
-        ScreenManager.removeResizeHandler(performValidation);
+        SceneManager.removeResizeHandler(performValidation);
         Networker.removeObserver(this);
         GlobalBroadcaster.removeObserver(this);
     }
@@ -225,7 +225,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, board.startingSituation, playedMoves);
                 shareDialog.showShareDialog(board);
             case Analyze:
-                ScreenManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null, null));
+                SceneManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null, null));
             case AcceptDraw:
                 Networker.emitEvent(AcceptDraw);
             case DeclineDraw:
@@ -350,13 +350,14 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         board.addObserver(this);
 
         boardWrapper = new BoardWrapper(board);
+
+        boardContainer.percentHeight = 100;
+        boardContainer.addComponent(boardWrapper);
+
         boardWrapper.horizontalAlign = 'center';
         boardWrapper.verticalAlign = 'center';
         boardWrapper.percentHeight = 100;
         boardWrapper.maxPercentWidth = 100;
-
-        boardContainer.percentHeight = 100;
-        boardContainer.addComponent(boardWrapper);
 
         cWhiteLoginLabel.text = lWhiteLoginLabel.text = whiteLogin;
         cBlackLoginLabel.text = lBlackLoginLabel.text = blackLogin;

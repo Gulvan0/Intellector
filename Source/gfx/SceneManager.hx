@@ -22,7 +22,7 @@ import haxe.ui.core.Screen as HaxeUIScreen;
 
 using StringTools;
 
-class ScreenManager
+class SceneManager
 {
     private static var scene:Scene;
     private static var currentScreenType:Null<ScreenType> = null;

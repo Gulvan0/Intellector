@@ -11,7 +11,7 @@ import utils.TimeControl;
 import net.Requests;
 import js.html.URLSearchParams;
 import browser.CredentialCookies;
-import gfx.ScreenManager;
+import gfx.SceneManager;
 import gfx.screens.Analysis;
 import gfx.screens.LanguageSelectIntro;
 import haxe.ui.Toolkit;
@@ -83,12 +83,12 @@ class Main extends Sprite
 	{
 		var langInitializedFromCookie:Bool = Preferences.language.load();
 
-		ScreenManager.launch();
+		SceneManager.launch();
 
 		if (langInitializedFromCookie)
 			onLanguageReady();
 		else
-			ScreenManager.toScreen(LanguageSelectIntro(onLanguageReady));
+			SceneManager.toScreen(LanguageSelectIntro(onLanguageReady));
 	}
 
 	private function onLanguageReady() 
@@ -101,10 +101,9 @@ class Main extends Sprite
 		Networker.onConnectionEstabilished = onConnected;
 		Networker.onConnectionFailed = onConnectionFailed;
 		//Networker.launch();
-		//ScreenManager.toScreen(ChallengeJoining("Gulvan", new TimeControl(30, 0), Black));
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
-		ScreenManager.toScreen(LiveGame(1337, Ongoing(GameLogParser.parse("#P|gulvan:kazvixx;
+		SceneManager.toScreen(LiveGame(1337, Ongoing(GameLogParser.parse("#P|gulvan:kazvixx;
 		#D|1659990040;
 		#T|600/0;
 		#S|bfrmrnrprqrriseteuivowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr;
@@ -126,12 +125,12 @@ class Main extends Sprite
 
 	private function onConnectionFailed(e)
 	{
-		ScreenManager.onConnectionError();
+		SceneManager.onConnectionError();
 	}
 
 	private function onConnected()
 	{
-		ScreenManager.observeNetEvents();
+		SceneManager.observeNetEvents();
 		if (CredentialCookies.hasLoginDetails())
 			LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), null, navigate, navigate);
 		else
@@ -171,13 +170,13 @@ class Main extends Sprite
             case "live": 
                 toGame(pathPartsAfter[0]);
             default:
-                ScreenManager.toScreen(MainMenu);
+                SceneManager.toScreen(MainMenu);
         }
 	}
 
 	private function toAnalysis() 
 	{
-		ScreenManager.toScreen(Analysis(null, null, null, null));
+		SceneManager.toScreen(Analysis(null, null, null, null));
 	}
 
 	private function toOpenChallengeJoining(owner:String) 
@@ -196,7 +195,7 @@ class Main extends Sprite
 		if (id != null)
 			Requests.getStudy(id);
 		else
-			ScreenManager.toScreen(MainMenu);
+			SceneManager.toScreen(MainMenu);
 	}
 
 	private function toGame(idStr:String) 
@@ -205,6 +204,6 @@ class Main extends Sprite
 		if (id != null)
 			Requests.getGame(id);
 		else
-			ScreenManager.toScreen(MainMenu);
+			SceneManager.toScreen(MainMenu);
 	}
 }

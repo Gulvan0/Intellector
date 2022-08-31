@@ -1,7 +1,7 @@
 package tests;
 
 import haxe.ui.HaxeUIApp;
-import gfx.ScreenManager;
+import gfx.SceneManager;
 import openfl.Lib;
 import tests.ui.utils.data.EndpointArgument;
 import tests.ui.utils.data.MacroStep;

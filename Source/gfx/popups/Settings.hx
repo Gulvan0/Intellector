@@ -45,7 +45,7 @@ class Settings extends Dialog
         if (Preferences.language.get() != oldLanguage)
             Browser.location.reload();
         else
-            ScreenManager.removeResizeHandler(resize);
+            SceneManager.removeResizeHandler(resize);
     }
 
     public function new()
@@ -90,7 +90,7 @@ class Settings extends Dialog
         branchingTurnColorPill.selected = Preferences.branchingTurnColorIndicators.get();
         branchingTurnColorLabel.text = Dictionary.getPhrase(branchingTurnColorPill.selected? SETTINGS_ENABLED_OPTION_VALUE : SETTINGS_DISABLED_OPTION_VALUE);
 
-        ScreenManager.addResizeHandler(resize);
+        SceneManager.addResizeHandler(resize);
         Timer.delay(resize, 50);
     }
 }

@@ -26,21 +26,15 @@ class ARPImage extends Image
         var b = super.validateComponentLayout();
         if (widthBased)
         {
-            var newWidth = height * originalWidth / originalHeight;
-            if (width != newWidth)
-            {
-                width = newWidth;
-                invalidateComponent();
-            }
+            var newHeight = width * originalHeight / originalWidth;
+            if (height != newHeight)
+                height = newHeight;
         }
         else
         {
-            var newHeight = width * originalHeight / originalWidth;
-            if (height != newHeight)
-            {
-                height = newHeight;
-                invalidateComponent();
-            }
+            var newWidth = height * originalWidth / originalHeight;
+            if (width != newWidth)
+                width = newWidth;
         }
         return b;
     }

@@ -158,7 +158,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onSiteNamePressed(e) 
     {
-        ScreenManager.toScreen(MainMenu);
+        SceneManager.toScreen(MainMenu);
     }
 
     private function onCreateChallengePressed(e)
@@ -176,12 +176,12 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onOpenChallengesPressed(e)
     {
-        ScreenManager.toScreen(MainMenu);
+        SceneManager.toScreen(MainMenu);
     }
 
     private function onCurrentGamesPressed(e)
     {
-        ScreenManager.toScreen(MainMenu);
+        SceneManager.toScreen(MainMenu);
     }
 
     private function onWatchPlayerPressed(e)
@@ -197,12 +197,12 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     private function onSpectationData(watchedPlayer:String, match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)
     {
         var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-        ScreenManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, watchedPlayer)));
+        SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, watchedPlayer)));
     }
 
     private function onAnalysisBoardPressed(e)
     {
-        ScreenManager.toScreen(Analysis(null, null, null, null));
+        SceneManager.toScreen(Analysis(null, null, null, null));
     }
 
     private function onPlayerProfilePressed(e)
