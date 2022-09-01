@@ -1,6 +1,5 @@
 package struct;
 
-import struct.PieceColor.opposite;
 import utils.TimeControl;
 import js.Cookie;
 
@@ -22,23 +21,23 @@ class ChallengeParams
     public var rated(default, set):Bool;
     public var ownerLogin:String;
 
-    public function set_customStartingSituation(value:Null<Situation>):Null<Situation>
+    private function set_customStartingSituation(value:Null<Situation>):Null<Situation>
     {
         if (customStartingSituation != null)
             rated = false;
         return customStartingSituation = value;
     }
 
-    public function set_rated(value:Bool):Bool
+    private function set_rated(value:Bool):Bool
     {
         if (value == true)
             customStartingSituation = null;
         return rated = value;
     }
 
-    public function createChallenge()
+    public function saveToCookies()
     {
-        //TODO: Fill
+        Cookie.set(cookieName, serialize(), 60 * 60 * 24 * 90);
     }
 
     public static function loadFromCookies():ChallengeParams
@@ -49,26 +48,21 @@ class ChallengeParams
             return defaultParams();
     }
 
-    public function saveToCookies()
-    {
-        Cookie.set(cookieName, serialize(), 60 * 60 * 24 * 90);
-    }
-
-    public static function defaultParams():ChallengeParams
-    {
-        return new ChallengeParams(new TimeControl(600, 0), Public);
-    }
-
     public static function rematchParams(opponentLogin:String, playerColor:PieceColor, timeControl:TimeControl, rated:Bool, ?startingSituation:Null<Situation>):ChallengeParams
     {
-        return new ChallengeParams(timeControl, Direct(opponentLogin), LoginManager.getLogin(), opposite(playerColor), startingSituation, rated);
+        return new ChallengeParams(timeControl, Direct(opponentLogin), LoginManager.getLogin(), playerColor, startingSituation, rated);
     }
 
     public static function playFromPosParams(situiation:Situation):ChallengeParams
     {
-        var params:ChallengeParams = ChallengeParams.defaultParams();
+        var params:ChallengeParams = defaultParams();
         params.customStartingSituation = situiation;
         return params;
+    }
+
+    private static function defaultParams():ChallengeParams
+    {
+        return new ChallengeParams(new TimeControl(600, 0), Public);
     }
 
     public static function deserialize(s:String):ChallengeParams
@@ -82,7 +76,7 @@ class ChallengeParams
         return new ChallengeParams(timeControl, type, acceptorColor, customStartingSituation, rated);
     }
 
-    public function serialize():String
+    private function serialize():String
     {
         var typeStr = switch type {
             case Public: "p";
