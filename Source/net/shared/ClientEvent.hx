@@ -18,7 +18,6 @@ enum ClientEvent
     CancelOpenChallenge; 
     FollowPlayer(login:String); //TODO: Ensure this also includes an effect of StopSpectating
     StopSpectating; //Used both to stop spectating a game AND to stop following a player
-    Rematch;
     Resign; 
     OfferDraw; 
     CancelDraw; 

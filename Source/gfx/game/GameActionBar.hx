@@ -29,6 +29,7 @@ enum ActionBtn
     AddTime;
     Rematch;
     Share;
+    PlayFromHere;
     Analyze;
     AcceptDraw;
     DeclineDraw;
@@ -159,8 +160,8 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         var shownButtons:Array<Button> = switch mode 
         {
             case PlayerOngoingGame: [changeOrientationBtn, offerDrawBtn, offerTakebackBtn, resignBtn, addTimeBtn];
-            case PlayerGameEnded: [changeOrientationBtn, analyzeBtn, shareBtn, rematchBtn];
-            case Spectator: [changeOrientationBtn, analyzeBtn, shareBtn];
+            case PlayerGameEnded: [changeOrientationBtn, analyzeBtn, shareBtn, playFromPosBtn, rematchBtn];
+            case Spectator: [changeOrientationBtn, analyzeBtn, shareBtn, playFromPosBtn];
         }
         changeActionButtons(shownButtons);
     }
@@ -306,6 +307,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         attachHandler(rematchBtn, Rematch);
         attachHandler(shareBtn, Share);
         attachHandler(analyzeBtn, Analyze);
+        attachHandler(playFromPosBtn, PlayFromHere);
     }
 
     public function new() 

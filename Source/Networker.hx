@@ -8,11 +8,6 @@ import net.shared.ServerEvent;
 import net.EventProcessingQueue;
 import gfx.Dialogs;
 import gfx.SceneManager;
-import struct.PieceColor;
-import dict.Dictionary;
-import struct.PieceType;
-import openfl.utils.Assets;
-import js.Browser;
 import hx.ws.WebSocket;
 import haxe.Timer;
 

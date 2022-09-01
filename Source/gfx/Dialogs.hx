@@ -1,5 +1,6 @@
 package gfx;
 
+import struct.ChallengeParams;
 import haxe.ui.containers.Box;
 import openfl.Assets;
 import js.Browser;
@@ -262,9 +263,11 @@ class Dialogs
         });
     }
 
-    public static function specifyChallengeParams()
+    public static function specifyChallengeParams(?initialParams:ChallengeParams)
     {
-        //TODO: Fill
+        if (initialParams == null)
+            initialParams = ChallengeParams.loadFromCookies();
+        //TODO: Create and add dialog component with these initial values of challenge parameters. Don't forget to save params before sending the challenge!
     }
 
     private static function onBtnAdded(btn:Button, type:PieceType, color:PieceColor, iconSize:Float, e) 

@@ -40,6 +40,12 @@ class AnalysisActionBar extends VBox implements IAnalysisPeripheralEventObserver
     {
         eventHandler(ShareRequested);
     }
+    
+    @:bind(playFromPosBtn, MouseEvent.CLICK)
+    private function onPlayFromPosPressed(e)
+    {
+        eventHandler(PlayFromHereRequested);
+    }
 
     public function new() 
     {

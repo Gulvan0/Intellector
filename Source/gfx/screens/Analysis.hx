@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import struct.ChallengeParams;
 import GlobalBroadcaster;
 import gfx.common.PlyHistoryView;
 import gfx.analysis.IAnalysisPeripheralEventObserver;
@@ -118,6 +119,8 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
 
         if (event.match(ShareRequested))
             displayShareDialog();
+        else if (event.match(PlayFromHereRequested))
+            Dialogs.specifyChallengeParams(ChallengeParams.playFromPosParams(board.shownSituation));
         else if (event.match(ApplyChangesRequested))
         {
             for (view in plyHistoryViews)

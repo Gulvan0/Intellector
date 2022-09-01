@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import struct.ChallengeParams;
 import haxe.ui.validation.InvalidationFlags;
 import GlobalBroadcaster;
 import haxe.ui.containers.Card;
@@ -215,7 +216,10 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case AddTime:
                 Networker.emitEvent(AddTime);
             case Rematch:
-                Networker.emitEvent(Rematch);
+                //TODO: Rated rematch
+                var opponentLogin:String = playerColor == White? blackLogin : whiteLogin;
+                var params:ChallengeParams = ChallengeParams.rematchParams(opponentLogin, playerColor, timeControl, false, board.startingSituation);
+                Dialogs.specifyChallengeParams(params);
             case Share:
                 var gameLink:String = URLEditor.getGameLink(gameID);
                 var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
@@ -224,6 +228,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 var shareDialog:ShareDialog = new ShareDialog();
                 shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, board.startingSituation, playedMoves);
                 shareDialog.showShareDialog(board);
+            case PlayFromHere:
+                var params:ChallengeParams = ChallengeParams.playFromPosParams(board.shownSituation);
+                Dialogs.specifyChallengeParams(params);
             case Analyze:
                 SceneManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null, null));
             case AcceptDraw:

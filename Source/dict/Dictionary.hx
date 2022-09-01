@@ -250,6 +250,7 @@ class Dictionary
         REMATCH_BTN_TOOLTIP => ["Rematch", "Реванш"],
         EXPLORE_IN_ANALYSIS_BTN_TOOLTIP => ["Explore on analysis board", "На доску анализа"],
         ADD_TIME_BTN_TOOLTIP => ["Add time", "Добавить время"],
+        PLAY_FROM_POS_BTN_TOOLTIP => ["Play from here", "Доиграть отсюда"],
         OFFER_DRAW_BTN_TOOLTIP => ["Offer draw", "Ничья"],
         TAKEBACK_BTN_TOOLTIP => ["Takeback", "Запросить возврат хода"],
         CANCEL_DRAW_BTN_TOOLTIP => ["Cancel draw", "Отменить ничью"],

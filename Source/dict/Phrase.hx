@@ -256,6 +256,7 @@ enum Phrase
     REMATCH_BTN_TOOLTIP;
     ADD_TIME_BTN_TOOLTIP;
     LIVE_SHARE_BTN_TOOLTIP;
+    PLAY_FROM_POS_BTN_TOOLTIP;
 
 
     //Connection management

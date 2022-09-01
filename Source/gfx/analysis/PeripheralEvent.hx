@@ -21,4 +21,5 @@ enum PeripheralEvent
     EditorLaunchRequested;
     ShareRequested;
     ScrollBtnPressed(type:PlyScrollType);
+    PlayFromHereRequested;
 }

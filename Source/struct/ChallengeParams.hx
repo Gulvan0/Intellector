@@ -1,5 +1,6 @@
 package struct;
 
+import struct.PieceColor.opposite;
 import utils.TimeControl;
 import js.Cookie;
 
@@ -56,6 +57,18 @@ class ChallengeParams
     public static function defaultParams():ChallengeParams
     {
         return new ChallengeParams(new TimeControl(600, 0), Public);
+    }
+
+    public static function rematchParams(opponentLogin:String, playerColor:PieceColor, timeControl:TimeControl, rated:Bool, ?startingSituation:Null<Situation>):ChallengeParams
+    {
+        return new ChallengeParams(timeControl, Direct(opponentLogin), LoginManager.getLogin(), opposite(playerColor), startingSituation, rated);
+    }
+
+    public static function playFromPosParams(situiation:Situation):ChallengeParams
+    {
+        var params:ChallengeParams = ChallengeParams.defaultParams();
+        params.customStartingSituation = situiation;
+        return params;
     }
 
     public static function deserialize(s:String):ChallengeParams
