@@ -76,7 +76,7 @@ class ChallengeParams
         return new ChallengeParams(timeControl, type, acceptorColor, customStartingSituation, rated);
     }
 
-    private function serialize():String
+    public function serialize():String
     {
         var typeStr = switch type {
             case Public: "p";

@@ -38,6 +38,16 @@ class TimeControl
         return str;    
     }
 
+    public static function correspondence():TimeControl
+    {
+        return new TimeControl(0, 0);
+    }
+
+    public static function normal(startMins:Float, bonusSecs:Int):TimeControl
+    {
+        return new TimeControl(Math.round(startMins * 60), bonusSecs);
+    }
+
     public var startSecs:Int;
     public var bonusSecs:Int;
 

@@ -2,7 +2,6 @@ package net.shared;
 
 import net.shared.SendChallengeResult;
 
-//TODO: Change the implementation on the server
 enum ServerEvent
 {
     GameStarted(match_id:Int, logPreamble:String); //Sent when a game with one of the players being the user starts. Signals the app to navigate to the game screen. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
@@ -13,18 +12,19 @@ enum ServerEvent
     GameIsOngoing(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetGame: game is in process. Player should either spectate or reconnect based on whether the log contains their login
     GameNotFound; //Answer to GetGame: no such game exists
 
-    SendDirectChallengeResult(result:SendChallengeResult); //Answer to CreateDirectChallenge
-    IncomingDirectChallenge(enemy:String, colour:String, startSecs:Int, bonusSecs:Int); //Invoked on recipient side by CreateDirectChallenge
-    DirectChallengeDeclined(callee:String); //Recipient has declined the challenge
-    DirectChallengeCancelled(callee:String); //Answer to accepting direct challenge: it was cancelled before the recipient answered //! TODO: new event, add logic to both server & client
-    DirectChallengeCallerOffline(caller:String); //Answer to accepting direct challenge: caller went offline before the recipient answered //! TODO: new event, add logic to both server & client
-    DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered //! TODO: new event, add logic to both server & client
+    CreateChallengeResult(result:SendChallengeResult);
+
+    IncomingDirectChallenge(id:Int, enemy:String, colour:String, startSecs:Int, bonusSecs:Int);
+
+    DirectChallengeDeclined(callee:String); //Recipient has declined the challenge. Its 'accepted' counterpart doesn't exist, instead, GameStarted is sent right away
+
+    DirectChallengeCancelled(callee:String); //Answer to accepting direct challenge: it was cancelled before the recipient answered //TODO: Ensure this has lower priority than the following two
+    DirectChallengeCallerOffline(caller:String); //Answer to accepting direct challenge: caller went offline before the recipient answered
+    DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered
     
     OpenChallengeInfo(serializedParams:String); //Answer to GetOpenChallenge when it exists with challenge parameters
     OpenChallengeHostPlaying(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetOpenChallenge: host already started a game
     OpenchallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist
-
-    OneTimeLoginDetails(password:String); //One-time password for a guest mock account
     
     LoginResult(success:Bool); //Answer to Login. Was the login successful
     RegisterResult(success:Bool); //Answer to Register. Was the registration successful

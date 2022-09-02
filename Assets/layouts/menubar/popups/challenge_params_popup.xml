@@ -12,76 +12,61 @@
     <stack id="typeSpecificStack">
         <hbox width="100%">
             <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIRECT_USERNAME_OPTION_NAME)}" verticalAlign="center" width="50%" />
-            <textfield id="usernameTF" width="50%" verticalAlign="center" />
+            <textfield id="usernameTF" width="50%" verticalAlign="center" restrictChars="A-Za-z0-9" />
         </hbox>
-        <vbox width="100%">
-            <hbox width="100%">
-                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY)}" width="50%" verticalAlign="center" />
-                <dropdown id="visibilityDropdown" selectedIndex="0" verticalAlign="center" width="50%">
-                    <data>
-                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY_ALL)}" />
-                        <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY_BY_LINK)}" />
-                    </data>
-                </dropdown>
-            </grid>
-                
-            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_LINK_HEADER)}" />
-            <hbox width="100%">
-                <textfield id="linkTF" text="${browser.URLEditor.getChallengeLink(LoginManager.getLogin())}" width="100%" height="30px" verticalAlign="center" />
-                <button id="copyLinkBtn" width="30px" height="30px" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_TOOLTIP)}" icon="assets/symbols/common/copy.svg" styleName="tool-button" />
-                <button id="copyLinkBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_SUCCESS_TOOLTIP)}" icon="assets/symbols/common/tick.svg" styleName="tool-button" />
-            </hbox>
-
-        </vbox>
+        <hbox width="100%">
+            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY)}" width="50%" verticalAlign="center" />
+            <dropdown id="visibilityDropdown" selectedIndex="0" verticalAlign="center" width="50%">
+                <data>
+                    <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY_ALL)}" />
+                    <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY_BY_LINK)}" />
+                </data>
+            </dropdown>
+        </hbox>
     </stack>
     
     <vbox width="100%">
         <hbox width="100%">
-            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIRECT_USERNAME_OPTION_NAME)}" verticalAlign="center" width="50%" />
+            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_OPTION_NAME)}" verticalAlign="center" width="50%" />
             <hbox width="45%" customStyle="border: 1px solid $normal-border-color;padding: 5px;" verticalAlign="center">
                 <image id="tcIcon" verticalAlign="center" />
                 <label id="tcLabel" verticalAlign="center" />
             </hbox>
-            <button styleName="tool-button" icon="assets/symbols/common/edit.svg" />
+            <button id="editTCBtn" styleName="tool-button" icon="assets/symbols/common/edit.svg" />
         </hbox>
         <vbox id="tcParamsBox" width="100%" hidden="true">
-            <grid width="100%" columns="5">
-                <button id="bulletBtn" text="1+0" />
-                <button id="bulletIncBtn" text="1+1" />
-                <button id="fastBlitzBtn" text="3+0" />
-                <button id="standardBlitzBtn" text="3+2" />
-                <button id="longBlitzBtn" text="5+0" />
-                <button id="rapidBtn" text="10+0" />
-                <button id="rapidIncBtn" text="10+5" />
-                <button id="longRapidBtn" text="15+10" />
-                <button id="halfhourBtn" text="30+0" />
-                <button id="hourBtn" text="60+0" />
-            </grid>
-            <hbox width="100%">
-                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_START_OPTION_NAME)}" verticalAlign="center" width="50%" />
-                <hbox width="50%">
-                    <textfield id="startMinsTF" width="50%" verticalAlign="center" />
-                    <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_MINS_APPENDIX)}" verticalAlign="bottom" />
-                    <textfield id="startSecsTF" width="50%" verticalAlign="center" /> 
+            <vbox id="tcValuesBox" width="100%">
+                <grid width="100%" columns="5">
+                    <button id="bulletBtn" text="1+0" />
+                    <button id="bulletIncBtn" text="1+1" />
+                    <button id="fastBlitzBtn" text="3+0" />
+                    <button id="standardBlitzBtn" text="3+2" />
+                    <button id="longBlitzBtn" text="5+0" />
+                    <button id="rapidBtn" text="10+0" />
+                    <button id="rapidIncBtn" text="10+5" />
+                    <button id="longRapidBtn" text="15+10" />
+                    <button id="halfhourBtn" text="30+0" />
+                    <button id="hourBtn" text="60+0" />
+                </grid>
+                <hbox width="100%">
+                    <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_START_OPTION_NAME)}" verticalAlign="center" width="50%" />
+                    <hbox width="50%">
+                        <textfield id="startMinsTF" width="50%" verticalAlign="center" restrictChars="0-9" />
+                        <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_MINS_APPENDIX)}" verticalAlign="bottom" />
+                        <textfield id="startSecsTF" width="50%" verticalAlign="center" restrictChars="0-9" /> 
+                        <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_SECS_APPENDIX)}" verticalAlign="bottom" />
+                    </hbox> 
+                </hbox>
+                <hbox width="100%">
+                    <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_INCREMENT_OPTION_NAME)}" verticalAlign="center" />
+                    <textfield id="bonusSecsTF" width="100%" verticalAlign="center" restrictChars="0-9" /> 
                     <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_SECS_APPENDIX)}" verticalAlign="bottom" />
-                </hbox> 
-            </hbox>
-            <hbox width="100%">
-                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_INCREMENT_OPTION_NAME)}" verticalAlign="center" />
-                <textfield id="bonusSecsTF" width="100%" verticalAlign="center" /> 
-                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_SECS_APPENDIX)}" verticalAlign="bottom" />
-            </hbox>
+                </hbox>
+            </vbox>
             <checkbox id="correspondenceCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_CORRESPONDENCE_CHECK_NAME)}" selected="false" />
             <button id="applyTcParamsBtn" text="OK" horizontalAlign="center" />
         </vbox>
         <checkbox id="rankedCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_RANKED_CHECK_NAME)}" selected="false" />
-        <vbox id="rankedParamsBox" width="100%" hidden="true">
-            <checkbox id="anyEloCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_RATED_ANY_ELO_CHECK_NAME)}" selected="true" />
-            <hbox id="maxEloDiffBox" width="100%" disabled="true">
-                <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_RATED_MAXDIFF_OPTION_NAME)}" verticalAlign="center" width="70%" />
-                <textfield id="maxEloDiffTF" width="30%" verticalAlign="center" text="0" /> 
-            </hbox>
-        </vbox>
         <vbox id="unrankedParamsBox" width="100%">
             <hbox width="100%">
                 <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_COLOR_OPTION_NAME)}" verticalAlign="center" width="50%" />
@@ -111,6 +96,6 @@
                 <label id="customStartposTurnColorLabel" horizontalAlign="center" />
             </vbox>
         </vbox>
-        <button id="confirmBtn" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIRECT_CONFIRM_BTN_TEXT)}" horizontalAlign="center" />
+        <button id="confirmBtn" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_CONFIRM_BTN_TEXT)}" horizontalAlign="center" />
     </vbox>
 </dialog>

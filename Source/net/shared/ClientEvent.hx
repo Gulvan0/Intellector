@@ -5,17 +5,15 @@ enum ClientEvent
     Login(login:String, password:String);
     Register(login:String, password:String);
     LogOut;
-    CreateDirectChallenge(calleeLogin:String, secsStart:Int, secsBonus:Int, color:Null<String>); 
-    AcceptDirectChallenge(callerLogin:String); 
-    DeclineDirectChallenge(callerLogin:String); 
-    CancelDirectChallenge(calleeLogin:String); 
+    CreateChallenge(serializedParams:String);
+    CancelChallenge(challengeID:Int);
+    AcceptOpenChallenge(challengeID:Int, guestLogin:Null<String>, guestPassword:Null<String>); 
+    AcceptDirectChallenge(challengeID:Int); 
+    DeclineDirectChallenge(challengeID:Int);
     Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<String>); 
     RequestTimeoutCheck; 
     Message(text:String); 
     GetOpenChallenge(hostLogin:String); 
-    CreateOpenChallenge(secsStart:Int, secsBonus:Int, color:Null<String>); 
-    AcceptOpenChallenge(callerLogin:String, guestLogin:Null<String>, guestPassword:Null<String>); 
-    CancelOpenChallenge; 
     FollowPlayer(login:String); //TODO: Ensure this also includes an effect of StopSpectating
     StopSpectating; //Used both to stop spectating a game AND to stop following a player
     Resign; 

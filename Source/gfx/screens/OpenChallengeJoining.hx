@@ -20,29 +20,29 @@ import utils.AssetManager;
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/simple_screens/join_challenge.xml'))
 class OpenChallengeJoining extends Screen
 {
-	private final challengeOwner:String;
+	private final challengeID:Int;
 	
 	@:bind(acceptBtn, MouseEvent.CLICK)
 	private function onAccepted(e)
 	{
 		if (LoginManager.isLogged())
-			Networker.emitEvent(AcceptOpenChallenge(challengeOwner, null, null));
+			Networker.emitEvent(AcceptOpenChallenge(challengeID, null, null));
 		else
 		{
 			LoginManager.generateOneTimeCredentials();
-			Networker.emitEvent(AcceptOpenChallenge(challengeOwner, LoginManager.getLogin(), LoginManager.getPassword()));
+			Networker.emitEvent(AcceptOpenChallenge(challengeID, LoginManager.getLogin(), LoginManager.getPassword()));
 		}
 	}
 
-    public function new(params:ChallengeParams)
+    public function new(id:Int, params:ChallengeParams)
     {
 		super();
-		this.challengeOwner = params.ownerLogin;
+		this.challengeID = id;
 
 		var timeControlString:String = params.timeControl.toString();
 		var timeControlType:TimeControlType = params.timeControl.getType();
 
-		challengeByLabel.text = Dictionary.getPhrase(OPENJOIN_CHALLENGE_BY_HEADER, [challengeOwner]);
+		challengeByLabel.text = Dictionary.getPhrase(OPENJOIN_CHALLENGE_BY_HEADER, [params.ownerLogin]);
 
 		tcIcon.resource = AssetManager.timeControlPath(timeControlType);
 		tcLabel.text = timeControlString;
@@ -53,8 +53,8 @@ class OpenChallengeJoining extends Screen
 
 		colorIcon.resource = AssetManager.challengeColorPath(params.acceptorColor);
 		colorIcon.tooltip = switch params.acceptorColor {
-			case White: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [challengeOwner]);
-			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [challengeOwner]);
+			case White: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [params.ownerLogin]);
+			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [params.ownerLogin]);
 			case null: Dictionary.getPhrase(OPENJOIN_COLOR_RANDOM);
 		};
 

@@ -86,6 +86,18 @@ class Situation
         return result;
     }
 
+    public function isValidStarting():Bool
+    {
+        var whiteIntPos = intellectorPos.get(White);
+        var blackIntPos = intellectorPos.get(Black);
+
+        for (color => pos in intellectorPos.keyValueIterator())
+            if (pos == null || pos.isFinalForColor(color))
+                return false;
+
+        return true;
+    }
+
     public function makeMove(ply:Ply, inPlace:Bool = false):Situation 
     {
         var next:Situation = inPlace? this : this.copy();
@@ -278,7 +290,7 @@ class Situation
         return s;
     }
 
-    public static function fromSIP(sip:String):Situation 
+    public static function fromSIP(sip:String):Null<Situation>
     {
         return SituationSerializer.deserialize(sip);
     }

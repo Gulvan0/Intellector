@@ -91,10 +91,10 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         //TODO: Fill
     }
 
-    private function displayIncomingChallengeDialog(caller:String)
+    private function displayIncomingChallengeDialog(id:Int, caller:String)
     {
-        var onConfirmed = Networker.emitEvent.bind(AcceptDirectChallenge(caller));
-        var onDeclined = Networker.emitEvent.bind(DeclineDirectChallenge(caller));
+        var onConfirmed = Networker.emitEvent.bind(AcceptDirectChallenge(id));
+        var onDeclined = Networker.emitEvent.bind(DeclineDirectChallenge(id));
 
         Assets.getSound("sounds/social.mp3").play();
         Dialogs.confirm(INCOMING_CHALLENGE_TEXT, INCOMING_CHALLENGE_TITLE, onConfirmed, onDeclined); //TODO: Rewrite (make more specific)
@@ -108,12 +108,12 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 setIngameStatus(true); //TODO: Also drop challenge from/to the opponent from the challenge list
             case GameEnded(_, _):
                 setIngameStatus(false);
-            case IncomingDirectChallenge(param1, param2, param3, param4): //TODO: change
+            case IncomingDirectChallenge(param0, param1, param2, param3, param4): //TODO: change
                 if (isPlayerInGame || Preferences.silentChallenges.get())
                     appendIncomingChallenge(null); //TODO: change
                 else
-                    displayIncomingChallengeDialog(null); //TODO: change
-            case SendDirectChallengeResult(result):
+                    displayIncomingChallengeDialog(null, null); //TODO: change
+            case CreateChallengeResult(result):
                 //TODO: Display dialog + maybe play sounds/challenge_sent.mp3
             case DirectChallengeDeclined(callee):
                 //TODO: Drop from list

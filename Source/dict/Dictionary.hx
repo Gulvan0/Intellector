@@ -213,6 +213,42 @@ class Dictionary
 
         INPUT_PLAYER_LOGIN => ["Input player's username", "Введите ник игрока"],
 
+        CHALLENGE_PARAMS_DIALOG_TITLE => ["Challenge Parameters", "Параметры Вызова"],
+    
+        CHALLENGE_PARAMS_TYPE_OPTION_NAME => ["Type", "Тип"],
+        CHALLENGE_PARAMS_TYPE_DIRECT => ["Direct", "Прямой"],
+        CHALLENGE_PARAMS_TYPE_OPEN => ["Open", "Открытый"],
+    
+        CHALLENGE_PARAMS_DIRECT_USERNAME_OPTION_NAME => ["Username", "Ник"],
+    
+        CHALLENGE_PARAMS_OPEN_VISIBILITY => ["Visibility", "Видимость"],
+        CHALLENGE_PARAMS_OPEN_VISIBILITY_ALL => ["Public", "Публичный"],
+        CHALLENGE_PARAMS_OPEN_VISIBILITY_BY_LINK => ["Link only", "Только по ссылке"],
+        CHALLENGE_PARAMS_OPEN_LINK_HEADER => ["Link", "Ссылка"],
+        
+        CHALLENGE_PARAMS_TIME_CONTROL_OPTION_NAME => ["Time Control", "Контроль времени"],
+        CHALLENGE_PARAMS_TIME_CONTROL_START_OPTION_NAME => ["Initial Time", "На партию"],
+        CHALLENGE_PARAMS_TIME_CONTROL_INCREMENT_OPTION_NAME => ["Bonus per Turn", "Бонус за ход"],
+        CHALLENGE_PARAMS_TIME_CONTROL_MINS_APPENDIX => ["m", "м"],
+        CHALLENGE_PARAMS_TIME_CONTROL_SECS_APPENDIX => ["s", "с"],
+        CHALLENGE_PARAMS_TIME_CONTROL_CORRESPONDENCE_CHECK_NAME => ["No control", "Без контроля"],
+    
+        CHALLENGE_PARAMS_RANKED_CHECK_NAME => ["Rated", "На рейтинг"],
+        CHALLENGE_PARAMS_RATED_ANY_ELO_CHECK_NAME => ["Any opponent", "Любой противник"],
+        CHALLENGE_PARAMS_RATED_MAXDIFF_OPTION_NAME => ["Max ELO difference", "Макс. разница ELO"],
+    
+        CHALLENGE_PARAMS_COLOR_OPTION_NAME => ["I Play", "Я играю"],
+        CHALLENGE_PARAMS_COLOR_RANDOM => ["Random color", "Случ. цветом"],
+        CHALLENGE_PARAMS_COLOR_WHITE => ["White", "Белыми"],
+        CHALLENGE_PARAMS_COLOR_BLACK => ["Black", "Черными"],
+    
+        CHALLENGE_PARAMS_STARTPOS_OPTION_NAME => ["Starting Position", "Фатум"],
+        CHALLENGE_PARAMS_STARTPOS_DEFAULT => ["Default", "Стандартная"],
+        CHALLENGE_PARAMS_STARTPOS_CUSTOM => ["Custom", "Особая"],
+        CHALLENGE_PARAMS_STARTPOS_SIP_OPTION_NAME => ["SIP", "SIP"],
+    
+        CHALLENGE_PARAMS_CONFIRM_BTN_TEXT => ["Create Challenge", "Создать вызов"],
+
         REQUESTS_ERROR_DIALOG_TITLE => ["Error", "Ошибка"],
         REQUESTS_ERROR_CHALLENGE_NOT_FOUND => ["Challenge not found", "Вызов не найден"],
         REQUESTS_ERROR_PLAYER_NOT_FOUND => ["Player not found", "Игрок не найден"],
