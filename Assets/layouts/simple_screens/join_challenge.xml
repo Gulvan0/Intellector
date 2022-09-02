@@ -1,20 +1,22 @@
 <component width="100%" height="100%">
     <vbox width="100%" height="100%">
-        <vbox horizontalAlign="center">
-            <label id="challengeByLabel" horizontalAlign="center" />
-            <spacer id="firstSpacer" />
+        <card id="challengeCard" layoutName="vertical" horizontalAlign="center">
+            <label id="challengeByLabel" horizontalAlign="center" style="font-name: 'fonts/Futura.ttf';"/>
             <hbox id="descriptionHBox">
                 <box id="tcIconBox" verticalAlign="center">
                     <image id="tcIcon" verticalAlign="center" horizontalAlign="center" />
                 </box>
                 <vbox verticalAlign="center">
-                    <label id="tcLabel" />
-                    <label id="bracketLabel" />
-                    <label id="colorLabel" />
+                    <label id="tcLabel" style="font-style:italic"/>
+                    <label id="bracketLabel" style="font-style:italic" />
+                    <hbox id="paramsBox">
+                        <label id="paramsLabel" style="font-style:italic" text="${Dictionary.getPhrase(OPENJOIN_ESSENTIAL_PARAMS_LABEL_TEXT)}" verticalAlign="center" />
+                        <image id="colorIcon" style="background-color:yellow;background-opacity:0" verticalAlign="center" />
+                        <image id="customStartPosIcon" style="background-color:yellow;background-opacity:0" verticalAlign="center" resource="assets/symbols/main_menu/challenge_modes/custom.svg" />
+                    </hbox>
                 </vbox>
             </hbox>
-            <spacer id="secondSpacer" />
-            <button id="acceptBtn" text="${Dictionary.getPhrase(OPENJOIN_ACCEPT_BTN_TEXT)}" horizontalAlign="center"/>
-        </vbox>
+            <button id="acceptBtn" text="${Dictionary.getPhrase(OPENJOIN_ACCEPT_BTN_TEXT)}" horizontalAlign="center" style="font-style:bold"/>
+        </card>
     </vbox>
 </component>

@@ -1,5 +1,6 @@
 package net;
 
+import struct.ChallengeParams;
 import dict.Dictionary;
 import gfx.Dialogs;
 import gfx.SceneManager;
@@ -48,10 +49,9 @@ class Requests
     {
         switch event
         {
-            case OpenChallengeInfo(hostLogin, secsStart, secsBonus, colorStr):
-                var timeControl:TimeControl = new TimeControl(secsStart, secsBonus);
-                var color:Null<PieceColor> = colorStr != null? PieceColor.createByName(colorStr) : null;
-                SceneManager.toScreen(ChallengeJoining(hostLogin, timeControl, color));
+            case OpenChallengeInfo(paramsStr):
+                var params:ChallengeParams = ChallengeParams.deserialize(paramsStr);
+                SceneManager.toScreen(ChallengeJoining(params));
             case OpenChallengeHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, ownerLogin)));

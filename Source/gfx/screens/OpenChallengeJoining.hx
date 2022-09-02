@@ -1,5 +1,8 @@
 package gfx.screens;
 
+import haxe.ui.tooltips.ToolTipManager;
+import gfx.common.SituationTooltipRenderer;
+import struct.ChallengeParams;
 import gfx.Dialogs;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
@@ -31,33 +34,53 @@ class OpenChallengeJoining extends Screen
 		}
 	}
 
-    public function new(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>, rated:Bool = false)
+    public function new(params:ChallengeParams)
     {
 		super();
-		this.challengeOwner = challengeOwner;
+		this.challengeOwner = params.ownerLogin;
+
+		var timeControlString:String = params.timeControl.toString();
+		var timeControlType:TimeControlType = params.timeControl.getType();
 
 		challengeByLabel.text = Dictionary.getPhrase(OPENJOIN_CHALLENGE_BY_HEADER, [challengeOwner]);
-		tcIcon.resource = AssetManager.timeControlPath(timeControl.getType());
-		tcLabel.text = timeControl.toString();
-		if (timeControl.getType() != Correspondence)
-			tcLabel.text += ' (${timeControl.getType().getName()})';
-		bracketLabel.text = Dictionary.getPhrase(rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
-		colorLabel.text = switch color {
-			case White: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [challengeOwner]);
-			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [challengeOwner]);
+
+		tcIcon.resource = AssetManager.timeControlPath(timeControlType);
+		tcLabel.text = timeControlString;
+		if (timeControlType != Correspondence)
+			tcLabel.text += ' (${timeControlType.getName()})';
+
+		bracketLabel.text = Dictionary.getPhrase(params.rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
+
+		colorIcon.resource = AssetManager.challengeColorPath(params.acceptorColor);
+		colorIcon.tooltip = switch params.acceptorColor {
+			case White: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [challengeOwner]);
+			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [challengeOwner]);
 			case null: Dictionary.getPhrase(OPENJOIN_COLOR_RANDOM);
 		};
 
+        if (params.customStartingSituation != null)
+        {
+            customStartPosIcon.hidden = false;
+            var renderer:SituationTooltipRenderer = new SituationTooltipRenderer(params.customStartingSituation);
+            ToolTipManager.instance.registerTooltip(customStartPosIcon, {
+                renderer: renderer
+            });
+        }
+        else
+            customStartPosIcon.hidden = true;
+
 		responsiveComponents = [
-			challengeByLabel => [StyleProp(FontSize) => VMIN(8)],
-			firstSpacer => [Height => VMIN(5)],
+			challengeByLabel => [StyleProp(FontSize) => VMIN(6)],
+			challengeCard => [StyleProp(VerticalSpacing) => VMIN(1.75)],
 			descriptionHBox => [StyleProp(HorizontalSpacing) => VMIN(2)],
 			tcIconBox => [Width => VMIN(16), Height => VMIN(16)],
-			tcLabel => [StyleProp(FontSize) => VMIN(5)],
-			bracketLabel => [StyleProp(FontSize) => VMIN(5)],
-			colorLabel => [StyleProp(FontSize) => VMIN(5)],
-			secondSpacer => [Height => VMIN(3.5)],
-			acceptBtn => [StyleProp(FontSize) => VMIN(6)]
+			tcLabel => [StyleProp(FontSize) => VMIN(4)],
+			bracketLabel => [StyleProp(FontSize) => VMIN(4)],
+			paramsBox => [StyleProp(HorizontalSpacing) => VMIN(1.5)],
+			paramsLabel => [StyleProp(FontSize) => VMIN(4)],
+			colorIcon => [Width => VMIN(4), Height => VMIN(4)],
+			customStartPosIcon => [Width => VMIN(4), Height => VMIN(4)],
+			acceptBtn => [StyleProp(FontSize) => VMIN(4.5)]
 		];
 		fittedComponents = [tcIcon];
     }

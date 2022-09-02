@@ -20,7 +20,7 @@ enum ServerEvent
     DirectChallengeCallerOffline(caller:String); //Answer to accepting direct challenge: caller went offline before the recipient answered //! TODO: new event, add logic to both server & client
     DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered //! TODO: new event, add logic to both server & client
     
-    OpenChallengeInfo(hostLogin:String, secsStart:Int, secsBonus:Int, color:Null<String>); //Answer to GetOpenChallenge when it exists with challenge details
+    OpenChallengeInfo(serializedParams:String); //Answer to GetOpenChallenge when it exists with challenge parameters
     OpenChallengeHostPlaying(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetOpenChallenge: host already started a game
     OpenchallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist
 

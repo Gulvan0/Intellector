@@ -78,8 +78,8 @@ class Utils
                 translations = getLiveGameScreenTitle(gameID, constructor);
             case PlayerProfile(ownerLogin): 
                 translations = [ownerLogin, ownerLogin];
-            case ChallengeJoining(challengeOwner, _, _):
-                translations = ['Challenge by $challengeOwner', 'Вызов $challengeOwner'];
+            case ChallengeJoining(params):
+                translations = ['Challenge by ${params.ownerLogin}', 'Вызов ${params.ownerLogin}'];
             default:
         }
 

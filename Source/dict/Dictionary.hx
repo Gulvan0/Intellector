@@ -68,6 +68,7 @@ class Dictionary
         OPENJOIN_RATED => ["Rated", "Рейтинговая"],
         OPENJOIN_UNRATED => ["Unrated", "Товарищеская"],
         OPENJOIN_ACCEPT_BTN_TEXT => ["Accept Challenge", "Принять вызов"],
+        OPENJOIN_ESSENTIAL_PARAMS_LABEL_TEXT => ["Features:", "Особенности:"],
 
         MENUBAR_PLAY_MENU_TITLE => ["Play", "Играть"],
         MENUBAR_PLAY_MENU_CREATE_GAME_ITEM => ["Create Game", "Создать игру"],

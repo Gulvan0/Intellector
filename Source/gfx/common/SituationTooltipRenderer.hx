@@ -1,5 +1,6 @@
 package gfx.common;
 
+import haxe.ui.styles.Style;
 import struct.PieceColor;
 import gfx.basic_components.BoardWrapper;
 import dict.Dictionary;
@@ -14,13 +15,17 @@ class SituationTooltipRenderer extends ItemRenderer
 
     private function onWidthChanged()
     {
-        turnColorLabel.customStyle = {fontSize: width / 10.5};
+        var newStyle:Style = turnColorLabel.customStyle.clone();
+        newStyle.fontSize = width / 10.5;
+        turnColorLabel.customStyle = newStyle;
     }
 
     public function setSituation(sit:Situation)
     {
         board.setShownSituation(sit);
         turnColorLabel.text = Dictionary.getPhrase(TURN_COLOR(sit.turnColor));
+        turnColorLabel.invalidateComponent();
+        turnColorLabel.validateNow();
     }
 
     public function setOrientation(orientationColor:PieceColor)
@@ -37,9 +42,6 @@ class SituationTooltipRenderer extends ItemRenderer
     {
         super();
 
-        if (situation != null)
-            situation = Situation.starting();
-
         board = new Board(situation, orientationColor, 40, None);
 
         var boardWrapper:BoardWrapper = new BoardWrapper(board);
@@ -48,5 +50,10 @@ class SituationTooltipRenderer extends ItemRenderer
         
         boardContainer.addComponent(boardWrapper);
         onWidthChanged();
+
+        if (situation == null)
+            setSituation(Situation.starting());
+        else
+            setSituation(situation);
     }
 }

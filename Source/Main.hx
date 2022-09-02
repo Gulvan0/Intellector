@@ -1,5 +1,7 @@
 package;
 
+import struct.Situation;
+import struct.ChallengeParams;
 import serialization.GameLogParser;
 import utils.Changelog;
 import gfx.screens.OpenChallengeJoining;
@@ -103,7 +105,7 @@ class Main extends Sprite
 		//Networker.launch();
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
-		SceneManager.toScreen(LiveGame(1337, Ongoing(GameLogParser.parse("#P|gulvan:kazvixx;
+		/*SceneManager.toScreen(LiveGame(1337, Ongoing(GameLogParser.parse("#P|gulvan:kazvixx;
 		#D|1659990040;
 		#T|600/0;
 		#S|bfrmrnrprqrriseteuivowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr;
@@ -120,7 +122,8 @@ class Main extends Sprite
 		3334/400000;
 		4635/450000;
 		6162/350000;
-		2634/420000;"), 420, 325, Date.now().getTime(), "kazvixx")));
+		2634/420000;"), 420, 325, Date.now().getTime(), "kazvixx")));*/
+		SceneManager.toScreen(ChallengeJoining(ChallengeParams.playFromPosParams(Situation.randomPlay(3))));
 	}
 
 	private function onConnectionFailed(e)

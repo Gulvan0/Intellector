@@ -1,5 +1,6 @@
 package gfx;
 
+import struct.ChallengeParams;
 import struct.Variant.VariantPath;
 import gfx.game.LiveGameConstructor;
 import struct.PieceColor;
@@ -12,5 +13,5 @@ enum ScreenType
     LanguageSelectIntro(languageReadyCallback:Void->Void);
     LiveGame(gameID:Int, constructor:LiveGameConstructor);
     PlayerProfile(ownerLogin:String);
-    ChallengeJoining(challengeOwner:String, timeControl:TimeControl, color:Null<PieceColor>);
+    ChallengeJoining(params:ChallengeParams);
 }
