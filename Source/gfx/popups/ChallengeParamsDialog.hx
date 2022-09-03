@@ -1,5 +1,7 @@
 package gfx.popups;
 
+import gfx.basic_components.BoardWrapper;
+import gameboard.Board;
 import utils.MathUtils;
 import haxe.ui.events.UIEvent;
 import utils.AssetManager;
@@ -18,11 +20,54 @@ class ChallengeParamsDialog extends Dialog
     private static inline final MAX_BONUS_SECS_ALLOWED:Int = 120;
 
     private var approvedTimeControl:TimeControl;
+    private var approvedStartPos:Situation;
+
+    private var startPosBoard:Board;
+
+    @:bind(typeStepper, UIEvent.CHANGE)
+    private function onTypeChanged(e)
+    {
+        typeSpecificStack.selectedIndex = typeStepper.selectedIndex;
+    }
+
+    @:bind(rankedCheck, UIEvent.CHANGE)
+    private function onBracketChanged(e)
+    {
+        unrankedParamsBox.hidden = rankedCheck.selected;
+    }
+
+    @:bind(startposDropdown, UIEvent.CHANGE)
+    private function onStartPosTypeChanged(e)
+    {
+        customStartposBox.hidden = startposDropdown.selectedIndex == 0;
+    }
+
+    @:bind(applySIPBtn, MouseEvent.CLICK)
+    private function onSIPApplied(e)
+    {
+        var deserializedSituation:Null<Situation> = Situation.fromSIP(sipTF.text);
+
+        if (deserializedSituation == null)
+            Dialogs.alert(CHALLENGE_PARAMS_INVALID_SIP_WARNING_TEXT, CHALLENGE_PARAMS_INVALID_SIP_WARNING_TITLE);
+        else if (!deserializedSituation.isValidStarting())
+            Dialogs.alert(CHALLENGE_PARAMS_INVALID_STARTPOS_WARNING_TEXT, CHALLENGE_PARAMS_INVALID_STARTPOS_WARNING_TITLE);
+        else
+        {
+            approvedStartPos = deserializedSituation;
+            startPosBoard.setShownSituation(approvedStartPos);
+            customStartposTurnColorLabel.text = Dictionary.getPhrase(TURN_COLOR(approvedStartPos.turnColor));
+        }
+    }
+
+    //TODO: Common time controls btn bindings and init
 
     @:bind(editTCBtn, MouseEvent.CLICK)
-    private function editTimeControl(e)
+    private function toggleTimeControlEditor(e)
     {
-        tcParamsBox.hidden = false;
+        if (tcParamsBox.hidden)
+            tcParamsBox.hidden = false;
+        else
+            restoreTimeControlInputValues();
     }
 
     @:bind(correspondenceCheck, UIEvent.CHANGE)
@@ -78,6 +123,7 @@ class ChallengeParamsDialog extends Dialog
         startMinsTF.text = "" + Math.floor(approvedTimeControl.startSecs / 60);
         startSecsTF.text = "" + approvedTimeControl.startSecs % 60;
         bonusSecsTF.text = "" + approvedTimeControl.bonusSecs;
+        tcParamsBox.hidden = true;
     }
 
     @:bind(confirmBtn, MouseEvent.CLICK)
@@ -99,13 +145,8 @@ class ChallengeParamsDialog extends Dialog
             else if (colorDropdown.selectedIndex == 2)
                 acceptorColor = White;
 
-            if (startposDropdown.selectedIndex == 1)
-            {
-                var deserializedSituation:Null<Situation> = Situation.fromSIP(sipTF.text);
-
-                if (deserializedSituation != null && !deserializedSituation.isDefaultStarting() && deserializedSituation.isValidStarting())
-                    customStartingSituation = deserializedSituation;
-            }
+            if (startposDropdown.selectedIndex == 1 && !approvedStartPos.isDefaultStarting())
+                customStartingSituation = approvedStartPos;
                 
         }
 
@@ -118,6 +159,61 @@ class ChallengeParamsDialog extends Dialog
     {
         super();
 
-        //TODO: Fill init and add more bindings
+        var timeControlType:TimeControlType = initialParams.timeControl.getType();
+        var isCorrespondence:Bool = timeControlType == Correspondence;
+
+        approvedTimeControl = initialParams.timeControl;
+
+        var hasCustomStartPos:Bool = initialParams.customStartingSituation != null && !approvedStartPos.isDefaultStarting() && approvedStartPos.isValidStarting();
+
+        if (hasCustomStartPos)
+            approvedStartPos = initialParams.customStartingSituation; 
+        else
+            approvedStartPos = Situation.starting();
+
+        startPosBoard = new Board(approvedStartPos, White, 40, None);
+
+        var boardWrapper:BoardWrapper = new BoardWrapper(startPosBoard);
+        boardWrapper.percentHeight = 100;
+        boardWrapper.maxPercentWidth = 100;
+
+        customStartposBoardContainer.addComponent(boardWrapper);
+
+        customStartposTurnColorLabel.text = Dictionary.getPhrase(TURN_COLOR(approvedStartPos.turnColor));
+        sipTF.text = approvedStartPos.serialize();
+        customStartposBox.hidden = !hasCustomStartPos;
+        startposDropdown.selectedIndex = hasCustomStartPos? 1 : 0;
+
+        colorDropdown.selectedIndex = switch initialParams.acceptorColor {
+            case null: 0;
+            case White: 2;
+            case Black: 1;
+        }
+
+        unrankedParamsBox.hidden = initialParams.rated;
+        rankedCheck.selected = initialParams.rated;
+
+        correspondenceCheck.selected = isCorrespondence;
+        tcValuesBox.disabled = isCorrespondence;
+        restoreTimeControlInputValues();
+
+        tcIcon.resource = AssetManager.timeControlPath(timeControlType);
+        tcLabel.text = approvedTimeControl.toString();
+
+        switch initialParams.type 
+        {
+            case Public:
+                typeSpecificStack.selectedIndex = 1;
+                typeStepper.selectedIndex = 1;
+                visibilityDropdown.selectedIndex = 0;
+            case ByLink:
+                typeSpecificStack.selectedIndex = 1;
+                typeStepper.selectedIndex = 1;
+                visibilityDropdown.selectedIndex = 1;
+            case Direct(calleeLogin):
+                typeSpecificStack.selectedIndex = 0;
+                typeStepper.selectedIndex = 0;
+                usernameTF.text = calleeLogin;
+        }
     }
 }

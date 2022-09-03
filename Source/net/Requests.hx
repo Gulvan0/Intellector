@@ -49,9 +49,9 @@ class Requests
     {
         switch event
         {
-            case OpenChallengeInfo(paramsStr):
+            case OpenChallengeInfo(id, paramsStr):
                 var params:ChallengeParams = ChallengeParams.deserialize(paramsStr);
-                SceneManager.toScreen(ChallengeJoining(params));
+                SceneManager.toScreen(ChallengeJoining(id, params));
             case OpenChallengeHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, ownerLogin)));

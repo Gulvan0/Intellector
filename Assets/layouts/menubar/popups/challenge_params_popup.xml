@@ -1,4 +1,4 @@
-<dialog title="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIALOG_TITLE)}">
+<dialog width="500px" title="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIALOG_TITLE)}">
     <hbox width="100%">
         <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TYPE_OPTION_NAME)}" verticalAlign="center" width="50%" />
         <option-stepper id="typeStepper" width="50%" verticalAlign="center">
@@ -9,7 +9,7 @@
         </option-stepper>
     </hbox>
 
-    <stack id="typeSpecificStack">
+    <stack width="100%" id="typeSpecificStack">
         <hbox width="100%">
             <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_DIRECT_USERNAME_OPTION_NAME)}" verticalAlign="center" width="50%" />
             <textfield id="usernameTF" width="50%" verticalAlign="center" restrictChars="A-Za-z0-9" />
@@ -25,14 +25,17 @@
         </hbox>
     </stack>
     
+    <spacer height="10px" />
+    
     <vbox width="100%">
-        <hbox width="100%">
-            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_OPTION_NAME)}" verticalAlign="center" width="50%" />
-            <hbox width="45%" customStyle="border: 1px solid $normal-border-color;padding: 5px;" verticalAlign="center">
-                <image id="tcIcon" verticalAlign="center" />
-                <label id="tcLabel" verticalAlign="center" />
+        <hbox width="100%" height="25px">
+            <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_OPTION_NAME)}" verticalAlign="center" width="50%" height="100%" />
+            <hbox width="50%" height="100%" style="border: 1px solid $normal-border-color;padding: 5px;" verticalAlign="center">
+                <arp-image id="tcIcon" height="100%" verticalAlign="center" />
+                <label id="tcLabel" height="100%" verticalAlign="center" />
+                <spacer width="100%" />
+                <arp-image id="editTCBtn" height="100%" style="background-color:yellow;background-opacity:0" resource="assets/symbols/common/edit.svg" />
             </hbox>
-            <button id="editTCBtn" styleName="tool-button" icon="assets/symbols/common/edit.svg" />
         </hbox>
         <vbox id="tcParamsBox" width="100%" hidden="true">
             <vbox id="tcValuesBox" width="100%">
@@ -66,7 +69,10 @@
             <checkbox id="correspondenceCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TIME_CONTROL_CORRESPONDENCE_CHECK_NAME)}" selected="false" />
             <button id="applyTcParamsBtn" text="OK" horizontalAlign="center" />
         </vbox>
-        <checkbox id="rankedCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_RANKED_CHECK_NAME)}" selected="false" />
+
+        <spacer height="10px" />
+
+        <checkbox id="rankedCheck" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_RANKED_CHECK_NAME)}" selected="false" horizontalAlign="center" />
         <vbox id="unrankedParamsBox" width="100%">
             <hbox width="100%">
                 <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_COLOR_OPTION_NAME)}" verticalAlign="center" width="50%" />
@@ -91,11 +97,15 @@
                 <hbox width="100%">
                     <label text="${Dictionary.getPhrase(CHALLENGE_PARAMS_STARTPOS_SIP_OPTION_NAME)}" verticalAlign="center" />
                     <textfield id="sipTF" width="100%" verticalAlign="center" />
+                    <button id="applySIPBtn" text="OK" />
                 </hbox>
                 <box id="customStartposBoardContainer" width="100%" horizontalAlign="center" />
                 <label id="customStartposTurnColorLabel" horizontalAlign="center" />
             </vbox>
         </vbox>
+
+        <spacer height="10px" />
+
         <button id="confirmBtn" text="${Dictionary.getPhrase(CHALLENGE_PARAMS_CONFIRM_BTN_TEXT)}" horizontalAlign="center" />
     </vbox>
 </dialog>

@@ -25,7 +25,7 @@ class Dictionary
         ANALYSIS_DISCARD_CHANGES_BTN_TEXT => ["Discard changes", "Отклонить изменения"],
         ANALYSIS_INPUT_SIP_PROMPT_TEXT => ["Input SIP", "Введите SIP"],
         ANALYSIS_INVALID_SIP_WARNING_TITLE => ["Warning: Invalid SIP", "Ошибка: Недопустимый SIP"],
-        ANALYSIS_INVALID_SIP_WARNING_TEXT => ["The SIP specified is invalid", "Введенная вами строка не является допустимым SIP"],
+        ANALYSIS_INVALID_SIP_WARNING_TEXT => ["The specified SIP is invalid", "Введенная вами строка не является допустимым SIP"],
         ANALYSIS_BRANCHING_HELP_LINK_TEXT => ["Branching Help", "Справка по дереву вариантов"],
         ANALYSIS_BRANCHING_HELP_DIALOG_TITLE => ["Branching Help", "Справка (дерево вариантов)"],
         ANALYSIS_BRANCHING_HELP_DIALOG_TEXT => ["<p><u><b>General</b></u></p><br><p><em>Use branching tab to navigate between different variations of the study. You can change the mode in settings.</em></p><br><p><b>LMB (Click):</b> Switch to branch</p><br><p><b>CTRL + LMB (Click):</b> Remove branch</p><br><p><b>Mouse wheel:</b> Scroll vertically</p><br><p><b>SHIFT + Mouse wheel:</b> Scroll horizontally</p><br><p>Alternatively, <b>Click &amp; Hold LMB</b> while moving the mouse to drag</p><br><p><u><b>Tree Mode</b></u></p><br><p><b>CTRL + Mouse wheel:</b> Zoom in / out</p>", ""],
@@ -238,16 +238,21 @@ class Dictionary
         CHALLENGE_PARAMS_RATED_MAXDIFF_OPTION_NAME => ["Max ELO difference", "Макс. разница ELO"],
     
         CHALLENGE_PARAMS_COLOR_OPTION_NAME => ["I Play", "Я играю"],
-        CHALLENGE_PARAMS_COLOR_RANDOM => ["Random color", "Случ. цветом"],
+        CHALLENGE_PARAMS_COLOR_RANDOM => ["Random color", "Случайным цветом"],
         CHALLENGE_PARAMS_COLOR_WHITE => ["White", "Белыми"],
         CHALLENGE_PARAMS_COLOR_BLACK => ["Black", "Черными"],
     
-        CHALLENGE_PARAMS_STARTPOS_OPTION_NAME => ["Starting Position", "Фатум"],
+        CHALLENGE_PARAMS_STARTPOS_OPTION_NAME => ["Starting Position", "Начальная позиция"],
         CHALLENGE_PARAMS_STARTPOS_DEFAULT => ["Default", "Стандартная"],
         CHALLENGE_PARAMS_STARTPOS_CUSTOM => ["Custom", "Особая"],
         CHALLENGE_PARAMS_STARTPOS_SIP_OPTION_NAME => ["SIP", "SIP"],
     
         CHALLENGE_PARAMS_CONFIRM_BTN_TEXT => ["Create Challenge", "Создать вызов"],
+
+        CHALLENGE_PARAMS_INVALID_SIP_WARNING_TITLE => ["Warning: Invalid SIP", "Ошибка: Недопустимый SIP"],
+        CHALLENGE_PARAMS_INVALID_SIP_WARNING_TEXT => ["The specified SIP is invalid", "Введенная вами строка не является допустимым SIP"],
+        CHALLENGE_PARAMS_INVALID_STARTPOS_WARNING_TITLE => ["Warning: Invalid position", "Ошибка: Недопустимая позиция"],
+        CHALLENGE_PARAMS_INVALID_STARTPOS_WARNING_TEXT => ["Custom starting position should contain one Intellector of each color. Additionally, none of them may be placed on the final rank", "Стартовая позиция должна содержать по одному Интеллектору каждого цвета, при этом ни один из Интов не может находиться на последней горизонтали"],
 
         REQUESTS_ERROR_DIALOG_TITLE => ["Error", "Ошибка"],
         REQUESTS_ERROR_CHALLENGE_NOT_FOUND => ["Challenge not found", "Вызов не найден"],

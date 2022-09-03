@@ -123,7 +123,7 @@ class Main extends Sprite
 		4635/450000;
 		6162/350000;
 		2634/420000;"), 420, 325, Date.now().getTime(), "kazvixx")));*/
-		SceneManager.toScreen(ChallengeJoining(ChallengeParams.playFromPosParams(Situation.randomPlay(3))));
+		SceneManager.toScreen(ChallengeJoining(123, ChallengeParams.playFromPosParams(Situation.randomPlay(3))));
 	}
 
 	private function onConnectionFailed(e)

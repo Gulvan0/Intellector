@@ -13,5 +13,5 @@ enum ScreenType
     LanguageSelectIntro(languageReadyCallback:Void->Void);
     LiveGame(gameID:Int, constructor:LiveGameConstructor);
     PlayerProfile(ownerLogin:String);
-    ChallengeJoining(params:ChallengeParams);
+    ChallengeJoining(id:Int, params:ChallengeParams);
 }

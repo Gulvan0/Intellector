@@ -163,7 +163,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onCreateChallengePressed(e)
     {
-        if (LoginManager.isLogged())
+        if (!LoginManager.isLogged())
             Dialogs.login(displayChallengeParamsDialog);
         else
             displayChallengeParamsDialog();
