@@ -63,7 +63,7 @@
         <spacer width="100%" />
 
         <menu id="challengesButton" icon="assets/symbols/upper_menu/challenges/button_icon/none.svg">
-            <scrollview id="challengeList" width="100%" height="170px" contentLayoutName="vertical" contentWidth="100%" />
+            <challenge-list id="challengeList" width="100%" height="170px" />
         </menu>
 
         <menu id="accountMenu">

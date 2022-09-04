@@ -4,7 +4,7 @@ import Preferences.PreferenceName;
 
 enum GlobalEvent
 {
-    LoggedIn;
+    LoggedIn(incomingChallenges:Array<{id:Int, serializedParams:String}>);
     LoggedOut;
     PreferenceUpdated(name:PreferenceName);
 }

@@ -1,5 +1,6 @@
 package utils;
 
+import gfx.menubar.ChallengesIconMode;
 import haxe.CallStack;
 import openfl.display.Sprite;
 import gfx.basic_components.SpriteWrapper;
@@ -63,6 +64,18 @@ class AssetManager
         };
 
         return 'assets/symbols/main_menu/challenge_modes/$filename.svg';
+    }
+
+    public static inline function challengesMenuIconPath(mode:ChallengesIconMode):String
+    {
+        var filename = switch mode 
+        {
+            case Empty: 'none';
+            case HasIncoming: 'in';
+            case HasOutgoing: 'out';
+            case HasBoth: 'both';
+        }
+        return 'assets/symbols/upper_menu/challenges/button_icon/$filename.svg';
     }
 
     public static function playPlySound(ply:Ply, situation:Situation)

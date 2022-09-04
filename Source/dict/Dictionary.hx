@@ -84,6 +84,14 @@ class Dictionary
         MENUBAR_SOCIAL_MENU_TITLE => ["Social", "Сообщество"],
         MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM => ["Player Profile", "Профиль игрока"],
 
+        MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE => ["Incoming Challenge", "Входящий вызов"],
+        MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE => ["Outgoing Challenge", "Исходящий вызов"],
+        MENUBAR_CHALLENGES_FROM_LINE_TEXT => ["From: $0", "От: $0"],
+        MENUBAR_CHALLENGES_TO_LINE_TEXT => ["To: $0", "Кому: $0"],
+        MENUBAR_CHALLENGES_ACCEPT_BUTTON_TEXT => ["Accept", "Принять"],
+        MENUBAR_CHALLENGES_DECLINE_BUTTON_TEXT => ["Decline", "Отклонить"],
+        MENUBAR_CHALLENGES_CANCEL_BUTTON_TEXT => ["Cancel challenge", "Отменить вызов"],
+
         MENUBAR_ACCOUNT_MENU_LOGIN_ITEM => ["Log In", "Войти"],
         MENUBAR_ACCOUNT_MENU_MY_PROFILE_ITEM => ["My Profile", "Мой профиль"],
         MENUBAR_ACCOUNT_MENU_SETTINGS_ITEM => ["Settings", "Настройки"],
@@ -213,6 +221,21 @@ class Dictionary
 
         INPUT_PLAYER_LOGIN => ["Input player's username", "Введите ник игрока"],
 
+        INCOMING_CHALLENGE_DIALOG_TITLE => ["Incoming Challenge", "Входящий вызов"],
+        INCOMING_CHALLENGE_CHALLENGE_BY_LABEL_TEXT => ["$0 challenges you to play a game!", "$0 вызывает вас на игру!"],
+        INCOMING_CHALLENGE_ACCEPT_BTN_TEXT => ["Accept", "Принять"],
+        INCOMING_CHALLENGE_DECLINE_BTN_TEXT => ["Decline", "Отклонить"],
+
+        INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE => ["Challenge Acceptance Error", "Ошибка принятия вызова"],
+        INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_OFFLINE => ["Failed to accept challenge: $0 is offline", "Не удалось принять вызов: $0 не в сети"],
+        INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_INGAME => ["Failed to accept challenge: $0 has already started another game", "Не удалось принять вызов: $0 уже участвует в другой партии"],
+        INCOMING_CHALLENGE_ACCEPT_ERROR_CHALLENGE_CANCELLED => ["Failed to accept challenge: $0 cancelled the challenge", "Не удалось принять вызов: $0 отменил вызов"],
+
+        SEND_CHALLENGE_ERROR_DIALOG_TITLE => ["Challenge Creation Error", "Ошибка создания вызова"],
+        SEND_CHALLENGE_ERROR_TO_ONESELF => ["Failed to create challenge: cannot send challenge to oneself", "Не удалось создать вызов: вызов не может быть адресован самому себе"],
+        SEND_CHALLENGE_ERROR_NOT_FOUND => ["Failed to create challenge: player not found", "Не удалось создать вызов: игрок не найден"],
+        SEND_CHALLENGE_ERROR_ALREADY_EXISTS => ["Failed to create challenge: you have already sent another challenge to this player. To create a new challenge, you should cancel the previous one first.", "Не удалось создать вызов: вызов, адресованный данному игроку уже существует. Для создания нового вызова, сперва отмените предыдущий."],
+
         CHALLENGE_PARAMS_DIALOG_TITLE => ["Challenge Parameters", "Параметры Вызова"],
     
         CHALLENGE_PARAMS_TYPE_OPTION_NAME => ["Type", "Тип"],
@@ -271,8 +294,6 @@ class Dictionary
         PROMOTION_DIALOG_TITLE => ["Promotion selection", "Превращение"],
         CHAMELEON_DIALOG_QUESTION => ["Morph into an eaten piece?", "Превратиться в съеденную фигуру?"],
         CHAMELEON_DIALOG_TITLE => ["Chameleon confirmation", "Хамелеон"],
-        INCOMING_CHALLENGE_TITLE => ["Incoming challenge", "Входящий вызов"],
-        INCOMING_CHALLENGE_TEXT => ["$0 wants to play with you ($1). Accept the challenge?", "$0 хочет с вами сыграть ($1). Принять вызов?"],
         /*
         ACCEPT_CHALLENGE => ["Accept challenge", "Принять вызов"],
         SEND_CHALLENGE_RESULT_SUCCESS => ["Challenge sent to ", "Вызов отправлен игроку "],

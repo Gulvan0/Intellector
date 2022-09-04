@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.popups.IncomingChallengeDialog;
 import gfx.popups.ChangelogDialog;
 import gfx.popups.ChallengeParamsDialog;
 import struct.ChallengeParams;
@@ -264,6 +265,12 @@ class Dialogs
             initialParams = ChallengeParams.loadFromCookies();
         var dialog:ChallengeParamsDialog = new ChallengeParamsDialog(initialParams, dontCacheParams);
         addDialog(dialog, true, dialog.onClose, true);
+    }
+
+    public static function incomingChallenge(id:Int, params:ChallengeParams)
+    {
+        var dialog:IncomingChallengeDialog = new IncomingChallengeDialog(id, params);
+        addDialog(dialog, true, null, false);
     }
 
     private static function onBtnAdded(btn:Button, type:PieceType, color:PieceColor, iconSize:Float, e) 

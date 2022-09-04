@@ -1,5 +1,8 @@
 package gfx;
 
+import utils.AssetManager;
+import haxe.ui.components.Image;
+import net.shared.SendChallengeResult;
 import openfl.Assets;
 import struct.ChallengeParams;
 import haxe.ui.containers.SideBar;
@@ -81,48 +84,58 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logOutBtn.disabled = ingame;
     }
 
-    private function appendIncomingChallenge(params:ChallengeParams)
+    private function onIncomingChallenge(id:Int, params:ChallengeParams)
     {
-        //TODO: Fill
+        if (isPlayerInGame || Preferences.silentChallenges.get())
+            challengeList.appendEntry(id, params);
+        else
+        {
+            Dialogs.incomingChallenge(id, params);
+            Assets.getSound("sounds/social.mp3").play();
+        }
     }
 
-    private function appendOutgoingChallenge(params:ChallengeParams)
+    private function onSendChallengeResultReceived(result:SendChallengeResult)
     {
-        //TODO: Fill
+        switch result 
+        {
+            case Success(challengeID, serializedParams):
+                challengeList.appendEntry(challengeID, ChallengeParams.deserialize(serializedParams));
+                Assets.getSound("sounds/challenge_sent.mp3").play();
+            case ToOneself:
+                Dialogs.info(SEND_CHALLENGE_ERROR_TO_ONESELF, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+            case PlayerNotFound:
+                Dialogs.info(SEND_CHALLENGE_ERROR_NOT_FOUND, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+            case AlreadyExists:
+                Dialogs.info(SEND_CHALLENGE_ERROR_ALREADY_EXISTS, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+        }
     }
 
-    private function displayIncomingChallengeDialog(id:Int, caller:String)
-    {
-        var onConfirmed = Networker.emitEvent.bind(AcceptDirectChallenge(id));
-        var onDeclined = Networker.emitEvent.bind(DeclineDirectChallenge(id));
-
-        Assets.getSound("sounds/social.mp3").play();
-        Dialogs.confirm(INCOMING_CHALLENGE_TEXT, INCOMING_CHALLENGE_TITLE, onConfirmed, onDeclined); //TODO: Rewrite (make more specific)
-    }
+    
 
     public function handleNetEvent(event:ServerEvent)
     {
         switch event
         {
-            case GameStarted(_, _):
-                setIngameStatus(true); //TODO: Also drop challenge from/to the opponent from the challenge list
+            case GameStarted(_, logPreamble):
+                setIngameStatus(true);
+                var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
+                var opponentLogin:String = parsedData.getPlayerOpponentLogin();
+                challengeList.removeEntriesByPlayer(opponentLogin);
             case GameEnded(_, _):
                 setIngameStatus(false);
-            case IncomingDirectChallenge(param0, param1, param2, param3, param4): //TODO: change
-                if (isPlayerInGame || Preferences.silentChallenges.get())
-                    appendIncomingChallenge(null); //TODO: change
-                else
-                    displayIncomingChallengeDialog(null, null); //TODO: change
+            case IncomingDirectChallenge(id, serializedParams):
+                onIncomingChallenge(id, ChallengeParams.deserialize(serializedParams));
             case CreateChallengeResult(result):
-                //TODO: Display dialog + maybe play sounds/challenge_sent.mp3
-            case DirectChallengeDeclined(callee):
-                //TODO: Drop from list
-            case DirectChallengeCancelled(callee):
-                //TODO: Drop from list
+                onSendChallengeResultReceived(result);
+            case DirectChallengeDeclined(id):
+                challengeList.removeEntryByID(id);
+            case DirectChallengeCancelled(caller):
+                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CHALLENGE_CANCELLED, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [caller]);
             case DirectChallengeCallerOffline(caller):
-                //TODO: Display dialog
+                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_OFFLINE, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [caller]);
             case DirectChallengeCallerInGame(caller):
-                //TODO: Display dialog
+                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_INGAME, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [caller]);
             default:
         }
     }
@@ -131,8 +144,13 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     {
         switch event 
         {
-            case LoggedIn, LoggedOut:
+            case LoggedIn(incomingChallenges):
                 refreshAccountElements();
+                for (info in incomingChallenges)
+                    challengeList.appendEntry(info.id, ChallengeParams.deserialize(info.serializedParams));
+            case LoggedOut:
+                refreshAccountElements();
+                challengeList.clearEntries();
             default:
         }
     }
@@ -242,7 +260,6 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logInBtn.hidden = logged;
         myProfileBtn.hidden = !logged;
         logOutBtn.hidden = !logged;
-        //TODO: Clear or populate challenge list
     }
 
     public function new()
@@ -250,8 +267,9 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         super();
 
         refreshAccountElements();
-
-        //TODO: Challenges
+        challengeList.onModeChanged = mode -> {
+            challengesButton.findComponent(Image).resource = AssetManager.challengesMenuIconPath(mode);
+        };
         
         sidemenu = new SideMenu();
         siteName.onClick = onSiteNamePressed;

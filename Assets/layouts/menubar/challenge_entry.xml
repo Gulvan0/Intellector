@@ -11,6 +11,10 @@
                 font-color: #333333;
                 font-bold: true;
             }
+            .params-row-icon {
+                background-color: yellow;
+                background-opacity: 0;
+            }
         </style>
         <arp-image id="incomingIcon" height="95%" verticalAlign="center" />
         <vbox width="100%" height="100%">
@@ -20,15 +24,15 @@
                 <copyable-text id="linkText" />
             </stack>
             <hbox height="25%" horizontalAlign="center">
-                <arp-image id="timeControlIcon" height="100%" />
+                <arp-image id="timeControlIcon" height="100%" styleName="params-row-icon" />
                 <label id="paramsLabel" height="100%" />
-                <arp-image id="colorIcon" height="100%" />
-                <arp-image id="customStartPosIcon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" height="100%" />
+                <arp-image id="colorIcon" height="100%" styleName="params-row-icon" />
+                <arp-image id="customStartPosIcon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" height="100%" styleName="params-row-icon" />
             </hbox>
             <hbox height="25%" horizontalAlign="center">
-                <button id="acceptBtn" verticalAlign="center" height="100%" text="" />
-                <button id="declineBtn" verticalAlign="center" height="100%" text="" />
-                <button id="cancelBtn" verticalAlign="center" height="100%" text="" />
+                <button id="acceptBtn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_ACCEPT_BUTTON_TEXT)}" />
+                <button id="declineBtn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_DECLINE_BUTTON_TEXT)}" />
+                <button id="cancelBtn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_CANCEL_BUTTON_TEXT)}" />
             </hbox>
         </vbox>
         

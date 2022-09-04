@@ -21,9 +21,9 @@ class URLEditor
         Browser.document.title = fullTitle;
     }
 
-    public static function getChallengeLink(login:String):String
+    public static function getChallengeLink(id:Int):String
     {
-        return Browser.location.host + ingameToUrlPath('join/$login');
+        return Browser.location.host + ingameToUrlPath('join/$id');
     }
 
     public static function getGameLink(id:Int):String

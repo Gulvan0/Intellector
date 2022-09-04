@@ -17,6 +17,8 @@
         <component class="gfx.main.PastGamesList" alias="pastgameslist" />
         <component class="gfx.basic_components.ARPImage" alias="arpimage" />
         <component class="gfx.basic_components.CopyableText" alias="copyabletext" />
+        <component class="gfx.menubar.ChallengeEntryRenderer" alias="challengeentryrenderer" />
+        <component class="gfx.menubar.ChallengeList" alias="challengelist" />
     </components>
     <themes>
         <global>

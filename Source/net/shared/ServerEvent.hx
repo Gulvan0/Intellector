@@ -1,5 +1,6 @@
 package net.shared;
 
+import net.shared.SignInResult;
 import net.shared.SendChallengeResult;
 
 enum ServerEvent
@@ -14,11 +15,11 @@ enum ServerEvent
 
     CreateChallengeResult(result:SendChallengeResult);
 
-    IncomingDirectChallenge(id:Int, enemy:String, colour:String, startSecs:Int, bonusSecs:Int);
+    IncomingDirectChallenge(id:Int, serializedParams:String);
 
-    DirectChallengeDeclined(callee:String); //Recipient has declined the challenge. Its 'accepted' counterpart doesn't exist, instead, GameStarted is sent right away
+    DirectChallengeDeclined(id:Int); //Recipient has declined the challenge. Its 'accepted' counterpart doesn't exist, instead, GameStarted is sent right away
 
-    DirectChallengeCancelled(callee:String); //Answer to accepting direct challenge: it was cancelled before the recipient answered //TODO: Ensure this has lower priority than the following two
+    DirectChallengeCancelled(caller:String); //Answer to accepting direct challenge: it was cancelled before the recipient answered //TODO: Ensure this has lower priority than the following two
     DirectChallengeCallerOffline(caller:String); //Answer to accepting direct challenge: caller went offline before the recipient answered
     DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered
     
@@ -26,8 +27,8 @@ enum ServerEvent
     OpenChallengeHostPlaying(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetOpenChallenge: host already started a game
     OpenchallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist
     
-    LoginResult(success:Bool); //Answer to Login. Was the login successful
-    RegisterResult(success:Bool); //Answer to Register. Was the registration successful
+    LoginResult(result:SignInResult); //Answer to Login
+    RegisterResult(result:SignInResult); //Answer to Register
     ReconnectionNeeded(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished live game
 
     Message(author:String, message:String); //New in-game player message

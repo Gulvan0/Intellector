@@ -1,5 +1,6 @@
 package;
 
+import net.shared.SignInResult;
 import net.shared.ServerEvent;
 import haxe.crypto.Md5;
 import browser.CredentialCookies;
@@ -60,24 +61,28 @@ class LoginManager
     {
         switch event
         {
-            case LoginResult(success), RegisterResult(success):
-                if (success)
-                {
-                    LoginManager.login = login;
-                    LoginManager.password = password;
-                    if (remember != null)
-                        CredentialCookies.saveLoginDetails(login, password, !remember);
-                    GlobalBroadcaster.broadcast(LoggedIn);
-                    onSuccess();
-                }
-                else
-                {
-                    CredentialCookies.removeLoginDetails();
-                    onFail();
-                }
+            case LoginResult(result), RegisterResult(result):
+                processSignInResult(login, password, remember, onSuccess, onFail, result);
                 return true;
             default:
                 return false;
+        }
+    }
+
+    private static function processSignInResult(login:String, password:String, remember:Null<Bool>, onSuccess:Void->Void, onFail:Void->Void, result:SignInResult)
+    {
+        switch result 
+        {
+            case Success(incomingChallenges):
+                LoginManager.login = login;
+                LoginManager.password = password;
+                if (remember != null)
+                    CredentialCookies.saveLoginDetails(login, password, !remember);
+                GlobalBroadcaster.broadcast(LoggedIn(incomingChallenges));
+                onSuccess();
+            case Fail:
+                CredentialCookies.removeLoginDetails();
+                onFail();
         }
     }
 
