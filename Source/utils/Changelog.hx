@@ -9,6 +9,12 @@ private class Entry
     public final date:String;
     public final descMap:Map<Language, String>;
 
+    public function getLength():Int
+    {
+        //+2 for the separating dot and space
+        return date.length + 2 + descMap[Preferences.language.get()].length;
+    }
+
     public function format():String
     {
         return '<b>$date.</b> ${descMap[Preferences.language.get()]}';
@@ -35,6 +41,11 @@ class Changelog
                 entry.descMap.set(language, Reflect.field(rawEntry, language.getName()));
             changelog.push(entry);
         }
+    }
+
+    public static function getFirstLength():Int
+    {
+        return changelog[0].getLength();
     }
 
     public static function getFirst():String

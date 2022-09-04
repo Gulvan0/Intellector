@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import haxe.ui.styles.Style;
 import gfx.ResponsiveToolbox;
 import gfx.Dialogs;
 import haxe.ui.events.MouseEvent;
@@ -12,6 +13,14 @@ class MainMenu extends Screen
 {
     @:bind(createGameBtn, MouseEvent.CLICK)
     private function onCreateGamePressed(?e)
+    {
+        if (!LoginManager.isLogged())
+            Dialogs.login(displayChallengeParamsDialog);
+        else
+            displayChallengeParamsDialog();
+    }
+
+    private function displayChallengeParamsDialog()
     {
         Dialogs.specifyChallengeParams();
     }
@@ -26,6 +35,10 @@ class MainMenu extends Screen
     {
         var compact:Bool = HaxeUIScreen.instance.actualWidth / HaxeUIScreen.instance.actualHeight < 1.2;
         var wasCompact:Bool = tablesBox.percentWidth == 100;
+
+        var newStyle:Style = changelogLabel.customStyle.clone();
+        newStyle.fontSize = Math.min(1.8 * HaxeUIScreen.instance.actualWidth / Changelog.getFirstLength(), 26);
+        changelogLabel.customStyle = newStyle;
 
         contentHBox.percentWidth = compact? 100 : 90;
         tablesBox.percentWidth = compact? 100 : 50;

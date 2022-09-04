@@ -1,0 +1,5 @@
+<dialog title="${Dictionary.getPhrase(CHANGELOG_DIALOG_TITLE)}" width="1000px" height="450px">
+    <scrollview width="100%" height="100%">
+        <label id="changesLabel" htmlText="${Changelog.getAll()}" />
+    </scrollview>
+</dialog>

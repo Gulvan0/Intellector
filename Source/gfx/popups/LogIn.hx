@@ -5,7 +5,7 @@ import gfx.Dialogs;
 import dict.Dictionary;
 import haxe.ui.containers.dialogs.Dialog;
 
-@:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/menubar/popups/login_popup.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/popups/login_popup.xml"))
 class LogIn extends Dialog 
 {
     public function new() 

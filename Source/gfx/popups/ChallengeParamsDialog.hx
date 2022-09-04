@@ -1,5 +1,9 @@
 package gfx.popups;
 
+import haxe.ui.locale.LocaleManager;
+import haxe.ui.components.Image;
+import haxe.Timer;
+import haxe.ui.components.Button;
 import gfx.basic_components.BoardWrapper;
 import gameboard.Board;
 import utils.MathUtils;
@@ -12,8 +16,9 @@ import haxe.ui.events.MouseEvent;
 import struct.ChallengeParams;
 import haxe.ui.containers.dialogs.Dialog;
 import dict.Dictionary;
+import haxe.ui.core.Screen as HaxeUIScreen;
 
-@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/menubar/popups/challenge_params_popup.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/popups/challenge_params_popup.xml'))
 class ChallengeParamsDialog extends Dialog
 {
     private static inline final MAX_START_SECS_ALLOWED:Int = 60 * 60 * 6;
@@ -22,29 +27,76 @@ class ChallengeParamsDialog extends Dialog
     private var approvedTimeControl:TimeControl;
     private var approvedStartPos:Situation;
 
+    private var dontCacheParams:Bool;
+
     private var startPosBoard:Board;
+
+    private function resize()
+    {
+        width = Math.min(500, 0.95 * HaxeUIScreen.instance.actualWidth);
+
+        var compact:Bool = width < 500;
+
+        recommendedTCsGrid.columns = compact? 4 : 5;
+
+        fastBlitzBtn.hidden = compact;
+        rapidIncBtn.hidden = compact;
+
+        bulletBtn.percentWidth = 100 / recommendedTCsGrid.columns;
+        bulletIncBtn.percentWidth = 100 / recommendedTCsGrid.columns;
+        standardBlitzBtn.percentWidth = 100 / recommendedTCsGrid.columns;
+        longBlitzBtn.percentWidth = 100 / recommendedTCsGrid.columns;
+        rapidBtn.percentWidth = 100 / recommendedTCsGrid.columns;
+        longRapidBtn.percentWidth = 100 / recommendedTCsGrid.columns;
+        halfhourBtn.percentWidth = 100 / recommendedTCsGrid.columns;
+        hourBtn.percentWidth = 100 / recommendedTCsGrid.columns;
+
+        if (compact)
+        {
+            for (btn in [bulletBtn, bulletIncBtn, standardBlitzBtn, longBlitzBtn])
+                btn.customStyle = {paddingLeft: 3, paddingRight: 3};
+            for (btn in [rapidBtn, longRapidBtn, halfhourBtn, hourBtn])
+                btn.customStyle = {paddingLeft: 2, paddingRight: 2};
+        }
+        else
+            for (btn in [rapidBtn, rapidIncBtn, longRapidBtn, halfhourBtn, hourBtn])
+                btn.customStyle = {paddingLeft: 3, paddingRight: 3};
+    }
+
+    public function onClose(?e)
+    {
+        SceneManager.removeResizeHandler(resize);
+    }
 
     @:bind(typeStepper, UIEvent.CHANGE)
     private function onTypeChanged(e)
     {
         typeSpecificStack.selectedIndex = typeStepper.selectedIndex;
+        Dialogs.updatePosition(this);
     }
 
     @:bind(rankedCheck, UIEvent.CHANGE)
     private function onBracketChanged(e)
     {
-        unrankedParamsBox.hidden = rankedCheck.selected;
+        if (rankedCheck.selected)
+            unrankedParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
+        else
+            unrankedParamsBox.fadeIn(Dialogs.updatePosition.bind(this));
     }
 
     @:bind(startposDropdown, UIEvent.CHANGE)
     private function onStartPosTypeChanged(e)
     {
-        customStartposBox.hidden = startposDropdown.selectedIndex == 0;
+        if (startposDropdown.selectedIndex == 0)
+            customStartposBox.fadeOut(Dialogs.updatePosition.bind(this));
+        else
+            customStartposBox.fadeIn(Dialogs.updatePosition.bind(this));
     }
 
     @:bind(applySIPBtn, MouseEvent.CLICK)
     private function onSIPApplied(e)
     {
+        trace(LocaleManager.instance.language);
         var deserializedSituation:Null<Situation> = Situation.fromSIP(sipTF.text);
 
         if (deserializedSituation == null)
@@ -59,15 +111,16 @@ class ChallengeParamsDialog extends Dialog
         }
     }
 
-    //TODO: Common time controls btn bindings and init
-
     @:bind(editTCBtn, MouseEvent.CLICK)
     private function toggleTimeControlEditor(e)
     {
         if (tcParamsBox.hidden)
-            tcParamsBox.hidden = false;
+            tcParamsBox.fadeIn(Dialogs.updatePosition.bind(this));
         else
+        {
             restoreTimeControlInputValues();
+            tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
+        }
     }
 
     @:bind(correspondenceCheck, UIEvent.CHANGE)
@@ -86,6 +139,7 @@ class ChallengeParamsDialog extends Dialog
             if (startMinsTF.text == "" && startSecsTF.text == "")
             {
                 restoreTimeControlInputValues();
+                tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
                 return;
             }
             else if (startMinsTF.text == "")
@@ -103,6 +157,7 @@ class ChallengeParamsDialog extends Dialog
             if (startMins == null || startSecs == null || bonusSecs == null || startMins < 0 || startSecs < 0 || bonusSecs < 0 || startMins + startSecs == 0)
             {
                 restoreTimeControlInputValues();
+                tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
                 return;
             }
 
@@ -115,15 +170,15 @@ class ChallengeParamsDialog extends Dialog
         tcIcon.resource = AssetManager.timeControlPath(approvedTimeControl.getType());
         tcLabel.text = approvedTimeControl.toString();
 
-        tcParamsBox.hidden = true;
+        tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
     }
 
-    private function restoreTimeControlInputValues()
+    private function restoreTimeControlInputValues(?customTimeControl:TimeControl)
     {
-        startMinsTF.text = "" + Math.floor(approvedTimeControl.startSecs / 60);
-        startSecsTF.text = "" + approvedTimeControl.startSecs % 60;
-        bonusSecsTF.text = "" + approvedTimeControl.bonusSecs;
-        tcParamsBox.hidden = true;
+        var timeControl:TimeControl = customTimeControl == null? approvedTimeControl : customTimeControl;
+        startMinsTF.text = "" + Math.floor(timeControl.startSecs / 60);
+        startSecsTF.text = "" + timeControl.startSecs % 60;
+        bonusSecsTF.text = "" + timeControl.bonusSecs;
     }
 
     @:bind(confirmBtn, MouseEvent.CLICK)
@@ -151,20 +206,52 @@ class ChallengeParamsDialog extends Dialog
         }
 
         var params:ChallengeParams = new ChallengeParams(timeControl, challengeType, ownerLogin, acceptorColor, customStartingSituation, rated);
-        params.saveToCookies();
+        if (!dontCacheParams)
+            params.saveToCookies();
         Networker.emitEvent(CreateChallenge(params.serialize()));
+        hideDialog(DialogButton.OK);
     }
 
-    public function new(initialParams:ChallengeParams)
+    public function new(initialParams:ChallengeParams, ?dontCacheParams:Bool = false)
     {
         super();
+        this.dontCacheParams = dontCacheParams;
+
+        var commonTimeControls:Map<Button, TimeControl> = [
+            bulletBtn => TimeControl.normal(1, 0),
+            bulletIncBtn => TimeControl.normal(1, 1),
+            fastBlitzBtn => TimeControl.normal(3, 0),
+            standardBlitzBtn => TimeControl.normal(3, 2),
+            longBlitzBtn => TimeControl.normal(5, 0),
+            rapidBtn => TimeControl.normal(10, 0),
+            rapidIncBtn => TimeControl.normal(10, 5),
+            longRapidBtn => TimeControl.normal(15, 10),
+            halfhourBtn => TimeControl.normal(30, 0),
+            hourBtn => TimeControl.normal(60, 0)
+        ];
+
+        for (btn => tc in commonTimeControls)
+        {
+            btn.text = tc.toString();
+            btn.icon = AssetManager.timeControlPath(tc.getType());
+            btn.onClick = e -> {
+                tcValuesBox.disabled = false;
+                correspondenceCheck.selected = false;
+                restoreTimeControlInputValues(tc);
+            };
+            Timer.delay(() -> {
+                var icon:Image = btn.findComponent(Image);
+                icon.height = 18;
+                icon.width = icon.originalWidth * icon.height / icon.originalHeight;
+            }, 40);
+        }
 
         var timeControlType:TimeControlType = initialParams.timeControl.getType();
         var isCorrespondence:Bool = timeControlType == Correspondence;
 
         approvedTimeControl = initialParams.timeControl;
 
-        var hasCustomStartPos:Bool = initialParams.customStartingSituation != null && !approvedStartPos.isDefaultStarting() && approvedStartPos.isValidStarting();
+        var hasCustomStartPos:Bool = initialParams.customStartingSituation != null && !initialParams.customStartingSituation.isDefaultStarting() && initialParams.customStartingSituation.isValidStarting();
 
         if (hasCustomStartPos)
             approvedStartPos = initialParams.customStartingSituation; 
@@ -174,8 +261,7 @@ class ChallengeParamsDialog extends Dialog
         startPosBoard = new Board(approvedStartPos, White, 40, None);
 
         var boardWrapper:BoardWrapper = new BoardWrapper(startPosBoard);
-        boardWrapper.percentHeight = 100;
-        boardWrapper.maxPercentWidth = 100;
+        boardWrapper.percentWidth = 100;
 
         customStartposBoardContainer.addComponent(boardWrapper);
 
@@ -215,5 +301,8 @@ class ChallengeParamsDialog extends Dialog
                 typeStepper.selectedIndex = 0;
                 usernameTF.text = calleeLogin;
         }
+
+        SceneManager.addResizeHandler(resize);
+        resize();
     }
 }

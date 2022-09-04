@@ -219,7 +219,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 //TODO: Rated rematch
                 var opponentLogin:String = playerColor == White? blackLogin : whiteLogin;
                 var params:ChallengeParams = ChallengeParams.rematchParams(opponentLogin, playerColor, timeControl, false, board.startingSituation);
-                Dialogs.specifyChallengeParams(params);
+                Dialogs.specifyChallengeParams(params, true);
             case Share:
                 var gameLink:String = URLEditor.getGameLink(gameID);
                 var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
@@ -230,7 +230,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 shareDialog.showShareDialog(board);
             case PlayFromHere:
                 var params:ChallengeParams = ChallengeParams.playFromPosParams(board.shownSituation);
-                Dialogs.specifyChallengeParams(params);
+                Dialogs.specifyChallengeParams(params, true);
             case Analyze:
                 SceneManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null, null));
             case AcceptDraw:

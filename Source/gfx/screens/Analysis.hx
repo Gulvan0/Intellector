@@ -120,7 +120,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
         if (event.match(ShareRequested))
             displayShareDialog();
         else if (event.match(PlayFromHereRequested))
-            Dialogs.specifyChallengeParams(ChallengeParams.playFromPosParams(board.shownSituation));
+            Dialogs.specifyChallengeParams(ChallengeParams.playFromPosParams(board.shownSituation), true);
         else if (event.match(ApplyChangesRequested))
         {
             for (view in plyHistoryViews)

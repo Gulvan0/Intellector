@@ -61,7 +61,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             if (btn.text != challengesButton.text)
                 ResponsiveToolbox.resizeComponent(btn, [StyleProp(FontSize) => VH(2), Height => VH(4)]);
             else
-                ResponsiveToolbox.resizeComponent(btn, [Height => VH(4)]);
+                ResponsiveToolbox.resizeComponent(btn, [Height => VH(4), IconWidth => VH(3), IconHeight => VH(3)]);
         }
     }
 

@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.popups.ChangelogDialog;
 import gfx.popups.ChallengeParamsDialog;
 import struct.ChallengeParams;
 import haxe.ui.containers.Box;
@@ -50,7 +51,14 @@ class Dialogs
     {
         dialog.x = (Screen.instance.actualWidth - dialog.width) / 2;
         dialog.y = (Screen.instance.actualHeight - dialog.height) / 2;
-        trace(Screen.instance.actualWidth, Screen.instance.actualHeight, dialog.width, dialog.height, dialog.x, dialog.y);
+    }
+
+    public static function updatePosition(dialog:Dialog)
+    {
+        Timer.delay(() -> {
+            if (dialog != null)
+                correctDialogPosition(dialog);
+        }, 60);
     }
 
     public static function onScreenResized() 
@@ -192,22 +200,8 @@ class Dialogs
 
     public static function changelog()
     {
-        var changesLabel:Label = new Label();
-        changesLabel.htmlText = Changelog.getAll();
-        changesLabel.customStyle = {fontSize: MathUtils.clamp(0.025 * Screen.instance.actualHeight, 12, 36)};
-
-        var changesSV:ScrollView = new ScrollView();
-        changesSV.width = Math.min(1000, 0.9 * Screen.instance.actualWidth);
-        changesSV.height = Math.min(450, 0.7 * Screen.instance.actualHeight);
-        changesSV.horizontalAlign = 'center';
-        changesSV.verticalAlign = 'center';
-        changesSV.addComponent(changesLabel);
-
-        var dialog:Dialog = new Dialog();
-        dialog.title = Dictionary.getPhrase(CHANGELOG_DIALOG_TITLE);
-        dialog.addComponent(changesSV);
-
-        addDialog(dialog, true, null, false);
+        var dialog:ChangelogDialog = new ChangelogDialog();
+        addDialog(dialog, true, dialog.onClose, false);
     }
 
     public static function settings()
@@ -264,12 +258,12 @@ class Dialogs
         });
     }
 
-    public static function specifyChallengeParams(?initialParams:ChallengeParams)
+    public static function specifyChallengeParams(?initialParams:ChallengeParams, ?dontCacheParams:Bool = false)
     {
         if (initialParams == null)
             initialParams = ChallengeParams.loadFromCookies();
-        var dialog:ChallengeParamsDialog = new ChallengeParamsDialog(initialParams);
-        addDialog(dialog, true, null, false);
+        var dialog:ChallengeParamsDialog = new ChallengeParamsDialog(initialParams, dontCacheParams);
+        addDialog(dialog, true, dialog.onClose, true);
     }
 
     private static function onBtnAdded(btn:Button, type:PieceType, color:PieceColor, iconSize:Float, e) 

@@ -1,7 +1,18 @@
 <component width="100%" height="100%">
+    <style>
+        #changelogLabel {
+            font-size:26px;
+            pointer-events:true;
+            background-opacity:0;
+            background-color:yellow;
+        }
+        #changelogLabel:hover {
+            color: #333333;
+        }
+    </style>
     <vbox width="100%" height="100%" style="spacing: 10px">
         <button id="createGameBtn" text="${Dictionary.getPhrase(MAIN_MENU_CREATE_GAME_BTN_TEXT)}" horizontalAlign="center" style="font-size:40px;font-name:'fonts/Futura.ttf'" />
-        <label id="changelogLabel" htmlText="${Changelog.getFirst()}" tooltip="${Dictionary.getPhrase(READ_FULL_CHANGELOG_TOOLTIP)}" style="font-size:26px;pointer-events:true;background-opacity:0;background-color:yellow" horizontalAlign="center" />
+        <label id="changelogLabel" htmlText="${Changelog.getFirst()}" tooltip="${Dictionary.getPhrase(READ_FULL_CHANGELOG_TOOLTIP)}" horizontalAlign="center" />
         <hbox id="contentHBox" horizontalAlign="center" width="90%" height="100%" continuous="true">
             <vbox id="tablesBox" width="50%" height="100%">
                 <open-challenges-table id="openChallengesTable" width="100%" height="50%" />
