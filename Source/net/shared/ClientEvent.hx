@@ -25,13 +25,16 @@ enum ClientEvent
     CancelTakeback; 
     AcceptTakeback; 
     DeclineTakeback;
-    SetStudy(name:String, variantStr:String, overwriteID:Null<Int>);
+    SetStudy(name:String, description:String, keyPositionSIP:String, variantStr:String, publicity:StudyPublicity, overwriteID:Null<Int>);
     AddTime; 
     GetGame(id:Int); //TODO: Ensure this also includes an effect of StopSpectating IN CASE THIS IS AN ONGOING GAME
     GetStudy(id:Int);
     GetPlayerProfile(login:String);
-    GetPlayerGames(login:String, after:Int, pageSize:Int);
-    GetPlayerStudies(login:String, after:Int, pageSize:Int);
+    AddFriend(login:String);
+    RemoveFriend(login:String);
+    GetGamesByLogin(login:String, after:Int, pageSize:Int, filterByTimeControl:Null<TimeControlType>);
+    GetStudiesByLogin(login:String, after:Int, pageSize:Int, filterByTags:Null<Array<String>>);
+    GetOngoingGamesByLogin(login:String);
     GetOpenChallenges;
     GetCurrentGames;
 }

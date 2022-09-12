@@ -5,6 +5,8 @@
             <label text="${Dictionary.getPhrase(SHARE_NAME_PREFIX_LABEL)}" verticalAlign="center" style="font-size:16px;font-bold:true" />
             <textfield id="nameInputField" width="100%" placeholder="${Dictionary.getPhrase(SHARE_STUDY_NAME_TEXTFIELD_PLACEHOLDER)}" /> 
         </hbox>
+        <label text="{Dictionary.getPhrase(SHARE_DESCRIPTION_PREFIX_LABEL)}" style="font-size:16px;font-bold:true" />
+        <textarea id="descInputField" width="100%"  />
         <hbox horizontalAlign="center">
             <button id="exportNewBtn" text="${Dictionary.getPhrase(SHARE_EXPORT_NEW_BTN_TEXT)}" />
             <button id="overwriteBtn" text="${Dictionary.getPhrase(SHARE_OVERWRITE_BTN_TEXT_TEMPLATE)}" />

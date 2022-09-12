@@ -30,7 +30,7 @@ class ShareExportTab extends Box
         this.overwriteCallback = overwriteCallback;
 
         if (oldStudyName != null)
-            overwriteBtn.text = overwriteBtn.text.replace('%name%', oldStudyName);
+            overwriteBtn.text = Dictionary.getPhrase(SHARE_OVERWRITE_BTN_TEXT_TEMPLATE, [oldStudyName]);
         else
             overwriteBtn.hidden = true;
     }

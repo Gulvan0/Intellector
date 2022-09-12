@@ -1,5 +1,7 @@
 package net;
 
+import net.shared.OverviewGameData;
+import gfx.profile.ProfileData;
 import struct.ChallengeParams;
 import dict.Dictionary;
 import gfx.Dialogs;
@@ -74,11 +76,80 @@ class Requests
     {
         switch event
         {
-            case PlayerProfile(recentGamesStr, recentStudiesStr, hasMoreGames, hasMoreStudies):
-                //TODO: Implement properly
+            case PlayerProfile(serializedProfileData):
+                var profileData:ProfileData = ProfileData.deserialize(serializedProfileData);
+                SceneManager.toScreen(PlayerProfile(login, profileData));
             case PlayerNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    public static function getPlayerPastGames(login:String, after:Int, pageSize:Int, filterByTimeControl:Null<TimeControlType>, callback:Array<OverviewGameData>->Void, ?hasMoreHandler:Bool->Void)
+    {
+        var requestedCount:Int = hasMoreHandler != null? pageSize + 1 : pageSize;
+        Networker.addHandler(getPlayerGames_handler.bind(callback, pageSize, hasMoreHandler));
+        Networker.emitEvent(GetGamesByLogin(login, after, requestedCount, filterByTimeControl));
+    }
+
+    public static function getPlayerOngoingGames(login:String, callback:Array<OverviewGameData>->Void)
+    {
+        Networker.addHandler(getPlayerGames_handler.bind(callback, null, null));
+        Networker.emitEvent(GetOngoingGamesByLogin(login));
+    }
+
+    private static function getPlayerGames_handler(callback:Array<OverviewGameData>->Void, pageSize:Null<Int>, hasMoreHandler:Null<Bool->Void>, event:ServerEvent) 
+    {
+        switch event
+        {
+            case Games(games):
+                if (hasMoreHandler != null)
+                    if (games.length > pageSize)
+                    {
+                        callback(games.slice(0, pageSize));
+                        hasMoreHandler(true);
+                    }
+                    else
+                    {
+                        callback(games);
+                        hasMoreHandler(false);
+                    }
+                else
+                    callback(games);
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    public static function getPlayerStudies(login:String, after:Int, pageSize:Int, filterByTags:Null<Array<String>>, callback:Array<OverviewStudyData>->Void, ?hasMoreHandler:Bool->Void)
+    {
+        var requestedCount:Int = hasMoreHandler != null? pageSize + 1 : pageSize;
+        Networker.addHandler(getPlayerStudies_handler.bind(callback, pageSize, hasMoreHandler));
+        Networker.emitEvent(GetStudiesByLogin(login, after, requestedCount, filterByTags));
+    }
+
+    private static function getPlayerStudies_handler(callback:Array<OverviewStudyData>->Void, pageSize:Int, hasMoreHandler:Null<Bool->Void>, event:ServerEvent) 
+    {
+        switch event
+        {
+            case Studies(studies):
+                if (hasMoreHandler != null)
+                    if (studies.length > pageSize)
+                    {
+                        callback(studies.slice(0, pageSize));
+                        hasMoreHandler(true);
+                    }
+                    else
+                    {
+                        callback(studies);
+                        hasMoreHandler(false);
+                    }
+                else
+                    callback(studies);
             default:
                 return false;
         }

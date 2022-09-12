@@ -2,6 +2,13 @@ package utils;
 using utils.StringUtils;
 using StringTools;
 
+enum abstract MaxLength(Int) 
+{
+    var StudyName = 25;
+    var StudyTag = 15;
+    var StudyDescription = 400;
+}
+
 class CharIterator 
 {
     private var s:String;
@@ -123,10 +130,13 @@ class StringUtils
             return true;
     }
 
-    public static function shorten(orig:String, ?maxChars:Int = 10):String
+    public static function shorten(orig:String, ?maxChars:Int = 10, ?addDots:Bool = true):String
     {
         if (orig.length > maxChars)
-            return orig.substr(0, maxChars - 3) + "...";
+            if (addDots)
+                return orig.substr(0, maxChars - 3) + "...";
+            else
+                return orig.substr(0, maxChars);
         else 
             return orig;
     }

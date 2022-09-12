@@ -56,10 +56,10 @@ enum ServerEvent
     SingleStudy(name:String, variantStr:String); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy
     StudyCreated(studyID:Int, studyName:String); //Answer to SetStudy with no overwriteID specified
-    PlayerProfile(recentGamesStr:String, recentStudiesStr:String, hasMoreGames:Bool, hasMoreStudies:Bool); //Answer to GetPlayerProfile //TODO: add more params (stats)
-    GamesList(listStr:String, hasNext:Bool); //Answer to GetPlayerGames
-    StudiesList(listStr:String, hasNext:Bool); //Answer to GetPlayerStudies
-    PlayerNotFound; //Answer to Spectate, GetPlayerProfile, GetPlayerGames and GetPlayerStudies: no such player exists
+    PlayerProfile(serializedProfileData:String); //Answer to GetPlayerProfile
+    Games(games:Array<OverviewGameData>); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
+    Studies(studies:Array<OverviewStudyData>); //Answer to GetStudiesByLogin
+    PlayerNotFound; //Answer to Spectate, GetPlayerProfile, GetGamesByLogin, GetOngoingGamesByLogin and GetStudiesByLogin: no such player exists
     PlayerOffline; //Answer to Spectate: no game to spectate with a requested player
     PlayerNotInGame; //Answer to Spectate: no game to spectate with a requested player
 

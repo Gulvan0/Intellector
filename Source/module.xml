@@ -19,6 +19,7 @@
         <component class="gfx.basic_components.CopyableText" alias="copyabletext" />
         <component class="gfx.menubar.ChallengeEntryRenderer" alias="challengeentryrenderer" />
         <component class="gfx.menubar.ChallengeList" alias="challengelist" />
+        <component class="gfx.profile.StudyWidget" alias="studywidget" />
     </components>
     <themes>
         <global>

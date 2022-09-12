@@ -1,16 +1,7 @@
 package utils;
 
 import dict.Dictionary;
-
-enum TimeControlType
-{
-    Hyperbullet;
-    Bullet;
-    Blitz;
-    Rapid;
-    Classic;
-    Correspondence;
-}
+import net.shared.TimeControlType;
 
 class TimeControl
 {

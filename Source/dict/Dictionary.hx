@@ -52,7 +52,7 @@ class Dictionary
         SHARE_NAME_PREFIX_LABEL => ["Name: ", "Название: "],
         SHARE_STUDY_NAME_TEXTFIELD_PLACEHOLDER => ["Enter study name...", "Название студии..."],
         SHARE_EXPORT_NEW_BTN_TEXT => ["Create New Study", "Создать новую студию"],
-        SHARE_OVERWRITE_BTN_TEXT_TEMPLATE => ["Overwrite %name%", "Перезаписать %name%"],
+        SHARE_OVERWRITE_BTN_TEXT_TEMPLATE => ["Overwrite $0", "Перезаписать $0"],
         SHARE_EXPORT_AS_QUESTION_MARKS_TEASER => ["Export as ???", "Экспорт ???"],
         SHARE_COMING_SOON => ["Coming soon!", "Скоро!"],
         
@@ -145,6 +145,37 @@ class Dictionary
 
         FOLLOWED_PLAYER_LABEL_GAMEINFOBOX_TOOLTIP => ["You follow this player. Each time he/she starts a new game, you'll be automatically redirected to watch it. To unfollow, simply leave this screen.", "Вы наблюдаете за этим игроком. Если игрок начнет новую игру, вы автоматически последуете за ним. Чтобы прекратить наблюдение, просто покиньте этот экран"],
 
+        PROFILE_ROLE_TEXT(Admin) => ["Main Developer", "Главный разработчик"],
+        PROFILE_ROLE_TEXT(AnacondaDeveloper) => ["Anaconda Developer", "Создатель Анаконды"],
+
+        PROFILE_STATUS_LAST_SEEN => ["Last seen: $0", "Был в сети: $0"],
+        PROFILE_STATUS_ONLINE => ["Online now", "В сети"],
+        PROFILE_STATUS_INGAME => ["Playing now", "Играет партию"],
+
+        PROFILE_QUICK_ACTION_SEND_CHALLENGE_TOOLTIP => ["Send Challenge", "Отправить вызов"],
+        PROFILE_QUICK_ACTION_FOLLOW_TOOLTIP => ["Follow", "Следить за игрой"],
+
+        PROFILE_ACTION_ADD_FRIEND_TOOLTIP => ["Add friend", "Добавить в друзья"],
+        PROFILE_ACTION_REMOVE_FRIEND_TOOLTIP => ["Remove friend", "Удалить из друзей"],
+
+        PROFILE_FRIENDS_PREPENDER => ["Friends: ", "Друзья: "],
+
+        PROFILE_STUDY_TAGS_PREPENDER => ["Tags: ", "Теги: "],
+        PROFILE_STUDY_EDIT_BTN_TOOLTIP => ["Edit study", "Редактировать студию"],
+        PROFILE_STUDY_REMOVE_BTN_TOOLTIP => ["Remove study", "Удалить студию"],
+
+        PROFILE_GAMES_TAB_TITLE => ["Games", "Игры"],
+        PROFILE_STUDIES_TAB_TITLE => ["Studies", "Студии"],
+        PROFILE_ONGOING_MATCHES_TAB_TITLE => ["Ongoing", "Текущие партии"],
+
+        PROFILE_LOAD_MORE_BTN_TEXT => ["Load more", "Загрузить больше"],
+        PROFILE_RELOAD_BTN_TEXT => ["Reload", "Обновить"],
+
+        PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP => ["Remove tag from filters", "Убрать тег из фильтров"],
+        PROFILE_ADD_TAG_FILTER_BTN_TOOLTIP => ["Add filter by tag", "Добавить фильтр по тегу"],
+        PROFILE_CLEAR_TAG_FILTERS_BTN_TOOLTIP => ["Clear filters", "Очистить фильтры"],
+        PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT => ["Input tag:", "Введите тег:"],
+        
         MAIN_MENU_CREATE_GAME_BTN_TEXT => ["Create Game", "Создать игру"],
         READ_FULL_CHANGELOG_TOOLTIP => ["Read full changelog", "Полный список изменений"],
 
@@ -294,18 +325,6 @@ class Dictionary
         PROMOTION_DIALOG_TITLE => ["Promotion selection", "Превращение"],
         CHAMELEON_DIALOG_QUESTION => ["Morph into an eaten piece?", "Превратиться в съеденную фигуру?"],
         CHAMELEON_DIALOG_TITLE => ["Chameleon confirmation", "Хамелеон"],
-        /*
-        ACCEPT_CHALLENGE => ["Accept challenge", "Принять вызов"],
-        SEND_CHALLENGE_RESULT_SUCCESS => ["Challenge sent to ", "Вызов отправлен игроку "],
-        SEND_CHALLENGE_RESULT_DECLINED => [" has declined your challenge", " отклонил(а) ваш вызов"],
-        SEND_CHALLENGE_RESULT_SAME => ["You can't challenge yourself", "Вы не можете отправлять вызов самому себе"],
-        SEND_CHALLENGE_RESULT_REPEATED => ["You have already sent a challenge to this player", "Вы уже отправили этому игроку вызов"],
-        SEND_CHALLENGE_RESULT_OFFLINE => ["Callee is offline", "Вызванный игрок не в сети"],
-        SEND_CHALLENGE_RESULT_BUSY => ["Callee is currently playing", "Вызванный игрок в игре"],
-        SEND_CHALLENGE_RESULT_DECLINED_TITLE => ["Challenge declined", "Вызов отклонен"],
-        SEND_CHALLENGE_RESULT_ERROR_TITLE => ["Challenge error", "Ошибка вызова"],
-        SEND_CHALLENGE_RESULT_SUCCESS_TITLE => ["Success", "Успех"],
-        */
         SPECTATOR_JOINED_MESSAGE => ["$0 is now spectating", "$0 стал наблюдателем"],
         SPECTATOR_LEFT_MESSAGE => ["$0 left", "$0 вышел"],
         OPENING_STARTING_POSITION => ["Starting position", "Начальная позиция"],
@@ -334,13 +353,6 @@ class Dictionary
         OPPONENT_DISCONNECTED_MESSAGE => ["$0 disconnected", "$0 отключились"],
         OPPONENT_RECONNECTED_MESSAGE => ["$0 reconnected", "$0 переподключились"],
         ABORT_CONFIRMATION_MESSAGE => ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"],
-        ENTER_PROFILE_OWNER => ["Enter the login of a profile owner", "Введите логин игрока, профиль которого вы хотите посетить"],
-        /*
-        SEND_CHALLENGE_RESULT_NOTFOUND => ["Callee not found", "Вызываемый игрок не найден"],
-        ACCEPT_CHALLENGE_RESULT_CANCELLED => ["A challenge has been cancelled", "Оппонент отменил вызов"],
-        ACCEPT_CHALLENGE_RESULT_OFFLINE => ["Caller is offline", "Оппонент не в сети"],
-        ACCEPT_CHALLENGE_RESULT_BUSY => ["Caller is currently playing", "Оппонент в игре"],
-        */
 
         SESSION_CLOSED_ALERT_TITLE => ["Connection Closed", "Соединение закрыто"],
         SESSION_CLOSED_ALERT_TEXT => ["Connection was closed. Either you logged from another tab, browser or device or you were inactive for too long. Reload the page to reconnect", "Соединение было разорвано. Либо вы подключились из другой вкладки, из другого браузера или с другого устройства, либо же вы были неактивны слишком долго. Перезагрузите страницу для переподключения"],
@@ -352,7 +364,7 @@ class Dictionary
         CLIPBOARD_ERROR_ALERT_TITLE => ["Clipboard Error", "Ошибка буфера обмена"],
         CLIPBOARD_ERROR_ALERT_TEXT => ["Failed to copy: $0", "Копирование не удалось: $0"],
         
-        CORRESPONDENCE_TIME_CONTROL_NAME => ["Correspondence", "По переписке"],
+        CORRESPONDENCE_TIME_CONTROL_NAME => ["Correspondence", "По переписке"]
     ];
 
     public static function getPhrase(phrase:Phrase, ?substitutions:Array<String>):String
