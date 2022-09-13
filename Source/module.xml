@@ -17,6 +17,8 @@
         <component class="gfx.main.PastGamesList" alias="pastgameslist" />
         <component class="gfx.basic_components.ARPImage" alias="arpimage" />
         <component class="gfx.basic_components.CopyableText" alias="copyabletext" />
+        <component class="gfx.basic_components.AutosizingLabel" alias="autosizinglabel" />
+        <component class="gfx.basic_components.AnnotatedImage" alias="annotatedimage" />
         <component class="gfx.menubar.ChallengeEntryRenderer" alias="challengeentryrenderer" />
         <component class="gfx.menubar.ChallengeList" alias="challengelist" />
         <component class="gfx.profile.StudyWidget" alias="studywidget" />
