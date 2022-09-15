@@ -1,5 +1,6 @@
 package gfx.game;
 
+import net.shared.TimeControlType;
 import dict.Utils;
 import format.SVG;
 import openfl.display.Shape;

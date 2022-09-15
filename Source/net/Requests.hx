@@ -1,6 +1,8 @@
 package net;
 
+import net.shared.TimeControlType;
 import net.shared.OverviewGameData;
+import net.shared.OverviewStudyData;
 import gfx.profile.ProfileData;
 import struct.ChallengeParams;
 import dict.Dictionary;
@@ -78,7 +80,7 @@ class Requests
         {
             case PlayerProfile(serializedProfileData):
                 var profileData:ProfileData = ProfileData.deserialize(serializedProfileData);
-                SceneManager.toScreen(PlayerProfile(login, profileData));
+                //SceneManager.toScreen(PlayerProfile(login, profileData)); //TODO: Uncomment
             case PlayerNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);

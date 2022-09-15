@@ -1,5 +1,6 @@
 package;
 
+import gfx.basic_components.AutosizingLabel;
 import struct.Situation;
 import struct.ChallengeParams;
 import serialization.GameLogParser;
@@ -83,6 +84,14 @@ class Main extends Sprite
 
 	private function start() 
 	{
+		var v = new AutosizingLabel();
+		v.customStyle = {backgroundColor: 0xff0000, backgroundOpacity: 0.5};
+		v.percentWidth = 100;
+		v.text = "Lorem ipsum dolor sit amet";
+		v.horizontalAlign = 'center';
+		v.verticalAlign = 'center';
+		haxe.ui.core.Screen.instance.addComponent(v);
+		return;
 		var langInitializedFromCookie:Bool = Preferences.language.load();
 
 		SceneManager.launch();
@@ -123,7 +132,7 @@ class Main extends Sprite
 		4635/450000;
 		6162/350000;
 		2634/420000;"), 420, 325, Date.now().getTime(), "kazvixx")));*/
-		SceneManager.toScreen(ChallengeJoining(123, ChallengeParams.playFromPosParams(Situation.randomPlay(3))));
+		//SceneManager.toScreen(ChallengeJoining(123, ChallengeParams.playFromPosParams(Situation.randomPlay(3))));
 	}
 
 	private function onConnectionFailed(e)

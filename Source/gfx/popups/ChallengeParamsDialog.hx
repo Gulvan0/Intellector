@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import net.shared.TimeControlType;
 import haxe.ui.locale.LocaleManager;
 import haxe.ui.components.Image;
 import haxe.Timer;

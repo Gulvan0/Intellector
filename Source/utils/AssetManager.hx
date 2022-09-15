@@ -4,7 +4,7 @@ import gfx.menubar.ChallengesIconMode;
 import haxe.CallStack;
 import openfl.display.Sprite;
 import gfx.basic_components.SpriteWrapper;
-import utils.TimeControl.TimeControlType;
+import net.shared.TimeControlType;
 import format.SVG;
 import gfx.analysis.PosEditMode;
 import openfl.geom.Matrix;

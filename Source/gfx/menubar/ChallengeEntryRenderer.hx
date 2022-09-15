@@ -1,5 +1,6 @@
 package gfx.menubar;
 
+import net.shared.TimeControlType;
 import browser.URLEditor;
 import struct.PieceColor;
 import utils.TimeControl;

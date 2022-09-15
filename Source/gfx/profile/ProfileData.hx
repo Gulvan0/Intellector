@@ -3,7 +3,7 @@ package gfx.profile;
 import net.shared.OverviewGameData;
 import net.shared.OverviewStudyData;
 import net.shared.UserRole;
-import utils.TimeControl.TimeControlType;
+import net.shared.TimeControlType;
 
 class ProfileData
 {

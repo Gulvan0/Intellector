@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import net.shared.TimeControlType;
 import haxe.ui.tooltips.ToolTipManager;
 import gfx.common.SituationTooltipRenderer;
 import struct.ChallengeParams;

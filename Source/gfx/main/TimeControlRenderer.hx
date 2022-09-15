@@ -3,6 +3,7 @@ package gfx.main;
 import utils.AssetManager;
 import utils.TimeControl;
 import haxe.ui.core.ItemRenderer;
+import net.shared.TimeControlType;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/main_menu/renderers/time_control_renderer.xml"))
 class TimeControlRenderer extends ItemRenderer
