@@ -9,7 +9,7 @@ using StringTools;
 
 class PortableIntellectorNotation 
 {
-    public static function serialize(startingSituation:Situation, movesPlayed:Array<Ply>, ?whiteLogin:String = "Anonymous", ?blackLogin:String = "Anonymous", ?timeControl:TimeControl, ?datetime:Date, ?outcome:Outcome, ?winnerColor:PieceColor):String
+    public static function serialize(startingSituation:Situation, movesPlayed:Array<Ply>, ?whiteLogin:String = "Anonymous", ?blackLogin:String = "Anonymous", ?timeControl:TimeControl, ?datetime:Date, ?outcome:Outcome):String
     {
         var pin:String = "";
         if (whiteLogin.startsWith("guest_"))
@@ -38,26 +38,31 @@ class PortableIntellectorNotation
 
         switch outcome 
         {
-            case Mate: 
+            case Mate(winnerColor): 
                 if (winnerColor == White)
                     pin += 'Fatum. White won';
                 else if (winnerColor == Black)
                     pin += 'Fatum. Black won';
                 else 
                     pin += 'Fatum';
-            case Breakthrough:
+            case Breakthrough(winnerColor):
                 if (winnerColor == White)
                     pin += 'Breakthrough. White won';
                 else if (winnerColor == Black)
                     pin += 'Breakthrough. Black won';
                 else 
                     pin += 'Breakthrough';
-            case Resign:
+            case Timeout(winnerColor):
+                if (winnerColor == White)
+                    pin += 'Black lost on time';
+                else if (winnerColor == Black)
+                    pin += 'White lost on time';
+            case Resign(winnerColor):
                 if (winnerColor == White)
                     pin += 'Black resigned';
                 else if (winnerColor == Black)
                     pin += 'White resigned';
-            case Abandon:
+            case Abandon(winnerColor):
                 if (winnerColor == White)
                     pin += 'Black left the game';
                 else if (winnerColor == Black)
@@ -67,12 +72,7 @@ class PortableIntellectorNotation
             case Repetition:
                 pin += 'Draw by repetition';
             case NoProgress:
-                pin += 'Draw by tranquility';
-            case Timeout:
-                if (winnerColor == White)
-                    pin += 'Black lost on time';
-                else if (winnerColor == Black)
-                    pin += 'White lost on time';
+                pin += 'Draw by quiescence';
             case Abort:
                 pin += 'Game aborted';
             case null:

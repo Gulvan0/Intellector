@@ -57,7 +57,6 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     private var blackLogin:String;
     private var timeControl:TimeControl;
     private var datetime:Date;
-    private var winnerColor:Null<PieceColor> = null;
     private var outcome:Null<Outcome> = null;
     private var getSecsLeftAfterMove:Null<(side:PieceColor, plyNum:Int)->Null<Float>>;
 
@@ -145,19 +144,18 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         switch event 
         {
             case GameEnded(winnerColorCode, outcomeCode, _, _):
-                winnerColor = GameLogParser.decodeColor(winnerColorCode);
-                outcome = GameLogParser.decodeOutcome(outcomeCode);
+                var winnerColor:Null<PieceColor> = GameLogParser.decodeColor(winnerColorCode);
+                outcome = GameLogParser.decodeOutcome(winnerColorCode, outcomeCode);
+
+                var winnerLogin:String = winnerColor == White? whiteLogin : blackLogin;
+                var loserLogin:String = winnerColor == Black? whiteLogin : blackLogin;
+
                 Assets.getSound("sounds/notify.mp3").play();
-                if (winnerColor == null)
-                    Dialogs.info(GAME_ENDED_DRAW_DIALOG_MESSAGE(outcome), GAME_ENDED_DIALOG_TITLE);
-                else if (playerColor == null)
-                {
-                    var winnerLogin:String = winnerColor == White? whiteLogin : blackLogin;
-                    var loserLogin:String = winnerColor == Black? whiteLogin : blackLogin;
-                    Dialogs.info(GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(outcome), GAME_ENDED_DIALOG_TITLE, [winnerLogin, loserLogin]);
-                }
+
+                if (playerColor != null)
+                    Dialogs.info(GAME_ENDED_PLAYER_DIALOG_MESSAGE(outcome, playerColor), GAME_ENDED_DIALOG_TITLE);
                 else
-                    Dialogs.info(GAME_ENDED_PLAYER_DIALOG_MESSAGE(outcome, winnerColor == playerColor), GAME_ENDED_DIALOG_TITLE);
+                    Dialogs.info(GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(outcome, winnerLogin, loserLogin), GAME_ENDED_DIALOG_TITLE);
             default:
         }
     }
@@ -223,7 +221,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case Share:
                 var gameLink:String = URLEditor.getGameLink(gameID);
                 var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
-                var pin:String = PortableIntellectorNotation.serialize(board.startingSituation, playedMoves, whiteLogin, blackLogin, timeControl, datetime, outcome, winnerColor);
+                var pin:String = PortableIntellectorNotation.serialize(board.startingSituation, playedMoves, whiteLogin, blackLogin, timeControl, datetime, outcome);
 
                 var shareDialog:ShareDialog = new ShareDialog();
                 shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, board.startingSituation, playedMoves);

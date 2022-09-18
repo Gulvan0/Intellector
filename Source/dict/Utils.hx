@@ -178,13 +178,78 @@ class Utils
         return Dictionary.chooseTranslation(translations);
     }
 
-    public static function getResolution(outcome:Null<Outcome>, winner:Null<PieceColor>):String
+    public static function getResolution(outcome:Null<Outcome>):String
     {
-        if (winner == null)
-            return Dictionary.getPhrase(GAME_RESOLUTION_GAME_IN_PROGRESS);
-        else if (winner == null)
-            return Dictionary.getPhrase(GAME_RESOLUTION_OUTCOME_SENTENCE(outcome, null));
-        else
-            return Dictionary.getPhrase(GAME_RESOLUTION_OUTCOME_SENTENCE(outcome, winner)) + ' • ' + Dictionary.getPhrase(GAME_RESOLUTION_WINNER_SENTENCE(winner));
+        var translations = switch outcome 
+        {
+            case null: ["Game is in progress", "Идет игра"];
+            case Mate(White): ["Fatum • White is victorious", "Фатум • Белые победили"];
+            case Breakthrough(White): ["Breakthrough • White is victorious", "Прорыв • Белые победили"];
+            case Timeout(White): ["Black lost on time • White is victorious", "Черные просрочили время • Белые победили"];
+            case Resign(White): ["Black resigned • White is victorious", "Черные сдались • Белые победили"];
+            case Abandon(White): ["Black left the game • White is victorious", "Черные покинули игру • Белые победили"];
+            case Mate(Black): ["Fatum • Black is victorious", "Фатум • Черные победили"];
+            case Breakthrough(Black): ["Breakthrough • Black is victorious", "Прорыв • Черные победили"];
+            case Timeout(Black): ["White lost on time • Black is victorious", "Белые просрочили время • Черные победили"];
+            case Resign(Black): ["White resigned • Black is victorious", "Белые сдались • Черные победили"];
+            case Abandon(Black): ["White left the game • Black is victorious", "Белые покинули игру • Черные победили"];
+            case DrawAgreement: ["Draw by agreement", "Ничья по согласию"];
+            case Repetition: ["Draw by repetition", "Ничья по троекратному повторению"];
+            case NoProgress: ["Draw by sixty-move rule", "Ничья по правилу 60 ходов"];
+            case Abort: ["Game aborted", "Игра прервана"];
+        }
+        return Dictionary.chooseTranslation(translations);
+    }
+
+    public static function chatboxGameOverMessage(outcome:Outcome):String
+    {
+        var lang:Language = Preferences.language.get();
+        switch outcome 
+        {
+            case Mate(winnerColor), Breakthrough(winnerColor):
+                var winnerStr:String = Utils.getColorName(winnerColor);
+                if (lang == EN)
+                    return '$winnerStr won';
+                else
+                    return '$winnerStr победили';
+            case Timeout(winnerColor):
+                var loserStr:String = Utils.getColorName(opposite(winnerColor));
+                if (lang == EN)
+                    return '$loserStr lost on time';
+                else
+                    return '$loserStr просрочили время';
+            case Resign(winnerColor):
+                var loserStr:String = Utils.getColorName(opposite(winnerColor));
+                if (lang == EN)
+                    return '$loserStr resigned';
+                else
+                    return '$loserStr сдались';
+            case Abandon(winnerColor):
+                var loserStr:String = Utils.getColorName(opposite(winnerColor));
+                if (lang == EN)
+                    return '$loserStr left the game';
+                else
+                    return '$loserStr покинули игру';
+            case DrawAgreement:
+                if (lang == EN)
+                    return 'Game ended with a draw (mutual agreement)';
+                else
+                    return 'Игра окончена вничью (по договоренности)';
+            case Repetition:
+                if (lang == EN)
+                    return 'Game ended with a draw (threefold repetition)';
+                else
+                    return 'Игра окончена вничью (по троекратному повторению)';
+            case NoProgress:
+                if (lang == EN)
+                    return 'Game ended with a draw (sixty-move rule)';
+                else
+                    return 'Игра окончена вничью (по правилу 60 ходов)';
+            case Abort:
+                if (lang == EN)
+                    return 'Game aborted';
+                else
+                    return 'Игра прервана';
+        }       
     }
 }

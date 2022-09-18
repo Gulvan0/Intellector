@@ -39,7 +39,7 @@ class PastGameWidget extends ItemRenderer
             datetimeLabel.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
             timeControlLabel.text = parsedData.timeControl.toString();
             opponentsLabel.text = '${parsedData.whiteLogin} vs ${parsedData.blackLogin}';
-            resultLabel.text = Utils.getResolution(parsedData.outcome, parsedData.winnerColor);
+            resultLabel.text = Utils.getResolution(parsedData.outcome);
             if (parsedData.startingSituation.isDefaultStarting())
                 openingLabel.text = OpeningTree.getOpening(parsedData.movesPlayed);
             else

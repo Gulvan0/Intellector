@@ -25,7 +25,6 @@ class GameLogParserOutput
     public var whiteLogin:Null<String>;
     public var blackLogin:Null<String>;
     public var outcome:Null<Outcome>;
-    public var winnerColor:Null<PieceColor>;
     public var msLeftWhenEnded:Null<Map<PieceColor, Int>>;
     public var movesPlayed:Array<Ply> = [];
     public var chatEntries:Array<ChatEntry> = [];
@@ -187,8 +186,7 @@ class GameLogParser
             case "C":
                 parserOutput.chatEntries.push(PlayerMessage(decodeColor(args[0]), args[1]));
             case "R":
-                parserOutput.winnerColor = decodeColor(args[0]);
-                parserOutput.outcome = decodeOutcome(args[1]);
+                parserOutput.outcome = decodeOutcome(args[0], args[1]);
             case "E":
                 var eventCode:String = args[0];
                 var logMessage:String = switch eventCode 
@@ -220,15 +218,16 @@ class GameLogParser
         }        
     }
 
-    public static function decodeOutcome(reasonCode:String):Null<Outcome>
+    public static function decodeOutcome(winnerColorCode:String, reasonCode:String):Null<Outcome>
     {
+        var winnerColor:PieceColor = decodeColor(winnerColorCode);
         return switch reasonCode 
         {
-            case "mat": Mate;
-            case "bre": Breakthrough;
-            case "res": Resign;
-            case "tim": Timeout;
-            case "aba": Abandon;
+            case "mat": Mate(winnerColor);
+            case "bre": Breakthrough(winnerColor);
+            case "res": Resign(winnerColor);
+            case "tim": Timeout(winnerColor);
+            case "aba": Abandon(winnerColor);
             case "rep": Repetition;
             case "100": NoProgress;
             case "agr": DrawAgreement;

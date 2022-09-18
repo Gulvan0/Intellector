@@ -37,8 +37,8 @@ class Chatbox extends VBox implements INetObserver
             case SpectatorMessage(author, message):
                 if (isOwnerSpectator)
                     appendMessage(author, message, false);
-            case GameEnded(winner_color, reason, _, _): 
-                onGameEnded(GameLogParser.decodeColor(winner_color), GameLogParser.decodeOutcome(reason));
+            case GameEnded(winnerColorCode, reasonCode, _, _): 
+                onGameEnded(GameLogParser.decodeOutcome(winnerColorCode, reasonCode));
             case PlayerDisconnected(color): 
                 appendLog(Utils.getPlayerDisconnectedMessage(PieceColor.createByName(color)));
             case PlayerReconnected(color): 
@@ -149,11 +149,11 @@ class Chatbox extends VBox implements INetObserver
         }
     }
 
-    private function onGameEnded(winnerColor:Null<PieceColor>, outcome:Outcome) 
+    private function onGameEnded(outcome:Outcome) 
     {
         messageInput.disabled = true;
         removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-        appendLog(Dictionary.getPhrase(GAME_CHATBOX_GAME_OVER_MESSAGE(outcome, winnerColor)));
+        appendLog(dict.Utils.chatboxGameOverMessage(outcome));
     }
 
     private function actualize(parserOutput:GameLogParserOutput, e)
@@ -170,7 +170,7 @@ class Chatbox extends VBox implements INetObserver
             }
         }
         if (parserOutput.outcome != null)
-            onGameEnded(parserOutput.winnerColor, parserOutput.outcome);
+            onGameEnded(parserOutput.outcome);
     }
 
     public function init(constructor:LiveGameConstructor)

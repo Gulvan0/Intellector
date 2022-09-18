@@ -1,5 +1,6 @@
 package dict;
 
+import gfx.profile.data.UserStatus;
 import net.shared.UserRole;
 import struct.Outcome;
 import struct.PieceColor;
@@ -7,8 +8,6 @@ import struct.PieceColor;
 enum Phrase
 {
     LANGUAGE_NAME;
-
-    PLAYER_NOT_FOUND;
 
     //Analysis screen
 
@@ -122,8 +121,6 @@ enum Phrase
     LOGIN_REPEAT_PASSWORD_FIELD_NAME;
     LOGIN_REMEMBER_ME;
     LOGIN_REMAIN_LOGGED;
-    LOGIN_LOG_IN_BTN_TEXT;
-    LOGIN_REGISTER_BTN_TEXT;
     
     LOGIN_WARNING_MESSAGEBOX_TITLE;
     LOGIN_INVALID_PASSWORD_WARNING_TEXT;
@@ -167,9 +164,7 @@ enum Phrase
 
     PROFILE_ROLE_TEXT(role:UserRole);
 
-    PROFILE_STATUS_LAST_SEEN;
-    PROFILE_STATUS_ONLINE;
-    PROFILE_STATUS_INGAME;
+    PROFILE_STATUS_TEXT(status:UserStatus);
 
     PROFILE_QUICK_ACTION_SEND_CHALLENGE_TOOLTIP;
     PROFILE_QUICK_ACTION_FOLLOW_TOOLTIP;
@@ -216,16 +211,9 @@ enum Phrase
 
     //Live Game
 
-    GAME_CHATBOX_GAME_OVER_MESSAGE(outcome:Outcome, winnerColor:Null<PieceColor>);
-
-    GAME_RESOLUTION_GAME_IN_PROGRESS;
-    GAME_RESOLUTION_OUTCOME_SENTENCE(outcome:Outcome, winnerColor:PieceColor);
-    GAME_RESOLUTION_WINNER_SENTENCE(winnerColor:PieceColor);
-
     GAME_ENDED_DIALOG_TITLE;
-    GAME_ENDED_PLAYER_DIALOG_MESSAGE(outcome:Outcome, isPlayerWinner:Bool);
-    GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(outcome:Outcome);
-    GAME_ENDED_DRAW_DIALOG_MESSAGE(outcome:Outcome);
+    GAME_ENDED_PLAYER_DIALOG_MESSAGE(outcome:Outcome, playerColor:PieceColor);
+    GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(outcome:Outcome, winnerLogin:String, loserLogin:String);
 
     //Dialogs
 

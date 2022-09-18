@@ -47,8 +47,8 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
                 accountMove(ply);
             case Rollback(plysToUndo, _, _, _):
                 revertPlys(plysToUndo);
-            case GameEnded(winner_color, reason, _, _):
-                resolution.text = Utils.getResolution(GameLogParser.decodeOutcome(reason), GameLogParser.decodeColor(winner_color));
+            case GameEnded(winnerColorCode, reasonCode, _, _):
+                resolution.text = Utils.getResolution(GameLogParser.decodeOutcome(winnerColorCode, reasonCode));
             default:
         }
     }
@@ -151,7 +151,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
         whiteLoginLabel.text = whiteLogin;
         blackLoginLabel.text = blackLogin;
-        resolution.text = Utils.getResolution(null, null);
+        resolution.text = Utils.getResolution(null);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
     }
@@ -167,7 +167,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         whiteLoginLabel.text = parsedData.whiteLogin;
         blackLoginLabel.text = parsedData.blackLogin;
-        resolution.text = Utils.getResolution(parsedData.outcome, parsedData.winnerColor);
+        resolution.text = Utils.getResolution(parsedData.outcome);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
 
