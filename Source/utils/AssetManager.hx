@@ -1,5 +1,6 @@
 package utils;
 
+import gfx.profile.data.UserStatus;
 import gfx.menubar.ChallengesIconMode;
 import haxe.CallStack;
 import openfl.display.Sprite;
@@ -24,6 +25,11 @@ class AssetManager
     private static var loadedResourcesCnt:Int = 0;
     private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length + TimeControlType.createAll().length;
     private static var onLoadedCallback:Void->Void;
+
+    public static inline function statusPath(status:UserStatus):String
+    {
+        return "assets/symbols/profile/user_status_indicators" + status.getName().toLowerCase() + ".svg";
+    }
 
     public static inline function piecePath(type:PieceType, color:PieceColor):String
     {
