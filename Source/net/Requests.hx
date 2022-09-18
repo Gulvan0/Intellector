@@ -3,7 +3,7 @@ package net;
 import net.shared.TimeControlType;
 import net.shared.OverviewGameData;
 import net.shared.OverviewStudyData;
-import gfx.profile.ProfileData;
+import gfx.profile.data.ProfileData;
 import struct.ChallengeParams;
 import dict.Dictionary;
 import gfx.Dialogs;

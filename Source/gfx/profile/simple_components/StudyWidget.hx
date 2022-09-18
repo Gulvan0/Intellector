@@ -1,4 +1,4 @@
-package gfx.profile;
+package gfx.profile.simple_components;
 
 import haxe.ui.events.MouseEvent;
 import haxe.ui.core.ItemRenderer;

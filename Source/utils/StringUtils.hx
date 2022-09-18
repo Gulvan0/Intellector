@@ -2,7 +2,7 @@ package utils;
 using utils.StringUtils;
 using StringTools;
 
-enum abstract MaxLength(Int) 
+enum abstract MaxLength(Int) to Int
 {
     var StudyName = 25;
     var StudyTag = 15;

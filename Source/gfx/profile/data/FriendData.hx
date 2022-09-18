@@ -1,4 +1,4 @@
-package gfx.profile;
+package gfx.profile.data;
 
 typedef FriendData = 
 {

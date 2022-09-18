@@ -1,5 +1,6 @@
 package;
 
+import tests.SimpleTests;
 import gfx.basic_components.AutosizingLabel;
 import struct.Situation;
 import struct.ChallengeParams;
@@ -84,13 +85,7 @@ class Main extends Sprite
 
 	private function start() 
 	{
-		var v = new AutosizingLabel();
-		v.customStyle = {backgroundColor: 0xff0000, backgroundOpacity: 0.5};
-		v.percentWidth = 100;
-		v.text = "Lorem ipsum dolor sit amet";
-		v.horizontalAlign = 'center';
-		v.verticalAlign = 'center';
-		haxe.ui.core.Screen.instance.addComponent(v);
+		SimpleTests.annotatedImage();
 		return;
 		var langInitializedFromCookie:Bool = Preferences.language.load();
 

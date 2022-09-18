@@ -8,7 +8,7 @@ class AutosizingLabel extends Label
 {
     public var minFontSize:Null<Float> = null;
     public var maxFontSize:Null<Float> = null;
-    public var sizePerCharWidth:Float = 2.1;
+    public var sizePerCharWidth:Float = 1.8;
     public var sizePerCharHeight:Float = 0.758;
     public var align:TextAlign = Center;
     public var lengthGetter:Label->Int = label -> label.text.length;

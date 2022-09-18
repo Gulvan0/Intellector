@@ -1,5 +1,11 @@
 package gfx.screens;
 
+import net.shared.EloValue;
+import gfx.profile.simple_components.FriendListEntry;
+import gfx.profile.simple_components.PlayerLabel;
+import haxe.ui.events.UIEvent;
+import utils.AssetManager;
+import haxe.ui.components.Button;
 import haxe.Timer;
 import utils.StringUtils;
 import js.Browser;
@@ -7,14 +13,14 @@ import net.shared.TimeControlType;
 import net.Requests;
 import utils.MathUtils;
 import dict.Utils;
-import gfx.profile.FriendData;
-import gfx.profile.SimpleComponents;
+import gfx.profile.data.FriendData;
 import net.shared.OverviewStudyData;
 import net.shared.OverviewGameData;
-import gfx.profile.ProfileData;
+import gfx.profile.data.ProfileData;
 import struct.ChallengeParams;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
+import utils.StringUtils;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/profile/profile.xml"))
 class Profile extends Screen
@@ -23,6 +29,7 @@ class Profile extends Screen
 
     private var profileOwnerLogin:String;
     private var isPlayer:Bool;
+    private var data:ProfileData;
 
     private var gamesLoaded:Int;
     private var studiesLoaded:Int;
@@ -62,12 +69,6 @@ class Profile extends Screen
         Timer.delay(() -> {
             addFriendBtn.hidden = false;
         }, 3000);
-    }
-
-    private function fillFriendList(friends:Array<FriendData>)
-    {
-        for (data in friends)
-            friendsSV.addComponent(SimpleComponents.friendEntry(data));
     }
 
     private function appendGames(games:Array<OverviewGameData>)
@@ -149,24 +150,15 @@ class Profile extends Screen
         gamesList.dataSource.clear();
         gamesLoaded = 0;
 
-        //TODO: Update visual representation
-
         activePastGameTimeControlFilter = timeControl;
         Requests.getPlayerPastGames(profileOwnerLogin, gamesLoaded, maxEntriesPerRequest, activePastGameTimeControlFilter, appendGames, updateLoadMoreBtn.bind(gamesLoadMoreBtn));
-    }
-
-    //TODO: Bind
-    private function onPastGamesTabSwitched(e)
-    {
-        var timeControl:Null<TimeControlType>; //TODO: Define
-        setPastGameFilter(timeControl);
     }
 
     //TODO: Bind
     private function onAddStudyTagFilterPressed(e)
     {
         Dialogs.prompt(PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT, All, tag -> {
-            var normalizedTag:String = StringUtils.shorten(tag, MaxChars.StudyTag, false);
+            var normalizedTag:String = StringUtils.shorten(tag, StudyTag, false);
             addStudyFilter(normalizedTag);
         });
     }
@@ -195,12 +187,52 @@ class Profile extends Screen
         Requests.getPlayerOngoingGames(profileOwnerLogin, refreshOngoing);
     }
 
+    private function fillFriendList(friends:Array<FriendData>)
+    {
+        for (data in friends)
+            friendsSV.addComponent(new FriendListEntry(data));
+    }
+
+    @:bind(tcFiltersDropdown, UIEvent.CHANGE)
+    private function onTimeControlDropdownChanged(e:UIEvent)
+    {
+        if (tcFiltersDropdown.selectedIndex == 0)
+            setPastGameFilter(null);
+        else
+            setPastGameFilter(TimeControlType.createByIndex(tcFiltersDropdown.selectedIndex - 1));
+    }
+
+    private function fillTimeControlFiltersDropdown(totalPastGames:Int, elo:Map<TimeControlType, EloValue>, gamesCntByTimeControl:Map<TimeControlType, Int>)
+    {
+        var allGamesEntry:Dynamic = {};
+        allGamesEntry.tc = "All Games"; //TODO: Change to dict phrase
+        allGamesEntry.games = 'Games: $totalPastGames'; //TODO: Change to dict phrase
+        allGamesEntry.elo = "";
+        allGamesEntry.icon = "assets/symbols/profile/any_time_control.svg"; //TODO: Move path to AssetManager
+        tcFiltersDropdown.dataSource.add(allGamesEntry);
+
+        for (timeControl in TimeControlType.createAll())
+        {
+            var tcGameCnt:Int = gamesCntByTimeControl.get(timeControl);
+            var tcElo:EloValue = elo.get(timeControl);
+            var tcEloStr:String = eloToStr(tcElo);
+
+            var entry:Dynamic = {};
+            entry.tc = timeControl.getName(); //TODO: Change everywhere to dict.utils method
+            entry.games = 'Games: $tcGameCnt'; //TODO: Change to dict phrase
+            entry.elo = 'ELO: $tcEloStr'; //TODO: Change to dict phrase
+            entry.icon = AssetManager.timeControlPath(timeControl);
+            tcFiltersDropdown.dataSource.add(entry);
+        }
+    }
+
     public function new(ownerLogin:String, data:ProfileData)
     {
         super();
 
         this.profileOwnerLogin = ownerLogin;
         this.isPlayer = LoginManager.isPlayer(ownerLogin);
+        this.data = data;
 
         this.gamesLoaded = data.preloadedGames.length;
         this.studiesLoaded = data.preloadedStudies.length;
@@ -208,7 +240,7 @@ class Profile extends Screen
         this.activeStudyFilters = [];
         this.activePastGameTimeControlFilter = null;
 
-        userLabelBox.addComponent(SimpleComponents.playerLabel(ownerLogin, data.getMainELO()));
+        userLabelBox.addComponent(new PlayerLabel(ownerLogin, data.elo));
         rolesLabel.text = data.roles.map(role -> Dictionary.getPhrase(PROFILE_ROLE_TEXT(role))).join(', ');
 
         switch data.status 
@@ -231,6 +263,7 @@ class Profile extends Screen
         removeFriendBtn.hidden = !data.isFriend;
 
         fillFriendList(data.friends);
+        fillTimeControlFiltersDropdown(data.totalPastGames, data.elo, data.gamesCntByTimeControl);
         appendGames(data.preloadedGames);
         appendStudies(data.preloadedStudies);
         refreshOngoing(data.gamesInProgress);
