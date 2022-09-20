@@ -4,16 +4,15 @@ import gfx.basic_components.utils.DimValue;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.HBox;
 
-@:xml('
-    <hbox>
-        <arp-image id="img" height="100%" horizontalAlign="center" verticalAlign="center" />
-        <autosizing-label id="lbl" height="100%" verticalAlign="center" />
-    </hbox>
-')
 class AnnotatedImage extends HBox
 {
+    public var img:ARPImage;
+    public var lbl:AutosizingLabel;
+
     private var squareImage:Bool;
+
     private var spacingPerHeightUnit:Float;
+    private var imageScaleFactor:Float;
 
     private override function validateComponentLayout() 
     {
@@ -28,37 +27,66 @@ class AnnotatedImage extends HBox
         newStyle.paddingRight = spacing;
         customStyle = newStyle;
 
-        if (squareImage && img.originalWidth > img.originalHeight)
-            img.percentHeight = 100 * img.originalHeight / img.originalWidth;
-
-        if (img.layout != null)
-            img.validateComponentLayout();
+        if (squareImage)
+            if (img.originalWidth > img.originalHeight)
+                img.percentWidth = 100 * imageScaleFactor;
+            else
+                img.percentHeight = 100 * imageScaleFactor;
 
         return b;
     }
 
-    public function new(w:DimValue, h:DimValue, imgPath:String, labelText:String, squareImage:Bool, ?imgTooltip:Null<String>, ?spacingPerHeightUnit:Float = 0.16)
+    public function new(w:DimValue, h:DimValue, imgPath:String, labelText:String, ?imgTooltip:Null<String>, ?spacingPerHeightUnit:Float = 0.16, ?imageScaleFactor:Float = 1, ?squareImage:Bool = true)
     {
-        super();
-
         if (h == Auto)
             throw "autoHeight cannot be true for AnnotatedImage";
 
+        super();
+        this.squareImage = squareImage;
+        this.spacingPerHeightUnit = spacingPerHeightUnit;
+        this.imageScaleFactor = imageScaleFactor;
+
         assignWidth(this, w);
         assignHeight(this, h);
-        this.spacingPerHeightUnit = spacingPerHeightUnit;
-        this.squareImage = squareImage;
 
-        lbl.text = labelText;
-        lbl.align = w == Auto? Left : Center;
-
+        img = new ARPImage();
+        lbl = new AutosizingLabel();
+        
         img.resource = imgPath;
         img.tooltip = imgTooltip;
 
+        var imageStyle:Style = {};
+
+        imageStyle.verticalAlign = "center";
+        imageStyle.horizontalAlign = "center";
+
         if (imgTooltip != null)
-            img.customStyle = {backgroundColor: 0, backgroundOpacity: 0, pointerEvents: 'true', horizontalAlign: "center", verticalAlign: "center"};
+        {
+            imageStyle.backgroundColor = 0;
+            imageStyle.backgroundOpacity = 0;
+            imageStyle.pointerEvents = 'true';
+        }
+
+        img.customStyle = imageStyle;
+
+        if (squareImage)
+        {
+            var sq:Square = new Square();
+            sq.percentHeight = 100;
+            sq.addComponent(img);
+            addComponent(sq);
+        }
+        else
+        {
+            img.percentHeight = 100 * imageScaleFactor;
+            addComponent(img);
+        }
 
         if (w != Auto)
             lbl.percentWidth = 100;
+        lbl.percentHeight = 100;
+        lbl.text = labelText;
+        lbl.align = w == Auto? Left : Center;
+        addComponent(lbl);
     }
 }

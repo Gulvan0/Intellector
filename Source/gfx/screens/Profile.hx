@@ -187,12 +187,6 @@ class Profile extends Screen
         Requests.getPlayerOngoingGames(profileOwnerLogin, refreshOngoing);
     }
 
-    private function fillFriendList(friends:Array<FriendData>)
-    {
-        for (data in friends)
-            friendsSV.addComponent(new FriendListEntry(data));
-    }
-
     @:bind(tcFiltersDropdown, UIEvent.CHANGE)
     private function onTimeControlDropdownChanged(e:UIEvent)
     {
@@ -262,7 +256,7 @@ class Profile extends Screen
         addFriendBtn.hidden = data.isFriend;
         removeFriendBtn.hidden = !data.isFriend;
 
-        fillFriendList(data.friends);
+        //fillFriendList(data.friends);
         fillTimeControlFiltersDropdown(data.totalPastGames, data.elo, data.gamesCntByTimeControl);
         appendGames(data.preloadedGames);
         appendStudies(data.preloadedStudies);

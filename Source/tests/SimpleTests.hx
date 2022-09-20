@@ -1,5 +1,11 @@
 package tests;
 
+import gfx.profile.complex_components.FriendList;
+import haxe.ui.containers.HBox;
+import haxe.ui.containers.Box;
+import gfx.basic_components.Square;
+import haxe.ui.containers.ScrollView;
+import gfx.profile.simple_components.FriendListEntry;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.VBox;
 import utils.AssetManager;
@@ -9,6 +15,53 @@ import gfx.basic_components.AutosizingLabel;
 
 class SimpleTests 
 {
+	public static function square()
+	{
+		var bgColors:Array<Int> = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff];
+		var squares:Array<Square> = [];
+
+		for (i in 0...4)
+		{
+			var sq:Square = new Square();
+			sq.customStyle = {backgroundColor: bgColors[i], backgroundOpacity: 0.5, verticalAlign: 'center'};
+			squares.push(sq);
+		}
+
+		squares[0].height = 100;
+		squares[1].percentHeight = 100;
+		squares[2].width = 100;
+		squares[3].percentWidth = 100;
+
+		var contents1:HBox = new HBox();
+		contents1.percentWidth = 100;
+		contents1.height = 150;
+		contents1.customStyle = {borderSize: 2, borderColor: 0x666666};
+		for (i in 0...2)
+			contents1.addComponent(squares[i]);
+
+		var contents2:VBox = new VBox();
+		contents2.percentHeight = 100;
+		contents2.width = 150;
+		contents2.customStyle = {borderSize: 2};
+		for (i in 2...4)
+			contents2.addComponent(squares[i]);
+
+		var vbox:VBox = new VBox();
+		vbox.percentWidth = 75;
+		vbox.percentHeight = 75;
+		vbox.verticalAlign = 'center';
+		vbox.horizontalAlign = 'center';
+		vbox.addComponent(contents1);
+		vbox.addComponent(contents2);
+		
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(vbox);
+
+		Screen.instance.addComponent(box);
+	}
+
     public static function autosizingLabel()
     {
 		var v = new AutosizingLabel();
@@ -27,9 +80,9 @@ class SimpleTests
 		vbox.verticalAlign = "center";
 
 		var images:Array<AnnotatedImage> = [
-			new AnnotatedImage(Exact(500), Exact(100), AssetManager.timeControlPath(Blitz), "3+2", true, "Blitz"),
-			new AnnotatedImage(Auto, Exact(100), AssetManager.timeControlPath(Rapid), "10+15", true, "Rapid"),
-			new AnnotatedImage(Percent(50), Exact(100), AssetManager.timeControlPath(Correspondence), "Correspondence", true)
+			new AnnotatedImage(Exact(500), Exact(100), AssetManager.timeControlPath(Blitz), "3+2", "Blitz"),
+			new AnnotatedImage(Auto, Exact(100), AssetManager.timeControlPath(Rapid), "10+15", "Rapid"),
+			new AnnotatedImage(Percent(50), Exact(100), AssetManager.timeControlPath(Correspondence), "Correspondence")
 		];
 
 		for (image in images)
@@ -50,5 +103,29 @@ class SimpleTests
 		}
 
 		Screen.instance.addComponent(vbox);
+	}
+
+	public static function friendList()
+	{
+		var fl:FriendList = new FriendList();
+		fl.percentWidth = 50;
+		fl.height = 50;
+		fl.percentContentHeight = 100;
+		fl.horizontalAlign = 'center';
+		fl.verticalAlign = 'center';
+		fl.fill([
+			{login: "gulvan", status: Online},
+			{login: "kazvixx", status: Offline(20)},
+			{login: "kartoved", status: Offline(123456)},
+			{login: "superqwerty", status: InGame},
+			{login: "kaz", status: Offline(12345678)}
+		]);
+
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(fl);
+
+		Screen.instance.addComponent(box);
 	}
 }

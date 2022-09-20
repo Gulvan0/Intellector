@@ -85,7 +85,7 @@ class Main extends Sprite
 
 	private function start() 
 	{
-		SimpleTests.annotatedImage();
+		SimpleTests.friendList();
 		return;
 		var langInitializedFromCookie:Bool = Preferences.language.load();
 

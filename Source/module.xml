@@ -15,6 +15,7 @@
         <component class="gfx.main.OpenChallengesTable" alias="openchallengestable" />
         <component class="gfx.main.CurrentGamesTable" alias="currentgamestable" />
         <component class="gfx.main.PastGamesList" alias="pastgameslist" />
+        <component class="gfx.basic_components.Square" alias="square" />
         <component class="gfx.basic_components.ARPImage" alias="arpimage" />
         <component class="gfx.basic_components.CopyableText" alias="copyabletext" />
         <component class="gfx.basic_components.AutosizingLabel" alias="autosizinglabel" />

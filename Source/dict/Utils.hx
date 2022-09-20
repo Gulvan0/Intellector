@@ -1,5 +1,6 @@
 package dict;
 
+import gfx.profile.data.UserStatus;
 import gfx.game.LiveGameConstructor;
 import utils.StringUtils;
 import utils.TimeControl;
@@ -28,6 +29,18 @@ class Utils
         {
             case EN: color.getName();
             case RU: color == White? "Белые" : "Черные";
+        }
+    }
+
+    public static function getUserStatusText(status:UserStatus) 
+    {
+        switch status 
+        {
+            case Offline(secondsSinceLastAction):
+                var activityStr:String = getTimePassedString(secondsSinceLastAction);
+                return Dictionary.getPhrase(PROFILE_STATUS_TEXT(status), [activityStr]);
+            case Online, InGame:
+                return Dictionary.getPhrase(PROFILE_STATUS_TEXT(status));
         }
     }
 

@@ -12,12 +12,16 @@ class ARPImage extends Image
     private override function set_componentWidth(value:Null<Float>):Null<Float> 
     {
         widthBased = true;
+        super.set_percentHeight(null);
+        super.set_componentHeight(null);
         return super.set_componentWidth(value);
     }
 
     private override function set_componentHeight(value:Null<Float>):Null<Float> 
     {
         widthBased = false;
+        super.set_percentWidth(null);
+        super.set_componentWidth(null);
         return super.set_componentHeight(value);
     }
 
@@ -36,18 +40,22 @@ class ARPImage extends Image
             if (width != newWidth)
                 width = newWidth;
         }
-        return b;
+        return super.validateComponentLayout() || b;
     }
 
     private override function set_percentWidth(value:Null<Float>):Null<Float> 
     {
         widthBased = true;
+        super.set_percentHeight(null);
+        super.set_componentHeight(null);
         return super.set_percentWidth(value);
     }
 
     private override function set_percentHeight(value:Null<Float>):Null<Float>
     {
         widthBased = false;
+        super.set_percentWidth(null);
+        super.set_componentWidth(null);
         return super.set_percentHeight(value);
     }
 }

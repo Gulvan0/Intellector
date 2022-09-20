@@ -28,7 +28,7 @@ class AssetManager
 
     public static inline function statusPath(status:UserStatus):String
     {
-        return "assets/symbols/profile/user_status_indicators" + status.getName().toLowerCase() + ".svg";
+        return "assets/symbols/profile/user_status_indicators/" + status.getName().toLowerCase() + ".svg";
     }
 
     public static inline function piecePath(type:PieceType, color:PieceColor):String
