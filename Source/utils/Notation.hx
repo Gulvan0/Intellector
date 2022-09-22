@@ -82,7 +82,10 @@ class Notation
                 str += '⬢';
 
         if (castle)
-            return str + Notation.hexNotation(ply.from).toUpperCase() + ":" + Notation.hexNotation(ply.to).toUpperCase();
+            if (hexTo.type == Intellector)
+                return str + Notation.hexNotation(ply.to).toUpperCase() + ":" + Notation.hexNotation(ply.from).toUpperCase();
+            else
+                return str + Notation.hexNotation(ply.from).toUpperCase() + ":" + Notation.hexNotation(ply.to).toUpperCase();
 
         str += Notation.pieceAbbreviation(hexFrom.type);
 

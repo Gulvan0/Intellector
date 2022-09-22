@@ -1,5 +1,7 @@
 package gfx;
 
+import gfx.profile.data.MiniProfileData;
+import gfx.profile.complex_components.MiniProfile;
 import gfx.popups.IncomingChallengeDialog;
 import gfx.popups.ChangelogDialog;
 import gfx.popups.ChallengeParamsDialog;
@@ -218,6 +220,12 @@ class Dialogs
             if (onLoggedIn != null && event.button == DialogButton.OK)
                 onLoggedIn();
         }, false);
+    }
+
+    public static function miniProfile(username:String, data:MiniProfileData, enableActions:Bool)
+    {
+        var dialog:MiniProfile = new MiniProfile(username, data, enableActions);
+        addDialog(dialog, true, dialog.onClose, false);
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void)

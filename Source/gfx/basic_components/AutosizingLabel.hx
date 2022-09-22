@@ -22,6 +22,13 @@ class AutosizingLabel extends Label
         return b;
     }
 
+    public function setFontBold(value:Bool)
+    {
+        var newStyle:Style = customStyle.clone();
+        newStyle.fontBold = value;
+        customStyle = newStyle;
+    }
+
     public function validateFontSize()
     {
         var fontSize:Float;
