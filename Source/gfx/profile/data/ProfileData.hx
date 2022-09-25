@@ -25,6 +25,21 @@ class ProfileData
         throw "Not implemented";
     }
 
+    public function findMainELO():EloValue
+    {
+        var argmax:TimeControlType = null;
+        var max:Int = -1;
+
+        for (tc => gamesCnt in gamesCntByTimeControl.keyValueIterator())
+            if (gamesCnt > max || (gamesCnt == max && isSecondLongerThanFirst(argmax, tc)))
+            {
+                argmax = tc;
+                max = gamesCnt;
+            }
+            
+        return elo.get(argmax);
+    }
+
     public function new()
     {
 

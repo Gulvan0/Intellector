@@ -1,6 +1,7 @@
 package tests;
 
-import gfx.profile.data.MiniProfileData;
+import gfx.Dialogs;
+import net.shared.MiniProfileData;
 import gfx.profile.simple_components.PlayerLabel;
 import gfx.profile.complex_components.FriendList;
 import haxe.ui.containers.HBox;
@@ -131,7 +132,7 @@ class SimpleTests
 		Screen.instance.addComponent(box);
 	}
 
-	public static function playerLabel()
+	public static function miniProfile()
 	{
 		var data:MiniProfileData = new MiniProfileData();
 		data.gamesCntByTimeControl = [
@@ -153,7 +154,12 @@ class SimpleTests
 		data.isFriend = false;
 		data.status = InGame;
 
-		var fl:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", data);
+		Dialogs.miniProfile("gulvan", data);
+	}
+
+	public function playerLabel()
+	{
+		var fl:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", 2300, true);
 		fl.horizontalAlign = 'center';
 		fl.verticalAlign = 'center';
 

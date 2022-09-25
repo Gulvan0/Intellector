@@ -1,8 +1,4 @@
-package gfx.profile.data;
-
-import net.shared.UserRole;
-import net.shared.TimeControlType;
-import net.shared.EloValue;
+package net.shared;
 
 class MiniProfileData
 {

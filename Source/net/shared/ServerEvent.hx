@@ -1,5 +1,7 @@
 package net.shared;
 
+import net.shared.OpenChallengeData;
+import net.shared.MiniProfileData;
 import net.shared.SignInResult;
 import net.shared.SendChallengeResult;
 
@@ -55,6 +57,7 @@ enum ServerEvent
     SingleStudy(name:String, variantStr:String); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy
     StudyCreated(studyID:Int, studyName:String); //Answer to SetStudy with no overwriteID specified
+    MiniProfile(data:MiniProfileData); //Answer to GetPlayerProfile
     PlayerProfile(serializedProfileData:String); //Answer to GetPlayerProfile
     Games(games:Array<OverviewGameData>); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
     Studies(studies:Array<OverviewStudyData>); //Answer to GetStudiesByLogin
@@ -62,7 +65,7 @@ enum ServerEvent
     PlayerOffline; //Answer to Spectate: no game to spectate with a requested player
     PlayerNotInGame; //Answer to Spectate: no game to spectate with a requested player
 
-    OpenChallenges(data:Array<String>); //Answer to GetOpenChallenges
+    OpenChallenges(data:Array<OpenChallengeData>); //Answer to GetOpenChallenges
     CurrentGames(data:Array<{id:Int, currentLog:String}>); //Answer to GetCurrentGames
 
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created

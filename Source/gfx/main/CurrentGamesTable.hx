@@ -1,5 +1,6 @@
 package gfx.main;
 
+import net.shared.EloValue;
 import haxe.ui.containers.VBox;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.events.UIEvent;
@@ -18,7 +19,16 @@ class CurrentGamesTable extends VBox
         for (gameData in data)
         {
             var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.currentLog);
-            table.dataSource.add({time: parsedData.timeControl, players: '${parsedData.whiteLogin} vs ${parsedData.blackLogin}', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});
+
+            var whiteLabel:String = parsedData.whiteLogin;
+            if (parsedData.whiteELO != null)
+                whiteLabel += ' (${eloToStr(parsedData.whiteELO)})';
+
+            var blackLabel:String = parsedData.blackLogin;
+            if (parsedData.blackELO != null)
+                blackLabel += ' (${eloToStr(parsedData.blackELO)})';
+
+            table.dataSource.add({time: parsedData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});
             gameIDs.push(gameData.id);
         }
     }

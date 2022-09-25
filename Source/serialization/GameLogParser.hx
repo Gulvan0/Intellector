@@ -1,5 +1,6 @@
 package serialization;
 
+import net.shared.EloValue;
 import utils.TimeControl;
 import struct.Outcome;
 import struct.PieceColor;
@@ -24,6 +25,8 @@ class GameLogParserOutput
     public var timeControl:TimeControl = new TimeControl(0, 0);
     public var whiteLogin:Null<String>;
     public var blackLogin:Null<String>;
+    public var whiteELO:EloValue;
+    public var blackELO:EloValue;
     public var outcome:Null<Outcome>;
     public var msLeftWhenEnded:Null<Map<PieceColor, Int>>;
     public var movesPlayed:Array<Ply> = [];
@@ -180,6 +183,9 @@ class GameLogParser
                 var playerLogins:Array<String> = args[0].split(":");
                 parserOutput.whiteLogin = playerLogins[0];
                 parserOutput.blackLogin = playerLogins[1];
+            case "e":
+                parserOutput.whiteELO = decodeELO(args[0]);
+                parserOutput.blackELO = decodeELO(args[1]);
             case "D":
                 parserOutput.datetime = Date.fromTime(Std.parseInt(args[0]) * 1000);
             case "L":
@@ -221,6 +227,16 @@ class GameLogParser
                 }
                 parserOutput.chatEntries.push(Log(logMessage));
         }        
+    }
+
+    private static function decodeELO(str:String):EloValue 
+    {
+        if (str == "n")
+            return None;
+        else if (str.startsWith("p"))
+            return Provisional(Std.parseInt(str.substr(1)));
+        else 
+            return Normal(Std.parseInt(str));
     }
 
     public static function decodeOutcome(winnerColorCode:String, reasonCode:String):Null<Outcome>

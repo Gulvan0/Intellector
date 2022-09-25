@@ -30,6 +30,7 @@ enum ClientEvent
     AddTime; 
     GetGame(id:Int); //TODO: Ensure this also includes an effect of StopSpectating IN CASE THIS IS AN ONGOING GAME
     GetStudy(id:Int);
+    GetMiniProfile(login:String);
     GetPlayerProfile(login:String);
     AddFriend(login:String);
     RemoveFriend(login:String);

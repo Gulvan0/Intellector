@@ -1,5 +1,6 @@
 package net;
 
+import net.shared.OpenChallengeData;
 import net.shared.TimeControlType;
 import net.shared.OverviewGameData;
 import net.shared.OverviewStudyData;
@@ -62,6 +63,24 @@ class Requests
             case OpenchallengeNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    public static function getMiniProfile(login:String) 
+    {
+        Networker.addHandler(getMiniProfile_handler.bind(login));
+        Networker.emitEvent(GetMiniProfile(login));
+    }
+
+    private static function getMiniProfile_handler(login:String, event:ServerEvent) 
+    {
+        switch event
+        {
+            case MiniProfile(data):
+                Dialogs.miniProfile(login, data);
             default:
                 return false;
         }
@@ -222,13 +241,13 @@ class Requests
         }
     }
 
-    public static function getOpenChallenges(callback:Array<String>->Void)
+    public static function getOpenChallenges(callback:Array<OpenChallengeData>->Void)
     {
         Networker.addHandler(getOpenChallenges_handler.bind(callback));
         Networker.emitEvent(GetOpenChallenges);
     }
 
-    private static function getOpenChallenges_handler(callback:Array<String>->Void, event:ServerEvent)
+    private static function getOpenChallenges_handler(callback:Array<OpenChallengeData>->Void, event:ServerEvent)
     {
         switch event
         {

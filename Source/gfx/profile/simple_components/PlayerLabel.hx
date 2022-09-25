@@ -1,8 +1,8 @@
 package gfx.profile.simple_components;
 
+import net.Requests;
 import gfx.basic_components.utils.DimValue;
 import haxe.ui.events.MouseEvent;
-import gfx.profile.data.MiniProfileData;
 import net.shared.EloValue;
 import net.shared.TimeControlType;
 import haxe.ui.containers.HBox;
@@ -15,22 +15,6 @@ import haxe.ui.containers.HBox;
 class PlayerLabel extends HBox
 {
     private var username:String;
-    private var miniProfileData:MiniProfileData;
-
-    private function findMainELO(gamesCntByTimeControl:Map<TimeControlType, Int>, eloMap:Map<TimeControlType, EloValue>):EloValue
-    {
-        var argmax:TimeControlType = null;
-        var max:Int = -1;
-
-        for (tc => gamesCnt in gamesCntByTimeControl.keyValueIterator())
-            if (gamesCnt > max || (gamesCnt == max && isSecondLongerThanFirst(argmax, tc)))
-            {
-                argmax = tc;
-                max = gamesCnt;
-            }
-            
-        return eloMap.get(argmax);
-    }
 
     @:bind(lbl, MouseEvent.MOUSE_OVER)
     private function onHover(e)
@@ -47,20 +31,19 @@ class PlayerLabel extends HBox
     @:bind(lbl, MouseEvent.CLICK)
     private function onClicked(e)
     {
-        Dialogs.miniProfile(username, miniProfileData);
+        Requests.getMiniProfile(username);
     }
 
-    public function new(height:DimValue, username:String, miniProfileData:MiniProfileData)
+    public function new(height:DimValue, username:String, displayedELO:EloValue, interactive:Bool)
     {
         super();
         this.username = username;
-        this.miniProfileData = miniProfileData;
         
         assignHeight(this, height);
 
-        var mainElo:EloValue = findMainELO(miniProfileData.gamesCntByTimeControl, miniProfileData.elo);
-        var mainEloStr:String = eloToStr(mainElo);
-        lbl.text = '$username ($mainEloStr)';
-        lbl.enablePointerEvents();
+        var displayedELOStr:String = eloToStr(displayedELO);
+        lbl.text = '$username ($displayedELOStr)';
+        if (interactive)
+            lbl.enablePointerEvents();
     }
 }

@@ -1,6 +1,5 @@
 package gfx;
 
-import gfx.profile.data.MiniProfileData;
 import gfx.profile.complex_components.MiniProfile;
 import gfx.popups.IncomingChallengeDialog;
 import gfx.popups.ChangelogDialog;
@@ -38,6 +37,7 @@ import haxe.ui.containers.dialogs.MessageBox.MessageBoxType;
 import haxe.ui.containers.dialogs.Dialogs as DialogManager;
 import haxe.ui.core.Screen;
 import gfx.basic_components.SpriteWrapper;
+import net.shared.MiniProfileData;
 
 enum SpaceRemoval
 {

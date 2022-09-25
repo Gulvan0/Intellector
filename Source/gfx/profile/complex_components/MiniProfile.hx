@@ -11,10 +11,10 @@ import net.shared.EloValue;
 import utils.AssetManager;
 import gfx.basic_components.AnnotatedImage;
 import net.shared.TimeControlType;
+import net.shared.MiniProfileData;
 import haxe.ds.BalancedTree;
 import dict.Dictionary;
 import gfx.profile.simple_components.PlayerLabel;
-import gfx.profile.data.MiniProfileData;
 import gfx.profile.Utils;
 import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.core.Screen as HaxeUIScreen;
@@ -111,6 +111,15 @@ class MiniProfile extends Dialog
             friendBtn.hidden = true;
         else
             unfriendBtn.hidden = true;
+
+        if (LoginManager.isPlayer(username))
+        {
+            friendBtn.hidden = true;
+            unfriendBtn.hidden = true;
+            followBtn.hidden = true;
+            unfollowBtn.hidden = true;
+            challengeBtn.hidden = true;
+        }
 
         if (SceneManager.playerInGame())
             btnBar.disabled = true;

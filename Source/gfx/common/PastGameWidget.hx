@@ -1,5 +1,6 @@
 package gfx.common;
 
+import net.shared.EloValue;
 import gameboard.Board;
 import gfx.basic_components.BoardWrapper;
 import struct.PieceColor;
@@ -36,9 +37,17 @@ class PastGameWidget extends ItemRenderer
         
             boardContainer.addComponent(boardWrapper);
 
+            var whiteLabel:String = parsedData.whiteLogin;
+            if (parsedData.whiteELO != null)
+                whiteLabel += ' (${eloToStr(parsedData.whiteELO)})';
+
+            var blackLabel:String = parsedData.blackLogin;
+            if (parsedData.blackELO != null)
+                blackLabel += ' (${eloToStr(parsedData.blackELO)})';
+
             datetimeLabel.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
             timeControlLabel.text = parsedData.timeControl.toString();
-            opponentsLabel.text = '${parsedData.whiteLogin} vs ${parsedData.blackLogin}';
+            opponentsLabel.text = '$whiteLabel vs $blackLabel';
             resultLabel.text = Utils.getResolution(parsedData.outcome);
             if (parsedData.startingSituation.isDefaultStarting())
                 openingLabel.text = OpeningTree.getOpening(parsedData.movesPlayed);

@@ -1,5 +1,7 @@
 package gfx.main;
 
+import net.shared.EloValue;
+import net.shared.OpenChallengeData;
 import haxe.ui.events.UIEvent;
 import struct.ChallengeParams;
 import haxe.ui.containers.VBox;
@@ -13,14 +15,14 @@ class OpenChallengesTable extends VBox
 {
     private var challengeOwners:Array<String> = [];
 
-    private function appendChallenges(data:Array<String>)
+    private function appendChallenges(challenges:Array<OpenChallengeData>)
     {
-        for (serializedParams in data)
+        for (data in challenges)
         {
-            var params:ChallengeParams = ChallengeParams.deserialize(serializedParams);
+            var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
             var bracketText:String = Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated));
             var modeData = {color: params.acceptorColor, situation: params.customStartingSituation};
-            table.dataSource.add({mode: modeData, time: params.timeControl, player: params.ownerLogin, bracket: bracketText});
+            table.dataSource.add({mode: modeData, time: params.timeControl, player: '${params.ownerLogin} (${eloToStr(data.ownerELO)})}', bracket: bracketText});
             challengeOwners.push(params.ownerLogin);
         }
     }
