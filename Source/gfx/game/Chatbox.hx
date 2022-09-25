@@ -1,5 +1,7 @@
 package gfx.game;
 
+import net.Requests;
+import haxe.ui.styles.Style;
 import utils.StringUtils;
 import dict.Phrase;
 import gfx.game.GameActionBar.ActionBtn;
@@ -87,40 +89,48 @@ class Chatbox extends VBox implements INetObserver
 
     private function appendMessage(author:String, text:String, isNotFromSpectator:Bool) 
     {
-        if (isNotFromSpectator)
-            appendTextGeneric('<p><b>$author:</b> $text</p>');
-        else
-            appendTextGeneric('<p><i><b>$author:</b> $text</i></p>');
+        var normalAuthorStyle:Style = {fontBold: true, fontItalic: !isNotFromSpectator, pointerEvents: 'true'};
+        var hoverAuthorStyle:Style = normalAuthorStyle.clone();
+        hoverAuthorStyle.color = 0x428fd8;
+
+        var authorLabel:Label = new Label();
+        authorLabel.percentWidth = 100;
+        authorLabel.text = author;
+        authorLabel.customStyle = normalAuthorStyle;
+
+        authorLabel.onMouseOver = e -> {
+            authorLabel.customStyle = hoverAuthorStyle;
+        };
+        authorLabel.onMouseOut = e -> {
+            authorLabel.customStyle = normalAuthorStyle;
+        };
+        authorLabel.onClick = e -> {
+            Requests.getMiniProfile(author);
+        };
+
+        var textLabel:Label = new Label();
+        textLabel.percentWidth = 100;
+        textLabel.text = author;
+        textLabel.customStyle = {fontItalic: !isNotFromSpectator};
+
+        history.addComponent(authorLabel);
+        history.addComponent(textLabel);
+        Timer.delay(scrollToMax, 50);
     }
 
     private function appendLog(text:String) 
     {
-        appendTextGeneric('<p><i>$text</i></p>');
-    }
-
-    private function appendTextGeneric(htmlString:String)
-    {
-        if (historyText.htmlText == null || historyText.htmlText == "null")
-            historyText.htmlText = htmlString;
-        else
-            historyText.htmlText += htmlString;
-        waitAndScroll();
-    }
-
-    private function waitAndScroll() 
-    {
-        var t:Timer = new Timer(100);
-        t.run = () -> {
-            t.stop(); 
-            scrollToMax();
-        }    
+        var label:Label = new Label();
+        label.percentWidth = 100;
+        label.text = text;
+        label.customStyle = {fontItalic: true, textAlign: 'center'};
+        
+        history.addComponent(label);
+        Timer.delay(scrollToMax, 50);
     }
 
     private function scrollToMax() 
     {
-        var hscroll = history.findComponent(HorizontalScroll, false);
-        if (hscroll != null)
-            hscroll.hidden = true;
         var vscroll = history.findComponent(VerticalScroll, false);
         if (vscroll != null)
             vscroll.pos = vscroll.max;
