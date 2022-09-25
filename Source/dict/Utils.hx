@@ -109,19 +109,29 @@ class Utils
         {
             case LessThanASecond: "Только что";
             case Seconds(1): "Секунду назад";
-            case Seconds(cnt) if (cnt < 5): '$cnt секунды назад';
+            case Seconds(cnt) if (cnt % 100 >= 11 && cnt % 100 <= 14): '$cnt секунд назад';
+            case Seconds(cnt) if (cnt % 10 == 1): '$cnt секунду назад';
+            case Seconds(cnt) if (cnt % 10 >= 2 && cnt % 10 <= 4): '$cnt секунды назад';
             case Seconds(cnt): '$cnt секунд назад';
             case Minutes(1): "Минуту назад";
-            case Minutes(cnt) if (cnt < 5): '$cnt минуты назад';
+            case Minutes(cnt) if (cnt % 100 >= 11 && cnt % 100 <= 14): '$cnt минут назад';
+            case Minutes(cnt) if (cnt % 10 == 1): '$cnt минуту назад';
+            case Minutes(cnt) if (cnt % 10 >= 2 && cnt % 10 <= 4): '$cnt минуты назад';
             case Minutes(cnt): '$cnt минут назад';
             case Hours(1): "Час назад";
-            case Hours(cnt) if (cnt < 5): '$cnt часа назад';
+            case Hours(cnt) if (cnt % 100 >= 11 && cnt % 100 <= 14): '$cnt часов назад';
+            case Hours(cnt) if (cnt % 10 == 1): '$cnt час назад';
+            case Hours(cnt) if (cnt % 10 >= 2 && cnt % 10 <= 4): '$cnt часа назад';
             case Hours(cnt): '$cnt часов назад';
             case Days(1): "Вчера";
-            case Days(cnt) if (cnt < 5): '$cnt дня назад';
+            case Days(cnt) if (cnt % 100 >= 11 && cnt % 100 <= 14): '$cnt дней назад';
+            case Days(cnt) if (cnt % 10 == 1): '$cnt день назад';
+            case Days(cnt) if (cnt % 10 >= 2 && cnt % 10 <= 4): '$cnt дня назад';
             case Days(cnt): '$cnt дней назад';
             case Years(1): "Год назад";
-            case Years(cnt) if (cnt < 5): '$cnt года назад';
+            case Years(cnt) if (cnt % 100 >= 11 && cnt % 100 <= 14): '$cnt лет назад';
+            case Years(cnt) if (cnt % 10 == 1): '$cnt год назад';
+            case Years(cnt) if (cnt % 10 >= 2 && cnt % 10 <= 4): '$cnt года назад';
             case Years(cnt): '$cnt лет назад';
         }
     }

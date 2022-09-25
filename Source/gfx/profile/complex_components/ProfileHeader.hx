@@ -1,6 +1,6 @@
 package gfx.profile.complex_components;
 
-import haxe.ui.containers.HBox;
+import haxe.ui.containers.VBox;
 import net.Requests;
 import struct.ChallengeParams;
 import haxe.ui.events.MouseEvent;
@@ -10,7 +10,7 @@ import gfx.profile.simple_components.PlayerLabel;
 import haxe.ui.containers.Box;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/profile/profile_header.xml"))
-class ProfileHeader extends HBox
+class ProfileHeader extends VBox
 {
     private var username:String;
 
@@ -45,8 +45,8 @@ class ProfileHeader extends HBox
         super();
         this.username = username;
 
-        usernameLabel = new PlayerLabel(Exact(32), username, profileData.getMainELO(), false);
-        leftVBox.addComponentAt(usernameLabel, 0);
+        usernameLabel = new PlayerLabel(Exact(44), username, profileData.findMainELO(), false);
+        upperHBox.addComponentAt(usernameLabel, 0);
 
         if (Lambda.empty(profileData.roles))
             rolesLabel.hidden = true;

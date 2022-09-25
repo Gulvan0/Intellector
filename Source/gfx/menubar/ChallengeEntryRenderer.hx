@@ -96,7 +96,7 @@ class ChallengeEntryRenderer extends ItemRenderer
         };
 
         timeControlIcon.resource = AssetManager.timeControlPath(timeControlType);
-        timeControlIcon.tooltip = timeControlType.getName();
+        timeControlIcon.tooltip = timeControlType == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : timeControlType.getName();
         paramsLabel.text = timeControl.toString() + ' • ' + Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated)) + ' • ';
         colorIcon.resource = AssetManager.challengeColorPath(color);
         colorIcon.tooltip = Dictionary.getPhrase(CHALLENGE_COLOR_ICON_TOOLTIP(color));

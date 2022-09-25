@@ -1,5 +1,7 @@
 package net.shared;
 
+import gfx.profile.data.UserStatus;
+
 class MiniProfileData
 {
     public var gamesCntByTimeControl:Map<TimeControlType, Int>;

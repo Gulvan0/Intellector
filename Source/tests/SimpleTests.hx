@@ -1,5 +1,7 @@
 package tests;
 
+import gfx.profile.data.ProfileData;
+import gfx.profile.complex_components.ProfileHeader;
 import gfx.Dialogs;
 import net.shared.MiniProfileData;
 import gfx.profile.simple_components.PlayerLabel;
@@ -159,7 +161,54 @@ class SimpleTests
 
 	public function playerLabel()
 	{
-		var fl:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", 2300, true);
+		var fl:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", Normal(2300), true);
+		fl.horizontalAlign = 'center';
+		fl.verticalAlign = 'center';
+
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(fl);
+
+		Screen.instance.addComponent(box);
+	}
+
+	public static function profileHeader()
+	{
+		var data:ProfileData = new ProfileData();
+		data.gamesCntByTimeControl = [
+			Hyperbullet => 0,
+			Bullet => 20,
+			Blitz => 3,
+			Rapid => 228,
+			Classic => 0,
+			Correspondence => 1
+		];
+		data.elo = [
+			Hyperbullet => None,
+			Bullet => Normal(1123),
+			Blitz => Provisional(1964),
+			Rapid => Normal(1556),
+			Classic => None,
+			Correspondence => Provisional(1520)
+		]; 
+		data.isFriend = false;
+		data.status = Offline(12345678);
+		data.roles = [Admin];
+		data.friends = [
+			{login: "gulvan", status: Online},
+			{login: "kazvixx", status: Offline(20)},
+			{login: "kartoved", status: Offline(123456)},
+			{login: "superqwerty", status: InGame},
+			{login: "kaz", status: Offline(12345678)}
+		];
+		data.preloadedGames = [];
+		data.preloadedStudies = [];
+		data.gamesInProgress = [];
+		data.totalPastGames = 252;
+		data.totalStudies = 0;
+
+		var fl:ProfileHeader = new ProfileHeader("kazvixx", data);
 		fl.horizontalAlign = 'center';
 		fl.verticalAlign = 'center';
 

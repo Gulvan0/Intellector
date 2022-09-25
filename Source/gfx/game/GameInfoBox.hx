@@ -75,7 +75,12 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         switch event 
         {
             case FollowedPlayerUpdated(followedLogin):
-                markFollowedPlayer(followedLogin);
+                if (whiteLoginLabel.username.toLowerCase() == followedLogin.toLowerCase())
+                    markFollowedPlayer(White);
+                else if (blackLoginLabel.username.toLowerCase() == followedLogin.toLowerCase())
+                    markFollowedPlayer(Black);
+                else
+                    markFollowedPlayer(null);
             default:
         }
     }

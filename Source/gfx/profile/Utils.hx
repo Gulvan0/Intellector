@@ -1,6 +1,5 @@
 package gfx.profile;
 
-import dict.Dictionary;
 import haxe.ui.styles.Style;
 import gfx.profile.data.UserStatus;
 import haxe.ui.components.Label;
@@ -9,7 +8,7 @@ class Utils
 {
     public static function updateStatusLabel(label:Label, status:UserStatus) 
     {
-        label.text = Dictionary.getPhrase(PROFILE_STATUS_TEXT(status));
+        label.text = dict.Utils.getUserStatusText(status);
         
         var newStyle:Style = label.customStyle.clone();
 

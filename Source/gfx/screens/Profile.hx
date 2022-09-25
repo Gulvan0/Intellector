@@ -212,7 +212,7 @@ class Profile extends Screen
             var tcEloStr:String = eloToStr(tcElo);
 
             var entry:Dynamic = {};
-            entry.tc = timeControl.getName(); //TODO: Change everywhere to dict.utils method
+            entry.tc = timeControl == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : timeControl.getName();
             entry.games = 'Games: $tcGameCnt'; //TODO: Change to dict phrase
             entry.elo = 'ELO: $tcEloStr'; //TODO: Change to dict phrase
             entry.icon = AssetManager.timeControlPath(timeControl);

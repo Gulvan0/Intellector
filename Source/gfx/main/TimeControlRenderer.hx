@@ -1,5 +1,6 @@
 package gfx.main;
 
+import dict.Dictionary;
 import utils.AssetManager;
 import utils.TimeControl;
 import haxe.ui.core.ItemRenderer;
@@ -17,7 +18,7 @@ class TimeControlRenderer extends ItemRenderer
             var timeControlType:TimeControlType = timeControl.getType();
 
             tcIcon.resource = AssetManager.timeControlPath(timeControlType);
-            tcIcon.text = timeControlType.getName();
+            tcIcon.text = timeControlType == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : timeControlType.getName();
 
             tcLabel.text = timeControl.toString();
         }
