@@ -110,6 +110,11 @@ class GameLogParserOutput
             return null;
     }
 
+    public function isPlayerParticipant():Bool 
+    {
+        return getPlayerColor() != null;
+    }
+
     public function getPlayerOpponentLogin():Null<String>
     {
         if (LoginManager.isPlayer(whiteLogin))

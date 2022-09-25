@@ -45,6 +45,9 @@ class ChallengeEntryRenderer extends ItemRenderer
 
     private override function onDataChanged(data:Dynamic) 
     {
+        if (data == null)
+            return;
+
         var isOutgoing:Bool = true;
         var params:ChallengeParams = data.params;
         challengeID = data.id;

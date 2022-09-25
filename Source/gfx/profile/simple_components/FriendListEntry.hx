@@ -1,5 +1,6 @@
 package gfx.profile.simple_components;
 
+import utils.StringUtils;
 import dict.Utils;
 import utils.AssetManager;
 import gfx.basic_components.GenAnnotatedImage;
@@ -9,7 +10,7 @@ class FriendListEntry extends GenAnnotatedImage<FriendData>
 {
     private function generateLabelText(data:FriendData):String
     {
-        return data.login.charAt(0).toUpperCase() + data.login.substr(1).toLowerCase();
+        return StringUtils.capitalize(data.login);
     } 
 
     private function generateImagePath(data:FriendData):String

@@ -48,6 +48,13 @@ class ChallengeParams
             return defaultParams();
     }
 
+    public static function directChallengeParams(calleeLogin:String):ChallengeParams
+    {
+        var params:ChallengeParams = loadFromCookies();
+        params.type = Direct(calleeLogin);
+        return params;
+    }
+
     public static function rematchParams(opponentLogin:String, playerColor:PieceColor, timeControl:TimeControl, rated:Bool, ?startingSituation:Null<Situation>):ChallengeParams
     {
         return new ChallengeParams(timeControl, Direct(opponentLogin), LoginManager.getLogin(), playerColor, startingSituation, rated);

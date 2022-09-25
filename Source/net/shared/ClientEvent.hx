@@ -14,8 +14,9 @@ enum ClientEvent
     RequestTimeoutCheck; 
     Message(text:String); 
     GetOpenChallenge(hostLogin:String); 
-    FollowPlayer(login:String); //TODO: Ensure this also includes an effect of StopSpectating
-    StopSpectating; //Used both to stop spectating a game AND to stop following a player
+    FollowPlayer(login:String); //TODO: Ensure this also includes an effect of StopFollowing
+    StopSpectating;
+    StopFollowing;
     Resign; 
     OfferDraw; 
     CancelDraw; 

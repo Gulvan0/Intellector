@@ -289,6 +289,22 @@ class Dictionary
                 return ["Clear filters", "Очистить фильтры"];
             case PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT:
                 return ["Input tag:", "Введите тег:"];
+            
+            case MINIPROFILE_DIALOG_TITLE(ownerLogin):
+                return ['Player info: $ownerLogin', 'Данные игрока: $ownerLogin'];
+            case MINIPROFILE_FOLLOW_BTN_TOOLTIP:
+                return ["Follow", "Отслеживать"];
+            case MINIPROFILE_UNFOLLOW_BTN_TOOLTIP:
+                return ["Stop following", "Перестать отслеживать"];
+            case MINIPROFILE_FRIEND_BTN_TOOLTIP:
+                return ["Add friend", "Добавить в друзья"];
+            case MINIPROFILE_UNFRIEND_BTN_TOOLTIP:
+                return ["Remove friend", "Удалить из друзей"];
+            case MINIPROFILE_CHALLENGE_BTN_TOOLTIP:
+                return ["Send challenge", "Вызвать на игру"];
+            case MINIPROFILE_TO_PROFILE_BTN_TOOLTIP:
+                return ["To profile", "Открыть профиль"];
+
             case MAIN_MENU_CREATE_GAME_BTN_TEXT:
                 return ["Create Game", "Создать игру"];
             case READ_FULL_CHANGELOG_TOOLTIP:

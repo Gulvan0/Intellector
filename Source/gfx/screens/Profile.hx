@@ -48,7 +48,7 @@ class Profile extends Screen
     @:bind(followBtn, MouseEvent.CLICK)
     private function follow(e)
     {
-        Networker.emitEvent(FollowPlayer(profileOwnerLogin));
+        Requests.followPlayer(profileOwnerLogin);
     }
 
     @:bind(addFriendBtn, MouseEvent.CLICK)

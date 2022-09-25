@@ -92,6 +92,11 @@ class StringUtils
         }
         return converted;
     }
+    
+    public static inline function capitalize(str:String):String
+    {
+        return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
+    }
 
     public static inline function clean(orig:String, ?maxChars:Int, ?isLegalChar:String->Bool):String
     {

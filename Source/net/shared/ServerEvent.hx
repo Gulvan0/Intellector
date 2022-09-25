@@ -7,7 +7,6 @@ enum ServerEvent
 {
     GameStarted(match_id:Int, logPreamble:String); //Sent when a game with one of the players being the user starts. Signals the app to navigate to the game screen. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
     SpectationData(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to Spectate. All the match details required may be derived from the currentLog arg. Signals the app to navigate to the game screen. 
-    FollowPlayerGameStarted(match_id:Int, followedPlayerLogin:String, logPreamble:String); //Sent when a player followed by the user starts a new game. Signals the app to navigate to the game screen. 
     
     GameIsOver(log:String); //Answer to GetGame: game has ended and now can be revisited
     GameIsOngoing(whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetGame: game is in process. Player should either spectate or reconnect based on whether the log contains their login

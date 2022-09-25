@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.game.LiveGameConstructor;
 import browser.CredentialCookies;
 import gfx.Dialogs;
 import serialization.GameLogParser;
@@ -34,6 +35,11 @@ class SceneManager
     public static function getCurrentScreenType():Null<ScreenType>
     {
         return currentScreenType;
+    }
+
+    public static function playerInGame():Bool
+    {
+        return scene.playerInGame();
     }
 
     public static function onConnectionError()
@@ -116,10 +122,15 @@ class SceneManager
         {
             case GameStarted(match_id, logPreamble):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
-                toScreen(LiveGame(match_id, New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime)));
-            case FollowPlayerGameStarted(match_id, followedPlayerLogin, logPreamble):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
-                toScreen(LiveGame(match_id, Ongoing(parsedData, parsedData.timeControl.startSecs, parsedData.timeControl.startSecs, Date.now().getTime(), followedPlayerLogin)));
+                var constructor:LiveGameConstructor;
+                if (parsedData.isPlayerParticipant())
+                {
+                    FollowManager.stopFollowing();
+                    constructor = New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
+                }
+                else
+                    constructor = Ongoing(parsedData, parsedData.timeControl.startSecs, parsedData.timeControl.startSecs, Date.now().getTime(), FollowManager.getFollowedPlayerLogin());
+                toScreen(LiveGame(match_id, constructor));
             case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));

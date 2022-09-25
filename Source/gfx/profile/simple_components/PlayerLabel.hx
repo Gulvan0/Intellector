@@ -16,11 +16,10 @@ class PlayerLabel extends HBox
 {
     private var username:String;
     private var miniProfileData:MiniProfileData;
-    public var enableMiniProfileActions:Bool;
 
     private function findMainELO(gamesCntByTimeControl:Map<TimeControlType, Int>, eloMap:Map<TimeControlType, EloValue>):EloValue
     {
-        var argmax:TimeControlType;
+        var argmax:TimeControlType = null;
         var max:Int = -1;
 
         for (tc => gamesCnt in gamesCntByTimeControl.keyValueIterator())
@@ -48,20 +47,20 @@ class PlayerLabel extends HBox
     @:bind(lbl, MouseEvent.CLICK)
     private function onClicked(e)
     {
-        Dialogs.miniProfile(username, miniProfileData, enableMiniProfileActions);
+        Dialogs.miniProfile(username, miniProfileData);
     }
 
-    public function new(height:DimValue, username:String, miniProfileData:MiniProfileData, enableMiniProfileActions:Bool)
+    public function new(height:DimValue, username:String, miniProfileData:MiniProfileData)
     {
         super();
         this.username = username;
         this.miniProfileData = miniProfileData;
-        this.enableMiniProfileActions = enableMiniProfileActions;
         
         assignHeight(this, height);
 
         var mainElo:EloValue = findMainELO(miniProfileData.gamesCntByTimeControl, miniProfileData.elo);
         var mainEloStr:String = eloToStr(mainElo);
         lbl.text = '$username ($mainEloStr)';
+        lbl.enablePointerEvents();
     }
 }

@@ -222,9 +222,9 @@ class Dialogs
         }, false);
     }
 
-    public static function miniProfile(username:String, data:MiniProfileData, enableActions:Bool)
+    public static function miniProfile(username:String, data:MiniProfileData)
     {
-        var dialog:MiniProfile = new MiniProfile(username, data, enableActions);
+        var dialog:MiniProfile = new MiniProfile(username, data);
         addDialog(dialog, true, dialog.onClose, false);
     }
 

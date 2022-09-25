@@ -179,13 +179,13 @@ class Requests
         return true;
     }
 
-    public static function watchPlayer(login:String)
+    public static function followPlayer(login:String)
     {
-        Networker.addHandler(watchPlayer_handler.bind(login));
+        Networker.addHandler(followPlayer_handler.bind(login));
         Networker.emitEvent(FollowPlayer(login));
     }
 
-    private static function watchPlayer_handler(login:String, event:ServerEvent)
+    private static function followPlayer_handler(login:String, event:ServerEvent)
     {
         switch event
         {

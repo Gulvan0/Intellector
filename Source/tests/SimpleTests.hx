@@ -1,5 +1,7 @@
 package tests;
 
+import gfx.profile.data.MiniProfileData;
+import gfx.profile.simple_components.PlayerLabel;
 import gfx.profile.complex_components.FriendList;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.Box;
@@ -120,6 +122,40 @@ class SimpleTests
 			{login: "superqwerty", status: InGame},
 			{login: "kaz", status: Offline(12345678)}
 		]);
+
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(fl);
+
+		Screen.instance.addComponent(box);
+	}
+
+	public static function playerLabel()
+	{
+		var data:MiniProfileData = new MiniProfileData();
+		data.gamesCntByTimeControl = [
+			Hyperbullet => 0,
+			Bullet => 20,
+			Blitz => 3,
+			Rapid => 228,
+			Classic => 0,
+			Correspondence => 1
+		];
+		data.elo = [
+			Hyperbullet => None,
+			Bullet => Normal(1123),
+			Blitz => Provisional(1964),
+			Rapid => Normal(1556),
+			Classic => None,
+			Correspondence => Provisional(1520)
+		]; 
+		data.isFriend = false;
+		data.status = InGame;
+
+		var fl:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", data);
+		fl.horizontalAlign = 'center';
+		fl.verticalAlign = 'center';
 
 		var box:Box = new Box();
 		box.percentWidth = 100;

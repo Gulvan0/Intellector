@@ -6,6 +6,7 @@ enum GlobalEvent
 {
     LoggedIn(incomingChallenges:Array<{id:Int, serializedParams:String}>);
     LoggedOut;
+    FollowedPlayerUpdated(followedLogin:String);
     PreferenceUpdated(name:PreferenceName);
 }
 

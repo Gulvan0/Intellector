@@ -29,6 +29,15 @@ class AutosizingLabel extends Label
         customStyle = newStyle;
     }
 
+    public function enablePointerEvents()
+    {
+        var newStyle:Style = customStyle.clone();
+        newStyle.pointerEvents = 'true';
+        newStyle.backgroundColor = 0x000000;
+        newStyle.backgroundOpacity = 0;
+        customStyle = newStyle;
+    }
+
     public function validateFontSize()
     {
         var fontSize:Float;

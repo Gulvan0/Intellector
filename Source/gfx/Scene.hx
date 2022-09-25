@@ -33,6 +33,11 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private static var isPlayerInGame:Bool = false;
 
+    public function playerInGame():Bool
+    {
+        return isPlayerInGame;
+    }
+
     public function resize()
     {
         var siteNameRules:Map<ResponsiveProperty, ResponsivenessRule> = [StyleProp(PaddingLeft) => VH(1), StyleProp(PaddingRight) => VH(1), StyleProp(FontSize) => VH(3)];
@@ -209,7 +214,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function startSpectating(requestedLogin:String)
     {
-        Requests.watchPlayer(requestedLogin);
+        Requests.followPlayer(requestedLogin);
     }
 
     private function onSpectationData(watchedPlayer:String, match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)
