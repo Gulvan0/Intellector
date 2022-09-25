@@ -143,7 +143,7 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
 
         switch constructor 
         {
-            case Live(New(_, _, _, startingSituation, _)):
+            case Live(New(_, _, _, _, _, startingSituation, _)):
                 this.startingSituation = startingSituation;
                 this.currentSituation = startingSituation.copy();
 

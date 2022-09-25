@@ -180,6 +180,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     public function handleGlobalEvent(event:GlobalEvent)
     {
         board.handleGlobalEvent(event);
+        gameinfobox.handleGlobalEvent(event);
 
         if (event.match(PreferenceUpdated(Markup)))
             boardContainer.invalidateComponentLayout(true);
@@ -322,7 +323,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, timeControl, _, startDatetime):
+            case New(whiteLogin, blackLogin, _, _, timeControl, _, startDatetime):
                 this.isPastGame = false;
                 this.playerColor = LoginManager.isPlayer(blackLogin)? Black : White;
                 this.whiteLogin = whiteLogin;

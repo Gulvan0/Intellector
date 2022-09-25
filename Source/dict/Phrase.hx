@@ -156,10 +156,6 @@ enum Phrase
     SETTINGS_DISABLED_OPTION_VALUE;
     SETTINGS_ENABLED_OPTION_VALUE;
 
-    //Spectate/Follow
-
-    FOLLOWED_PLAYER_LABEL_GAMEINFOBOX_TOOLTIP;
-
     //Profile
 
     PROFILE_ROLE_TEXT(role:UserRole);
@@ -225,6 +221,9 @@ enum Phrase
     GAME_ENDED_DIALOG_TITLE;
     GAME_ENDED_PLAYER_DIALOG_MESSAGE(outcome:Outcome, playerColor:PieceColor);
     GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(outcome:Outcome, winnerLogin:String, loserLogin:String);
+
+    LIVE_WATCHING_LABEL_TEXT(watchedPlayerLogin:String);
+    LIVE_WATCHING_LABEL_TOOLTIP;
 
     //Dialogs
 

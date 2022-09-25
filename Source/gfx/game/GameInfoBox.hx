@@ -1,5 +1,8 @@
 package gfx.game;
 
+import net.shared.EloValue;
+import GlobalBroadcaster.GlobalEvent;
+import gfx.profile.simple_components.PlayerLabel;
 import net.shared.TimeControlType;
 import dict.Utils;
 import format.SVG;
@@ -33,6 +36,10 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
     private var openingTree:OpeningTree;
     private var movesAfterTerminalOpeningNode:Int = 0;
 
+    private var whiteLoginLabel:PlayerLabel;
+    private var crossSign:Label;
+    private var blackLoginLabel:PlayerLabel;
+
     private var renderedForWidth:Float = 0;
 
     public function handleNetEvent(event:ServerEvent)
@@ -59,6 +66,16 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         {
             case ContinuationMove(ply, plyStr, performedBy):
                 accountMove(ply);
+            default:
+        }
+    }
+
+    public function handleGlobalEvent(event:GlobalEvent)
+    {
+        switch event 
+        {
+            case FollowedPlayerUpdated(followedLogin):
+                markFollowedPlayer(followedLogin);
             default:
         }
     }
@@ -139,7 +156,24 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         return b;
     }
 
-    private function initNewGame(whiteLogin:String, blackLogin:String, timeControl:TimeControl, startDatetime:Date)
+    private function fillOpponentsBox(whiteLogin:String, blackLogin:String, whiteELO:EloValue, blackELO:EloValue)
+    {
+        whiteLoginLabel = new PlayerLabel(Exact(20), whiteLogin, whiteELO, true);
+        whiteLoginLabel.horizontalAlign = "center";
+
+        crossSign = new Label();
+        crossSign.text = "⚔";
+        crossSign.customStyle = {fontSize: 20, fontBold: true, horizontalAlign: "center"};
+
+        blackLoginLabel = new PlayerLabel(Exact(20), blackLogin, blackELO, true);
+        blackLoginLabel.horizontalAlign = "center";
+
+        opponentsBox.addComponent(whiteLoginLabel);
+        opponentsBox.addComponent(crossSign);
+        opponentsBox.addComponent(blackLoginLabel);
+    }
+
+    private function initNewGame(whiteLogin:String, blackLogin:String, whiteELO:EloValue, blackELO:EloValue, timeControl:TimeControl, startDatetime:Date)
     {
         var tcType:TimeControlType = timeControl.getType();
 
@@ -149,9 +183,8 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
             matchParameters.text = timeControl.toString() + " • " + tcType.getName();
 
         datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
-        whiteLoginLabel.text = whiteLogin;
-        blackLoginLabel.text = blackLogin;
         resolution.text = Utils.getResolution(null);
+        fillOpponentsBox(whiteLogin, blackLogin, whiteELO, blackELO);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
     }
@@ -165,8 +198,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         else
             matchParameters.text = parsedData.timeControl.toString() + " • " + tcType.getName();
 
-        whiteLoginLabel.text = parsedData.whiteLogin;
-        blackLoginLabel.text = parsedData.blackLogin;
+        fillOpponentsBox(parsedData.whiteLogin, parsedData.blackLogin, parsedData.whiteELO, parsedData.blackELO);
         resolution.text = Utils.getResolution(parsedData.outcome);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
@@ -178,16 +210,19 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
             accountMove(ply);
     }
 
-    private function markFollowedPlayer(color:PieceColor)
+    private function markFollowedPlayer(color:Null<PieceColor>)
     {
-        var label:Label = color == White? whiteLoginLabel : blackLoginLabel;
-
-        label.text = "👁 " + label.text;
-        label.tooltip = Dictionary.getPhrase(FOLLOWED_PLAYER_LABEL_GAMEINFOBOX_TOOLTIP);
-
-        var newStyle:Style = label.customStyle.clone();
-        newStyle.pointerEvents = "true";
-        label.customStyle = newStyle;
+        switch color 
+        {
+            case null:
+                watchingLabel.hidden = true;
+            case White:
+                watchingLabel.hidden = false;
+                watchingLabel.text = Dictionary.getPhrase(LIVE_WATCHING_LABEL_TEXT(whiteLoginLabel.username));
+            case Black:
+                watchingLabel.hidden = false;
+                watchingLabel.text = Dictionary.getPhrase(LIVE_WATCHING_LABEL_TEXT(blackLoginLabel.username));
+        }
     }
 
     public function init(constructor:LiveGameConstructor)
@@ -196,8 +231,8 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, timeControl, _, startDatetime):
-                initNewGame(whiteLogin, blackLogin, timeControl, startDatetime);
+            case New(whiteLogin, blackLogin, whiteElo, blackElo, timeControl, _, startDatetime):
+                initNewGame(whiteLogin, blackLogin, whiteElo, blackElo, timeControl, startDatetime);
             case Ongoing(parsedData, _, _, _, followedPlayerLogin):
                 initActualizedGame(parsedData);
                 if (followedPlayerLogin != null)

@@ -279,7 +279,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, timeControl, startingSituation, _):
+            case New(whiteLogin, blackLogin, _, _, timeControl, startingSituation, _):
                 setMode(PlayerOngoingGame);
                 this.enableTakebackAfterMove = startingSituation.turnColor == White? 1 : 2;
                 move = 0;

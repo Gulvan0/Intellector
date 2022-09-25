@@ -9,11 +9,8 @@
         <box id="imagebox" width="70px" height="70px" style="padding:0 0 0 0" verticalAlign="center">
             <image id="timeControlIcon" verticalAlign="center" horizontalAlign="center" />
         </box>
-        <vbox id="opponentsBox" width="100%" style="spacing:0px;margin-left:5px" verticalAlign="center">
-            <label id="whiteLoginLabel" width="100%" verticalAlign="center" style="font-size:17px;text-align:center;background-color:yellow;background-opacity:0" />
-            <label id="crossSign" width="100%" verticalAlign="center" text="⚔" style="font-size:20px;text-align:center;font-style:bold" />
-            <label id="blackLoginLabel" width="100%" verticalAlign="center" style="font-size:17px;text-align:center;background-color:yellow;background-opacity:0" />
-        </vbox>
+        <vbox id="opponentsBox" width="100%" style="spacing:0px;margin-left:5px" verticalAlign="center" />
     </hbox>
+    <label id="watchingLabel" hidden="true" tooltip="${Dictionary.getPhrase(LIVE_WATCHING_LABEL_TOOLTIP)}" width="100%" style="font-size:16px;margin-top:10px;margin-bottom:10px;text-align:center;pointer-events:true" />
     <label id="opening" width="100%" horizontalAlign="center" style="font-size:14px;margin-top:10px;font-style:italic;text-align:left" />
 </card>

@@ -333,7 +333,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
                 this.state = new NeutralState();
                 this.behavior = new AnalysisBehavior();
 
-            case Live(New(whiteLogin, blackLogin, _, startingSituation, _)):
+            case Live(New(whiteLogin, blackLogin, _, _,  _, startingSituation, _)):
                 this._startingSituation = startingSituation;
                 this._currentSituation = _startingSituation.copy();
                 

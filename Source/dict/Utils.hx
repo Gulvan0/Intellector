@@ -147,7 +147,7 @@ class Utils
     {
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, timeControl, startingSituation, startDatetime):
+            case New(whiteLogin, blackLogin, _, _, timeControl, startingSituation, startDatetime):
                 var opponentLogin:String = LoginManager.isPlayer(whiteLogin)? blackLogin : whiteLogin;
                 return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
             case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp, followedPlayerLogin):

@@ -243,8 +243,6 @@ class Dictionary
                 return ["Disabled", "Нет"];
             case SETTINGS_ENABLED_OPTION_VALUE:
                 return ["Enabled", "Да"];
-            case FOLLOWED_PLAYER_LABEL_GAMEINFOBOX_TOOLTIP:
-                return ["You follow this player. Each time he/she starts a new game, you'll be automatically redirected to watch it. To unfollow, simply leave this screen.", "Вы наблюдаете за этим игроком. Если игрок начнет новую игру, вы автоматически последуете за ним. Чтобы прекратить наблюдение, просто покиньте этот экран"];
             case PROFILE_ROLE_TEXT(Admin):
                 return ["Main Developer", "Главный разработчик"];
             case PROFILE_ROLE_TEXT(AnacondaDeveloper):
@@ -337,6 +335,7 @@ class Dictionary
                 return ["You will play as White", "Вы будете играть за белых"];
             case CHALLENGE_COLOR_ICON_TOOLTIP(Black):
                 return ["You will play as Black", "Вы будете играть за черных"];
+
             case GAME_ENDED_DIALOG_TITLE:
                 return ["Game over", "Игра окончена"];
             case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Mate(winnerColor), playerColor) if (playerColor == winnerColor):
@@ -377,6 +376,13 @@ class Dictionary
                 return ["Game has ended up in a draw. Reason: sixty-move rule.", "Игра завершена вничью. Причина: правило 60 ходов"];
             case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Abort, _), GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(Abort, _, _):
                 return ["Game aborted.", "Игра прервана."];
+
+            case LIVE_WATCHING_LABEL_TEXT(watchedPlayerLogin):
+                return ['Watching $watchedPlayerLogin', 'Наблюдение за $watchedPlayerLogin'];
+            case LIVE_WATCHING_LABEL_TOOLTIP:
+                return ["You follow this player. Each time he/she starts a new game, you'll be automatically redirected to watch it. To unfollow, simply leave this screen.", "Вы наблюдаете за этим игроком. Если игрок начнет новую игру, вы автоматически последуете за ним. Чтобы прекратить наблюдение, просто покиньте этот экран"];
+                
+
             case INPUT_PLAYER_LOGIN:
                 return ["Input player's username", "Введите ник игрока"];
             case INCOMING_CHALLENGE_DIALOG_TITLE:

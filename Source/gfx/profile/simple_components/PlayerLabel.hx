@@ -14,7 +14,7 @@ import haxe.ui.containers.HBox;
 ')
 class PlayerLabel extends HBox
 {
-    private var username:String;
+    public var username(default, null):String;
 
     @:bind(lbl, MouseEvent.MOUSE_OVER)
     private function onHover(e)
