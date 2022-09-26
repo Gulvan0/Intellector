@@ -281,10 +281,10 @@ class Dictionary
                 return ["Reload", "Обновить"];
             case PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP:
                 return ["Remove tag from filters", "Убрать тег из фильтров"];
-            case PROFILE_ADD_TAG_FILTER_BTN_TOOLTIP:
-                return ["Add filter by tag", "Добавить фильтр по тегу"];
-            case PROFILE_CLEAR_TAG_FILTERS_BTN_TOOLTIP:
-                return ["Clear filters", "Очистить фильтры"];
+            case PROFILE_ADD_TAG_FILTER_BTN_TEXT:
+                return ["Add filter", "Добавить фильтр"];
+            case PROFILE_CLEAR_TAG_FILTERS_BTN_TEXT:
+                return ["Clear", "Очистить"];
             case PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT:
                 return ["Input tag:", "Введите тег:"];
             

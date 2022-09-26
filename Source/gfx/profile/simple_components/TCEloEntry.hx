@@ -5,6 +5,7 @@ import dict.Utils;
 import utils.AssetManager;
 import gfx.basic_components.GenAnnotatedImage;
 import gfx.profile.data.EloData;
+import dict.Dictionary;
 
 class TCEloEntry extends GenAnnotatedImage<EloData>
 {

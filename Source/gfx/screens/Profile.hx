@@ -37,40 +37,6 @@ class Profile extends Screen
     private var activePastGameTimeControlFilter:Null<TimeControlType>;
     private var activeStudyFilters:Array<String>;
 
-    @:bind(sendChallengeBtn, MouseEvent.CLICK)
-    private function sendChallenge(e)
-    {
-        var params:ChallengeParams = ChallengeParams.loadFromCookies();
-        params.type = Direct(profileOwnerLogin);
-        Dialogs.specifyChallengeParams(params);
-    }
-
-    @:bind(followBtn, MouseEvent.CLICK)
-    private function follow(e)
-    {
-        Requests.followPlayer(profileOwnerLogin);
-    }
-
-    @:bind(addFriendBtn, MouseEvent.CLICK)
-    private function addFriend(e)
-    {
-        addFriendBtn.hidden = true;
-        Networker.emitEvent(AddFriend(profileOwnerLogin));
-        Timer.delay(() -> {
-            removeFriendBtn.hidden = false;
-        }, 3000);
-    }
-
-    @:bind(removeFriendBtn, MouseEvent.CLICK)
-    private function removeFriend(e)
-    {
-        removeFriendBtn.hidden = true;
-        Networker.emitEvent(RemoveFriend(profileOwnerLogin));
-        Timer.delay(() -> {
-            addFriendBtn.hidden = false;
-        }, 3000);
-    }
-
     private function appendGames(games:Array<OverviewGameData>)
     {
         for (data in games)

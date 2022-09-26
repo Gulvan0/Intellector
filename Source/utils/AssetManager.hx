@@ -17,6 +17,11 @@ import openfl.display.BitmapData;
 import struct.PieceType;
 import struct.PieceColor;
 
+enum SingleAsset
+{
+    StudyTagFilterCross;
+}
+
 class AssetManager 
 {
     public static var pieces:Map<PieceType, Map<PieceColor, SVG>> = [];
@@ -25,6 +30,14 @@ class AssetManager
     private static var loadedResourcesCnt:Int = 0;
     private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length + TimeControlType.createAll().length;
     private static var onLoadedCallback:Void->Void;
+
+    public static inline function singleAssetPath(asset:SingleAsset):String
+    {
+        return "assets/symbols/" + switch asset 
+        {
+            case StudyTagFilterCross: "common/study/remove_filter_cross.svg";
+        }
+    }
 
     public static inline function statusPath(status:UserStatus):String
     {

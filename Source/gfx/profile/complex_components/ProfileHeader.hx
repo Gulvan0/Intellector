@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import haxe.Timer;
 import haxe.ui.containers.VBox;
 import net.Requests;
 import struct.ChallengeParams;
@@ -31,13 +32,21 @@ class ProfileHeader extends VBox
     @:bind(addFriendBtn, MouseEvent.CLICK)
     private function onAddFriendPressed(e)
     {
+        addFriendBtn.hidden = true;
         Networker.emitEvent(AddFriend(username));
+        Timer.delay(() -> {
+            removeFriendBtn.hidden = false;
+        }, 3000);
     }
 
     @:bind(removeFriendBtn, MouseEvent.CLICK)
     private function onRemoveFriendPressed(e)
     {
+        removeFriendBtn.hidden = true;
         Networker.emitEvent(RemoveFriend(username));
+        Timer.delay(() -> {
+            addFriendBtn.hidden = false;
+        }, 3000);
     }
 
     public function new(username:String, profileData:ProfileData)

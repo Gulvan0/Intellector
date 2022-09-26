@@ -1,5 +1,6 @@
 package tests;
 
+import gfx.profile.simple_components.StudyFilterRect;
 import gfx.profile.data.ProfileData;
 import gfx.profile.complex_components.ProfileHeader;
 import gfx.Dialogs;
@@ -217,6 +218,21 @@ class SimpleTests
 		box.percentHeight = 100;
 		box.addComponent(fl);
 
+		Screen.instance.addComponent(box);
+	}
+
+	public static function studyTagFilterRect()
+	{
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+
+		var fl:StudyFilterRect;
+		fl = new StudyFilterRect(Exact(30), "разобрать потом", () -> {box.removeComponent(fl);});
+		fl.horizontalAlign = 'center';
+		fl.verticalAlign = 'center';
+
+		box.addComponent(fl);
 		Screen.instance.addComponent(box);
 	}
 }
