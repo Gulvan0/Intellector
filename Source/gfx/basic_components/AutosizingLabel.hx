@@ -1,5 +1,6 @@
 package gfx.basic_components;
 
+import haxe.ui.events.UIEvent;
 import gfx.basic_components.utils.TextAlign;
 import haxe.ui.styles.Style;
 import haxe.ui.components.Label;
@@ -13,13 +14,10 @@ class AutosizingLabel extends Label
     public var align:TextAlign = Center;
     public var lengthGetter:Label->Int = label -> label.text.length;
 
-    private override function validateComponentLayout():Bool 
+    @:bind(this, UIEvent.RESIZE)
+    private function onResize(e)
     {
-        var b:Bool = super.validateComponentLayout();
-
         validateFontSize();
-
-        return b;
     }
 
     public function setFontBold(value:Bool)

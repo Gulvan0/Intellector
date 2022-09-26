@@ -1,5 +1,7 @@
 package gfx.profile.complex_components;
 
+import dict.Dictionary;
+import gfx.basic_components.utils.DimValue;
 import gfx.profile.data.UserStatus;
 import gfx.basic_components.AutosizingLabel;
 import gfx.profile.simple_components.FriendListEntry;
@@ -33,13 +35,15 @@ class FriendList extends ScrollView
             addComponent(new FriendListEntry(data));
     }
 
-    public function new()
+    public function new(w:DimValue, h:Float)
     {
         super();
         this.contentLayoutName = 'horizontal';
+        this.contentHeight = h;
+        assignWidth(this, w);
         
         var titleLabel:AutosizingLabel = new AutosizingLabel();
-        titleLabel.text = "Friends: "; //TODO: Use dict
+        titleLabel.text = Dictionary.getPhrase(PROFILE_FRIENDS_PREPENDER);
         titleLabel.customStyle = {fontBold: true};
         titleLabel.percentHeight = 100;
         addComponent(titleLabel);

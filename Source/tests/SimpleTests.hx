@@ -1,5 +1,6 @@
 package tests;
 
+import gfx.profile.complex_components.StudyFilterList;
 import gfx.profile.simple_components.StudyFilterRect;
 import gfx.profile.data.ProfileData;
 import gfx.profile.complex_components.ProfileHeader;
@@ -113,10 +114,7 @@ class SimpleTests
 
 	public static function friendList()
 	{
-		var fl:FriendList = new FriendList();
-		fl.percentWidth = 50;
-		fl.height = 50;
-		fl.percentContentHeight = 100;
+		var fl:FriendList = new FriendList(Percent(50), 50);
 		fl.horizontalAlign = 'center';
 		fl.verticalAlign = 'center';
 		fl.fill([
@@ -233,6 +231,40 @@ class SimpleTests
 		fl.verticalAlign = 'center';
 
 		box.addComponent(fl);
+		Screen.instance.addComponent(box);
+	}
+
+	public static function studyFilterList()
+	{
+		var tags:Array<String> = [];
+
+		function onAdded(tag:String)
+		{
+			tags.push(tag);
+			trace(tags);
+		}
+
+		function onRemoved(tag:String)
+		{
+			tags.remove(tag);
+			trace(tags);
+		}
+
+		function onCleared()
+		{
+			tags = [];
+			trace(tags);
+		}
+
+		var fl:StudyFilterList = new StudyFilterList(Percent(50), 36, onAdded, onRemoved, onCleared);
+		fl.horizontalAlign = 'center';
+		fl.verticalAlign = 'center';
+
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(fl);
+
 		Screen.instance.addComponent(box);
 	}
 }

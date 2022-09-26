@@ -279,6 +279,11 @@ class Dictionary
                 return ["Load more", "Загрузить больше"];
             case PROFILE_RELOAD_BTN_TEXT:
                 return ["Reload", "Обновить"];
+
+            case PROFILE_TAG_FILTERS_PREPENDER:
+                return ["Filter by tags:", "Фильтровать по тегам:"];
+            case PROFILE_TAG_NO_FILTERS_PLACEHOLDER_TEXT:
+                return ["<none selected>", "<не выбраны>"];
             case PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP:
                 return ["Remove tag from filters", "Убрать тег из фильтров"];
             case PROFILE_ADD_TAG_FILTER_BTN_TEXT:

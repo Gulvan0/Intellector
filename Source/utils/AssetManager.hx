@@ -1,5 +1,6 @@
 package utils;
 
+import haxe.ui.util.ImageLoader;
 import gfx.profile.data.UserStatus;
 import gfx.menubar.ChallengesIconMode;
 import haxe.CallStack;
@@ -28,7 +29,7 @@ class AssetManager
     public static var timeControlIcons:Map<TimeControlType, SVG> = [];
 
     private static var loadedResourcesCnt:Int = 0;
-    private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length + TimeControlType.createAll().length;
+    private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length + TimeControlType.createAll().length + SingleAsset.createAll().length;
     private static var onLoadedCallback:Void->Void;
 
     public static inline function singleAssetPath(asset:SingleAsset):String
@@ -134,5 +135,8 @@ class AssetManager
                 timeControlIcons.set(type, new SVG(s));
                 onResourceLoaded();
             });
+
+        for (asset in SingleAsset.createAll())
+            new ImageLoader(singleAssetPath(asset)).load(d -> {onResourceLoaded();}, false);
     }
 }

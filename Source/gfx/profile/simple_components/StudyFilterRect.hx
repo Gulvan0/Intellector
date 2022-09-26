@@ -1,5 +1,6 @@
 package gfx.profile.simple_components;
 
+import haxe.ui.events.UIEvent;
 import dict.Dictionary;
 import utils.AssetManager;
 import gfx.basic_components.ARPImage;
@@ -12,6 +13,20 @@ class StudyFilterRect extends HBox
     public var tagLabel:AutosizingLabel;
     public var cross:ARPImage;
 
+    @:bind(this, UIEvent.RESIZE)
+    private function onResize(e)
+    {
+        var spacing:Float = 0.16 * height;
+        customStyle = {
+            horizontalSpacing: spacing,
+            paddingTop: spacing,
+            paddingBottom: spacing,
+            paddingLeft: spacing,
+            paddingRight: spacing,
+            backgroundColor: 0x7fc7ff
+        };
+    }
+
     public function new(h:DimValue, tagName:String, onRemovePressed:Void->Void)
     {
         if (h == Auto)
@@ -21,15 +36,9 @@ class StudyFilterRect extends HBox
 
         assignHeight(this, h);
 
-        var spacing:Float = 0.16 * height;
-        customStyle.horizontalSpacing = spacing;
-        customStyle.paddingTop = spacing;
-        customStyle.paddingBottom = spacing;
-        customStyle.paddingLeft = spacing;
-        customStyle.paddingRight = spacing;
-        customStyle.backgroundColor = 0x7fc7ff;
-
         tagLabel = new AutosizingLabel();
+        tagLabel.align = Left;
+        tagLabel.sizePerCharHeight = 0.9;
         tagLabel.percentHeight = 100;
         tagLabel.text = tagName;
         tagLabel.customStyle.color = 0x0a4761;

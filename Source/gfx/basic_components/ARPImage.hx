@@ -9,20 +9,20 @@ class ARPImage extends Image
 {
     private var widthBased:Bool = true;
 
-    private override function set_componentWidth(value:Null<Float>):Null<Float> 
+    private override function set_width(value:Float):Float 
     {
         widthBased = true;
         super.set_percentHeight(null);
         super.set_componentHeight(null);
-        return super.set_componentWidth(value);
+        return super.set_width(value);
     }
 
-    private override function set_componentHeight(value:Null<Float>):Null<Float> 
+    private override function set_height(value:Float):Float 
     {
         widthBased = false;
         super.set_percentWidth(null);
         super.set_componentWidth(null);
-        return super.set_componentHeight(value);
+        return super.set_height(value);
     }
 
     private override function validateComponentLayout():Bool 
@@ -32,13 +32,13 @@ class ARPImage extends Image
         {
             var newHeight = width * originalHeight / originalWidth;
             if (height != newHeight)
-                height = newHeight;
+                super.set_height(newHeight);
         }
         else
         {
             var newWidth = height * originalWidth / originalHeight;
             if (width != newWidth)
-                width = newWidth;
+                super.set_width(newWidth);
         }
         return super.validateComponentLayout() || b;
     }
