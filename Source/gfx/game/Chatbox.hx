@@ -39,7 +39,7 @@ class Chatbox extends VBox implements INetObserver
             case SpectatorMessage(author, message):
                 if (isOwnerSpectator)
                     appendMessage(author, message, false);
-            case GameEnded(winnerColorCode, reasonCode, _, _): 
+            case GameEnded(winnerColorCode, reasonCode, _, _, _): 
                 onGameEnded(GameLogParser.decodeOutcome(winnerColorCode, reasonCode));
             case PlayerDisconnected(color): 
                 appendLog(Utils.getPlayerDisconnectedMessage(PieceColor.createByName(color)));

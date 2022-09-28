@@ -221,8 +221,6 @@ enum Phrase
     //Live Game
 
     GAME_ENDED_DIALOG_TITLE;
-    GAME_ENDED_PLAYER_DIALOG_MESSAGE(outcome:Outcome, playerColor:PieceColor);
-    GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(outcome:Outcome, winnerLogin:String, loserLogin:String);
 
     LIVE_WATCHING_LABEL_TEXT(watchedPlayerLogin:String);
     LIVE_WATCHING_LABEL_TOOLTIP;

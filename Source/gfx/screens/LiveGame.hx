@@ -147,19 +147,18 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         switch event 
         {
-            case GameEnded(winnerColorCode, outcomeCode, _, _):
-                var winnerColor:Null<PieceColor> = GameLogParser.decodeColor(winnerColorCode);
+            case GameEnded(winnerColorCode, outcomeCode, _, _, newPersonalElo):
                 outcome = GameLogParser.decodeOutcome(winnerColorCode, outcomeCode);
-
-                var winnerLogin:String = winnerColor == White? whiteLogin : blackLogin;
-                var loserLogin:String = winnerColor == Black? whiteLogin : blackLogin;
 
                 Assets.getSound("sounds/notify.mp3").play();
 
+                var message:String;
                 if (playerColor != null)
-                    Dialogs.info(GAME_ENDED_PLAYER_DIALOG_MESSAGE(outcome, playerColor), GAME_ENDED_DIALOG_TITLE);
+                    message = Utils.getPlayerGameOverDialogMessage(outcome, playerColor, newPersonalElo);
                 else
-                    Dialogs.info(GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(outcome, winnerLogin, loserLogin), GAME_ENDED_DIALOG_TITLE);
+                    message = Utils.getSpectatorGameOverDialogMessage(outcome, whiteLogin, blackLogin);
+                
+                Dialogs.infoRaw(message, Dictionary.getPhrase(GAME_ENDED_DIALOG_TITLE));
             default:
         }
     }

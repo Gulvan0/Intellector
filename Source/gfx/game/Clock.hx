@@ -75,7 +75,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 moveNum -= plysToUndo;
                 if (plysToUndo % 2 == 1)
                     toggleTurnColor();
-            case GameEnded(winner_color, reason, whiteSecondsRemainder, blackSecondsRemainder):
+            case GameEnded(winner_color, reason, whiteSecondsRemainder, blackSecondsRemainder, _):
                 active = false;
                 pauseTimer();
                 correctTime(whiteSecondsRemainder, blackSecondsRemainder, Date.now().getTime());

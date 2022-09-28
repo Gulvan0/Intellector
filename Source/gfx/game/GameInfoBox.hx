@@ -54,7 +54,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
                 accountMove(ply);
             case Rollback(plysToUndo, _, _, _):
                 revertPlys(plysToUndo);
-            case GameEnded(winnerColorCode, reasonCode, _, _):
+            case GameEnded(winnerColorCode, reasonCode, _, _, _):
                 resolution.text = Utils.getResolution(GameLogParser.decodeOutcome(winnerColorCode, reasonCode));
             default:
         }

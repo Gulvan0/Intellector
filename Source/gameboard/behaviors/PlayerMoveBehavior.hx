@@ -29,7 +29,7 @@ class PlayerMoveBehavior implements IBehavior
                 if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 1)
                     boardInstance.state = new StubState();
                 
-            case GameEnded(winner_color, reason, _, _):
+            case GameEnded(winner_color, reason, _, _, _):
                 boardInstance.state.exitToNeutral();
                 boardInstance.state = new StubState();
             

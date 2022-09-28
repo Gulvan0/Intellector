@@ -38,7 +38,7 @@ enum ServerEvent
     TimeCorrection(whiteSeconds:Float, blackSeconds:Float, timestamp:Float); //Signals to update the in-game timers. Significant game events (Move, Rollback, GameEnded) also contain the same data which should be processed in the exact same way
     Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<String>, whiteSeconds:Float, blackSeconds:Float, timestamp:Float); //A move has been played. Sent both to opponent and to all of the spectators
     Rollback(plysToUndo:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float); //Signal to undo a number of plys in a current game. Sent to both spectators and players
-    GameEnded(winner_color:String, reason:String, whiteSecondsRemainder:Float, blackSecondsRemainder:Float); //Game over. Sent both to players and to all of the spectators
+    GameEnded(winner_color:String, reason:String, whiteSecondsRemainder:Float, blackSecondsRemainder:Float, newPersonalElo:Null<Int>); //Game over. Sent both to players and to all of the spectators
 
     PlayerDisconnected(color:String); //Sent to the players and the spectators when one of the players disconnects
     PlayerReconnected(color:String); //Sent to the players and the spectators when one of the players reconnects

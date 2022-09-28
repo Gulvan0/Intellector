@@ -90,7 +90,7 @@ class EnemyMoveBehavior implements IBehavior
                 if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 0)
                     boardInstance.state = new StubState();
                 
-            case GameEnded(winner_color, reason, _, _):
+            case GameEnded(winner_color, reason, _, _, _):
                 boardInstance.state.exitToNeutral();
                 resetPremoves();
                 boardInstance.state = new StubState();

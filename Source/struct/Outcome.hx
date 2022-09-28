@@ -2,26 +2,46 @@ package struct;
 
 import struct.PieceColor;
 
-enum Outcome
+enum DecisiveOutcomeType
 {
-    Mate(winner:PieceColor);
-    Breakthrough(winner:PieceColor);
-    Timeout(winner:PieceColor);
-    Resign(winner:PieceColor);
-    Abandon(winner:PieceColor);
+    Mate;
+    Breakthrough;
+    Timeout;
+    Resign;
+    Abandon;
+}
+
+enum DrawishOutcomeType
+{
     DrawAgreement;
     Repetition;
     NoProgress;
     Abort;
 }
 
-function isDrawish(outcome:Outcome)
+enum PersonalOutcome
+{
+    Win(type:DecisiveOutcomeType);
+    Loss(type:DecisiveOutcomeType);
+    Draw(type:DrawishOutcomeType);
+}
+
+enum Outcome
+{
+    Decisive(type:DecisiveOutcomeType, winnerColor:PieceColor);
+    Drawish(type:DrawishOutcomeType);
+}
+
+function toPersonal(outcome:Outcome, playerColor:PieceColor):PersonalOutcome
 {
     switch outcome 
     {
-        case Mate(_), Breakthrough(_), Timeout(_), Resign(_), Abandon(_):
-            return false;
-        case DrawAgreement, Repetition, NoProgress, Abort:
-            return true;
+        case Decisive(type, winnerColor):
+            if (winnerColor == playerColor)
+                return Win(type);
+            else
+                return Loss(type);
+        case Drawish(type):
+            return Draw(type);
     }
 }

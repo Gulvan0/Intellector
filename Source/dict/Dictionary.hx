@@ -343,50 +343,11 @@ class Dictionary
 
             case GAME_ENDED_DIALOG_TITLE:
                 return ["Game over", "Игра окончена"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Mate(winnerColor), playerColor) if (playerColor == winnerColor):
-                return ["Your opponent's Intellector has been captured. You won!", "Интеллектор противника пал. Вы победили!"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Mate(winnerColor), playerColor):
-                return ["Your Intellector has been captured. You lost.", "Ваш Интеллектор пал. Вы проиграли."];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Breakthrough(winnerColor), playerColor) if (playerColor == winnerColor):
-                return ["Your Intellector has reached the last rank. You won!", "Ваш Интеллектор достиг последней горизонтали. Вы победили!"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Breakthrough(winnerColor), playerColor):
-                return ["Your opponent's Intellector has reached the last rank. You lost.", "Вражеский Интеллектор достиг последней горизонтали. Вы проиграли."];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Timeout(winnerColor), playerColor) if (playerColor == winnerColor):
-                return ["Your opponent has run out of time. You won!", "У вашего противника закончилось время. Вы победили!"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Timeout(winnerColor), playerColor):
-                return ["You lost on time.", "У вас закончилось время. Вы проиграли."];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Resign(winnerColor), playerColor) if (playerColor == winnerColor):
-                return ["Your opponent has resigned. You won!", "Ваш противник сдался. Вы победили!"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Resign(winnerColor), playerColor):
-                return ["You lost by resignation.", "Вы сдались; в игре засчитано поражение"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Abandon(winnerColor), playerColor) if (playerColor == winnerColor):
-                return ["Your opponent has abandoned the game. You won!", "Ваш противник покинул партию. Вы победили!"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Abandon(winnerColor), playerColor):
-                return ["You lost (game abandoned).", "Игра покинута. Вы проиграли."];
-            case GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(Mate(_), winnerLogin, loserLogin):
-                return ['$loserLogin\'s Intellector has been captured. $winnerLogin won.', 'Интеллектор игрока $loserLogin повержен. Победитель: $winnerLogin.'];
-            case GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(Breakthrough(_), winnerLogin, loserLogin):
-                return ['$winnerLogin\'s Intellector has reached the last rank. $winnerLogin won.', 'Интеллектор игрока $winnerLogin достиг последней горизонтали. Победитель: $winnerLogin.'];
-            case GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(Timeout(_), winnerLogin, loserLogin):
-                return ['$loserLogin has lost on time. $winnerLogin won.', 'Игрок $loserLogin просрочил время. Победитель: $winnerLogin.'];
-            case GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(Resign(_), winnerLogin, loserLogin):
-                return ['$loserLogin has resigned. $winnerLogin won.', 'Игрок $loserLogin сдался. Победитель: $winnerLogin.'];
-            case GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(Abandon(_), winnerLogin, loserLogin):
-                return ['$loserLogin has left the game. $winnerLogin won.', 'Игрок $loserLogin покинул партию. Победитель: $winnerLogin.'];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(DrawAgreement, _), GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(DrawAgreement, _, _):
-                return ["Game has ended up in a draw. Reason: mutual agreement.", "Игра завершена вничью. Причина: взаимное согласие"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Repetition, _), GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(Repetition, _, _):
-                return ["Game has ended up in a draw. Reason: threefold repetition.", "Игра завершена вничью. Причина: троекратное повторение"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(NoProgress, _), GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(NoProgress, _, _):
-                return ["Game has ended up in a draw. Reason: sixty-move rule.", "Игра завершена вничью. Причина: правило 60 ходов"];
-            case GAME_ENDED_PLAYER_DIALOG_MESSAGE(Abort, _), GAME_ENDED_SPECTATOR_DIALOG_MESSAGE(Abort, _, _):
-                return ["Game aborted.", "Игра прервана."];
 
             case LIVE_WATCHING_LABEL_TEXT(watchedPlayerLogin):
                 return ['Watching $watchedPlayerLogin', 'Наблюдение за $watchedPlayerLogin'];
             case LIVE_WATCHING_LABEL_TOOLTIP:
                 return ["You follow this player. Each time he/she starts a new game, you'll be automatically redirected to watch it. To unfollow, simply leave this screen.", "Вы наблюдаете за этим игроком. Если игрок начнет новую игру, вы автоматически последуете за ним. Чтобы прекратить наблюдение, просто покиньте этот экран"];
-                
 
             case INPUT_PLAYER_LOGIN:
                 return ["Input player's username", "Введите ник игрока"];

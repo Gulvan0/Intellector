@@ -59,7 +59,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
     {
         switch event 
         {
-            case GameEnded(_, _, _, _):
+            case GameEnded(_, _, _, _, _):
                 btnBar.hidden = false;
                 drawRequestBox.hidden = true;
                 takebackRequestBox.hidden = true;

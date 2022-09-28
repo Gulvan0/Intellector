@@ -225,7 +225,7 @@ class SimpleTests
 		box.percentWidth = 100;
 		box.percentHeight = 100;
 
-		var fl:StudyFilterRect;
+		var fl:StudyFilterRect = null;
 		fl = new StudyFilterRect(Exact(30), "разобрать потом", () -> {box.removeComponent(fl);});
 		fl.horizontalAlign = 'center';
 		fl.verticalAlign = 'center';

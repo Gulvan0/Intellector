@@ -106,7 +106,7 @@ class Dialogs
     {
         var messageStr:String = Dictionary.getPhrase(message, messageSubstitutions);
         var titleStr:String = Dictionary.getPhrase(title);
-        addDialog(DialogManager.messageBox(messageStr, titleStr, MessageBoxType.TYPE_WARNING, true), false);
+        alertRaw(messageStr, titleStr);
     }
 
     public static function alertCallback(message:Phrase, title:Phrase):Void->Void 
@@ -114,9 +114,14 @@ class Dialogs
         return alert.bind(message, title);
     }
 
+    public static function infoRaw(message:String, title:String)
+    {
+        addDialog(DialogManager.messageBox(message, title, MessageBoxType.TYPE_INFO, true), false);
+    }
+
     public static function info(message:Phrase, title:Phrase, ?messageSubstitutions:Array<String>)
     {
-        addDialog(DialogManager.messageBox(Dictionary.getPhrase(message, messageSubstitutions), Dictionary.getPhrase(title), MessageBoxType.TYPE_INFO, true), false);
+        infoRaw(Dictionary.getPhrase(message, messageSubstitutions), Dictionary.getPhrase(title));
     }
 
     public static function confirmRaw(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)

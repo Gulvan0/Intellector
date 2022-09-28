@@ -38,42 +38,38 @@ class PortableIntellectorNotation
 
         switch outcome 
         {
-            case Mate(winnerColor): 
+            case Decisive(Mate, winnerColor): 
                 if (winnerColor == White)
                     pin += 'Fatum. White won';
-                else if (winnerColor == Black)
+                else
                     pin += 'Fatum. Black won';
-                else 
-                    pin += 'Fatum';
-            case Breakthrough(winnerColor):
+            case Decisive(Breakthrough, winnerColor):
                 if (winnerColor == White)
                     pin += 'Breakthrough. White won';
-                else if (winnerColor == Black)
+                else
                     pin += 'Breakthrough. Black won';
-                else 
-                    pin += 'Breakthrough';
-            case Timeout(winnerColor):
+            case Decisive(Timeout, winnerColor):
                 if (winnerColor == White)
                     pin += 'Black lost on time';
-                else if (winnerColor == Black)
+                else
                     pin += 'White lost on time';
-            case Resign(winnerColor):
+            case Decisive(Resign, winnerColor):
                 if (winnerColor == White)
                     pin += 'Black resigned';
-                else if (winnerColor == Black)
+                else
                     pin += 'White resigned';
-            case Abandon(winnerColor):
+            case Decisive(Abandon, winnerColor):
                 if (winnerColor == White)
                     pin += 'Black left the game';
-                else if (winnerColor == Black)
+                else
                     pin += 'White left the game';
-            case DrawAgreement:
+            case Drawish(DrawAgreement):
                 pin += 'Draw by agreement';
-            case Repetition:
+            case Drawish(Repetition):
                 pin += 'Draw by repetition';
-            case NoProgress:
+            case Drawish(NoProgress):
                 pin += 'Draw by quiescence';
-            case Abort:
+            case Drawish(Abort):
                 pin += 'Game aborted';
             case null:
         }

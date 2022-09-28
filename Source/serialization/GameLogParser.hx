@@ -244,15 +244,15 @@ class GameLogParser
         var winnerColor:PieceColor = decodeColor(winnerColorCode);
         return switch reasonCode 
         {
-            case "mat": Mate(winnerColor);
-            case "bre": Breakthrough(winnerColor);
-            case "res": Resign(winnerColor);
-            case "tim": Timeout(winnerColor);
-            case "aba": Abandon(winnerColor);
-            case "rep": Repetition;
-            case "100": NoProgress;
-            case "agr": DrawAgreement;
-            case "abo": Abort; 
+            case "mat": Decisive(Mate, winnerColor);
+            case "bre": Decisive(Breakthrough, winnerColor);
+            case "res": Decisive(Resign, winnerColor);
+            case "tim": Decisive(Timeout, winnerColor);
+            case "aba": Decisive(Abandon, winnerColor);
+            case "rep": Drawish(Repetition);
+            case "100": Drawish(NoProgress);
+            case "agr": Drawish(DrawAgreement);
+            case "abo": Drawish(Abort); 
             default: null;
         }
     }
