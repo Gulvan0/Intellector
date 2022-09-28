@@ -14,7 +14,7 @@ import net.Requests;
 import utils.MathUtils;
 import dict.Utils;
 import gfx.profile.data.FriendData;
-import net.shared.OverviewStudyData;
+import net.shared.StudyInfo;
 import net.shared.OverviewGameData;
 import gfx.profile.data.ProfileData;
 import struct.ChallengeParams;
@@ -45,7 +45,7 @@ class Profile extends Screen
         gamesLoaded += games.length;
     }
 
-    private function appendStudies(studies:Array<OverviewStudyData>)
+    private function appendStudies(studies:Array<StudyInfo>)
     {
         for (data in studies)
             studiesList.dataSource.add(data);

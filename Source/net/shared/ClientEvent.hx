@@ -26,7 +26,8 @@ enum ClientEvent
     CancelTakeback; 
     AcceptTakeback; 
     DeclineTakeback;
-    SetStudy(name:String, description:String, keyPositionSIP:String, variantStr:String, publicity:StudyPublicity, overwriteID:Null<Int>);
+    CreateStudy(info:StudyInfo);
+    OverwriteStudy(overwrittenStudyID:Int, info:StudyInfo);
     AddTime; 
     GetGame(id:Int); //TODO: Ensure this also includes an effect of StopSpectating IN CASE THIS IS AN ONGOING GAME
     GetStudy(id:Int);

@@ -67,7 +67,7 @@ class StudyFilterList extends ScrollView
         onTagsCleared();
     }
 
-    public function new(w:DimValue, h:Float, onTagAdded:String->Void, onTagRemoved:String->Void, onTagsCleared:Void->Void)
+    public function new(w:DimValue, contentHeight:Float, onTagAdded:String->Void, onTagRemoved:String->Void, onTagsCleared:Void->Void)
     {
         super();
 
@@ -76,7 +76,7 @@ class StudyFilterList extends ScrollView
         this.onTagsCleared = onTagsCleared;
 
         this.contentLayoutName = 'horizontal';
-        this.contentHeight = h;
+        this.contentHeight = contentHeight;
         assignWidth(this, w);
         
         var titleLabel:AutosizingLabel = new AutosizingLabel();

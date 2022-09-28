@@ -1,5 +1,6 @@
 package net.shared;
 
+import net.shared.StudyInfo;
 import net.shared.OpenChallengeData;
 import net.shared.MiniProfileData;
 import net.shared.SignInResult;
@@ -54,13 +55,14 @@ enum ServerEvent
     TakebackAccepted;
     TakebackDeclined;
 
-    SingleStudy(name:String, variantStr:String); //Answer to GetStudy
+    SingleStudy(info:StudyInfo); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy
-    StudyCreated(studyID:Int, studyName:String); //Answer to SetStudy with no overwriteID specified
+    StudyCreated(studyID:Int, studyName:String); //Answer to CreateStudy
     MiniProfile(data:MiniProfileData); //Answer to GetPlayerProfile
     PlayerProfile(serializedProfileData:String); //Answer to GetPlayerProfile
     Games(games:Array<OverviewGameData>); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
-    Studies(studies:Array<OverviewStudyData>); //Answer to GetStudiesByLogin
+    Studies(studies:Array<StudyInfo>); //Answer to GetStudiesByLogin
+
     PlayerNotFound; //Answer to Spectate, GetPlayerProfile, GetGamesByLogin, GetOngoingGamesByLogin and GetStudiesByLogin: no such player exists
     PlayerOffline; //Answer to Spectate: no game to spectate with a requested player
     PlayerNotInGame; //Answer to Spectate: no game to spectate with a requested player

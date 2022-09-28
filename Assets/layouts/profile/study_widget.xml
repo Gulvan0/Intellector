@@ -1,16 +1,49 @@
 <item-renderer width="100%" height="100%">
-    <hbox width="100%" height="100%">
-        <box id="boardContainer" width="50px" height="100%" />
-        <vbox width="100%" height="100%">
-            <hbox width="100%" height="20px">
-                <scrollview id="tagsSV" layoutName="horizontal" width="100%" height="100%" >
-                    <label text="${Dictionary.getPhrase(PROFILE_STUDY_TAGS_PREPENDER)}" verticalAlign="center" style="font-size: 10" />
-                </scrollview>
-                <arp-image id="editBtn" height="100%" resource="assets/symbols/common/edit.svg" tooltip="${Dictionary.getPhrase(PROFILE_STUDY_EDIT_BTN_TOOLTIP)}" verticalAlign="center" style="background-color:yellow;background-opacity:0;pointer-events:true" />
-                <arp-image id="deleteBtn" height="100%" resource="assets/symbols/analysis/delete.svg" tooltip="${Dictionary.getPhrase(PROFILE_STUDY_REMOVE_BTN_TOOLTIP)}" verticalAlign="center" style="background-color:yellow;background-opacity:0;pointer-events:true" />
-            </hbox>
-            <label id="nameLabel" width="100%" style="font-align: center;font-size: 14" />
-            <label id="descriptionLabel" width="100%" height="100%" style="font-align: center;font-size: 12" />
-        </vbox>
-    </hbox>
+    <style>
+        #fullBox {
+            background: #e7e7e7;
+            border: 1.5px solid #dddddd;
+            padding: 4px;
+        }
+        #contentBox {
+            border-top: 1px solid #dddddd;
+            background: #fdfdfd #eaeaea;
+            pointer-events:true;
+            padding: 3px;
+        }
+        #contentBox:hover {
+            background: #c9e3ff;
+        }
+        #upperRow {
+            padding: 3px;
+            spacing: 5px;
+        }
+        .action-btn {
+            background-color:white;
+            background-opacity: 0;
+            pointer-events:true;
+        }
+        .action-btn:hover {
+            background-color: #f9f9f9;
+            background-opacity: 1;
+        }
+    </style>
+    <vbox id="fullBox" width="100%" height="100%">
+        <hbox id="upperRow" width="100%" height="40px">
+            <box id="tagListContainer" width="100%" height="100%" />
+            <square id="editBtn" styleName="action-btn" height="100%" tooltip="${Dictionary.getPhrase(PROFILE_STUDY_EDIT_BTN_TOOLTIP)}">
+                <arp-image height="80%" resource="assets/symbols/common/edit.svg" verticalAlign="center" horizontalAlign="center" />
+            </square>
+            <square id="deleteBtn" styleName="action-btn" height="100%" tooltip="${Dictionary.getPhrase(PROFILE_STUDY_REMOVE_BTN_TOOLTIP)}">
+                <arp-image height="80%" resource="assets/symbols/analysis/delete.svg" verticalAlign="center" horizontalAlign="center" />
+            </square>
+        </hbox>
+        <hbox id="contentBox" width="100%" height="100%">
+            <square id="boardContainer" height="100%" />
+            <vbox width="100%" height="100%">
+                <label id="nameLabel" width="100%" style="font-size: 16" />
+                <label id="descriptionLabel" width="100%" height="100%" style="font-size: 12" />
+            </vbox>
+        </hbox>
+    </vbox>
 </item-renderer>

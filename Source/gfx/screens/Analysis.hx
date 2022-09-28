@@ -90,11 +90,11 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
         var serializedVariant:String = variant.serialize();
 
         var exportNewCallback:String->Void = name -> {
-            //Networker.emitEvent(SetStudy(name, serializedVariant, null)); //TODO: Change
+            //Networker.emitEvent(CreateStudy(name, serializedVariant, null)); //TODO: Change
         };
 
         var overwriteCallback:Int->String->Void = (id:Int, name:String) -> {
-            //Networker.emitEvent(SetStudy(name, serializedVariant, id)); //TODO: Change
+            //Networker.emitEvent(OverwriteStudy(name, serializedVariant, id)); //TODO: Change
         };
 
         var shareDialog:ShareDialog = new ShareDialog();

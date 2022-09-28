@@ -35,11 +35,11 @@ class FriendList extends ScrollView
             addComponent(new FriendListEntry(data));
     }
 
-    public function new(w:DimValue, h:Float)
+    public function new(w:DimValue, contentHeight:Float)
     {
         super();
         this.contentLayoutName = 'horizontal';
-        this.contentHeight = h;
+        this.contentHeight = contentHeight;
         assignWidth(this, w);
         
         var titleLabel:AutosizingLabel = new AutosizingLabel();

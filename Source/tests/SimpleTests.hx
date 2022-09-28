@@ -1,5 +1,8 @@
 package tests;
 
+import net.shared.StudyInfo;
+import gfx.profile.simple_components.StudyWidget;
+import gfx.profile.complex_components.StudyTagList;
 import gfx.profile.simple_components.StudyTagLabel;
 import gfx.profile.complex_components.StudyFilterList;
 import gfx.profile.simple_components.StudyFilterRect;
@@ -280,6 +283,56 @@ class SimpleTests
 		fl.verticalAlign = 'center';
 
 		box.addComponent(fl);
+		Screen.instance.addComponent(box);
+	}
+
+	public static function studyTagList()
+	{
+		var fl:StudyTagList = new StudyTagList(Percent(50), 36, ["test1", "разобрать потом", "flank_attack"], s -> {trace(s);});
+		fl.horizontalAlign = 'center';
+		fl.verticalAlign = 'center';
+
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(fl);
+
+		Screen.instance.addComponent(box);
+	}
+
+	public static function studyWidget()
+	{
+		var info:StudyInfo = new StudyInfo();
+		info.name = "Some clever name";
+		info.description = "This study is about bla-bla-bla and bla-bla-bla, moreover, bla-bla-bla. Some more bla-bla-bla and bla-bla-bla and bla-bla-bla";
+		info.publicity = Public;
+		info.tags = ["test1", "разобрать потом", "flank_attack"];
+		info.variantStr = "";
+		info.keyPositionSIP = "w\\rerlrvn!DnZr";
+
+		var data:StudyWidgetData = {
+			info: info,
+			onStudyClicked: () -> {trace('Clicked');},
+			onTagSelected: tag -> {trace('Tag: $tag');},
+			onEditPressed: () -> {trace('Edit requested');},
+			onDeletePressed: () -> {trace('Delete requested');},
+		};
+
+		var fl:StudyWidget = new StudyWidget();
+		fl.data = data;
+
+		var container:Box = new Box();
+		container.percentWidth = 50;
+		container.height = 200;
+		container.horizontalAlign = 'center';
+		container.verticalAlign = 'center';
+		container.addComponent(fl);
+
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(container);
+
 		Screen.instance.addComponent(box);
 	}
 }

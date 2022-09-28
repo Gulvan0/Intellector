@@ -263,7 +263,7 @@ class Dictionary
                 return ["Remove friend", "Удалить из друзей"];
             case PROFILE_FRIENDS_PREPENDER:
                 return ["Friends: ", "Друзья: "];
-            case PROFILE_STUDY_TAGS_PREPENDER:
+            case PROFILE_STUDY_TAG_LABELS_PREPENDER:
                 return ["Tags: ", "Теги: "];
             case PROFILE_STUDY_EDIT_BTN_TOOLTIP:
                 return ["Edit study", "Редактировать студию"];

@@ -3,7 +3,7 @@ package net;
 import net.shared.OpenChallengeData;
 import net.shared.TimeControlType;
 import net.shared.OverviewGameData;
-import net.shared.OverviewStudyData;
+import net.shared.StudyInfo;
 import gfx.profile.data.ProfileData;
 import struct.ChallengeParams;
 import dict.Dictionary;
@@ -146,14 +146,14 @@ class Requests
         return true;
     }
 
-    public static function getPlayerStudies(login:String, after:Int, pageSize:Int, filterByTags:Null<Array<String>>, callback:Array<OverviewStudyData>->Void, ?hasMoreHandler:Bool->Void)
+    public static function getPlayerStudies(login:String, after:Int, pageSize:Int, filterByTags:Null<Array<String>>, callback:Array<StudyInfo>->Void, ?hasMoreHandler:Bool->Void)
     {
         var requestedCount:Int = hasMoreHandler != null? pageSize + 1 : pageSize;
         Networker.addHandler(getPlayerStudies_handler.bind(callback, pageSize, hasMoreHandler));
         Networker.emitEvent(GetStudiesByLogin(login, after, requestedCount, filterByTags));
     }
 
-    private static function getPlayerStudies_handler(callback:Array<OverviewStudyData>->Void, pageSize:Int, hasMoreHandler:Null<Bool->Void>, event:ServerEvent) 
+    private static function getPlayerStudies_handler(callback:Array<StudyInfo>->Void, pageSize:Int, hasMoreHandler:Null<Bool->Void>, event:ServerEvent) 
     {
         switch event
         {
@@ -187,8 +187,8 @@ class Requests
     {
         switch event
         {
-            case SingleStudy(name, variantStr):
-                SceneManager.toScreen(Analysis(variantStr, 0, id, name));
+            case SingleStudy(info):
+                SceneManager.toScreen(Analysis(info.variantStr, 0, id, info.name));
             case StudyNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_STUDY_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
