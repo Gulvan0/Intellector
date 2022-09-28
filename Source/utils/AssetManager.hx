@@ -21,6 +21,7 @@ import struct.PieceColor;
 enum SingleAsset
 {
     StudyTagFilterCross;
+    StudyTagLabel;
 }
 
 class AssetManager 
@@ -37,6 +38,7 @@ class AssetManager
         return "assets/symbols/" + switch asset 
         {
             case StudyTagFilterCross: "common/study/remove_filter_cross.svg";
+            case StudyTagLabel: "profile/tag.svg";
         }
     }
 

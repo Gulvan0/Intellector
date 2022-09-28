@@ -1,5 +1,6 @@
 package tests;
 
+import gfx.profile.simple_components.StudyTagLabel;
 import gfx.profile.complex_components.StudyFilterList;
 import gfx.profile.simple_components.StudyFilterRect;
 import gfx.profile.data.ProfileData;
@@ -265,6 +266,20 @@ class SimpleTests
 		box.percentHeight = 100;
 		box.addComponent(fl);
 
+		Screen.instance.addComponent(box);
+	}
+
+	public static function studyTagLabel()
+	{
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+
+		var fl:StudyTagLabel = new StudyTagLabel(Exact(30), "разобрать потом", () -> {trace(1);});
+		fl.horizontalAlign = 'center';
+		fl.verticalAlign = 'center';
+
+		box.addComponent(fl);
 		Screen.instance.addComponent(box);
 	}
 }
