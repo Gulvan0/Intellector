@@ -1,5 +1,6 @@
 package gfx;
 
+import net.shared.StudyInfo;
 import gfx.profile.complex_components.MiniProfile;
 import gfx.popups.IncomingChallengeDialog;
 import gfx.popups.ChangelogDialog;
@@ -231,6 +232,11 @@ class Dialogs
     {
         var dialog:MiniProfile = new MiniProfile(username, data);
         addDialog(dialog, true, dialog.onClose, false);
+    }
+
+    public static function editStudyParams(currentParams:StudyInfo, callback:StudyInfo->Void)
+    {
+        //TODO: Fill
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void)

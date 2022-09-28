@@ -54,8 +54,8 @@ enum ServerEvent
     StudyCreated(studyID:Int, studyName:String); //Answer to CreateStudy
     MiniProfile(data:MiniProfileData); //Answer to GetPlayerProfile
     PlayerProfile(serializedProfileData:String); //Answer to GetPlayerProfile
-    Games(games:Array<GameInfo>); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
-    Studies(studies:Array<StudyInfo>); //Answer to GetStudiesByLogin
+    Games(games:Array<GameInfo>, hasNext:Bool); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
+    Studies(studies:Map<Int, StudyInfo>, hasNext:Bool); //Answer to GetStudiesByLogin
 
     PlayerNotFound; //Answer to Spectate, GetPlayerProfile, GetGamesByLogin, GetOngoingGamesByLogin and GetStudiesByLogin: no such player exists
     PlayerOffline; //Answer to Spectate: no game to spectate with a requested player

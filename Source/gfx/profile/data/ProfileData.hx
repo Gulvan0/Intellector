@@ -14,7 +14,7 @@ class ProfileData
     public var isFriend:Bool;
     public var friends:Array<FriendData>;
     public var preloadedGames:Array<GameInfo>;
-    public var preloadedStudies:Array<StudyInfo>;
+    public var preloadedStudies:Map<Int, StudyInfo>;
     public var gamesInProgress:Array<GameInfo>;
     public var totalPastGames:Int;
     public var totalStudies:Int;

@@ -15,6 +15,9 @@ import utils.TimeControl;
 import net.shared.ClientEvent;
 import net.shared.ServerEvent;
 
+typedef GetGamesCallback = (games:Array<GameInfo>, hasNext:Bool) -> Void;
+typedef GetStudiesCallback = (studyMap:Map<Int, StudyInfo>, hasNext:Bool) -> Void;
+
 class Requests
 {
     public static function getGame(id:Int)
@@ -109,68 +112,42 @@ class Requests
         return true;
     }
 
-    public static function getPlayerPastGames(login:String, after:Int, pageSize:Int, filterByTimeControl:Null<TimeControlType>, callback:Array<GameInfo>->Void, ?hasMoreHandler:Bool->Void)
+    public static function getPlayerPastGames(login:String, after:Int, pageSize:Int, filterByTimeControl:Null<TimeControlType>, callback:GetGamesCallback)
     {
-        var requestedCount:Int = hasMoreHandler != null? pageSize + 1 : pageSize;
-        Networker.addHandler(getPlayerGames_handler.bind(callback, pageSize, hasMoreHandler));
-        Networker.emitEvent(GetGamesByLogin(login, after, requestedCount, filterByTimeControl));
+        Networker.addHandler(getPlayerGames_handler.bind(callback));
+        Networker.emitEvent(GetGamesByLogin(login, after, pageSize, filterByTimeControl));
     }
 
-    public static function getPlayerOngoingGames(login:String, callback:Array<GameInfo>->Void)
+    public static function getPlayerOngoingGames(login:String, callback:GetGamesCallback)
     {
-        Networker.addHandler(getPlayerGames_handler.bind(callback, null, null));
+        Networker.addHandler(getPlayerGames_handler.bind(callback));
         Networker.emitEvent(GetOngoingGamesByLogin(login));
     }
 
-    private static function getPlayerGames_handler(callback:Array<GameInfo>->Void, pageSize:Null<Int>, hasMoreHandler:Null<Bool->Void>, event:ServerEvent) 
+    private static function getPlayerGames_handler(callback:GetGamesCallback, event:ServerEvent) 
     {
         switch event
         {
-            case Games(games):
-                if (hasMoreHandler != null)
-                    if (games.length > pageSize)
-                    {
-                        callback(games.slice(0, pageSize));
-                        hasMoreHandler(true);
-                    }
-                    else
-                    {
-                        callback(games);
-                        hasMoreHandler(false);
-                    }
-                else
-                    callback(games);
+            case Games(games, hasNext):
+                callback(games, hasNext);
             default:
                 return false;
         }
         return true;
     }
 
-    public static function getPlayerStudies(login:String, after:Int, pageSize:Int, filterByTags:Null<Array<String>>, callback:Array<StudyInfo>->Void, ?hasMoreHandler:Bool->Void)
+    public static function getPlayerStudies(login:String, after:Int, pageSize:Int, filterByTags:Null<Array<String>>, callback:GetStudiesCallback)
     {
-        var requestedCount:Int = hasMoreHandler != null? pageSize + 1 : pageSize;
-        Networker.addHandler(getPlayerStudies_handler.bind(callback, pageSize, hasMoreHandler));
-        Networker.emitEvent(GetStudiesByLogin(login, after, requestedCount, filterByTags));
+        Networker.addHandler(getPlayerStudies_handler.bind(callback));
+        Networker.emitEvent(GetStudiesByLogin(login, after, pageSize, filterByTags));
     }
 
-    private static function getPlayerStudies_handler(callback:Array<StudyInfo>->Void, pageSize:Int, hasMoreHandler:Null<Bool->Void>, event:ServerEvent) 
+    private static function getPlayerStudies_handler(callback:GetStudiesCallback, event:ServerEvent) 
     {
         switch event
         {
-            case Studies(studies):
-                if (hasMoreHandler != null)
-                    if (studies.length > pageSize)
-                    {
-                        callback(studies.slice(0, pageSize));
-                        hasMoreHandler(true);
-                    }
-                    else
-                    {
-                        callback(studies);
-                        hasMoreHandler(false);
-                    }
-                else
-                    callback(studies);
+            case Studies(studies, hasNext):
+                callback(studies, hasNext);
             default:
                 return false;
         }

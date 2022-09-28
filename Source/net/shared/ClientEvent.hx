@@ -28,6 +28,7 @@ enum ClientEvent
     DeclineTakeback;
     CreateStudy(info:StudyInfo);
     OverwriteStudy(overwrittenStudyID:Int, info:StudyInfo);
+    DeleteStudy(id:Int);
     AddTime; 
     GetGame(id:Int); //TODO: Ensure this also includes an effect of StopSpectating IN CASE THIS IS AN ONGOING GAME
     GetStudy(id:Int);
