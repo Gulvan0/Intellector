@@ -1,7 +1,7 @@
 package gfx.profile.data;
 
 import net.shared.EloValue;
-import net.shared.OverviewGameData;
+import net.shared.GameInfo;
 import net.shared.StudyInfo;
 import net.shared.UserRole;
 import net.shared.TimeControlType;
@@ -13,9 +13,9 @@ class ProfileData
     public var roles:Array<UserRole>;
     public var isFriend:Bool;
     public var friends:Array<FriendData>;
-    public var preloadedGames:Array<OverviewGameData>;
+    public var preloadedGames:Array<GameInfo>;
     public var preloadedStudies:Array<StudyInfo>;
-    public var gamesInProgress:Array<OverviewGameData>;
+    public var gamesInProgress:Array<GameInfo>;
     public var totalPastGames:Int;
     public var totalStudies:Int;
     public var gamesCntByTimeControl:Map<TimeControlType, Int>;

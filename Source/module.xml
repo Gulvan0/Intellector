@@ -2,7 +2,7 @@
     <components>
         <component class="gfx.common.MoveNavigator" alias="movenavigator" />
         <component class="gfx.common.CreepingLine" alias="creepingline" />
-        <component class="gfx.common.PastGameWidget" alias="pastgamewidget" />
+        <component class="gfx.common.GameWidget" alias="gamewidget" />
         <component class="gfx.game.Clock" alias="clock" />
         <component class="gfx.game.GameActionBar" alias="gameactionbar" />
         <component class="gfx.game.GameInfoBox" alias="gameinfobox" />

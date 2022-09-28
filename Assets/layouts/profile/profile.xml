@@ -15,7 +15,7 @@
                     </item-renderer>
                 </dropdown>
                 <listview id="gamesList" width="100%">
-                    <past-game-widget />
+                    <game-widget />
                 </listview> 
                 <button id="gamesLoadMoreBtn" text="${Dictionary.getPhrase(PROFILE_LOAD_MORE_BTN_TEXT)}" horizontalAlign="center" />
             </scrollview>
@@ -27,7 +27,7 @@
             </scrollview>
             <scrollview layoutName="vertical" width="100%" text="${Dictionary.getPhrase(PROFILE_ONGOING_MATCHES_TAB_TITLE)}">
                 <listview id="ongoingList" width="100%">
-                    <past-game-widget />
+                    <game-widget />
                 </listview> 
                 <button id="ongoingReloadBtn" text="${Dictionary.getPhrase(PROFILE_RELOAD_BTN_TEXT)}" horizontalAlign="center" />
             </scrollview>

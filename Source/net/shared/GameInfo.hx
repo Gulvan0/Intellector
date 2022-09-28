@@ -1,7 +1,12 @@
 package net.shared;
 
-typedef OverviewGameData =
+class GameInfo
 {
     public var id:Int;
     public var log:String;
+
+    public function new()
+    {
+        
+    }
 }

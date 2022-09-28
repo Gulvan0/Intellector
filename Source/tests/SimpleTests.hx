@@ -1,5 +1,8 @@
 package tests;
 
+import gfx.common.GameWidget;
+import gfx.common.GameWidget.GameWidgetData;
+import net.shared.GameInfo;
 import net.shared.StudyInfo;
 import gfx.profile.simple_components.StudyWidget;
 import gfx.profile.complex_components.StudyTagList;
@@ -315,10 +318,59 @@ class SimpleTests
 			onStudyClicked: () -> {trace('Clicked');},
 			onTagSelected: tag -> {trace('Tag: $tag');},
 			onEditPressed: () -> {trace('Edit requested');},
-			onDeletePressed: () -> {trace('Delete requested');},
+			onDeletePressed: () -> {trace('Delete requested');}
 		};
 
 		var fl:StudyWidget = new StudyWidget();
+		fl.data = data;
+
+		var container:Box = new Box();
+		container.percentWidth = 50;
+		container.height = 200;
+		container.horizontalAlign = 'center';
+		container.verticalAlign = 'center';
+		container.addComponent(fl);
+
+		var box:Box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+		box.addComponent(container);
+
+		Screen.instance.addComponent(box);
+	}
+
+	public static function gameWidget()
+	{
+		var info:GameInfo = new GameInfo();
+		info.id = 228;
+		info.log = "#P|gulvan:kazvixx;
+		#e|p1200/n;
+		#D|1659990040;
+		#T|600/0;
+		#S|bfrmrnrprqrriseteuivowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr;
+		2043/600000;
+		4443/600000;
+		4142/580000;
+		4342/570000;
+		3031/550000;
+		4241/540000;
+		3132/500000;
+		4130/510000;
+		3233/450000;
+		3020Liberator/480000;
+		3334/400000;
+		4635/450000;
+		6162/350000;
+		2634/420000;
+		#R|b/res";
+
+		var data:GameWidgetData = {
+			info: info,
+			watchedLogin: "gulvan",
+			onClicked: () -> {trace('Clicked');}
+		};
+
+		var fl:GameWidget = new GameWidget();
 		fl.data = data;
 
 		var container:Box = new Box();

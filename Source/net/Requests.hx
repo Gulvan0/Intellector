@@ -2,7 +2,7 @@ package net;
 
 import net.shared.OpenChallengeData;
 import net.shared.TimeControlType;
-import net.shared.OverviewGameData;
+import net.shared.GameInfo;
 import net.shared.StudyInfo;
 import gfx.profile.data.ProfileData;
 import struct.ChallengeParams;
@@ -109,20 +109,20 @@ class Requests
         return true;
     }
 
-    public static function getPlayerPastGames(login:String, after:Int, pageSize:Int, filterByTimeControl:Null<TimeControlType>, callback:Array<OverviewGameData>->Void, ?hasMoreHandler:Bool->Void)
+    public static function getPlayerPastGames(login:String, after:Int, pageSize:Int, filterByTimeControl:Null<TimeControlType>, callback:Array<GameInfo>->Void, ?hasMoreHandler:Bool->Void)
     {
         var requestedCount:Int = hasMoreHandler != null? pageSize + 1 : pageSize;
         Networker.addHandler(getPlayerGames_handler.bind(callback, pageSize, hasMoreHandler));
         Networker.emitEvent(GetGamesByLogin(login, after, requestedCount, filterByTimeControl));
     }
 
-    public static function getPlayerOngoingGames(login:String, callback:Array<OverviewGameData>->Void)
+    public static function getPlayerOngoingGames(login:String, callback:Array<GameInfo>->Void)
     {
         Networker.addHandler(getPlayerGames_handler.bind(callback, null, null));
         Networker.emitEvent(GetOngoingGamesByLogin(login));
     }
 
-    private static function getPlayerGames_handler(callback:Array<OverviewGameData>->Void, pageSize:Null<Int>, hasMoreHandler:Null<Bool->Void>, event:ServerEvent) 
+    private static function getPlayerGames_handler(callback:Array<GameInfo>->Void, pageSize:Null<Int>, hasMoreHandler:Null<Bool->Void>, event:ServerEvent) 
     {
         switch event
         {

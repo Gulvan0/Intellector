@@ -1,11 +1,5 @@
 package net.shared;
 
-import net.shared.StudyInfo;
-import net.shared.OpenChallengeData;
-import net.shared.MiniProfileData;
-import net.shared.SignInResult;
-import net.shared.SendChallengeResult;
-
 enum ServerEvent
 {
     GameStarted(match_id:Int, logPreamble:String); //Sent when a game with one of the players being the user starts. Signals the app to navigate to the game screen. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
@@ -60,7 +54,7 @@ enum ServerEvent
     StudyCreated(studyID:Int, studyName:String); //Answer to CreateStudy
     MiniProfile(data:MiniProfileData); //Answer to GetPlayerProfile
     PlayerProfile(serializedProfileData:String); //Answer to GetPlayerProfile
-    Games(games:Array<OverviewGameData>); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
+    Games(games:Array<GameInfo>); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
     Studies(studies:Array<StudyInfo>); //Answer to GetStudiesByLogin
 
     PlayerNotFound; //Answer to Spectate, GetPlayerProfile, GetGamesByLogin, GetOngoingGamesByLogin and GetStudiesByLogin: no such player exists

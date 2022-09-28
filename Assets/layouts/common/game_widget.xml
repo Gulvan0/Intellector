@@ -1,0 +1,29 @@
+<item-renderer width="100%" height="100%">
+    <style>
+        #fullBox {
+            border: 1px solid #dddddd;
+            background: #fdfdfd #eaeaea;
+            pointer-events:true;
+            padding: 5px;
+            spacing: 0px;
+        }
+        #fullBox:hover {
+            background: #c9e3ff;
+        }
+    </style>
+    <hbox id="fullBox" width="100%" height="100%">
+        <square id="boardContainer" height="100%" />
+        <vbox id="infoBox" width="100%" height="100%">
+            <hbox width="100%">
+                <label id="datetimeLabel" verticalAlign="center" style="font-size: 15" />
+                <spacer width="100%" />
+                <label id="timeControlLabel" verticalAlign="center" style="font-size: 15" />
+            </hbox>
+            <box id="opponentsLabelBox" width="100%" height="100%" horizontalAlign="center">
+                <label id="opponentsLabel" horizontalAlign="center" verticalAlign="center" style="text-align:center;font-size: 22" />
+            </box>
+            <label id="resultLabel" horizontalAlign="center" style="font-size: 18" />
+            <label id="openingLabel" width="100%" style="text-align:center;font-style: italic;font-size: 18" />
+        </vbox>
+    </hbox>
+</item-renderer>

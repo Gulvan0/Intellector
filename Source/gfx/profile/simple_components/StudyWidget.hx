@@ -68,6 +68,8 @@ class StudyWidget extends ItemRenderer
 
     private override function onDataChanged(data:Dynamic)
     {
+        super.onDataChanged(data);
+        
         if (data == null)
             return;
 

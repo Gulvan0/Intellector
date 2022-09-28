@@ -15,7 +15,7 @@ import utils.MathUtils;
 import dict.Utils;
 import gfx.profile.data.FriendData;
 import net.shared.StudyInfo;
-import net.shared.OverviewGameData;
+import net.shared.GameInfo;
 import gfx.profile.data.ProfileData;
 import struct.ChallengeParams;
 import haxe.ui.events.MouseEvent;
@@ -37,7 +37,7 @@ class Profile extends Screen
     private var activePastGameTimeControlFilter:Null<TimeControlType>;
     private var activeStudyFilters:Array<String>;
 
-    private function appendGames(games:Array<OverviewGameData>)
+    private function appendGames(games:Array<GameInfo>)
     {
         for (data in games)
             gamesList.dataSource.add(data);
@@ -53,7 +53,7 @@ class Profile extends Screen
         studiesLoaded += studies.length;
     }
 
-    private function refreshOngoing(games:Array<OverviewGameData>)
+    private function refreshOngoing(games:Array<GameInfo>)
     {
         ongoingList.dataSource.clear();
         for (data in games)
