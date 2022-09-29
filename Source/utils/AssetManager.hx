@@ -22,15 +22,15 @@ enum SingleAsset
 {
     StudyTagFilterCross;
     StudyTagLabel;
+    AllGamesTimeControlFilterIcon;
 }
 
 class AssetManager 
 {
     public static var pieces:Map<PieceType, Map<PieceColor, SVG>> = [];
-    public static var timeControlIcons:Map<TimeControlType, SVG> = [];
 
     private static var loadedResourcesCnt:Int = 0;
-    private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length + TimeControlType.createAll().length + SingleAsset.createAll().length;
+    private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length;
     private static var onLoadedCallback:Void->Void;
 
     public static inline function singleAssetPath(asset:SingleAsset):String
@@ -39,6 +39,7 @@ class AssetManager
         {
             case StudyTagFilterCross: "common/study/remove_filter_cross.svg";
             case StudyTagLabel: "profile/tag.svg";
+            case AllGamesTimeControlFilterIcon: "profile/any_time_control.svg";
         }
     }
 
@@ -114,7 +115,6 @@ class AssetManager
     private static function onResourceLoaded() 
     {
         loadedResourcesCnt++;
-        trace('Loaded resource: $loadedResourcesCnt/$totalResourcesCnt');
         if (loadedResourcesCnt == totalResourcesCnt)
             onLoadedCallback();
     }
@@ -131,14 +131,5 @@ class AssetManager
                     onResourceLoaded();
                 });
         }
-
-        for (type in TimeControlType.createAll())
-            Assets.loadText(timeControlPath(type)).onComplete(s -> {
-                timeControlIcons.set(type, new SVG(s));
-                onResourceLoaded();
-            });
-
-        for (asset in SingleAsset.createAll())
-            new ImageLoader(singleAssetPath(asset)).load(d -> {onResourceLoaded();}, false);
     }
 }

@@ -48,7 +48,7 @@ class OpenChallengeJoining extends Screen
 		tcIcon.resource = AssetManager.timeControlPath(timeControlType);
 		tcLabel.text = timeControlString;
 		if (timeControlType != Correspondence)
-			tcLabel.text += ' (${timeControlType == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : timeControlType.getName()})';
+			tcLabel.text += ' (${Utils.getTimeControlName(timeControlType)})';
 
 		bracketLabel.text = Dictionary.getPhrase(params.rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
 

@@ -1,5 +1,6 @@
 package dict;
 
+import net.shared.EloValue;
 import gfx.profile.data.UserStatus;
 import net.shared.UserRole;
 import struct.Outcome;
@@ -176,6 +177,10 @@ enum Phrase
 
     PROFILE_LOAD_MORE_BTN_TEXT;
     PROFILE_RELOAD_BTN_TEXT;
+
+    PROFILE_GAMES_TCFILTER_ALL_GAMES_OPTION_NAME;
+    PROFILE_GAMES_TCFILTER_GAMECNT_LABEL_TEXT(cnt:Int);
+    PROFILE_GAMES_TCFILTER_ELO_LABEL_TEXT(elo:EloValue);
 
     PROFILE_STUDY_TAG_LABELS_PREPENDER;
     PROFILE_STUDY_EDIT_BTN_TOOLTIP;

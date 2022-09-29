@@ -21,7 +21,7 @@ class TCEloEntry extends GenAnnotatedImage<EloData>
 
     private function generateImageTooltip(data:EloData):Null<String>
     {
-        return data.timeControl == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : data.timeControl.getName(); //TODO: Replace
+        return Utils.getTimeControlName(data.timeControl);
     }
     
     public function new(data:EloData)

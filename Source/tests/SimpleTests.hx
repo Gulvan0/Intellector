@@ -1,5 +1,11 @@
 package tests;
 
+import gfx.basic_components.utils.DimValue;
+import tests.data.StudyInfos;
+import haxe.ui.core.Component;
+import tests.data.ProfileInfos;
+import tests.data.GameLogs;
+import gfx.profile.simple_components.TimeControlFilterDropdown;
 import gfx.common.GameWidget;
 import gfx.common.GameWidget.GameWidgetData;
 import net.shared.GameInfo;
@@ -29,6 +35,38 @@ import gfx.basic_components.AutosizingLabel;
 
 class SimpleTests 
 {
+	private static var box:Box;
+
+	private static var traceArg:Dynamic->Void = arg -> {trace(arg);};
+
+	private static function add(comp:Component, ?wrapperWidth:DimValue, ?wrapperHeight:DimValue)
+	{
+		comp.horizontalAlign = 'center';
+		comp.verticalAlign = 'center';
+
+		box = new Box();
+		box.percentWidth = 100;
+		box.percentHeight = 100;
+
+		if (wrapperWidth != null || wrapperHeight != null)
+		{
+			var wrapperBox:Box = new Box();
+
+			if (wrapperWidth != null)
+				assignWidth(wrapperBox, wrapperWidth);
+
+			if (wrapperHeight != null)
+				assignHeight(wrapperBox, wrapperHeight);
+
+			wrapperBox.addComponent(comp);
+			box.addComponent(wrapperBox);
+		}
+		else
+			box.addComponent(comp);
+
+		Screen.instance.addComponent(box);
+	}
+
 	public static function square()
 	{
 		var bgColors:Array<Int> = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff];
@@ -63,17 +101,10 @@ class SimpleTests
 		var vbox:VBox = new VBox();
 		vbox.percentWidth = 75;
 		vbox.percentHeight = 75;
-		vbox.verticalAlign = 'center';
-		vbox.horizontalAlign = 'center';
 		vbox.addComponent(contents1);
 		vbox.addComponent(contents2);
 		
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(vbox);
-
-		Screen.instance.addComponent(box);
+		add(vbox);
 	}
 
     public static function autosizingLabel()
@@ -82,16 +113,13 @@ class SimpleTests
 		v.customStyle = {backgroundColor: 0xff0000, backgroundOpacity: 0.5};
 		v.percentWidth = 100;
 		v.text = "Lorem ipsum dolor sit amet";
-		v.horizontalAlign = 'center';
-		v.verticalAlign = 'center';
-		Screen.instance.addComponent(v);
+		add(v);
 	}
 	
 	public static function annotatedImage()
 	{
 		var vbox:VBox = new VBox();
 		vbox.percentWidth = 100;
-		vbox.verticalAlign = "center";
 
 		var images:Array<AnnotatedImage> = [
 			new AnnotatedImage(Exact(500), Exact(100), AssetManager.timeControlPath(Blitz), "3+2", "Blitz"),
@@ -116,129 +144,38 @@ class SimpleTests
 			vbox.addComponent(image);
 		}
 
-		Screen.instance.addComponent(vbox);
+		add(vbox);
 	}
 
 	public static function friendList()
 	{
-		var fl:FriendList = new FriendList(Percent(50), 50);
-		fl.horizontalAlign = 'center';
-		fl.verticalAlign = 'center';
-		fl.fill([
-			{login: "gulvan", status: Online},
-			{login: "kazvixx", status: Offline(20)},
-			{login: "kartoved", status: Offline(123456)},
-			{login: "superqwerty", status: InGame},
-			{login: "kaz", status: Offline(12345678)}
-		]);
-
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(fl);
-
-		Screen.instance.addComponent(box);
+		var comp:FriendList = new FriendList(Percent(50), 50);
+		comp.fill(ProfileInfos.friendList1());
+		add(comp);
 	}
 
 	public static function miniProfile()
 	{
-		var data:MiniProfileData = new MiniProfileData();
-		data.gamesCntByTimeControl = [
-			Hyperbullet => 0,
-			Bullet => 20,
-			Blitz => 3,
-			Rapid => 228,
-			Classic => 0,
-			Correspondence => 1
-		];
-		data.elo = [
-			Hyperbullet => None,
-			Bullet => Normal(1123),
-			Blitz => Provisional(1964),
-			Rapid => Normal(1556),
-			Classic => None,
-			Correspondence => Provisional(1520)
-		]; 
-		data.isFriend = false;
-		data.status = InGame;
-
-		Dialogs.miniProfile("gulvan", data);
+		Dialogs.miniProfile("gulvan", ProfileInfos.miniData1());
 	}
 
 	public function playerLabel()
 	{
-		var fl:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", Normal(2300), true);
-		fl.horizontalAlign = 'center';
-		fl.verticalAlign = 'center';
-
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(fl);
-
-		Screen.instance.addComponent(box);
+		var comp:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", Normal(2300), true);
+		add(comp);
 	}
 
 	public static function profileHeader()
 	{
-		var data:ProfileData = new ProfileData();
-		data.gamesCntByTimeControl = [
-			Hyperbullet => 0,
-			Bullet => 20,
-			Blitz => 3,
-			Rapid => 228,
-			Classic => 0,
-			Correspondence => 1
-		];
-		data.elo = [
-			Hyperbullet => None,
-			Bullet => Normal(1123),
-			Blitz => Provisional(1964),
-			Rapid => Normal(1556),
-			Classic => None,
-			Correspondence => Provisional(1520)
-		]; 
-		data.isFriend = false;
-		data.status = Offline(12345678);
-		data.roles = [Admin];
-		data.friends = [
-			{login: "gulvan", status: Online},
-			{login: "kazvixx", status: Offline(20)},
-			{login: "kartoved", status: Offline(123456)},
-			{login: "superqwerty", status: InGame},
-			{login: "kaz", status: Offline(12345678)}
-		];
-		data.preloadedGames = [];
-		data.preloadedStudies = [];
-		data.gamesInProgress = [];
-		data.totalPastGames = 252;
-		data.totalStudies = 0;
-
-		var fl:ProfileHeader = new ProfileHeader("kazvixx", data);
-		fl.horizontalAlign = 'center';
-		fl.verticalAlign = 'center';
-
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(fl);
-
-		Screen.instance.addComponent(box);
+		var comp:ProfileHeader = new ProfileHeader("kazvixx", ProfileInfos.data1());
+		add(comp);
 	}
 
 	public static function studyTagFilterRect()
 	{
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-
-		var fl:StudyFilterRect = null;
-		fl = new StudyFilterRect(Exact(30), "разобрать потом", () -> {box.removeComponent(fl);});
-		fl.horizontalAlign = 'center';
-		fl.verticalAlign = 'center';
-
-		box.addComponent(fl);
-		Screen.instance.addComponent(box);
+		var comp:StudyFilterRect = null;
+		comp = new StudyFilterRect(Exact(30), StudyInfos.tag(1), () -> {box.removeComponent(comp);});
+		add(comp);
 	}
 
 	public static function studyFilterList()
@@ -263,106 +200,42 @@ class SimpleTests
 			trace(tags);
 		}
 
-		var fl:StudyFilterList = new StudyFilterList(Percent(50), 36, onAdded, onRemoved, onCleared);
-		fl.horizontalAlign = 'center';
-		fl.verticalAlign = 'center';
-
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(fl);
-
-		Screen.instance.addComponent(box);
+		var comp:StudyFilterList = new StudyFilterList(Percent(50), 36, onAdded, onRemoved, onCleared);
+		add(comp);
 	}
 
 	public static function studyTagLabel()
 	{
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-
-		var fl:StudyTagLabel = new StudyTagLabel(Exact(30), "разобрать потом", () -> {trace(1);});
-		fl.horizontalAlign = 'center';
-		fl.verticalAlign = 'center';
-
-		box.addComponent(fl);
-		Screen.instance.addComponent(box);
+		var comp:StudyTagLabel = new StudyTagLabel(Exact(30), StudyInfos.tag(1), () -> {trace(1);});
+		add(comp);
 	}
 
 	public static function studyTagList()
 	{
-		var fl:StudyTagList = new StudyTagList(Percent(50), 36, ["test1", "разобрать потом", "flank_attack"], s -> {trace(s);});
-		fl.horizontalAlign = 'center';
-		fl.verticalAlign = 'center';
-
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(fl);
-
-		Screen.instance.addComponent(box);
+		var comp:StudyTagList = new StudyTagList(Percent(50), 36, StudyInfos.tagList1(), s -> {trace(s);});
+		add(comp);
 	}
 
 	public static function studyWidget()
 	{
-		var info:StudyInfo = new StudyInfo();
-		info.name = "Some clever name";
-		info.description = "This study is about bla-bla-bla and bla-bla-bla, moreover, bla-bla-bla. Some more bla-bla-bla and bla-bla-bla and bla-bla-bla";
-		info.publicity = Public;
-		info.tags = ["test1", "разобрать потом", "flank_attack"];
-		info.variantStr = "";
-		info.keyPositionSIP = "w\\rerlrvn!DnZr";
-
 		var data:StudyWidgetData = {
-			info: info,
+			info: StudyInfos.info1(),
 			onStudyClicked: () -> {trace('Clicked');},
 			onTagSelected: tag -> {trace('Tag: $tag');},
 			onEditPressed: () -> {trace('Edit requested');},
 			onDeletePressed: () -> {trace('Delete requested');}
 		};
 
-		var fl:StudyWidget = new StudyWidget();
-		fl.data = data;
-
-		var container:Box = new Box();
-		container.percentWidth = 50;
-		container.height = 200;
-		container.horizontalAlign = 'center';
-		container.verticalAlign = 'center';
-		container.addComponent(fl);
-
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(container);
-
-		Screen.instance.addComponent(box);
+		var comp:StudyWidget = new StudyWidget();
+		comp.data = data;
+		add(comp, Percent(50), Exact(200));
 	}
 
 	public static function gameWidget()
 	{
 		var info:GameInfo = new GameInfo();
 		info.id = 228;
-		info.log = "#P|gulvan:kazvixx;
-		#e|p1200/n;
-		#D|1659990040;
-		#T|600/0;
-		#S|bfrmrnrprqrriseteuivowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr;
-		2043/600000;
-		4443/600000;
-		4142/580000;
-		4342/570000;
-		3031/550000;
-		4241/540000;
-		3132/500000;
-		4130/510000;
-		3233/450000;
-		3020Liberator/480000;
-		3334/400000;
-		4635/450000;
-		6162/350000;
-		2634/420000;
-		#R|b/res";
+		info.log = GameLogs.log1();
 
 		var data:GameWidgetData = {
 			info: info,
@@ -370,21 +243,15 @@ class SimpleTests
 			onClicked: () -> {trace('Clicked');}
 		};
 
-		var fl:GameWidget = new GameWidget();
-		fl.data = data;
+		var comp:GameWidget = new GameWidget();
+		comp.data = data;
+		add(comp, Percent(50), Exact(200));
+	}
 
-		var container:Box = new Box();
-		container.percentWidth = 50;
-		container.height = 200;
-		container.horizontalAlign = 'center';
-		container.verticalAlign = 'center';
-		container.addComponent(fl);
-
-		var box:Box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
-		box.addComponent(container);
-
-		Screen.instance.addComponent(box);
+	public static function tcFilterDropdown()
+	{
+		var sampleProfileData:ProfileData = ProfileInfos.data1();
+		var comp:TimeControlFilterDropdown = new TimeControlFilterDropdown(sampleProfileData.elo, sampleProfileData.gamesCntByTimeControl, sampleProfileData.totalPastGames, traceArg);
+		add(comp);
 	}
 }

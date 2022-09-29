@@ -1,5 +1,6 @@
 package dict;
 
+import net.shared.EloValue.eloToStr;
 import struct.PieceColor;
 import struct.Outcome;
 
@@ -263,22 +264,32 @@ class Dictionary
                 return ["Remove friend", "Удалить из друзей"];
             case PROFILE_FRIENDS_PREPENDER:
                 return ["Friends: ", "Друзья: "];
-            case PROFILE_STUDY_TAG_LABELS_PREPENDER:
-                return ["Tags: ", "Теги: "];
-            case PROFILE_STUDY_EDIT_BTN_TOOLTIP:
-                return ["Edit study", "Редактировать студию"];
-            case PROFILE_STUDY_REMOVE_BTN_TOOLTIP:
-                return ["Remove study", "Удалить студию"];
+
             case PROFILE_GAMES_TAB_TITLE:
                 return ["Games", "Игры"];
             case PROFILE_STUDIES_TAB_TITLE:
                 return ["Studies", "Студии"];
             case PROFILE_ONGOING_MATCHES_TAB_TITLE:
                 return ["Ongoing", "Текущие партии"];
+                
             case PROFILE_LOAD_MORE_BTN_TEXT:
                 return ["Load more", "Загрузить больше"];
             case PROFILE_RELOAD_BTN_TEXT:
                 return ["Reload", "Обновить"];
+
+            case PROFILE_GAMES_TCFILTER_ALL_GAMES_OPTION_NAME:
+                return ["All Games", "Все игры"];
+            case PROFILE_GAMES_TCFILTER_GAMECNT_LABEL_TEXT(cnt):
+                return ['Games: $cnt', 'Игр: $cnt'];
+            case PROFILE_GAMES_TCFILTER_ELO_LABEL_TEXT(elo):
+                return ['ELO: ${eloToStr(elo)}', 'ELO: ${eloToStr(elo)}'];
+
+            case PROFILE_STUDY_TAG_LABELS_PREPENDER:
+                return ["Tags: ", "Теги: "];
+            case PROFILE_STUDY_EDIT_BTN_TOOLTIP:
+                return ["Edit study", "Редактировать студию"];
+            case PROFILE_STUDY_REMOVE_BTN_TOOLTIP:
+                return ["Remove study", "Удалить студию"];
 
             case PROFILE_TAG_FILTERS_PREPENDER:
                 return ["Filter by tags:", "Фильтровать по тегам:"];

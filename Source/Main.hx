@@ -107,7 +107,7 @@ class Main extends Sprite
 		//Networker.launch();
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
-		SimpleTests.gameWidget();
+		SimpleTests.tcFilterDropdown();
 		/*SceneManager.toScreen(LiveGame(1337, Ongoing(GameLogParser.parse("#P|gulvan:kazvixx;
 		#D|1659990040;
 		#T|600/0;

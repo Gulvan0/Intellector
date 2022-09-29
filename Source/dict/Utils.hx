@@ -1,5 +1,6 @@
 package dict;
 
+import net.shared.TimeControlType;
 import dict.utils.TimePhrases;
 import dict.utils.OutcomePhrases;
 import utils.SpecialChar;
@@ -16,12 +17,20 @@ import struct.PieceColor;
 
 class Utils
 {
-    public static function getColorName(color:PieceColor) 
+    public static function getColorName(color:PieceColor):String
     {
         return switch Preferences.language.get()
         {
             case EN: color.getName();
             case RU: color == White? "Белые" : "Черные";
+        }
+    }
+
+    public static function getTimeControlName(type:TimeControlType):String
+    {
+        return switch type {
+            case Correspondence: Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
+            default: type.getName();
         }
     }
 

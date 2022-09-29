@@ -1,5 +1,6 @@
 package gfx.main;
 
+import dict.Utils;
 import dict.Dictionary;
 import utils.AssetManager;
 import utils.TimeControl;
@@ -18,7 +19,7 @@ class TimeControlRenderer extends ItemRenderer
             var timeControlType:TimeControlType = timeControl.getType();
 
             tcIcon.resource = AssetManager.timeControlPath(timeControlType);
-            tcIcon.text = timeControlType == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : timeControlType.getName();
+            tcIcon.text = Utils.getTimeControlName(timeControlType);
 
             tcLabel.text = timeControl.toString();
         }

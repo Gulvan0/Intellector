@@ -1,5 +1,6 @@
 package gfx.menubar;
 
+import dict.Utils;
 import net.shared.TimeControlType;
 import browser.URLEditor;
 import struct.PieceColor;
@@ -96,7 +97,7 @@ class ChallengeEntryRenderer extends ItemRenderer
         };
 
         timeControlIcon.resource = AssetManager.timeControlPath(timeControlType);
-        timeControlIcon.tooltip = timeControlType == Correspondence? Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME) : timeControlType.getName();
+        timeControlIcon.tooltip = Utils.getTimeControlName(timeControlType);
         paramsLabel.text = timeControl.toString() + ' • ' + Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated)) + ' • ';
         colorIcon.resource = AssetManager.challengeColorPath(color);
         colorIcon.tooltip = Dictionary.getPhrase(CHALLENGE_COLOR_ICON_TOOLTIP(color));

@@ -1,5 +1,6 @@
 package gfx.game;
 
+import utils.SpecialChar;
 import net.shared.EloValue;
 import GlobalBroadcaster.GlobalEvent;
 import gfx.profile.simple_components.PlayerLabel;
@@ -182,10 +183,11 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
     {
         var tcType:TimeControlType = timeControl.getType();
 
-        if (tcType == Correspondence)
+        var separator:String = " " + SpecialChar.Dot + " ";
+        if (tcType != Correspondence)
             matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
         else
-            matchParameters.text = timeControl.toString() + " • " + tcType.getName();
+            matchParameters.text = timeControl.toString() + separator + tcType.getName();
 
         datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
         resolution.text = Utils.getResolution(null);
@@ -198,10 +200,11 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
     {
         var tcType:TimeControlType = parsedData.timeControl.getType();
 
-        if (tcType == Correspondence)
+        var separator:String = " " + SpecialChar.Dot + " ";
+        if (tcType != Correspondence)
             matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
         else
-            matchParameters.text = parsedData.timeControl.toString() + " • " + tcType.getName();
+            matchParameters.text = parsedData.timeControl.toString() + separator + tcType.getName();
 
         fillOpponentsBox(parsedData.whiteLogin, parsedData.blackLogin, parsedData.whiteELO, parsedData.blackELO);
         resolution.text = Utils.getResolution(parsedData.outcome);

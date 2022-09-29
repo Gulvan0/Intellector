@@ -97,7 +97,6 @@ class ChallengeParamsDialog extends Dialog
     @:bind(applySIPBtn, MouseEvent.CLICK)
     private function onSIPApplied(e)
     {
-        trace(LocaleManager.instance.language);
         var deserializedSituation:Null<Situation> = Situation.fromSIP(sipTF.text);
 
         if (deserializedSituation == null)
