@@ -11,6 +11,7 @@ import dict.Dictionary;
 
 typedef StudyWidgetData =
 {
+    var id:Int;
     var info:StudyInfo;
     var onTagSelected:String->Void;
     var onEditPressed:Void->Void;
@@ -45,7 +46,7 @@ class StudyWidget extends ItemRenderer
     {
         tagListContainer.removeAllComponents();
 
-        var tagList:StudyTagList = new StudyTagList(Percent(100), 34, tags, typedData.onTagSelected);
+        var tagList:StudyTagList = new StudyTagList(Percent(100), 26, tags, typedData.onTagSelected);
         tagList.verticalAlign = 'center';
         tagListContainer.addComponent(tagList);
     }

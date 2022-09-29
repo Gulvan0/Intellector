@@ -27,4 +27,32 @@ class StudyInfos
 
         return info;
     }
+
+    public static function info2():StudyInfo
+    {
+        var info:StudyInfo = new StudyInfo();
+
+		info.name = "Yet another clever name";
+		info.description = "This study has dumb and not very long description, yet containing a looooooooooooooooooooooooong word";
+		info.publicity = DirectOnly;
+		info.tags = [];
+		info.variantStr = "";
+        info.keyPositionSIP = "b\\rerlrvn!Dn";
+
+        return info;
+    }
+
+    public static function info3():StudyInfo
+    {
+        var info:StudyInfo = new StudyInfo();
+
+		info.name = "Private";
+		info.description = "This is a private study";
+		info.publicity = Private;
+		info.tags = [tag(2)];
+		info.variantStr = "";
+        info.keyPositionSIP = "b\\rervn!Dn";
+
+        return info;
+    }
 }

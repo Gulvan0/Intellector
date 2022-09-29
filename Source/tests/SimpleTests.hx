@@ -1,5 +1,6 @@
 package tests;
 
+import gfx.profile.complex_components.StudiesTab;
 import gfx.basic_components.utils.DimValue;
 import tests.data.StudyInfos;
 import haxe.ui.core.Component;
@@ -51,6 +52,8 @@ class SimpleTests
 		if (wrapperWidth != null || wrapperHeight != null)
 		{
 			var wrapperBox:Box = new Box();
+			wrapperBox.horizontalAlign = 'center';
+			wrapperBox.verticalAlign = 'center';
 
 			if (wrapperWidth != null)
 				assignWidth(wrapperBox, wrapperWidth);
@@ -219,6 +222,7 @@ class SimpleTests
 	public static function studyWidget()
 	{
 		var data:StudyWidgetData = {
+			id: 12,
 			info: StudyInfos.info1(),
 			onStudyClicked: () -> {trace('Clicked');},
 			onTagSelected: tag -> {trace('Tag: $tag');},
@@ -253,5 +257,15 @@ class SimpleTests
 		var sampleProfileData:ProfileData = ProfileInfos.data1();
 		var comp:TimeControlFilterDropdown = new TimeControlFilterDropdown(sampleProfileData.elo, sampleProfileData.gamesCntByTimeControl, sampleProfileData.totalPastGames, traceArg);
 		add(comp);
+	}
+
+	public static function studyList()
+	{
+		var comp:StudiesTab = new StudiesTab([
+			111 => StudyInfos.info1(),
+			23 => StudyInfos.info2(),
+			21 => StudyInfos.info3()
+		], 5);
+		add(comp, Percent(50), Percent(90));
 	}
 }

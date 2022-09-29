@@ -10,16 +10,14 @@ import haxe.ui.components.Button;
 import haxe.ui.containers.ListView;
 import haxe.ui.containers.ScrollView;
 
+@:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/profile/studies_tab.xml'))
 class StudiesTab extends ScrollView
 {
     private static inline final STUDIES_PAGE_SIZE:Int = 10;
 
-    private var profileOwner:String;
-
     private var studyFilterList:StudyFilterList;
-    private var studiesList:ListView;
-    private var loadMoreBtn:Button;
 
+    private var profileOwner:String;
     private var activeTags:Array<String> = [];
     private var loadedStudies:Map<Int, StudyInfo> = [];
 
@@ -67,7 +65,7 @@ class StudiesTab extends ScrollView
         Networker.emitEvent(OverwriteStudy(id, newParams));
 
         var oldParams:StudyInfo = loadedStudies.get(id);
-        var itemIndex:Int = studiesList.dataSource.indexOf(oldParams);
+        var itemIndex:Int = indexOf(id);
 
         studiesList.dataSource.update(itemIndex, oldParams);
         loadedStudies.set(id, newParams);
@@ -76,7 +74,7 @@ class StudiesTab extends ScrollView
     private function onDeleteStudyRequested(id:Int)
     {
         Networker.emitEvent(DeleteStudy(id));
-        studiesList.dataSource.remove(loadedStudies.get(id));
+        studiesList.dataSource.removeAt(indexOf(id));
         loadedStudies.remove(id);
     }
 
@@ -85,6 +83,7 @@ class StudiesTab extends ScrollView
         for (id => info in infos.keyValueIterator())
         {
             var studyWidgetData:StudyWidgetData = {
+                id: id,
                 info: info,
                 onStudyClicked: onStudyClicked.bind(id),
                 onDeletePressed: onDeleteStudyRequested.bind(id),
@@ -92,7 +91,7 @@ class StudiesTab extends ScrollView
                 onTagSelected: onTagSelectedFromStudyWidget
             };
 
-            studiesList.dataSource.add(studyWidgetData);
+            studiesList.dataSource.insert(0, studyWidgetData);
             loadedStudies.set(id, info);
         }
 
@@ -112,26 +111,25 @@ class StudiesTab extends ScrollView
         Requests.getPlayerStudies(profileOwner, Lambda.count(loadedStudies), STUDIES_PAGE_SIZE, activeTags, appendStudies);
     }
 
+    private function indexOf(id:Int):Int
+    {
+        for (i in 0...studiesList.dataSource.size)
+        {
+            var element:StudyWidgetData = studiesList.dataSource.get(i);
+            if (element.id == id)
+                return i;
+        }
+        return -1;
+    }
+
     public function new(preloadedStudies:Map<Int, StudyInfo>, totalStudies:Int)
     {
         super();
-        this.percentWidth = 100;
-        this.percentHeight = 100;
-        this.percentContentWidth = 100;
 
-        studyFilterList = new StudyFilterList(Percent(100), 36, onTagFilterAdded, onTagFilterRemoved, onFiltersCleared);
-        addComponent(studyFilterList);
+        studyFilterList = new StudyFilterList(Percent(100), 27, onTagFilterAdded, onTagFilterRemoved, onFiltersCleared);
+        addComponentAt(studyFilterList, 0);
 
-        studiesList = new ListView();
-        studiesList.percentWidth = 100;
-        studiesList.percentContentWidth = 100;
-        studiesList.itemRenderer = new StudyWidget();
-        addComponent(studiesList);
-
-        loadMoreBtn = new Button();
-        loadMoreBtn.text = Dictionary.getPhrase(PROFILE_LOAD_MORE_BTN_TEXT);
-        loadMoreBtn.horizontalAlign = 'center';
-        addComponent(loadMoreBtn);
+        studiesList.addComponent(new StudyWidget());
 
         appendStudies(preloadedStudies, Lambda.count(preloadedStudies) < totalStudies);
     }

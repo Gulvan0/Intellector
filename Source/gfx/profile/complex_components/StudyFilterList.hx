@@ -28,8 +28,8 @@ class StudyFilterList extends ScrollView
 
     private function addTag(name:String, ignoreCallback:Bool)
     {
-        name.shorten(StudyTag, false);
-        name.trim();
+        name = name.shorten(StudyTag, false);
+        name = name.trim();
 
         if (tagRects.exists(name))
             return;
