@@ -91,11 +91,12 @@ class StudiesTab extends ScrollView
                 onTagSelected: onTagSelectedFromStudyWidget
             };
 
-            studiesList.dataSource.insert(0, studyWidgetData);
+            studiesList.dataSource.add(studyWidgetData);
             loadedStudies.set(id, info);
         }
 
         loadMoreBtn.visible = hasNext;
+        loadMoreBtn.disabled = false;
     }
 
     private function reloadStudies()
@@ -108,6 +109,7 @@ class StudiesTab extends ScrollView
     @:bind(loadMoreBtn, MouseEvent.CLICK)
     private function loadMore(?e)
     {
+        loadMoreBtn.disabled = true;
         Requests.getPlayerStudies(profileOwner, Lambda.count(loadedStudies), STUDIES_PAGE_SIZE, activeTags, appendStudies);
     }
 
@@ -125,6 +127,7 @@ class StudiesTab extends ScrollView
     public function new(preloadedStudies:Map<Int, StudyInfo>, totalStudies:Int)
     {
         super();
+        this.text = Dictionary.getPhrase(PROFILE_STUDIES_TAB_TITLE);
 
         studyFilterList = new StudyFilterList(Percent(100), 27, onTagFilterAdded, onTagFilterRemoved, onFiltersCleared);
         addComponentAt(studyFilterList, 0);

@@ -1,7 +1,7 @@
 <item-renderer width="100%" height="100%">
     <style>
         #fullBox {
-            border: 1px solid #dddddd;
+            border: 1px solid #aaaaaa;
             background: #fdfdfd #eaeaea;
             pointer-events:true;
             padding: 5px;

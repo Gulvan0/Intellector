@@ -272,11 +272,6 @@ class Dictionary
             case PROFILE_ONGOING_MATCHES_TAB_TITLE:
                 return ["Ongoing", "Текущие партии"];
                 
-            case PROFILE_LOAD_MORE_BTN_TEXT:
-                return ["Load more", "Загрузить больше"];
-            case PROFILE_RELOAD_BTN_TEXT:
-                return ["Reload", "Обновить"];
-
             case PROFILE_GAMES_TCFILTER_ALL_GAMES_OPTION_NAME:
                 return ["All Games", "Все игры"];
             case PROFILE_GAMES_TCFILTER_GAMECNT_LABEL_TEXT(cnt):
@@ -290,6 +285,11 @@ class Dictionary
                 return ["Edit study", "Редактировать студию"];
             case PROFILE_STUDY_REMOVE_BTN_TOOLTIP:
                 return ["Remove study", "Удалить студию"];
+            case PROFILE_LOAD_MORE_BTN_TEXT:
+                return ["Load more", "Загрузить больше"];
+                
+            case PROFILE_ONGOING_RELOAD_BTN_TEXT:
+                return ["Reload", "Обновить"];
 
             case PROFILE_TAG_FILTERS_PREPENDER:
                 return ["Filter by tags:", "Фильтровать по тегам:"];
