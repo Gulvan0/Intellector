@@ -25,8 +25,7 @@ class GameLogParserOutput
     public var timeControl:TimeControl = new TimeControl(0, 0);
     public var whiteLogin:Null<String>;
     public var blackLogin:Null<String>;
-    public var whiteELO:EloValue;
-    public var blackELO:EloValue;
+    public var elo:Null<Map<PieceColor, EloValue>>;
     public var outcome:Null<Outcome>;
     public var msLeftWhenEnded:Null<Map<PieceColor, Int>>;
     public var movesPlayed:Array<Ply> = [];
@@ -91,6 +90,11 @@ class GameLogParserOutput
     public function gameEnded():Bool
     {
         return outcome != null;
+    }
+
+    public function isRated():Bool
+    {
+        return elo != null;
     }
 
     public function getParticipantColor(participantLogin:String)
@@ -184,8 +188,7 @@ class GameLogParser
                 parserOutput.whiteLogin = playerLogins[0];
                 parserOutput.blackLogin = playerLogins[1];
             case "e":
-                parserOutput.whiteELO = decodeELO(args[0]);
-                parserOutput.blackELO = decodeELO(args[1]);
+                parserOutput.elo = [White => decodeELO(args[0]), Black => decodeELO(args[1])];
             case "D":
                 parserOutput.datetime = Date.fromTime(Std.parseInt(args[0]) * 1000);
             case "L":

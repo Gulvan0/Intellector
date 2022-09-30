@@ -52,7 +52,7 @@ class StudiesTab extends ScrollView
     private function onStudyClicked(id:Int)
     {
         var info:StudyInfo = loadedStudies.get(id);
-        SceneManager.toScreen(Analysis(info.variantStr, null, id, info.name));
+        SceneManager.toScreen(Analysis(info.variantStr, null, id, info));
     }
 
     private function onEditStudyRequested(id:Int)

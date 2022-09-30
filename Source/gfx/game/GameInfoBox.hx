@@ -162,8 +162,11 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         return b;
     }
 
-    private function fillOpponentsBox(whiteLogin:String, blackLogin:String, whiteELO:EloValue, blackELO:EloValue)
+    private function fillOpponentsBox(whiteLogin:String, blackLogin:String, playerElos:Null<Map<PieceColor, EloValue>>)
     {
+        var whiteELO = playerElos != null? playerElos[White] : null;
+        var blackELO = playerElos != null? playerElos[Black] : null;
+
         whiteLoginLabel = new PlayerLabel(Exact(20), whiteLogin, whiteELO, true);
         whiteLoginLabel.horizontalAlign = "center";
 
@@ -179,7 +182,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         opponentsBox.addComponent(blackLoginLabel);
     }
 
-    private function initNewGame(whiteLogin:String, blackLogin:String, whiteELO:EloValue, blackELO:EloValue, timeControl:TimeControl, startDatetime:Date)
+    private function initNewGame(whiteLogin:String, blackLogin:String, playerElos:Null<Map<PieceColor, EloValue>>, timeControl:TimeControl, startDatetime:Date)
     {
         var tcType:TimeControlType = timeControl.getType();
 
@@ -191,7 +194,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
         resolution.text = Utils.getResolution(null);
-        fillOpponentsBox(whiteLogin, blackLogin, whiteELO, blackELO);
+        fillOpponentsBox(whiteLogin, blackLogin, playerElos);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
     }
@@ -206,7 +209,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         else
             matchParameters.text = parsedData.timeControl.toString() + separator + tcType.getName();
 
-        fillOpponentsBox(parsedData.whiteLogin, parsedData.blackLogin, parsedData.whiteELO, parsedData.blackELO);
+        fillOpponentsBox(parsedData.whiteLogin, parsedData.blackLogin, parsedData.elo);
         resolution.text = Utils.getResolution(parsedData.outcome);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
@@ -239,8 +242,8 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, whiteElo, blackElo, timeControl, _, startDatetime):
-                initNewGame(whiteLogin, blackLogin, whiteElo, blackElo, timeControl, startDatetime);
+            case New(whiteLogin, blackLogin, playerElos, timeControl, _, startDatetime):
+                initNewGame(whiteLogin, blackLogin, playerElos, timeControl, startDatetime);
             case Ongoing(parsedData, _, _, _, followedPlayerLogin):
                 initActualizedGame(parsedData);
                 if (followedPlayerLogin != null)

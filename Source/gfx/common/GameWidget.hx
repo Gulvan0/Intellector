@@ -113,12 +113,13 @@ class GameWidget extends ItemRenderer
         reloadBoard(parsedData.currentSituation, watchedColor);
 
         var whitePlayerStr:String = parsedData.whiteLogin;
-        if (parsedData.whiteELO != null)
-            whitePlayerStr += ' (${eloToStr(parsedData.whiteELO)})';
-
         var blackPlayerStr:String = parsedData.blackLogin;
-        if (parsedData.blackELO != null)
-            blackPlayerStr += ' (${eloToStr(parsedData.blackELO)})';
+
+        if (parsedData.elo != null)
+        {
+            whitePlayerStr += ' (${eloToStr(parsedData.elo[White])})';
+            blackPlayerStr += ' (${eloToStr(parsedData.elo[Black])})';
+        }
 
         opponentsLabelLongText = '$whitePlayerStr vs $blackPlayerStr';
         opponentsLabelTallText = '$whitePlayerStr\nvs\n$blackPlayerStr';

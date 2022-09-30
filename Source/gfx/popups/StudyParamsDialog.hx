@@ -58,7 +58,7 @@ class StudyParamsDialog extends Dialog
         info.name = nameTF.text.trim().shorten(StudyName, false);
         info.description = descTextArea.text.trim().shorten(StudyDescription, false);
         info.publicity = StudyPublicity.createByIndex(accessDropdown.selectedIndex);
-        info.tags = null; //TODO: Replace
+        info.tags = null; //TODO: Replace (mind the resriction)
 
         return info;
     }

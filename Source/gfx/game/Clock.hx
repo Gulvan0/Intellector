@@ -206,7 +206,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         this.ownerColor = ownerColor;
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, _, _, timeControl, startingSituation, _):
+            case New(whiteLogin, blackLogin, _, timeControl, startingSituation, _):
                 if (timeControl.getType() == Correspondence)
                 {
                     this.active = false;

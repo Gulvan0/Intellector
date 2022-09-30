@@ -34,15 +34,21 @@ class PlayerLabel extends HBox
         Requests.getMiniProfile(username);
     }
 
-    public function new(height:DimValue, username:String, displayedELO:EloValue, interactive:Bool)
+    public function new(height:DimValue, username:String, displayedELO:Null<EloValue>, interactive:Bool)
     {
         super();
         this.username = username;
         
         assignHeight(this, height);
 
-        var displayedELOStr:String = eloToStr(displayedELO);
-        lbl.text = '$username ($displayedELOStr)';
+        if (displayedELO != null)
+        {
+            var displayedELOStr:String = eloToStr(displayedELO);
+            lbl.text = '$username ($displayedELOStr)';
+        }
+        else
+            lbl.text = '$username';
+
         if (interactive)
             lbl.enablePointerEvents();
     }

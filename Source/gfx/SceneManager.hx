@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.game.LiveGameConstructor;
 import net.shared.StudyInfo;
 import gfx.game.LiveGameConstructor;
 import browser.CredentialCookies;
@@ -140,7 +141,7 @@ class SceneManager
                 if (parsedData.isPlayerParticipant())
                 {
                     FollowManager.stopFollowing();
-                    constructor = New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.whiteELO, parsedData.blackELO, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
+                    constructor = New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.elo, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
                 }
                 else
                     constructor = Ongoing(parsedData, parsedData.timeControl.startSecs, parsedData.timeControl.startSecs, Date.now().getTime(), FollowManager.getFollowedPlayerLogin());

@@ -58,6 +58,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     private var timeControl:TimeControl;
     private var datetime:Date;
     private var outcome:Null<Outcome> = null;
+    private var rated:Bool;
     private var getSecsLeftAfterMove:Null<(side:PieceColor, plyNum:Int)->Null<Float>>;
 
     private var netObservers:Array<INetObserver>;
@@ -218,9 +219,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case AddTime:
                 Networker.emitEvent(AddTime);
             case Rematch:
-                //TODO: Rated rematch
                 var opponentLogin:String = playerColor == White? blackLogin : whiteLogin;
-                var params:ChallengeParams = ChallengeParams.rematchParams(opponentLogin, playerColor, timeControl, false, board.startingSituation);
+                var params:ChallengeParams = ChallengeParams.rematchParams(opponentLogin, playerColor, timeControl, rated, board.startingSituation);
                 Dialogs.specifyChallengeParams(params, true);
             case Share:
                 var gameLink:String = URLEditor.getGameLink(gameID);
@@ -322,13 +322,14 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, _, _, timeControl, _, startDatetime):
+            case New(whiteLogin, blackLogin, playerElos, timeControl, _, startDatetime):
                 this.isPastGame = false;
                 this.playerColor = LoginManager.isPlayer(blackLogin)? Black : White;
                 this.whiteLogin = whiteLogin;
                 this.blackLogin = blackLogin;
                 this.timeControl = timeControl;
                 this.datetime = startDatetime;
+                this.rated = playerElos != null;
                 this.getSecsLeftAfterMove = null;
 
                 setOrientation(playerColor);
@@ -340,6 +341,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.blackLogin = parsedData.blackLogin;
                 this.timeControl = parsedData.timeControl;
                 this.datetime = parsedData.datetime;
+                this.rated = parsedData.isRated();
                 this.getSecsLeftAfterMove = null;
 
                 setOrientation(followedPlayerLogin != null? parsedData.getParticipantColor(followedPlayerLogin) : playerColor);
@@ -351,6 +353,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.blackLogin = parsedData.blackLogin;
                 this.timeControl = parsedData.timeControl;
                 this.datetime = parsedData.datetime;
+                this.rated = parsedData.isRated();
                 this.getSecsLeftAfterMove = parsedData.msPerMoveDataAvailable? parsedData.getSecsLeftAfterMove : null;
 
                 setOrientation(watchedPlyerLogin != null? parsedData.getParticipantColor(watchedPlyerLogin) : White);

@@ -187,7 +187,7 @@ class Chatbox extends VBox implements INetObserver
     {
         switch constructor 
         {
-            case New(_, _, _, _, _, _, _):
+            case New(_, _, _, _, _, _):
                 this.isOwnerSpectator = false;
             case Ongoing(parsedData, _, _, _, followedPlayerLogin):
                 this.isOwnerSpectator = followedPlayerLogin != null;
