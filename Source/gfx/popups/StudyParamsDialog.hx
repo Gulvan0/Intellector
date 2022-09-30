@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.profile.complex_components.StudyFilterList;
 import net.Requests;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
@@ -27,6 +28,9 @@ class StudyParamsDialog extends Dialog
     private final oldStudyID:Null<Int>;
     private final serializedVariant:String;
     private final keySIP:String;
+
+    private var studyTagList:StudyFilterList;
+    private var tags:Array<String> = [];
 
     private function resize()
     {
@@ -58,7 +62,7 @@ class StudyParamsDialog extends Dialog
         info.name = nameTF.text.trim().shorten(StudyName, false);
         info.description = descTextArea.text.trim().shorten(StudyDescription, false);
         info.publicity = StudyPublicity.createByIndex(accessDropdown.selectedIndex);
-        info.tags = null; //TODO: Replace (mind the resriction)
+        info.tags = tags;
 
         return info;
     }
@@ -68,7 +72,7 @@ class StudyParamsDialog extends Dialog
         nameTF.text = studyInfo.name;
         descTextArea.text = studyInfo.description;
         accessDropdown.selectedIndex = studyInfo.publicity.getIndex();
-        //TODO: Fill tags
+        tags = studyInfo.tags;
     }
 
     @:bind(createBtn, MouseEvent.CLICK)
@@ -102,6 +106,22 @@ class StudyParamsDialog extends Dialog
         hideDialog(null);
     }
 
+    private function onTagAdded(tag:String)
+    {
+        if (tags.length < MAX_TAG_COUNT)
+            tags.push(tag);
+    }
+
+    private function onTagRemoved(tag:String)
+    {
+        tags.remove(tag);
+    }
+
+    private function onTagsCleared()
+    {
+        tags = [];
+    }
+
     public function new(mode:StudyParamsDialogMode)
     {
         super();
@@ -110,6 +130,9 @@ class StudyParamsDialog extends Dialog
         tagsOptionName.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_PARAM_TAGS(MAX_TAG_COUNT));
 
         nameTF.maxChars = StudyName;
+
+        studyTagList = new StudyFilterList(Percent(100), 25, onTagAdded, onTagRemoved, onTagsCleared, STUDY_PARAMS_DIALOG_TAG_LIST_PREPENDER, STUDY_PARAMS_DIALOG_NO_TAGS_PLACEHOLDER, STUDY_PARAMS_DIALOG_ADD_TAG_BUTTON_TOOLTIP, STUDY_PARAMS_DIALOG_REMOVE_TAG_BUTTON_TOOLTIP, STUDY_PARAMS_DIALOG_CLEAR_TAGS_BUTTON_TOOLTIP, STUDY_PARAMS_DIALOG_TAG_PROMPT_QUESTION);
+        addComponent(studyTagList);
 
         switch mode 
         {

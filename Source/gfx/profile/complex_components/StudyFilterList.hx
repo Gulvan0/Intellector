@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import dict.Phrase;
 import gfx.basic_components.utils.DimValue;
 import dict.Dictionary;
 import haxe.ui.containers.HBox;
@@ -21,6 +22,9 @@ class StudyFilterList extends ScrollView
     private var noneLabel:AutosizingLabel;
     private var tagBox:HBox;
 
+    private var removeTagTooltip:Phrase;
+    private var promptQuestion:Phrase;
+
     public function appendTag(name:String)
     {
         addTag(name, true);
@@ -36,7 +40,7 @@ class StudyFilterList extends ScrollView
 
         noneLabel.hidden = true;
 
-        var rect:StudyFilterRect = new StudyFilterRect(Percent(100), name, removeTag.bind(name));
+        var rect:StudyFilterRect = new StudyFilterRect(Percent(100), name, removeTag.bind(name), removeTagTooltip);
         tagBox.addComponent(rect);
         tagRects.set(name, rect);
         if (!ignoreCallback)
@@ -56,7 +60,7 @@ class StudyFilterList extends ScrollView
 
     private function onAddNewTagPressed(e)
     {
-        Dialogs.prompt(PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT, None, addTag.bind(_, false));
+        Dialogs.prompt(promptQuestion, None, addTag.bind(_, false));
     }
 
     private function onClearTagsPressed(e)
@@ -67,9 +71,11 @@ class StudyFilterList extends ScrollView
         onTagsCleared();
     }
 
-    public function new(w:DimValue, contentHeight:Float, onTagAdded:String->Void, onTagRemoved:String->Void, onTagsCleared:Void->Void)
+    public function new(w:DimValue, contentHeight:Float, onTagAdded:String->Void, onTagRemoved:String->Void, onTagsCleared:Void->Void, prepender:Phrase, noTagsPlaceholder:Phrase, addTag:Phrase, removeTag:Phrase, clear:Phrase, promptQuestion:Phrase)
     {
         super();
+        this.promptQuestion = promptQuestion;
+        this.removeTagTooltip = removeTag;
 
         this.onTagAdded = onTagAdded;
         this.onTagRemoved = onTagRemoved;
@@ -80,12 +86,12 @@ class StudyFilterList extends ScrollView
         assignWidth(this, w);
         
         var titleLabel:AutosizingLabel = new AutosizingLabel();
-        titleLabel.text = Dictionary.getPhrase(PROFILE_TAG_FILTERS_PREPENDER);
+        titleLabel.text = Dictionary.getPhrase(prepender);
         titleLabel.percentHeight = 100;
         addComponent(titleLabel);
         
         noneLabel = new AutosizingLabel();
-        noneLabel.text = Dictionary.getPhrase(PROFILE_TAG_NO_FILTERS_PLACEHOLDER_TEXT);
+        noneLabel.text = Dictionary.getPhrase(noTagsPlaceholder);
         noneLabel.customStyle = {color: 0x999999, fontItalic: true};
         noneLabel.percentHeight = 100;
         addComponent(noneLabel);
@@ -96,14 +102,14 @@ class StudyFilterList extends ScrollView
 
         var addNewTagLink:AutosizingLabel = new AutosizingLabel();
         addNewTagLink.percentHeight = 100;
-        addNewTagLink.text = Dictionary.getPhrase(PROFILE_ADD_TAG_FILTER_BTN_TEXT);
+        addNewTagLink.text = Dictionary.getPhrase(addTag);
         addNewTagLink.styleNames = "link";
         addNewTagLink.onClick = onAddNewTagPressed;
         addComponent(addNewTagLink);
 
         var clearTagsLink:AutosizingLabel = new AutosizingLabel();
         clearTagsLink.percentHeight = 100;
-        clearTagsLink.text = Dictionary.getPhrase(PROFILE_CLEAR_TAG_FILTERS_BTN_TEXT);
+        clearTagsLink.text = Dictionary.getPhrase(clear);
         clearTagsLink.styleNames = "link";
         clearTagsLink.onClick = onClearTagsPressed;
         addComponent(clearTagsLink);

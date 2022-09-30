@@ -8,6 +8,7 @@ import dict.Dictionary;
 import haxe.Timer;
 import serialization.GameLogParser;
 import net.Requests;
+import struct.PieceColor;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/main_menu/current_games_table.xml"))
 class CurrentGamesTable extends VBox
@@ -21,12 +22,12 @@ class CurrentGamesTable extends VBox
             var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.currentLog);
 
             var whiteLabel:String = parsedData.whiteLogin;
-            if (parsedData.whiteELO != null)
-                whiteLabel += ' (${eloToStr(parsedData.whiteELO)})';
-
             var blackLabel:String = parsedData.blackLogin;
-            if (parsedData.blackELO != null)
-                blackLabel += ' (${eloToStr(parsedData.blackELO)})';
+            if (parsedData.elo != null)
+            {
+                whiteLabel += ' (${eloToStr(parsedData.elo[White])})';
+                whiteLabel += ' (${eloToStr(parsedData.elo[Black])})';
+            }
 
             table.dataSource.add({time: parsedData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});
             gameIDs.push(gameData.id);

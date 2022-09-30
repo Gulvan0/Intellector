@@ -177,7 +177,7 @@ class SimpleTests
 	public static function studyTagFilterRect()
 	{
 		var comp:StudyFilterRect = null;
-		comp = new StudyFilterRect(Exact(30), StudyInfos.tag(1), () -> {box.removeComponent(comp);});
+		comp = new StudyFilterRect(Exact(30), StudyInfos.tag(1), () -> {box.removeComponent(comp);}, PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP);
 		add(comp);
 	}
 
@@ -203,7 +203,7 @@ class SimpleTests
 			trace(tags);
 		}
 
-		var comp:StudyFilterList = new StudyFilterList(Percent(50), 36, onAdded, onRemoved, onCleared);
+		var comp:StudyFilterList = new StudyFilterList(Percent(50), 36, onAdded, onRemoved, onCleared, PROFILE_TAG_FILTERS_PREPENDER, PROFILE_TAG_NO_FILTERS_PLACEHOLDER_TEXT, PROFILE_ADD_TAG_FILTER_BTN_TEXT, PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP, PROFILE_CLEAR_TAG_FILTERS_BTN_TEXT, PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT);
 		add(comp);
 	}
 

@@ -89,10 +89,10 @@ class Utils
         {
             case MainMenu: 
                 translations = ["Home", "Главная"];
-            case Analysis(_, _, exploredStudyID, exploredStudyName):
-                if (exploredStudyName != null)
+            case Analysis(_, _, exploredStudyID, exploredStudyInfo):
+                if (exploredStudyInfo != null)
                 {
-                    var shortenedName:String = StringUtils.shorten(exploredStudyName);
+                    var shortenedName:String = StringUtils.shorten(exploredStudyInfo.name);
                     translations = ['Study $shortenedName ($exploredStudyID) | Analysis Board', 'Студия $shortenedName ($exploredStudyID) | Доска анализа'];
                 }
                 else

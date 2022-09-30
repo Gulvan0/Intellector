@@ -383,10 +383,16 @@ class Dictionary
             case STUDY_PARAMS_DIALOG_ACCESS_OPTION(Private):
                 return ["Private", "Приватный"];
             
+            case STUDY_PARAMS_DIALOG_TAG_LIST_PREPENDER:
+                return ["", ""];
+            case STUDY_PARAMS_DIALOG_NO_TAGS_PLACEHOLDER:
+                return ["<no tags>", "<нет>"];
             case STUDY_PARAMS_DIALOG_ADD_TAG_BUTTON_TOOLTIP:
-                return ["Unrated", "Добавить"];
+                return ["Add", "Добавить"];
+            case STUDY_PARAMS_DIALOG_REMOVE_TAG_BUTTON_TOOLTIP:
+                return ["Remove", "Убрать"];
             case STUDY_PARAMS_DIALOG_CLEAR_TAGS_BUTTON_TOOLTIP:
-                return ["Unrated", "Очистить все"];
+                return ["Clear", "Очистить"];
             case STUDY_PARAMS_DIALOG_TAG_PROMPT_QUESTION:
                 return ["Input tag:", "Введите тег:"];
         

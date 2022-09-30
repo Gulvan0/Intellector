@@ -1,5 +1,6 @@
 package gfx.profile.simple_components;
 
+import dict.Phrase;
 import haxe.ui.events.UIEvent;
 import dict.Dictionary;
 import utils.AssetManager;
@@ -27,7 +28,7 @@ class StudyFilterRect extends HBox
         };
     }
 
-    public function new(h:DimValue, tagName:String, onRemovePressed:Void->Void)
+    public function new(h:DimValue, tagName:String, onRemovePressed:Void->Void, removeBtnTooltip:Phrase)
     {
         if (h == Auto)
             throw "autoHeight cannot be true for StudyFilterRect";
@@ -46,7 +47,7 @@ class StudyFilterRect extends HBox
 
         cross = new ARPImage();
         cross.resource = AssetManager.singleAssetPath(StudyTagFilterCross);
-        cross.tooltip = Dictionary.getPhrase(PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP);
+        cross.tooltip = Dictionary.getPhrase(removeBtnTooltip);
         cross.percentHeight = 100;
         cross.customStyle.horizontalAlign = "center";
         cross.customStyle.backgroundColor = 0;

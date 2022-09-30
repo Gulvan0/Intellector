@@ -1,5 +1,7 @@
 package net.shared;
 
+import net.shared.TimeControlType.isSecondLongerThanFirst;
+
 class ProfileData
 {
     public var elo:Map<TimeControlType, EloValue>;
