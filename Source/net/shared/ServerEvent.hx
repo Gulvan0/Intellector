@@ -1,5 +1,7 @@
 package net.shared;
 
+import net.shared.ProfileData;
+
 enum ServerEvent
 {
     GameStarted(match_id:Int, logPreamble:String); //Sent when a game with one of the players being the user starts. Signals the app to navigate to the game screen. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
@@ -51,9 +53,9 @@ enum ServerEvent
 
     SingleStudy(info:StudyInfo); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy
-    StudyCreated(studyID:Int, studyName:String); //Answer to CreateStudy
+    StudyCreated(studyID:Int, info:StudyInfo); //Answer to CreateStudy
     MiniProfile(data:MiniProfileData); //Answer to GetPlayerProfile
-    PlayerProfile(serializedProfileData:String); //Answer to GetPlayerProfile
+    PlayerProfile(data:ProfileData); //Answer to GetPlayerProfile
     Games(games:Array<GameInfo>, hasNext:Bool); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
     Studies(studies:Map<Int, StudyInfo>, hasNext:Bool); //Answer to GetStudiesByLogin
 

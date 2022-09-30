@@ -87,24 +87,11 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
 
     private function displayShareDialog()
     {
-        var serializedVariant:String = variant.serialize();
-
-        var exportNewCallback:String->Void = name -> {
-            //Networker.emitEvent(CreateStudy(name, serializedVariant, null)); //TODO: Change
-        };
-
-        var overwriteCallback:Int->String->Void = (id:Int, name:String) -> {
-            //Networker.emitEvent(OverwriteStudy(name, serializedVariant, id)); //TODO: Change
-        };
-
         var shareDialog:ShareDialog = new ShareDialog();
         switch SceneManager.getCurrentScreenType()
         {
-            case Analysis(_, _, exploredStudyID, exploredStudyName):
-                if (exploredStudyID != null)
-                    shareDialog.initInAnalysis(board.shownSituation, board.orientationColor, exportNewCallback, overwriteCallback.bind(exploredStudyID), exploredStudyName);
-                else
-                    shareDialog.initInAnalysis(board.shownSituation, board.orientationColor, exportNewCallback);
+            case Analysis(_, _, exploredStudyID, exploredStudyInfo):
+                shareDialog.initInAnalysis(board.shownSituation, board.orientationColor, variant, exploredStudyID, exploredStudyInfo);
             default:
                 throw "ShareRequested happened outside of Analysis screen!";
         }

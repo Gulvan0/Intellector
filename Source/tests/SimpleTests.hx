@@ -16,7 +16,7 @@ import gfx.profile.complex_components.StudyTagList;
 import gfx.profile.simple_components.StudyTagLabel;
 import gfx.profile.complex_components.StudyFilterList;
 import gfx.profile.simple_components.StudyFilterRect;
-import gfx.profile.data.ProfileData;
+import net.shared.ProfileData;
 import gfx.profile.complex_components.ProfileHeader;
 import gfx.Dialogs;
 import net.shared.MiniProfileData;

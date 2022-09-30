@@ -4,7 +4,7 @@ import net.shared.TimeControlType;
 import dict.utils.TimePhrases;
 import dict.utils.OutcomePhrases;
 import utils.SpecialChar;
-import gfx.profile.data.UserStatus;
+import net.shared.UserStatus;
 import gfx.game.LiveGameConstructor;
 import utils.StringUtils;
 import utils.TimeControl;
@@ -99,8 +99,8 @@ class Utils
                     translations = ["Analysis Board", "Доска анализа"];
             case LiveGame(gameID, constructor): 
                 translations = getLiveGameScreenTitle(gameID, constructor);
-            case PlayerProfile(ownerLogin): 
-                translations = [ownerLogin, ownerLogin];
+            case PlayerProfile(ownerLogin, _): 
+                translations = ['$ownerLogin\'s profile', 'Профиль $ownerLogin'];
             case ChallengeJoining(_, params):
                 translations = ['Challenge by ${params.ownerLogin}', 'Вызов ${params.ownerLogin}'];
             default:

@@ -54,8 +54,10 @@ class Dictionary
                 return ["Branching Help", "Справка (дерево вариантов)"];
             case ANALYSIS_BRANCHING_HELP_DIALOG_TEXT:
                 return ["<p><u><b>General</b></u></p><br><p><em>Use branching tab to navigate between different variations of the study. You can change the mode in settings.</em></p><br><p><b>LMB (Click):</b> Switch to branch</p><br><p><b>CTRL + LMB (Click):</b> Remove branch</p><br><p><b>Mouse wheel:</b> Scroll vertically</p><br><p><b>SHIFT + Mouse wheel:</b> Scroll horizontally</p><br><p>Alternatively, <b>Click &amp; Hold LMB</b> while moving the mouse to drag</p><br><p><u><b>Tree Mode</b></u></p><br><p><b>CTRL + Mouse wheel:</b> Zoom in / out</p>", ""];
+            
             case SHARE_DIALOG_TITLE:
                 return ["Share", "Поделиться"];
+
             case SHARE_POSITION_TAB_NAME:
                 return ["Share Position", "Поделиться позицией"];
             case SHARE_SIP_HEADER:
@@ -74,6 +76,7 @@ class Dictionary
                 return ["Background Color: ", "Цвет фона: "];
             case SHARE_DOWNLOAD_PNG_TRANSPARENT_BG_CHECKBOX_TEXT:
                 return ["Transparent Background", "Прозрачный фон"];
+
             case SHARE_GAME_TAB_NAME:
                 return ["Share Game", "Поделиться игрой"];
             case SHARE_LINK_HEADER:
@@ -88,22 +91,18 @@ class Dictionary
                 return ["Interval (ms): ", "Интервал (мс): "];
             case SHARE_EXPORT_AND_DOWNLOAD_BTN_TEXT:
                 return ["Export & Download", "Скачать"];
+
             case SHARE_EXPORT_TAB_NAME:
                 return ["Export", "Экспорт"];
             case SHARE_EXPORT_AS_STUDY_HEADER:
                 return ["Export as Study", "Экспорт студии"];
-            case SHARE_NAME_PREFIX_LABEL:
-                return ["Name: ", "Название: "];
-            case SHARE_STUDY_NAME_TEXTFIELD_PLACEHOLDER:
-                return ["Enter study name...", "Название студии..."];
-            case SHARE_EXPORT_NEW_BTN_TEXT:
-                return ["Create New Study", "Создать новую студию"];
-            case SHARE_OVERWRITE_BTN_TEXT_TEMPLATE:
-                return ["Overwrite $0", "Перезаписать $0"];
+            case SHARE_EXPORT_AS_STUDY_BTN_TEXT:
+                return ["Export Study", "Экспортировать студию"];
             case SHARE_EXPORT_AS_QUESTION_MARKS_TEASER:
                 return ["Export as ???", "Экспорт ???"];
             case SHARE_COMING_SOON:
                 return ["Coming soon!", "Скоро!"];
+
             case COPY_BTN_TOOLTIP:
                 return ["Copy", "Копировать"];
             case COPY_BTN_SUCCESS_TOOLTIP:
@@ -362,6 +361,46 @@ class Dictionary
 
             case INPUT_PLAYER_LOGIN:
                 return ["Input player's username", "Введите ник игрока"];
+
+            case STUDY_PARAMS_DIALOG_CREATE_TITLE:
+                return ["Save Study", "Сохранить студию"];
+            case STUDY_PARAMS_DIALOG_EDIT_TITLE:
+                return ["Edit Study Parameters", "Изменить параметры студии"];
+        
+            case STUDY_PARAMS_DIALOG_PARAM_NAME:
+                return ["Name: ", "Название: "];
+            case STUDY_PARAMS_DIALOG_PARAM_ACCESS:
+                return ["Access: ", "Доступ: "];
+            case STUDY_PARAMS_DIALOG_PARAM_DESCRIPTION(textCharsLimit):
+                return ['Description (max $textCharsLimit chars):', 'Описание (до $textCharsLimit символов):'];
+            case STUDY_PARAMS_DIALOG_PARAM_TAGS(tagCntLimit):
+                return ['Tags (up to $tagCntLimit):', 'Теги (не более $tagCntLimit):'];
+        
+            case STUDY_PARAMS_DIALOG_ACCESS_OPTION(Public):
+                return ["Public", "Публичный"];
+            case STUDY_PARAMS_DIALOG_ACCESS_OPTION(DirectOnly):
+                return ["From profile only", "Только из профиля"];
+            case STUDY_PARAMS_DIALOG_ACCESS_OPTION(Private):
+                return ["Private", "Приватный"];
+            
+            case STUDY_PARAMS_DIALOG_ADD_TAG_BUTTON_TOOLTIP:
+                return ["Unrated", "Добавить"];
+            case STUDY_PARAMS_DIALOG_CLEAR_TAGS_BUTTON_TOOLTIP:
+                return ["Unrated", "Очистить все"];
+            case STUDY_PARAMS_DIALOG_TAG_PROMPT_QUESTION:
+                return ["Input tag:", "Введите тег:"];
+        
+            case STUDY_PARAMS_DIALOG_CREATE_BUTTON_TEXT:
+                return ["Create Study", "Создать студию"];
+            case STUDY_PARAMS_DIALOG_OVERWRITE_BUTTON_TEXT(overwrittenStudyName):
+                return ['Overwrite $overwrittenStudyName', 'Перезаписать $overwrittenStudyName'];
+            case STUDY_PARAMS_DIALOG_CREATE_AS_NEW_BUTTON_TEXT:
+                return ["Create New Study", "Создать новую студию"];
+            case STUDY_PARAMS_DIALOG_SAVE_CHANGES_BUTTON_TEXT:
+                return ["Unrated", "Товарищеская"];
+            case STUDY_PARAMS_DIALOG_CANCEL_BUTTON_TEXT:
+                return ["Cancel", "Отмена"];
+
             case INCOMING_CHALLENGE_DIALOG_TITLE:
                 return ["Incoming Challenge", "Входящий вызов"];
             case INCOMING_CHALLENGE_CHALLENGE_BY_LABEL_TEXT:

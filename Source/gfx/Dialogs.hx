@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.popups.StudyParamsDialog;
 import net.shared.StudyInfo;
 import gfx.profile.complex_components.MiniProfile;
 import gfx.popups.IncomingChallengeDialog;
@@ -234,9 +235,10 @@ class Dialogs
         addDialog(dialog, true, dialog.onClose, false);
     }
 
-    public static function editStudyParams(currentParams:StudyInfo, callback:StudyInfo->Void)
+    public static function studyParams(mode:StudyParamsDialogMode)
     {
-        //TODO: Fill
+        var dialog:StudyParamsDialog = new StudyParamsDialog(mode);
+        addDialog(dialog, true, dialog.onClose, true);
     }
 
     public static function promotionSelect(color:PieceColor, callback:PieceType->Void)

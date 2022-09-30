@@ -6,7 +6,7 @@ import net.Requests;
 import struct.ChallengeParams;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
-import gfx.profile.data.ProfileData;
+import net.shared.ProfileData;
 import gfx.profile.simple_components.PlayerLabel;
 import haxe.ui.containers.Box;
 

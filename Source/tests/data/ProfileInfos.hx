@@ -1,8 +1,8 @@
 package tests.data;
 
-import gfx.profile.data.FriendData;
+import net.shared.FriendData;
 import net.shared.MiniProfileData;
-import gfx.profile.data.ProfileData;
+import net.shared.ProfileData;
 
 class ProfileInfos
 {

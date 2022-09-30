@@ -6,7 +6,7 @@ import utils.StringUtils;
 import dict.Utils;
 import utils.AssetManager;
 import gfx.basic_components.GenAnnotatedImage;
-import gfx.profile.data.FriendData;
+import net.shared.FriendData;
 
 class FriendListEntry extends GenAnnotatedImage<FriendData>
 {

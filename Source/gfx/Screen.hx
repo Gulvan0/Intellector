@@ -59,8 +59,8 @@ class Screen extends Component
                 new LanguageSelectIntro(languageReadyCallback);
             case LiveGame(id, constructor):
                 new LiveGame(id, constructor);
-            case PlayerProfile(ownerLogin):
-                new MainMenu(); //TODO: Replace
+            case PlayerProfile(ownerLogin, data):
+                new Profile(ownerLogin, data);
             case ChallengeJoining(id, params):
                 new OpenChallengeJoining(id, params);
         };

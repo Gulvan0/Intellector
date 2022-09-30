@@ -35,6 +35,13 @@
             </vbox>
         </box>
         <sharegametab id="shareGameTab" />
-        <shareexporttab id="shareExportTab" />
+        <box id="shareExportTab" width="100%" height="100%" text="${Dictionary.getPhrase(SHARE_EXPORT_TAB_NAME)}">
+            <vbox width="100%" height="100%">
+                <section-header  width="100%" text="${Dictionary.getPhrase(SHARE_EXPORT_AS_STUDY_HEADER)}" />
+                <button id="exportStudyBtn" text="${Dictionary.getPhrase(SHARE_EXPORT_AS_STUDY_BTN_TEXT)}" horizontalAlign="center" />
+                <section-header  width="100%" text="${Dictionary.getPhrase(SHARE_EXPORT_AS_QUESTION_MARKS_TEASER)}" />
+                <label text="${Dictionary.getPhrase(SHARE_COMING_SOON)}" horizontalAlign="center" style="font-size:22px" />
+            </vbox>
+        </box>
     </tabview>
 </dialog>

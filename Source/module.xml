@@ -8,7 +8,6 @@
         <component class="gfx.game.GameInfoBox" alias="gameinfobox" />
         <component class="gfx.game.Chatbox" alias="chatbox" />
         <component class="gfx.game.ShareGameTab" alias="sharegametab" />
-        <component class="gfx.analysis.ShareExportTab" alias="shareexporttab" />
         <component class="gfx.analysis.AnalysisActionBar" alias="analysisactionbar" />
         <component class="gfx.main.ChallengeModeRenderer" alias="challengemoderenderer" />
         <component class="gfx.main.TimeControlRenderer" alias="timecontrolrenderer" />

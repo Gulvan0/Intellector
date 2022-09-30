@@ -1,10 +1,4 @@
-package gfx.profile.data;
-
-import net.shared.EloValue;
-import net.shared.GameInfo;
-import net.shared.StudyInfo;
-import net.shared.UserRole;
-import net.shared.TimeControlType;
+package net.shared;
 
 class ProfileData
 {
@@ -19,11 +13,6 @@ class ProfileData
     public var totalPastGames:Int;
     public var totalStudies:Int;
     public var gamesCntByTimeControl:Map<TimeControlType, Int>;
-
-    public static function deserialize(s:String):ProfileData
-    {
-        throw "Not implemented";
-    }
 
     public function findMainELO():EloValue
     {

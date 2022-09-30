@@ -1,7 +1,7 @@
 package utils;
 
 import haxe.ui.util.ImageLoader;
-import gfx.profile.data.UserStatus;
+import net.shared.UserStatus;
 import gfx.menubar.ChallengesIconMode;
 import haxe.CallStack;
 import openfl.display.Sprite;

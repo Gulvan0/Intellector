@@ -2,10 +2,10 @@ package gfx.profile.complex_components;
 
 import dict.Dictionary;
 import gfx.basic_components.utils.DimValue;
-import gfx.profile.data.UserStatus;
+import net.shared.UserStatus;
 import gfx.basic_components.AutosizingLabel;
 import gfx.profile.simple_components.FriendListEntry;
-import gfx.profile.data.FriendData;
+import net.shared.FriendData;
 import haxe.ui.containers.ScrollView;
 
 class FriendList extends ScrollView

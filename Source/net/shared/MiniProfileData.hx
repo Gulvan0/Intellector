@@ -1,6 +1,6 @@
 package net.shared;
 
-import gfx.profile.data.UserStatus;
+import net.shared.UserStatus;
 
 class MiniProfileData
 {

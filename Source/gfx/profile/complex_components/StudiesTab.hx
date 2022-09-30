@@ -57,7 +57,7 @@ class StudiesTab extends ScrollView
 
     private function onEditStudyRequested(id:Int)
     {
-        Dialogs.editStudyParams(loadedStudies.get(id), onStudyEdited.bind(id));
+        Dialogs.studyParams(Edit(id, loadedStudies.get(id), onStudyEdited.bind(id)));
     }
 
     private function onStudyEdited(id:Int, newParams:StudyInfo)

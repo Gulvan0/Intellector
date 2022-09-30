@@ -1,5 +1,6 @@
 package gfx;
 
+import net.shared.StudyInfo;
 import gfx.game.LiveGameConstructor;
 import browser.CredentialCookies;
 import gfx.Dialogs;
@@ -50,7 +51,7 @@ class SceneManager
 
         switch currentScreenType 
         {
-            case MainMenu, LiveGame(_, _), PlayerProfile(_), ChallengeJoining(_, _):
+            case MainMenu, LiveGame(_, _), PlayerProfile(_, _), ChallengeJoining(_, _):
                 cleanupCallback = Dialogs.reconnectionDialog();
             case Analysis(_, _, _, _):
                 //* Do nothing
@@ -116,6 +117,19 @@ class SceneManager
         }
     }
 
+    public static function updateAnalysisStudyInfo(studyID:Null<Int>, studyInfo:Null<StudyInfo>)
+    {
+        switch currentScreenType 
+        {
+            case Analysis(initialVariantStr, selectedMainlineMove, _, _):
+                var newScreenType:ScreenType = Analysis(initialVariantStr, selectedMainlineMove, studyID, studyInfo);
+                URLEditor.setPath(URLEditor.getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
+                currentScreenType = newScreenType;
+            default:
+                throw "Cannot update study info outside of analysis screen";
+        }
+    }
+
     private static function handleNetEvent(event:ServerEvent):Bool
     {
         switch event 
@@ -134,14 +148,6 @@ class SceneManager
             case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
-            case StudyCreated(studyID, studyName):
-                if (currentScreenType.match(Analysis(_, _, _)))
-                {
-                    //Only change URL and screen data, but do not touch displayed components
-                    var newScreenType:ScreenType = Analysis(null, null, studyID, studyName);
-                    URLEditor.setPath(URLEditor.getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
-                    currentScreenType = newScreenType;
-                }
             default:
         }
         return false;

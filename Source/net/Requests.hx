@@ -4,7 +4,7 @@ import net.shared.OpenChallengeData;
 import net.shared.TimeControlType;
 import net.shared.GameInfo;
 import net.shared.StudyInfo;
-import gfx.profile.data.ProfileData;
+import net.shared.ProfileData;
 import struct.ChallengeParams;
 import dict.Dictionary;
 import gfx.Dialogs;
@@ -100,9 +100,8 @@ class Requests
     {
         switch event
         {
-            case PlayerProfile(serializedProfileData):
-                var profileData:ProfileData = ProfileData.deserialize(serializedProfileData);
-                //SceneManager.toScreen(PlayerProfile(login, profileData)); //TODO: Uncomment
+            case PlayerProfile(data):
+                SceneManager.toScreen(PlayerProfile(login, data));
             case PlayerNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
@@ -165,10 +164,28 @@ class Requests
         switch event
         {
             case SingleStudy(info):
-                SceneManager.toScreen(Analysis(info.variantStr, 0, id, info.name));
+                SceneManager.toScreen(Analysis(info.variantStr, 0, id, info));
             case StudyNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_STUDY_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    public static function createStudy(params:StudyInfo) 
+    {
+        Networker.addHandler(createStudy_handler);
+        Networker.emitEvent(CreateStudy(params));
+    }
+
+    private static function createStudy_handler(event:ServerEvent) 
+    {
+        switch event
+        {
+            case StudyCreated(id, info):
+                SceneManager.updateAnalysisStudyInfo(id, info);
             default:
                 return false;
         }

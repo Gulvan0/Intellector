@@ -1,5 +1,8 @@
 package gfx.common;
 
+import struct.Variant;
+import gfx.popups.StudyParamsDialog.StudyParamsDialogMode;
+import net.shared.StudyInfo;
 import haxe.ui.util.Color;
 import haxe.ui.core.Screen;
 import openfl.geom.Matrix;
@@ -183,15 +186,25 @@ class ShareDialog extends Dialog
     public function initInGame(situation:Situation, orientation:PieceColor, gameLink:String, pin:String, startingSituation:Situation, plySequence:Array<Ply>)
     {
         init(situation, orientation);
-        shareGameTab.init(gameLink, pin, startingSituation, plySequence);
         tabView.removeComponent(shareExportTab);
+        shareGameTab.init(gameLink, pin, startingSituation, plySequence);
     }
 
-    public function initInAnalysis(situation:Situation, orientation:PieceColor, exportNewCallback:(name:String)->Void, ?overwriteCallback:(newName:String)->Void, ?oldStudyName:String)
+    public function initInAnalysis(situation:Situation, orientation:PieceColor, variant:Variant, ?oldStudyID:Int, ?oldStudyInfo:StudyInfo)
     {
         init(situation, orientation);
-        shareExportTab.init(exportNewCallback, overwriteCallback, oldStudyName);
         tabView.removeComponent(shareGameTab);
+        
+        var studyParamsDialogMode:StudyParamsDialogMode;
+        if (oldStudyID != null && oldStudyInfo != null)
+            studyParamsDialogMode = CreateOrOverwrite(variant, oldStudyID, oldStudyInfo);
+        else
+            studyParamsDialogMode = Create(variant);
+
+        exportStudyBtn.onClick = e -> {
+            hideDialog(null);
+            Dialogs.studyParams(studyParamsDialogMode);
+        }
     }
 
     private function init(situation:Situation, orientation:PieceColor)

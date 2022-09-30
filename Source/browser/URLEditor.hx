@@ -39,7 +39,7 @@ class URLEditor
             case Analysis(_, _, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
             case LanguageSelectIntro(_): "";
             case LiveGame(gameID, _): 'live/$gameID';
-            case PlayerProfile(ownerLogin): 'player/$ownerLogin';
+            case PlayerProfile(ownerLogin, _): 'player/$ownerLogin';
             case ChallengeJoining(_, params): 'join/${params.ownerLogin}';
         }
     }
