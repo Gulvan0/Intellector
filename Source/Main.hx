@@ -139,10 +139,8 @@ class Main extends Sprite
 
 			navigateToSection(section, pagePathParts.slice(1));
 		}
-		else if (searcher.has("id")) //* These are added for the backward compatibility
+		else if (searcher.has("id")) //* This case was added for the backward compatibility
 			navigateToSection("live", [searcher.get("id")]);
-        else if (searcher.has("ch"))
-            navigateToSection("join", [searcher.get("ch")]);
         else
             navigateToSection("home", []);
 	}
@@ -171,9 +169,13 @@ class Main extends Sprite
 		SceneManager.toScreen(Analysis(null, null, null, null));
 	}
 
-	private function toOpenChallengeJoining(owner:String) 
+	private function toOpenChallengeJoining(idStr:String) 
 	{
-		Requests.getOpenChallenge(owner);
+		var id:Null<Int> = Std.parseInt(idStr);
+		if (id != null)
+			Requests.getOpenChallenge(id);
+		else
+			SceneManager.toScreen(MainMenu);
 	}
 
 	private function toProfile(login:String) 

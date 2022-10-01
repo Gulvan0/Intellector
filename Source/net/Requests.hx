@@ -47,13 +47,13 @@ class Requests
         return true;
     }
 
-    public static function getOpenChallenge(ownerLogin:String) 
+    public static function getOpenChallenge(id:Int) 
     {
-        Networker.addHandler(getOpenChallenge_handler.bind(ownerLogin));
-        Networker.emitEvent(GetOpenChallenge(ownerLogin));
+        Networker.addHandler(getOpenChallenge_handler);
+        Networker.emitEvent(GetOpenChallenge(id));
     }
 
-    private static function getOpenChallenge_handler(ownerLogin:String, event:ServerEvent):Bool
+    private static function getOpenChallenge_handler(event:ServerEvent):Bool
     {
         switch event
         {
@@ -62,7 +62,7 @@ class Requests
                 SceneManager.toScreen(ChallengeJoining(id, params));
             case OpenChallengeHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, ownerLogin)));
+                SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
             case OpenchallengeNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);

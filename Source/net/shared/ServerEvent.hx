@@ -22,7 +22,7 @@ enum ServerEvent
     DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered
     
     OpenChallengeInfo(id:Int, serializedParams:String); //Answer to GetOpenChallenge when it exists with challenge parameters
-    OpenChallengeHostPlaying(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetOpenChallenge: host already started a game
+    OpenChallengeHostPlaying(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetOpenChallenge: host already started a game //TODO: Keep track of challengeOwners, or else OpenchallengeNotFound will always be returned instead
     OpenchallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist
     
     LoginResult(result:SignInResult); //Answer to Login

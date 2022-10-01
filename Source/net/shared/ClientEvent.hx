@@ -13,7 +13,7 @@ enum ClientEvent
     Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<String>); 
     RequestTimeoutCheck; 
     Message(text:String); 
-    GetOpenChallenge(hostLogin:String); 
+    GetOpenChallenge(id:Int); 
     FollowPlayer(login:String); //TODO: Ensure this also includes an effect of StopFollowing
     StopSpectating;
     StopFollowing;
