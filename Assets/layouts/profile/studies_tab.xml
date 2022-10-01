@@ -16,37 +16,37 @@
             border: 1px solid #aaaaaa;
         }
 
-        .listview {
+        #studiesList {
             border: none;
             background-opacity: 0;
         }
 
-        .listview .listview-contents {
+        #studiesList .listview-contents {
             spacing: 10px;
             background-opacity: 0;
         }
 
-        .listview .even {
+        #studiesList .even {
             background-opacity: 0;
         }
 
-        .listview .even:hover {
+        #studiesList .even:hover {
             background-opacity: 0;
         }
 
-        .listview .odd {
+        #studiesList .odd {
             background-opacity: 0;
         }
 
-        .listview .odd:hover {
+        #studiesList .odd:hover {
             background-opacity: 0;
         }
 
-        .listview .listview-contents > .itemrenderer {
+        #studiesList .listview-contents > .itemrenderer {
             padding: 0px;
         }
 
-        .listview .listview-contents > .itemrenderer:selected {
+        #studiesList .listview-contents > .itemrenderer:selected {
             background-opacity: 0;
         }
     </style>

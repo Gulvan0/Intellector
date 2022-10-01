@@ -31,6 +31,9 @@
                     border: none;
                     padding: none;
                 }
+                .dropdown-popup {
+                    filter: none;
+                }
             </style>
         </global>
     </themes>

@@ -1,5 +1,7 @@
 package gfx.profile.complex_components;
 
+import tests.SimpleTests;
+import haxe.ds.BalancedTree;
 import dict.Dictionary;
 import gfx.profile.simple_components.StudyWidget;
 import haxe.ui.events.MouseEvent;
@@ -62,12 +64,10 @@ class StudiesTab extends ScrollView
 
     private function onStudyEdited(id:Int, newParams:StudyInfo)
     {
-        Networker.emitEvent(OverwriteStudy(id, newParams));
-
-        var oldParams:StudyInfo = loadedStudies.get(id);
         var itemIndex:Int = indexOf(id);
-
-        studiesList.dataSource.update(itemIndex, oldParams);
+        var newWidgetData:StudyWidgetData = generateStudyWidgetData(id, newParams);
+        
+        studiesList.dataSource.update(itemIndex, newWidgetData);
         loadedStudies.set(id, newParams);
     }
 
@@ -78,19 +78,28 @@ class StudiesTab extends ScrollView
         loadedStudies.remove(id);
     }
 
+    private function generateStudyWidgetData(id:Int, info:StudyInfo):StudyWidgetData
+    {
+        return {
+            id: id,
+            info: info,
+            onStudyClicked: onStudyClicked.bind(id),
+            onDeletePressed: onDeleteStudyRequested.bind(id),
+            onEditPressed: onEditStudyRequested.bind(id),
+            onTagSelected: onTagSelectedFromStudyWidget
+        };
+    }
+
     private function appendStudies(infos:Map<Int, StudyInfo>, hasNext:Bool)
     {
+        var infoTree:BalancedTree<Int, StudyInfo> = new BalancedTree();
         for (id => info in infos.keyValueIterator())
-        {
-            var studyWidgetData:StudyWidgetData = {
-                id: id,
-                info: info,
-                onStudyClicked: onStudyClicked.bind(id),
-                onDeletePressed: onDeleteStudyRequested.bind(id),
-                onEditPressed: onEditStudyRequested.bind(id),
-                onTagSelected: onTagSelectedFromStudyWidget
-            };
+            infoTree.set(-id, info);
 
+        for (negID => info in infoTree.keyValueIterator())
+        {
+            var id:Int = -negID;
+            var studyWidgetData:StudyWidgetData = generateStudyWidgetData(id, info);
             studiesList.dataSource.add(studyWidgetData);
             loadedStudies.set(id, info);
         }

@@ -22,6 +22,15 @@ class StudyTagList extends ScrollView
         titleLabel.text = Dictionary.getPhrase(PROFILE_STUDY_TAG_LABELS_PREPENDER);
         titleLabel.percentHeight = 100;
         addComponent(titleLabel);
+        
+        if (Lambda.empty(tags))
+        {
+            var noneLabel:AutosizingLabel = new AutosizingLabel();
+            noneLabel.text = Dictionary.getPhrase(PROFILE_STUDY_NO_TAGS_PLACEHOLDER);
+            noneLabel.customStyle = {color: 0x999999, fontItalic: true};
+            noneLabel.percentHeight = 100;
+            addComponent(noneLabel);
+        }
 
         for (tag in tags)
             addComponent(new StudyTagLabel(Percent(100), tag, onTagClicked.bind(tag)));

@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.ResponsiveToolbox.Dimension;
 import gfx.profile.complex_components.StudyFilterList;
 import net.Requests;
 import haxe.ui.events.MouseEvent;
@@ -26,6 +27,7 @@ class StudyParamsDialog extends Dialog
     private static inline final MAX_TAG_COUNT:Int = 10;
 
     private final oldStudyID:Null<Int>;
+    private final onParamsEdited:Null<StudyInfo->Void>;
     private final serializedVariant:String;
     private final keySIP:String;
 
@@ -35,6 +37,7 @@ class StudyParamsDialog extends Dialog
     private function resize()
     {
         width = Math.min(400, HaxeUIScreen.instance.actualWidth * 0.98);
+        ResponsiveToolbox.resizeComponent(descTextArea, [Height => Min([Exact(200), VH(35)])]);
     }
 
     public function onClose(?e)
@@ -73,6 +76,8 @@ class StudyParamsDialog extends Dialog
         descTextArea.text = studyInfo.description;
         accessDropdown.selectedIndex = studyInfo.publicity.getIndex();
         tags = studyInfo.tags;
+        for (tag in tags)
+            studyTagList.appendTag(tag);
     }
 
     @:bind(createBtn, MouseEvent.CLICK)
@@ -97,6 +102,7 @@ class StudyParamsDialog extends Dialog
     {
         var info = constructStudyInfo();
         Networker.emitEvent(OverwriteStudy(oldStudyID, info));
+        onParamsEdited(info);
         hideDialog(null);
     }
 
@@ -132,7 +138,7 @@ class StudyParamsDialog extends Dialog
         nameTF.maxChars = StudyName;
 
         studyTagList = new StudyFilterList(Percent(100), 25, onTagAdded, onTagRemoved, onTagsCleared, STUDY_PARAMS_DIALOG_TAG_LIST_PREPENDER, STUDY_PARAMS_DIALOG_NO_TAGS_PLACEHOLDER, STUDY_PARAMS_DIALOG_ADD_TAG_BUTTON_TOOLTIP, STUDY_PARAMS_DIALOG_REMOVE_TAG_BUTTON_TOOLTIP, STUDY_PARAMS_DIALOG_CLEAR_TAGS_BUTTON_TOOLTIP, STUDY_PARAMS_DIALOG_TAG_PROMPT_QUESTION);
-        addComponent(studyTagList);
+        tagListContainer.addComponent(studyTagList);
 
         switch mode 
         {
@@ -143,7 +149,6 @@ class StudyParamsDialog extends Dialog
                 overwriteBtn.hidden = true;
                 saveParamsBtn.hidden = true;
 
-                oldStudyID = null;
                 serializedVariant = variant.serialize();
                 keySIP = generateKeySIP(variant);
 
@@ -167,6 +172,7 @@ class StudyParamsDialog extends Dialog
                 saveParamsBtn.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_SAVE_CHANGES_BUTTON_TEXT);
 
                 oldStudyID = studyID;
+                onParamsEdited = onNewParamsSent;
                 serializedVariant = currentParams.variantStr;
                 keySIP = currentParams.keyPositionSIP;
 

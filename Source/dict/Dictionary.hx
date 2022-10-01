@@ -280,6 +280,8 @@ class Dictionary
 
             case PROFILE_STUDY_TAG_LABELS_PREPENDER:
                 return ["Tags: ", "Теги: "];
+            case PROFILE_STUDY_NO_TAGS_PLACEHOLDER:
+                return ["<none>", "<нет>"];
             case PROFILE_STUDY_EDIT_BTN_TOOLTIP:
                 return ["Edit study", "Редактировать студию"];
             case PROFILE_STUDY_REMOVE_BTN_TOOLTIP:
@@ -403,7 +405,7 @@ class Dictionary
             case STUDY_PARAMS_DIALOG_CREATE_AS_NEW_BUTTON_TEXT:
                 return ["Create New Study", "Создать новую студию"];
             case STUDY_PARAMS_DIALOG_SAVE_CHANGES_BUTTON_TEXT:
-                return ["Unrated", "Товарищеская"];
+                return ["Save Changes", "Сохранить изменения"];
             case STUDY_PARAMS_DIALOG_CANCEL_BUTTON_TEXT:
                 return ["Cancel", "Отмена"];
 

@@ -265,7 +265,7 @@ class SimpleTests
 		add(comp);
 	}
 
-	public static function studyList()
+	public static function studyTab()
 	{
 		var comp:StudiesTab = new StudiesTab([
 			111 => StudyInfos.info1(),
@@ -289,7 +289,7 @@ class SimpleTests
 
 	public static function editStudyDialog()
 	{
-		var mode:StudyParamsDialogMode = Edit(23, StudyInfos.info1(), traceArg);
+		var mode:StudyParamsDialogMode = Edit(111, StudyInfos.info1(), traceArg);
 		Dialogs.studyParams(mode);
 	}
 
@@ -321,5 +321,15 @@ class SimpleTests
 		}
 
 		SceneManager.scene.challengeList.appendEntry(i + 1, challengeParams);
+	}
+
+	public static function simpleAnalysis()
+	{
+		SceneManager.toScreen(Analysis(Variants.variant1().serialize(), 0, null, null));
+	}
+
+	public static function studyAnalysis()
+	{
+		SceneManager.toScreen(Analysis(Variants.variant1().serialize(), 0, 111, StudyInfos.info1()));
 	}
 }

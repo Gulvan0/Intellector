@@ -19,13 +19,13 @@
                 </data>
             </dropdown>
         </hbox>
-        <label id="descOptionName" styleName="param-name-label" verticalAlign="center" width="50%" />
+        <label id="descOptionName" styleName="param-name-label" verticalAlign="center" width="100%" />
         <textarea id="descTextArea" width="100%" height="200px" />
-        <label styleName="param-name-label" id="tagsOptionName" verticalAlign="center" width="50%" />
-
+        <label styleName="param-name-label" id="tagsOptionName" verticalAlign="center" width="100%" />
+        <box id="tagListContainer" width="100%" />
+        <button id="overwriteBtn" horizontalAlign="center" />
         <hbox horizontalAlign="center">
             <button id="createBtn" />
-            <button id="overwriteBtn" />
             <button id="saveParamsBtn" />
             <button id="cancelBtn" text="${Dictionary.getPhrase(STUDY_PARAMS_DIALOG_CANCEL_BUTTON_TEXT)}"/>
         </hbox>

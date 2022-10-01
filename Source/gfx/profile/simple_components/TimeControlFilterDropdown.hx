@@ -9,7 +9,7 @@ import net.shared.TimeControlType;
 import haxe.ui.components.DropDown;
 
 @:xml('
-    <item-renderer layoutName="horizontal" width="250px" height="71px">
+    <item-renderer layoutName="horizontal" width="100%" height="71px">
         <square height="100%">
             <arp-image id="img" horizontalAlign="center" verticalAlign="center" />
         </square>
@@ -33,15 +33,6 @@ private class TimeControlFilterRenderer extends ItemRenderer
     }
 }
 
-@:xml('
-    <dropdown>
-        <style>
-            .popup {
-                filter: none;
-            }
-        </style>
-    </dropdown>
-')
 class TimeControlFilterDropdown extends DropDown
 {
     private var onFilterSelected:Null<TimeControlType>->Void;
@@ -61,6 +52,7 @@ class TimeControlFilterDropdown extends DropDown
     public function new(elo:Map<TimeControlType, EloValue>, gamesCntByTimeControl:Map<TimeControlType, Int>, totalPastGames:Int, onFilterSelected:Null<TimeControlType>->Void)
     {
         super();
+        this.width = 250;
         this.onFilterSelected = onFilterSelected;
 
         addComponent(new TimeControlFilterRenderer());
