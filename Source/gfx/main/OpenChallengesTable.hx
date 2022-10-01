@@ -13,7 +13,7 @@ import net.Requests;
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/main_menu/open_challenges_table.xml"))
 class OpenChallengesTable extends VBox
 {
-    private var challengeOwners:Array<String> = [];
+    private var challengeIDs:Array<Int> = [];
 
     private function appendChallenges(challenges:Array<OpenChallengeData>)
     {
@@ -23,14 +23,14 @@ class OpenChallengesTable extends VBox
             var bracketText:String = Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated));
             var modeData = {color: params.acceptorColor, situation: params.customStartingSituation};
             table.dataSource.add({mode: modeData, time: params.timeControl, player: '${params.ownerLogin} (${eloToStr(data.ownerELO)})}', bracket: bracketText});
-            challengeOwners.push(params.ownerLogin);
+            challengeIDs.push(data.id);
         }
     }
 
     @:bind(table, UIEvent.CHANGE)
     private function onGameSelected(e:UIEvent)
     {
-        Requests.getOpenChallenge(challengeOwners[table.selectedIndex]);
+        Requests.getOpenChallenge(challengeIDs[table.selectedIndex]);
     }
 
     @:bind(reloadBtn, MouseEvent.CLICK)
@@ -38,7 +38,7 @@ class OpenChallengesTable extends VBox
     {
         reloadBtn.disabled = true;
         table.dataSource.clear();
-        challengeOwners = [];
+        challengeIDs = [];
         loadChallenges();
         Timer.delay(() -> {
             if (reloadBtn != null)

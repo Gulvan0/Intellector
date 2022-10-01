@@ -271,7 +271,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
         refreshAccountElements();
         challengeList.onModeChanged = mode -> {
-            challengesButton.findComponent(Image).resource = AssetManager.challengesMenuIconPath(mode);
+            challengesButton.icon = AssetManager.challengesMenuIconPath(mode);
         };
         
         sidemenu = new SideMenu();

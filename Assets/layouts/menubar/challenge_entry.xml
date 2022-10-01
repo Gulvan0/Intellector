@@ -1,8 +1,9 @@
-<item-renderer width="100%" height="50px">
+<item-renderer width="100%" height="100px">
     <hbox id="thisBox" width="100%" height="100%">
         <style>
             #thisBox {
                 background-color: #ffffff;
+                padding: 8px;
             }
             #thisBox:hover {
                 background-color: #dddddd;
@@ -14,25 +15,27 @@
             .params-row-icon {
                 background-color: yellow;
                 background-opacity: 0;
+                pointer-events: true;
+            }
+            .decision-action-btn {
+                font-size: 10px;
             }
         </style>
-        <arp-image id="incomingIcon" height="95%" verticalAlign="center" />
-        <vbox width="100%" height="100%">
-            <label id="headerLabel" horizontalAlign="center" />
-            <stack id="opponentOrLinkStack" width="100%" height="25%">
-                <label id="opponentLabel" />
-                <copyable-text id="linkText" />
-            </stack>
-            <hbox height="25%" horizontalAlign="center">
+        <arp-image id="incomingIcon" height="75%" verticalAlign="center" />
+        <vbox width="100%" height="100%" verticalAlign="center">
+            <autosizing-label id="headerLabel" height="25%" horizontalAlign="center" />
+            <box id="secondRow" width="100%" height="25%" />
+            <hbox height="25%" horizontalAlign="center" style="spacing:0px">
                 <arp-image id="timeControlIcon" height="100%" styleName="params-row-icon" />
-                <label id="paramsLabel" height="100%" />
+                <autosizing-label id="paramsLabel" height="100%" />
                 <arp-image id="colorIcon" height="100%" styleName="params-row-icon" />
+                <spacer id="modeIconsSpacer" width="3px" />
                 <arp-image id="customStartPosIcon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" height="100%" styleName="params-row-icon" />
             </hbox>
             <hbox height="25%" horizontalAlign="center">
-                <button id="acceptBtn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_ACCEPT_BUTTON_TEXT)}" />
-                <button id="declineBtn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_DECLINE_BUTTON_TEXT)}" />
-                <button id="cancelBtn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_CANCEL_BUTTON_TEXT)}" />
+                <button id="acceptBtn" styleName="decision-action-btn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_ACCEPT_BUTTON_TEXT)}" />
+                <button id="declineBtn" styleName="decision-action-btn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_DECLINE_BUTTON_TEXT)}" />
+                <button id="cancelBtn" styleName="decision-action-btn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_CANCEL_BUTTON_TEXT)}" />
             </hbox>
         </vbox>
         

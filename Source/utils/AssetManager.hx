@@ -101,6 +101,12 @@ class AssetManager
         return 'assets/symbols/upper_menu/challenges/button_icon/$filename.svg';
     }
 
+    public static inline function challengesMenuItemArrowPath(isIncoming:Bool):String
+    {
+        var filename:String = isIncoming? "incoming" : "outgoing";
+        return 'assets/symbols/upper_menu/challenges/item_arrow_img/$filename.svg';
+    }
+
     public static function playPlySound(ply:Ply, situation:Situation)
     {
         var isCastle:Bool = Rules.isCastle(ply, situation);

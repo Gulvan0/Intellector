@@ -1,5 +1,7 @@
 package gfx.menubar;
 
+import gfx.basic_components.AutosizingLabel;
+import gfx.basic_components.CopyableText;
 import dict.Utils;
 import net.shared.TimeControlType;
 import browser.URLEditor;
@@ -16,8 +18,6 @@ import struct.ChallengeParams;
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/menubar/challenge_entry.xml"))
 class ChallengeEntryRenderer extends ItemRenderer
 {
-    private static inline final arrowImageFolder:String = "Assets/symbols/upper_menu/challenges/item_arrow_img";
-
     private var challengeID:Int;
 
     @:bind(acceptBtn, MouseEvent.CLICK)
@@ -38,62 +38,74 @@ class ChallengeEntryRenderer extends ItemRenderer
         Networker.emitEvent(CancelChallenge(challengeID));
     }
 
-    private static function getArrowIconPath(isIncoming:Bool)
-    {
-        var fileName:String = isIncoming? "incoming" : "outgoing";
-        return arrowImageFolder + fileName + ".svg";
-    }
-
     private override function onDataChanged(data:Dynamic) 
     {
         if (data == null)
             return;
 
-        var isOutgoing:Bool = true;
+        var isIncoming:Bool;
         var params:ChallengeParams = data.params;
         challengeID = data.id;
 
         switch params.type 
         {
             case Public, ByLink:
-                incomingIcon.resource = getArrowIconPath(false);
+                isIncoming = false;
 
                 headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE);
 
-                opponentOrLinkStack.selectedIndex = 1;
-                linkText.text = URLEditor.getChallengeLink(data.id);
+                var linkText:CopyableText = new CopyableText();
+                var s = linkText.tf.customStyle.clone();
+                s.fontSize = 8;
+                linkText.tf.customStyle = s;
+
+                linkText.percentWidth = 90;
+                linkText.percentHeight = 100;
+                linkText.horizontalAlign = "center";
+                linkText.copiedText = URLEditor.getChallengeLink(data.id);
+                secondRow.addComponent(linkText);
 
                 acceptBtn.hidden = true;
                 declineBtn.hidden = true;
                 cancelBtn.onClick = e -> {Networker.emitEvent(CancelChallenge(data.id));};
+
             case Direct(calleeLogin):
-                isOutgoing = LoginManager.isPlayer(params.ownerLogin);
+                isIncoming = LoginManager.isPlayer(calleeLogin);
 
-                incomingIcon.resource = getArrowIconPath(!isOutgoing);
-                opponentOrLinkStack.selectedIndex = 0;
+                var opponentLabelText:String;
 
-                acceptBtn.hidden = isOutgoing;
-                declineBtn.hidden = isOutgoing;
-                cancelBtn.hidden = !isOutgoing;
+                acceptBtn.hidden = !isIncoming;
+                declineBtn.hidden = !isIncoming;
+                cancelBtn.hidden = isIncoming;
 
-                if (isOutgoing)
+                if (isIncoming)
                 {
-                    headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE);
-                    opponentLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_TO_LINE_TEXT, [calleeLogin]);
+                    headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE);
+                    opponentLabelText = Dictionary.getPhrase(MENUBAR_CHALLENGES_FROM_LINE_TEXT, [params.ownerLogin]);
                 }
                 else
                 {
-                    headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE);
-                    opponentLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_FROM_LINE_TEXT, [params.ownerLogin]);
+                    headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE);
+                    opponentLabelText = Dictionary.getPhrase(MENUBAR_CHALLENGES_TO_LINE_TEXT, [calleeLogin]);
                 }
+
+                var opponentLabel:AutosizingLabel = new AutosizingLabel();
+                opponentLabel.text = opponentLabelText;
+                opponentLabel.percentWidth = 100;
+                opponentLabel.percentHeight = 100;
+                opponentLabel.align = Center;
+                secondRow.addComponent(opponentLabel);
         }
+
+        incomingIcon.resource = AssetManager.challengesMenuItemArrowPath(isIncoming);
 
         var timeControl:TimeControl = params.timeControl;
         var timeControlType:TimeControlType = timeControl.getType();
-        var color:Null<PieceColor> = switch params.acceptorColor {
+        var color:Null<PieceColor> = switch params.acceptorColor 
+        {
             case null: null;
-            case White: isOutgoing? Black : White;
-            case Black: isOutgoing? White : Black;
+            case White: isIncoming? White : Black;
+            case Black: isIncoming? Black : White;
         };
 
         timeControlIcon.resource = AssetManager.timeControlPath(timeControlType);
@@ -106,9 +118,11 @@ class ChallengeEntryRenderer extends ItemRenderer
         {
             var renderer:SituationTooltipRenderer = new SituationTooltipRenderer(params.customStartingSituation);
             ToolTipManager.instance.registerTooltip(customStartPosIcon, {renderer: renderer});
-            customStartPosIcon.hidden = false;
         }
         else
+        {
+            modeIconsSpacer.hidden = true;
             customStartPosIcon.hidden = true;
+        }
     }
 }

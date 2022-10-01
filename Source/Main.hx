@@ -53,8 +53,7 @@ using StringTools;
 	- Path parsing. Retrieving the page the user requested from
 	the URL search params: navigate() and navigateToSection(). 
 	The former provides backward compatibility for the old URLs
-	(pre-2.0). The latter one parses the
-	modern paths;
+	(pre-2.0). The latter one parses the modern paths;
 	- Navigating to a respective page: all of the following 
 	methods. The ones needing an additional data make use of a
 	Requests class, retrieving the missing data from the server.
@@ -112,7 +111,7 @@ class Main extends Sprite
 	{
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
-		//Your testing code here
+		SimpleTests.challengeMenuEvent(0);//Your testing code here
 	}
 
 	private function onConnectionFailed(e)

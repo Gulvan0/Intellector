@@ -1,5 +1,6 @@
 package gfx.basic_components;
 
+import haxe.ui.util.ImageLoader;
 import haxe.Timer;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.HBox;
@@ -23,7 +24,6 @@ class CopyableText extends HBox
     }
 
     @:bind(copyBtn, MouseEvent.CLICK)
-    @:bind(copyBtnTick, MouseEvent.CLICK)
     public function onCopySIPPressed(e) 
     {
         Browser.navigator.clipboard.writeText(tf.text)
@@ -39,18 +39,24 @@ class CopyableText extends HBox
     private function onCopySuccessful()
     {
         showTick();
-        Timer.delay(hideTick, 500);
+        Timer.delay(showCopy, 500);
     }
 
     private function showTick()
     {
+        tickBtn.hidden = false;
         copyBtn.hidden = true;
-        copyBtnTick.hidden = false;
     }
 
-    private function hideTick()
+    private function showCopy()
     {
         copyBtn.hidden = false;
-        copyBtnTick.hidden = true;
+        tickBtn.hidden = true;
+    }
+
+    public function new()
+    {
+        super();
+        showCopy();
     }
 }

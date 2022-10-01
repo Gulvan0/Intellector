@@ -1,5 +1,7 @@
 package tests;
 
+import haxe.ui.containers.Grid;
+import gfx.menubar.ChallengeEntryRenderer;
 import gfx.SceneManager;
 import tests.data.ChallengeParameters;
 import struct.ChallengeParams;
@@ -304,6 +306,36 @@ class SimpleTests
 		}
 
 		Dialogs.incomingChallenge(42, challengeParams);
+	}
+
+	public static function challengeEntryRenderer(i:Int) 
+	{
+		var contentBox:Grid = new Grid();
+		contentBox.columns = 2;
+		for (i in 0...7)
+		{
+			var challengeParams:ChallengeParams = switch i
+			{
+				case 0: ChallengeParameters.incomingDirectBlitzCustomized();
+				case 1: ChallengeParameters.outgoingDirect();
+				case 2: ChallengeParameters.incomingDirectRapidRated();
+				case 3: ChallengeParameters.outgoingPublic();
+				case 4: ChallengeParameters.incomingDirectCorrespondenceUnrated();
+				case 5: ChallengeParameters.outgoingByLink();
+				default: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
+			};
+
+			var innerBox:Box = new Box();
+			assignWidth(innerBox, Exact(325));
+
+			var comp = new ChallengeEntryRenderer();
+			comp.data = {id: 12, params: challengeParams};
+
+			innerBox.addComponent(comp);
+			contentBox.addComponent(innerBox);
+		}
+		
+		add(contentBox);
 	}
 
 	@:access(gfx.SceneManager.scene)
