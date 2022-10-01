@@ -1,5 +1,11 @@
 package tests;
 
+import gfx.SceneManager;
+import tests.data.ChallengeParameters;
+import struct.ChallengeParams;
+import tests.data.Variants;
+import struct.Variant;
+import gfx.popups.StudyParamsDialog;
 import gfx.profile.complex_components.StudiesTab;
 import gfx.basic_components.utils.DimValue;
 import tests.data.StudyInfos;
@@ -267,5 +273,53 @@ class SimpleTests
 			21 => StudyInfos.info3()
 		], 5);
 		add(comp, Percent(50), Percent(90));
+	}
+
+	public static function newStudyDialog()
+	{
+		var mode:StudyParamsDialogMode = Create(Variants.variant1());
+		Dialogs.studyParams(mode);
+	}
+
+	public static function overwriteStudyDialog()
+	{
+		var mode:StudyParamsDialogMode = CreateOrOverwrite(Variants.variant1(), 23, StudyInfos.info1());
+		Dialogs.studyParams(mode);
+	}
+
+	public static function editStudyDialog()
+	{
+		var mode:StudyParamsDialogMode = Edit(23, StudyInfos.info1(), traceArg);
+		Dialogs.studyParams(mode);
+	}
+
+	public static function incomingChallengeDialog(i:Int)
+	{
+		var challengeParams:ChallengeParams = switch i
+		{
+			case 0: ChallengeParameters.incomingDirectBlitzCustomized();
+			case 1: ChallengeParameters.incomingDirectRapidRated();
+			case 2: ChallengeParameters.incomingDirectCorrespondenceUnrated();
+			default: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
+		}
+
+		Dialogs.incomingChallenge(42, challengeParams);
+	}
+
+	@:access(gfx.SceneManager.scene)
+	public static function challengeMenuEvent(i:Int) 
+	{
+		var challengeParams:ChallengeParams = switch i
+		{
+			case 0: ChallengeParameters.incomingDirectBlitzCustomized();
+			case 1: ChallengeParameters.incomingDirectRapidRated();
+			case 2: ChallengeParameters.incomingDirectCorrespondenceUnrated();
+			case 3: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
+			case 4: ChallengeParameters.outgoingDirect();
+			case 5: ChallengeParameters.outgoingPublic();
+			default: ChallengeParameters.outgoingByLink();
+		}
+
+		SceneManager.scene.challengeList.appendEntry(i + 1, challengeParams);
 	}
 }
