@@ -169,7 +169,7 @@ class Dialogs
     **/
     public static function reconnectionDialog():Void->Void
     {
-        var loadingAnimation:SpriteWrapper = new SpriteWrapper(Assets.getMovieClip("preloader:LogoPreloader"), false);
+        var loadingAnimation:SpriteWrapper = new SpriteWrapper(Assets.getMovieClip("preloader:LogoPreloader"), true);
         loadingAnimation.x = 120;
         loadingAnimation.y = 132;
 
@@ -177,7 +177,7 @@ class Dialogs
         box.width = 240;
         box.height = 264;
         box.horizontalAlign = 'center';
-        box.addComponent(loadingAnimation);
+        box.addChild(loadingAnimation);
 
         var label:Label = new Label();
         label.customStyle = {fontSize: 14, fontItalic: true};
@@ -291,7 +291,7 @@ class Dialogs
     public static function incomingChallenge(id:Int, params:ChallengeParams)
     {
         var dialog:IncomingChallengeDialog = new IncomingChallengeDialog(id, params);
-        addDialog(dialog, true, null, false);
+        addDialog(dialog, true, dialog.onClose, false);
     }
 
     private static function onBtnAdded(btn:Button, type:PieceType, color:PieceColor, iconSize:Float, e) 

@@ -1,20 +1,22 @@
 <dialog title="${Dictionary.getPhrase(INCOMING_CHALLENGE_DIALOG_TITLE)}" width="300px">
+    <style>
+        .params-icon {
+            background-color:yellow;
+            background-opacity:0;
+            pointer-events:true;
+        }
+    </style>
     <vbox width="100%">
-        <label id="challengeByLabel" horizontalAlign="center" />
-        <hbox id="descriptionHBox">
-            <box id="tcIconBox" verticalAlign="center">
-                <image id="tcIcon" verticalAlign="center" horizontalAlign="center" />
-            </box>
-            <vbox verticalAlign="center">
-                <label id="tcLabel" style="font-style:italic"/>
-                <label id="bracketLabel" style="font-style:italic" />
-                <hbox id="paramsBox">
-                    <label id="paramsLabel" style="font-style:italic" text="${Dictionary.getPhrase(OPENJOIN_ESSENTIAL_PARAMS_LABEL_TEXT)}" verticalAlign="center" />
-                    <image id="colorIcon" style="background-color:yellow;background-opacity:0" verticalAlign="center" />
-                    <image id="customStartPosIcon" style="background-color:yellow;background-opacity:0" verticalAlign="center" resource="assets/symbols/main_menu/challenge_modes/custom.svg" />
-                </hbox>
-            </vbox>
+        <autosizing-label id="challengeByLabel" height="28px" horizontalAlign="center" />
+        <spacer height="10px" />
+        <box id="timeControlRowBox" height="28px" horizontalAlign="center" />
+        <autosizing-label id="bracketLabel" height="24px" horizontalAlign="center" />
+        <hbox id="paramsBox" height="24px" horizontalAlign="center">
+            <autosizing-label id="paramsLabel" height="100%" text="${Dictionary.getPhrase(OPENJOIN_ESSENTIAL_PARAMS_LABEL_TEXT)}" />
+            <arp-image id="colorIcon" height="100%" styleName="params-icon" />
+            <arp-image id="customStartPosIcon" height="100%" styleName="params-icon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" />
         </hbox>
+        <spacer height="10px" />
         <hbox horizontalAlign="center">
             <button id="acceptBtn" text="${Dictionary.getPhrase(INCOMING_CHALLENGE_ACCEPT_BTN_TEXT)}" horizontalAlign="center" />
             <button id="declineBtn" text="${Dictionary.getPhrase(INCOMING_CHALLENGE_DECLINE_BTN_TEXT)}" horizontalAlign="center" />

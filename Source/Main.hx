@@ -105,9 +105,14 @@ class Main extends Sprite
 		Networker.onConnectionEstabilished = onConnected;
 		Networker.onConnectionFailed = onConnectionFailed;
 		//Networker.launch();
+		test();
+	}
+
+	private function test()
+	{
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
-		SimpleTests.studyAnalysis();
+		//Your testing code here
 	}
 
 	private function onConnectionFailed(e)
