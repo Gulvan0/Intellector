@@ -1,6 +1,6 @@
 package gfx.main;
 
-import net.shared.EloValue;
+import utils.StringUtils.eloToStr;
 import net.shared.OpenChallengeData;
 import haxe.ui.events.UIEvent;
 import struct.ChallengeParams;

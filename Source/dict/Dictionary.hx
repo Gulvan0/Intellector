@@ -1,6 +1,6 @@
 package dict;
 
-import net.shared.EloValue.eloToStr;
+import utils.StringUtils.eloToStr;
 import struct.PieceColor;
 import struct.Outcome;
 

@@ -4,6 +4,7 @@ import net.Requests;
 import gfx.basic_components.utils.DimValue;
 import haxe.ui.events.MouseEvent;
 import net.shared.EloValue;
+import utils.StringUtils.eloToStr;
 import net.shared.TimeControlType;
 import haxe.ui.containers.HBox;
 

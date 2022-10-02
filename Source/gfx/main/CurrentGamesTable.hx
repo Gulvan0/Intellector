@@ -1,6 +1,6 @@
 package gfx.main;
 
-import net.shared.EloValue;
+import utils.StringUtils.eloToStr;
 import haxe.ui.containers.VBox;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.events.UIEvent;

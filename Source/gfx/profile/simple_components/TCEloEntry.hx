@@ -1,6 +1,6 @@
 package gfx.profile.simple_components;
 
-import net.shared.EloValue.eloToStr;
+import utils.StringUtils.eloToStr;
 import dict.Utils;
 import utils.AssetManager;
 import gfx.basic_components.GenAnnotatedImage;

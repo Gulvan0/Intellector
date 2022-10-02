@@ -1,4 +1,7 @@
 package utils;
+
+import net.shared.EloValue;
+import utils.SpecialChar;
 using utils.StringUtils;
 using StringTools;
 
@@ -144,5 +147,15 @@ class StringUtils
                 return orig.substr(0, maxChars);
         else 
             return orig;
+    }
+
+    public static inline function eloToStr(value:EloValue):String
+    {
+        return switch value 
+        {
+            case None: LongDash;
+            case Provisional(elo): '$elo?';
+            case Normal(elo): '$elo';
+        }
     }
 }

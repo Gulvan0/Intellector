@@ -1,5 +1,6 @@
 package gfx.common;
 
+import utils.StringUtils.eloToStr;
 import haxe.ui.containers.VBox;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.HBox;
