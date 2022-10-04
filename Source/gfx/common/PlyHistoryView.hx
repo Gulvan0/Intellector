@@ -68,10 +68,10 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
     {
         switch event 
         {
-            case Move(fromI, toI, fromJ, toJ, morphInto, _, _, _):
+            case Move(fromI, toI, fromJ, toJ, morphInto, _):
                 var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
                 appendPly(ply, true);
-            case Rollback(plysToUndo, _, _, _):
+            case Rollback(plysToUndo, _):
                 revertPlys(plysToUndo);
             default:
         }
@@ -154,7 +154,7 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
                     appendPly(ply, false);
                 performScroll(End);
 
-            case Live(Ongoing(parsedData, _, _, _, _)), Live(Past(parsedData, _)):
+            case Live(Ongoing(parsedData, _, _)), Live(Past(parsedData, _)):
                 this.startingSituation = parsedData.startingSituation;
                 this.currentSituation = startingSituation.copy();
                 for (ply in parsedData.movesPlayed)

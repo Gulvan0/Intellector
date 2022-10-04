@@ -144,11 +144,11 @@ class SceneManager
                     constructor = New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.elo, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
                 }
                 else
-                    constructor = Ongoing(parsedData, parsedData.timeControl.startSecs, parsedData.timeControl.startSecs, Date.now().getTime(), FollowManager.getFollowedPlayerLogin());
+                    constructor = Ongoing(parsedData, null, FollowManager.getFollowedPlayerLogin());
                 toScreen(LiveGame(match_id, constructor));
-            case ReconnectionNeeded(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
+            case ReconnectionNeeded(match_id, timeData, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
+                toScreen(LiveGame(match_id, Ongoing(parsedData, timeData, null)));
             default:
         }
         return false;

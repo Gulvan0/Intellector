@@ -334,7 +334,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
                 setOrientation(playerColor);
 
-            case Ongoing(parsedData, _, _, _, followedPlayerLogin):
+            case Ongoing(parsedData, _, followedPlayerLogin):
                 this.isPastGame = false;
                 this.playerColor = parsedData.getPlayerColor();
                 this.whiteLogin = parsedData.whiteLogin;

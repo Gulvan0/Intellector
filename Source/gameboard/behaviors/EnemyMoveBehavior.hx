@@ -80,7 +80,7 @@ class EnemyMoveBehavior implements IBehavior
 	{
         switch event 
         {
-            case Rollback(plysToUndo, _, _, _):
+            case Rollback(plysToUndo, _):
                 boardInstance.state.exitToNeutral();
                 resetPremoves();
                 boardInstance.revertPlys(plysToUndo);
@@ -95,7 +95,7 @@ class EnemyMoveBehavior implements IBehavior
                 resetPremoves();
                 boardInstance.state = new StubState();
 
-            case Move(fromI, toI, fromJ, toJ, morphInto, _, _, _):
+            case Move(fromI, toI, fromJ, toJ, morphInto, _):
                 boardInstance.state.exitToNeutral();
                 if (!Preferences.premoveEnabled.get())
                     boardInstance.state = new StubState();

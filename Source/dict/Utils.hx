@@ -68,7 +68,7 @@ class Utils
             case New(whiteLogin, blackLogin, _, timeControl, startingSituation, startDatetime):
                 var opponentLogin:String = LoginManager.isPlayer(whiteLogin)? blackLogin : whiteLogin;
                 return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
-            case Ongoing(parsedData, _, _, _, followedPlayerLogin):
+            case Ongoing(parsedData, _, followedPlayerLogin):
                 if (followedPlayerLogin != null)
                     return ['Spectating: ${parsedData.whiteLogin} vs ${parsedData.blackLogin}', 'Наблюдение: ${parsedData.whiteLogin} против ${parsedData.blackLogin}'];
                 else

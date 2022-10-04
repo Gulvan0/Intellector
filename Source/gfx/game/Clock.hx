@@ -1,5 +1,6 @@
 package gfx.game;
 
+import net.shared.TimeReservesData;
 import net.shared.ServerEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import gameboard.GameBoard.IGameBoardObserver;
@@ -64,21 +65,21 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
 
         switch event 
         {
-            case TimeCorrection(whiteSeconds, blackSeconds, timestamp):
-                correctTime(whiteSeconds, blackSeconds, timestamp);
-            case Move(fromI, toI, fromJ, toJ, morphInto, whiteSeconds, blackSeconds, timestamp):
-                correctTime(whiteSeconds, blackSeconds, timestamp);
+            case TimeCorrection(timeData):
+                correctTime(timeData);
+            case Move(fromI, toI, fromJ, toJ, morphInto, timeData):
+                correctTime(timeData);
                 moveNum++;
                 toggleTurnColor();
-            case Rollback(plysToUndo, whiteSeconds, blackSeconds, timestamp):
-                correctTime(whiteSeconds, blackSeconds, timestamp);
+            case Rollback(plysToUndo, timeData):
+                correctTime(timeData);
                 moveNum -= plysToUndo;
                 if (plysToUndo % 2 == 1)
                     toggleTurnColor();
-            case GameEnded(winner_color, reason, whiteSecondsRemainder, blackSecondsRemainder, _):
+            case GameEnded(_, _, whiteSecondsRemainder, blackSecondsRemainder, _):
                 active = false;
                 pauseTimer();
-                correctTime(whiteSecondsRemainder, blackSecondsRemainder, Date.now().getTime());
+                correctTime(new TimeReservesData(whiteSecondsRemainder, blackSecondsRemainder, Date.now().getTime()));
                 refreshColoring();
             default:
         }
@@ -183,11 +184,19 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         pauseTimer();
     }
 
-    private function correctTime(whiteSeconds:Float, blackSeconds:Float, validAt:Float) 
+    private function correctTime(timeData:TimeReservesData) 
     {
-        secondsLeftAtReliableTimestamp = ownerColor == White? whiteSeconds : blackSeconds;
-        reliableTimestamp = validAt;
+        secondsLeftAtReliableTimestamp = ownerColor == White? timeData.whiteSeconds : timeData.blackSeconds;
+        reliableTimestamp = timeData.timestamp;
         updateTimeLeft();
+    }
+
+    private function initTime(timeControlStartSecs:Int, startDatetime:Date)
+    {
+        secondsLeftAtReliableTimestamp = timeControlStartSecs;
+        reliableTimestamp = startDatetime.getTime();
+        label.text = TimeControl.secsToString(timeControlStartSecs);
+        secondsLeft = timeControlStartSecs;
     }
 
     private function toggleTurnColor()
@@ -206,7 +215,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         this.ownerColor = ownerColor;
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, _, timeControl, startingSituation, _):
+            case New(whiteLogin, blackLogin, _, timeControl, startingSituation, startDatetime):
                 if (timeControl.getType() == Correspondence)
                 {
                     this.active = false;
@@ -220,10 +229,10 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 this.active = true;
                 this.ownerToMove = startingSituation.turnColor == ownerColor;
                 this.moveNum = 0;
-                this.secondsLeft = timeControl.startSecs;
 
-                label.text = TimeControl.secsToString(timeControl.startSecs);
-            case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp, _):
+                initTime(timeControl.startSecs, startDatetime);
+
+            case Ongoing(parsedData, timeData, _):
                 if (parsedData.timeControl.getType() == Correspondence)
                 {
                     this.active = false;
@@ -240,7 +249,11 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 this.ownerToMove = parsedData.currentSituation.turnColor == ownerColor;
                 this.moveNum = parsedData.moveCount;
 
-                correctTime(whiteSeconds, blackSeconds, timeValidAtTimestamp);
+                if (timeData != null)
+                    correctTime(timeData);
+                else
+                    initTime(startSecs, parsedData.datetime);
+
                 if (ownerToMove && (moveNum >= 2 || secondsLeft != startSecs)) //The last condition is a somewhat (i. e., unless float ownerSecsLeft will miraclously match integer startSecs) reliable workaround for cases when the first two moves had been made, but then, due to takebacks, the total move count became less than 2 once again (and then the reconnection happened)
                     launchTimer();
 

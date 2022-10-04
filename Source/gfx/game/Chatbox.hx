@@ -189,7 +189,7 @@ class Chatbox extends VBox implements INetObserver
         {
             case New(_, _, _, _, _, _):
                 this.isOwnerSpectator = false;
-            case Ongoing(parsedData, _, _, _, followedPlayerLogin):
+            case Ongoing(parsedData, _, followedPlayerLogin):
                 this.isOwnerSpectator = followedPlayerLogin != null;
                 addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
             case Past(parsedData, _):

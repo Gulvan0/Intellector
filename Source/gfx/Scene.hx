@@ -216,12 +216,6 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         Requests.followPlayer(requestedLogin);
     }
 
-    private function onSpectationData(watchedPlayer:String, match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String)
-    {
-        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-        SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, watchedPlayer)));
-    }
-
     private function onAnalysisBoardPressed(e)
     {
         SceneManager.toScreen(Analysis(null, null, null, null));

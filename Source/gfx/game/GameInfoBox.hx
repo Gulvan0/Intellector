@@ -47,13 +47,13 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
     {
         switch event 
         {
-            case Move(fromI, toI, fromJ, toJ, morphInto, _, _, _):
+            case Move(fromI, toI, fromJ, toJ, morphInto, _):
                 var ply:Ply = new Ply();
                 ply.from = new IntPoint(fromI, fromJ);
                 ply.to = new IntPoint(toI, toJ);
                 ply.morphInto = morphInto == null? null : PieceType.createByName(morphInto);
                 accountMove(ply);
-            case Rollback(plysToUndo, _, _, _):
+            case Rollback(plysToUndo, _):
                 revertPlys(plysToUndo);
             case GameEnded(winnerColorCode, reasonCode, _, _, _):
                 resolution.text = Utils.getResolution(GameLogParser.decodeOutcome(winnerColorCode, reasonCode));
@@ -244,7 +244,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         {
             case New(whiteLogin, blackLogin, playerElos, timeControl, _, startDatetime):
                 initNewGame(whiteLogin, blackLogin, playerElos, timeControl, startDatetime);
-            case Ongoing(parsedData, _, _, _, followedPlayerLogin):
+            case Ongoing(parsedData, _, followedPlayerLogin):
                 initActualizedGame(parsedData);
                 if (followedPlayerLogin != null)
                     markFollowedPlayer(parsedData.getParticipantColor(followedPlayerLogin));

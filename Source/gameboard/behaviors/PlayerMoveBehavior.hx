@@ -20,7 +20,7 @@ class PlayerMoveBehavior implements IBehavior
 	{
         switch event 
         {
-            case Rollback(plysToUndo, _, _, _):
+            case Rollback(plysToUndo, _):
                 boardInstance.state.exitToNeutral();
                 boardInstance.revertPlys(plysToUndo);
                 if (plysToUndo % 2 == 1)

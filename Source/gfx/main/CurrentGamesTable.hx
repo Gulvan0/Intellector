@@ -1,5 +1,6 @@
 package gfx.main;
 
+import net.shared.GameInfo;
 import utils.StringUtils.eloToStr;
 import haxe.ui.containers.VBox;
 import haxe.ui.events.MouseEvent;
@@ -15,11 +16,11 @@ class CurrentGamesTable extends VBox
 {
     private var gameIDs:Array<Int> = [];
 
-    public function appendGames(data:Array<{id:Int, currentLog:String}>)
+    public function appendGames(data:Array<GameInfo>)
     {
         for (gameData in data)
         {
-            var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.currentLog);
+            var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.log);
 
             var whiteLabel:String = parsedData.whiteLogin;
             var blackLabel:String = parsedData.blackLogin;

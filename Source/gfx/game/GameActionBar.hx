@@ -92,9 +92,9 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
             case TakebackAccepted, TakebackDeclined:
                 cancelTakebackBtn.hidden = true;
                 offerTakebackBtn.hidden = false;
-            case Move(_, _, _, _, _, _, _, _):
+            case Move(_, _, _, _, _, _):
                 move++;
-            case Rollback(plysToUndo, _, _, _):
+            case Rollback(plysToUndo, _):
                 shutAllTakebackRequests();
                 move -= plysToUndo;
             default:
@@ -284,7 +284,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                 this.enableTakebackAfterMove = startingSituation.turnColor == White? 1 : 2;
                 move = 0;
 
-            case Ongoing(parsedData, _, _, _, followedPlayerLogin):
+            case Ongoing(parsedData, _, followedPlayerLogin):
                 setMode(followedPlayerLogin != null? Spectator : PlayerOngoingGame);
                 this.enableTakebackAfterMove = parsedData.startingSituation.turnColor == White? 1 : 2;
                 move = parsedData.moveCount;
