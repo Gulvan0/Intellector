@@ -1,6 +1,9 @@
 package struct;
+
 import serialization.PlySerializer;
 import utils.Notation;
+import net.shared.PieceType;
+
 using StringTools;
 
 class Ply 

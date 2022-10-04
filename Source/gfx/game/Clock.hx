@@ -5,7 +5,7 @@ import net.shared.ServerEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import gameboard.GameBoard.IGameBoardObserver;
 import net.EventProcessingQueue.INetObserver;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import openfl.events.Event;
 import haxe.ui.containers.Box;
 import haxe.Timer;
@@ -67,7 +67,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         {
             case TimeCorrection(timeData):
                 correctTime(timeData);
-            case Move(fromI, toI, fromJ, toJ, morphInto, timeData):
+            case Move(_, _, _, _, _, timeData):
                 correctTime(timeData);
                 moveNum++;
                 toggleTurnColor();
@@ -76,10 +76,13 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 moveNum -= plysToUndo;
                 if (plysToUndo % 2 == 1)
                     toggleTurnColor();
-            case GameEnded(_, _, whiteSecondsRemainder, blackSecondsRemainder, _):
+            case GameEnded(_, whiteSecondsRemainder, blackSecondsRemainder, _):
                 active = false;
                 pauseTimer();
-                correctTime(new TimeReservesData(whiteSecondsRemainder, blackSecondsRemainder, Date.now().getTime()));
+                if (ownerColor == White && whiteSecondsRemainder != null)
+                    label.text = TimeControl.secsToString(whiteSecondsRemainder);
+                else if (ownerColor == Black && blackSecondsRemainder != null)
+                    label.text = TimeControl.secsToString(whiteSecondsRemainder);
                 refreshColoring();
             default:
         }

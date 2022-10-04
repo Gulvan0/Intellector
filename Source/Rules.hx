@@ -4,8 +4,8 @@ import gameboard.Board;
 import struct.Ply;
 import struct.Situation;
 import struct.Hex;
-import struct.PieceType;
-import struct.PieceColor;
+import net.shared.PieceType;
+import net.shared.PieceColor;
 import struct.IntPoint;
 using Lambda;
 

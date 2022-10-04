@@ -21,7 +21,7 @@ import struct.Hex;
 import struct.IntPoint;
 import struct.Ply;
 import net.shared.ServerEvent;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import gfx.utils.PlyScrollType;
 import openfl.events.MouseEvent;
 import struct.Situation;

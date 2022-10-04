@@ -10,7 +10,7 @@ import haxe.ui.events.UIEvent;
 import gfx.Dialogs;
 import gameboard.GameBoard.GameBoardEvent;
 import struct.Situation;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import js.Browser;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;

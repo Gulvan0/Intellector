@@ -1,12 +1,12 @@
 package serialization;
 
-import struct.PieceColor;
+import net.shared.PieceColor;
 import struct.Hex;
-import struct.PieceType;
+import net.shared.PieceType;
 import struct.Situation;
 import struct.IntPoint;
-import struct.PieceType.letter as pieceLetter;
-import struct.PieceColor.letter as colorLetter;
+import net.shared.PieceType.letter as pieceLetter;
+import net.shared.PieceColor.letter as colorLetter;
 
 class SituationSerializer 
 {

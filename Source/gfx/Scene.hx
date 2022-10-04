@@ -126,7 +126,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
                 var opponentLogin:String = parsedData.getPlayerOpponentLogin();
                 challengeList.removeEntriesByPlayer(opponentLogin);
-            case GameEnded(_, _, _, _, _):
+            case GameEnded(_, _, _, _):
                 setIngameStatus(false);
             case IncomingDirectChallenge(data):
                 onIncomingChallenge(data);

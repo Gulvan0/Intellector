@@ -4,7 +4,7 @@ import gfx.analysis.PeripheralEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import net.shared.ServerEvent;
 import haxe.ui.styles.Style;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import gfx.utils.PlyScrollType;
 import struct.Situation;
 import struct.Ply;

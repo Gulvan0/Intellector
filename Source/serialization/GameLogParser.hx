@@ -2,11 +2,11 @@ package serialization;
 
 import net.shared.EloValue;
 import utils.TimeControl;
-import struct.Outcome;
-import struct.PieceColor;
+import net.shared.Outcome;
+import net.shared.PieceColor;
 import struct.Ply;
 import struct.Situation;
-import struct.PieceType;
+import net.shared.PieceType;
 import struct.Hex;
 import struct.HexTransform;
 import struct.ReversiblePly;
@@ -242,7 +242,7 @@ class GameLogParser
             return Normal(Std.parseInt(str));
     }
 
-    public static function decodeOutcome(winnerColorCode:String, reasonCode:String):Null<Outcome>
+    private static function decodeOutcome(winnerColorCode:String, reasonCode:String):Null<Outcome>
     {
         var winnerColor:PieceColor = decodeColor(winnerColorCode);
         return switch reasonCode 
@@ -260,7 +260,7 @@ class GameLogParser
         }
     }
 
-    public static function decodeColor(letter:String):Null<PieceColor> 
+    private static function decodeColor(letter:String):Null<PieceColor> 
     {
         return switch letter 
         {

@@ -13,7 +13,7 @@ import gfx.utils.PlyScrollType;
 import struct.Ply;
 import struct.Situation;
 import haxe.ui.containers.VBox;
-import struct.PieceColor;
+import net.shared.PieceColor;
 
 abstract class PlyHistoryView extends VBox implements IGameBoardObserver implements IAnalysisPeripheralEventObserver implements INetObserver
 {
@@ -69,7 +69,7 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
         switch event 
         {
             case Move(fromI, toI, fromJ, toJ, morphInto, _):
-                var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
+                var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
                 appendPly(ply, true);
             case Rollback(plysToUndo, _):
                 revertPlys(plysToUndo);

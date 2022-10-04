@@ -7,8 +7,8 @@ import openfl.geom.Point;
 import utils.AssetManager;
 import openfl.display.Bitmap;
 import struct.Hex;
-import struct.PieceType;
-import struct.PieceColor;
+import net.shared.PieceType;
+import net.shared.PieceColor;
 import openfl.display.Sprite;
 
 class Piece extends Sprite 

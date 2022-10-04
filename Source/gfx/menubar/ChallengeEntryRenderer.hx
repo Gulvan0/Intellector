@@ -6,7 +6,7 @@ import gfx.basic_components.CopyableText;
 import dict.Utils;
 import net.shared.TimeControlType;
 import browser.URLEditor;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.TimeControl;
 import gfx.common.SituationTooltipRenderer;
 import haxe.ui.tooltips.ToolTipManager;

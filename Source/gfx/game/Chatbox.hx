@@ -5,12 +5,12 @@ import haxe.ui.styles.Style;
 import utils.StringUtils;
 import dict.Phrase;
 import gfx.game.GameActionBar.ActionBtn;
-import struct.Outcome;
+import net.shared.Outcome;
 import serialization.GameLogParser;
 import net.EventProcessingQueue.INetObserver;
 import haxe.ui.containers.VBox;
 import net.shared.ServerEvent;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import dict.Dictionary;
 import dict.Utils;
 import haxe.ui.components.HorizontalScroll;
@@ -39,12 +39,12 @@ class Chatbox extends VBox implements INetObserver
             case SpectatorMessage(author, message):
                 if (isOwnerSpectator)
                     appendMessage(author, message, false);
-            case GameEnded(winnerColorCode, reasonCode, _, _, _): 
-                onGameEnded(GameLogParser.decodeOutcome(winnerColorCode, reasonCode));
+            case GameEnded(outcome, _, _, _): 
+                onGameEnded(outcome);
             case PlayerDisconnected(color): 
-                appendLog(Utils.getPlayerDisconnectedMessage(PieceColor.createByName(color)));
+                appendLog(Utils.getPlayerDisconnectedMessage(color));
             case PlayerReconnected(color): 
-                appendLog(Utils.getPlayerReconnectedMessage(PieceColor.createByName(color)));
+                appendLog(Utils.getPlayerReconnectedMessage(color));
             case NewSpectator(login): 
                 appendLog(Dictionary.getPhrase(SPECTATOR_JOINED_MESSAGE, [login]));
             case SpectatorLeft(login): 

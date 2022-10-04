@@ -6,7 +6,7 @@ import struct.IntPoint;
 import struct.Ply;
 import net.shared.ServerEvent;
 import struct.ReversiblePly;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.AssetManager;
 import gameboard.states.StubState;
 import gameboard.states.NeutralState;
@@ -29,7 +29,7 @@ class PlayerMoveBehavior implements IBehavior
                 if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 1)
                     boardInstance.state = new StubState();
                 
-            case GameEnded(winner_color, reason, _, _, _):
+            case GameEnded(_, _, _, _):
                 boardInstance.state.exitToNeutral();
                 boardInstance.state = new StubState();
             
@@ -76,7 +76,7 @@ class PlayerMoveBehavior implements IBehavior
 	{
         AssetManager.playPlySound(ply, boardInstance.shownSituation);
         boardInstance.emit(ContinuationMove(ply, ply.toNotation(boardInstance.shownSituation), playerColor));
-        Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
+        Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto));
         boardInstance.makeMove(ply);
         if (Preferences.premoveEnabled.get())
             boardInstance.state = new NeutralState();

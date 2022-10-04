@@ -1,7 +1,7 @@
 package gfx.analysis;
 
-import struct.PieceType;
-import struct.PieceColor;
+import net.shared.PieceType;
+import net.shared.PieceColor;
 
 enum PosEditMode 
 {

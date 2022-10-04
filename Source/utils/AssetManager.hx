@@ -15,8 +15,8 @@ import struct.Situation;
 import struct.Hex;
 import openfl.Assets;
 import openfl.display.BitmapData;
-import struct.PieceType;
-import struct.PieceColor;
+import net.shared.PieceType;
+import net.shared.PieceColor;
 
 enum SingleAsset
 {

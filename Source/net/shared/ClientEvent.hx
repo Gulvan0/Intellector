@@ -10,7 +10,7 @@ enum ClientEvent
     AcceptOpenChallenge(challengeID:Int, guestLogin:Null<String>, guestPassword:Null<String>); 
     AcceptDirectChallenge(challengeID:Int); 
     DeclineDirectChallenge(challengeID:Int);
-    Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<String>); 
+    Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<PieceType>); 
     RequestTimeoutCheck; 
     Message(text:String); 
     GetOpenChallenge(id:Int); 

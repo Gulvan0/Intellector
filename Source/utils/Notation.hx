@@ -2,7 +2,7 @@ package utils;
 
 import struct.Situation;
 import struct.Ply;
-import struct.PieceType;
+import net.shared.PieceType;
 import struct.IntPoint;
 using StringTools;
 

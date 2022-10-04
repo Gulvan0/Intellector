@@ -1,4 +1,4 @@
-package struct;
+package net.shared;
 
 enum PieceType
 {

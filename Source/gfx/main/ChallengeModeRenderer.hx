@@ -5,7 +5,7 @@ import haxe.ui.tooltips.ToolTipManager;
 import gfx.common.SituationTooltipRenderer;
 import struct.Situation;
 import utils.AssetManager;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.TimeControl;
 import haxe.ui.core.ItemRenderer;
 

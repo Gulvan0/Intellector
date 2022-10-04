@@ -50,7 +50,7 @@ class TGameInfoBox extends TestedComponent
         if (i % 2 == 1)
             gameinfobox.handleGameBoardEvent(ContinuationMove(plyInfo.ply, plyInfo.plyStr, Black));
         else
-            gameinfobox.handleNetEvent(Move(plyInfo.ply.from.i, plyInfo.ply.to.i, plyInfo.ply.from.j, plyInfo.ply.to.j, plyInfo.ply.morphInto == null? null : plyInfo.ply.morphInto.getName()));
+            gameinfobox.handleNetEvent(Move(plyInfo.ply.from.i, plyInfo.ply.to.i, plyInfo.ply.from.j, plyInfo.ply.to.j, plyInfo.ply.morphInto));
         
         previousSituations.push(playthrough_sit.copy());
         playthrough_sit.makeMove(plyInfo.ply, true);

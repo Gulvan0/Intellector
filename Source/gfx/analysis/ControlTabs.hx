@@ -19,7 +19,7 @@ import gfx.utils.PlyScrollType;
 import struct.Variant;
 import haxe.ui.containers.ScrollView;
 import haxe.ui.containers.Box;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import haxe.ui.components.TextField;
 import haxe.ui.components.Label;
 import dict.Dictionary;

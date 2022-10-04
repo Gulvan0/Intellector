@@ -1,12 +1,14 @@
 package dict.utils;
 
-import struct.PieceColor;
-import struct.Outcome;
+import utils.StringUtils;
+import net.shared.EloValue;
+import net.shared.PieceColor;
+import net.shared.Outcome;
 import utils.SpecialChar;
 
 class OutcomePhrases
 {
-    private static function getWinningGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType, newPersonalElo:Null<Int>):Array<String>
+    private static function getWinningGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType):Array<String>
     {
         return switch outcomeType 
         {
@@ -23,7 +25,7 @@ class OutcomePhrases
         }
     }
 
-    private static function getLosingGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType, newPersonalElo:Null<Int>):Array<String>
+    private static function getLosingGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType):Array<String>
     {
         return switch outcomeType 
         {
@@ -90,24 +92,25 @@ class OutcomePhrases
         return Dictionary.chooseTranslation(translations);
     }
 
-    public static function getPlayerGameOverDialogMessage(outcome:Outcome, playerColor:PieceColor, newPersonalElo:Null<Int>)
+    public static function getPlayerGameOverDialogMessage(outcome:Outcome, playerColor:PieceColor, newPersonalElo:Null<EloValue>)
     {
         var personalOutcome:PersonalOutcome = toPersonal(outcome, playerColor);
 
         var translations:Array<String> = switch personalOutcome 
         {
             case Win(type):
-                getWinningGameOverDialogMessageTL(type, newPersonalElo);
+                getWinningGameOverDialogMessageTL(type);
             case Loss(type):
-                getLosingGameOverDialogMessageTL(type, newPersonalElo);
+                getLosingGameOverDialogMessageTL(type);
             case Draw(type):
                 getDrawishGameOverDialogMessageTL(type);
         }
 
         if (newPersonalElo != null)
         {
-            translations[0] += ' Your new rating: $newPersonalElo';
-            translations[1] += ' Ваш новый рейтинг: $newPersonalElo';
+            var eloStr:String = StringUtils.eloToStr(newPersonalElo);
+            translations[0] += ' Your new rating: $eloStr';
+            translations[1] += ' Ваш новый рейтинг: $eloStr';
         }
 
         return Dictionary.chooseTranslation(translations);

@@ -4,7 +4,7 @@ import gameboard.GameBoard.IGameBoardObserver;
 import net.EventProcessingQueue.INetObserver;
 import gameboard.GameBoard.GameBoardEvent;
 import haxe.ui.containers.VBox;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import js.Browser;
 import net.shared.ServerEvent;
 import haxe.ui.components.Button;
@@ -59,7 +59,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
     {
         switch event 
         {
-            case GameEnded(_, _, _, _, _):
+            case GameEnded(_, _, _, _):
                 btnBar.hidden = false;
                 drawRequestBox.hidden = true;
                 takebackRequestBox.hidden = true;

@@ -1,5 +1,6 @@
 package struct;
 
+import net.shared.PieceColor;
 import utils.TimeControl;
 import js.Cookie;
 

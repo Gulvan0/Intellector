@@ -11,7 +11,7 @@ import utils.MathUtils;
 import haxe.ui.events.UIEvent;
 import utils.AssetManager;
 import struct.Situation;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.TimeControl;
 import haxe.ui.events.MouseEvent;
 import struct.ChallengeParams;

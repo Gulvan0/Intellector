@@ -21,8 +21,8 @@
         <box width="100%" verticalAlign="center">
             <dropdown id="turnColorStepper" width="100%">
                 <data>
-                    <item text="${Dictionary.getPhrase(TURN_COLOR(struct.PieceColor.White))}" />
-                    <item text="${Dictionary.getPhrase(TURN_COLOR(struct.PieceColor.Black))}" />
+                    <item text="${Dictionary.getPhrase(TURN_COLOR(net.shared.PieceColor.White))}" />
+                    <item text="${Dictionary.getPhrase(TURN_COLOR(net.shared.PieceColor.Black))}" />
                 </data>
             </dropdown>
         </box>

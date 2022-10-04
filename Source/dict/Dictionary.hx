@@ -1,8 +1,8 @@
 package dict;
 
 import utils.StringUtils.eloToStr;
-import struct.PieceColor;
-import struct.Outcome;
+import net.shared.PieceColor;
+import net.shared.Outcome;
 
 class Dictionary 
 {

@@ -12,7 +12,7 @@ import net.shared.GameInfo;
 import net.shared.EloValue;
 import gameboard.Board;
 import gfx.basic_components.BoardWrapper;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import dict.Dictionary;
 import openings.OpeningTree;
 import dict.Utils;

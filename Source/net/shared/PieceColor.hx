@@ -1,4 +1,4 @@
-package struct;
+package net.shared;
 
 enum PieceColor
 {
@@ -24,9 +24,4 @@ inline function colorByLetter(letter:String):Null<PieceColor>
         case "b": Black;
         default: null;
     }
-}
-
-inline function plain(color:PieceColor):String 
-{
-    return color == White? "white" : "black";    
 }

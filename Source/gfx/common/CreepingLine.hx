@@ -5,7 +5,7 @@ import haxe.ui.components.HorizontalScroll;
 import net.shared.ServerEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import gfx.analysis.PeripheralEvent;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import gfx.utils.PlyScrollType;
 import haxe.ui.containers.VBox;
 using utils.CallbackTools;

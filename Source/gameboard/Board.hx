@@ -12,7 +12,7 @@ import struct.ReversiblePly;
 import struct.Hex;
 import struct.Situation;
 import struct.IntPoint;
-import struct.PieceColor;
+import net.shared.PieceColor;
 
 /**
     A simplest board with a very basic functionality

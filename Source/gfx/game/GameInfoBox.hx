@@ -22,14 +22,14 @@ import haxe.ui.containers.VBox;
 import struct.Ply;
 import openings.OpeningTree;
 import dict.Dictionary;
-import struct.PieceType;
-import struct.PieceColor;
+import net.shared.PieceType;
+import net.shared.PieceColor;
 import haxe.ui.styles.Style;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import openfl.text.TextField;
 import openfl.display.Sprite;
-import struct.Outcome;
+import net.shared.Outcome;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/live/gameinfobox.xml'))
 class GameInfoBox extends Card implements IGameBoardObserver implements INetObserver
@@ -51,12 +51,12 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
                 var ply:Ply = new Ply();
                 ply.from = new IntPoint(fromI, fromJ);
                 ply.to = new IntPoint(toI, toJ);
-                ply.morphInto = morphInto == null? null : PieceType.createByName(morphInto);
+                ply.morphInto = morphInto;
                 accountMove(ply);
             case Rollback(plysToUndo, _):
                 revertPlys(plysToUndo);
-            case GameEnded(winnerColorCode, reasonCode, _, _, _):
-                resolution.text = Utils.getResolution(GameLogParser.decodeOutcome(winnerColorCode, reasonCode));
+            case GameEnded(outcome, _, _, _):
+                resolution.text = Utils.getResolution(outcome);
             default:
         }
     }

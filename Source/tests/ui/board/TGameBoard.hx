@@ -11,7 +11,7 @@ import haxe.Timer;
 import serialization.PlySerializer;
 import struct.Ply;
 import gameboard.behaviors.AnalysisBehavior;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import gameboard.behaviors.EnemyMoveBehavior;
 import gameboard.states.StubState;
 import gameboard.behaviors.PlayerMoveBehavior;
@@ -153,7 +153,7 @@ class TGameBoard extends TestedComponent
     @prompt("APly", "Enemy move")
     private function _act_enemyMove(ply:Ply) 
     {
-        board.handleNetEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto == null? null : ply.morphInto.getName()));
+        board.handleNetEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto));
     }
 
     @prompt("AInt", "Moves to cancel")

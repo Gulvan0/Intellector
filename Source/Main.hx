@@ -10,7 +10,7 @@ import gfx.screens.OpenChallengeJoining;
 import gfx.Dialogs;
 import tests.ui.analysis.TAnalysisScreen;
 import haxe.ui.locale.LocaleManager;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.TimeControl;
 import net.Requests;
 import js.html.URLSearchParams;

@@ -1,6 +1,6 @@
 package gameboard.states;
 
-import struct.PieceType;
+import net.shared.PieceType;
 import gfx.Dialogs;
 import struct.Hex;
 import struct.Ply;

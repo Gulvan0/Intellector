@@ -1,6 +1,6 @@
 package gameboard.behaviors;
 
-import struct.PieceType;
+import net.shared.PieceType;
 import struct.Hex;
 import struct.Situation;
 import gameboard.states.HexSelectionState;
@@ -11,7 +11,7 @@ import struct.Ply;
 import struct.IntPoint;
 import net.shared.ServerEvent;
 import struct.ReversiblePly;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.AssetManager;
 
 class EditorSetBehavior extends EditorBehavior implements IBehavior 

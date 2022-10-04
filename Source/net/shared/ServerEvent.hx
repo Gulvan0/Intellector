@@ -1,12 +1,9 @@
 package net.shared;
 
-import net.shared.GameInfo;
-import net.shared.ProfileData;
-
 enum ServerEvent
 {
-    GameStarted(match_id:Int, logPreamble:String); //Sent when a game with one of the players being the user starts. Signals the app to navigate to the game screen. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
-    SpectationData(match_id:Int, timeData:Null<TimeReservesData>, currentLog:String); //Answer to Spectate. All the match details required may be derived from the currentLog arg. Signals the app to navigate to the game screen. 
+    GameStarted(gameID:Int, logPreamble:String); //Sent when a game with one of the players being the user starts. Signals the app to navigate to the game screen. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
+    SpectationData(gameID:Int, timeData:Null<TimeReservesData>, currentLog:String); //Answer to Spectate. All the match details required may be derived from the currentLog arg. Signals the app to navigate to the game screen. 
     
     GameIsOver(log:String); //Answer to GetGame: game has ended and now can be revisited
     GameIsOngoing(timeData:Null<TimeReservesData>, currentLog:String); //Answer to GetGame: game is in process. Player should either spectate or reconnect based on whether the log contains their login
@@ -23,24 +20,23 @@ enum ServerEvent
     DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered
     
     OpenChallengeInfo(data:ChallengeData); //Answer to GetOpenChallenge when it exists with challenge parameters
-    OpenChallengeHostPlaying(match_id:Int, timeData:Null<TimeReservesData>, currentLog:String); //Answer to GetOpenChallenge: host already started a game
+    OpenChallengeHostPlaying(gameID:Int, timeData:Null<TimeReservesData>, currentLog:String); //Answer to GetOpenChallenge: host already started a game
     OpenchallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist
     
     LoginResult(result:SignInResult); //Answer to Login
     RegisterResult(result:SignInResult); //Answer to Register
-    ReconnectionNeeded(match_id:Int, timeData:TimeReservesData, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished non-correspondence game
+    ReconnectionNeeded(gameID:Int, timeData:TimeReservesData, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished non-correspondence game
 
     Message(author:String, message:String); //New in-game player message
     SpectatorMessage(author:String, message:String); //New in-game spectator message
     //TODO: Make sure the server responds to Move and AddTime with TimeCorrection. Other TimeCorrection emissions may be removed
     TimeCorrection(timeData:TimeReservesData); //Signals to update the in-game timers. Significant game events (Move, Rollback, GameEnded) also contain the same data which should be processed in the exact same way
-    Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<String>, timeData:Null<TimeReservesData>); //A move has been played. Sent both to opponent and to all of the spectators
+    Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<PieceType>, timeData:Null<TimeReservesData>); //A move has been played. Sent both to opponent and to all of the spectators
     Rollback(plysToUndo:Int, timeData:Null<TimeReservesData>); //Signal to undo a number of plys in a current game. Sent to both spectators and players
-    //TODO: Replace with Outcome, check whether remainders should be made optional and elo have the type EloValue. Also update to PieceColor everywhere
-    GameEnded(winner_color:String, reason:String, whiteSecondsRemainder:Float, blackSecondsRemainder:Float, newPersonalElo:Null<Int>); //Game over. Sent both to players and to all of the spectators
+    GameEnded(outcome:Outcome, whiteSecondsRemainder:Null<Float>, blackSecondsRemainder:Null<Float>, newPersonalElo:Null<EloValue>); //Game over. Sent both to players and to all of the spectators
 
-    PlayerDisconnected(color:String); //Sent to the players and the spectators when one of the players disconnects
-    PlayerReconnected(color:String); //Sent to the players and the spectators when one of the players reconnects
+    PlayerDisconnected(color:PieceColor); //Sent to the players and the spectators when one of the players disconnects
+    PlayerReconnected(color:PieceColor); //Sent to the players and the spectators when one of the players reconnects
     NewSpectator(login:String); //Sent both to players and to all of the spectators when a new user starts spectating
     SpectatorLeft(login:String); //Sent both to players and to all of the spectators when a user stops spectating
 

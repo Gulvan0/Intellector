@@ -9,7 +9,7 @@ import dict.Dictionary;
 import haxe.Timer;
 import serialization.GameLogParser;
 import net.Requests;
-import struct.PieceColor;
+import net.shared.PieceColor;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/main_menu/current_games_table.xml"))
 class CurrentGamesTable extends VBox

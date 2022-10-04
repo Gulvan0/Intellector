@@ -4,8 +4,8 @@ import net.shared.StudyPublicity;
 import net.shared.EloValue;
 import net.shared.UserStatus;
 import net.shared.UserRole;
-import struct.Outcome;
-import struct.PieceColor;
+import net.shared.Outcome;
+import net.shared.PieceColor;
 
 enum Phrase
 {

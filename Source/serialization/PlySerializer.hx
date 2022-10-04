@@ -2,7 +2,7 @@ package serialization;
 
 import struct.Situation;
 import struct.Ply;
-import struct.PieceType;
+import net.shared.PieceType;
 import struct.ReversiblePly;
 import struct.IntPoint;
 

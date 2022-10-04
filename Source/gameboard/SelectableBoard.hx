@@ -8,7 +8,7 @@ import openfl.display.JointStyle;
 import openfl.display.CapsStyle;
 import openfl.geom.Point;
 import openfl.events.Event;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import struct.Situation;
 import openfl.display.Sprite;
 import struct.IntPoint;

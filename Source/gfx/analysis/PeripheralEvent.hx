@@ -1,7 +1,7 @@
 package gfx.analysis;
 
 import gfx.utils.PlyScrollType;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import struct.Situation;
 import struct.Ply;
 

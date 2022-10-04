@@ -1,7 +1,7 @@
 package gfx.common;
 
 import haxe.ui.styles.Style;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import gfx.basic_components.BoardWrapper;
 import dict.Dictionary;
 import gameboard.Board;

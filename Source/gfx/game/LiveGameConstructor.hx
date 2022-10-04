@@ -1,7 +1,7 @@
 package gfx.game;
 
 import net.shared.TimeReservesData;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import net.shared.EloValue;
 import struct.Situation;
 import serialization.GameLogParser.GameLogParserOutput;

@@ -10,7 +10,7 @@ import dict.Dictionary;
 import gfx.Dialogs;
 import gfx.SceneManager;
 import serialization.GameLogParser;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.TimeControl;
 import net.shared.ClientEvent;
 import net.shared.ServerEvent;
@@ -59,9 +59,9 @@ class Requests
         {
             case OpenChallengeInfo(data):
                 SceneManager.toScreen(ChallengeJoining(data));
-            case OpenChallengeHostPlaying(match_id, timeData, currentLog):
+            case OpenChallengeHostPlaying(gameID, timeData, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, timeData, null)));
+                SceneManager.toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, null)));
             case OpenchallengeNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
@@ -201,9 +201,9 @@ class Requests
     {
         switch event
         {
-            case SpectationData(match_id, timeData, currentLog): 
+            case SpectationData(gameID, timeData, currentLog): 
 		        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, timeData, login)));
+                SceneManager.toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, login)));
             case PlayerNotInGame:
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_IN_GAME, REQUESTS_ERROR_DIALOG_TITLE);
             case PlayerOffline:

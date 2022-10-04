@@ -23,7 +23,7 @@ import js.html.FileSaver;
 import haxe.Timer;
 import gfx.Dialogs;
 import js.Browser;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import gameboard.Board;
 import gfx.basic_components.BoardWrapper;
 import struct.Situation;

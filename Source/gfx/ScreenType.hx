@@ -6,7 +6,7 @@ import net.shared.ProfileData;
 import struct.ChallengeParams;
 import struct.Variant.VariantPath;
 import gfx.game.LiveGameConstructor;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.TimeControl;
 
 enum ScreenType

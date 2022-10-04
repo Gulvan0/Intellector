@@ -9,7 +9,7 @@ import haxe.ui.core.Component;
 import utils.MathUtils;
 import haxe.ui.core.Screen as HaxeUIScreen;
 import browser.URLEditor;
-import struct.Outcome;
+import net.shared.Outcome;
 import serialization.PortableIntellectorNotation;
 import gfx.common.ShareDialog;
 import openfl.events.Event;
@@ -37,7 +37,7 @@ import gameboard.behaviors.StubBehavior;
 import gameboard.behaviors.IBehavior;
 import gameboard.GameBoard;
 import utils.TimeControl;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import haxe.exceptions.NotImplementedException;
 import haxe.ui.containers.VBox;
 
@@ -148,9 +148,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         switch event 
         {
-            case GameEnded(winnerColorCode, outcomeCode, _, _, newPersonalElo):
-                outcome = GameLogParser.decodeOutcome(winnerColorCode, outcomeCode);
-
+            case GameEnded(outcome, _, _, newPersonalElo):
                 Assets.getSound("sounds/notify.mp3").play();
 
                 var message:String;
@@ -172,7 +170,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         switch event 
         {
             case ContinuationMove(ply, _, _):
-                Networker.emitEvent(Move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto.getName()));
+                Networker.emitEvent(Move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto));
             default:
         }
     }

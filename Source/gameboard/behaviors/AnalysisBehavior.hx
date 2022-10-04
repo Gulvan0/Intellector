@@ -7,7 +7,7 @@ import struct.IntPoint;
 import struct.Ply;
 import net.shared.ServerEvent;
 import struct.ReversiblePly;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.AssetManager;
 
 class AnalysisBehavior implements IBehavior 

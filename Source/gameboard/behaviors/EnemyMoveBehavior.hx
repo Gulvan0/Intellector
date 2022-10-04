@@ -8,7 +8,7 @@ import struct.IntPoint;
 import gameboard.states.StubState;
 import net.shared.ServerEvent;
 import struct.ReversiblePly;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import utils.AssetManager;
 import gameboard.states.DraggingState;
 import gameboard.states.NeutralState;
@@ -71,7 +71,7 @@ class EnemyMoveBehavior implements IBehavior
                     displayPlannedPremove(premove);
                 premoves = followingPremoves;
     
-                Networker.emitEvent(Move(activatedPremove.from.i, activatedPremove.to.i, activatedPremove.from.j, activatedPremove.to.j, activatedPremove.morphInto == null? null : activatedPremove.morphInto.getName()));
+                Networker.emitEvent(Move(activatedPremove.from.i, activatedPremove.to.i, activatedPremove.from.j, activatedPremove.to.j, activatedPremove.morphInto));
             }
         }
     }
@@ -90,7 +90,7 @@ class EnemyMoveBehavior implements IBehavior
                 if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 0)
                     boardInstance.state = new StubState();
                 
-            case GameEnded(winner_color, reason, _, _, _):
+            case GameEnded(_, _, _, _):
                 boardInstance.state.exitToNeutral();
                 resetPremoves();
                 boardInstance.state = new StubState();
@@ -99,7 +99,7 @@ class EnemyMoveBehavior implements IBehavior
                 boardInstance.state.exitToNeutral();
                 if (!Preferences.premoveEnabled.get())
                     boardInstance.state = new StubState();
-                var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto == null? null : PieceType.createByName(morphInto));
+                var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
                 handleOpponentMove(ply);
 
             default:

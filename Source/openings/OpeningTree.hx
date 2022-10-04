@@ -2,7 +2,7 @@ package openings;
 
 import struct.Ply;
 import dict.Dictionary;
-import struct.PieceType;
+import net.shared.PieceType;
 
 class Branch
 {

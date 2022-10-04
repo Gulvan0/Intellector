@@ -1,8 +1,8 @@
 package serialization;
 
 import struct.Situation;
-import struct.PieceColor;
-import struct.Outcome;
+import net.shared.PieceColor;
+import net.shared.Outcome;
 import utils.TimeControl;
 import struct.Ply;
 using StringTools;

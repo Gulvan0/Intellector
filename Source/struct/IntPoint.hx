@@ -1,7 +1,7 @@
 package struct;
 
 import ds.tools.Assert;
-import struct.PieceColor;
+import net.shared.PieceColor;
 
 function equal(p1:Null<IntPoint>, p2:Null<IntPoint>):Bool
 {

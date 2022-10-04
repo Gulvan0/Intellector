@@ -1,5 +1,6 @@
 package dict;
 
+import net.shared.EloValue;
 import net.shared.TimeControlType;
 import dict.utils.TimePhrases;
 import dict.utils.OutcomePhrases;
@@ -11,9 +12,9 @@ import utils.TimeControl;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
 import gfx.ScreenType;
-import struct.Outcome;
+import net.shared.Outcome;
 import Preferences.Markup;
-import struct.PieceColor;
+import net.shared.PieceColor;
 
 class Utils
 {
@@ -114,7 +115,7 @@ class Utils
         return OutcomePhrases.getSpectatorGameOverDialogMessage(outcome, whiteLogin, blackLogin);
     }
 
-    public static function getPlayerGameOverDialogMessage(outcome:Outcome, playerColor:PieceColor, newPersonalElo:Null<Int>)
+    public static function getPlayerGameOverDialogMessage(outcome:Outcome, playerColor:PieceColor, newPersonalElo:Null<EloValue>)
     {
         return OutcomePhrases.getPlayerGameOverDialogMessage(outcome, playerColor, newPersonalElo);
     }

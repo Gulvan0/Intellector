@@ -1,5 +1,8 @@
 package struct;
 
+import net.shared.PieceType;
+import net.shared.PieceColor;
+
 class Hex 
 {
     public var type:Null<PieceType> = null;

@@ -9,7 +9,7 @@ import gfx.Dialogs;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
 import utils.TimeControl;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import haxe.ui.components.Button;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.VBox;

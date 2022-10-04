@@ -11,7 +11,7 @@ import gfx.common.ShareDialog;
 import js.Browser;
 import gameboard.behaviors.AnalysisBehavior;
 import struct.Situation;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import gfx.basic_components.BoardWrapper;
 import haxe.ui.core.Component;
 import struct.Variant;

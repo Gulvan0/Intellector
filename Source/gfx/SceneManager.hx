@@ -18,7 +18,7 @@ import js.html.URLSearchParams;
 import net.EventProcessingQueue.INetObserver;
 import net.shared.ServerEvent;
 import openfl.display.Sprite;
-import struct.PieceColor;
+import net.shared.PieceColor;
 import browser.URLEditor;
 import utils.TimeControl;
 import haxe.ui.core.Screen as HaxeUIScreen;
@@ -135,7 +135,7 @@ class SceneManager
     {
         switch event 
         {
-            case GameStarted(match_id, logPreamble):
+            case GameStarted(gameID, logPreamble):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
                 var constructor:LiveGameConstructor;
                 if (parsedData.isPlayerParticipant())
@@ -145,10 +145,10 @@ class SceneManager
                 }
                 else
                     constructor = Ongoing(parsedData, null, FollowManager.getFollowedPlayerLogin());
-                toScreen(LiveGame(match_id, constructor));
-            case ReconnectionNeeded(match_id, timeData, currentLog):
+                toScreen(LiveGame(gameID, constructor));
+            case ReconnectionNeeded(gameID, timeData, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                toScreen(LiveGame(match_id, Ongoing(parsedData, timeData, null)));
+                toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, null)));
             default:
         }
         return false;

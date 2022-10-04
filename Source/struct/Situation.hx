@@ -2,7 +2,8 @@ package struct;
 
 import serialization.SituationSerializer;
 import utils.MathUtils;
-import struct.PieceColor.opposite;
+import net.shared.PieceType;
+import net.shared.PieceColor;
 
 class Situation 
 {

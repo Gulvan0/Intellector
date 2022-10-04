@@ -1,6 +1,4 @@
-package struct;
-
-import struct.PieceColor;
+package net.shared;
 
 enum DecisiveOutcomeType
 {
