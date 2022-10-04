@@ -1,5 +1,6 @@
 package gfx;
 
+import net.shared.ChallengeData;
 import utils.AssetManager;
 import haxe.ui.components.Image;
 import net.shared.SendChallengeResult;
@@ -89,13 +90,13 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logOutBtn.disabled = ingame;
     }
 
-    private function onIncomingChallenge(id:Int, params:ChallengeParams)
+    private function onIncomingChallenge(data:ChallengeData)
     {
         if (isPlayerInGame || Preferences.silentChallenges.get())
-            challengeList.appendEntry(id, params);
+            challengeList.appendEntry(data);
         else
         {
-            Dialogs.incomingChallenge(id, params);
+            Dialogs.incomingChallenge(data);
             Assets.getSound("sounds/social.mp3").play();
         }
     }
@@ -104,8 +105,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     {
         switch result 
         {
-            case Success(challengeID, serializedParams):
-                challengeList.appendEntry(challengeID, ChallengeParams.deserialize(serializedParams));
+            case Success(data):
+                challengeList.appendEntry(data);
                 Assets.getSound("sounds/challenge_sent.mp3").play();
             case ToOneself:
                 Dialogs.info(SEND_CHALLENGE_ERROR_TO_ONESELF, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
@@ -127,8 +128,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 challengeList.removeEntriesByPlayer(opponentLogin);
             case GameEnded(_, _, _, _, _):
                 setIngameStatus(false);
-            case IncomingDirectChallenge(id, serializedParams):
-                onIncomingChallenge(id, ChallengeParams.deserialize(serializedParams));
+            case IncomingDirectChallenge(data):
+                onIncomingChallenge(data);
             case CreateChallengeResult(result):
                 onSendChallengeResultReceived(result);
             case DirectChallengeDeclined(id):
@@ -150,7 +151,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             case LoggedIn(incomingChallenges):
                 refreshAccountElements();
                 for (info in incomingChallenges)
-                    challengeList.appendEntry(info.id, ChallengeParams.deserialize(info.serializedParams));
+                    challengeList.appendEntry(info);
             case LoggedOut:
                 refreshAccountElements();
                 challengeList.clearEntries();

@@ -52,7 +52,7 @@ class SceneManager
 
         switch currentScreenType 
         {
-            case MainMenu, LiveGame(_, _), PlayerProfile(_, _), ChallengeJoining(_, _):
+            case MainMenu, LiveGame(_, _), PlayerProfile(_, _), ChallengeJoining(_):
                 cleanupCallback = Dialogs.reconnectionDialog();
             case Analysis(_, _, _, _):
                 //* Do nothing

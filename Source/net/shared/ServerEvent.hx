@@ -13,7 +13,7 @@ enum ServerEvent
 
     CreateChallengeResult(result:SendChallengeResult);
 
-    IncomingDirectChallenge(id:Int, serializedParams:String);
+    IncomingDirectChallenge(data:ChallengeData);
 
     DirectChallengeDeclined(id:Int); //Recipient has declined the challenge. Its 'accepted' counterpart doesn't exist, instead, GameStarted is sent right away
 
@@ -21,7 +21,7 @@ enum ServerEvent
     DirectChallengeCallerOffline(caller:String); //Answer to accepting direct challenge: caller went offline before the recipient answered
     DirectChallengeCallerInGame(caller:String); //Answer to accepting direct challenge: caller joined a different game before the recipient answered
     
-    OpenChallengeInfo(id:Int, serializedParams:String); //Answer to GetOpenChallenge when it exists with challenge parameters
+    OpenChallengeInfo(data:ChallengeData); //Answer to GetOpenChallenge when it exists with challenge parameters
     OpenChallengeHostPlaying(match_id:Int, whiteSeconds:Float, blackSeconds:Float, timestamp:Float, currentLog:String); //Answer to GetOpenChallenge: host already started a game //TODO: Keep track of challengeOwners, or else OpenchallengeNotFound will always be returned instead
     OpenchallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist
     
@@ -63,7 +63,7 @@ enum ServerEvent
     PlayerOffline; //Answer to Spectate: no game to spectate with a requested player
     PlayerNotInGame; //Answer to Spectate: no game to spectate with a requested player
 
-    OpenChallenges(data:Array<OpenChallengeData>); //Answer to GetOpenChallenges
+    OpenChallenges(data:Array<ChallengeData>); //Answer to GetOpenChallenges
     CurrentGames(data:Array<{id:Int, currentLog:String}>); //Answer to GetCurrentGames
 
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created

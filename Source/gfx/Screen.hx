@@ -61,8 +61,8 @@ class Screen extends Component
                 new LiveGame(id, constructor);
             case PlayerProfile(ownerLogin, data):
                 new Profile(ownerLogin, data);
-            case ChallengeJoining(id, params):
-                new OpenChallengeJoining(id, params);
+            case ChallengeJoining(data):
+                new OpenChallengeJoining(data);
         };
     }
     

@@ -1,5 +1,6 @@
 package gfx.menubar;
 
+import net.shared.ChallengeData;
 import gfx.basic_components.AutosizingLabel;
 import gfx.basic_components.CopyableText;
 import dict.Utils;
@@ -44,8 +45,9 @@ class ChallengeEntryRenderer extends ItemRenderer
             return;
 
         var isIncoming:Bool;
-        var params:ChallengeParams = data.params;
-        challengeID = data.id;
+        var challengeData:ChallengeData = data;
+        var params:ChallengeParams = ChallengeParams.deserialize(challengeData.serializedParams);
+        challengeID = challengeData.id;
 
         switch params.type 
         {
@@ -62,12 +64,12 @@ class ChallengeEntryRenderer extends ItemRenderer
                 linkText.percentWidth = 90;
                 linkText.percentHeight = 100;
                 linkText.horizontalAlign = "center";
-                linkText.copiedText = URLEditor.getChallengeLink(data.id);
+                linkText.copiedText = URLEditor.getChallengeLink(challengeData.id);
                 secondRow.addComponent(linkText);
 
                 acceptBtn.hidden = true;
                 declineBtn.hidden = true;
-                cancelBtn.onClick = e -> {Networker.emitEvent(CancelChallenge(data.id));};
+                cancelBtn.onClick = e -> {Networker.emitEvent(CancelChallenge(challengeData.id));};
 
             case Direct(calleeLogin):
                 isIncoming = LoginManager.isPlayer(calleeLogin);
@@ -81,7 +83,7 @@ class ChallengeEntryRenderer extends ItemRenderer
                 if (isIncoming)
                 {
                     headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE);
-                    opponentLabelText = Dictionary.getPhrase(MENUBAR_CHALLENGES_FROM_LINE_TEXT, [params.ownerLogin]);
+                    opponentLabelText = Dictionary.getPhrase(MENUBAR_CHALLENGES_FROM_LINE_TEXT, [challengeData.ownerLogin]);
                 }
                 else
                 {

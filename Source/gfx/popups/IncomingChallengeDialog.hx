@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import net.shared.ChallengeData;
 import haxe.ui.tooltips.ToolTipOptions;
 import gfx.basic_components.AnnotatedImage;
 import dict.Utils;
@@ -43,12 +44,14 @@ class IncomingChallengeDialog extends Dialog
         hideDialog(null);
     }
 
-    public function new(id:Int, params:ChallengeParams)
+    public function new(data:ChallengeData)
     {
         super();
-        this.challengeID = id;
+        this.challengeID = data.id;
+
+        var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
         
-		challengeByLabel.text = Dictionary.getPhrase(INCOMING_CHALLENGE_CHALLENGE_BY_LABEL_TEXT, [params.ownerLogin]);
+		challengeByLabel.text = Dictionary.getPhrase(INCOMING_CHALLENGE_CHALLENGE_BY_LABEL_TEXT, [data.ownerLogin]);
         challengeByLabel.setFontBold(true);
         
         var timeControlType:TimeControlType = params.timeControl.getType();
@@ -64,8 +67,8 @@ class IncomingChallengeDialog extends Dialog
 		colorIcon.resource = AssetManager.challengeColorPath(params.acceptorColor);
         colorIcon.tooltip = switch params.acceptorColor 
         {
-			case White: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [params.ownerLogin]);
-			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [params.ownerLogin]);
+			case White: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [data.ownerLogin]);
+			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [data.ownerLogin]);
 			case null: Dictionary.getPhrase(OPENJOIN_COLOR_RANDOM);
 		};
 

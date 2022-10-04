@@ -1,5 +1,6 @@
 package gfx;
 
+import net.shared.ChallengeData;
 import net.shared.StudyInfo;
 import net.shared.ProfileData;
 import struct.ChallengeParams;
@@ -15,5 +16,5 @@ enum ScreenType
     LanguageSelectIntro(languageReadyCallback:Void->Void);
     LiveGame(gameID:Int, constructor:LiveGameConstructor);
     PlayerProfile(ownerLogin:String, data:ProfileData);
-    ChallengeJoining(id:Int, params:ChallengeParams);
+    ChallengeJoining(data:ChallengeData);
 }

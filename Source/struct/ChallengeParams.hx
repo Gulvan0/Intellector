@@ -19,7 +19,6 @@ class ChallengeParams
     public var acceptorColor:Null<PieceColor>;
     public var customStartingSituation(default, set):Null<Situation>;
     public var rated(default, set):Bool;
-    public var ownerLogin:String;
 
     private function set_customStartingSituation(value:Null<Situation>):Null<Situation>
     {
@@ -57,7 +56,7 @@ class ChallengeParams
 
     public static function rematchParams(opponentLogin:String, playerColor:PieceColor, timeControl:TimeControl, rated:Bool, ?startingSituation:Null<Situation>):ChallengeParams
     {
-        return new ChallengeParams(timeControl, Direct(opponentLogin), LoginManager.getLogin(), playerColor, startingSituation, rated);
+        return new ChallengeParams(timeControl, Direct(opponentLogin), playerColor, startingSituation, rated);
     }
 
     public static function playFromPosParams(situiation:Situation):ChallengeParams
@@ -103,13 +102,12 @@ class ChallengeParams
         return timeControl.startSecs + ";" + timeControl.bonusSecs + ";" + typeStr + ";" + colorStr + ";" + sitStr + ";" + ratedStr;
     }
 
-    public function new(timeControl:TimeControl, type:ChallengeType, ?ownerLogin:String, ?acceptorColor:Null<PieceColor>, ?customStartingSituation:Null<Situation>, ?rated:Bool = false)
+    public function new(timeControl:TimeControl, type:ChallengeType, ?acceptorColor:Null<PieceColor>, ?customStartingSituation:Null<Situation>, ?rated:Bool = false)
     {
         this.timeControl = timeControl;
         this.type = type;
         this.acceptorColor = acceptorColor;
         this.customStartingSituation = customStartingSituation;
         this.rated = rated;
-        this.ownerLogin = ownerLogin == null? LoginManager.getLogin() : ownerLogin;
     }
 }

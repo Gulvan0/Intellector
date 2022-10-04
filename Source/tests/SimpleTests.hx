@@ -1,5 +1,6 @@
 package tests;
 
+import net.shared.ChallengeData;
 import haxe.ui.containers.Grid;
 import gfx.menubar.ChallengeEntryRenderer;
 import gfx.SceneManager;
@@ -305,7 +306,13 @@ class SimpleTests
 			default: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
 		}
 
-		Dialogs.incomingChallenge(42, challengeParams);
+		var challengeData:ChallengeData = new ChallengeData();
+		challengeData.id = 42;
+		challengeData.serializedParams = challengeParams.serialize();
+		challengeData.ownerLogin = "kaz";
+		challengeData.ownerELO = Normal(1345);
+
+		Dialogs.incomingChallenge(challengeData);
 	}
 
 	public static function challengeEntryRenderer(i:Int) 
@@ -325,11 +332,17 @@ class SimpleTests
 				default: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
 			};
 
+			var challengeData:ChallengeData = new ChallengeData();
+			challengeData.id = 12;
+			challengeData.serializedParams = challengeParams.serialize();
+			challengeData.ownerLogin = i % 2 == 0? "kaz" : "gulvan";
+			challengeData.ownerELO = Provisional(1250);
+
 			var innerBox:Box = new Box();
 			assignWidth(innerBox, Exact(325));
 
 			var comp = new ChallengeEntryRenderer();
-			comp.data = {id: 12, params: challengeParams};
+			comp.data = challengeData;
 
 			innerBox.addComponent(comp);
 			contentBox.addComponent(innerBox);
@@ -352,7 +365,13 @@ class SimpleTests
 			default: ChallengeParameters.outgoingByLink();
 		}
 
-		SceneManager.scene.challengeList.appendEntry(i + 1, challengeParams);
+		var challengeData:ChallengeData = new ChallengeData();
+		challengeData.id = 12;
+		challengeData.serializedParams = challengeParams.serialize();
+		challengeData.ownerLogin = i < 4? "kaz" : "gulvan";
+		challengeData.ownerELO = Provisional(1250);
+
+		SceneManager.scene.challengeList.appendEntry(challengeData);
 	}
 
 	public static function simpleAnalysis()

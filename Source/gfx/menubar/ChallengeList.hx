@@ -2,6 +2,7 @@ package gfx.menubar;
 
 import struct.ChallengeParams;
 import haxe.ui.containers.ListView;
+import net.shared.ChallengeData;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/menubar/challenge_list.xml'))
 class ChallengeList extends ListView
@@ -23,19 +24,19 @@ class ChallengeList extends ListView
         return v;
     }
 
-    public function appendEntry(id:Int, params:ChallengeParams)
+    public function appendEntry(data:ChallengeData)
     {
-        dataSource.add({id: id, params: params});
+        dataSource.add(data);
 
-        indexByID.set(id, dataSource.size - 1);
+        indexByID.set(data.id, dataSource.size - 1);
 
-        if (!LoginManager.isPlayer(params.ownerLogin))
+        if (!LoginManager.isPlayer(data.ownerLogin))
         {
-            var ownerLogin:String = params.ownerLogin.toLowerCase();
+            var ownerLogin:String = data.ownerLogin.toLowerCase();
             if (idsByOwnerLogin.exists(ownerLogin))
-                idsByOwnerLogin.get(ownerLogin).push(id);
+                idsByOwnerLogin.get(ownerLogin).push(data.id);
             else
-                idsByOwnerLogin.set(ownerLogin, [id]);
+                idsByOwnerLogin.set(ownerLogin, [data.id]);
             if (currentMode == Empty)
                 currentMode = HasIncoming;
             else if (currentMode == HasOutgoing)
@@ -43,7 +44,7 @@ class ChallengeList extends ListView
         }
         else
         {
-            ownIDs.push(id);
+            ownIDs.push(data.id);
             if (currentMode == Empty)
                 currentMode = HasOutgoing;
             else if (currentMode == HasIncoming)

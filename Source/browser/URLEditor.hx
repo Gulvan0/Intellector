@@ -40,7 +40,7 @@ class URLEditor
             case LanguageSelectIntro(_): "";
             case LiveGame(gameID, _): 'live/$gameID';
             case PlayerProfile(ownerLogin, _): 'player/$ownerLogin';
-            case ChallengeJoining(_, params): 'join/${params.ownerLogin}';
+            case ChallengeJoining(data): 'join/${data.ownerLogin}';
         }
     }
 

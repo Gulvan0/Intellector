@@ -1,5 +1,6 @@
 package gfx;
 
+import net.shared.ChallengeData;
 import gfx.popups.StudyParamsDialog;
 import net.shared.StudyInfo;
 import gfx.profile.complex_components.MiniProfile;
@@ -288,9 +289,9 @@ class Dialogs
         addDialog(dialog, true, dialog.onClose, true);
     }
 
-    public static function incomingChallenge(id:Int, params:ChallengeParams)
+    public static function incomingChallenge(data:ChallengeData)
     {
-        var dialog:IncomingChallengeDialog = new IncomingChallengeDialog(id, params);
+        var dialog:IncomingChallengeDialog = new IncomingChallengeDialog(data);
         addDialog(dialog, true, dialog.onClose, false);
     }
 

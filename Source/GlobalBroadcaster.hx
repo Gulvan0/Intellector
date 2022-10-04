@@ -1,10 +1,11 @@
 package;
 
+import net.shared.ChallengeData;
 import Preferences.PreferenceName;
 
 enum GlobalEvent
 {
-    LoggedIn(incomingChallenges:Array<{id:Int, serializedParams:String}>);
+    LoggedIn(incomingChallenges:Array<ChallengeData>);
     LoggedOut;
     FollowedPlayerUpdated(followedLogin:String);
     PreferenceUpdated(name:PreferenceName);

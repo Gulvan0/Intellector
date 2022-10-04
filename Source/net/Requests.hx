@@ -1,6 +1,6 @@
 package net;
 
-import net.shared.OpenChallengeData;
+import net.shared.ChallengeData;
 import net.shared.TimeControlType;
 import net.shared.GameInfo;
 import net.shared.StudyInfo;
@@ -57,9 +57,8 @@ class Requests
     {
         switch event
         {
-            case OpenChallengeInfo(id, paramsStr):
-                var params:ChallengeParams = ChallengeParams.deserialize(paramsStr);
-                SceneManager.toScreen(ChallengeJoining(id, params));
+            case OpenChallengeInfo(data):
+                SceneManager.toScreen(ChallengeJoining(data));
             case OpenChallengeHostPlaying(match_id, whiteSeconds, blackSeconds, timestamp, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 SceneManager.toScreen(LiveGame(match_id, Ongoing(parsedData, whiteSeconds, blackSeconds, timestamp, null)));
@@ -235,13 +234,13 @@ class Requests
         }
     }
 
-    public static function getOpenChallenges(callback:Array<OpenChallengeData>->Void)
+    public static function getOpenChallenges(callback:Array<ChallengeData>->Void)
     {
         Networker.addHandler(getOpenChallenges_handler.bind(callback));
         Networker.emitEvent(GetOpenChallenges);
     }
 
-    private static function getOpenChallenges_handler(callback:Array<OpenChallengeData>->Void, event:ServerEvent)
+    private static function getOpenChallenges_handler(callback:Array<ChallengeData>->Void, event:ServerEvent)
     {
         switch event
         {

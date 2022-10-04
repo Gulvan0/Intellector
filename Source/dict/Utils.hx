@@ -68,7 +68,7 @@ class Utils
             case New(whiteLogin, blackLogin, _, timeControl, startingSituation, startDatetime):
                 var opponentLogin:String = LoginManager.isPlayer(whiteLogin)? blackLogin : whiteLogin;
                 return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
-            case Ongoing(parsedData, whiteSeconds, blackSeconds, timeValidAtTimestamp, followedPlayerLogin):
+            case Ongoing(parsedData, _, _, _, followedPlayerLogin):
                 if (followedPlayerLogin != null)
                     return ['Spectating: ${parsedData.whiteLogin} vs ${parsedData.blackLogin}', 'Наблюдение: ${parsedData.whiteLogin} против ${parsedData.blackLogin}'];
                 else
@@ -101,8 +101,8 @@ class Utils
                 translations = getLiveGameScreenTitle(gameID, constructor);
             case PlayerProfile(ownerLogin, _): 
                 translations = ['$ownerLogin\'s profile', 'Профиль $ownerLogin'];
-            case ChallengeJoining(_, params):
-                translations = ['Challenge by ${params.ownerLogin}', 'Вызов ${params.ownerLogin}'];
+            case ChallengeJoining(data):
+                translations = ['Challenge by ${data.ownerLogin}', 'Вызов ${data.ownerLogin}'];
             default:
         }
 

@@ -184,8 +184,6 @@ class ChallengeParamsDialog extends Dialog
     @:bind(confirmBtn, MouseEvent.CLICK)
     private function createChallenge(e)
     {
-        var ownerLogin:String = LoginManager.getLogin();
-
         var challengeType:ChallengeType = typeStepper.selectedIndex == 0? Direct(usernameTF.text) : visibilityDropdown.selectedIndex == 0? Public : ByLink;
         var timeControl:TimeControl = approvedTimeControl;
         var rated:Bool = rankedCheck.selected;
@@ -205,7 +203,7 @@ class ChallengeParamsDialog extends Dialog
                 
         }
 
-        var params:ChallengeParams = new ChallengeParams(timeControl, challengeType, ownerLogin, acceptorColor, customStartingSituation, rated);
+        var params:ChallengeParams = new ChallengeParams(timeControl, challengeType, acceptorColor, customStartingSituation, rated);
         if (!dontCacheParams)
             params.saveToCookies();
         Networker.emitEvent(CreateChallenge(params.serialize()));
