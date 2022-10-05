@@ -48,28 +48,17 @@ class SceneManager
     {
         scene.menubar.disabled = true;
 
-        var cleanupCallback:Null<Void->Void> = null;
-
         switch currentScreenType 
         {
-            case MainMenu, LiveGame(_, _), PlayerProfile(_, _), ChallengeJoining(_):
-                cleanupCallback = Dialogs.reconnectionDialog();
-            case Analysis(_, _, _, _):
-                //* Do nothing
+            case MainMenu, LiveGame(_, _), PlayerProfile(_, _), ChallengeJoining(_), Analysis(_, _, _, _):
+                var removeDialogCallback:Void->Void = Dialogs.reconnectionDialog();
+                Networker.startSessionRestorationAttempts(() -> {
+                    removeDialogCallback();
+                    scene.menubar.disabled = false;
+                }, Browser.location.reload.bind(false));
             case LanguageSelectIntro(_), null:
-                toScreen(Analysis(null, null, null, null));
+                Browser.location.reload(); //Shouldn't have ended up there, but anyway, let's reload
         }
-		
-		Networker.startReconnectAttempts(onReconnected.bind(cleanupCallback));
-    }
-
-    private static function onReconnected(cleanupCallback:Null<Void->Void>)
-    {
-        if (cleanupCallback != null)
-            cleanupCallback();
-        scene.menubar.disabled = false;
-        if (CredentialCookies.hasLoginDetails())
-            LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), null, ()->{}, ()->{});
     }
 
     public static function toScreen(type:ScreenType)
@@ -111,11 +100,16 @@ class SceneManager
             openflContent.style.height = innerHeightStr;
             lastResizeTimestamp = timestamp;
 
-            Timer.delay(scene.resize, 40);
-            for (handler in resizeHandlers)
-                Timer.delay(handler, 40);
-            Timer.delay(Dialogs.onScreenResized, 40);
+            Timer.delay(broadcastResizeEvent, 40);
         }
+    }
+
+    private static function broadcastResizeEvent()
+    {
+        scene.resize();
+        for (handler in resizeHandlers)
+            handler();
+        Dialogs.onScreenResized();
     }
 
     public static function updateAnalysisStudyInfo(studyID:Null<Int>, studyInfo:Null<StudyInfo>)

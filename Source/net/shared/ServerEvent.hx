@@ -25,6 +25,7 @@ enum ServerEvent
     
     LoginResult(result:SignInResult); //Answer to Login
     RegisterResult(result:SignInResult); //Answer to Register
+    RestoreSessionResult(result:SessionRestorationResult); //Answer to RestoreSession
     ReconnectionNeeded(gameID:Int, timeData:TimeReservesData, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished non-correspondence game
 
     Message(author:String, message:String); //New in-game player message
@@ -64,5 +65,6 @@ enum ServerEvent
     OpenChallenges(data:Array<ChallengeData>); //Answer to GetOpenChallenges
     CurrentGames(data:Array<GameInfo>); //Answer to GetCurrentGames
 
+    SessionToken(token:String);
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created
 }

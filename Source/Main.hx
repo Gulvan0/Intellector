@@ -102,7 +102,6 @@ class Main extends Sprite
 			LocaleManager.instance.language = "en";
 
 		Networker.onConnectionEstabilished = onConnected;
-		Networker.onConnectionFailed = onConnectionFailed;
 		//Networker.launch();
 		test();
 	}
@@ -112,11 +111,6 @@ class Main extends Sprite
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
 		SimpleTests.challengeMenuEvent(0);//Your testing code here
-	}
-
-	private function onConnectionFailed(e)
-	{
-		SceneManager.onConnectionError();
 	}
 
 	private function onConnected()

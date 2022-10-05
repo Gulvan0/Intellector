@@ -5,6 +5,7 @@ import haxe.Serializer;
 import js.html.Event;
 import net.shared.ClientEvent;
 import net.shared.ServerEvent;
+import net.shared.SessionRestorationResult;
 import net.EventProcessingQueue;
 import gfx.Dialogs;
 import gfx.SceneManager;
@@ -21,11 +22,11 @@ class Networker
 
     public static var eventQueue:EventProcessingQueue = new EventProcessingQueue();
     public static var onConnectionEstabilished:Void->Void;
-    public static var onConnectionFailed:Event->Void;
 
     private static var suppressAlert:Bool;
     private static var backoffDelay:Float;
     private static var doNotReconnect:Bool = false;
+    private static var reconnectionToken:String = "not_set";
     public static var ignoreEmitCalls:Bool = false; 
 
     public static function launch() 
@@ -42,7 +43,7 @@ class Networker
         _ws.onopen = onConnectionOpen;
         _ws.onmessage = onMessageRecieved;
         _ws.onclose = onConnectionClosed;
-        _ws.onerror = onConnectionFailed;
+        _ws.onerror = startReconnectionAttempts.bind(onConnectionOpen); //Will be changed to SceneManager handler after the connection is open
     }
     
     public static function dropConnection() 
@@ -64,16 +65,27 @@ class Networker
 
     private static function onMessageRecieved(msg)
     {
+        var event:ServerEvent;
+
         try
         {
-            var event:ServerEvent = Unserializer.run(msg);
-            if (event == DontReconnect)
-                onReconnectionForbidden();
-            else
-                eventQueue.processEvent(event);
+            event = Unserializer.run(msg);
         }
         catch (e)
+        {
             trace("Unexpected message: " + msg);
+            return;
+        }
+
+        switch event
+        {
+            case DontReconnect:
+                onReconnectionForbidden();
+            case SessionToken(token):
+                reconnectionToken = token;
+            default:
+                eventQueue.processEvent(event);
+        }
     }
 
     private static function onConnectionClosed()
@@ -89,7 +101,7 @@ class Networker
         }
         
         if (!doNotReconnect)
-            startReconnectAttempts(onConnectionOpen);
+            startReconnectionAttempts(onConnectionOpen);
     }
 
     private static function onConnectionError(err:Event)
@@ -98,7 +110,7 @@ class Networker
         SceneManager.onConnectionError();
     }
 
-    public static function startReconnectAttempts(onConnected:Void->Void)
+    public static function startReconnectionAttempts(onConnected:Void->Void)
     {
         backoffDelay = 1000;
         _ws.onopen = onConnected;
@@ -110,6 +122,34 @@ class Networker
                 backoffDelay += 1000 * (Math.random() - 0.5);
         };
         _ws.open();
+    }
+
+    public static function startSessionRestorationAttempts(onRestored:Void->Void, onNotRestored:Void->Void)
+    {
+        startReconnectionAttempts(() -> {
+            addHandler(sessionRestorationHandler.bind(onRestored, onNotRestored));
+            emitEvent(RestoreSession(reconnectionToken));
+        });
+    }
+
+    private static function sessionRestorationHandler(onRestored:Void->Void, onNotRestored:Void->Void, event:ServerEvent):Bool
+    {
+        switch event 
+        {
+            case RestoreSessionResult(result):
+                switch result 
+                {
+                    case Restored(missedEvents):
+                        for (missedEvent in missedEvents)
+                            eventQueue.processEvent(missedEvent);
+                        onRestored();
+                    case NotRestored:
+                        onNotRestored();
+                }
+            default:
+                return false;
+        }
+        return true;
     }
 
     private static function onReconnectionForbidden() 

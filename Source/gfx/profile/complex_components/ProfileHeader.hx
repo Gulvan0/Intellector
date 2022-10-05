@@ -17,6 +17,8 @@ class ProfileHeader extends VBox
 
     private var usernameLabel:PlayerLabel;
 
+    private var addRemoveFriendToggleTimer:Null<Timer>;
+
     @:bind(sendChallengeBtn, MouseEvent.CLICK)
     private function onSendChallengePressed(e)
     {
@@ -32,9 +34,14 @@ class ProfileHeader extends VBox
     @:bind(addFriendBtn, MouseEvent.CLICK)
     private function onAddFriendPressed(e)
     {
+        if (addRemoveFriendToggleTimer != null)
+            addRemoveFriendToggleTimer.stop();
+
         addFriendBtn.hidden = true;
         Networker.emitEvent(AddFriend(username));
-        Timer.delay(() -> {
+        
+        addRemoveFriendToggleTimer = Timer.delay(() -> {
+            addRemoveFriendToggleTimer = null;
             removeFriendBtn.hidden = false;
         }, 3000);
     }
@@ -42,9 +49,14 @@ class ProfileHeader extends VBox
     @:bind(removeFriendBtn, MouseEvent.CLICK)
     private function onRemoveFriendPressed(e)
     {
+        if (addRemoveFriendToggleTimer != null)
+            addRemoveFriendToggleTimer.stop();
+
         removeFriendBtn.hidden = true;
         Networker.emitEvent(RemoveFriend(username));
-        Timer.delay(() -> {
+
+        addRemoveFriendToggleTimer = Timer.delay(() -> {
+            addRemoveFriendToggleTimer = null;
             addFriendBtn.hidden = false;
         }, 3000);
     }

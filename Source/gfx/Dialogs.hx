@@ -55,6 +55,9 @@ class Dialogs
 
     private static function correctDialogPosition(dialog:Dialog)
     {
+        if (dialog == null)
+            return;
+        
         dialog.x = (Screen.instance.actualWidth - dialog.width) / 2;
         dialog.y = (Screen.instance.actualHeight - dialog.height) / 2;
     }

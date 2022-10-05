@@ -4,6 +4,7 @@ enum ClientEvent
 {
     Login(login:String, password:String);
     Register(login:String, password:String);
+    RestoreSession(token:String);
     LogOut;
     CreateChallenge(serializedParams:String);
     CancelChallenge(challengeID:Int);
