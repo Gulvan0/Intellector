@@ -38,8 +38,8 @@ enum ServerEvent
 
     PlayerDisconnected(color:PieceColor); //Sent to the players and the spectators when one of the players disconnects
     PlayerReconnected(color:PieceColor); //Sent to the players and the spectators when one of the players reconnects
-    NewSpectator(login:String); //Sent both to players and to all of the spectators when a new user starts spectating
-    SpectatorLeft(login:String); //Sent both to players and to all of the spectators when a user stops spectating
+    NewSpectator(login:Null<String>); //Sent both to players and to all of the spectators when a new user starts spectating
+    SpectatorLeft(login:Null<String>); //Sent both to players and to all of the spectators when a user stops spectating
 
     DrawOffered;
     DrawCancelled;

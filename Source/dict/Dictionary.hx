@@ -523,10 +523,18 @@ class Dictionary
                 return ["Morph into an eaten piece?", "Превратиться в съеденную фигуру?"];
             case CHAMELEON_DIALOG_TITLE:
                 return ["Chameleon confirmation", "Хамелеон"];
-            case SPECTATOR_JOINED_MESSAGE:
-                return ["$0 is now spectating", "$0 стал наблюдателем"];
-            case SPECTATOR_LEFT_MESSAGE:
-                return ["$0 left", "$0 вышел"];
+
+            case SPECTATOR_JOINED_MESSAGE(login):
+                if (login != null)
+                    return ['$login is now spectating', '$login стал наблюдателем'];
+                else
+                    return ['An anonymous user is now spectating', 'Анонимный пользователь стал наблюдателем'];
+            case SPECTATOR_LEFT_MESSAGE(login):
+                if (login != null)
+                    return ['$login stopped spectating', '$login прекратил наблюдение'];
+                else
+                    return ['An anonymous user stopped spectating', 'Анонимный пользователь прекратил наблюдение'];
+
             case OPENING_STARTING_POSITION:
                 return ["Starting position", "Начальная позиция"];
             case RESIGN_BTN_ABORT_TOOLTIP:

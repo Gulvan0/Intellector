@@ -46,9 +46,9 @@ class Chatbox extends VBox implements INetObserver
             case PlayerReconnected(color): 
                 appendLog(Utils.getPlayerReconnectedMessage(color));
             case NewSpectator(login): 
-                appendLog(Dictionary.getPhrase(SPECTATOR_JOINED_MESSAGE, [login]));
+                appendLog(Dictionary.getPhrase(SPECTATOR_JOINED_MESSAGE(login)));
             case SpectatorLeft(login): 
-                appendLog(Dictionary.getPhrase(SPECTATOR_LEFT_MESSAGE, [login]));
+                appendLog(Dictionary.getPhrase(SPECTATOR_LEFT_MESSAGE(login)));
             case DrawOffered:
                 appendLog(Dictionary.getPhrase(DRAW_OFFERED_MESSAGE));
             case DrawCancelled:
