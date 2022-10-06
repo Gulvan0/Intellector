@@ -197,7 +197,10 @@ class Chatbox extends VBox implements INetObserver
                 addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
         }
 
-        addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+        if (LoginManager.isLogged())
+            addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+        else
+            messageInput.disabled = true;
     }
 
     public function new() 
