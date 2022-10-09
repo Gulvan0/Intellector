@@ -224,6 +224,9 @@ enum Phrase
 
     //Live Game
 
+    INVALID_MOVE_DIALOG_TITLE;
+    INVALID_MOVE_DIALOG_MESSAGE;
+
     GAME_ENDED_DIALOG_TITLE;
 
     LIVE_WATCHING_LABEL_TEXT(watchedPlayerLogin:String);

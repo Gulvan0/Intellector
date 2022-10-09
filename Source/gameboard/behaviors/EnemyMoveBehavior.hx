@@ -1,5 +1,6 @@
 package gameboard.behaviors;
 
+import gfx.Dialogs;
 import gfx.analysis.PeripheralEvent;
 import utils.exceptions.AlreadyInitializedException;
 import struct.Hex;
@@ -80,6 +81,9 @@ class EnemyMoveBehavior implements IBehavior
 	{
         switch event 
         {
+            case InvalidMove:
+                Dialogs.alert(INVALID_MOVE_DIALOG_MESSAGE, INVALID_MOVE_DIALOG_TITLE);
+
             case Rollback(plysToUndo, _):
                 boardInstance.state.exitToNeutral();
                 resetPremoves();

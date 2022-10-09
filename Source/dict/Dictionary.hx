@@ -353,6 +353,11 @@ class Dictionary
             case CHALLENGE_COLOR_ICON_TOOLTIP(Black):
                 return ["You will play as Black", "Вы будете играть за черных"];
 
+            case INVALID_MOVE_DIALOG_TITLE:
+                return ["Invalid move", "Недопустимый ход"];
+            case INVALID_MOVE_DIALOG_MESSAGE:
+                return ["Server refused to process your move. Please reload the page and try again", "Ход, сделанный вами, не прошел проверку сервера. Перезагрузите страницу и попробуйте снова"];
+
             case GAME_ENDED_DIALOG_TITLE:
                 return ["Game over", "Игра окончена"];
 
