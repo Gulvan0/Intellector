@@ -140,9 +140,6 @@ class SceneManager
                 else
                     constructor = Ongoing(parsedData, null, FollowManager.getFollowedPlayerLogin());
                 toScreen(LiveGame(gameID, constructor));
-            case ReconnectionNeeded(gameID, timeData, currentLog):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, null)));
             default:
         }
         return false;

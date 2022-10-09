@@ -26,7 +26,6 @@ enum ServerEvent
     LoginResult(result:SignInResult); //Answer to Login
     RegisterResult(result:SignInResult); //Answer to Register
     RestoreSessionResult(result:SessionRestorationResult); //Answer to RestoreSession
-    ReconnectionNeeded(gameID:Int, timeData:TimeReservesData, currentLog:String); //Answer to Login. Login succeeded, but player has an unfinished non-correspondence game
 
     InvalidMove; //Sent to the player who attempted to perform an invalid move
     Message(author:String, message:String); //New in-game player message

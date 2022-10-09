@@ -121,6 +121,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     {
         switch event
         {
+            case LoginResult(ReconnectionNeeded(_, _, _, _)):
+                setIngameStatus(true);
             case GameStarted(_, logPreamble):
                 setIngameStatus(true);
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);

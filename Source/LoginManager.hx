@@ -1,5 +1,8 @@
 package;
 
+import net.shared.ChallengeData;
+import serialization.GameLogParser;
+import gfx.SceneManager;
 import net.shared.SignInResult;
 import net.shared.ServerEvent;
 import haxe.crypto.Md5;
@@ -74,16 +77,25 @@ class LoginManager
         switch result 
         {
             case Success(incomingChallenges):
-                LoginManager.login = login;
-                LoginManager.password = password;
-                if (remember != null)
-                    CredentialCookies.saveLoginDetails(login, password, !remember);
-                GlobalBroadcaster.broadcast(LoggedIn(incomingChallenges));
-                onSuccess();
+                onSuccessfulSignIn(login, password, remember, incomingChallenges, onSuccess);
+            case ReconnectionNeeded(incomingChallenges, gameID, timeData, currentLog):
+                onSuccessfulSignIn(login, password, remember, incomingChallenges, onSuccess);
+                var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
+                SceneManager.toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, null)));
             case Fail:
                 CredentialCookies.removeLoginDetails();
                 onFail();
         }
+    }
+
+    private static function onSuccessfulSignIn(login:String, password:String, remember:Null<Bool>, incomingChallenges:Array<ChallengeData>, callback:Void->Void)
+    {
+        LoginManager.login = login;
+        LoginManager.password = password;
+        if (remember != null)
+            CredentialCookies.saveLoginDetails(login, password, !remember);
+        GlobalBroadcaster.broadcast(LoggedIn(incomingChallenges));
+        callback();
     }
 
     public static function isLogged():Bool
