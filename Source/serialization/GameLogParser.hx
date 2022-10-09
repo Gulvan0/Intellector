@@ -165,7 +165,7 @@ class GameLogParser
                 parserOutput.whiteLogin = playerLogins[0];
                 parserOutput.blackLogin = playerLogins[1];
             case "e":
-                parserOutput.elo = [White => decodeELO(args[0]), Black => decodeELO(args[1])];
+                parserOutput.elo = [White => deserialize(args[0]), Black => deserialize(args[1])];
             case "D":
                 parserOutput.datetime = Date.fromTime(Std.parseInt(args[0]) * 1000);
             case "L":
@@ -207,16 +207,6 @@ class GameLogParser
                 }
                 parserOutput.chatEntries.push(Log(logMessage));
         }        
-    }
-
-    private static function decodeELO(str:String):EloValue 
-    {
-        if (str == "n")
-            return None;
-        else if (str.startsWith("p"))
-            return Provisional(Std.parseInt(str.substr(1)));
-        else 
-            return Normal(Std.parseInt(str));
     }
 
     private static function decodeOutcome(winnerColorCode:String, reasonCode:String):Null<Outcome>
