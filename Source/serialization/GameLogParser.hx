@@ -32,15 +32,7 @@ class GameLogParserOutput
     public var chatEntries:Array<ChatEntry> = [];
     public var datetime:Null<Date>;
     public var startingSituation:Situation = Situation.starting();
-    /**
-        NOTE: getSecsLeftAfterMove() provides a more convenient way of retrieving the data.
-
-        i-th element determines the amount of milliseconds a player had after making the (i+1)-th move, including increment.
-        For example, if white starts, 0th element corresponds to a time left for White after White made the first move.
-        In the same way, 1th element equals the time Black had after making the second move (again, provided White starts).
-        If, for some reason, there's data missing for some of the moves, the respective elements will be null.
-    **/
-    public var msLeftOnMove:Array<Null<Int>> = [];
+    public var msLeftOnMove:Map<PieceColor, Array<Null<Int>>> = [White => [], Black => []];
     public var msPerMoveDataAvailable:Bool;
 
     public var currentSituation:Situation;
@@ -57,7 +49,7 @@ class GameLogParserOutput
             currentSituation.makeMove(ply, true);
         }
 
-        msPerMoveDataAvailable = msLeftOnMove.exists(x -> x != null);
+        msPerMoveDataAvailable = msLeftOnMove[White].exists(x -> x != null) || msLeftOnMove[Black].exists(x -> x != null);
     }
 
     public function getSecsLeftAfterMove(side:PieceColor, plyNum:Int):Null<Float>
@@ -68,20 +60,14 @@ class GameLogParserOutput
         if (plyNum == moveCount && msLeftWhenEnded != null)
             return msLeftWhenEnded[side] / 1000;
 
-        var isOwnMove:Bool;
-        if (side == startingSituation.turnColor)
-            isOwnMove = plyNum % 2 == 1;
-        else
-            isOwnMove = plyNum % 2 == 0;
-
-        var index:Int = isOwnMove? plyNum - 1 : plyNum - 2;
+        var index:Int = plyNum - 1;
         while (index >= 0)
         {
-            var msLeft:Null<Int> = msLeftOnMove[index];
+            var msLeft:Null<Int> = msLeftOnMove[side][index];
             if (msLeft != null)
                 return msLeft / 1000;
             else
-                index -= 2;
+                index--;
         }
 
         return timeControl.startSecs;
@@ -160,22 +146,13 @@ class GameLogParser
 
     private static function processNormalEntry(trimmedEntry:String, parserOutput:GameLogParserOutput)
     {
-        var plyStr:String;
+        var splitted:Array<String> = trimmedEntry.split("/");
 
-        if (trimmedEntry.contains("/"))
-        {
-            var splitted:Array<String> = trimmedEntry.split("/");
-            plyStr = splitted[0];
-            parserOutput.msLeftOnMove.push(Std.parseInt(splitted[1]));
-        }
-        else
-        {
-            plyStr = trimmedEntry;
-            parserOutput.msLeftOnMove.push(null);
-        }
-
-        var ply:Ply = PlySerializer.deserialize(plyStr);
+        var ply:Ply = PlySerializer.deserialize(splitted[0]);
         parserOutput.movesPlayed.push(ply);
+
+        parserOutput.msLeftOnMove[White].push(Std.parseInt(splitted[1]));
+        parserOutput.msLeftOnMove[Black].push(Std.parseInt(splitted[2]));
     }
 
     private static function processSpecialEntry(typeCode:String, body:String, parserOutput:GameLogParserOutput) 
