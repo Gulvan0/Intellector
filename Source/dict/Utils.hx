@@ -18,9 +18,11 @@ import net.shared.PieceColor;
 
 class Utils
 {
-    public static function getColorName(color:PieceColor):String
+    public static function getColorName(color:PieceColor, ?lang:Language):String
     {
-        return switch Preferences.language.get()
+        if (lang == null)
+            lang = Preferences.language.get();
+        return switch lang
         {
             case EN: color.getName();
             case RU: color == White? "Белые" : "Черные";
@@ -50,16 +52,6 @@ class Utils
     public static function getTimePassedString(secsPassed:Float):String
     {
         return TimePhrases.getTimePassedString(secsPassed);
-    }
-
-    public static function getPlayerDisconnectedMessage(playerColor:PieceColor)
-    {
-        return Dictionary.getPhrase(OPPONENT_DISCONNECTED_MESSAGE, [getColorName(playerColor)]);
-    }
-
-    public static function getPlayerReconnectedMessage(playerColor:PieceColor)
-    {
-        return Dictionary.getPhrase(OPPONENT_RECONNECTED_MESSAGE, [getColorName(playerColor)]);
     }
 
     private static function getLiveGameScreenTitle(id:Int, constructor:LiveGameConstructor):Array<String>

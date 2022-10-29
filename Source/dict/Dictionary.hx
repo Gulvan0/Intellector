@@ -1,5 +1,6 @@
 package dict;
 
+import net.shared.Constants;
 import utils.StringUtils.eloToStr;
 import net.shared.PieceColor;
 import net.shared.Outcome;
@@ -570,26 +571,29 @@ class Dictionary
                 return ["Accept draw?", "Принять ничью?"];
             case TAKEBACK_QUESTION_TEXT:
                 return ["Accept takeback?", "Дать переходить?"];
-            case DRAW_OFFERED_MESSAGE:
-                return ["Draw offered", "Ничья предложена"];
-            case DRAW_CANCELLED_MESSAGE:
-                return ["Draw cancelled", "Предложение ничьи отменено"];
-            case DRAW_ACCEPTED_MESSAGE:
+            case DRAW_OFFERED_MESSAGE(color):
+                return ['${Utils.getColorName(color, EN)} offered a draw', '${Utils.getColorName(color, RU)} предлагают ничью'];
+            case DRAW_CANCELLED_MESSAGE(_):
+                return ["Draw request cancelled", "Предложение ничьи отменено"];
+            case DRAW_ACCEPTED_MESSAGE(_):
                 return ["Draw accepted", "Ничья принята"];
-            case DRAW_DECLINED_MESSAGE:
+            case DRAW_DECLINED_MESSAGE(_):
                 return ["Draw declined", "Ничья отклонена"];
-            case TAKEBACK_OFFERED_MESSAGE:
-                return ["Takeback offered", "Тейкбек предложен"];
-            case TAKEBACK_CANCELLED_MESSAGE:
+            case TAKEBACK_OFFERED_MESSAGE(color):
+                return ['${Utils.getColorName(color, EN)} offered a takeback', '${Utils.getColorName(color, RU)} предлагают тейкбек'];
+            case TAKEBACK_CANCELLED_MESSAGE(_):
                 return ["Takeback cancelled", "Запрос тейкбека отменен"];
-            case TAKEBACK_ACCEPTED_MESSAGE:
+            case TAKEBACK_ACCEPTED_MESSAGE(_):
                 return ["Takeback accepted", "Тейкбек принят"];
-            case TAKEBACK_DECLINED_MESSAGE:
+            case TAKEBACK_DECLINED_MESSAGE(_):
                 return ["Takeback declined", "Тейкбек отклонен"];
-            case OPPONENT_DISCONNECTED_MESSAGE:
-                return ["$0 disconnected", "$0 отключились"];
-            case OPPONENT_RECONNECTED_MESSAGE:
-                return ["$0 reconnected", "$0 переподключились"];
+            case PLAYER_DISCONNECTED_MESSAGE(color):
+                return ['${Utils.getColorName(color, EN)} disconnected', '${Utils.getColorName(color, RU)} отключились'];
+            case PLAYER_RECONNECTED_MESSAGE(color):
+                return ['${Utils.getColorName(color, EN)} reconnected', '${Utils.getColorName(color, RU)} переподключились'];
+            case TIME_ADDED_MESSAGE(color):
+                var secsAdded:Int = Math.round(Constants.msAddedByOpponent / 1000);
+                return ['${Utils.getColorName(color, EN)}: +$secsAdded seconds', '${Utils.getColorName(color, RU)}: +$secsAdded секунд'];
             case ABORT_CONFIRMATION_MESSAGE:
                 return ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"];
             case SESSION_CLOSED_ALERT_TITLE:

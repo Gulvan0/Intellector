@@ -7,9 +7,6 @@ import net.shared.PieceColor;
 import struct.Ply;
 import struct.Situation;
 import net.shared.PieceType;
-import struct.Hex;
-import struct.HexTransform;
-import struct.ReversiblePly;
 import dict.*;
 using StringTools;
 using Lambda;
@@ -183,25 +180,27 @@ class GameLogParser
                 var logMessage:String = switch eventCode 
                 {
                     case "dcn":
-                        Utils.getPlayerDisconnectedMessage(decodeColor(args[1]));
+                        Dictionary.getPhrase(PLAYER_DISCONNECTED_MESSAGE(decodeColor(args[1])));
                     case "rcn":
-                        Utils.getPlayerReconnectedMessage(decodeColor(args[1]));
+                        Dictionary.getPhrase(PLAYER_RECONNECTED_MESSAGE(decodeColor(args[1])));
                     case "dof":
-                        Dictionary.getPhrase(DRAW_OFFERED_MESSAGE);
+                        Dictionary.getPhrase(DRAW_OFFERED_MESSAGE(decodeColor(args[1])));
                     case "dca":
-                        Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE);
+                        Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE(decodeColor(args[1])));
                     case "dac":
-                        Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE);
+                        Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE(decodeColor(args[1])));
                     case "dde":
-                        Dictionary.getPhrase(DRAW_DECLINED_MESSAGE);
+                        Dictionary.getPhrase(DRAW_DECLINED_MESSAGE(decodeColor(args[1])));
                     case "tof":
-                        Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE);
+                        Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE(decodeColor(args[1])));
                     case "tca":
-                        Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE);
+                        Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE(decodeColor(args[1])));
                     case "tac":
-                        Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE);
+                        Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE(decodeColor(args[1])));
                     case "tde":
-                        Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE);
+                        Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE(decodeColor(args[1])));
+                    case "tad":
+                        Dictionary.getPhrase(TIME_ADDED_MESSAGE(decodeColor(args[1])));
                     default:
                         "";
                 }
