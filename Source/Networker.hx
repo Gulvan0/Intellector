@@ -1,5 +1,6 @@
 package;
 
+import hx.ws.Types.MessageType;
 import haxe.Unserializer;
 import haxe.Serializer;
 import js.html.Event;
@@ -63,18 +64,25 @@ class Networker
         onConnectionEstabilished();
     }
 
-    private static function onMessageRecieved(msg)
+    private static function onMessageRecieved(msg:MessageType)
     {
         var event:ServerEvent;
 
-        try
+        switch msg 
         {
-            event = Unserializer.run(msg);
-        }
-        catch (e)
-        {
-            trace("Unexpected message: " + msg);
-            return;
+            case BytesMessage(content):
+                trace("Unexpected bytes: " + content.readAllAvailableBytes().toString());
+                return;
+            case StrMessage(content):
+                try
+                {
+                    event = Unserializer.run(content);
+                }
+                catch (e)
+                {
+                    trace("Unexpected message: " + content);
+                    return;
+                }
         }
 
         switch event

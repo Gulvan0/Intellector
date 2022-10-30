@@ -42,4 +42,5 @@ enum ClientEvent
     GetOngoingGamesByLogin(login:String);
     GetOpenChallenges;
     GetCurrentGames;
+    GetRecentGames;
 }

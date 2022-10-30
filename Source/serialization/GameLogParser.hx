@@ -19,7 +19,7 @@ enum ChatEntry
 
 class GameLogParserOutput
 {
-    public var timeControl:TimeControl = new TimeControl(0, 0);
+    public var timeControl:TimeControl = TimeControl.correspondence();
     public var whiteRef:String;
     public var blackRef:String;
     public var elo:Null<Map<PieceColor, EloValue>>;
@@ -158,9 +158,8 @@ class GameLogParser
         switch typeCode
         {
             case "P":
-                var playerLogins:Array<String> = args[0].split(":");
-                parserOutput.whiteRef = playerLogins[0];
-                parserOutput.blackRef = playerLogins[1];
+                parserOutput.whiteRef = args[0];
+                parserOutput.blackRef = args[1];
             case "e":
                 parserOutput.elo = [White => deserialize(args[0]), Black => deserialize(args[1])];
             case "D":

@@ -255,4 +255,22 @@ class Requests
                 return false;
         }
     }
+
+    public static function getRecentGames(callback:Array<GameInfo>->Void)
+    {
+        Networker.addHandler(getRecentGames_handler.bind(callback));
+        Networker.emitEvent(GetRecentGames);
+    }
+
+    private static function getRecentGames_handler(callback:Array<GameInfo>->Void, event:ServerEvent)
+    {
+        switch event
+        {
+            case RecentGames(data):
+                callback(data);
+                return true;
+            default:
+                return false;
+        }
+    }
 }

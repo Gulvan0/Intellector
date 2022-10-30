@@ -125,7 +125,11 @@ class GameWidget extends ItemRenderer
         opponentsLabelLongText = '$whitePlayerStr vs $blackPlayerStr';
         opponentsLabelTallText = '$whitePlayerStr\nvs\n$blackPlayerStr';
 
-        datetimeLabel.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+        if (parsedData.datetime != null)
+            datetimeLabel.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+        else
+            datetimeLabel.hidden = true;
+
         timeControlLabel.text = parsedData.timeControl.toString();
         opponentsLabel.text = opponentsLabelLongText;
         resultLabel.text = Utils.getResolution(parsedData.outcome);

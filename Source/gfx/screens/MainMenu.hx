@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import net.Requests;
 import haxe.ui.styles.Style;
 import gfx.ResponsiveToolbox;
 import gfx.Dialogs;
@@ -11,6 +12,13 @@ import haxe.ui.core.Screen as HaxeUIScreen;
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main_menu/main_menu.xml"))
 class MainMenu extends Screen
 {
+    public function onEnter()
+    {
+        openChallengesTable.loadChallenges();
+        currentGamesTable.loadCurrentGames();
+        Requests.getRecentGames(pastGamesList.appendGames);
+    }
+
     @:bind(createGameBtn, MouseEvent.CLICK)
     private function onCreateGamePressed(?e)
     {
@@ -75,5 +83,7 @@ class MainMenu extends Screen
             responsiveComponents.set(column, [StyleProp(FontSize) => tableLegendFontSizeRule, StyleProp(PaddingTop) => tableLegendPaddingRule, StyleProp(PaddingBottom) => tableLegendPaddingRule, StyleProp(PaddingLeft) => tableLegendPaddingRule, StyleProp(PaddingRight) => tableLegendPaddingRule]);
         for (column in currentGamesTable.tableHeader.childComponents)
             responsiveComponents.set(column, [StyleProp(FontSize) => tableLegendFontSizeRule, StyleProp(PaddingTop) => tableLegendPaddingRule, StyleProp(PaddingBottom) => tableLegendPaddingRule, StyleProp(PaddingLeft) => tableLegendPaddingRule, StyleProp(PaddingRight) => tableLegendPaddingRule]);
+    
+        customEnterHandler = onEnter;
     }
 }

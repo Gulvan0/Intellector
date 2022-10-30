@@ -102,15 +102,15 @@ class Main extends Sprite
 			LocaleManager.instance.language = "en";
 
 		Networker.onConnectionEstabilished = onConnected;
-		//Networker.launch();
-		test();
+		Networker.launch();
+		//test();
 	}
 
 	private function test()
 	{
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
-		SimpleTests.challengeMenuEvent(0);//Your testing code here
+		//Your testing code here (refer to `tests` package)
 	}
 
 	private function onConnected()

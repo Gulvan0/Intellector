@@ -69,6 +69,7 @@ enum ServerEvent
 
     OpenChallenges(data:Array<ChallengeData>); //Answer to GetOpenChallenges
     CurrentGames(data:Array<GameInfo>); //Answer to GetCurrentGames
+    RecentGames(data:Array<GameInfo>); //Answer to GetRecentGames
 
     SessionToken(token:String);
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created
