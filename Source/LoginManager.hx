@@ -11,12 +11,12 @@ using StringTools;
 
 class LoginManager
 {
-    private static inline final onetimeLoginPrefix:String = "guest_";
-
     private static var login:Null<String>;
     private static var password:Null<String>;
 
-    public static function getLogin():String
+    public static var sessionID:Null<String>;
+
+    public static function getLogin():Null<String>
     {
         return login;
     }
@@ -24,6 +24,11 @@ class LoginManager
     public static function getPassword():Null<String>
     {
         return password;
+    }
+    
+    public static function getRef():String
+    {
+        return login != null? login : "_" + sessionID;
     }
 
     public static function imitateLoggedState(?assumedLogin:String = "Tester")
@@ -41,16 +46,6 @@ class LoginManager
     {
         Networker.addHandler(responseHandler.bind(login, password, remember, onSuccess, onFail));
         Networker.emitEvent(Register(login, password));
-    }
-
-    public static function generateOneTimeCredentials()
-    {
-        if (isLogged())
-            throw "Already logged, but trying to generate credentials";
-
-        login = onetimeLoginPrefix + Math.ceil(Math.random() * 100000);
-        password = Md5.encode(Std.string(Math.random()));
-        CredentialCookies.saveLoginDetails(login, password, true);
     }
 
     public static function logout()
@@ -103,13 +98,11 @@ class LoginManager
         return login != null;
     }
 
-    public static function isPlayer(suspectedLogin:String)
+    public static function isPlayer(suspectedRef:String)
     {
-        return login != null && login.toLowerCase() == suspectedLogin.toLowerCase();
-    }
-
-    public static function isPlayerGuest():Bool
-    {
-        return login.startsWith(onetimeLoginPrefix);
+        if (suspectedRef.charAt(0) == "_")
+            return sessionID != null && sessionID == suspectedRef.substr(1);
+        else
+            return login != null && login.toLowerCase() == suspectedRef.toLowerCase();
     }
 }

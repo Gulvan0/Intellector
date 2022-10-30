@@ -29,6 +29,24 @@ class Utils
         }
     }
 
+    public static function guestName(guestID:String):String
+    {
+        return 'Guest $guestID';
+    }
+
+    public static function playerRef(ref:String):String 
+    {
+        if (ref.charAt(0) == "_")
+            return guestName(ref.substr(1));
+        else
+            return ref;
+    }
+
+    public static function opponentRef(whiteRef:String, blackRef:String):String
+    {
+        return LoginManager.isPlayer(whiteRef)? playerRef(whiteRef) : playerRef(blackRef);
+    }
+
     public static function getTimeControlName(type:TimeControlType):String
     {
         return switch type {
@@ -58,19 +76,25 @@ class Utils
     {
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, _, timeControl, startingSituation, startDatetime):
-                var opponentLogin:String = LoginManager.isPlayer(whiteLogin)? blackLogin : whiteLogin;
-                return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
-            case Ongoing(parsedData, _, followedPlayerLogin):
-                if (followedPlayerLogin != null)
-                    return ['Spectating: ${parsedData.whiteLogin} vs ${parsedData.blackLogin}', 'Наблюдение: ${parsedData.whiteLogin} против ${parsedData.blackLogin}'];
+            case New(whiteRef, blackRef, _, _, _, _):
+                var opponent:String = opponentRef(whiteRef, blackRef);
+                return ['Playing vs $opponent', 'Игра против $opponent'];
+            case Ongoing(parsedData, _, _):
+                if (parsedData.isPlayerParticipant())
+                {
+                    var whiteStr:String = playerRef(parsedData.whiteRef);
+                    var blackStr:String = playerRef(parsedData.blackRef);
+                    return ['Spectating: $whiteStr vs $blackStr', 'Наблюдение: $whiteStr против $blackStr'];
+                }
                 else
                 {
-                    var opponentLogin:String = LoginManager.isPlayer(parsedData.whiteLogin)? parsedData.blackLogin : parsedData.whiteLogin;
-                    return ['Playing vs $opponentLogin', 'Игра против $opponentLogin'];
+                    var opponent:String = opponentRef(parsedData.whiteRef, parsedData.blackRef);
+                    return ['Playing vs $opponent', 'Игра против $opponent'];
                 }
             case Past(parsedData, _):
-                return ['Game $id: ${parsedData.whiteLogin} vs ${parsedData.blackLogin}', 'Игра $id: ${parsedData.whiteLogin} против ${parsedData.blackLogin}'];
+                var whiteStr:String = playerRef(parsedData.whiteRef);
+                var blackStr:String = playerRef(parsedData.blackRef);
+                return ['Game $id: $whiteStr vs $blackStr', 'Игра $id: $whiteStr против $blackStr'];
         }
     }
 
@@ -102,9 +126,9 @@ class Utils
         return Dictionary.chooseTranslation(translations);
     }
 
-    public static function getSpectatorGameOverDialogMessage(outcome:Outcome, whiteLogin:String, blackLogin:String)
+    public static function getSpectatorGameOverDialogMessage(outcome:Outcome, whiteRef:String, blackRef:String)
     {
-        return OutcomePhrases.getSpectatorGameOverDialogMessage(outcome, whiteLogin, blackLogin);
+        return OutcomePhrases.getSpectatorGameOverDialogMessage(outcome, playerRef(whiteRef), playerRef(blackRef));
     }
 
     public static function getPlayerGameOverDialogMessage(outcome:Outcome, playerColor:PieceColor, newPersonalElo:Null<EloValue>)

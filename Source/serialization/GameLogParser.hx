@@ -20,8 +20,8 @@ enum ChatEntry
 class GameLogParserOutput
 {
     public var timeControl:TimeControl = new TimeControl(0, 0);
-    public var whiteLogin:Null<String>;
-    public var blackLogin:Null<String>;
+    public var whiteRef:String;
+    public var blackRef:String;
     public var elo:Null<Map<PieceColor, EloValue>>;
     public var outcome:Null<Outcome>;
     public var msLeftWhenEnded:Null<Map<PieceColor, Int>>;
@@ -80,11 +80,11 @@ class GameLogParserOutput
         return elo != null;
     }
 
-    public function getParticipantColor(participantLogin:String)
+    public function getParticipantColor(participantRef:String):Null<PieceColor>
     {
-        if (whiteLogin.toLowerCase() == participantLogin.toLowerCase())
+        if (whiteRef.toLowerCase() == participantRef.toLowerCase())
             return White;
-        else if (blackLogin.toLowerCase() == participantLogin.toLowerCase())
+        else if (blackRef.toLowerCase() == participantRef.toLowerCase())
             return Black;
         else
             return null;
@@ -92,9 +92,9 @@ class GameLogParserOutput
 
     public function getPlayerColor():Null<PieceColor>
     {
-        if (LoginManager.isPlayer(whiteLogin))
+        if (LoginManager.isPlayer(whiteRef))
             return White;
-        else if (LoginManager.isPlayer(blackLogin))
+        else if (LoginManager.isPlayer(blackRef))
             return Black;
         else
             return null;
@@ -105,12 +105,12 @@ class GameLogParserOutput
         return getPlayerColor() != null;
     }
 
-    public function getPlayerOpponentLogin():Null<String>
+    public function getPlayerOpponentRef():Null<String>
     {
-        if (LoginManager.isPlayer(whiteLogin))
-            return blackLogin;
-        else if (LoginManager.isPlayer(blackLogin))
-            return whiteLogin;
+        if (LoginManager.isPlayer(whiteRef))
+            return blackRef;
+        else if (LoginManager.isPlayer(blackRef))
+            return whiteRef;
         else
             return null;
     }
@@ -159,8 +159,8 @@ class GameLogParser
         {
             case "P":
                 var playerLogins:Array<String> = args[0].split(":");
-                parserOutput.whiteLogin = playerLogins[0];
-                parserOutput.blackLogin = playerLogins[1];
+                parserOutput.whiteRef = playerLogins[0];
+                parserOutput.blackRef = playerLogins[1];
             case "e":
                 parserOutput.elo = [White => deserialize(args[0]), Black => deserialize(args[1])];
             case "D":

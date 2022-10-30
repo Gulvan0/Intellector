@@ -114,6 +114,12 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 Dialogs.info(SEND_CHALLENGE_ERROR_NOT_FOUND, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
             case AlreadyExists:
                 Dialogs.info(SEND_CHALLENGE_ERROR_ALREADY_EXISTS, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+            case RematchExpired:
+                Dialogs.info(SEND_CHALLENGE_ERROR_REMATCH_EXPIRED, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+            case Impossible:
+                Dialogs.info(SEND_CHALLENGE_ERROR_IMPOSSIBLE, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+            case Merged:
+                //* Do nothing
         }
     }
 
@@ -126,7 +132,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             case GameStarted(_, logPreamble):
                 setIngameStatus(true);
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
-                var opponentLogin:String = parsedData.getPlayerOpponentLogin();
+                var opponentLogin:String = parsedData.getPlayerOpponentRef();
                 challengeList.removeEntriesByPlayer(opponentLogin);
             case GameEnded(_, _, _, _):
                 setIngameStatus(false);
@@ -134,14 +140,16 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 onIncomingChallenge(data);
             case CreateChallengeResult(result):
                 onSendChallengeResultReceived(result);
+            case DirectChallengeCancelled(id):
+                challengeList.removeEntryByID(id);
             case DirectChallengeDeclined(id):
                 challengeList.removeEntryByID(id);
-            case DirectChallengeCancelled(caller):
-                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CHALLENGE_CANCELLED, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [caller]);
-            case DirectChallengeCallerOffline(caller):
-                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_OFFLINE, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [caller]);
-            case DirectChallengeCallerInGame(caller):
-                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_INGAME, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [caller]);
+            case ChallengeCancelledByOwner:
+                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CHALLENGE_CANCELLED, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE);
+            case ChallengeOwnerOffline(owner):
+                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_OFFLINE, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [owner]);
+            case ChallengeOwnerInGame(owner):
+                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_INGAME, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [owner]);
             default:
         }
     }

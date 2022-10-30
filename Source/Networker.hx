@@ -83,6 +83,7 @@ class Networker
                 onReconnectionForbidden();
             case SessionToken(token):
                 reconnectionToken = token;
+                LoginManager.sessionID = token.split('_')[1];
             default:
                 eventQueue.processEvent(event);
         }

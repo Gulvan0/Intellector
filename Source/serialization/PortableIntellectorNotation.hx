@@ -1,5 +1,6 @@
 package serialization;
 
+import dict.Utils;
 import struct.Situation;
 import net.shared.PieceColor;
 import net.shared.Outcome;
@@ -9,14 +10,12 @@ using StringTools;
 
 class PortableIntellectorNotation 
 {
-    public static function serialize(startingSituation:Situation, movesPlayed:Array<Ply>, ?whiteLogin:String = "Anonymous", ?blackLogin:String = "Anonymous", ?timeControl:TimeControl, ?datetime:Date, ?outcome:Outcome):String
+    public static function serialize(startingSituation:Situation, movesPlayed:Array<Ply>, ?whiteRef:String = "Anonymous", ?blackRef:String = "Anonymous", ?timeControl:TimeControl, ?datetime:Date, ?outcome:Outcome):String
     {
         var pin:String = "";
-        if (whiteLogin.startsWith("guest_"))
-            whiteLogin = "Unknown Guest";
-        if (blackLogin.startsWith("guest_"))
-            blackLogin = "Unknown Guest";
-        pin += '#Players: $whiteLogin vs $blackLogin;\n';
+        var whitePlayer:String = Utils.playerRef(whiteRef);
+        var blackPlayer:String = Utils.playerRef(blackRef);
+        pin += '#Players: $whitePlayer vs $blackPlayer;\n';
         if (timeControl != null)
             pin += '#TimeControl: ${timeControl.toString()};\n';
         if (datetime != null)

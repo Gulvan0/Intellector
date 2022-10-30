@@ -1,5 +1,7 @@
 package gfx.game;
 
+import haxe.Timer;
+import net.shared.Constants;
 import gameboard.GameBoard.IGameBoardObserver;
 import net.EventProcessingQueue.INetObserver;
 import gameboard.GameBoard.GameBoardEvent;
@@ -59,13 +61,17 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
     {
         switch event 
         {
-            case GameEnded(_, _, _, _):
+            case GameEnded(_, rematchPossible, _, _):
                 btnBar.hidden = false;
                 drawRequestBox.hidden = true;
                 takebackRequestBox.hidden = true;
                 if (mode == PlayerOngoingGame)
                     setMode(PlayerGameEnded);
-            case DrawOffered:
+                if (rematchPossible)
+                    Timer.delay(() -> {if (rematchBtn != null) rematchBtn.disabled = true;}, 1000 * 60 * Constants.minutesBeforeRematchExpires);
+                else
+                    rematchBtn.disabled = true;
+            case DrawOffered(_):
                 if (compact)
                 {
                     btnBar.hidden = true;
@@ -73,9 +79,9 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                 }
                 drawRequestBox.hidden = false;
                 incomingDrawRequestPending = true;
-            case DrawCancelled:
+            case DrawCancelled(_):
                 disableDrawRequest();
-            case TakebackOffered:
+            case TakebackOffered(_):
                 if (compact)
                 {
                     btnBar.hidden = true;
@@ -84,12 +90,12 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                 offerTakebackBtn.disabled = true;
                 takebackRequestBox.hidden = false;
                 incomingTakebackRequestPending = true;
-            case TakebackCancelled:
+            case TakebackCancelled(_):
                 disableTakebackRequest();
-            case DrawAccepted, DrawDeclined:
+            case DrawAccepted(_), DrawDeclined(_):
                 cancelDrawBtn.hidden = true;
                 offerDrawBtn.hidden = false;
-            case TakebackAccepted, TakebackDeclined:
+            case TakebackAccepted(_), TakebackDeclined(_):
                 cancelTakebackBtn.hidden = true;
                 offerTakebackBtn.hidden = false;
             case Move(_, _, _, _, _, _):
@@ -279,13 +285,13 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, _, timeControl, startingSituation, _):
+            case New(_, _, _, _, startingSituation, _):
                 setMode(PlayerOngoingGame);
                 this.enableTakebackAfterMove = startingSituation.turnColor == White? 1 : 2;
                 move = 0;
 
             case Ongoing(parsedData, _, followedPlayerLogin):
-                setMode(followedPlayerLogin != null? Spectator : PlayerOngoingGame);
+                setMode(parsedData.isPlayerParticipant()? PlayerOngoingGame : Spectator);
                 this.enableTakebackAfterMove = parsedData.startingSituation.turnColor == White? 1 : 2;
                 move = parsedData.moveCount;
 

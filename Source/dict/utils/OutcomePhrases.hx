@@ -42,20 +42,20 @@ class OutcomePhrases
         }
     }
 
-    private static function getDecisiveSpectatorGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType, winnerLogin:String, loserLogin:String):Array<String>
+    private static function getDecisiveSpectatorGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType, winner:String, loser:String):Array<String>
     {
         return switch outcomeType 
         {
             case Mate:
-                ['$loserLogin\'s Intellector has been captured. $winnerLogin won.', 'Интеллектор игрока $loserLogin повержен. Победитель: $winnerLogin.'];
+                ['$loser\'s Intellector has been captured. $winner won.', 'Интеллектор игрока $loser повержен. Победитель: $winner.'];
             case Breakthrough:
-                ['$winnerLogin\'s Intellector has reached the last rank. $winnerLogin won.', 'Интеллектор игрока $winnerLogin достиг последней горизонтали. Победитель: $winnerLogin.'];
+                ['$winner\'s Intellector has reached the last rank. $winner won.', 'Интеллектор игрока $winner достиг последней горизонтали. Победитель: $winner.'];
             case Timeout:
-                ['$loserLogin has lost on time. $winnerLogin won.', 'Игрок $loserLogin просрочил время. Победитель: $winnerLogin.'];
+                ['$loser has lost on time. $winner won.', 'Игрок $loser просрочил время. Победитель: $winner.'];
             case Resign:
-                ['$loserLogin has resigned. $winnerLogin won.', 'Игрок $loserLogin сдался. Победитель: $winnerLogin.'];
+                ['$loser has resigned. $winner won.', 'Игрок $loser сдался. Победитель: $winner.'];
             case Abandon:
-                ['$loserLogin has left the game. $winnerLogin won.', 'Игрок $loserLogin покинул партию. Победитель: $winnerLogin.'];
+                ['$loser has left the game. $winner won.', 'Игрок $loser покинул партию. Победитель: $winner.'];
         }
     }
 
@@ -74,17 +74,17 @@ class OutcomePhrases
         }
     }
 
-    public static function getSpectatorGameOverDialogMessage(outcome:Outcome, whiteLogin:String, blackLogin:String)
+    public static function getSpectatorGameOverDialogMessage(outcome:Outcome, whitePlayer:String, blackPlayer:String)
     {
         var translations:Array<String>;
         
         switch outcome 
         {
             case Decisive(type, winnerColor):
-                var winnerLogin:String = winnerColor == White? whiteLogin : blackLogin;
-                var loserLogin:String = winnerColor == Black? whiteLogin : blackLogin;
+                var winner:String = winnerColor == White? whitePlayer : blackPlayer;
+                var loser:String = winnerColor == Black? whitePlayer : blackPlayer;
 
-                translations = getDecisiveSpectatorGameOverDialogMessageTL(type, winnerLogin, loserLogin);
+                translations = getDecisiveSpectatorGameOverDialogMessageTL(type, winner, loser);
             case Drawish(type):
                 translations = getDrawishGameOverDialogMessageTL(type);
         }

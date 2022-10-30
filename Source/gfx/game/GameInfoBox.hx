@@ -37,9 +37,9 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
     private var openingTree:OpeningTree;
     private var movesAfterTerminalOpeningNode:Int = 0;
 
-    private var whiteLoginLabel:PlayerLabel;
+    private var whitePlayerLabel:PlayerLabel;
     private var crossSign:Label;
-    private var blackLoginLabel:PlayerLabel;
+    private var blackPlayerLabel:PlayerLabel;
 
     private var renderedForWidth:Float = 0;
 
@@ -76,9 +76,9 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         switch event 
         {
             case FollowedPlayerUpdated(followedLogin):
-                if (whiteLoginLabel.username.toLowerCase() == followedLogin.toLowerCase())
+                if (whitePlayerLabel.playerRef == followedLogin.toLowerCase())
                     markFollowedPlayer(White);
-                else if (blackLoginLabel.username.toLowerCase() == followedLogin.toLowerCase())
+                else if (blackPlayerLabel.playerRef == followedLogin.toLowerCase())
                     markFollowedPlayer(Black);
                 else
                     markFollowedPlayer(null);
@@ -141,17 +141,17 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         oppStyle.marginLeft = this.width / 70;
         opponentsBox.customStyle = oppStyle;
 
-        var wlStyle = whiteLoginLabel.customStyle.clone();
+        var wlStyle = whitePlayerLabel.customStyle.clone();
         wlStyle.fontSize = this.width * 17 / 350;
-        whiteLoginLabel.customStyle = wlStyle;
+        whitePlayerLabel.customStyle = wlStyle;
 
         var crossStyle = crossSign.customStyle.clone();
         crossStyle.fontSize = this.width * 20 / 350;
         crossSign.customStyle = crossStyle;
 
-        var blStyle = blackLoginLabel.customStyle.clone();
+        var blStyle = blackPlayerLabel.customStyle.clone();
         blStyle.fontSize = this.width * 17 / 350;
-        blackLoginLabel.customStyle = blStyle;
+        blackPlayerLabel.customStyle = blStyle;
 
         var opStyle = opening.customStyle.clone();
         opStyle.fontSize = this.width / 25;
@@ -162,27 +162,27 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         return b;
     }
 
-    private function fillOpponentsBox(whiteLogin:String, blackLogin:String, playerElos:Null<Map<PieceColor, EloValue>>)
+    private function fillOpponentsBox(whiteRef:String, blackRef:String, playerElos:Null<Map<PieceColor, EloValue>>)
     {
         var whiteELO = playerElos != null? playerElos[White] : null;
         var blackELO = playerElos != null? playerElos[Black] : null;
 
-        whiteLoginLabel = new PlayerLabel(Exact(20), whiteLogin, whiteELO, true);
-        whiteLoginLabel.horizontalAlign = "center";
+        whitePlayerLabel = new PlayerLabel(Exact(20), whiteRef, whiteELO, true);
+        whitePlayerLabel.horizontalAlign = "center";
 
         crossSign = new Label();
         crossSign.text = "⚔";
         crossSign.customStyle = {fontSize: 20, fontBold: true, horizontalAlign: "center"};
 
-        blackLoginLabel = new PlayerLabel(Exact(20), blackLogin, blackELO, true);
-        blackLoginLabel.horizontalAlign = "center";
+        blackPlayerLabel = new PlayerLabel(Exact(20), blackRef, blackELO, true);
+        blackPlayerLabel.horizontalAlign = "center";
 
-        opponentsBox.addComponent(whiteLoginLabel);
+        opponentsBox.addComponent(whitePlayerLabel);
         opponentsBox.addComponent(crossSign);
-        opponentsBox.addComponent(blackLoginLabel);
+        opponentsBox.addComponent(blackPlayerLabel);
     }
 
-    private function initNewGame(whiteLogin:String, blackLogin:String, playerElos:Null<Map<PieceColor, EloValue>>, timeControl:TimeControl, startDatetime:Date)
+    private function initNewGame(whiteRef:String, blackRef:String, playerElos:Null<Map<PieceColor, EloValue>>, timeControl:TimeControl, startDatetime:Date)
     {
         var tcType:TimeControlType = timeControl.getType();
 
@@ -194,7 +194,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
         resolution.text = Utils.getResolution(null);
-        fillOpponentsBox(whiteLogin, blackLogin, playerElos);
+        fillOpponentsBox(whiteRef, blackRef, playerElos);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
     }
@@ -209,7 +209,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         else
             matchParameters.text = parsedData.timeControl.toString() + separator + tcType.getName();
 
-        fillOpponentsBox(parsedData.whiteLogin, parsedData.blackLogin, parsedData.elo);
+        fillOpponentsBox(parsedData.whiteRef, parsedData.blackRef, parsedData.elo);
         resolution.text = Utils.getResolution(parsedData.outcome);
         opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
@@ -229,10 +229,10 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
                 watchingLabel.hidden = true;
             case White:
                 watchingLabel.hidden = false;
-                watchingLabel.text = Dictionary.getPhrase(LIVE_WATCHING_LABEL_TEXT(whiteLoginLabel.username));
+                watchingLabel.text = Dictionary.getPhrase(LIVE_WATCHING_LABEL_TEXT(Utils.playerRef(whitePlayerLabel.playerRef)));
             case Black:
                 watchingLabel.hidden = false;
-                watchingLabel.text = Dictionary.getPhrase(LIVE_WATCHING_LABEL_TEXT(blackLoginLabel.username));
+                watchingLabel.text = Dictionary.getPhrase(LIVE_WATCHING_LABEL_TEXT(Utils.playerRef(blackPlayerLabel.playerRef)));
         }
     }
 
@@ -242,8 +242,8 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, playerElos, timeControl, _, startDatetime):
-                initNewGame(whiteLogin, blackLogin, playerElos, timeControl, startDatetime);
+            case New(whiteRef, blackRef, playerElos, timeControl, _, startDatetime):
+                initNewGame(whiteRef, blackRef, playerElos, timeControl, startDatetime);
             case Ongoing(parsedData, _, followedPlayerLogin):
                 initActualizedGame(parsedData);
                 if (followedPlayerLogin != null)

@@ -24,7 +24,7 @@ class ChallengeEntryRenderer extends ItemRenderer
     @:bind(acceptBtn, MouseEvent.CLICK)
     private function onAccepted(e)
     {
-        Networker.emitEvent(AcceptDirectChallenge(challengeID));
+        Networker.emitEvent(AcceptChallenge(challengeID));
     }
 
     @:bind(declineBtn, MouseEvent.CLICK)

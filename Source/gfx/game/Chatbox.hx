@@ -28,43 +28,45 @@ using StringTools;
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/live/chatbox.xml'))
 class Chatbox extends VBox implements INetObserver
 {
-    private var isOwnerSpectator:Bool;
+    private var ownerColor:Null<PieceColor>;
 
     public function handleNetEvent(event:ServerEvent)
     {
         switch event
         {
-            case Message(author, message):
-                appendMessage(author, message, true);
-            case SpectatorMessage(author, message):
-                if (isOwnerSpectator)
-                    appendMessage(author, message, false);
+            case Message(authorRef, message):
+                appendMessage(authorRef, message, true);
+            case SpectatorMessage(authorRef, message):
+                if (ownerColor == null)
+                    appendMessage(authorRef, message, false);
             case GameEnded(outcome, _, _, _): 
                 onGameEnded(outcome);
             case PlayerDisconnected(color): 
-                appendLog(Utils.getPlayerDisconnectedMessage(color));
+                appendLog(Dictionary.getPhrase(PLAYER_DISCONNECTED_MESSAGE(color)));
             case PlayerReconnected(color): 
-                appendLog(Utils.getPlayerReconnectedMessage(color));
-            case NewSpectator(login): 
-                appendLog(Dictionary.getPhrase(SPECTATOR_JOINED_MESSAGE(login)));
-            case SpectatorLeft(login): 
-                appendLog(Dictionary.getPhrase(SPECTATOR_LEFT_MESSAGE(login)));
-            case DrawOffered:
-                appendLog(Dictionary.getPhrase(DRAW_OFFERED_MESSAGE));
-            case DrawCancelled:
-                appendLog(Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE));
-            case DrawAccepted:
-                appendLog(Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE));
-            case DrawDeclined:
-                appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE));
-            case TakebackOffered:
-                appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE));
-            case TakebackCancelled:
-                appendLog(Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE));
-            case TakebackAccepted:
-                appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE));
-            case TakebackDeclined:
-                appendLog(Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE));
+                appendLog(Dictionary.getPhrase(PLAYER_RECONNECTED_MESSAGE(color)));
+            case NewSpectator(ref): 
+                appendLog(Dictionary.getPhrase(SPECTATOR_JOINED_MESSAGE(Utils.playerRef(ref))));
+            case SpectatorLeft(ref): 
+                appendLog(Dictionary.getPhrase(SPECTATOR_LEFT_MESSAGE(Utils.playerRef(ref))));
+            case DrawOffered(color):
+                appendLog(Dictionary.getPhrase(DRAW_OFFERED_MESSAGE(color)));
+            case DrawCancelled(color):
+                appendLog(Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE(color)));
+            case DrawAccepted(color):
+                appendLog(Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE(color)));
+            case DrawDeclined(color):
+                appendLog(Dictionary.getPhrase(DRAW_DECLINED_MESSAGE(color)));
+            case TakebackOffered(color):
+                appendLog(Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE(color)));
+            case TakebackCancelled(color):
+                appendLog(Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE(color)));
+            case TakebackAccepted(color):
+                appendLog(Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE(color)));
+            case TakebackDeclined(color):
+                appendLog(Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE(color)));
+            case TimeAdded(color, _):
+                appendLog(Dictionary.getPhrase(TIME_ADDED_MESSAGE(color)));
             default:
         }
     }
@@ -73,21 +75,21 @@ class Chatbox extends VBox implements INetObserver
     {
         var message:Null<Phrase> = switch btn 
         {
-            case OfferDraw: DRAW_OFFERED_MESSAGE;
-            case CancelDraw: DRAW_CANCELLED_MESSAGE;
-            case OfferTakeback: TAKEBACK_OFFERED_MESSAGE;
-            case CancelTakeback: TAKEBACK_CANCELLED_MESSAGE;
-            case AcceptDraw: DRAW_ACCEPTED_MESSAGE;
-            case DeclineDraw: DRAW_DECLINED_MESSAGE;
-            case AcceptTakeback: TAKEBACK_ACCEPTED_MESSAGE;
-            case DeclineTakeback: TAKEBACK_DECLINED_MESSAGE;
+            case OfferDraw: DRAW_OFFERED_MESSAGE(ownerColor);
+            case CancelDraw: DRAW_CANCELLED_MESSAGE(ownerColor);
+            case OfferTakeback: TAKEBACK_OFFERED_MESSAGE(ownerColor);
+            case CancelTakeback: TAKEBACK_CANCELLED_MESSAGE(ownerColor);
+            case AcceptDraw: DRAW_ACCEPTED_MESSAGE(ownerColor);
+            case DeclineDraw: DRAW_DECLINED_MESSAGE(ownerColor);
+            case AcceptTakeback: TAKEBACK_ACCEPTED_MESSAGE(ownerColor);
+            case DeclineTakeback: TAKEBACK_DECLINED_MESSAGE(ownerColor);
             default: null;
         };
         if (message != null)
             appendLog(Dictionary.getPhrase(message));
     }
 
-    private function appendMessage(author:String, text:String, isNotFromSpectator:Bool) 
+    private function appendMessage(authorRef:String, text:String, isNotFromSpectator:Bool) 
     {
         var normalAuthorStyle:Style = {fontBold: true, fontItalic: !isNotFromSpectator, pointerEvents: 'true'};
         var hoverAuthorStyle:Style = normalAuthorStyle.clone();
@@ -95,7 +97,7 @@ class Chatbox extends VBox implements INetObserver
 
         var authorLabel:Label = new Label();
         authorLabel.percentWidth = 100;
-        authorLabel.text = author;
+        authorLabel.text = Utils.playerRef(authorRef);
         authorLabel.customStyle = normalAuthorStyle;
 
         authorLabel.onMouseOver = e -> {
@@ -104,13 +106,14 @@ class Chatbox extends VBox implements INetObserver
         authorLabel.onMouseOut = e -> {
             authorLabel.customStyle = normalAuthorStyle;
         };
-        authorLabel.onClick = e -> {
-            Requests.getMiniProfile(author);
-        };
+        if (authorRef.charAt(0) != "_")
+            authorLabel.onClick = e -> {
+                Requests.getMiniProfile(authorRef);
+            };
 
         var textLabel:Label = new Label();
         textLabel.percentWidth = 100;
-        textLabel.text = author;
+        textLabel.text = text;
         textLabel.customStyle = {fontItalic: !isNotFromSpectator};
 
         history.addComponent(authorLabel);
@@ -145,6 +148,7 @@ class Chatbox extends VBox implements INetObserver
 
     private function send() 
     {
+        var ownRef:String = LoginManager.getRef();
         var text = StringUtils.clean(messageInput.text, 500);
 
         messageInput.text = "";
@@ -152,10 +156,10 @@ class Chatbox extends VBox implements INetObserver
         if (text != "")
         {
             Networker.emitEvent(Message(text));
-            if (isOwnerSpectator)
-                appendMessage(LoginManager.getLogin(), text, false);
+            if (ownerColor == null)
+                appendMessage(ownRef, text, false);
             else 
-                appendMessage(LoginManager.getLogin(), text, true);
+                appendMessage(ownRef, text, true);
         }
     }
 
@@ -173,8 +177,8 @@ class Chatbox extends VBox implements INetObserver
             switch entry
             {
                 case PlayerMessage(authorColor, text):
-                    var author:String = authorColor == White? parserOutput.whiteLogin : parserOutput.blackLogin;
-                    appendMessage(author, text, true);
+                    var authorRef:String = authorColor == White? parserOutput.whiteRef : parserOutput.blackRef;
+                    appendMessage(authorRef, text, true);
                 case Log(text):
                     appendLog(text);
             }
@@ -187,13 +191,18 @@ class Chatbox extends VBox implements INetObserver
     {
         switch constructor 
         {
-            case New(_, _, _, _, _, _):
-                this.isOwnerSpectator = false;
-            case Ongoing(parsedData, _, followedPlayerLogin):
-                this.isOwnerSpectator = followedPlayerLogin != null;
+            case New(whiteRef, blackRef, _, _, _, _):
+                if (LoginManager.isPlayer(whiteRef))
+                    this.ownerColor = White;
+                else if (LoginManager.isPlayer(blackRef))
+                    this.ownerColor = Black;
+                else
+                    this.ownerColor = null;
+            case Ongoing(parsedData, _, _):
+                this.ownerColor = parsedData.getPlayerColor();
                 addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
             case Past(parsedData, _):
-                this.isOwnerSpectator = true;
+                this.ownerColor = null;
                 addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
         }
 

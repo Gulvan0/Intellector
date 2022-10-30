@@ -1,5 +1,6 @@
 package gfx.main;
 
+import dict.Utils;
 import net.shared.GameInfo;
 import utils.StringUtils.eloToStr;
 import haxe.ui.containers.VBox;
@@ -22,8 +23,8 @@ class CurrentGamesTable extends VBox
         {
             var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.log);
 
-            var whiteLabel:String = parsedData.whiteLogin;
-            var blackLabel:String = parsedData.blackLogin;
+            var whiteLabel:String = Utils.playerRef(parsedData.whiteRef);
+            var blackLabel:String = Utils.playerRef(parsedData.blackRef);
             if (parsedData.elo != null)
             {
                 whiteLabel += ' (${eloToStr(parsedData.elo[White])})';

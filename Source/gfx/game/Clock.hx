@@ -76,13 +76,13 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 moveNum -= plysToUndo;
                 if (plysToUndo % 2 == 1)
                     toggleTurnColor();
-            case GameEnded(_, whiteSecondsRemainder, blackSecondsRemainder, _):
+            case TimeAdded(_, timeData):
+                correctTime(timeData);
+            case GameEnded(_, _, remainingTimeMs, _):
                 active = false;
                 pauseTimer();
-                if (ownerColor == White && whiteSecondsRemainder != null)
-                    label.text = TimeControl.secsToString(whiteSecondsRemainder);
-                else if (ownerColor == Black && blackSecondsRemainder != null)
-                    label.text = TimeControl.secsToString(whiteSecondsRemainder);
+                if (remainingTimeMs != null)
+                    label.text = TimeControl.secsToString(remainingTimeMs[ownerColor] / 1000);
                 refreshColoring();
             default:
         }
@@ -218,7 +218,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         this.ownerColor = ownerColor;
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, _, timeControl, startingSituation, startDatetime):
+            case New(whiteRef, blackRef, _, timeControl, startingSituation, startDatetime):
                 if (timeControl.getType() == Correspondence)
                 {
                     this.active = false;
@@ -228,7 +228,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 }
 
                 this.playSoundOnOneMinuteLeft = timeControl.startSecs >= 90;
-                this.alertsEnabled = LoginManager.isPlayer(ownerColor == White? whiteLogin : blackLogin);
+                this.alertsEnabled = LoginManager.isPlayer(ownerColor == White? whiteRef : blackRef);
                 this.active = true;
                 this.ownerToMove = startingSituation.turnColor == ownerColor;
                 this.moveNum = 0;

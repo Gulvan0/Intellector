@@ -33,7 +33,7 @@ class IncomingChallengeDialog extends Dialog
     @:bind(acceptBtn, MouseEvent.CLICK)
     private function onAccepted(e)
     {
-        Networker.emitEvent(AcceptDirectChallenge(challengeID));
+        Networker.emitEvent(AcceptChallenge(challengeID));
         hideDialog(null);
     }
 

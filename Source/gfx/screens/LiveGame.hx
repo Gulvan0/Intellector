@@ -53,8 +53,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     private var isPastGame:Bool;
     private var gameID:Int;
-    private var whiteLogin:String;
-    private var blackLogin:String;
+    private var whiteRef:String;
+    private var blackRef:String;
     private var timeControl:TimeControl;
     private var datetime:Date;
     private var outcome:Null<Outcome> = null;
@@ -79,12 +79,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function onClose()
     {
-        if (playerColor == null && !isPastGame)
-        {
-            if (FollowManager.isFollowing())
-                Networker.emitEvent(StopFollowing);
-            Networker.emitEvent(StopSpectating);
-        }
+        Networker.emitEvent(LeaveGame(gameID));
+
+        FollowManager.stopFollowing();
 
         cWhiteClock.deactivate();
         cBlackClock.deactivate();
@@ -155,7 +152,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 if (playerColor != null)
                     message = Utils.getPlayerGameOverDialogMessage(outcome, playerColor, newPersonalElo);
                 else
-                    message = Utils.getSpectatorGameOverDialogMessage(outcome, whiteLogin, blackLogin);
+                    message = Utils.getSpectatorGameOverDialogMessage(outcome, whiteRef, blackRef);
                 
                 Dialogs.infoRaw(message, Dictionary.getPhrase(GAME_ENDED_DIALOG_TITLE));
             default:
@@ -217,13 +214,18 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case AddTime:
                 Networker.emitEvent(AddTime);
             case Rematch:
-                var opponentLogin:String = playerColor == White? blackLogin : whiteLogin;
-                var params:ChallengeParams = ChallengeParams.rematchParams(opponentLogin, playerColor, timeControl, rated, board.startingSituation);
-                Dialogs.specifyChallengeParams(params, true);
+                var opponentRef:String = playerColor == White? blackRef : whiteRef;
+                if (opponentRef.charAt(0) != "_")
+                {
+                    var params:ChallengeParams = ChallengeParams.rematchParams(opponentRef, playerColor, timeControl, rated, board.startingSituation);
+                    Dialogs.specifyChallengeParams(params, true);
+                }
+                else
+                    Networker.emitEvent(SimpleRematch);
             case Share:
                 var gameLink:String = URLEditor.getGameLink(gameID);
                 var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
-                var pin:String = PortableIntellectorNotation.serialize(board.startingSituation, playedMoves, whiteLogin, blackLogin, timeControl, datetime, outcome);
+                var pin:String = PortableIntellectorNotation.serialize(board.startingSituation, playedMoves, whiteRef, blackRef, timeControl, datetime, outcome);
 
                 var shareDialog:ShareDialog = new ShareDialog();
                 shareDialog.initInGame(board.shownSituation, board.orientationColor, gameLink, pin, board.startingSituation, playedMoves);
@@ -320,11 +322,11 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         switch constructor 
         {
-            case New(whiteLogin, blackLogin, playerElos, timeControl, _, startDatetime):
+            case New(whiteRef, blackRef, playerElos, timeControl, _, startDatetime):
                 this.isPastGame = false;
-                this.playerColor = LoginManager.isPlayer(blackLogin)? Black : White;
-                this.whiteLogin = whiteLogin;
-                this.blackLogin = blackLogin;
+                this.playerColor = LoginManager.isPlayer(blackRef)? Black : White;
+                this.whiteRef = whiteRef;
+                this.blackRef = blackRef;
                 this.timeControl = timeControl;
                 this.datetime = startDatetime;
                 this.rated = playerElos != null;
@@ -335,20 +337,25 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case Ongoing(parsedData, _, followedPlayerLogin):
                 this.isPastGame = false;
                 this.playerColor = parsedData.getPlayerColor();
-                this.whiteLogin = parsedData.whiteLogin;
-                this.blackLogin = parsedData.blackLogin;
+                this.whiteRef = parsedData.whiteRef;
+                this.blackRef = parsedData.blackRef;
                 this.timeControl = parsedData.timeControl;
                 this.datetime = parsedData.datetime;
                 this.rated = parsedData.isRated();
                 this.getSecsLeftAfterMove = null;
 
-                setOrientation(followedPlayerLogin != null? parsedData.getParticipantColor(followedPlayerLogin) : playerColor);
+                if (followedPlayerLogin != null)
+                    setOrientation(parsedData.getParticipantColor(followedPlayerLogin));
+                else if (playerColor != null)
+                    setOrientation(playerColor);
+                else
+                    setOrientation(White);
 
             case Past(parsedData, watchedPlyerLogin):
                 this.isPastGame = true;
                 this.playerColor = null;
-                this.whiteLogin = parsedData.whiteLogin;
-                this.blackLogin = parsedData.blackLogin;
+                this.whiteRef = parsedData.whiteRef;
+                this.blackRef = parsedData.blackRef;
                 this.timeControl = parsedData.timeControl;
                 this.datetime = parsedData.datetime;
                 this.rated = parsedData.isRated();
@@ -369,8 +376,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         boardWrapper.percentHeight = 100;
         boardWrapper.maxPercentWidth = 100;
 
-        cWhiteLoginLabel.text = lWhiteLoginLabel.text = whiteLogin;
-        cBlackLoginLabel.text = lBlackLoginLabel.text = blackLogin;
+        cWhiteLoginLabel.text = lWhiteLoginLabel.text = Utils.playerRef(whiteRef);
+        cBlackLoginLabel.text = lBlackLoginLabel.text = Utils.playerRef(blackRef);
 
         cWhiteClock.init(constructor, White);
         cBlackClock.init(constructor, Black);

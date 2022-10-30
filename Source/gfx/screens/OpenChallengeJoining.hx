@@ -27,13 +27,7 @@ class OpenChallengeJoining extends Screen
 	@:bind(acceptBtn, MouseEvent.CLICK)
 	private function onAccepted(e)
 	{
-		if (LoginManager.isLogged())
-			Networker.emitEvent(AcceptOpenChallenge(challengeID, null, null));
-		else
-		{
-			LoginManager.generateOneTimeCredentials();
-			Networker.emitEvent(AcceptOpenChallenge(challengeID, LoginManager.getLogin(), LoginManager.getPassword()));
-		}
+		Networker.emitEvent(AcceptChallenge(challengeID));
 	}
 
     public function new(data:ChallengeData)
@@ -71,7 +65,10 @@ class OpenChallengeJoining extends Screen
             });
         }
         else
-            customStartPosIcon.hidden = true;
+			customStartPosIcon.hidden = true;
+		
+		if (LoginManager.isPlayer(data.ownerLogin))
+			acceptBtn.disabled = true;
 
 		responsiveComponents = [
 			challengeByLabel => [StyleProp(FontSize) => VMIN(6)],

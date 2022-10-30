@@ -8,16 +8,12 @@ enum ClientEvent
     LogOut;
     CreateChallenge(serializedParams:String);
     CancelChallenge(challengeID:Int);
-    AcceptOpenChallenge(challengeID:Int, guestLogin:Null<String>, guestPassword:Null<String>); 
-    AcceptDirectChallenge(challengeID:Int); 
+    AcceptChallenge(challengeID:Int); 
     DeclineDirectChallenge(challengeID:Int);
     Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<PieceType>); 
     RequestTimeoutCheck; 
     Message(text:String); 
-    GetOpenChallenge(id:Int); 
-    FollowPlayer(login:String); //TODO: Ensure this also includes an effect of StopFollowing
-    StopSpectating;
-    StopFollowing;
+    SimpleRematch;
     Resign; 
     OfferDraw; 
     CancelDraw; 
@@ -27,11 +23,15 @@ enum ClientEvent
     CancelTakeback; 
     AcceptTakeback; 
     DeclineTakeback;
+    AddTime; 
+    GetOpenChallenge(id:Int); 
+    FollowPlayer(login:String);
+    LeaveGame(id:Int);
+    StopFollowing;
     CreateStudy(info:StudyInfo);
     OverwriteStudy(overwrittenStudyID:Int, info:StudyInfo);
     DeleteStudy(id:Int);
-    AddTime; 
-    GetGame(id:Int); //TODO: Ensure this also includes an effect of StopSpectating IN CASE THIS IS AN ONGOING GAME
+    GetGame(id:Int);
     GetStudy(id:Int);
     GetMiniProfile(login:String);
     GetPlayerProfile(login:String);

@@ -430,7 +430,7 @@ class Dictionary
             case INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_INGAME:
                 return ["Failed to accept challenge: $0 has already started another game", "Не удалось принять вызов: $0 уже участвует в другой партии"];
             case INCOMING_CHALLENGE_ACCEPT_ERROR_CHALLENGE_CANCELLED:
-                return ["Failed to accept challenge: $0 cancelled the challenge", "Не удалось принять вызов: $0 отменил вызов"];
+                return ["Failed to accept challenge: the challenge was cancelled", "Не удалось принять вызов: вызов был отменен"];
             case SEND_CHALLENGE_ERROR_DIALOG_TITLE:
                 return ["Challenge Creation Error", "Ошибка создания вызова"];
             case SEND_CHALLENGE_ERROR_TO_ONESELF:
@@ -438,7 +438,11 @@ class Dictionary
             case SEND_CHALLENGE_ERROR_NOT_FOUND:
                 return ["Failed to create challenge: player not found", "Не удалось создать вызов: игрок не найден"];
             case SEND_CHALLENGE_ERROR_ALREADY_EXISTS:
-                return ["Failed to create challenge: you have already sent another challenge to this player. To create a new challenge, you should cancel the previous one first.", "Не удалось создать вызов: вызов, адресованный данному игроку уже существует. Для создания нового вызова, сперва отмените предыдущий."];
+                return ["Failed to create challenge: you have already sent another challenge to this player. To create a new challenge, you should cancel the previous one first", "Не удалось создать вызов: вызов, адресованный данному игроку уже существует. Для создания нового вызова, сперва отмените предыдущий"];
+            case SEND_CHALLENGE_ERROR_REMATCH_EXPIRED:
+                return ["Failed to create challenge: rematch time has expired. Create a new challenge instead", "Не удалось создать вызов: время на предложение реванша истекло. Создайте новый вызов"];
+            case SEND_CHALLENGE_ERROR_IMPOSSIBLE:
+                return ["Failed to create challenge: impossible challenge. Please try again", "Не удалось создать вызов: невозможный вызов. Попробуйте снова"];
             case CHALLENGE_PARAMS_DIALOG_TITLE:
                 return ["Challenge Parameters", "Параметры Вызова"];
             case CHALLENGE_PARAMS_TYPE_OPTION_NAME:
@@ -513,6 +517,10 @@ class Dictionary
                 return ["This player is offline", "Игрок не в сети"];
             case REQUESTS_ERROR_PLAYER_NOT_IN_GAME:
                 return ["This player is not in the game", "В настоящий момент игрок не участвует в партии"];
+            case REQUESTS_FOLLOW_PLAYER_SUCCESS_DIALOG_TEXT:
+                return ["You started following this player. Whenever he/she starts a new game, you will become the spectator automatically", "Теперь вы отслеживаете этого игрока. Когда он начнет партию, вы будете автоматически добавлены в число наблюдателей"];
+            case REQUESTS_FOLLOW_PLAYER_SUCCESS_DIALOG_TITLE:
+                return ["Success", "Успех"];
             case TURN_COLOR(White):
                 return ["White to move", "Ход белых"];
             case TURN_COLOR(Black):
@@ -530,16 +538,10 @@ class Dictionary
             case CHAMELEON_DIALOG_TITLE:
                 return ["Chameleon confirmation", "Хамелеон"];
 
-            case SPECTATOR_JOINED_MESSAGE(login):
-                if (login != null)
-                    return ['$login is now spectating', '$login стал наблюдателем'];
-                else
-                    return ['An anonymous user is now spectating', 'Анонимный пользователь стал наблюдателем'];
-            case SPECTATOR_LEFT_MESSAGE(login):
-                if (login != null)
-                    return ['$login stopped spectating', '$login прекратил наблюдение'];
-                else
-                    return ['An anonymous user stopped spectating', 'Анонимный пользователь прекратил наблюдение'];
+            case SPECTATOR_JOINED_MESSAGE(displayName):
+                return ['$displayName is now spectating', '$displayName стал наблюдателем'];
+            case SPECTATOR_LEFT_MESSAGE(displayName):
+                return ['$displayName stopped spectating', '$displayName прекратил наблюдение'];
 
             case OPENING_STARTING_POSITION:
                 return ["Starting position", "Начальная позиция"];

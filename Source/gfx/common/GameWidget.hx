@@ -113,8 +113,8 @@ class GameWidget extends ItemRenderer
 
         reloadBoard(parsedData.currentSituation, watchedColor);
 
-        var whitePlayerStr:String = parsedData.whiteLogin;
-        var blackPlayerStr:String = parsedData.blackLogin;
+        var whitePlayerStr:String = Utils.playerRef(parsedData.whiteRef);
+        var blackPlayerStr:String = Utils.playerRef(parsedData.blackRef);
 
         if (parsedData.elo != null)
         {

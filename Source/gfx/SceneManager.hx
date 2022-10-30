@@ -135,7 +135,7 @@ class SceneManager
                 if (parsedData.isPlayerParticipant())
                 {
                     FollowManager.stopFollowing();
-                    constructor = New(parsedData.whiteLogin, parsedData.blackLogin, parsedData.elo, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
+                    constructor = New(parsedData.whiteRef, parsedData.blackRef, parsedData.elo, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
                 }
                 else
                     constructor = Ongoing(parsedData, null, FollowManager.getFollowedPlayerLogin());

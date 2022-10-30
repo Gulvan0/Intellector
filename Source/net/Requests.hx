@@ -35,10 +35,7 @@ class Requests
 		        SceneManager.toScreen(LiveGame(id, Past(parsedData, null)));
             case GameIsOngoing(timeData, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-		        if (LoginManager.isLogged() || parsedData.getPlayerColor() == null)
-			        SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, timeData, parsedData.whiteLogin)));
-		        else
-			        SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, timeData, null)));
+                SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, timeData, null)));
             case GameNotFound:
                 SceneManager.toScreen(MainMenu);
             default:
@@ -62,7 +59,10 @@ class Requests
             case OpenChallengeHostPlaying(gameID, timeData, currentLog):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 SceneManager.toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, null)));
-            case OpenchallengeNotFound:
+            case OpenChallengeGameEnded(gameID, log):
+                var parsedData:GameLogParserOutput = GameLogParser.parse(log);
+                SceneManager.toScreen(LiveGame(gameID, Past(parsedData, null)));
+            case OpenChallengeNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
@@ -83,6 +83,8 @@ class Requests
         {
             case MiniProfile(data):
                 Dialogs.miniProfile(login, data);
+            case PlayerNotFound:
+                Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
         }
@@ -128,6 +130,8 @@ class Requests
         {
             case Games(games, hasNext):
                 callback(games, hasNext);
+            case PlayerNotFound:
+                Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
         }
@@ -146,6 +150,8 @@ class Requests
         {
             case Studies(studies, hasNext):
                 callback(studies, hasNext);
+            case PlayerNotFound:
+                Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
         }
@@ -204,10 +210,8 @@ class Requests
             case SpectationData(gameID, timeData, currentLog): 
 		        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 SceneManager.toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, login)));
-            case PlayerNotInGame:
-                Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_IN_GAME, REQUESTS_ERROR_DIALOG_TITLE);
-            case PlayerOffline:
-                Dialogs.alert(REQUESTS_ERROR_PLAYER_OFFLINE, REQUESTS_ERROR_DIALOG_TITLE);
+            case FollowSuccess:
+                Dialogs.info(REQUESTS_FOLLOW_PLAYER_SUCCESS_DIALOG_TEXT, REQUESTS_FOLLOW_PLAYER_SUCCESS_DIALOG_TITLE);
             case PlayerNotFound:
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:

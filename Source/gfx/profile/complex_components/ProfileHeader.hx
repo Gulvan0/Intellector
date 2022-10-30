@@ -83,7 +83,7 @@ class ProfileHeader extends VBox
 
         switch profileData.status 
         {
-            case Offline(secondsSinceLastAction):
+            case Offline(_):
                 sendChallengeBtn.hidden = true;
                 followBtn.hidden = true;
             case Online:
