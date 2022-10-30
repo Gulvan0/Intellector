@@ -90,6 +90,16 @@ class Settings extends Dialog
         branchingTurnColorPill.selected = Preferences.branchingTurnColorIndicators.get();
         branchingTurnColorLabel.text = Dictionary.getPhrase(branchingTurnColorPill.selected? SETTINGS_ENABLED_OPTION_VALUE : SETTINGS_DISABLED_OPTION_VALUE);
 
+        switch Preferences.autoScrollOnMove.get() 
+        {
+            case Always:
+                autoScrollBar.selectedButton = autoScrollBtnAlways;
+            case OwnGameOnly:
+                autoScrollBar.selectedButton = autoScrollBtnOwn;
+            case Never:
+                autoScrollBar.selectedButton = autoScrollBtnNever;
+        }
+
         SceneManager.addResizeHandler(resize);
         Timer.delay(resize, 50);
     }

@@ -34,10 +34,13 @@ class EnemyMoveBehavior implements IBehavior
 
     private function handleOpponentMove(ply:Ply)
     {
+        if (Preferences.autoScrollOnMove.get() != Never || !Lambda.empty(premoves))
+            boardInstance.applyScrolling(End);
+
         if (Lambda.empty(premoves))
         {
-            AssetManager.playPlySound(ply, boardInstance.currentSituation);
             boardInstance.makeMove(ply);
+            AssetManager.playPlySound(ply, boardInstance.currentSituation);
 
             boardInstance.state.exitToNeutral();
             boardInstance.behavior = new PlayerMoveBehavior(playerColor);
@@ -49,8 +52,8 @@ class EnemyMoveBehavior implements IBehavior
     
             resetPremoves();
     
-            AssetManager.playPlySound(ply, boardInstance.currentSituation);
             boardInstance.makeMove(ply);
+            AssetManager.playPlySound(ply, boardInstance.currentSituation);
 
             var premoveDeparture:Hex = boardInstance.currentSituation.get(activatedPremove.from);
     

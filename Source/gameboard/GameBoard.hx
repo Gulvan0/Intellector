@@ -1,5 +1,6 @@
 package gameboard;
 
+import gameboard.behaviors.SpectatorBehaviour;
 import GlobalBroadcaster;
 import GlobalBroadcaster.IGlobalEventObserver;
 import gameboard.behaviors.*;
@@ -370,7 +371,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
                 else
                 {
                     this.state = new StubState();
-                    this.behavior = new StubBehavior();
+                    this.behavior = new SpectatorBehavior();
                 }
 
             

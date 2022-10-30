@@ -18,6 +18,13 @@ enum BranchingTabType
     PlainText;
 }
 
+enum AutoScrollType
+{
+    Always;
+    OwnGameOnly;
+    Never;
+}
+
 private class Preference<T>
 {
     private static var FIVE_YEARS = 60 * 60 * 24 * 365 * 5;
@@ -106,6 +113,7 @@ enum PreferenceName
     BranchingType;
     BranchingShowTurnColor;
     SilentChallenges;
+    AutoScrollOnMoveReceived;
 }
 
 class Preferences
@@ -117,4 +125,5 @@ class Preferences
     public static final branchingTabType:Preference<BranchingTabType> = new Preference(BranchingType, Tree);
     public static final branchingTurnColorIndicators:Preference<Bool> = new Preference(BranchingShowTurnColor, true);
     public static final silentChallenges:Preference<Bool> = new Preference(SilentChallenges, false);
+    public static final autoScrollOnMove:Preference<AutoScrollType> = new Preference(AutoScrollOnMoveReceived, OwnGameOnly);
 }

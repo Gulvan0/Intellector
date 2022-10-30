@@ -41,6 +41,12 @@
                 <switch id="branchingTurnColorPill" styleName="pill-switch" onClick="Preferences.branchingTurnColorIndicators.set(this.selected);branchingTurnColorLabel.text = Dictionary.getPhrase(this.selected? SETTINGS_ENABLED_OPTION_VALUE : SETTINGS_DISABLED_OPTION_VALUE)" />
                 <label id="branchingTurnColorLabel" style="pill-label" />
             </hbox>
+            <section-header text="${Dictionary.getPhrase(SETTINGS_AUTOSCROLL_OPTION_NAME)}" />
+            <buttonbar id="autoScrollBar" horizontalAlign="center">
+                <button id="autoScrollBtnAlways" text="${Dictionary.getPhrase(SETTINGS_AUTOSCROLL_ALWAYS_OPTION_VALUE)}" onClick="Preferences.autoScrollOnMove.set(Always)" />
+                <button id="autoScrollBtnOwn" text="${Dictionary.getPhrase(SETTINGS_AUTOSCROLL_OWN_OPTION_VALUE)}" onClick="Preferences.autoScrollOnMove.set(OwnGameOnly)" />
+                <button id="autoScrollBtnNever" text="${Dictionary.getPhrase(SETTINGS_AUTOSCROLL_NEVER_OPTION_VALUE)}" onClick="Preferences.autoScrollOnMove.set(Never)" />
+            </buttonbar>
         </scrollview>
         <vbox width="100%" height="100%">
             

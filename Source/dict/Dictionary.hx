@@ -228,6 +228,8 @@ class Dictionary
                 return ["Display turn color in Tree mode", "Отображать цвет хода в режиме Дерева"];
             case SETTINGS_SILENT_CHALLENGES_OPTION_NAME:
                 return ["Ignore incoming challenges", "Не уведомлять о входящих вызовах"];
+            case SETTINGS_AUTOSCROLL_OPTION_NAME:
+                return ["Return to the updated current position", "Возвращаться к обновленной текущей позиции"];
             case SETTINGS_MARKUP_ALL_OPTION_VALUE:
                 return ["All", "Все"];
             case SETTINGS_MARKUP_LETTERS_OPTION_VALUE:
@@ -240,6 +242,12 @@ class Dictionary
                 return ["Outline", "Список"];
             case SETTINGS_BRANCHING_TYPE_PLAIN_OPTION_VALUE:
                 return ["Plain text", "Текст"];
+            case SETTINGS_AUTOSCROLL_ALWAYS_OPTION_VALUE:
+                return ["Always", "Всегда"];
+            case SETTINGS_AUTOSCROLL_OWN_OPTION_VALUE:
+                return ["Own games only", "Только в своих партиях"];
+            case SETTINGS_AUTOSCROLL_NEVER_OPTION_VALUE:
+                return ["Never", "Никогда"];
             case SETTINGS_DISABLED_OPTION_VALUE:
                 return ["Disabled", "Нет"];
             case SETTINGS_ENABLED_OPTION_VALUE:
