@@ -46,8 +46,9 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
 
     private var move(default, set):Int;
 
-    private var enableDrawAfterMove:Int;
-    private var enableTakebackAfterMove:Int;
+    private var enableDrawSinceMove:Int;
+    private var enableTakebackSinceMove:Int;
+    private var enableAddTimeSinceMove:Int;
     private var changeAbortToResignAfterMove:Int;
     private var resignConfirmationMessage:String;
 
@@ -124,15 +125,20 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         if (mode != PlayerOngoingGame)
             return move;
 
-        if (move < enableTakebackAfterMove)
+        if (move < enableTakebackSinceMove)
             offerTakebackBtn.disabled = true;
         else
             offerTakebackBtn.disabled = false;
 
-        if (move < enableDrawAfterMove)
+        if (move < enableDrawSinceMove)
             offerDrawBtn.disabled = true;
         else 
             offerDrawBtn.disabled = false;
+
+        if (move < enableAddTimeSinceMove)
+            addTimeBtn.disabled = true;
+        else
+            addTimeBtn.disabled = false;
 
         if (move < changeAbortToResignAfterMove)
         {
@@ -277,7 +283,8 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         this.compact = compact;
         this.onBtnPressed = onBtnPressed;
         
-        this.enableDrawAfterMove = 2;
+        this.enableAddTimeSinceMove = 1;
+        this.enableDrawSinceMove = 2;
         this.changeAbortToResignAfterMove = 2;
 
         this.incomingDrawRequestPending = false;
@@ -287,12 +294,12 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         {
             case New(_, _, _, _, startingSituation, _):
                 setMode(PlayerOngoingGame);
-                this.enableTakebackAfterMove = startingSituation.turnColor == White? 1 : 2;
+                this.enableTakebackSinceMove = startingSituation.turnColor == White? 1 : 2;
                 move = 0;
 
             case Ongoing(parsedData, _, followedPlayerLogin):
                 setMode(parsedData.isPlayerParticipant()? PlayerOngoingGame : Spectator);
-                this.enableTakebackAfterMove = parsedData.startingSituation.turnColor == White? 1 : 2;
+                this.enableTakebackSinceMove = parsedData.startingSituation.turnColor == White? 1 : 2;
                 move = parsedData.moveCount;
 
             case Past(parsedData, _):
