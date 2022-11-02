@@ -1,4 +1,36 @@
 <vbox width="600px" height="800px">
+    <style>
+        .listview {
+            border: 1px solid #aaaaaa;
+            background-color: #f6f6f6;
+            padding: 4px;
+        }
+
+        .listview .listview-contents {
+            spacing: 10px;
+            background-opacity: 0;
+        }
+
+        .listview .even {
+            background-opacity: 0;
+        }
+
+        .listview .even:hover {
+            background-opacity: 0;
+        }
+
+        .listview .odd {
+            background-opacity: 0;
+        }
+
+        .listview .odd:hover {
+            background-opacity: 0;
+        }
+
+        .listview .listview-contents > .itemrenderer {
+            padding: 0px;
+        }
+    </style>
     <hbox id="tableTitleBox" width="100%" height="40px">
         <label id="title" text="${Dictionary.getPhrase(PAST_GAMES_TABLE_HEADER)}" style="font-size: 30px;font-name: 'fonts/FuturaItalic.ttf'" verticalAlign="bottom" />
     </hbox>

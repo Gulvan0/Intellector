@@ -16,7 +16,6 @@ import haxe.ui.containers.VBox;
 import dict.Dictionary;
 import js.Browser;
 import dict.Utils;
-import openfl.display.Sprite;
 import utils.AssetManager;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/simple_screens/join_challenge.xml'))

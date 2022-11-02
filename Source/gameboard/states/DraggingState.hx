@@ -16,6 +16,7 @@ class DraggingState extends BasePlayableState
     public function onEntered()
     {
         draggedPiece = boardInstance.getPiece(dragStartLocation);
+        draggedPiece.cacheAsBitmap = true;
         boardInstance.bringPieceToFront(draggedPiece);
         draggedPiece.startDrag(true);
 
@@ -28,6 +29,7 @@ class DraggingState extends BasePlayableState
     private function exit(transition:Transition)
     {
         draggedPiece.stopDrag();
+        draggedPiece.cacheAsBitmap = false;
         draggedPiece.reposition(dragStartLocation, boardInstance);
 
         boardInstance.getHex(dragStartLocation).hideLayer(LMB);

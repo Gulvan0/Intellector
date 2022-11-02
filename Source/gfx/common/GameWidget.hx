@@ -1,5 +1,7 @@
 package gfx.common;
 
+import gameboard.lightweight.LighttBoard.LightBoard;
+import haxe.CallStack;
 import utils.StringUtils.eloToStr;
 import haxe.ui.containers.VBox;
 import haxe.ui.styles.Style;
@@ -74,20 +76,12 @@ class GameWidget extends ItemRenderer
             opponentsLabel.text = opponentsLabelLongText;
     }
 
-    private function reloadBoard(shownSituation:Situation, watchedColor:Null<PieceColor>) 
+    private function loadBoard(shownSituation:Situation, watchedColor:Null<PieceColor>) 
     {
-        boardContainer.removeAllComponents();
-
         var orientationColor:PieceColor = watchedColor == null? shownSituation.turnColor : watchedColor;
-        var board:Board = new Board(shownSituation, orientationColor, 40, None);
-        var wrapper:BoardWrapper = new BoardWrapper(board);
+        var board:LightBoard = new LightBoard(shownSituation, orientationColor, 9.14);
 
-        wrapper.percentWidth = 100;
-        wrapper.maxPercentHeight = 100;
-        wrapper.horizontalAlign = 'center';
-        wrapper.verticalAlign = 'center';
-
-        boardContainer.addComponent(wrapper);
+        boardContainer.addChild(board);
     }
 
     @:bind(fullBox, MouseEvent.CLICK)
@@ -100,7 +94,7 @@ class GameWidget extends ItemRenderer
     {
         super.onDataChanged(data);
 
-        if (data == null)
+        if (data == null || typedData != null)
             return;
         
         typedData = data;
@@ -111,7 +105,7 @@ class GameWidget extends ItemRenderer
         if (typedData.watchedLogin != null)
             watchedColor = parsedData.getParticipantColor(typedData.watchedLogin);
 
-        reloadBoard(parsedData.currentSituation, watchedColor);
+        loadBoard(parsedData.currentSituation, watchedColor);
 
         var whitePlayerStr:String = Utils.playerRef(parsedData.whiteRef);
         var blackPlayerStr:String = Utils.playerRef(parsedData.blackRef);
