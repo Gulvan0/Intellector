@@ -1,5 +1,6 @@
 package gfx.common;
 
+import utils.MathUtils;
 import gfx.analysis.PeripheralEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import net.shared.ServerEvent;
@@ -35,17 +36,17 @@ class MoveNavigator extends PlyHistoryView
     {   
         if (currentSituation.turnColor == White)
         {
-            lastMovetableEntry = {"num": '${moveHistory.length + 1}', "white_move": plyStr, "black_move": " "};
+            lastMovetableEntry = {"num": '${moveHistory.length + 1}', "whiteMove": {plyStr: plyStr, selected: false}, "blackMove": {plyStr: "", selected: false}};
             movetable.dataSource.add(lastMovetableEntry);
         }
         else if (lastMovetableEntry == null)
         {
-            lastMovetableEntry = {"num": '1', "white_move": "", "black_move": plyStr};
+            lastMovetableEntry = {"num": '1', "whiteMove": {plyStr: "", selected: false}, "blackMove": {plyStr: plyStr, selected: false}};
             movetable.dataSource.add(lastMovetableEntry);
         }
         else
         {
-            lastMovetableEntry.black_move = plyStr;
+            lastMovetableEntry.blackMove.plyStr = plyStr;
             movetable.dataSource.update(movetable.dataSource.size - 1, lastMovetableEntry);
         }
 
@@ -57,10 +58,49 @@ class MoveNavigator extends PlyHistoryView
         disabled = editorActive;
     }
 
+    private function rowIndexByPlyNum(plyNum:Int):Null<Int>
+    {
+        if (plyNum > 0)
+            return startingSituation.turnColor == White? Math.floor((plyNum - 1) / 2) : Math.floor(plyNum / 2);
+        else
+            return null;
+    }
+
+    private function setMoveBold(plyNum:Int, bold:Bool)
+    {
+        if (plyNum <= 0)
+            return;
+
+        var moveColor:PieceColor = plyNum % 2 == 1? startingSituation.turnColor : opposite(startingSituation.turnColor);
+        var rowIndex:Int = rowIndexByPlyNum(plyNum);
+        var currentlySelectedRowData = movetable.dataSource.get(rowIndex);
+
+        if (moveColor == White)
+            currentlySelectedRowData.whiteMove.selected = bold;
+        else
+            currentlySelectedRowData.blackMove.selected = bold;
+
+        movetable.dataSource.update(rowIndex, currentlySelectedRowData);
+    }
+
     public function setShownMove(value:Int)
     {
-        //TODO: Make selected move bold
+        if (shownMove == value)
+            return;
+
+        if (shownMove > 0)
+            setMoveBold(shownMove, false);
+
         shownMove = value;
+
+        if (value > 0)
+        {
+            setMoveBold(value, true);
+            scrollToShownMove();
+        }
+        else
+            scrollTo(0);
+
         updateScrollButtons();
     }
 
@@ -70,11 +110,31 @@ class MoveNavigator extends PlyHistoryView
         movetable.dataSource.clear();
     }
 
-    private function scrollToEnd() 
+    private function scrollTo(relPos:Float)
     {
         var vscroll = movetable.findComponent(VerticalScroll, false);
         if (vscroll != null)
-            vscroll.pos = vscroll.max;
+            vscroll.pos = vscroll.min + relPos * (vscroll.max - vscroll.min);
+    }
+
+    private function scrollToShownMove()
+    {
+        if (shownMove == 0)
+        {
+            scrollTo(0);
+            return;
+        }
+
+        var totalRows:Int = startingSituation.turnColor == White? Math.ceil(moveHistory.length / 2) : Math.ceil((moveHistory.length + 1) / 2);
+        var neededRowIndex:Int = rowIndexByPlyNum(shownMove);
+
+        var windowHeight:Float = movetable.height;
+        var totalHeight:Float = movetable.contentHeight;
+        var rowHeight:Float = totalHeight / totalRows;
+
+        var neededRowCenterY:Float = neededRowIndex * rowHeight + rowHeight / 2;
+        var relPos:Float = MathUtils.clamp((neededRowCenterY - windowHeight / 2) / (totalHeight - windowHeight), 0, 1);
+        scrollTo(relPos);
     }
 
     private function updateScrollButtons() 

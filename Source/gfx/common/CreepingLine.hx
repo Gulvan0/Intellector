@@ -1,5 +1,6 @@
 package gfx.common;
 
+import utils.MathUtils;
 import haxe.Timer;
 import haxe.ui.components.HorizontalScroll;
 import net.shared.ServerEvent;
@@ -38,9 +39,13 @@ class CreepingLine extends PlyHistoryView
     {
         if (shownMove > 0 && plyCards.length >= shownMove)
             plyCards[shownMove-1].deselect();
+
         shownMove = value;
+
         if (shownMove > 0)
             plyCards[shownMove-1].select();
+
+        scrollToShownMove();
     }
 
     private function onHistoryDropped()
@@ -50,11 +55,24 @@ class CreepingLine extends PlyHistoryView
         plyCards = [];
     }
 
-    private function scrollToEnd() 
+    private function scrollTo(relPos:Float)
     {
         var hscroll = runwaySV.findComponent(HorizontalScroll, false);
         if (hscroll != null)
-            hscroll.pos = hscroll.max;
+            hscroll.pos = hscroll.min + relPos * (hscroll.max - hscroll.min);
+    }
+
+    private function scrollToShownMove()
+    {
+        if (shownMove == 0)
+        {
+            scrollTo(0);
+            return;
+        }
+
+        var card = plyCards[shownMove-1];
+        var newScrollPos = MathUtils.clamp((card.x + card.width / 2 - runwaySV.width / 2) / (lineBox.width - runwaySV.width), 0, 1);
+        scrollTo(newScrollPos);
     }
 
     private function postInit()

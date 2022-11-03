@@ -37,6 +37,8 @@ enum ActionBtn
     DeclineDraw;
     AcceptTakeback;
     DeclineTakeback;
+    PrevMove;
+    NextMove;
 }
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/action_bar.xml"))
@@ -175,6 +177,13 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
             case PlayerGameEnded: [changeOrientationBtn, analyzeBtn, shareBtn, playFromPosBtn, rematchBtn];
             case Spectator: [changeOrientationBtn, analyzeBtn, shareBtn, playFromPosBtn];
         }
+
+        if (compact)
+        {
+            shownButtons.push(prevMoveBtn);
+            shownButtons.push(nextMoveBtn);
+        }
+            
         changeActionButtons(shownButtons);
     }
 
@@ -321,6 +330,8 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         attachHandler(shareBtn, Share);
         attachHandler(analyzeBtn, Analyze);
         attachHandler(playFromPosBtn, PlayFromHere);
+        attachHandler(prevMoveBtn, PrevMove);
+        attachHandler(nextMoveBtn, NextMove);
     }
 
     public function new() 

@@ -1,5 +1,6 @@
 package gfx.common;
 
+import haxe.ui.events.UIEvent;
 import serialization.GameLogParser.GameLogParserOutput;
 import struct.IntPoint;
 import net.EventProcessingQueue.INetObserver;
@@ -30,7 +31,13 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
     private abstract function onEditorToggled(editorActive:Bool):Void;
     private abstract function setShownMove(value:Int):Void;
     private abstract function onHistoryDropped():Void;
-    private abstract function scrollToEnd():Void;
+    private abstract function scrollToShownMove():Void;
+
+    @:bind(this, UIEvent.RESIZE)
+    private function onResize(e)
+    {
+        Timer.delay(scrollToShownMove, 40);
+    }
 
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
@@ -72,13 +79,13 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
         {
             case Move(fromI, toI, fromJ, toJ, morphInto, _):
                 var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
-                var scrollToEnd:Bool = switch Preferences.autoScrollOnMove.get() 
+                var selectMove:Bool = switch Preferences.autoScrollOnMove.get() 
                 {
                     case Always: true;
                     case OwnGameOnly: isGamePlayable;
                     case Never: false;
                 }
-                appendPly(ply, scrollToEnd);
+                appendPly(ply, selectMove);
             case Rollback(plysToUndo, _):
                 revertPlys(plysToUndo);
             default:
@@ -99,7 +106,6 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
                     setShownMove(shownMove+1);
             case End:
                 setShownMove(moveHistory.length);
-                Timer.delay(scrollToEnd, 50);
             case Precise(plyNum):
                 setShownMove(plyNum);
         };

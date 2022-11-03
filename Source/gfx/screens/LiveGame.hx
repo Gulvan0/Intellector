@@ -243,6 +243,10 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 Networker.emitEvent(AcceptTakeback);
             case DeclineTakeback:
                 Networker.emitEvent(DeclineTakeback);
+            case PrevMove:
+                onPlyScrollRequested(Prev);
+            case NextMove:
+                onPlyScrollRequested(Next);
         }
         chatbox.reactToOwnAction(btn);
     }
