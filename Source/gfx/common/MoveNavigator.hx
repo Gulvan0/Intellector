@@ -1,5 +1,6 @@
 package gfx.common;
 
+import haxe.ui.constants.SelectionMode;
 import utils.MathUtils;
 import gfx.analysis.PeripheralEvent;
 import gameboard.GameBoard.GameBoardEvent;
@@ -32,16 +33,26 @@ class MoveNavigator extends PlyHistoryView
         updateScrollButtons();
     }
 
+    private function onPlySelectedManually(num:Int)
+    {
+        onScrollRequested(Precise(num));
+    }
+
     private function appendPlyStr(plyStr:String)
     {   
         if (currentSituation.turnColor == White)
         {
-            lastMovetableEntry = {"num": '${moveHistory.length + 1}', "whiteMove": {plyStr: plyStr, selected: false}, "blackMove": {plyStr: "", selected: false}};
+            var moveNum:Int = moveHistory.length + 1;
+            var whiteData = {plyStr: plyStr, selected: false, onMoveSelected: onPlySelectedManually.bind(moveNum)};
+            var blackData = {plyStr: "", selected: false, onMoveSelected: onPlySelectedManually.bind(moveNum + 1)};
+            lastMovetableEntry = {"num": '$moveNum', "whiteMove": whiteData, "blackMove": blackData};
             movetable.dataSource.add(lastMovetableEntry);
         }
         else if (lastMovetableEntry == null)
         {
-            lastMovetableEntry = {"num": '1', "whiteMove": {plyStr: "", selected: false}, "blackMove": {plyStr: plyStr, selected: false}};
+            var whiteData = {plyStr: "", selected: false, onMoveSelected: null};
+            var blackData = {plyStr: plyStr, selected: false, onMoveSelected: onPlySelectedManually.bind(1)};
+            lastMovetableEntry = {"num": '1', "whiteMove": whiteData, "blackMove": blackData};
             movetable.dataSource.add(lastMovetableEntry);
         }
         else
@@ -148,5 +159,6 @@ class MoveNavigator extends PlyHistoryView
     public function new()
     {
         super();
+        movetable.selectionMode = SelectionMode.DISABLED;
     }   
 }
