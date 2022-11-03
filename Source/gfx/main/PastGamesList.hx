@@ -9,7 +9,6 @@ import dict.*;
 class PastGamesList extends VBox
 {
     public var ownerLogin:Null<String>;
-    private var minID:Null<Int>;
 
     private function onGameClicked(info:GameInfo)
     {
@@ -17,18 +16,14 @@ class PastGamesList extends VBox
         SceneManager.toScreen(LiveGame(info.id, Past(parsedData, ownerLogin)));
     }
 
+    public function insertAtBeginning(info:GameInfo)
+    {
+        list.dataSource.insert(0, {info: info, watchedLogin: ownerLogin, onClicked: onGameClicked.bind(info)});
+    }
+
     public function appendGames(data:Array<GameInfo>)
     {
         for (gameData in data)
-        {
             list.dataSource.add({info: gameData, watchedLogin: ownerLogin, onClicked: onGameClicked.bind(gameData)});
-            if (minID == null || gameData.id < minID)
-                minID = gameData.id;
-        }
-    }
-
-    public function getMinID():Null<Int>
-    {
-        return minID;    
     }
 }

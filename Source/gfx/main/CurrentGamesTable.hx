@@ -36,6 +36,17 @@ class CurrentGamesTable extends VBox
         }
     }
 
+    public function removeGame(id:Int)
+    {
+        var index:Null<Int> = gameIDs.indexOf(id);
+
+        if (index == null)
+            return;
+
+        gameIDs.splice(index, 1);
+        table.dataSource.removeAt(index);
+    }
+
     @:bind(table, UIEvent.CHANGE)
     private function onGameSelected(e:UIEvent)
     {
@@ -55,7 +66,7 @@ class CurrentGamesTable extends VBox
         }, 5000);
     }
 
-    public function loadCurrentGames()
+    private function loadCurrentGames()
     {
         Requests.getCurrentGames(appendGames);
     }

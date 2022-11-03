@@ -43,4 +43,6 @@ enum ClientEvent
     GetOpenChallenges;
     GetCurrentGames;
     GetRecentGames;
+    MainMenuEntered;
+    MainMenuLeft;
 }

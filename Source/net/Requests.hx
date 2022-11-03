@@ -17,6 +17,7 @@ import net.shared.ServerEvent;
 
 typedef GetGamesCallback = (games:Array<GameInfo>, hasNext:Bool) -> Void;
 typedef GetStudiesCallback = (studyMap:Map<Int, StudyInfo>, hasNext:Bool) -> Void;
+typedef MainMenuEnteredCallback = (openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>) -> Void;
 
 class Requests
 {
@@ -268,6 +269,24 @@ class Requests
         {
             case RecentGames(data):
                 callback(data);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static function getMainMenuData(callback:MainMenuEnteredCallback)
+    {
+        Networker.addHandler(getMainMenuData_handler.bind(callback));
+        Networker.emitEvent(MainMenuEntered);
+    }
+
+    private static function getMainMenuData_handler(callback:MainMenuEnteredCallback, event:ServerEvent)
+    {
+        switch event
+        {
+            case MainMenuData(openChallenges, currentGames, recentGames):
+                callback(openChallenges, currentGames, recentGames);
                 return true;
             default:
                 return false;

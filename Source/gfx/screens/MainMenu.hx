@@ -1,5 +1,9 @@
 package gfx.screens;
 
+import net.shared.ServerEvent;
+import net.EventProcessingQueue.INetObserver;
+import net.shared.GameInfo;
+import net.shared.ChallengeData;
 import net.Requests;
 import haxe.ui.styles.Style;
 import gfx.ResponsiveToolbox;
@@ -10,13 +14,42 @@ import utils.Changelog;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main_menu/main_menu.xml"))
-class MainMenu extends Screen
+class MainMenu extends Screen implements INetObserver
 {
     public function onEnter()
     {
-        openChallengesTable.loadChallenges();
-        currentGamesTable.loadCurrentGames();
-        Requests.getRecentGames(pastGamesList.appendGames);
+        Requests.getMainMenuData(onMainMenuData);
+        Networker.addObserver(this);
+    }
+
+    public function onClose()
+    {
+        Networker.removeObserver(this);
+        Networker.emitEvent(MainMenuLeft);
+    }
+
+    public function handleNetEvent(event:ServerEvent) 
+    {
+        switch event 
+        {
+            case MainMenuNewOpenChallenge(data):
+                openChallengesTable.appendChallenges([data]);
+            case MainMenuNewGame(data):
+                currentGamesTable.appendGames([data]);
+            case MainMenuGameEnded(data):
+                currentGamesTable.removeGame(data.id);
+                pastGamesList.insertAtBeginning(data);
+            case MainMenuOpenChallengeRemoved(id):
+                openChallengesTable.removeChallenge(id);
+            default:
+        }
+    }
+
+    private function onMainMenuData(openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>)
+    {
+        openChallengesTable.appendChallenges(openChallenges);
+        currentGamesTable.appendGames(currentGames);
+        pastGamesList.appendGames(recentGames);
     }
 
     @:bind(createGameBtn, MouseEvent.CLICK)
@@ -85,5 +118,6 @@ class MainMenu extends Screen
             responsiveComponents.set(column, [StyleProp(FontSize) => tableLegendFontSizeRule, StyleProp(PaddingTop) => tableLegendPaddingRule, StyleProp(PaddingBottom) => tableLegendPaddingRule, StyleProp(PaddingLeft) => tableLegendPaddingRule, StyleProp(PaddingRight) => tableLegendPaddingRule]);
     
         customEnterHandler = onEnter;
+        customCloseHandler = onClose;
     }
 }

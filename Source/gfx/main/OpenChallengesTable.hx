@@ -1,5 +1,6 @@
 package gfx.main;
 
+import GlobalBroadcaster.IGlobalEventObserver;
 import utils.StringUtils.eloToStr;
 import net.shared.ChallengeData;
 import haxe.ui.events.UIEvent;
@@ -13,9 +14,9 @@ import net.Requests;
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/main_menu/open_challenges_table.xml"))
 class OpenChallengesTable extends VBox
 {
-    private var challengeIDs:Array<Int> = [];
+    private var challengeData:Array<ChallengeData> = [];
 
-    private function appendChallenges(challenges:Array<ChallengeData>)
+    public function appendChallenges(challenges:Array<ChallengeData>)
     {
         for (data in challenges)
         {
@@ -23,14 +24,27 @@ class OpenChallengesTable extends VBox
             var bracketText:String = Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated));
             var modeData = {color: params.acceptorColor, situation: params.customStartingSituation};
             table.dataSource.add({mode: modeData, time: params.timeControl, player: '${data.ownerLogin} (${eloToStr(data.ownerELO)})}', bracket: bracketText});
-            challengeIDs.push(data.id);
+            challengeData.push(data);
         }
+    }
+
+    public function removeChallenge(id:Int) 
+    {
+        var index:Null<Int> = Lambda.findIndex(challengeData, x -> x.id == id);
+
+        if (index == null)
+            return;
+
+        challengeData.splice(index, 1);
+        table.dataSource.removeAt(index);
     }
 
     @:bind(table, UIEvent.CHANGE)
     private function onGameSelected(e:UIEvent)
     {
-        Requests.getOpenChallenge(challengeIDs[table.selectedIndex]);
+        var data:ChallengeData = challengeData[table.selectedIndex];
+        if (!LoginManager.isPlayer(data.ownerLogin))
+            Requests.getOpenChallenge(data.id);
     }
 
     @:bind(reloadBtn, MouseEvent.CLICK)
@@ -38,7 +52,7 @@ class OpenChallengesTable extends VBox
     {
         reloadBtn.disabled = true;
         table.dataSource.clear();
-        challengeIDs = [];
+        challengeData = [];
         loadChallenges();
         Timer.delay(() -> {
             if (reloadBtn != null)
@@ -46,7 +60,7 @@ class OpenChallengesTable extends VBox
         }, 5000);
     }
 
-    public function loadChallenges()
+    private function loadChallenges()
     {
         Requests.getOpenChallenges(appendChallenges);
     }

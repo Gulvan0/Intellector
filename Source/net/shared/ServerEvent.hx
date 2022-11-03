@@ -70,6 +70,11 @@ enum ServerEvent
     OpenChallenges(data:Array<ChallengeData>); //Answer to GetOpenChallenges
     CurrentGames(data:Array<GameInfo>); //Answer to GetCurrentGames
     RecentGames(data:Array<GameInfo>); //Answer to GetRecentGames
+    MainMenuData(openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>); //Answer to MainMenuEntered. Contains the data of all three events above
+    MainMenuNewOpenChallenge(data:ChallengeData);
+    MainMenuOpenChallengeRemoved(id:Int);
+    MainMenuNewGame(data:GameInfo);
+    MainMenuGameEnded(data:GameInfo);
 
     SessionToken(token:String);
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created
