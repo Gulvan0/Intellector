@@ -31,7 +31,7 @@ class CurrentGamesTable extends VBox
                 whiteLabel += ' (${eloToStr(parsedData.elo[Black])})';
             }
 
-            table.dataSource.add({time: parsedData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});
+            table.dataSource.add({timeControl: parsedData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});
             gameIDs.push(gameData.id);
         }
     }
@@ -69,5 +69,11 @@ class CurrentGamesTable extends VBox
     private function loadCurrentGames()
     {
         Requests.getCurrentGames(appendGames);
+    }
+
+    public function new()
+    {
+        super();
+        table.selectionMode = DISABLED;
     }
 }

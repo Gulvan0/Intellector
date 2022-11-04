@@ -18,5 +18,11 @@
         </header>
         
         <time-control-renderer id="time" />
+        <item-renderer>
+            <label id="players" style="text-align:center;" />
+        </item-renderer>
+        <item-renderer>
+            <label id="bracket" style="text-align:center;" />
+        </item-renderer>
     </tableview>
 </vbox>

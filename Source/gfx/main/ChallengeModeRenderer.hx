@@ -15,10 +15,10 @@ class ChallengeModeRenderer extends ItemRenderer
     private override function onDataChanged(data:Dynamic) 
     {
         super.onDataChanged(data);
-        if (data != null) 
+        if (data != null && data.mode != null) 
         {
-            var color:Null<PieceColor> = data.color;
-            var customStartingSituation:Null<Situation> = data.situation;
+            var color:Null<PieceColor> = data.mode.color;
+            var customStartingSituation:Null<Situation> = data.mode.situation;
             colorIcon.resource = AssetManager.challengeColorPath(color);
             colorIcon.tooltip = Dictionary.getPhrase(CHALLENGE_COLOR_ICON_TOOLTIP(color));
             if (customStartingSituation != null)
