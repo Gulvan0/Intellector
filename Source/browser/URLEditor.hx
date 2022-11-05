@@ -1,5 +1,6 @@
 package browser;
 
+import dict.Utils;
 import js.html.URLSearchParams;
 import gfx.ScreenType;
 import js.Browser;
@@ -11,7 +12,12 @@ class URLEditor
         setPath("");
     }
 
-    public static function setPath(path:String, ?title:String)
+    public static function setPathByScreen(type:ScreenType)
+    {
+        setPath(getURLPath(type), Utils.getScreenTitle(type));
+    }
+
+    private static function setPath(path:String, ?title:String)
     {
         if (StringTools.startsWith(path, "/"))
             path = path.substr(1);
@@ -31,7 +37,7 @@ class URLEditor
         return Browser.location.host + ingameToUrlPath('live/$id');
     }
 
-    public static function getURLPath(type:ScreenType):String
+    private static function getURLPath(type:ScreenType):String
     {
         return switch type 
         {

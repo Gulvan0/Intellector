@@ -58,7 +58,7 @@ class SceneManager
     {
         scene.toScreen(type);
         currentScreenType = type;
-        URLEditor.setPath(URLEditor.getURLPath(type), Utils.getScreenTitle(type));
+        URLEditor.setPathByScreen(type);
     }
 
     public static function clearScreen()
@@ -111,7 +111,7 @@ class SceneManager
         {
             case Analysis(initialVariantStr, selectedMainlineMove, _, _):
                 var newScreenType:ScreenType = Analysis(initialVariantStr, selectedMainlineMove, studyID, studyInfo);
-                URLEditor.setPath(URLEditor.getURLPath(newScreenType), Utils.getScreenTitle(newScreenType));
+                URLEditor.setPathByScreen(newScreenType);
                 currentScreenType = newScreenType;
             default:
                 throw "Cannot update study info outside of analysis screen";
@@ -138,18 +138,15 @@ class SceneManager
         return false;
     }
 
-    public static function observeNetEvents()
-    {
-        Networker.addHandler(handleNetEvent);
-        Networker.addObserver(scene);
-    }
-
     public static function launch()
     {
         scene = new Scene();
         scene.menubar.disabled = true;
         HaxeUIScreen.instance.addComponent(scene);
         GlobalBroadcaster.addObserver(scene);
+
+        Networker.addHandler(handleNetEvent);
+        Networker.addObserver(scene);
 
 		openflContent = Browser.document.getElementById("openfl-content");
 		openflContent.style.width = '${Browser.document.documentElement.clientWidth}px';

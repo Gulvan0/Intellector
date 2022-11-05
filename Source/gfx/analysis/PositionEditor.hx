@@ -27,6 +27,8 @@ class PositionEditor extends VBox implements IGameBoardObserver implements IAnal
     private var editModeBtns:Map<PosEditMode, Button>;
     private var toolBtns:Array<Button>;
 
+    public var customReadyHandler:Null<Void->Void>;
+
     private function getTurnColor():PieceColor
     {
         return turnColorStepper.selectedIndex == 0? White : Black;
@@ -35,6 +37,14 @@ class PositionEditor extends VBox implements IGameBoardObserver implements IAnal
     private function setTurnColor(color:PieceColor)
     {
         turnColorStepper.selectedIndex = color == White? 0 : 1;
+    }
+
+    private override function onReady()
+    {
+        super.onReady();
+        if (customReadyHandler != null)
+            customReadyHandler();
+        customReadyHandler = null;
     }
 
     public function updateLayout(availableWidth:Float, availableHeight:Float):Bool

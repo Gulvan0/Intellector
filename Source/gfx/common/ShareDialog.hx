@@ -194,17 +194,22 @@ class ShareDialog extends Dialog
     {
         init(situation, orientation);
         tabView.removeComponent(shareGameTab);
-        
-        var studyParamsDialogMode:StudyParamsDialogMode;
-        if (oldStudyID != null && oldStudyInfo != null)
-            studyParamsDialogMode = CreateOrOverwrite(variant, oldStudyID, oldStudyInfo);
-        else
-            studyParamsDialogMode = Create(variant);
 
-        exportStudyBtn.onClick = e -> {
-            hideDialog(null);
-            Dialogs.studyParams(studyParamsDialogMode);
+        if (Networker.isConnectedToServer())
+        {
+            var studyParamsDialogMode:StudyParamsDialogMode;
+            if (oldStudyID != null && oldStudyInfo != null)
+                studyParamsDialogMode = CreateOrOverwrite(variant, oldStudyID, oldStudyInfo);
+            else
+                studyParamsDialogMode = Create(variant);
+    
+            exportStudyBtn.onClick = e -> {
+                hideDialog(null);
+                Dialogs.studyParams(studyParamsDialogMode);
+            }
         }
+        else
+            tabView.removeComponent(shareExportTab);
     }
 
     private function init(situation:Situation, orientation:PieceColor)

@@ -204,7 +204,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         var tcType:TimeControlType = parsedData.timeControl.getType();
 
         var separator:String = " " + SpecialChar.Dot + " ";
-        if (tcType != Correspondence)
+        if (tcType == Correspondence)
             matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
         else
             matchParameters.text = parsedData.timeControl.toString() + separator + tcType.getName();

@@ -50,7 +50,7 @@ class Main extends Sprite
 	**/
 	private function init(callback:Void->Void) 
 	{
-		Browser.window.onpopstate = ScreenNavigator.navigate; //TODO: Has reloading stage? Can escape ongoing finite game?
+		Browser.window.onpopstate = ScreenNavigator.navigate;
 		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
 		Browser.document.addEventListener('wheel', event -> {
 			if (event.ctrlKey)
@@ -85,6 +85,8 @@ class Main extends Sprite
 	**/
 	private function onLanguageReady() 
 	{
+		SceneManager.clearScreen();
+		
 		if (Preferences.language.get() == RU)
 			LocaleManager.instance.language = "ru";
 		else

@@ -1,5 +1,7 @@
 package gfx;
 
+import js.Browser;
+import browser.URLEditor;
 import net.shared.ChallengeData;
 import utils.AssetManager;
 import haxe.ui.components.Image;
@@ -88,6 +90,11 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logInBtn.disabled = ingame;
         myProfileBtn.disabled = ingame;
         logOutBtn.disabled = ingame;
+
+        if (ingame)
+            Browser.window.onpopstate = () -> {URLEditor.setPathByScreen(SceneManager.getCurrentScreenType());};
+        else
+            Browser.window.onpopstate = ScreenNavigator.navigate;
     }
 
     private function onIncomingChallenge(data:ChallengeData)

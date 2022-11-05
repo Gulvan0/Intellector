@@ -33,6 +33,7 @@ class Networker
     private static var backoffDelay:Float;
     private static var doNotReconnect:Bool = false;
     private static var reconnectionToken:String = "not_set";
+    private static var isConnected:Bool = false;
     public static var ignoreEmitCalls:Bool = false; 
 
     public static function getSessionID():String
@@ -40,55 +41,80 @@ class Networker
         return reconnectionToken.split('_')[1];
     }
 
+    public static function isConnectedToServer():Bool
+    {
+        return isConnected;
+    }
+
+    private static function createWS()
+    {
+        #if prod
+        _ws = new WebSocket("wss://play-intellector.ru:5000", false);
+        #else
+        _ws = new WebSocket("ws://192.168.1.106:5000", false);
+        #end
+    }
+
     public static function launch() 
     {
+        trace("launch()");
         Serializer.USE_ENUM_INDEX = true;
 
-        eventQueue.flush();
+        createWS();
+        
+        _ws.onopen = onConnectionOpen.bind(true);
+        _ws.onerror = onErrorBeforeOpen;
 
-        #if prod
-        _ws = new WebSocket("wss://play-intellector.ru:5000");
-        #else
-        _ws = new WebSocket("ws://localhost:5000");
-        #end
-        _ws.onopen = onConnectionOpen;
-        _ws.onmessage = onMessageRecieved;
-        _ws.onclose = onConnectionClosed;
-        _ws.onerror = onConnectionFailed;
+        _ws.open();
+    }
+
+    private static function onErrorBeforeOpen(e)
+    {
+        ScreenNavigator.toAnalysis();
+        Dialogs.info(SERVER_UNAVAILABLE_DIALOG_TEXT, SERVER_UNAVAILABLE_DIALOG_TITLE);
+        startReconnectionAttempts(onConnectionOpen.bind(false));
     }
     
     public static function dropConnection() 
     {
+        trace("dropConnection()");
         if (_ws != null)
         {
             suppressAlert = true;
+            isConnected = false;
             _ws.close();
             _ws = null;
         }
     }
 
-    private static function onConnectionFailed(e)
+    @:access(hx.ws.WebSocket._ws)
+    private static function onConnectionOpen(?navigateByURL:Bool = true)
     {
-        ScreenNavigator.toAnalysis();
-        //TODO: Show explanatory dialog
-        startReconnectionAttempts(onConnectionOpen);
-    }
-
-    private static function onConnectionOpen()
-    {
-        _ws.onerror = onConnectionError;
+        trace("onConnectionOpen()");
         suppressAlert = false;
+        isConnected = true;
 
-        SceneManager.observeNetEvents();
+        _ws.onmessage = onMessageRecieved;
+        _ws.onclose = onConnectionClosed;
+        _ws.onerror = onConnectionError;
 
-        if (CredentialCookies.hasLoginDetails())
-            Requests.greet(Login(CredentialCookies.getLogin(), CredentialCookies.getPassword()), onGreetingAnswered);
-		else
-            Requests.greet(Simple, onGreetingAnswered);
+        if (_ws._ws.readyState == 1)
+            if (CredentialCookies.hasLoginDetails())
+                Requests.greet(Login(CredentialCookies.getLogin(), CredentialCookies.getPassword()), onGreetingAnswered.bind(_, !navigateByURL));
+            else
+                Requests.greet(Simple, onGreetingAnswered.bind(_, !navigateByURL));
+        else
+            Timer.delay(() -> {
+                if (CredentialCookies.hasLoginDetails())
+                    Requests.greet(Login(CredentialCookies.getLogin(), CredentialCookies.getPassword()), onGreetingAnswered.bind(_, !navigateByURL));
+                else
+                    Requests.greet(Simple, onGreetingAnswered.bind(_, !navigateByURL));
+            }, 100);
     }
 
     private static function onMessageRecieved(msg:MessageType)
     {
+        trace("onMessageRecieved()");
         var event:ServerEvent;
 
         switch msg 
@@ -122,6 +148,9 @@ class Networker
 
     private static function onConnectionClosed()
     {
+        trace("onConnectionClosed()");
+        isConnected = false;
+
         if (doNotReconnect)
         {
             SceneManager.clearScreen();
@@ -144,26 +173,38 @@ class Networker
 
     private static function onConnectionError(err:Event)
     {
+        isConnected = false;
+        trace("onConnectionError()");
         trace("Connection error: " + err.type);
     }
 
     private static function onConnectionReopened()
     {
+        trace("onConnectionReopened()");
+        isConnected = true;
+
+        _ws.onmessage = onMessageRecieved;
+        _ws.onclose = onConnectionClosed;
         _ws.onerror = onConnectionError;
+
         suppressAlert = false;
-        Requests.greet(Reconnect(reconnectionToken), onGreetingAnswered);
+        Requests.greet(Reconnect(reconnectionToken), onGreetingAnswered.bind(_, true));
     }
 
-	private static function onGreetingAnswered(data:GreetingResponseData)
+	private static function onGreetingAnswered(data:GreetingResponseData, ?dontLeave:Bool = false)
 	{
+        trace("onGreetingAnswered()");
 		switch data 
 		{
 			case ConnectedAsGuest(token, invalidCredentials):
+                SceneManager.onConnected();
                 reconnectionToken = token;
                 if (invalidCredentials)
                     CredentialCookies.removeLoginDetails();
-				ScreenNavigator.navigate();
+                if (!dontLeave)
+				    ScreenNavigator.navigate();
 			case Logged(token, incomingChallenges, ongoingFiniteGame):
+                SceneManager.onConnected();
                 reconnectionToken = token;
                 LoginManager.assignCredentials(CredentialCookies.getLogin(), CredentialCookies.getPassword(), None);
                 GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
@@ -172,7 +213,7 @@ class Networker
                     var parsedData:GameLogParserOutput = GameLogParser.parse(ongoingFiniteGame.currentLog);
                     SceneManager.toScreen(LiveGame(ongoingFiniteGame.id, Ongoing(parsedData, ongoingFiniteGame.timeData, null)));
                 }
-                else
+                else if (!dontLeave)
 				    ScreenNavigator.navigate();
 			case Reconnected(missedEvents):
                 Dialogs.closeReconnectionDialog();
@@ -182,20 +223,33 @@ class Networker
             case NotReconnected:
                 Browser.location.reload(false);
 		}
-	}
+    }
+    
+    private static function retryConnecting(onOpen:Void->Void)
+    {
+        trace("startReconnectionAttempts:callback()");
+
+        _ws.close();
+        isConnected = false;
+
+        createWS();
+
+        _ws.onopen = onOpen;
+        _ws.onerror = e -> {retryConnecting(onOpen);};
+
+        Timer.delay(_ws.open, Math.round(backoffDelay));
+
+        if (backoffDelay < 16000)
+            backoffDelay += backoffDelay * (Math.random() - 0.5);
+        else
+            backoffDelay += 1000 * (Math.random() - 0.5);
+    }
 
     public static function startReconnectionAttempts(onOpen:Void->Void)
     {
+        trace("startReconnectionAttempts()");
         backoffDelay = 1000;
-        _ws.onopen = onOpen;
-        _ws.onerror = (e) -> {
-            Timer.delay(_ws.open, Math.round(backoffDelay));
-            if (backoffDelay < 16000)
-                backoffDelay += backoffDelay * (Math.random() - 0.5);
-            else
-                backoffDelay += 1000 * (Math.random() - 0.5);
-        };
-        _ws.open();
+        retryConnecting(onOpen);
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------------------------

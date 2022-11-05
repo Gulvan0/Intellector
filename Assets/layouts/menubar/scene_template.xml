@@ -2,11 +2,18 @@
     <style>
         .menubar-button {
             font-weight: 300;
+            color: $normal-text-color;
         }
+
         .menubar-button:hover {
             background-color: #eeeeee;
             color: #333333;
         }
+        
+        .menubar-button:disabled {
+            color: $disabled-text-color;
+        }
+
         #siteName {
             pointer-events: true;
             white-space: nowrap;
@@ -19,6 +26,10 @@
 
         #siteName:hover {
             color: #428fd8;
+        }
+
+        #siteName:disabled {
+            color: $disabled-text-color;
         }
 
         #mobileMenuButton {

@@ -582,7 +582,10 @@ class Dictionary
             case TAKEBACK_QUESTION_TEXT:
                 return ["Accept takeback?", "Дать переходить?"];
             case DRAW_OFFERED_MESSAGE(color):
-                return ['${Utils.getColorName(color, EN)} offered a draw', '${Utils.getColorName(color, RU)} предлагают ничью'];
+                if (color != null)
+                    return ['${Utils.getColorName(color, EN)} offered a draw', '${Utils.getColorName(color, RU)} предлагают ничью'];
+                else
+                    return ['Draw offered', 'Ничья предложена'];
             case DRAW_CANCELLED_MESSAGE(_):
                 return ["Draw request cancelled", "Предложение ничьи отменено"];
             case DRAW_ACCEPTED_MESSAGE(_):
@@ -590,7 +593,10 @@ class Dictionary
             case DRAW_DECLINED_MESSAGE(_):
                 return ["Draw declined", "Ничья отклонена"];
             case TAKEBACK_OFFERED_MESSAGE(color):
-                return ['${Utils.getColorName(color, EN)} offered a takeback', '${Utils.getColorName(color, RU)} предлагают тейкбек'];
+                if (color != null)
+                    return ['${Utils.getColorName(color, EN)} requested a takeback', '${Utils.getColorName(color, RU)} запросили тейкбек'];
+                else
+                    return ['Takeback requested', 'Тейкбек запрошен'];
             case TAKEBACK_CANCELLED_MESSAGE(_):
                 return ["Takeback cancelled", "Запрос тейкбека отменен"];
             case TAKEBACK_ACCEPTED_MESSAGE(_):
@@ -606,6 +612,15 @@ class Dictionary
                 return ['${Utils.getColorName(color, EN)}: +$secsAdded seconds', '${Utils.getColorName(color, RU)}: +$secsAdded секунд'];
             case ABORT_CONFIRMATION_MESSAGE:
                 return ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"];
+
+            case CONNECTION_LOST_ERROR:
+                return ["Connection lost", "Потеряно соединение"];
+            case CONNECTION_ERROR_DIALOG_TITLE:
+                return ["Connection error", "Ошибка подключения"];
+            case SERVER_UNAVAILABLE_DIALOG_TEXT:
+                return ["Failed to connect to the server. You may use the analysis board while the server is unreachable. Once the connection is restored, the upper menu will become active", "Не удалось подключиться к серверу. На время переподключения открыта доска анализа. Верхнее меню станет вновь активным, когда подключение восстановится"];
+            case SERVER_UNAVAILABLE_DIALOG_TITLE:
+                return ["Server unavailable", "Сервер недоступен"];
             case SESSION_CLOSED_ALERT_TITLE:
                 return ["Connection Closed", "Соединение закрыто"];
             case SESSION_CLOSED_ALERT_TEXT:
@@ -614,10 +629,7 @@ class Dictionary
                 return ["Reconnecting...", "Восстанавливаем соединение..."];
             case RECONNECTION_POP_UP_TITLE:
                 return ["Connection lost", "Потеряно соединение"];
-            case CONNECTION_LOST_ERROR:
-                return ["Connection lost", "Потеряно соединение"];
-            case CONNECTION_ERROR_DIALOG_TITLE:
-                return ["Connection error", "Ошибка подключения"];
+
             case CLIPBOARD_ERROR_ALERT_TITLE:
                 return ["Clipboard Error", "Ошибка буфера обмена"];
             case CLIPBOARD_ERROR_ALERT_TEXT:

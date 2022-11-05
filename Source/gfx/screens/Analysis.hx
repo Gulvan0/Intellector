@@ -101,6 +101,9 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
 
     private function handlePeripheralEvent(event:PeripheralEvent)
     {
+        if (!Networker.isConnectedToServer() && event.match(PlayFromHereRequested))
+            return;
+
         for (obs in analysisPeripheryObservers)
             obs.handleAnalysisPeripheralEvent(event);
 
@@ -125,7 +128,10 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
     private override function onReady()
     {
         super.onReady();
-        redrawPositionEditor();
+        if (positionEditor.isReady)
+            redrawPositionEditor();
+        else
+            positionEditor.customReadyHandler = redrawPositionEditor;
     }
 
     public function new(?initialVariantStr:String, ?selectedMainlineMove:Int)
