@@ -5,6 +5,6 @@ import net.shared.ChallengeData;
 enum SignInResult
 {
     Success(incomingChallenges:Array<ChallengeData>);
-    ReconnectionNeeded(incomingChallenges:Array<ChallengeData>, gameID:Int, timeData:TimeReservesData, currentLog:String);
+    ReconnectionNeeded(incomingChallenges:Array<ChallengeData>, gameInfo:OngoingGameInfo);
     Fail;
 }

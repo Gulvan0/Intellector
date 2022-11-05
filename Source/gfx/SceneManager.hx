@@ -44,21 +44,14 @@ class SceneManager
         return scene.playerInGame();
     }
 
-    public static function onConnectionError()
+    public static function onDisconnected()
     {
         scene.menubar.disabled = true;
+    }
 
-        switch currentScreenType 
-        {
-            case MainMenu, LiveGame(_, _), PlayerProfile(_, _), ChallengeJoining(_), Analysis(_, _, _, _):
-                var removeDialogCallback:Void->Void = Dialogs.reconnectionDialog();
-                Networker.startSessionRestorationAttempts(() -> {
-                    removeDialogCallback();
-                    scene.menubar.disabled = false;
-                }, Browser.location.reload.bind(false));
-            case LanguageSelectIntro(_), null:
-                Browser.location.reload(); //Shouldn't have ended up there, but anyway, let's reload
-        }
+    public static function onConnected()
+    {
+        scene.menubar.disabled = false;
     }
 
     public static function toScreen(type:ScreenType)
@@ -154,6 +147,7 @@ class SceneManager
     public static function launch()
     {
         scene = new Scene();
+        scene.menubar.disabled = true;
         HaxeUIScreen.instance.addComponent(scene);
         GlobalBroadcaster.addObserver(scene);
 

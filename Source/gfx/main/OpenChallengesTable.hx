@@ -20,7 +20,6 @@ class OpenChallengesTable extends VBox
         for (data in challenges)
         {
             var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
-            trace(data, params);
             var bracketText:String = Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated));
             var modeData = {color: params.acceptorColor, situation: params.customStartingSituation};
             table.dataSource.add({mode: modeData, timeControl: params.timeControl, player: '${data.ownerLogin} (${eloToStr(data.ownerELO)})', bracket: bracketText});

@@ -5,8 +5,9 @@ import Preferences.PreferenceName;
 
 enum GlobalEvent
 {
-    LoggedIn(incomingChallenges:Array<ChallengeData>);
+    LoggedIn;
     LoggedOut;
+    IncomingChallengesBatch(incomingChallenges:Array<ChallengeData>);
     FollowedPlayerUpdated(followedLogin:String);
     PreferenceUpdated(name:PreferenceName);
 }

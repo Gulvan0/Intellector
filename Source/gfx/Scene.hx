@@ -127,7 +127,10 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     {
         switch event
         {
-            case LoginResult(ReconnectionNeeded(_, _, _, _)):
+            case GreetingResponse(Logged(_, _, ongoingFiniteGame)):
+                if (ongoingFiniteGame != null)
+                    setIngameStatus(true);
+            case LoginResult(ReconnectionNeeded(_, _)):
                 setIngameStatus(true);
             case GameStarted(_, logPreamble):
                 setIngameStatus(true);
@@ -158,8 +161,9 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     {
         switch event 
         {
-            case LoggedIn(incomingChallenges):
+            case LoggedIn:
                 refreshAccountElements();
+            case IncomingChallengesBatch(incomingChallenges):
                 for (info in incomingChallenges)
                     challengeList.appendEntry(info);
             case LoggedOut:
@@ -258,7 +262,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onLogOutPressed(e)
     {
-        LoginManager.logout();
+        LoginManager.removeCredentials();
+        Networker.emitEvent(LogOut);
     }
 
     private function refreshAccountElements()

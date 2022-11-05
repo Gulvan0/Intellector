@@ -1,5 +1,7 @@
 package net;
 
+import net.shared.GreetingResponseData;
+import net.shared.Greeting;
 import net.shared.ChallengeData;
 import net.shared.TimeControlType;
 import net.shared.GameInfo;
@@ -21,6 +23,79 @@ typedef MainMenuEnteredCallback = (openChallenges:Array<ChallengeData>, currentG
 
 class Requests
 {
+    public static function greet(greeting:Greeting, callback:GreetingResponseData->Void)
+    {
+        Networker.addHandler(greet_handler.bind(callback));
+        Networker.emitEvent(Greet(greeting));
+    }
+
+    private static function greet_handler(callback:GreetingResponseData->Void, event:ServerEvent):Bool
+    {
+        switch event 
+        {
+            case GreetingResponse(data):
+                callback(data);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static function signin(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void) 
+    {
+        Networker.addHandler(signin_handler.bind(login, password, remember, onSuccess, onFail));
+        Networker.emitEvent(Login(login, password));
+    }
+
+    private static function signin_handler(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void, event:ServerEvent) 
+    {
+        switch event
+        {
+            case LoginResult(result):
+                switch result 
+                {
+                    case Success(incomingChallenges):
+                        LoginManager.assignCredentials(login, password, remember? LongTerm : ShortTerm);
+                        GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
+                        onSuccess();
+                    case ReconnectionNeeded(incomingChallenges, gameInfo):
+                        LoginManager.assignCredentials(login, password, remember? LongTerm : ShortTerm);
+                        GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
+                        var parsedData:GameLogParserOutput = GameLogParser.parse(gameInfo.currentLog);
+                        SceneManager.toScreen(LiveGame(gameInfo.id, Ongoing(parsedData, gameInfo.timeData, null)));
+                    case Fail:
+                        onFail();
+                }
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static function register(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void) 
+    {
+        Networker.addHandler(register_handler.bind(login, password, remember, onSuccess, onFail));
+        Networker.emitEvent(Register(login, password));
+    }
+
+    private static function register_handler(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void, event:ServerEvent) 
+    {
+        switch event
+        {
+            case RegisterResult(result):
+                if (result == Success)
+                {
+                    LoginManager.assignCredentials(login, password, remember? LongTerm : ShortTerm);
+                    onSuccess();
+                }
+                else
+                    onFail();
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static function getGame(id:Int)
     {
         Networker.addHandler(getGame_handler.bind(id));
@@ -57,9 +132,9 @@ class Requests
         {
             case OpenChallengeInfo(data):
                 SceneManager.toScreen(ChallengeJoining(data));
-            case OpenChallengeHostPlaying(gameID, timeData, currentLog):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                SceneManager.toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, null)));
+            case OpenChallengeHostPlaying(data):
+                var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
+                SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, null)));
             case OpenChallengeGameEnded(gameID, log):
                 var parsedData:GameLogParserOutput = GameLogParser.parse(log);
                 SceneManager.toScreen(LiveGame(gameID, Past(parsedData, null)));
@@ -208,9 +283,9 @@ class Requests
     {
         switch event
         {
-            case SpectationData(gameID, timeData, currentLog): 
-		        var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                SceneManager.toScreen(LiveGame(gameID, Ongoing(parsedData, timeData, login)));
+            case SpectationData(data): 
+		        var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
+                SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, login)));
             case FollowSuccess:
                 Dialogs.info(REQUESTS_FOLLOW_PLAYER_SUCCESS_DIALOG_TEXT, REQUESTS_FOLLOW_PLAYER_SUCCESS_DIALOG_TITLE);
             case PlayerNotFound:

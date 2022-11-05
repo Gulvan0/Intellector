@@ -1,5 +1,11 @@
 package;
 
+import js.Browser;
+import serialization.GameLogParser;
+import gfx.ScreenNavigator;
+import browser.CredentialCookies;
+import net.shared.GreetingResponseData;
+import net.Requests;
 import hx.ws.Types.MessageType;
 import haxe.Unserializer;
 import haxe.Serializer;
@@ -22,13 +28,17 @@ class Networker
     private static var _ws:WebSocket;
 
     public static var eventQueue:EventProcessingQueue = new EventProcessingQueue();
-    public static var onConnectionEstabilished:Void->Void;
 
     private static var suppressAlert:Bool;
     private static var backoffDelay:Float;
     private static var doNotReconnect:Bool = false;
     private static var reconnectionToken:String = "not_set";
     public static var ignoreEmitCalls:Bool = false; 
+
+    public static function getSessionID():String
+    {
+        return reconnectionToken.split('_')[1];
+    }
 
     public static function launch() 
     {
@@ -44,7 +54,7 @@ class Networker
         _ws.onopen = onConnectionOpen;
         _ws.onmessage = onMessageRecieved;
         _ws.onclose = onConnectionClosed;
-        _ws.onerror = startReconnectionAttempts.bind(onConnectionOpen); //Will be changed to SceneManager handler after the connection is open
+        _ws.onerror = onConnectionFailed;
     }
     
     public static function dropConnection() 
@@ -57,11 +67,24 @@ class Networker
         }
     }
 
+    private static function onConnectionFailed(e)
+    {
+        ScreenNavigator.toAnalysis();
+        //TODO: Show explanatory dialog
+        startReconnectionAttempts(onConnectionOpen);
+    }
+
     private static function onConnectionOpen()
     {
         _ws.onerror = onConnectionError;
         suppressAlert = false;
-        onConnectionEstabilished();
+
+        SceneManager.observeNetEvents();
+
+        if (CredentialCookies.hasLoginDetails())
+            Requests.greet(Login(CredentialCookies.getLogin(), CredentialCookies.getPassword()), onGreetingAnswered);
+		else
+            Requests.greet(Simple, onGreetingAnswered);
     }
 
     private static function onMessageRecieved(msg:MessageType)
@@ -80,7 +103,8 @@ class Networker
                 }
                 catch (e)
                 {
-                    trace("Unexpected message: " + content);
+                    trace("Failed to deserialize message: " + content);
+                    trace(e);
                     return;
                 }
         }
@@ -88,10 +112,9 @@ class Networker
         switch event
         {
             case DontReconnect:
-                onReconnectionForbidden();
-            case SessionToken(token):
-                reconnectionToken = token;
-                LoginManager.sessionID = token.split('_')[1];
+                doNotReconnect = true;
+                suppressAlert = true;
+                Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
             default:
                 eventQueue.processEvent(event);
         }
@@ -99,30 +122,72 @@ class Networker
 
     private static function onConnectionClosed()
     {
-        SceneManager.clearScreen();
+        if (doNotReconnect)
+        {
+            SceneManager.clearScreen();
 
-        if (suppressAlert)
-            trace("Connection closed");
+            if (!suppressAlert)
+            {
+                Dialogs.alert(CONNECTION_LOST_ERROR, CONNECTION_ERROR_DIALOG_TITLE);
+                suppressAlert = true;
+            }
+            else
+                trace("Connection closed");
+        }
         else
         {
-            Dialogs.alert(CONNECTION_LOST_ERROR, CONNECTION_ERROR_DIALOG_TITLE);
-            suppressAlert = true;
+            SceneManager.onDisconnected();
+            Dialogs.reconnectionDialog();
+            startReconnectionAttempts(onConnectionReopened);
         }
-        
-        if (!doNotReconnect)
-            startReconnectionAttempts(onConnectionOpen);
     }
 
     private static function onConnectionError(err:Event)
     {
         trace("Connection error: " + err.type);
-        SceneManager.onConnectionError();
     }
 
-    public static function startReconnectionAttempts(onConnected:Void->Void)
+    private static function onConnectionReopened()
+    {
+        _ws.onerror = onConnectionError;
+        suppressAlert = false;
+        Requests.greet(Reconnect(reconnectionToken), onGreetingAnswered);
+    }
+
+	private static function onGreetingAnswered(data:GreetingResponseData)
+	{
+		switch data 
+		{
+			case ConnectedAsGuest(token, invalidCredentials):
+                reconnectionToken = token;
+                if (invalidCredentials)
+                    CredentialCookies.removeLoginDetails();
+				ScreenNavigator.navigate();
+			case Logged(token, incomingChallenges, ongoingFiniteGame):
+                reconnectionToken = token;
+                LoginManager.assignCredentials(CredentialCookies.getLogin(), CredentialCookies.getPassword(), None);
+                GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
+                if (ongoingFiniteGame != null)
+                {
+                    var parsedData:GameLogParserOutput = GameLogParser.parse(ongoingFiniteGame.currentLog);
+                    SceneManager.toScreen(LiveGame(ongoingFiniteGame.id, Ongoing(parsedData, ongoingFiniteGame.timeData, null)));
+                }
+                else
+				    ScreenNavigator.navigate();
+			case Reconnected(missedEvents):
+                Dialogs.closeReconnectionDialog();
+                SceneManager.onConnected();
+                for (missedEvent in missedEvents)
+                    eventQueue.processEvent(missedEvent);
+            case NotReconnected:
+                Browser.location.reload(false);
+		}
+	}
+
+    public static function startReconnectionAttempts(onOpen:Void->Void)
     {
         backoffDelay = 1000;
-        _ws.onopen = onConnected;
+        _ws.onopen = onOpen;
         _ws.onerror = (e) -> {
             Timer.delay(_ws.open, Math.round(backoffDelay));
             if (backoffDelay < 16000)
@@ -131,41 +196,6 @@ class Networker
                 backoffDelay += 1000 * (Math.random() - 0.5);
         };
         _ws.open();
-    }
-
-    public static function startSessionRestorationAttempts(onRestored:Void->Void, onNotRestored:Void->Void)
-    {
-        startReconnectionAttempts(() -> {
-            addHandler(sessionRestorationHandler.bind(onRestored, onNotRestored));
-            emitEvent(RestoreSession(reconnectionToken));
-        });
-    }
-
-    private static function sessionRestorationHandler(onRestored:Void->Void, onNotRestored:Void->Void, event:ServerEvent):Bool
-    {
-        switch event 
-        {
-            case RestoreSessionResult(result):
-                switch result 
-                {
-                    case Restored(missedEvents):
-                        for (missedEvent in missedEvents)
-                            eventQueue.processEvent(missedEvent);
-                        onRestored();
-                    case NotRestored:
-                        onNotRestored();
-                }
-            default:
-                return false;
-        }
-        return true;
-    }
-
-    private static function onReconnectionForbidden() 
-    {
-        doNotReconnect = true;
-        suppressAlert = true;
-        Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -52,6 +52,7 @@ enum SpaceRemoval
 class Dialogs
 {
     private static var shownDialogs:Array<Dialog> = [];
+    private static var reconnectionPopUp:Null<Dialog>;
 
     private static function correctDialogPosition(dialog:Dialog)
     {
@@ -169,10 +170,12 @@ class Dialogs
 
     /**
         Displays non-closable reconnection pop-up
-        @returns Callback closing the dialog
     **/
-    public static function reconnectionDialog():Void->Void
+    public static function reconnectionDialog()
     {
+        if (reconnectionPopUp != null)
+            return;
+        
         var loadingAnimation:SpriteWrapper = new SpriteWrapper(Assets.getMovieClip("preloader:LogoPreloader"), true);
         loadingAnimation.x = 120;
         loadingAnimation.y = 132;
@@ -198,7 +201,15 @@ class Dialogs
         dialog.closable = false;
         dialog.addComponent(vbox);
         addDialog(dialog, true, null, true);
-        return () -> {dialog.hideDialog(null);};
+
+        reconnectionPopUp = dialog;
+    }
+
+    public static function closeReconnectionDialog()
+    {
+        if (reconnectionPopUp != null)
+            reconnectionPopUp.hideDialog(null);
+        reconnectionPopUp = null;
     }
 
     public static function branchingHelp()

@@ -2,9 +2,9 @@ package net.shared;
 
 enum ClientEvent
 {
+    Greet(greeting:Greeting);
     Login(login:String, password:String);
     Register(login:String, password:String);
-    RestoreSession(token:String);
     LogOut;
     CreateChallenge(serializedParams:String);
     CancelChallenge(challengeID:Int);

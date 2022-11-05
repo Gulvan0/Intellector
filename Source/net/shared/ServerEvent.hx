@@ -1,12 +1,11 @@
 package net.shared;
 
-import net.shared.TimeReservesData;
-import net.shared.PieceColor;
-
 enum ServerEvent
 {
+    GreetingResponse(data:GreetingResponseData); //Answer to Greeting
+
     GameStarted(gameID:Int, logPreamble:String); //Sent when a game with one of the players being the user starts. Signals the app to navigate to the game screen. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
-    SpectationData(gameID:Int, timeData:Null<TimeReservesData>, currentLog:String); //Sent to a spectator joining the game. All the match details required may be derived from the currentLog arg. Signals the app to navigate to the game screen. 
+    SpectationData(data:OngoingGameInfo); //Sent to a spectator joining the game. All the match details required may be derived from the currentLog arg. Signals the app to navigate to the game screen. 
     
     GameIsOver(log:String); //Answer to GetGame: game has ended and now can be revisited
     GameIsOngoing(timeData:Null<TimeReservesData>, currentLog:String); //Answer to GetGame: game is in process. Player should either spectate or reconnect based on whether the log contains their login
@@ -24,13 +23,12 @@ enum ServerEvent
     ChallengeOwnerInGame(owner:String); //Answer to AcceptChallenge: caller joined a different game before the recipient answered
     
     OpenChallengeInfo(data:ChallengeData); //Answer to GetOpenChallenge when it exists with challenge parameters
-    OpenChallengeHostPlaying(gameID:Int, timeData:Null<TimeReservesData>, currentLog:String); //Answer to GetOpenChallenge: the challenge has already been accepted by other player, the game is in progress
+    OpenChallengeHostPlaying(data:OngoingGameInfo); //Answer to GetOpenChallenge: the challenge has already been accepted by other player, the game is in progress
     OpenChallengeGameEnded(gameID:Int, log:String); //Answer to GetOpenChallenge: the challenge has already been accepted by other player and the corresponding game has already ended
     OpenChallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist
     
     LoginResult(result:SignInResult); //Answer to Login
-    RegisterResult(result:SignInResult); //Answer to Register
-    RestoreSessionResult(result:SessionRestorationResult); //Answer to RestoreSession
+    RegisterResult(result:RegisterResult); //Answer to Register
 
     InvalidMove; //Sent to the player who attempted to perform an invalid move
     Message(authorRef:String, message:String); //New in-game player message
@@ -76,6 +74,5 @@ enum ServerEvent
     MainMenuNewGame(data:GameInfo);
     MainMenuGameEnded(data:GameInfo);
 
-    SessionToken(token:String);
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created
 }

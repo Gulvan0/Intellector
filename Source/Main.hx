@@ -1,5 +1,7 @@
 package;
 
+import gfx.ScreenNavigator;
+import net.shared.GreetingResponseData;
 import tests.SimpleTests;
 import gfx.basic_components.AutosizingLabel;
 import struct.Situation;
@@ -34,29 +36,6 @@ using StringTools;
 	The file is structured in a waterfall manner: as you go
 	through all of the initialization steps, you descend lower
 	and lower.
-
-	Generally, initialization consists of the following phases:
-	- Some purely technical aspects for the app to work
-	correctly: init();
-	- An attempt to load user's language preference from their
-	cookies; if no exist (usually when this is their first visit),
-	the user is asked to choose: start();
-	- Connection attempt. If it is impossible to connect to the
-	server, leave user in the "playground" (analysis board, that
-	is), while actively trying to reconnect behind the scenes:
-	onLanguageReady();
-	- Auto Sign-In. Loads the user's credentials from the cookies
-	to automatically log them in. Continues right after ANY 
-	response from the server is received, since signing in isn't
-	mandatory. For the same reason, jumps to the next step if no 
-	credential cookies are found. Located in onConnected();
-	- Path parsing. Retrieving the page the user requested from
-	the URL search params: navigate() and navigateToSection(). 
-	The former provides backward compatibility for the old URLs
-	(pre-2.0). The latter one parses the modern paths;
-	- Navigating to a respective page: all of the following 
-	methods. The ones needing an additional data make use of a
-	Requests class, retrieving the missing data from the server.
 **/
 class Main extends Sprite
 {
@@ -66,9 +45,12 @@ class Main extends Sprite
 		init(start);
 	}
 
+	/**
+		Some purely technical aspects for the app to work correctly
+	**/
 	private function init(callback:Void->Void) 
 	{
-		Browser.window.onpopstate = navigate;
+		Browser.window.onpopstate = ScreenNavigator.navigate; //TODO: Has reloading stage? Can escape ongoing finite game?
 		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
 		Browser.document.addEventListener('wheel', event -> {
 			if (event.ctrlKey)
@@ -82,6 +64,10 @@ class Main extends Sprite
 		AssetManager.load(callback);
 	}
 
+	/**
+		Attempt to load user's language preference from their cookies.
+		If no exist (usually when it's their first visit), ask user to choose
+	**/
 	private function start() 
 	{
 		var langInitializedFromCookie:Bool = Preferences.language.load();
@@ -94,6 +80,9 @@ class Main extends Sprite
 			SceneManager.toScreen(LanguageSelectIntro(onLanguageReady));
 	}
 
+	/**
+		Set locale and finally attempt to connect
+	**/
 	private function onLanguageReady() 
 	{
 		if (Preferences.language.get() == RU)
@@ -101,96 +90,17 @@ class Main extends Sprite
 		else
 			LocaleManager.instance.language = "en";
 
-		Networker.onConnectionEstabilished = onConnected;
 		Networker.launch();
 		//test();
 	}
 
+	/**
+		Method called instead of Networker.launch() during testing
+	**/
 	private function test()
 	{
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
 		//Your testing code here (refer to `tests` package)
-	}
-
-	private function onConnected()
-	{
-		SceneManager.observeNetEvents();
-		if (CredentialCookies.hasLoginDetails())
-			LoginManager.signin(CredentialCookies.getLogin(), CredentialCookies.getPassword(), null, navigate, navigate);
-		else
-			navigate();
-	}
-
-	private function navigate()
-	{
-		var searcher = new URLSearchParams(Browser.location.search);
-        if (searcher.has("p"))
-        {
-			var pagePathParts:Array<String> = searcher.get("p").split('/');
-			var section:String = pagePathParts[0];
-
-			navigateToSection(section, pagePathParts.slice(1));
-		}
-		else if (searcher.has("id")) //* This case was added for the backward compatibility
-			navigateToSection("live", [searcher.get("id")]);
-        else
-            navigateToSection("home", []);
-	}
-
-    private function navigateToSection(section:String, pathPartsAfter:Array<String>)
-    {
-		switch section
-        {
-            case "analysis":  
-                toAnalysis();
-            case "join":
-				toOpenChallengeJoining(pathPartsAfter[0]);
-            case "player":
-				toProfile(pathPartsAfter[0]);
-            case "study":
-				toStudy(pathPartsAfter[0]);
-            case "live": 
-                toGame(pathPartsAfter[0]);
-            default:
-                SceneManager.toScreen(MainMenu);
-        }
-	}
-
-	private function toAnalysis() 
-	{
-		SceneManager.toScreen(Analysis(null, null, null, null));
-	}
-
-	private function toOpenChallengeJoining(idStr:String) 
-	{
-		var id:Null<Int> = Std.parseInt(idStr);
-		if (id != null)
-			Requests.getOpenChallenge(id);
-		else
-			SceneManager.toScreen(MainMenu);
-	}
-
-	private function toProfile(login:String) 
-	{
-		Requests.getPlayerProfile(login);
-	}
-
-	private function toStudy(idStr:String) 
-	{
-		var id:Null<Int> = Std.parseInt(idStr);
-		if (id != null)
-			Requests.getStudy(id);
-		else
-			SceneManager.toScreen(MainMenu);
-	}
-
-	private function toGame(idStr:String) 
-	{
-		var id:Null<Int> = Std.parseInt(idStr);
-		if (id != null)
-			Requests.getGame(id);
-		else
-			SceneManager.toScreen(MainMenu);
 	}
 }

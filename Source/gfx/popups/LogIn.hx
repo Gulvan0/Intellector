@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import net.Requests;
 import utils.StringUtils;
 import gfx.Dialogs;
 import dict.Dictionary;
@@ -44,7 +45,7 @@ class LogIn extends Dialog
 
         if (signInMode) 
         {
-            LoginManager.signin(login, password, signInRememberMeCheckbox.selected, fn.bind(true), () -> {
+            Requests.signin(login, password, signInRememberMeCheckbox.selected, fn.bind(true), () -> {
                 Dialogs.alert(LOGIN_INVALID_PASSWORD_WARNING_TEXT, LOGIN_WARNING_MESSAGEBOX_TITLE);
                 fn(false);
             });
@@ -79,7 +80,7 @@ class LogIn extends Dialog
                 return;
             }
 
-            LoginManager.register(login, password, signUpStayLoggedCheckbox.selected, fn.bind(true), () -> {
+            Requests.register(login, password, signUpStayLoggedCheckbox.selected, fn.bind(true), () -> {
                 Dialogs.alert(LOGIN_ALREADY_REGISTERED_WARNING_TEXT, LOGIN_WARNING_MESSAGEBOX_TITLE);
                 fn(false);
             });
