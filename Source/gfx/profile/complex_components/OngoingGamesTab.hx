@@ -34,6 +34,8 @@ class OngoingGamesTab extends VBox
     public function new(profileOwnerLogin:String, gamesInProgress:Array<GameInfo>)
     {
         super();
+        this.percentWidth = 100;
+        this.percentHeight = 100;
         this.text = Dictionary.getPhrase(PROFILE_ONGOING_MATCHES_TAB_TITLE);
         this.profileOwnerLogin = profileOwnerLogin;
 
