@@ -104,6 +104,5 @@ class Main extends Sprite
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
 		//Your testing code here (refer to `tests` package)
-		SceneManager.toScreen(Analysis(null, null, null, null));
 	}
 }

@@ -48,8 +48,6 @@ class PastGamesTab extends VBox
     public function new(profileOwnerLogin:String, preloadedGames:Array<GameInfo>, elo:Map<TimeControlType, EloValue>, gamesCntByTimeControl:Map<TimeControlType, Int>, totalPastGames:Int)
     {
         super();
-        this.percentWidth = 100;
-        this.percentHeight = 100;
         this.text = Dictionary.getPhrase(PROFILE_GAMES_TAB_TITLE);
         this.profileOwnerLogin = profileOwnerLogin;
         this.activeTimeControlFilter = null;

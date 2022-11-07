@@ -51,7 +51,7 @@ class Networker
         #if prod
         _ws = new WebSocket("wss://play-intellector.ru:5000", false);
         #else
-        _ws = new WebSocket("ws://localhost:5000", false);
+        _ws = new WebSocket("ws://192.168.1.106:5000", false);
         #end
     }
 

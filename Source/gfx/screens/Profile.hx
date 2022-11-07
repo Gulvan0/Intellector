@@ -1,7 +1,5 @@
 package gfx.screens;
 
-import gfx.basic_components.utils.DimValue.assignWidth;
-import haxe.ui.events.UIEvent;
 import gfx.profile.complex_components.OngoingGamesTab;
 import gfx.profile.complex_components.StudiesTab;
 import gfx.profile.complex_components.PastGamesTab;
@@ -15,15 +13,6 @@ class Profile extends Screen
     private var profileOwnerLogin:String;
     private var isPlayer:Bool;
     private var data:ProfileData;
-
-    @:bind(this, UIEvent.RESIZE)
-    private function onResize(e)
-    {
-        if (haxe.ui.core.Screen.instance.actualWidth > 800)
-            assignWidth(contentsBox, Exact(800));
-        else
-            assignWidth(contentsBox, Percent(100));
-    }
 
     public function new(ownerLogin:String, data:ProfileData)
     {
@@ -47,10 +36,8 @@ class Profile extends Screen
         tabView.addComponent(studiesTab);
         tabView.addComponent(ongoingGamesTab);
 
-        assignWidth(header, Percent(100));
-
-        /*this.responsiveComponents = [
+        this.responsiveComponents = [
             contentsBox => [Width => Min([VW(100), Exact(800)])]
-        ];*/
+        ];
     }
 }
