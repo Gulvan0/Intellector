@@ -94,7 +94,12 @@ class ProfileHeader extends VBox
                 followBtn.hidden = LoginManager.isPlayer(username);
         }
 
-        if (profileData.isFriend)
+        if (!LoginManager.isLogged() || LoginManager.isPlayer(username))
+        {
+            addFriendBtn.hidden = true;
+            removeFriendBtn.hidden = true;
+        }
+        else if (profileData.isFriend)
             addFriendBtn.hidden = true;
         else
             removeFriendBtn.hidden = true;

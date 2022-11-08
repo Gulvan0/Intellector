@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import haxe.Timer;
 import dict.Dictionary;
 import net.shared.EloValue;
 import net.shared.GameInfo;
@@ -19,6 +20,7 @@ class PastGamesTab extends VBox
     private var profileOwnerLogin:String;
     private var activeTimeControlFilter:Null<TimeControlType>;
     private var hasNext:Bool;
+    private var canLoad:Bool = true;
 
     private function onGameClicked(info:GameInfo)
     {
@@ -37,12 +39,16 @@ class PastGamesTab extends VBox
     {
         list.appendGames(games);
         this.hasNext = hasNext;
+        Timer.delay(() -> {canLoad = true;}, 100);
     }
 
     private function onScrolled()
     {
-        if (hasNext && list.vscrollPos >= list.vscrollMax) 
+        if (hasNext && canLoad && list.vscrollPos >= list.vscrollMax) 
+        {
+            canLoad = false;
             Requests.getPlayerPastGames(profileOwnerLogin, list.loadedGamesCount, GAMES_PAGE_SIZE, activeTimeControlFilter, onGamesLoaded);
+        }
     }
 
     public function new(profileOwnerLogin:String, preloadedGames:Array<GameInfo>, elo:Map<TimeControlType, EloValue>, gamesCntByTimeControl:Map<TimeControlType, Int>, totalPastGames:Int)

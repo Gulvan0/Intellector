@@ -40,7 +40,7 @@ class OngoingGamesTab extends VBox
         this.profileOwnerLogin = profileOwnerLogin;
 
         reloadBtn = new Button();
-        reloadBtn.text = Dictionary.getPhrase(PROFILE_LOAD_MORE_BTN_TEXT);
+        reloadBtn.text = Dictionary.getPhrase(PROFILE_ONGOING_RELOAD_BTN_TEXT);
         reloadBtn.horizontalAlign = 'center';
         reloadBtn.onClick = onReloadPressed;
         addComponent(reloadBtn);

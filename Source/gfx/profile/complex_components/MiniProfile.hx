@@ -112,7 +112,7 @@ class MiniProfile extends Dialog
         else
             unfriendBtn.hidden = true;
 
-        if (LoginManager.isPlayer(username))
+        if (!LoginManager.isLogged() || LoginManager.isPlayer(username))
         {
             friendBtn.hidden = true;
             unfriendBtn.hidden = true;

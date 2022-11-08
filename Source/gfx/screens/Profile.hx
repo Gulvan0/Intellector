@@ -16,8 +16,17 @@ class Profile extends Screen
     private var isPlayer:Bool;
     private var data:ProfileData;
 
-    @:bind(this, UIEvent.RESIZE)
-    private function onResize(e)
+    private function onEnter()
+    {
+        SceneManager.addResizeHandler(onResize);
+    }
+
+    private function onClose()
+    {
+        SceneManager.removeResizeHandler(onResize);
+    }
+
+    private function onResize()
     {
         if (haxe.ui.core.Screen.instance.actualWidth > 800)
             assignWidth(contentsBox, Exact(800));
@@ -49,8 +58,7 @@ class Profile extends Screen
 
         assignWidth(header, Percent(100));
 
-        /*this.responsiveComponents = [
-            contentsBox => [Width => Min([VW(100), Exact(800)])]
-        ];*/
+        customEnterHandler = onEnter;
+        customCloseHandler = onClose;
     }
 }
