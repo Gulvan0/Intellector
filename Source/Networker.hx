@@ -1,5 +1,7 @@
 package;
 
+import js.html.XMLHttpRequest;
+import haxe.Http;
 import js.Browser;
 import serialization.GameLogParser;
 import gfx.ScreenNavigator;
@@ -26,6 +28,7 @@ using Lambda;
 class Networker
 {
     private static var _ws:WebSocket;
+    private static var address:String;
 
     public static var eventQueue:EventProcessingQueue = new EventProcessingQueue();
 
@@ -48,16 +51,32 @@ class Networker
 
     private static function createWS()
     {
-        #if prod
-        _ws = new WebSocket("wss://play-intellector.ru:5000", false);
-        #else
-        _ws = new WebSocket("ws://localhost:5000", false);
-        #end
+        _ws = new WebSocket(address, false);
     }
 
     public static function launch() 
     {
         Serializer.USE_ENUM_INDEX = true;
+        
+        var req = new XMLHttpRequest();
+        req.onload = () -> {
+            var configMap:Map<String, String> = [];
+            var lines:Array<String> = req.responseText.split('\n');
+            for (line in lines)
+            {
+                var splitted:Array<String> = line.split(':');
+                configMap.set(StringTools.trim(splitted[0]), StringTools.trim(splitted[1]));
+            }
+
+            if (configMap["secure"] == "true")
+                address = "wss://";
+            else
+                address = "ws://";
+
+            address += configMap["host"] + ":" + configMap["port"];
+        };
+        req.open('GET', 'config.yaml', false);
+        req.send();
 
         createWS();
         
