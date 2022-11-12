@@ -122,23 +122,18 @@ class BoardWrapper extends Component
         else
             return false;
     }
-
-    private function updateBoardSizeLater()
-    {
-        Timer.delay(updateBoardSize, 120);
-    }
-
+    
     private function onAdded(e)
     {
         removeEventListener(Event.ADDED_TO_STAGE, onAdded);
-        SceneManager.addResizeHandler(updateBoardSizeLater);
+        SceneManager.addResizeHandler(updateBoardSize);
         addEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
     }
 
     private function onRemoved(e)
     {
         removeEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
-        SceneManager.removeResizeHandler(updateBoardSizeLater);
+        SceneManager.removeResizeHandler(updateBoardSize);
     }
 
     public function new(board:Board) 

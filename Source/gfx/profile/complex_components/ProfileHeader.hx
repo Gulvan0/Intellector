@@ -38,11 +38,13 @@ class ProfileHeader extends VBox
             addRemoveFriendToggleTimer.stop();
 
         addFriendBtn.hidden = true;
+        removeFriendBtn.disabled = true;
+        removeFriendBtn.hidden = false;
         Networker.emitEvent(AddFriend(username));
         
         addRemoveFriendToggleTimer = Timer.delay(() -> {
             addRemoveFriendToggleTimer = null;
-            removeFriendBtn.hidden = false;
+            removeFriendBtn.disabled = false;
         }, 3000);
     }
 
@@ -53,11 +55,13 @@ class ProfileHeader extends VBox
             addRemoveFriendToggleTimer.stop();
 
         removeFriendBtn.hidden = true;
+        addFriendBtn.disabled = true;
+        addFriendBtn.hidden = false;
         Networker.emitEvent(RemoveFriend(username));
 
         addRemoveFriendToggleTimer = Timer.delay(() -> {
             addRemoveFriendToggleTimer = null;
-            addFriendBtn.hidden = false;
+            addFriendBtn.disabled = false;
         }, 3000);
     }
 

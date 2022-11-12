@@ -12,13 +12,12 @@ class Screen extends Component
 {
     public final menuHidden:Bool;
     private var responsiveComponents:Map<Component, Map<ResponsiveProperty, ResponsivenessRule>> = [];
-    private var fittedComponents:Array<Component> = [];
     private var customEnterHandler:Null<Void->Void> = null;
     private var customCloseHandler:Null<Void->Void> = null;
 
     public function onEntered()
     {
-        if (!responsiveComponents.empty() || !fittedComponents.empty())
+        if (!responsiveComponents.empty())
         {
             resize();
             SceneManager.addResizeHandler(resize);
@@ -40,11 +39,6 @@ class Screen extends Component
     {
         for (comp => rules in responsiveComponents.keyValueIterator())
             ResponsiveToolbox.resizeComponent(comp, rules);
-
-        Timer.delay(() -> {
-            for (comp in fittedComponents)
-                ResponsiveToolbox.fitComponent(comp);
-        }, 50);
     }
     
     public static function build(type:ScreenType):Screen

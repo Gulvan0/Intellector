@@ -10,6 +10,8 @@ import haxe.ui.containers.ScrollView;
 
 class FriendList extends ScrollView
 {
+    private var noneLabel:AutosizingLabel;
+
     private function ordinalNumber(status:UserStatus):Int
     {
         return switch status {
@@ -26,8 +28,10 @@ class FriendList extends ScrollView
 
     public function fill(friends:Array<FriendData>)
     {
-        for (component in childComponents.slice(1))
+        for (component in childComponents.slice(2))
             removeComponent(component);
+        
+        noneLabel.hidden = true;
 
         friends.sort(compare);
 
@@ -47,5 +51,11 @@ class FriendList extends ScrollView
         titleLabel.customStyle = {fontBold: true};
         titleLabel.percentHeight = 100;
         addComponent(titleLabel);
+        
+        noneLabel = new AutosizingLabel();
+        noneLabel.text = Dictionary.getPhrase(PROFILE_NO_FRIENDS_PLACEHOLDER);
+        noneLabel.customStyle = {color: 0x999999, fontItalic: true};
+        noneLabel.percentHeight = 100;
+        addComponent(noneLabel);
     }
 }

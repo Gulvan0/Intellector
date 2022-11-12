@@ -29,6 +29,15 @@ class OpenChallengeJoining extends Screen
 		Networker.emitEvent(AcceptChallenge(challengeID));
 	}
 
+	private override function onReady()
+	{
+		super.onReady();
+		if (tcIcon.originalWidth > tcIcon.originalHeight)
+			tcIcon.percentWidth = 100;
+		else
+			tcIcon.percentHeight = 100;
+	}
+
     public function new(data:ChallengeData)
     {
 		super();
@@ -82,6 +91,5 @@ class OpenChallengeJoining extends Screen
 			customStartPosIcon => [Width => VMIN(4), Height => VMIN(4)],
 			acceptBtn => [StyleProp(FontSize) => VMIN(4.5)]
 		];
-		fittedComponents = [tcIcon];
     }
 }

@@ -42,6 +42,7 @@ class OpenChallengesTable extends VBox
     private function onGameSelected(e:UIEvent)
     {
         var data:ChallengeData = challengeData[table.selectedIndex];
+        table.selectedIndex = -1;
         if (!LoginManager.isPlayer(data.ownerLogin))
             Requests.getOpenChallenge(data.id);
     }
@@ -67,6 +68,6 @@ class OpenChallengesTable extends VBox
     public function new()
     {
         super();
-        table.selectionMode = DISABLED;
+        table.selectionMode = ONE_ITEM;
     }
 }

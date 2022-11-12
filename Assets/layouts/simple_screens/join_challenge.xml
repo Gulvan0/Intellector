@@ -4,7 +4,7 @@
             <label id="challengeByLabel" horizontalAlign="center" style="font-name: 'fonts/Futura.ttf';"/>
             <hbox id="descriptionHBox">
                 <box id="tcIconBox" verticalAlign="center">
-                    <image id="tcIcon" verticalAlign="center" horizontalAlign="center" />
+                    <arp-image id="tcIcon" verticalAlign="center" horizontalAlign="center" />
                 </box>
                 <vbox verticalAlign="center">
                     <label id="tcLabel" style="font-style:italic"/>

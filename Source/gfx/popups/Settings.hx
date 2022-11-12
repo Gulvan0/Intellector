@@ -48,6 +48,13 @@ class Settings extends Dialog
             SceneManager.removeResizeHandler(resize);
     }
 
+    private override function onReady()
+    {
+        super.onReady();
+        resize();
+        SceneManager.addResizeHandler(resize);
+    }
+
     public function new()
     {
         super();
@@ -99,8 +106,5 @@ class Settings extends Dialog
             case Never:
                 autoScrollBar.selectedButton = autoScrollBtnNever;
         }
-
-        SceneManager.addResizeHandler(resize);
-        Timer.delay(resize, 50);
     }
 }

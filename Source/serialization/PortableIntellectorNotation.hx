@@ -71,6 +71,7 @@ class PortableIntellectorNotation
             case Drawish(Abort):
                 pin += 'Game aborted';
             case null:
+                pin += '...To be continued';
         }
 
         return pin;

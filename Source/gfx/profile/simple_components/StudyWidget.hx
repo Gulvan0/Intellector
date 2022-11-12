@@ -12,6 +12,7 @@ import dict.Dictionary;
 typedef StudyWidgetData =
 {
     var id:Int;
+    var ownerLogin:String;
     var info:StudyInfo;
     var onTagSelected:String->Void;
     var onEditPressed:Void->Void;
@@ -75,6 +76,12 @@ class StudyWidget extends ItemRenderer
             return;
 
         typedData = data;
+
+        if (!LoginManager.isPlayer(typedData.ownerLogin))
+        {
+            editBtn.hidden = true;
+            deleteBtn.hidden = true;
+        }
 
         var info:StudyInfo = typedData.info;
 

@@ -85,8 +85,6 @@ class Main extends Sprite
 	**/
 	private function onLanguageReady() 
 	{
-		SceneManager.clearScreen();
-		
 		if (Preferences.language.get() == RU)
 			LocaleManager.instance.language = "ru";
 		else
@@ -104,6 +102,5 @@ class Main extends Sprite
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
 		//Your testing code here (refer to `tests` package)
-		SceneManager.toScreen(Analysis(null, null, null, null));
 	}
 }

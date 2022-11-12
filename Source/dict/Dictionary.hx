@@ -272,6 +272,8 @@ class Dictionary
                 return ["Remove friend", "Удалить из друзей"];
             case PROFILE_FRIENDS_PREPENDER:
                 return ["Friends: ", "Друзья: "];
+            case PROFILE_NO_FRIENDS_PLACEHOLDER:
+                return ["no friends", "друзей нет"];
 
             case PROFILE_GAMES_TAB_TITLE:
                 return ["Games", "Игры"];

@@ -57,7 +57,7 @@ class ScreenNavigator
 
 	private static function toProfile(login:String) 
 	{
-		Requests.getPlayerProfile(login);
+		Requests.getPlayerProfile(login, true);
 	}
 
 	private static function toStudy(idStr:String) 

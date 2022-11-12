@@ -232,6 +232,7 @@ class SimpleTests
 	{
 		var data:StudyWidgetData = {
 			id: 12,
+			ownerLogin: LoginManager.getLogin(),
 			info: StudyInfos.info1(),
 			onStudyClicked: () -> {trace('Clicked');},
 			onTagSelected: tag -> {trace('Tag: $tag');},
@@ -270,7 +271,7 @@ class SimpleTests
 
 	public static function studyTab()
 	{
-		var comp:StudiesTab = new StudiesTab([
+		var comp:StudiesTab = new StudiesTab("gulvan", [
 			111 => StudyInfos.info1(),
 			23 => StudyInfos.info2(),
 			21 => StudyInfos.info3()

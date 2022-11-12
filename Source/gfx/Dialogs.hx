@@ -73,10 +73,8 @@ class Dialogs
 
     public static function onScreenResized() 
     {
-        Timer.delay(() -> {
-            for (dialog in shownDialogs)
-                correctDialogPosition(dialog);
-        }, 40);
+        for (dialog in shownDialogs)
+            correctDialogPosition(dialog);
     }
 
     public static function hasActiveDialog():Bool
@@ -101,7 +99,6 @@ class Dialogs
         dialog.onDialogClosed = onDialogClosed.bind(_, dialog, customCloseHandler);
         if (show)
             dialog.showDialog(modal);
-        Timer.delay(correctDialogPosition.bind(dialog), 40);
     }
 
     public static function alertRaw(message:String, ?title:String = "Raw alert")
@@ -152,15 +149,22 @@ class Dialogs
     {
         var res:Null<String> = Browser.window.prompt(Dictionary.getPhrase(message));
 
+        if (res == null)
+        {
+            if (onCancel != null)
+                onCancel();
+            return;
+        }
+
         if (removeSpaces == Trim)
             res = StringTools.trim(res);
         else if (removeSpaces == All)
             res = StringTools.replace(res, ' ', '');
 
-        if (res != null && (res != "" || !emptyIsCancel))
-            onInput(res);
-        else if (onCancel != null)
+        if (res == "" && emptyIsCancel)
             onCancel();
+        else
+            onInput(res);
     }
 
     public static function custom(dialog:Dialog, modal:Bool = true, ?onClosed:DialogEvent->Void)

@@ -45,8 +45,10 @@ class Profile extends Screen
         var header:ProfileHeader = new ProfileHeader(ownerLogin, data);
         var friendsList:FriendList = new FriendList(Percent(100), 50);
 
+        friendsList.fill(data.friends);
+
         var pastGamesTab:PastGamesTab = new PastGamesTab(ownerLogin, data.preloadedGames, data.elo, data.gamesCntByTimeControl, data.totalPastGames);
-        var studiesTab:StudiesTab = new StudiesTab(data.preloadedStudies, data.totalStudies);
+        var studiesTab:StudiesTab = new StudiesTab(ownerLogin, data.preloadedStudies, data.totalStudies);
         var ongoingGamesTab:OngoingGamesTab = new OngoingGamesTab(ownerLogin, data.gamesInProgress);
 
         contentsBox.addComponentAt(header, 0);

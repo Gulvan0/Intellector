@@ -57,7 +57,6 @@ class Networker
 
     public static function launch() 
     {
-        trace("launch()");
         Serializer.USE_ENUM_INDEX = true;
 
         createWS();
@@ -77,7 +76,6 @@ class Networker
     
     public static function dropConnection() 
     {
-        trace("dropConnection()");
         if (_ws != null)
         {
             suppressAlert = true;
@@ -90,7 +88,9 @@ class Networker
     @:access(hx.ws.WebSocket._ws)
     private static function onConnectionOpen(?navigateByURL:Bool = true)
     {
-        trace("onConnectionOpen()");
+        if (isConnected)
+            return;
+
         suppressAlert = false;
         isConnected = true;
 
@@ -114,7 +114,6 @@ class Networker
 
     private static function onMessageRecieved(msg:MessageType)
     {
-        trace("onMessageRecieved()");
         var event:ServerEvent;
 
         switch msg 
@@ -148,7 +147,6 @@ class Networker
 
     private static function onConnectionClosed()
     {
-        trace("onConnectionClosed()");
         isConnected = false;
 
         if (doNotReconnect)
@@ -174,13 +172,11 @@ class Networker
     private static function onConnectionError(err:Event)
     {
         isConnected = false;
-        trace("onConnectionError()");
         trace("Connection error: " + err.type);
     }
 
     private static function onConnectionReopened()
     {
-        trace("onConnectionReopened()");
         isConnected = true;
 
         _ws.onmessage = onMessageRecieved;
@@ -193,7 +189,6 @@ class Networker
 
 	private static function onGreetingAnswered(data:GreetingResponseData, ?dontLeave:Bool = false)
 	{
-        trace("onGreetingAnswered()");
 		switch data 
 		{
 			case ConnectedAsGuest(token, invalidCredentials):
@@ -227,8 +222,6 @@ class Networker
     
     private static function retryConnecting(onOpen:Void->Void)
     {
-        trace("startReconnectionAttempts:callback()");
-
         _ws.close();
         isConnected = false;
 
@@ -247,7 +240,6 @@ class Networker
 
     public static function startReconnectionAttempts(onOpen:Void->Void)
     {
-        trace("startReconnectionAttempts()");
         backoffDelay = 1000;
         retryConnecting(onOpen);
     }

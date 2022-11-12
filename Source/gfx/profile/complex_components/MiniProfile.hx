@@ -107,11 +107,6 @@ class MiniProfile extends Dialog
         else
             unfollowBtn.hidden = true;
 
-        if (data.isFriend)
-            friendBtn.hidden = true;
-        else
-            unfriendBtn.hidden = true;
-
         if (!LoginManager.isLogged() || LoginManager.isPlayer(username))
         {
             friendBtn.hidden = true;
@@ -120,6 +115,10 @@ class MiniProfile extends Dialog
             unfollowBtn.hidden = true;
             challengeBtn.hidden = true;
         }
+        else if (data.isFriend)
+            friendBtn.hidden = true;
+        else
+            unfriendBtn.hidden = true;
 
         if (SceneManager.playerInGame())
             btnBar.disabled = true;

@@ -167,20 +167,21 @@ class Requests
         return true;
     }
 
-    public static function getPlayerProfile(login:String) 
+    public static function getPlayerProfile(login:String, ?returnToMainOnFailed:Bool = false) 
     {
-        Networker.addHandler(getPlayerProfile_handler.bind(login));
+        Networker.addHandler(getPlayerProfile_handler.bind(login, returnToMainOnFailed));
         Networker.emitEvent(GetPlayerProfile(login));
     }
 
-    private static function getPlayerProfile_handler(login:String, event:ServerEvent) 
+    private static function getPlayerProfile_handler(login:String, returnToMainOnFailed:Bool, event:ServerEvent) 
     {
         switch event
         {
             case PlayerProfile(data):
                 SceneManager.toScreen(PlayerProfile(login, data));
             case PlayerNotFound:
-                SceneManager.toScreen(MainMenu);
+                if (returnToMainOnFailed)
+                    SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;

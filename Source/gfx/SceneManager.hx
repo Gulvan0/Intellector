@@ -1,5 +1,6 @@
 package gfx;
 
+import haxe.ui.events.UIEvent;
 import gfx.game.LiveGameConstructor;
 import net.shared.StudyInfo;
 import gfx.game.LiveGameConstructor;
@@ -29,10 +30,12 @@ class SceneManager
 {
     private static var scene:Scene;
     private static var currentScreenType:Null<ScreenType> = null;
-    private static var openflContent:Element;
 
     private static var lastResizeTimestamp:Float;
+    private static var cachedWidth:Float;
+    private static var cachedHeight:Float;
     private static var resizeHandlers:Array<Void->Void> = [];
+    private static var resizeTimeout:Null<Timer>;
 
     public static function getCurrentScreenType():Null<ScreenType>
     {
@@ -78,31 +81,32 @@ class SceneManager
         resizeHandlers.remove(handler);
     }
 
-    private static function onEnterFrame(e)
+    private static function onResized(?e)
     {
         var timestamp:Float = Date.now().getTime();
-        if (timestamp - lastResizeTimestamp > 100)
+        var msSinceLastResize:Float = timestamp - lastResizeTimestamp;
+
+        if (msSinceLastResize > 100 && (cachedWidth != HaxeUIScreen.instance.actualWidth || cachedHeight != HaxeUIScreen.instance.actualHeight))
         {
-            var innerWidthStr = '${Browser.document.documentElement.clientWidth}px';
-            var innerHeightStr = '${Browser.document.documentElement.clientHeight}px';
-
-            if (openflContent.style.width == innerWidthStr && openflContent.style.height == innerHeightStr)
-                return;
-
-            openflContent.style.width = innerWidthStr;
-            openflContent.style.height = innerHeightStr;
             lastResizeTimestamp = timestamp;
+            cachedWidth = HaxeUIScreen.instance.actualWidth;
+            cachedHeight = HaxeUIScreen.instance.actualHeight;
 
-            Timer.delay(broadcastResizeEvent, 40);
+            scene.resize();
+
+            for (handler in resizeHandlers)
+                handler();
+
+            Dialogs.onScreenResized();
         }
+        else if (resizeTimeout == null)
+            resizeTimeout = Timer.delay(onDelayedResizeTimerFired, Math.ceil(100 - msSinceLastResize));
     }
 
-    private static function broadcastResizeEvent()
+    private static function onDelayedResizeTimerFired()
     {
-        scene.resize();
-        for (handler in resizeHandlers)
-            handler();
-        Dialogs.onScreenResized();
+        resizeTimeout = null;
+        onResized();
     }
 
     public static function updateAnalysisStudyInfo(studyID:Null<Int>, studyInfo:Null<StudyInfo>)
@@ -148,12 +152,11 @@ class SceneManager
         Networker.addHandler(handleNetEvent);
         Networker.addObserver(scene);
 
-		openflContent = Browser.document.getElementById("openfl-content");
-		openflContent.style.width = '${Browser.document.documentElement.clientWidth}px';
-        openflContent.style.height = '${Browser.document.documentElement.clientHeight}px';
         lastResizeTimestamp = Date.now().getTime();
+        cachedWidth = HaxeUIScreen.instance.actualWidth;
+        cachedHeight = HaxeUIScreen.instance.actualHeight;
 
-        Timer.delay(scene.resize, 40);
-        scene.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+        scene.resize();
+        HaxeUIScreen.instance.registerEvent(UIEvent.RESIZE, onResized);
     }
 }

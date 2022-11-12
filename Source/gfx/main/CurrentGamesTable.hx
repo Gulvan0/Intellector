@@ -50,7 +50,9 @@ class CurrentGamesTable extends VBox
     @:bind(table, UIEvent.CHANGE)
     private function onGameSelected(e:UIEvent)
     {
-        Requests.getGame(gameIDs[table.selectedIndex]);
+        var gameID:Int = gameIDs[table.selectedIndex];
+        table.selectedIndex = -1;
+        Requests.getGame(gameID);
     }
 
     @:bind(reloadBtn, MouseEvent.CLICK)
@@ -74,6 +76,6 @@ class CurrentGamesTable extends VBox
     public function new()
     {
         super();
-        table.selectionMode = DISABLED;
+        table.selectionMode = ONE_ITEM;
     }
 }

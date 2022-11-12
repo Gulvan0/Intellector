@@ -35,6 +35,7 @@ enum Dimension
     Percent(value:Float);
     VW(value:Float);
     VH(value:Float);
+    VMIN(value:Float);
 }
 
 enum ResponsivenessRule
@@ -138,7 +139,7 @@ class ResponsiveToolbox
         {
             case VW(value): evaluateDim(VW(value));
             case VH(value): evaluateDim(VH(value));
-            case VMIN(value): evaluateRule(Min([VW(value), VH(value)]));
+            case VMIN(value): evaluateDim(VMIN(value));
             case Min(values): values.map(evaluateDim.bind(_, parentVal)).arrmin();
             case Max(values): values.map(evaluateDim.bind(_, parentVal)).arrmax();
             case Clamp(value, min, max): evaluateDim(value, parentVal).clamp(evaluateDim(min, parentVal), evaluateDim(max, parentVal));
@@ -156,6 +157,7 @@ class ResponsiveToolbox
             case Percent(value): parentVal * value / 100;
             case VW(value): HaxeUIScreen.instance.actualWidth * value / 100;
             case VH(value): HaxeUIScreen.instance.actualHeight * value / 100;
+            case VMIN(value): Math.min(HaxeUIScreen.instance.actualWidth, HaxeUIScreen.instance.actualHeight) * value / 100;
         }
     }
 }

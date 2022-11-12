@@ -17,7 +17,7 @@ class LanguageSelectIntro extends Screen
         onLangSelected();
     }
 
-    @:bind(ruBtn, MouseEvent.CLICK)
+    @:bind(enBtn, MouseEvent.CLICK)
     private function onEnPressed(e)
     {
         Preferences.language.set(EN, true);

@@ -147,6 +147,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         {
             case GameEnded(outcome, _, _, newPersonalElo):
                 Assets.getSound("sounds/notify.mp3").play();
+                this.outcome = outcome;
 
                 var message:String;
                 if (playerColor != null)
@@ -333,6 +334,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.blackRef = blackRef;
                 this.timeControl = timeControl;
                 this.datetime = startDatetime;
+                this.outcome = null;
                 this.rated = playerElos != null;
                 this.getSecsLeftAfterMove = null;
 
@@ -345,6 +347,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.blackRef = parsedData.blackRef;
                 this.timeControl = parsedData.timeControl;
                 this.datetime = parsedData.datetime;
+                this.outcome = parsedData.outcome;
                 this.rated = parsedData.isRated();
                 this.getSecsLeftAfterMove = null;
 
@@ -362,6 +365,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 this.blackRef = parsedData.blackRef;
                 this.timeControl = parsedData.timeControl;
                 this.datetime = parsedData.datetime;
+                this.outcome = parsedData.outcome;
                 this.rated = parsedData.isRated();
                 this.getSecsLeftAfterMove = parsedData.msPerMoveDataAvailable? parsedData.getSecsLeftAfterMove : null;
 
