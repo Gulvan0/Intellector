@@ -447,6 +447,8 @@ class Dictionary
                 return ["Failed to create challenge: player not found", "Не удалось создать вызов: игрок не найден"];
             case SEND_CHALLENGE_ERROR_ALREADY_EXISTS:
                 return ["Failed to create challenge: you have already sent another challenge to this player. To create a new challenge, you should cancel the previous one first", "Не удалось создать вызов: вызов, адресованный данному игроку уже существует. Для создания нового вызова, сперва отмените предыдущий"];
+            case SEND_CHALLENGE_ERROR_DUPLICATE:
+                return ["Failed to create challenge: you have already created another similar challenge", "Не удалось создать вызов: вы уже создавали подобный вызов"];
             case SEND_CHALLENGE_ERROR_REMATCH_EXPIRED:
                 return ["Failed to create challenge: rematch time has expired. Create a new challenge instead", "Не удалось создать вызов: время на предложение реванша истекло. Создайте новый вызов"];
             case SEND_CHALLENGE_ERROR_IMPOSSIBLE:

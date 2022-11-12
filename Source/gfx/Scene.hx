@@ -121,6 +121,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 Dialogs.info(SEND_CHALLENGE_ERROR_NOT_FOUND, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
             case AlreadyExists:
                 Dialogs.info(SEND_CHALLENGE_ERROR_ALREADY_EXISTS, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+            case Duplicate:
+                Dialogs.info(SEND_CHALLENGE_ERROR_DUPLICATE, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
             case RematchExpired:
                 Dialogs.info(SEND_CHALLENGE_ERROR_REMATCH_EXPIRED, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
             case Impossible:
