@@ -26,6 +26,7 @@ class MainMenu extends Screen implements INetObserver
     {
         Networker.removeObserver(this);
         Networker.emitEvent(MainMenuLeft);
+        SceneManager.removeResizeHandler(onResize);
     }
 
     public function handleNetEvent(event:ServerEvent) 
@@ -72,10 +73,16 @@ class MainMenu extends Screen implements INetObserver
         Dialogs.changelog();
     }
 
-    private override function validateComponentLayout():Bool 
+    private override function onReady()
+    {
+        super.onReady();
+        onResize();
+        SceneManager.addResizeHandler(onResize);
+    }
+
+    private function onResize() 
     {
         var compact:Bool = HaxeUIScreen.instance.actualWidth / HaxeUIScreen.instance.actualHeight < 1.2;
-        var wasCompact:Bool = tablesBox.percentWidth == 100;
 
         var newStyle:Style = changelogLabel.customStyle.clone();
         newStyle.fontSize = Math.min(1.8 * HaxeUIScreen.instance.actualWidth / Changelog.getFirstLength(), 26);
@@ -87,36 +94,28 @@ class MainMenu extends Screen implements INetObserver
         pastGamesList.percentWidth = compact? 100 : 50;
         pastGamesList.percentHeight = compact? 33.33 : 100;
 
-        var parentChanged:Bool = super.validateComponentLayout();
+        var tableHeaderHeightRule:ResponsivenessRule = Min([Exact(30), VMIN(5)]);
+        var tableHeaderBoxHeightRule:ResponsivenessRule = Min([Exact(40), VMIN(6.66)]);
+        var tableHeaderReloadBtnHeightRule:ResponsivenessRule = Min([Exact(20), VMIN(3.33)]);
 
-        return parentChanged || wasCompact != compact;
+        ResponsiveToolbox.resizeComponent(contentHBox, [StyleProp(HorizontalSpacing) => VW(8)]);
+        
+        ResponsiveToolbox.resizeComponent(openChallengesTable.tableTitleBox, [Height => tableHeaderBoxHeightRule]);
+        ResponsiveToolbox.resizeComponent(openChallengesTable.title, [StyleProp(FontSize) => tableHeaderHeightRule]);
+        ResponsiveToolbox.resizeComponent(openChallengesTable.reloadBtn, [StyleProp(FontSize) => tableHeaderReloadBtnHeightRule, IconWidth => tableHeaderReloadBtnHeightRule, IconHeight => tableHeaderReloadBtnHeightRule]);
+
+        ResponsiveToolbox.resizeComponent(currentGamesTable.tableTitleBox, [Height => tableHeaderBoxHeightRule]);
+        ResponsiveToolbox.resizeComponent(currentGamesTable.title, [StyleProp(FontSize) => tableHeaderHeightRule]);
+        ResponsiveToolbox.resizeComponent(currentGamesTable.reloadBtn, [StyleProp(FontSize) => tableHeaderReloadBtnHeightRule, IconWidth => tableHeaderReloadBtnHeightRule, IconHeight => tableHeaderReloadBtnHeightRule]);
+
+        ResponsiveToolbox.resizeComponent(pastGamesList.tableTitleBox, [Height => tableHeaderBoxHeightRule]);
+        ResponsiveToolbox.resizeComponent(pastGamesList.title, [StyleProp(FontSize) => tableHeaderHeightRule]);
     }
 
     public function new()
     {
         super();
-        var tableHeaderHeightRule:ResponsivenessRule = Min([Exact(30), VW(6)]);
-        var tableHeaderBoxHeightRule:ResponsivenessRule = Min([Exact(40), VW(8)]);
-        var tableHeaderReloadBtnHeightRule:ResponsivenessRule = Min([Exact(20), VW(4)]);
-        var tableLegendFontSizeRule:ResponsivenessRule = Min([Exact(12), VW(2.5)]);
-        var tableLegendPaddingRule:ResponsivenessRule = Min([Exact(8), VW(1)]);
         
-        responsiveComponents = [
-            contentHBox => [StyleProp(HorizontalSpacing) => VW(10)],
-            openChallengesTable.title => [StyleProp(FontSize) => tableHeaderHeightRule],
-            currentGamesTable.title => [StyleProp(FontSize) => tableHeaderHeightRule],
-            pastGamesList.title => [StyleProp(FontSize) => tableHeaderHeightRule],
-            openChallengesTable.reloadBtn => [StyleProp(FontSize) => tableHeaderReloadBtnHeightRule, IconWidth => tableHeaderReloadBtnHeightRule, IconHeight => tableHeaderReloadBtnHeightRule],
-            currentGamesTable.reloadBtn => [StyleProp(FontSize) => tableHeaderReloadBtnHeightRule, IconWidth => tableHeaderReloadBtnHeightRule, IconHeight => tableHeaderReloadBtnHeightRule],
-            openChallengesTable.tableTitleBox => [Height => tableHeaderBoxHeightRule],
-            currentGamesTable.tableTitleBox => [Height => tableHeaderBoxHeightRule],
-            pastGamesList.tableTitleBox => [Height => tableHeaderBoxHeightRule],
-        ];
-        for (column in openChallengesTable.tableHeader.childComponents)
-            responsiveComponents.set(column, [StyleProp(FontSize) => tableLegendFontSizeRule, StyleProp(PaddingTop) => tableLegendPaddingRule, StyleProp(PaddingBottom) => tableLegendPaddingRule, StyleProp(PaddingLeft) => tableLegendPaddingRule, StyleProp(PaddingRight) => tableLegendPaddingRule]);
-        for (column in currentGamesTable.tableHeader.childComponents)
-            responsiveComponents.set(column, [StyleProp(FontSize) => tableLegendFontSizeRule, StyleProp(PaddingTop) => tableLegendPaddingRule, StyleProp(PaddingBottom) => tableLegendPaddingRule, StyleProp(PaddingLeft) => tableLegendPaddingRule, StyleProp(PaddingRight) => tableLegendPaddingRule]);
-    
         customEnterHandler = onEnter;
         customCloseHandler = onClose;
     }

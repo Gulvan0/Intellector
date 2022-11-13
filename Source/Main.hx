@@ -58,6 +58,7 @@ class Main extends Sprite
 		}, true);
 		OpeningTree.init();
 		Changelog.init();
+		Config.init();
 		
 		Toolkit.init({container: stage});
 		Toolkit.scale = 1;

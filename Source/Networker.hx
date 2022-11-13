@@ -57,26 +57,13 @@ class Networker
     public static function launch() 
     {
         Serializer.USE_ENUM_INDEX = true;
-        
-        var req = new XMLHttpRequest();
-        req.onload = () -> {
-            var configMap:Map<String, String> = [];
-            var lines:Array<String> = req.responseText.split('\n');
-            for (line in lines)
-            {
-                var splitted:Array<String> = line.split(':');
-                configMap.set(StringTools.trim(splitted[0]), StringTools.trim(splitted[1]));
-            }
 
-            if (configMap["secure"] == "true")
-                address = "wss://";
-            else
-                address = "ws://";
+        if (Config.dict.getBool("secure"))
+            address = "wss://";
+        else
+            address = "ws://";
 
-            address += configMap["host"] + ":" + configMap["port"];
-        };
-        req.open('GET', 'config.yaml', false);
-        req.send();
+        address += Config.dict.getString("host") + ":" + Config.dict.getString("port");
 
         createWS();
         
