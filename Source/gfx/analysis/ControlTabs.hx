@@ -128,12 +128,17 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
                 variantViewSV.hidden = true;
                 variantViewSV.percentContentWidth = null;
                 branchingTabContentsBox.addComponent(comp);
+                onChange = e -> {
+                    if (selectedPage == branchingTab)
+                        comp.refreshSelection();
+                };
             case PlainText: 
                 var box:VariantPlainText = new VariantPlainText(initialVariant, selectedNode);
                 variantView = box;
                 variantViewSV.hidden = false;
                 variantViewSV.percentContentWidth = 100;
                 variantViewSV.addComponent(box);
+                onChange = null;
         };
         variantView.init(eventHandler);
     }

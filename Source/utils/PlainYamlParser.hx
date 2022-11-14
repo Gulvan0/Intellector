@@ -75,7 +75,7 @@ class PlainYamlDict
             map.set(key, BoolVal(false));
         else if (Std.parseInt(rawValue) != null)
             map.set(key, IntVal(Std.parseInt(rawValue)));
-        else if (Std.parseFloat(rawValue) != null)
+        else if (!Math.isNaN(Std.parseFloat(rawValue)))
             map.set(key, FloatVal(Std.parseFloat(rawValue)));
         else
             map.set(key, StringVal(rawValue));
@@ -98,9 +98,9 @@ class PlainYamlParser
         for (line in lines)
         {
             var splitted:Array<String> = line.split(':');
-            dict.set(splitted[0].trim(), splitted[1].trim());
+            dict.set(splitted[0].trim(), splitted.slice(1).join(':').trim());
         }
-
+        
         return dict;
     }
 }

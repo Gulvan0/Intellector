@@ -9,7 +9,7 @@ class Config
     
     public static function init() 
     {
-        FileLoader.loadText('config.yaml', s -> {
+        FileLoader.loadText('./assets/config.yaml', s -> {
             dict = PlainYamlParser.parse(s);
         });
     }

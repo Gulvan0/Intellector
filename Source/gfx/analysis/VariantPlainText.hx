@@ -120,18 +120,22 @@ class VariantPlainText extends HBox implements IVariantView
 
     private function onNodeSelectRequest(path:VariantPath)
     {
-        var extendedPath:VariantPath;
         if (selectedBranch.contains(path))
-            extendedPath = selectedBranch;
+        {
+            selectBranchUnsafe(selectedBranch, path.length);
+            eventHandler(ScrollBtnPressed(Precise(path.length)));
+        }
         else
-            extendedPath = variantRef.extendPathLeftmost(path);
+        {
+            var extendedPath:VariantPath = variantRef.extendPathLeftmost(path);
 
-        var branch = variantRef.getBranchByPath(extendedPath);
-        var branchStr = variantRef.getBranchNotationByPath(extendedPath);
-        var pointer = path.length;
-
-        selectBranchUnsafe(extendedPath, path.length);
-        eventHandler(BranchSelected(branch, branchStr, pointer));
+            var branch = variantRef.getBranchByPath(extendedPath);
+            var branchStr = variantRef.getBranchNotationByPath(extendedPath);
+            var pointer = path.length;
+    
+            selectBranchUnsafe(extendedPath, path.length);
+            eventHandler(BranchSelected(branch, branchStr, pointer));
+        }
     }
 
     private function asComponent(item:Item):Component
@@ -491,6 +495,26 @@ class VariantPlainText extends HBox implements IVariantView
     {
         if (Lambda.empty(path))
             throw "Cannot remove root";
+
+        if (selectedBranch.contains(path))
+        {
+            var parentPath:VariantPath = path.parent();
+            var newSelectedBranch:VariantPath;
+
+            if (variantRef.childCount(parentPath) == 1)
+                newSelectedBranch = parentPath;
+            else if (path.lastNodeNum() == 0)
+                newSelectedBranch = variantRef.extendPathLeftmost(parentPath.child(1));
+            else
+                newSelectedBranch = variantRef.extendPathLeftmost(parentPath.child(0)); 
+
+            selectBranchUnsafe(newSelectedBranch, parentPath.length);
+
+            var branch:Array<Ply> = variantRef.getBranchByPath(selectedBranch);
+            var branchStr:Array<String> = variantRef.getBranchNotationByPath(selectedBranch);
+            var pointer:Int = parentPath.length;
+            eventHandler(BranchSelected(branch, branchStr, pointer)); //We emit BranchSelected instead of ScrollBtnPressed intentionally: the FULL selected branch DOES change (it gets shortened)
+        }
 
         unpack();
 

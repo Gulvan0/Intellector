@@ -85,28 +85,31 @@ class VariantTree extends Sprite implements IVariantView
     private function onNodeSelectRequest(code:String)
     {
         var path:VariantPath = VariantPath.fromCode(code);
-        var extendedPath:VariantPath;
+
         if (selectedBranch.contains(path))
-            extendedPath = selectedBranch;
+        {
+            selectBranchUnsafe(selectedBranch, path.length);
+            eventHandler(ScrollBtnPressed(Precise(path.length)));
+        }
         else
-            extendedPath = variantRef.extendPathLeftmost(path);
+        {
+            var extendedPath:VariantPath = variantRef.extendPathLeftmost(path);
 
-        var branch = variantRef.getBranchByPath(extendedPath);
-        var branchStr = variantRef.getBranchNotationByPath(extendedPath);
-        var pointer = path.length;
-
-        selectBranchUnsafe(extendedPath, path.length);
-        eventHandler(BranchSelected(branch, branchStr, pointer));
+            var branch = variantRef.getBranchByPath(extendedPath);
+            var branchStr = variantRef.getBranchNotationByPath(extendedPath);
+            var pointer = path.length;
+    
+            selectBranchUnsafe(extendedPath, path.length);
+            eventHandler(BranchSelected(branch, branchStr, pointer));
+        }
     }
 
     private function onNodeRemoveRequest(code:String)
     {
-        if (code == '')
-            return;
-        
         var path:VariantPath = VariantPath.fromCode(code);
 
-        removeNodeByPath(path);
+        if (!path.isRoot())
+            removeNodeByPath(path);
     }
 
     private function deselectAll() 

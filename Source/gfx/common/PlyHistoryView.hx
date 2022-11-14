@@ -124,8 +124,8 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
     {
         currentSituation = startingSituation.copy();
         moveHistory = [];
+        shownMove = 0;
         onHistoryDropped();
-        performScroll(Home);
     }
 
     private function rewrite(newPlySequence:Array<Ply>, newShownMove:Int):Void

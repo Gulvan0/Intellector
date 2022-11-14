@@ -59,9 +59,14 @@ class VariantOutline extends TreeView implements IVariantView
         selectedBranch = fullBranch.copy();
         selectedMove = selectUpToMove;
 
-        if (selectUpToMove > 0)
+        refreshSelection();
+    }
+
+    public function refreshSelection()
+    {
+        if (selectedMove > 0)
         {
-            var selectedPathStr:String = fullBranch.subpath(selectUpToMove).asArray().join('/');
+            var selectedPathStr:String = selectedBranch.subpath(selectedMove).asArray().join('/');
             rootNode.findNodeByPath(selectedPathStr).selected = true;
         }
         else 
@@ -116,13 +121,18 @@ class VariantOutline extends TreeView implements IVariantView
         var nodePath:VariantPath = VariantPath.fromCode(treeNode.data.code);
         if (treeNode.selected)
         {
-            if (!selectedBranch.contains(nodePath))
-                selectBranchUnsafe(variantRef.extendPathLeftmost(nodePath), nodePath.length);
+            selectedMove = nodePath.length;
+            
+            if (selectedBranch.contains(nodePath))
+                eventHandler(ScrollBtnPressed(Precise(selectedMove)));
+            else
+            {
+                selectedBranch = variantRef.extendPathLeftmost(nodePath);
 
-            var branch:Array<Ply> = variantRef.getBranchByPath(selectedBranch);
-            var branchStr:Array<String> = variantRef.getBranchNotationByPath(selectedBranch);
-            var pointer:Int = nodePath.length;
-            eventHandler(BranchSelected(branch, branchStr, pointer));
+                var branch:Array<Ply> = variantRef.getBranchByPath(selectedBranch);
+                var branchStr:Array<String> = variantRef.getBranchNotationByPath(selectedBranch);
+                eventHandler(BranchSelected(branch, branchStr, selectedMove));
+            }
         }
     }
 
@@ -152,17 +162,29 @@ class VariantOutline extends TreeView implements IVariantView
     {
         var nodePath:VariantPath = VariantPath.fromCode(treeNode.data.code);
 
-        selectBranchUnsafe(selectedBranch, selectedMove); //Since haxeui always selects the clicked node
+        if (nodePath.isRoot())
+            return;
 
         if (selectedBranch.contains(nodePath))
         {
-            selectBranchUnsafe(nodePath.parent(), nodePath.length);
+            var parentPath:VariantPath = nodePath.parent();
+            var newSelectedBranch:VariantPath;
+
+            if (variantRef.childCount(parentPath) == 1)
+                newSelectedBranch = parentPath;
+            else if (nodePath.lastNodeNum() == 0)
+                newSelectedBranch = variantRef.extendPathLeftmost(parentPath.child(1));
+            else
+                newSelectedBranch = variantRef.extendPathLeftmost(parentPath.child(0)); 
+
+            selectBranchUnsafe(newSelectedBranch, parentPath.length);
 
             var branch:Array<Ply> = variantRef.getBranchByPath(selectedBranch);
             var branchStr:Array<String> = variantRef.getBranchNotationByPath(selectedBranch);
-            var pointer:Int = selectedBranch.length;
-            eventHandler(BranchSelected(branch, branchStr, pointer));
+            eventHandler(BranchSelected(branch, branchStr, selectedMove)); //We emit BranchSelected instead of ScrollBtnPressed intentionally: the FULL selected branch DOES change (it gets shortened)
         }
+        else
+            refreshSelection(); //Since haxeui always selects the clicked node
         
         treeNode.parentNode.removeNode(treeNode);
 

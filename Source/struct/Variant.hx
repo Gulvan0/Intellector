@@ -1,10 +1,7 @@
 package struct;
 
-import haxe.display.Display.Package;
 import serialization.SituationSerializer;
 import serialization.PlySerializer;
-import haxe.Json;
-import haxe.ui.util.Variant;
 import struct.Ply;
 
 abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
@@ -19,6 +16,11 @@ abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
     public function asArray():Array<Int>
     {
         return this;
+    }
+
+    public function isRoot():Bool
+    {
+        return Lambda.empty(this);
     }
 
     public function isMainLine():Bool

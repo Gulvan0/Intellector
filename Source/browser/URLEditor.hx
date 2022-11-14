@@ -20,8 +20,6 @@ class URLEditor
 
     private static function setPath(path:String, ?title:String)
     {
-        trace(path, title);
-        trace(CallStack.callStack());
         if (StringTools.startsWith(path, "/"))
             path = path.substr(1);
         var fullTitle:String = title != null? title + " - Intellector" : "Intellector";
