@@ -1,4 +1,4 @@
-<tabview width="100%" height="100%">
+<tabview width="100%" height="100%" styleName="full-width-buttons">
     <box text="${Dictionary.getPhrase(ANALYSIS_OVERVIEW_TAB_NAME)}" width="100%" height="100%">
         <vbox width="100%" height="100%">
             <movenavigator id="navigator" height="100%" />
