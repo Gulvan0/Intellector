@@ -154,6 +154,8 @@ class Dictionary
                 return ["From: $0", "От: $0"];
             case MENUBAR_CHALLENGES_TO_LINE_TEXT:
                 return ["To: $0", "Кому: $0"];
+            case MENUBAR_CHALLENGES_COPY_LINK_TEXT:
+                return ["Copy Link", "Копировать ссылку"];
             case MENUBAR_CHALLENGES_ACCEPT_BUTTON_TEXT:
                 return ["Accept", "Принять"];
             case MENUBAR_CHALLENGES_DECLINE_BUTTON_TEXT:
@@ -441,6 +443,14 @@ class Dictionary
                 return ["Failed to accept challenge: $0 has already started another game", "Не удалось принять вызов: $0 уже участвует в другой партии"];
             case INCOMING_CHALLENGE_ACCEPT_ERROR_CHALLENGE_CANCELLED:
                 return ["Failed to accept challenge: the challenge was cancelled", "Не удалось принять вызов: вызов был отменен"];
+            case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TITLE:
+                return ["Challenge sent!", "Вызов отправлен!"];
+            case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(opponentLogin):
+                return ['Your challenge has been successfully sent to $opponentLogin. You may cancel it at any time using the challenge menu at the top-right corner of your screen.', 'Вызов успешно отправлен игроку $opponentLogin. Чтобы отменить его, воспользуйтесь меню вызовов в правом верхнем углу экрана.'];
+            case SEND_OPEN_CHALLENGE_SUCCESS_DIALOG_TITLE:
+                return ["Challenge created!", "Вызов создан!"];
+            case SEND_OPEN_CHALLENGE_SUCCESS_DIALOG_TEXT:
+                return ["Your open challenge has been created. To invite your friends directly, you may send them the link below. To cancel the challenge or to copy this link once again, use the challenge menu at the top-right corner of your screen.", "Ваш открытый вызов создан. Чтобы пригласить друзей напрямую, отправьте им ссылку ниже. Вы в любой момент можете отменить вызов или заново скопировать ссылку на него, воспользовавшись меню вызовов в правом верхнем углу экрана."];
             case SEND_CHALLENGE_ERROR_DIALOG_TITLE:
                 return ["Challenge Creation Error", "Ошибка создания вызова"];
             case SEND_CHALLENGE_ERROR_TO_ONESELF:

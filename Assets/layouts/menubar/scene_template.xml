@@ -47,6 +47,10 @@
             width: 16px;
             height: 16px;
         }
+
+        #challengesMenu {
+            width: 350px;
+        }
     </style>
     <menubar id="menubar" width="100%" height="5%">
         <image verticalAlign="center" resource="assets/symbols/upper_menu/open_sidebar_btn.svg" id="mobileMenuButton" onClick="sidemenu.show();" />
@@ -73,8 +77,8 @@
 
         <spacer width="100%" />
 
-        <menu id="challengesButton" icon="assets/symbols/upper_menu/challenges/button_icon/none.svg">
-            <challenge-list id="challengeList" width="325px" height="250px" horizontalAlign="left" />
+        <menu id="challengesMenu" icon="assets/symbols/upper_menu/challenges/button_icon/none.svg">
+            <challenge-list id="challengeList" width="100%" height="250px" />
         </menu>
 
         <menu id="accountMenu">

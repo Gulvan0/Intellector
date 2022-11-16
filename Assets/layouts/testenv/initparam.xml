@@ -1,9 +1,9 @@
 <hbox width="100%">
     <style>
-        .option-stepper {
+        #paramValuesDropdown {
             clip: true;
         }
-        .option-stepper .label {
+        #paramValuesDropdown .label {
             word-wrap: false;
         }
     </style>

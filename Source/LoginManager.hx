@@ -47,9 +47,9 @@ class LoginManager
         LoginManager.password = password;
 
         if (preservation == LongTerm)
-            CredentialCookies.saveLoginDetails(login, password, true);
-        else if (preservation == ShortTerm)
             CredentialCookies.saveLoginDetails(login, password, false);
+        else if (preservation == ShortTerm)
+            CredentialCookies.saveLoginDetails(login, password, true);
 
         GlobalBroadcaster.broadcast(LoggedIn);
     }

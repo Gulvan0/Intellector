@@ -24,11 +24,4 @@ class TimeControlRenderer extends ItemRenderer
             tcLabel.text = timeControl.toString();
         }
     }
-
-    private override function validateComponentLayout():Bool 
-    {
-        var b = super.validateComponentLayout();
-        tcLabel.customStyle = {fontSize: height / 1.5};
-        return b;
-    }
 }

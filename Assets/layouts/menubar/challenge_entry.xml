@@ -1,30 +1,44 @@
-<item-renderer width="100%" height="100px">
+<item-renderer id="thisRenderer" width="100%" height="100px">
     <hbox id="thisBox" width="100%" height="100%">
         <style>
+            #thisRenderer {
+                padding: 0px;
+                background-opacity: 0;
+                pointer-events: false;
+            }
+
+            #thisRenderer:hover {
+                padding: 0px;
+                background-opacity: 0;
+                pointer-events: false;
+            }
+
             #thisBox {
-                background-color: #ffffff;
-                padding: 8px;
+                padding-left: 6px;
+                padding-right: 6px;
+                padding-top: 4px;
+                padding-bottom: 4px;
             }
-            #thisBox:hover {
-                background-color: #dddddd;
-            }
+
             #headerLabel {
                 font-color: #333333;
                 font-bold: true;
             }
+
             .params-row-icon {
                 background-color: yellow;
                 background-opacity: 0;
                 pointer-events: true;
             }
+
             .decision-action-btn {
-                font-size: 10px;
+                font-size: 14px;
             }
         </style>
         <arp-image id="incomingIcon" height="75%" verticalAlign="center" />
-        <vbox width="100%" height="100%" verticalAlign="center">
+        <vbox width="100%" height="100%" verticalAlign="center" style="spacing:0px">
             <autosizing-label id="headerLabel" height="25%" horizontalAlign="center" />
-            <box id="secondRow" width="100%" height="25%" />
+            <box id="secondRow" width="100%" height="20%" />
             <hbox height="25%" horizontalAlign="center" style="spacing:0px">
                 <arp-image id="timeControlIcon" height="100%" styleName="params-row-icon" />
                 <autosizing-label id="paramsLabel" height="100%" />
@@ -32,10 +46,10 @@
                 <spacer id="modeIconsSpacer" width="3px" />
                 <arp-image id="customStartPosIcon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" height="100%" styleName="params-row-icon" />
             </hbox>
-            <hbox height="25%" horizontalAlign="center">
-                <button id="acceptBtn" styleName="decision-action-btn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_ACCEPT_BUTTON_TEXT)}" />
-                <button id="declineBtn" styleName="decision-action-btn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_DECLINE_BUTTON_TEXT)}" />
-                <button id="cancelBtn" styleName="decision-action-btn" verticalAlign="center" height="100%" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_CANCEL_BUTTON_TEXT)}" />
+            <hbox height="30%" horizontalAlign="center">
+                <button id="acceptBtn" styleName="decision-action-btn" verticalAlign="center" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_ACCEPT_BUTTON_TEXT)}" />
+                <button id="declineBtn" styleName="decision-action-btn" verticalAlign="center" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_DECLINE_BUTTON_TEXT)}" />
+                <button id="cancelBtn" styleName="decision-action-btn" verticalAlign="center" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_CANCEL_BUTTON_TEXT)}" />
             </hbox>
         </vbox>
         

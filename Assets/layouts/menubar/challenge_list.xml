@@ -1,3 +1,29 @@
-<listview> 
+<listview id="thisList" contentWidth="100%" selectionMode="disabled">
+    <style>
+        #thisList {
+            background-color: #ffffff;
+            padding: 0px;
+        }
+
+        #thisList .even {
+            background-color: #fdfdfd;
+        }
+
+        #thisList .even:hover {
+            background-color: #fdfdfd;
+        }
+
+        #thisList .odd {
+            background-color: #efefef;
+        }
+
+        #thisList .odd:hover {
+            background-color: #efefef;
+        }
+
+        #thisList .listview-contents > .itemrenderer {
+            padding: 0px;
+        }
+    </style>
     <challenge-entry-renderer />
 </listview>

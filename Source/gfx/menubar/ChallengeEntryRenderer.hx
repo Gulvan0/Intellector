@@ -1,5 +1,7 @@
 package gfx.menubar;
 
+import browser.Clipboard;
+import js.Browser;
 import net.shared.ChallengeData;
 import gfx.basic_components.AutosizingLabel;
 import gfx.basic_components.CopyableText;
@@ -39,9 +41,14 @@ class ChallengeEntryRenderer extends ItemRenderer
         Networker.emitEvent(CancelChallenge(challengeID));
     }
 
+    private function onCopyRequested(e)
+    {
+        Clipboard.copy(URLEditor.getChallengeLink(challengeID));
+    }
+
     private override function onDataChanged(data:Dynamic) 
     {
-        if (data == null)
+        if (data == null || data.id == null || data.id == challengeID)
             return;
 
         var isIncoming:Bool;
@@ -56,16 +63,14 @@ class ChallengeEntryRenderer extends ItemRenderer
 
                 headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE);
 
-                var linkText:CopyableText = new CopyableText();
-                var s = linkText.tf.customStyle.clone();
-                s.fontSize = 8;
-                linkText.tf.customStyle = s;
-
-                linkText.percentWidth = 90;
-                linkText.percentHeight = 100;
-                linkText.horizontalAlign = "center";
-                linkText.copiedText = URLEditor.getChallengeLink(challengeData.id);
-                secondRow.addComponent(linkText);
+                var link:AutosizingLabel = new AutosizingLabel();
+                link.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_COPY_LINK_TEXT);
+                link.styleNames = "link";
+                link.percentWidth = 100;
+                link.percentHeight = 100;
+                link.align = Center;
+                link.onClick = onCopyRequested;
+                secondRow.addComponent(link);
 
                 acceptBtn.hidden = true;
                 declineBtn.hidden = true;

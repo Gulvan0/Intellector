@@ -1,16 +1,16 @@
 <vbox width="100%" style="padding: 1 1 1 1">
     <style>
-        .button-bar .button {
+        #btnBar .button {
             border: 1 solid $normal-border-color;
         }
 
-        .horizontal-button-bar .button.first {
+        #btnBar .button.first {
             border-left-size: 1;
             border-top-left-radius: 0.5;
             border-bottom-left-radius: 0.5;
         }
 
-        .horizontal-button-bar .button.last {
+        #btnBar .button.last {
             border-top-right-radius: 0.5;
             border-bottom-right-radius: 0.5;
         }

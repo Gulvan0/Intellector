@@ -1,5 +1,6 @@
 package gfx.game;
 
+import browser.Clipboard;
 import openfl.events.Event;
 import haxe.ui.events.FocusEvent;
 import haxe.ui.util.Color;
@@ -30,16 +31,17 @@ class ShareGameTab extends Box
     @:bind(copyPINBtn, MouseEvent.CLICK)
     private function onCopyPINPressed(e)
     {
-        Browser.navigator.clipboard.writeText(pinTextArea.text)
-            .catchError(e -> {Dialogs.alert(CLIPBOARD_ERROR_ALERT_TEXT, CLIPBOARD_ERROR_ALERT_TITLE, ['$e']);})
-            .finally(() -> {
-                copyPINBtn.hidden = true;
-                copyPINBtnTick.hidden = false;
-                Timer.delay(() -> {
-                    copyPINBtnTick.hidden = true;
-                    copyPINBtn.hidden = false;
-                }, 500);
-            });
+        Clipboard.copy(pinTextArea.text, onPINCopied);
+    }
+
+    private function onPINCopied()
+    {
+        copyPINBtn.hidden = true;
+        copyPINBtnTick.hidden = false;
+        Timer.delay(() -> {
+            copyPINBtnTick.hidden = true;
+            copyPINBtn.hidden = false;
+        }, 500);
     }
     
     @:bind(downloadGifBtn, MouseEvent.CLICK)

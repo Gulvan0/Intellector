@@ -1,33 +1,33 @@
 <vbox width="600px" height="800px">
     <style>
-        .listview {
+        #list {
             border: 1px solid #aaaaaa;
             background-color: #f6f6f6;
             padding: 4px;
         }
 
-        .listview .listview-contents {
+        #list .listview-contents {
             spacing: 10px;
             background-opacity: 0;
         }
 
-        .listview .even {
+        #list .even {
             background-opacity: 0;
         }
 
-        .listview .even:hover {
+        #list .even:hover {
             background-opacity: 0;
         }
 
-        .listview .odd {
+        #list .odd {
             background-opacity: 0;
         }
 
-        .listview .odd:hover {
+        #list .odd:hover {
             background-opacity: 0;
         }
 
-        .listview .listview-contents > .itemrenderer {
+        #list .listview-contents > .itemrenderer {
             padding: 0px;
         }
     </style>

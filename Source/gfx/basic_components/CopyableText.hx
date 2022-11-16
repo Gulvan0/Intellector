@@ -1,5 +1,6 @@
 package gfx.basic_components;
 
+import browser.Clipboard;
 import haxe.ui.util.ImageLoader;
 import haxe.Timer;
 import haxe.ui.events.MouseEvent;
@@ -26,14 +27,7 @@ class CopyableText extends HBox
     @:bind(copyBtn, MouseEvent.CLICK)
     public function onCopySIPPressed(e) 
     {
-        Browser.navigator.clipboard.writeText(tf.text)
-            .catchError(onCopyError)
-            .finally(onCopySuccessful);
-    }
-
-    private function onCopyError(e)
-    {
-        Dialogs.alert(CLIPBOARD_ERROR_ALERT_TEXT, CLIPBOARD_ERROR_ALERT_TITLE, ['$e']);
+        Clipboard.copy(tf.text, onCopySuccessful);
     }
 
     private function onCopySuccessful()

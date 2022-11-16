@@ -66,10 +66,10 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
         for (btn in findComponents('menubar-button'))
         {
-            if (btn.text != accountMenu.text && btn.text != challengesButton.text)
+            if (btn.text != accountMenu.text && btn.text != challengesMenu.text)
                 btn.hidden = compact;
             
-            if (btn.text != challengesButton.text)
+            if (btn.text != challengesMenu.text)
                 ResponsiveToolbox.resizeComponent(btn, [StyleProp(FontSize) => VH(2), Height => VH(4)]);
             else
                 ResponsiveToolbox.resizeComponent(btn, [Height => VH(4), IconWidth => VH(3), IconHeight => VH(3)]);
@@ -86,7 +86,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         watchMenu.disabled = ingame;
         learnMenu.disabled = ingame;
         socialMenu.disabled = ingame;
-        challengesButton.disabled = ingame;
+        challengesMenu.disabled = ingame;
         logInBtn.disabled = ingame;
         myProfileBtn.disabled = ingame;
         logOutBtn.disabled = ingame;
@@ -113,7 +113,15 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         switch result 
         {
             case Success(data):
+                var challengeParams:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
                 challengeList.appendEntry(data);
+                switch challengeParams.type 
+                {
+                    case Public, ByLink:
+                        Dialogs.openChallengeCreated(data.id);
+                    case Direct(calleeLogin):
+                        Dialogs.info(SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(calleeLogin), SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TITLE);
+                }
                 Assets.getSound("sounds/challenge_sent.mp3").play();
             case ToOneself:
                 Dialogs.info(SEND_CHALLENGE_ERROR_TO_ONESELF, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
@@ -290,7 +298,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
         refreshAccountElements();
         challengeList.onModeChanged = mode -> {
-            challengesButton.icon = AssetManager.challengesMenuIconPath(mode);
+            challengesMenu.icon = AssetManager.challengesMenuIconPath(mode);
         };
         
         sidemenu = new SideMenu();

@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.popups.OpenChallengeCreated;
 import net.shared.ChallengeData;
 import gfx.popups.StudyParamsDialog;
 import net.shared.StudyInfo;
@@ -113,9 +114,9 @@ class Dialogs
         alertRaw(messageStr, titleStr);
     }
 
-    public static function alertCallback(message:Phrase, title:Phrase):Void->Void 
+    public static function alertCallback(message:Phrase, title:Phrase, ?messageSubstitutions:Array<String>):Void->Void 
     {
-        return alert.bind(message, title);
+        return alert.bind(message, title, messageSubstitutions);
     }
 
     public static function infoRaw(message:String, title:String)
@@ -225,6 +226,12 @@ class Dialogs
         messageBox.messageLabel.customStyle = {fontSize: Math.max(Screen.instance.actualHeight * 0.02, 12)};
         messageBox.width = Math.min(500, Screen.instance.actualWidth * 0.95);
         addDialog(messageBox, true, null, true);
+    }
+
+    public static function openChallengeCreated(id:Int)
+    {
+        var dialog:OpenChallengeCreated = new OpenChallengeCreated(id);
+        addDialog(dialog, true, dialog.onClose, false);
     }
 
     public static function changelog()
