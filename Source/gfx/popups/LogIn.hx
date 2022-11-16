@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import browser.CredentialCookies;
 import net.Requests;
 import utils.StringUtils;
 import gfx.Dialogs;
@@ -13,6 +14,11 @@ class LogIn extends Dialog
     {
         super();
         buttons = DialogButton.CANCEL | DialogButton.OK;
+        if (CredentialCookies.hasLoginDetails())
+        {
+            signInUsernameField.text = CredentialCookies.getLogin();
+            signInPasswordField.text = CredentialCookies.getPassword();
+        }
     }
     
     public override function validateDialog(button:DialogButton, fn:Bool->Void) 

@@ -621,6 +621,11 @@ class Dictionary
                 return ["Connection lost", "Потеряно соединение"];
             case CONNECTION_ERROR_DIALOG_TITLE:
                 return ["Connection error", "Ошибка подключения"];
+            case SERVER_ERROR_DIALOG_TITLE:
+                return ["Server error", "Ошибка сервера"];
+            case SERVER_ERROR_DIALOG_TEXT(errorMessage):
+                return ['A server error occured while processing your request. Details:\n$errorMessage', 'Во время исполнения вашего запроса возникла серверная ошибка. Подробности:\n$errorMessage'];
+
             case SERVER_UNAVAILABLE_DIALOG_TEXT:
                 return ["Failed to connect to the server. You may use the analysis board while the server is unreachable. Once the connection is restored, the upper menu will become active", "Не удалось подключиться к серверу. На время переподключения открыта доска анализа. Верхнее меню станет вновь активным, когда подключение восстановится"];
             case SERVER_UNAVAILABLE_DIALOG_TITLE:

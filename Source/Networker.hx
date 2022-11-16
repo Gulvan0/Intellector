@@ -146,6 +146,8 @@ class Networker
                 doNotReconnect = true;
                 suppressAlert = true;
                 Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
+            case ServerError(message):
+                Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
             default:
                 eventQueue.processEvent(event);
         }
