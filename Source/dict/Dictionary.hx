@@ -146,6 +146,8 @@ class Dictionary
                 return ["Social", "Сообщество"];
             case MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM:
                 return ["Player Profile", "Профиль игрока"];
+            case MENUBAR_CHALLENGES_NO_CHALLENGES_PLACEHOLDER:
+                return ["No challenges", "Нет вызовов"];
             case MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE:
                 return ["Incoming Challenge", "Входящий вызов"];
             case MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE:

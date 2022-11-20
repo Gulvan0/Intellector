@@ -22,22 +22,26 @@ import struct.ChallengeParams;
 class ChallengeEntryRenderer extends ItemRenderer
 {
     private var challengeID:Int;
+    private var list:ChallengeList;
 
     @:bind(acceptBtn, MouseEvent.CLICK)
     private function onAccepted(e)
     {
+        list.removeEntryByID(challengeID);
         Networker.emitEvent(AcceptChallenge(challengeID));
     }
 
     @:bind(declineBtn, MouseEvent.CLICK)
     private function onDeclined(e)
     {
+        list.removeEntryByID(challengeID);
         Networker.emitEvent(DeclineDirectChallenge(challengeID));
     }
 
     @:bind(cancelBtn, MouseEvent.CLICK)
     private function onCancelled(e)
     {
+        list.removeEntryByID(challengeID);
         Networker.emitEvent(CancelChallenge(challengeID));
     }
 
@@ -52,56 +56,43 @@ class ChallengeEntryRenderer extends ItemRenderer
             return;
 
         var isIncoming:Bool;
-        var challengeData:ChallengeData = data;
-        var params:ChallengeParams = ChallengeParams.deserialize(challengeData.serializedParams);
+        var challengeData:ChallengeEntryData = data;
+        var params:ChallengeParams = challengeData.params;
+
         challengeID = challengeData.id;
+        list = challengeData.list;
 
         switch params.type 
         {
             case Public, ByLink:
                 isIncoming = false;
 
+                secondRow.selectedIndex = 1;
                 headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE);
-
-                var link:AutosizingLabel = new AutosizingLabel();
-                link.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_COPY_LINK_TEXT);
-                link.styleNames = "link";
-                link.percentWidth = 100;
-                link.percentHeight = 100;
-                link.align = Center;
                 link.onClick = onCopyRequested;
-                secondRow.addComponent(link);
 
                 acceptBtn.hidden = true;
                 declineBtn.hidden = true;
-                cancelBtn.onClick = e -> {Networker.emitEvent(CancelChallenge(challengeData.id));};
 
             case Direct(calleeLogin):
                 isIncoming = LoginManager.isPlayer(calleeLogin);
 
-                var opponentLabelText:String;
-
-                acceptBtn.hidden = !isIncoming;
-                declineBtn.hidden = !isIncoming;
-                cancelBtn.hidden = isIncoming;
+                secondRow.selectedIndex = 0;
 
                 if (isIncoming)
                 {
                     headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE);
-                    opponentLabelText = Dictionary.getPhrase(MENUBAR_CHALLENGES_FROM_LINE_TEXT, [challengeData.ownerLogin]);
+                    fromToLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_FROM_LINE_TEXT, [challengeData.ownerLogin]);
                 }
                 else
                 {
                     headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE);
-                    opponentLabelText = Dictionary.getPhrase(MENUBAR_CHALLENGES_TO_LINE_TEXT, [calleeLogin]);
+                    fromToLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_TO_LINE_TEXT, [calleeLogin]);
                 }
 
-                var opponentLabel:AutosizingLabel = new AutosizingLabel();
-                opponentLabel.text = opponentLabelText;
-                opponentLabel.percentWidth = 100;
-                opponentLabel.percentHeight = 100;
-                opponentLabel.align = Center;
-                secondRow.addComponent(opponentLabel);
+                acceptBtn.hidden = !isIncoming;
+                declineBtn.hidden = !isIncoming;
+                cancelBtn.hidden = isIncoming;
         }
 
         incomingIcon.resource = AssetManager.challengesMenuItemArrowPath(isIncoming);

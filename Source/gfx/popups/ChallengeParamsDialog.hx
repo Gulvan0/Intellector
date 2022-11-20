@@ -130,7 +130,13 @@ class ChallengeParamsDialog extends Dialog
     }
 
     @:bind(applyTcParamsBtn, MouseEvent.CLICK)
-    private function approveTimeControl(e)
+    private function onApplyTCPressed(e)
+    {
+        approveTimeControl();
+        tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
+    }
+    
+    private function approveTimeControl()
     {
         if (correspondenceCheck.selected)
             approvedTimeControl = TimeControl.correspondence();
@@ -169,8 +175,6 @@ class ChallengeParamsDialog extends Dialog
 
         tcIcon.resource = AssetManager.timeControlPath(approvedTimeControl.getType());
         tcLabel.text = approvedTimeControl.toString();
-
-        tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
     }
 
     private function restoreTimeControlInputValues(?customTimeControl:TimeControl)
@@ -236,6 +240,7 @@ class ChallengeParamsDialog extends Dialog
                 tcValuesBox.disabled = false;
                 correspondenceCheck.selected = false;
                 restoreTimeControlInputValues(tc);
+                approveTimeControl();
             };
             Timer.delay(() -> {
                 var icon:Image = btn.findComponent(Image);

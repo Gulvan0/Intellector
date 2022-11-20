@@ -22,7 +22,7 @@ class IncomingChallengeDialog extends Dialog
 
     private function resize()
     {
-        width = Math.min(300, HaxeUIScreen.instance.actualWidth * 0.98);
+        width = Math.min(350, HaxeUIScreen.instance.actualWidth * 0.98);
     }
 
     public function onClose(?e)
@@ -47,6 +47,7 @@ class IncomingChallengeDialog extends Dialog
     public function new(data:ChallengeData)
     {
         super();
+        this.closable = false;
         this.challengeID = data.id;
 
         var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);

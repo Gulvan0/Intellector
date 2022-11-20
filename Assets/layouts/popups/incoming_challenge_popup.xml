@@ -1,4 +1,4 @@
-<dialog title="${Dictionary.getPhrase(INCOMING_CHALLENGE_DIALOG_TITLE)}" width="300px">
+<dialog title="${Dictionary.getPhrase(INCOMING_CHALLENGE_DIALOG_TITLE)}" width="350px">
     <style>
         .params-icon {
             background-color:yellow;
@@ -7,7 +7,7 @@
         }
     </style>
     <vbox width="100%">
-        <autosizing-label id="challengeByLabel" height="28px" horizontalAlign="center" />
+        <autosizing-label id="challengeByLabel" width="100%" height="28px" style="text-align:center" />
         <spacer height="10px" />
         <box id="timeControlRowBox" height="28px" horizontalAlign="center" />
         <autosizing-label id="bracketLabel" height="24px" horizontalAlign="center" />

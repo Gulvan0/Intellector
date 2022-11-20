@@ -372,7 +372,7 @@ class SimpleTests
 		challengeData.ownerLogin = i < 4? "kaz" : "gulvan";
 		challengeData.ownerELO = Provisional(1250);
 
-		SceneManager.scene.challengeList.appendEntry(challengeData);
+		SceneManager.scene.challengesMenu.appendEntry(challengeData);
 	}
 
 	public static function simpleAnalysis()

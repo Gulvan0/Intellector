@@ -3,14 +3,11 @@
         <style>
             #thisRenderer {
                 padding: 0px;
-                background-opacity: 0;
-                pointer-events: false;
+                cursor: default;
             }
 
             #thisRenderer:hover {
                 padding: 0px;
-                background-opacity: 0;
-                pointer-events: false;
             }
 
             #thisBox {
@@ -21,8 +18,13 @@
             }
 
             #headerLabel {
-                font-color: #333333;
+                font-size: 16px;
+                color: #333333;
                 font-bold: true;
+            }
+
+            #paramsLabel {
+                font-size: 14px;
             }
 
             .params-row-icon {
@@ -34,19 +36,49 @@
             .decision-action-btn {
                 font-size: 14px;
             }
+
+            #fromToLabel {
+                font-size: 14px;
+                text-align: center;
+            }
+
+            #link {
+                color: $accent-color-darker;
+                cursor: pointer;
+                font-underline: true;
+                pointer-events: true;
+                font-size: 14px;
+                text-align: center;
+            }
+
+            #link:hover {
+                color: $accent-color;
+            }
+
+            #link:down {
+                color: $accent-color-darker;
+            }
+                
+            #link:disabled {
+                color: $disabled-text-color;
+            }
         </style>
         <arp-image id="incomingIcon" height="75%" verticalAlign="center" />
-        <vbox width="100%" height="100%" verticalAlign="center" style="spacing:0px">
-            <autosizing-label id="headerLabel" height="25%" horizontalAlign="center" />
-            <box id="secondRow" width="100%" height="20%" />
-            <hbox height="25%" horizontalAlign="center" style="spacing:0px">
+        <vbox width="100%" height="100%" verticalAlign="center" style="spacing:2px">
+            <label id="headerLabel" horizontalAlign="center" />
+            <stack id="secondRow" width="100%">
+                <label id="fromToLabel" horizontalAlign="center" />
+                <link id="link" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_COPY_LINK_TEXT)}" horizontalAlign="center" />
+            </stack>
+            <hbox height="18px" horizontalAlign="center" style="spacing:0px">
                 <arp-image id="timeControlIcon" height="100%" styleName="params-row-icon" />
-                <autosizing-label id="paramsLabel" height="100%" />
+                <label id="paramsLabel" verticalAlign="center" />
                 <arp-image id="colorIcon" height="100%" styleName="params-row-icon" />
                 <spacer id="modeIconsSpacer" width="3px" />
                 <arp-image id="customStartPosIcon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" height="100%" styleName="params-row-icon" />
             </hbox>
-            <hbox height="30%" horizontalAlign="center">
+            <spacer height="100%" />
+            <hbox height="30px" horizontalAlign="center">
                 <button id="acceptBtn" styleName="decision-action-btn" verticalAlign="center" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_ACCEPT_BUTTON_TEXT)}" />
                 <button id="declineBtn" styleName="decision-action-btn" verticalAlign="center" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_DECLINE_BUTTON_TEXT)}" />
                 <button id="cancelBtn" styleName="decision-action-btn" verticalAlign="center" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_CANCEL_BUTTON_TEXT)}" />

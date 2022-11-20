@@ -72,8 +72,10 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             if (btn.text != challengesMenu.text)
                 ResponsiveToolbox.resizeComponent(btn, [StyleProp(FontSize) => VH(2), Height => VH(4)]);
             else
-                ResponsiveToolbox.resizeComponent(btn, [Height => VH(4), IconWidth => VH(3), IconHeight => VH(3)]);
+                ResponsiveToolbox.resizeComponent(btn, [Height => VH(4)]);
         }
+        
+        //ResponsiveToolbox.resizeComponent(challengesMenu.flagIcon, [Width => VH(3), Height => VH(3)]);
     }
 
     private function setIngameStatus(ingame:Bool)
@@ -100,7 +102,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     private function onIncomingChallenge(data:ChallengeData)
     {
         if (isPlayerInGame || Preferences.silentChallenges.get())
-            challengeList.appendEntry(data);
+            challengesMenu.appendEntry(data);
         else
         {
             Dialogs.incomingChallenge(data);
@@ -114,7 +116,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         {
             case Success(data):
                 var challengeParams:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
-                challengeList.appendEntry(data);
+                challengesMenu.appendEntry(data);
                 switch challengeParams.type 
                 {
                     case Public, ByLink:
@@ -153,7 +155,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 setIngameStatus(true);
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
                 var opponentLogin:String = parsedData.getPlayerOpponentRef();
-                challengeList.removeEntriesByPlayer(opponentLogin);
+                challengesMenu.removeEntriesByPlayer(opponentLogin);
             case GameEnded(_, _, _, _):
                 setIngameStatus(false);
             case IncomingDirectChallenge(data):
@@ -161,9 +163,9 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             case CreateChallengeResult(result):
                 onSendChallengeResultReceived(result);
             case DirectChallengeCancelled(id):
-                challengeList.removeEntryByID(id);
+                challengesMenu.removeEntryByID(id);
             case DirectChallengeDeclined(id):
-                challengeList.removeEntryByID(id);
+                challengesMenu.removeEntryByID(id);
             case ChallengeCancelledByOwner:
                 Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CHALLENGE_CANCELLED, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE);
             case ChallengeOwnerOffline(owner):
@@ -182,10 +184,10 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 refreshAccountElements();
             case IncomingChallengesBatch(incomingChallenges):
                 for (info in incomingChallenges)
-                    challengeList.appendEntry(info);
+                    challengesMenu.appendEntry(info);
             case LoggedOut:
                 refreshAccountElements();
-                challengeList.clearEntries();
+                challengesMenu.clearEntries();
             default:
         }
     }
@@ -297,9 +299,6 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         super();
 
         refreshAccountElements();
-        challengeList.onModeChanged = mode -> {
-            challengesMenu.icon = AssetManager.challengesMenuIconPath(mode);
-        };
         
         sidemenu = new SideMenu();
         siteName.onClick = onSiteNamePressed;

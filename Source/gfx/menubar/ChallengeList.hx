@@ -1,34 +1,60 @@
 package gfx.menubar;
 
+import haxe.ui.events.UIEvent;
+import haxe.ui.containers.menus.Menu;
+import haxe.ui.containers.menus.Menu.MenuEvent;
+import haxe.ui.containers.Stack;
 import struct.ChallengeParams;
 import haxe.ui.containers.ListView;
 import net.shared.ChallengeData;
+import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/menubar/challenge_list.xml'))
-class ChallengeList extends ListView
+class ChallengeList extends Menu
 {
+    public var flagIcon:ChallengeMenuIcon;
+    private var menuShown:Bool = false;
+
     private var indexByID:Map<Int, Int> = [];
     private var idsByOwnerLogin:Map<String, Array<Int>> = [];
     private var ownIDs:Array<Int> = [];
 
-    private var currentMode(default, set):ChallengesIconMode = Empty;
-    public var onModeChanged:ChallengesIconMode->Void;
-
-    private function set_currentMode(v:ChallengesIconMode):ChallengesIconMode
+    @:bind(this, MenuEvent.MENU_OPENED)
+    private function onOpened(e)
     {
-        if (currentMode == v)
-            return v;
+        menuShown = true;
+        flagIcon.resetUnread();
+    }
 
-        currentMode = v;
-        onModeChanged(v);
-        return v;
+    @:bind(this, MenuEvent.MENU_CLOSED)
+    private function onClosed(e)
+    {
+        menuShown = false;
+    }
+
+    private function updateItemCount(newItemCount:Int)
+    {
+        if (newItemCount == 0)
+        {
+            stack.selectedIndex = 0;
+            stack.height = 30;
+        }
+        else 
+        {
+            stack.selectedIndex = 1;
+            stack.height = Math.min(newItemCount * 102, 250);
+        }
     }
 
     public function appendEntry(data:ChallengeData)
     {
-        dataSource.add(data);
+        actualList.dataSource.add(new ChallengeEntryData(data, this));
 
-        indexByID.set(data.id, dataSource.size - 1);
+        var newItemCount:Int = actualList.dataSource.size;
+
+        updateItemCount(newItemCount);
+
+        indexByID.set(data.id, newItemCount - 1);
 
         if (!LoginManager.isPlayer(data.ownerLogin))
         {
@@ -37,33 +63,23 @@ class ChallengeList extends ListView
                 idsByOwnerLogin.get(ownerLogin).push(data.id);
             else
                 idsByOwnerLogin.set(ownerLogin, [data.id]);
-            if (currentMode == Empty)
-                currentMode = HasIncoming;
-            else if (currentMode == HasOutgoing)
-                currentMode = HasBoth;
+            flagIcon.addIncoming(data.id, !menuShown);
         }
         else
         {
             ownIDs.push(data.id);
-            if (currentMode == Empty)
-                currentMode = HasOutgoing;
-            else if (currentMode == HasIncoming)
-                currentMode = HasBoth;
+            flagIcon.addOutgoing(data.id);
         }
-    }
-
-    private function removeEntry(index:Int)
-    {
-        dataSource.removeAt(index);
     }
 
     public function clearEntries()
     {
-        dataSource.clear();
+        flagIcon.clear();
+        actualList.dataSource.clear();
+        updateItemCount(0);
         indexByID = [];
         idsByOwnerLogin = [];
         ownIDs = [];
-        currentMode = Empty;
     }
 
     public function removeEntryByID(id:Int)
@@ -73,17 +89,12 @@ class ChallengeList extends ListView
         if (index == null)
             return;
 
-        dataSource.removeAt(index);
+        actualList.dataSource.removeAt(index);
+        updateItemCount(actualList.dataSource.size);
 
         indexByID.remove(id);
 
         var isOwn:Bool = ownIDs.remove(id);
-
-        if (isOwn && Lambda.empty(ownIDs))
-            if (currentMode == HasOutgoing)
-                currentMode = Empty;
-            else if (currentMode == HasBoth)
-                currentMode = HasIncoming;
 
         if (!isOwn)
         {
@@ -94,12 +105,10 @@ class ChallengeList extends ListView
                     idsByOwnerLogin.remove(login);
             }
 
-            if (Lambda.empty(idsByOwnerLogin))
-                if (currentMode == HasIncoming)
-                    currentMode = Empty;
-                else if (currentMode == HasBoth)
-                    currentMode = HasOutgoing;
+            flagIcon.removeIncoming(id);
         }
+        else
+            flagIcon.removeOutgoing(id);
     }
 
     public function removeEntriesByPlayer(login:String)
@@ -117,5 +126,7 @@ class ChallengeList extends ListView
     public function new() 
     {
         super();
+        flagIcon = new ChallengeMenuIcon();
+        icon = flagIcon;
     }
 }

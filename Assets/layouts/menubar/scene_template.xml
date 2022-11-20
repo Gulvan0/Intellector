@@ -38,18 +38,9 @@
             background-opacity: 0;
         }
 
-        .menubar-button .icon {
-            width: 25px;
-            height: 25px;
-        }
-
         .menuitem-icon {
             width: 16px;
             height: 16px;
-        }
-
-        #challengesMenu {
-            width: 350px;
         }
     </style>
     <menubar id="menubar" width="100%" height="5%">
@@ -77,9 +68,7 @@
 
         <spacer width="100%" />
 
-        <menu id="challengesMenu" icon="assets/symbols/upper_menu/challenges/button_icon/none.svg">
-            <challenge-list id="challengeList" width="100%" height="250px" />
-        </menu>
+        <challenge-list id="challengesMenu" />
 
         <menu id="accountMenu">
             <menuitem id="logInBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGIN_ITEM)}" icon="assets/symbols/upper_menu/account/log_in.svg" />
