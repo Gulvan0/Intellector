@@ -57,6 +57,16 @@ class SceneManager
         scene.menubar.disabled = false;
     }
 
+    public static function onModalDialogShown()
+    {
+        scene.disabled = true;
+    }
+
+    public static function onModalDialogHidden()
+    {
+        scene.disabled = false;
+    }
+
     public static function toScreen(type:ScreenType)
     {
         scene.toScreen(type);

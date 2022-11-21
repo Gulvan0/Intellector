@@ -84,6 +84,5 @@
                 <button id="cancelBtn" styleName="decision-action-btn" verticalAlign="center" text="${Dictionary.getPhrase(MENUBAR_CHALLENGES_CANCEL_BUTTON_TEXT)}" />
             </hbox>
         </vbox>
-        
     </hbox>
 </item-renderer>

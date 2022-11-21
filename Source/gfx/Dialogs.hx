@@ -90,9 +90,11 @@ class Dialogs
             customCloseHandler(e);
         if (hasActiveDialog())
             shownDialogs[0].disabled = false;
+        else
+            SceneManager.onModalDialogHidden();
     }
 
-    private static function addDialog(dialog:Dialog, show:Bool, ?customCloseHandler:DialogEvent->Void, ?modal:Bool)
+    private static function addDialog(dialog:Dialog, show:Bool, ?customCloseHandler:DialogEvent->Void, ?modal:Bool = true)
     {
         if (hasActiveDialog())
             shownDialogs[0].disabled = true;
@@ -100,6 +102,8 @@ class Dialogs
         dialog.onDialogClosed = onDialogClosed.bind(_, dialog, customCloseHandler);
         if (show)
             dialog.showDialog(modal);
+        if (modal)
+            SceneManager.onModalDialogShown();
     }
 
     public static function alertRaw(message:String, ?title:String = "Raw alert")
