@@ -75,7 +75,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 ResponsiveToolbox.resizeComponent(btn, [Height => VH(4)]);
         }
         
-        //ResponsiveToolbox.resizeComponent(challengesMenu.flagIcon, [Width => VH(3), Height => VH(3)]);
+        ResponsiveToolbox.resizeComponent(challengesMenu.flagIcon, [Width => VH(3), Height => VH(3)]);
     }
 
     private function setIngameStatus(ingame:Bool)

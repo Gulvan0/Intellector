@@ -1,5 +1,6 @@
 package gfx.basic_components;
 
+import haxe.ui.events.UIEvent;
 import haxe.Timer;
 import haxe.ui.Toolkit;
 import openfl.events.Event;
@@ -102,38 +103,27 @@ class BoardWrapper extends Component
         return super.set_percentHeight(value);
     }
 
-    private override function validateComponentLayout():Bool 
+    private function onResize(e)
     {
-        var b1 = super.validateComponentLayout();
-        var b2 = updateBoardSize();
-        
-        return b1 || b2;
-    }
-
-    private function updateBoardSize():Bool
-    {
-        var newHexSideLength = widthToHexSideLength(componentWidth);
+        trace(haxe.ui.core.Screen.instance.actualWidth, haxe.ui.core.Screen.instance.actualHeight);
+        var newHexSideLength = widthToHexSideLength(componentWidth); //Uses overriden getter, so the calculation is OK
         
         if (board.hexSideLength != newHexSideLength)
-        {
-            board.resize(newHexSideLength); //Uses overriden getter, so the calculation is OK
-            return true;
-        }
-        else
-            return false;
+            board.resize(newHexSideLength);
     }
     
     private function onAdded(e)
     {
         removeEventListener(Event.ADDED_TO_STAGE, onAdded);
-        SceneManager.addResizeHandler(updateBoardSize);
+        parentComponent.registerEvent(UIEvent.RESIZE, onResize);
+        //SceneManager.addResizeHandler(updateBoardSize);
         addEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
     }
 
     private function onRemoved(e)
     {
         removeEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
-        SceneManager.removeResizeHandler(updateBoardSize);
+        //SceneManager.removeResizeHandler(updateBoardSize);
     }
 
     public function new(board:Board) 
