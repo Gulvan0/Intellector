@@ -156,7 +156,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
 
         actionBar.eventHandler = handlePeripheralEvent;
         
-        boardWrapper = new BoardWrapper(board);
+        boardWrapper = new BoardWrapper(board, boardContainer);
         boardWrapper.percentHeight = 100;
         boardWrapper.maxPercentWidth = 100;
         boardWrapper.horizontalAlign = 'center';

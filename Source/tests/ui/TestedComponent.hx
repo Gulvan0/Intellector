@@ -79,7 +79,7 @@ class TestedComponent extends Box
         switch compGfx 
         {
             case Board(board):
-                var boardWrapper:BoardWrapper = new BoardWrapper(board);
+                var boardWrapper:BoardWrapper = new BoardWrapper(board, this);
                 boardWrapper.percentWidth = 90;
                 boardWrapper.maxPercentHeight = 90;
                 boardWrapper.horizontalAlign = 'center';

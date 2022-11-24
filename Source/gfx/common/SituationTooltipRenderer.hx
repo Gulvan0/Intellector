@@ -44,7 +44,7 @@ class SituationTooltipRenderer extends ItemRenderer
 
         board = new Board(situation, orientationColor, 40, None);
 
-        var boardWrapper:BoardWrapper = new BoardWrapper(board);
+        var boardWrapper:BoardWrapper = new BoardWrapper(board, boardContainer);
         boardWrapper.percentWidth = 100;
         boardWrapper.maxPercentHeight = 100;
         

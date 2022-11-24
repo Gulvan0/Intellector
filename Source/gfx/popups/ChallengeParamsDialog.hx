@@ -263,7 +263,7 @@ class ChallengeParamsDialog extends Dialog
 
         startPosBoard = new Board(approvedStartPos, White, 40, None);
 
-        var boardWrapper:BoardWrapper = new BoardWrapper(startPosBoard);
+        var boardWrapper:BoardWrapper = new BoardWrapper(startPosBoard, customStartposBoardContainer);
         boardWrapper.percentWidth = 100;
 
         customStartposBoardContainer.addComponent(boardWrapper);

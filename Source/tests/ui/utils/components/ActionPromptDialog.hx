@@ -156,17 +156,18 @@ class ActionPromptDialog extends Dialog
         label.text = prompt.displayName + ":";
         label.customStyle = {fontSize: 18};
 
+        var vbox:VBox = new VBox();
+        vbox.percentWidth = 100;
+        vbox.percentHeight = 100 / totalPlyInputs;
+        
         var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, EnsureSingle, Disabled, White, 40, None);
-        var boardWrapper:BoardWrapper = new BoardWrapper(inputBoard);
+        var boardWrapper:BoardWrapper = new BoardWrapper(inputBoard, vbox);
         boardWrapper.maxPercentWidth = 100;
         boardWrapper.percentHeight = 100;
         boardWrapper.horizontalAlign = 'center';
 
         inputBoards.set(prompt.displayName, inputBoard);
 
-        var vbox:VBox = new VBox();
-        vbox.percentWidth = 100;
-        vbox.percentHeight = 100 / totalPlyInputs;
         vbox.addComponent(label);
         vbox.addComponent(boardWrapper);
         if (!Lambda.empty(prompt.defaultValues))

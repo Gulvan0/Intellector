@@ -16,6 +16,8 @@ class BoardWrapper extends Component
     public var maxPercentWidth:Null<Float>;
     public var maxPercentHeight:Null<Float>;
 
+    private var watchedParent:Component;
+
     /** height/width **/
     public static function invAspectRatio(lettersEnabled:Bool):Float
     {
@@ -105,7 +107,6 @@ class BoardWrapper extends Component
 
     private function onResize(e)
     {
-        trace(haxe.ui.core.Screen.instance.actualWidth, haxe.ui.core.Screen.instance.actualHeight);
         var newHexSideLength = widthToHexSideLength(componentWidth); //Uses overriden getter, so the calculation is OK
         
         if (board.hexSideLength != newHexSideLength)
@@ -115,23 +116,29 @@ class BoardWrapper extends Component
     private function onAdded(e)
     {
         removeEventListener(Event.ADDED_TO_STAGE, onAdded);
-        parentComponent.registerEvent(UIEvent.RESIZE, onResize);
-        //SceneManager.addResizeHandler(updateBoardSize);
+        if (watchedParent != null)
+            watchedParent.registerEvent(UIEvent.RESIZE, onResize);
+        onResize(null);
         addEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
     }
 
     private function onRemoved(e)
     {
         removeEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
-        //SceneManager.removeResizeHandler(updateBoardSize);
+        if (watchedParent != null)
+            watchedParent.unregisterEvent(UIEvent.RESIZE, onResize);
+        addEventListener(Event.ADDED_TO_STAGE, onAdded);
     }
 
-    public function new(board:Board) 
+    public function new(board:Board, watchedParent:Component) 
     {
         super();
         this.board = board;
+        this.watchedParent = watchedParent;
+
         this.width = board.width;
         this.height = board.height;
+
         addChild(board);
         addEventListener(Event.ADDED_TO_STAGE, onAdded);
     }

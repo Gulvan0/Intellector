@@ -58,7 +58,7 @@ class StudyWidget extends ItemRenderer
 
         var keySituation:Situation = Situation.fromSIP(keyPositionSIP);
         var board:Board = new Board(keySituation, keySituation.turnColor, 40, None);
-        var wrapper:BoardWrapper = new BoardWrapper(board);
+        var wrapper:BoardWrapper = new BoardWrapper(board, boardContainer);
 
         wrapper.percentWidth = 100;
         wrapper.maxPercentHeight = 100;

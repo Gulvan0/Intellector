@@ -218,7 +218,7 @@ class ShareDialog extends Dialog
 
         sipText.copiedText = situation.serialize();
 
-        boardWrapper = new BoardWrapper(board);
+        boardWrapper = new BoardWrapper(board, boardContainer);
         boardWrapper.percentWidth = 100;
         boardWrapper.maxPercentHeight = 100;
         boardWrapper.horizontalAlign = 'center';

@@ -374,7 +374,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         board.addObserver(this);
 
-        boardWrapper = new BoardWrapper(board);
+        boardWrapper = new BoardWrapper(board, boardContainer);
 
         boardContainer.percentHeight = 100;
         boardContainer.addComponent(boardWrapper);
