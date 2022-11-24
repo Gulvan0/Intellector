@@ -256,7 +256,7 @@ class Dialogs
         addDialog(dialog, true, event -> {
             if (onLoggedIn != null && event.button == DialogButton.OK)
                 onLoggedIn();
-        }, false);
+        }, true);
     }
 
     public static function miniProfile(username:String, data:MiniProfileData)

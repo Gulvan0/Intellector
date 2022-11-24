@@ -1,5 +1,6 @@
 package dict;
 
+import browser.Blinker.BlinkerNotification;
 import net.shared.StudyPublicity;
 import net.shared.EloValue;
 import net.shared.UserStatus;
@@ -430,4 +431,6 @@ enum Phrase
     //Special
 
     CORRESPONDENCE_TIME_CONTROL_NAME;
+
+    NOTIFICATION_BROWSER_TAB_TITLE(notification:BlinkerNotification);
 }

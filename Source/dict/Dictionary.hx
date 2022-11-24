@@ -655,8 +655,16 @@ class Dictionary
                 return ["Clipboard Error", "Ошибка буфера обмена"];
             case CLIPBOARD_ERROR_ALERT_TEXT:
                 return ["Failed to copy: $0", "Копирование не удалось: $0"];
+
             case CORRESPONDENCE_TIME_CONTROL_NAME:
                 return ["Correspondence", "По переписке"];
+
+            case NOTIFICATION_BROWSER_TAB_TITLE(notification):
+                return switch notification 
+                {
+                    case IncomingChallenge: ["New Challenge!", "Новый вызов!"];
+                    case GameStarted: ["Game Started!", "Игра началась!"];
+                }
         }
     }
 

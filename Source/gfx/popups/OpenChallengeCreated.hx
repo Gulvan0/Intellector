@@ -1,6 +1,6 @@
 package gfx.popups;
 
-import browser.URLEditor;
+import browser.Url;
 import utils.MathUtils;
 import haxe.ui.containers.dialogs.Dialog;
 import utils.Changelog;
@@ -23,7 +23,7 @@ class OpenChallengeCreated extends Dialog
     public function new(challengeID:Int)
     {
         super();
-        linkText.copiedText = URLEditor.getChallengeLink(challengeID);
+        linkText.copiedText = Url.getChallengeLink(challengeID);
 
         resize();
         SceneManager.addResizeHandler(resize);

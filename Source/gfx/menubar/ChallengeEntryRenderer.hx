@@ -7,7 +7,7 @@ import gfx.basic_components.AutosizingLabel;
 import gfx.basic_components.CopyableText;
 import dict.Utils;
 import net.shared.TimeControlType;
-import browser.URLEditor;
+import browser.Url;
 import net.shared.PieceColor;
 import utils.TimeControl;
 import gfx.common.SituationTooltipRenderer;
@@ -47,7 +47,7 @@ class ChallengeEntryRenderer extends ItemRenderer
 
     private function onCopyRequested(e)
     {
-        Clipboard.copy(URLEditor.getChallengeLink(challengeID));
+        Clipboard.copy(Url.getChallengeLink(challengeID));
     }
 
     private override function onDataChanged(data:Dynamic) 

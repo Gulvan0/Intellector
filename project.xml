@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-	<icon path="Assets/favicon.png" />
+	<icon path="Assets/favicons/normal.png" />
 	
 	<meta title="Intellector" package="com.sample.intellector" version="1.0.0" company="Company Name" />
 	<app main="Main" path="Export" file="1646787907" preloader="Preloader" />

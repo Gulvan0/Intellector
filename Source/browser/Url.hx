@@ -6,8 +6,15 @@ import js.html.URLSearchParams;
 import gfx.ScreenType;
 import js.Browser;
 
-class URLEditor 
+class Url 
 {
+    private static var currentTitle:String;
+
+    public static function getCurrentTitle():String
+    {
+        return currentTitle;
+    }
+
     public static function clear() 
     {
         setPath("");
@@ -26,6 +33,7 @@ class URLEditor
         if (new URLSearchParams(Browser.location.search).get("p") != path)
             Browser.window.history.pushState({}, fullTitle, ingameToUrlPath(path));
         Browser.document.title = fullTitle;
+        Url.currentTitle = fullTitle;
     }
 
     public static function getChallengeLink(id:Int):String

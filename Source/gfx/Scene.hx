@@ -1,7 +1,8 @@
 package gfx;
 
+import browser.Blinker;
 import js.Browser;
-import browser.URLEditor;
+import browser.Url;
 import net.shared.ChallengeData;
 import utils.AssetManager;
 import haxe.ui.components.Image;
@@ -94,7 +95,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logOutBtn.disabled = ingame;
 
         if (ingame)
-            Browser.window.onpopstate = () -> {URLEditor.setPathByScreen(SceneManager.getCurrentScreenType());};
+            Browser.window.onpopstate = () -> {Url.setPathByScreen(SceneManager.getCurrentScreenType());};
         else
             Browser.window.onpopstate = ScreenNavigator.navigate;
     }
@@ -105,6 +106,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             challengesMenu.appendEntry(data);
         else
         {
+            Blinker.blink(IncomingChallenge);
             Dialogs.incomingChallenge(data);
             Assets.getSound("sounds/social.mp3").play();
         }
@@ -152,6 +154,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             case LoginResult(ReconnectionNeeded(_, _)):
                 setIngameStatus(true);
             case GameStarted(_, logPreamble):
+                Blinker.blink(GameStarted);
                 setIngameStatus(true);
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
                 var opponentLogin:String = parsedData.getPlayerOpponentRef();

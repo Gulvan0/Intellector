@@ -8,7 +8,7 @@ import gfx.game.*;
 import haxe.ui.core.Component;
 import utils.MathUtils;
 import haxe.ui.core.Screen as HaxeUIScreen;
-import browser.URLEditor;
+import browser.Url;
 import net.shared.Outcome;
 import serialization.PortableIntellectorNotation;
 import gfx.common.ShareDialog;
@@ -224,7 +224,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 else
                     Networker.emitEvent(SimpleRematch);
             case Share:
-                var gameLink:String = URLEditor.getGameLink(gameID);
+                var gameLink:String = Url.getGameLink(gameID);
                 var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
                 var pin:String = PortableIntellectorNotation.serialize(board.startingSituation, playedMoves, whiteRef, blackRef, timeControl, datetime, outcome);
 

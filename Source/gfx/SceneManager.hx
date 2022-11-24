@@ -20,7 +20,7 @@ import net.EventProcessingQueue.INetObserver;
 import net.shared.ServerEvent;
 import openfl.display.Sprite;
 import net.shared.PieceColor;
-import browser.URLEditor;
+import browser.Url;
 import utils.TimeControl;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
@@ -71,14 +71,14 @@ class SceneManager
     {
         scene.toScreen(type);
         currentScreenType = type;
-        URLEditor.setPathByScreen(type);
+        Url.setPathByScreen(type);
     }
 
     public static function clearScreen()
     {
         scene.toScreen(null);
         currentScreenType = null;
-        URLEditor.clear();
+        Url.clear();
     }
 
     public static function addResizeHandler(handler:Void->Void)
@@ -125,7 +125,7 @@ class SceneManager
         {
             case Analysis(initialVariantStr, selectedMainlineMove, _, _):
                 var newScreenType:ScreenType = Analysis(initialVariantStr, selectedMainlineMove, studyID, studyInfo);
-                URLEditor.setPathByScreen(newScreenType);
+                Url.setPathByScreen(newScreenType);
                 currentScreenType = newScreenType;
             default:
                 throw "Cannot update study info outside of analysis screen";

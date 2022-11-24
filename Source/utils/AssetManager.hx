@@ -23,6 +23,8 @@ enum SingleAsset
     StudyTagFilterCross;
     StudyTagLabel;
     AllGamesTimeControlFilterIcon;
+    NormalFavicon;
+    NotificationFavicon;
 }
 
 class AssetManager 
@@ -35,11 +37,15 @@ class AssetManager
 
     public static inline function singleAssetPath(asset:SingleAsset):String
     {
-        return "assets/symbols/" + switch asset 
+        var symbolsDir:String = "assets/symbols/";
+        var faviconsDir:String = "assets/favicons/";
+        return switch asset 
         {
-            case StudyTagFilterCross: "common/study/remove_filter_cross.svg";
-            case StudyTagLabel: "profile/tag.svg";
-            case AllGamesTimeControlFilterIcon: "profile/any_time_control.svg";
+            case StudyTagFilterCross: symbolsDir + "common/study/remove_filter_cross.svg";
+            case StudyTagLabel: symbolsDir + "profile/tag.svg";
+            case AllGamesTimeControlFilterIcon: symbolsDir + "profile/any_time_control.svg";
+            case NormalFavicon: faviconsDir + "normal.png";
+            case NotificationFavicon: faviconsDir + "notification.png";
         }
     }
 

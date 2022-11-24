@@ -1,5 +1,6 @@
 package;
 
+import browser.Blinker;
 import gfx.ScreenNavigator;
 import net.shared.GreetingResponseData;
 import tests.SimpleTests;
@@ -56,6 +57,7 @@ class Main extends Sprite
 			if (event.ctrlKey)
 				event.preventDefault();
 		}, true);
+		Blinker.init();
 		OpeningTree.init();
 		Changelog.init();
 		Config.init();
