@@ -15,6 +15,11 @@ class OngoingGameInfo
         return info;
     }
 
+    public function toString():String 
+    {
+        return 'OngoingGameInfo {\nid: $id\ntimeData: $timeData\ncurrentLog:\n$currentLog}';
+    }
+
     public function new()
     {
         

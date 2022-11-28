@@ -9,6 +9,11 @@ class MiniProfileData
     public var status:UserStatus;
     public var isFriend:Bool;
 
+    public function toString():String 
+    {
+        return 'MiniProfileData {\ngamesCntByTimeControl: $gamesCntByTimeControl\nelo: $elo\nstatus: $status\nisFriend: $isFriend\n}';
+    }
+
     public function new()
     {
 

@@ -9,6 +9,11 @@ class StudyInfo
     public var keyPositionSIP:String;
     public var variantStr:String;
 
+    public function toString():String 
+    {
+        return 'StudyInfo {\n name: $name\n description: $description\n tags:$tags\n publicity:$publicity\n keyPositionSIP:$keyPositionSIP\n variantStr:$variantStr\n}';
+    }
+
     public function new()
     {
 

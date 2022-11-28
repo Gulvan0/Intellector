@@ -13,6 +13,11 @@ class GameInfo
         return info;
     }
 
+    public function toString():String
+    {
+        return 'GameInfo {\nID: $id\nLog:\n$log}';    
+    }
+
     public function new()
     {
         

@@ -11,6 +11,11 @@ class TimeReservesData
         return [White => whiteSeconds, Black => blackSeconds];
     }
 
+    public function toString():String 
+    {
+        return 'TimeReservesData {\n whiteSeconds: $whiteSeconds\n blackSeconds: $blackSeconds\n timestamp:$timestamp\n}';
+    }
+
     public function new(whiteSeconds:Float, blackSeconds:Float, timestamp:Float)
     {
         this.whiteSeconds = whiteSeconds;
