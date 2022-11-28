@@ -163,7 +163,7 @@ class GameLogParser
             case "e":
                 parserOutput.elo = [White => deserialize(args[0]), Black => deserialize(args[1])];
             case "D":
-                parserOutput.datetime = Date.fromTime(Std.parseInt(args[0]) * 1000);
+                parserOutput.datetime = Date.fromTime(Std.parseFloat(args[0]) * 1000);
             case "L":
                 parserOutput.msLeftWhenEnded = [White => Std.parseInt(args[0]), Black => Std.parseInt(args[1])];
             case "S":
