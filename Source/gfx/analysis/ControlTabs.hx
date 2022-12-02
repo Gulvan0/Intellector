@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import gameboard.GameBoard.IGameBoardObserver;
 import Preferences.BranchingTabType;
 import haxe.ui.core.Screen;
 import openfl.events.MouseEvent;
@@ -8,13 +9,10 @@ import haxe.ui.containers.dialogs.MessageBox;
 import gfx.basic_components.SpriteWrapper;
 import haxe.ui.events.UIEvent;
 import gfx.Dialogs;
-import gameboard.GameBoard.IGameBoardObserver;
 import gameboard.GameBoard.GameBoardEvent;
 import haxe.ui.core.Component;
 import haxe.ui.components.Image;
-import struct.Ply;
 import gfx.common.MoveNavigator;
-import struct.Situation;
 import gfx.utils.PlyScrollType;
 import struct.Variant;
 import haxe.ui.containers.ScrollView;

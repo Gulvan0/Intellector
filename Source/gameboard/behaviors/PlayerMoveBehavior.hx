@@ -2,10 +2,7 @@ package gameboard.behaviors;
 
 import gfx.analysis.PeripheralEvent;
 import utils.exceptions.AlreadyInitializedException;
-import struct.IntPoint;
-import struct.Ply;
 import net.shared.ServerEvent;
-import struct.ReversiblePly;
 import net.shared.PieceColor;
 import utils.AssetManager;
 import gameboard.states.StubState;

@@ -4,9 +4,7 @@ import net.shared.PieceColor;
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.events.MouseEvent;
 import openfl.display.Sprite;
-import struct.IntPoint;
 import net.shared.PieceColor.opposite;
-import struct.Situation;
 import gameboard.SelectableBoard;
 
 class AugmentedSelectableBoard extends SelectableBoard

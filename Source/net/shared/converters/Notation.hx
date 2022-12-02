@@ -1,77 +1,97 @@
-package utils;
+package net.shared.converters;
 
-import struct.Situation;
-import struct.Ply;
+import net.shared.board.Rules;
+import net.shared.board.RawPly;
+import net.shared.board.HexCoords;
+import net.shared.board.Situation;
 import net.shared.PieceType;
-import struct.IntPoint;
+import net.shared.PieceColor;
+
 using StringTools;
 
 class Notation 
 {
-    public static function plyFromNotation(plyStr:String, context:Situation):Ply
+    public static function plySequenceToNotation(plys:Array<RawPly>, startingSituation:Situation):Array<String>
     {
-        var ply:Ply = new Ply();
+        var plyStrSeq = [];
+        var situation = startingSituation.copy();
+
+        for (ply in plys)
+        {
+            plyStrSeq.push(ply.toNotation(situation));
+            situation.performRawPly(ply);
+        }
+
+        return plyStrSeq;
+    }
+
+    public static function plyFromNotation(plyStr:String, context:Situation):RawPly
+    {
+        var ply:RawPly = new RawPly();
 
         if (plyStr.contains(":"))
         {
             var splitted = plyStr.split(":");
 
-            ply.from = Notation.parseIntPoint(splitted[0]);
-            ply.to = Notation.parseIntPoint(splitted[1]);
+            ply.from = Notation.parseHexCoords(splitted[0]);
+            ply.to = Notation.parseHexCoords(splitted[1]);
             ply.morphInto = null;
+
+            return ply;
         }
         else
         {
-            var movingPiece:PieceType;
+            var movingPiece:PieceType = Notation.pieceFromAbbreviation(plyStr.charAt(0));
 
-            if (["P", "A", "D", "L", "F", "I"].contains(plyStr.charAt(0)))
-            {
-                movingPiece = Notation.pieceFromAbbreviation(plyStr.charAt(0));
-                plyStr = plyStr.substr(1);
-                
-            }
-            else
+            if (movingPiece == null)
                 movingPiece = Progressor;
+            else
+                plyStr = plyStr.substr(1);
 
             if (plyStr.contains("~") || (plyStr.contains("X") && plyStr.charAt(0) != "X"))
             {
-                ply.from = Notation.parseIntPoint(plyStr.substr(0, 2));
+                ply.from = Notation.parseHexCoords(plyStr.substr(0, 2));
                 plyStr = plyStr.substr(3);
-                ply.to = Notation.parseIntPoint(plyStr.substr(0, 2));
+                ply.to = Notation.parseHexCoords(plyStr.substr(0, 2));
                 plyStr = plyStr.substr(2);
+
+                if (plyStr.charAt(0) == "=")
+                    ply.morphInto = Notation.pieceFromAbbreviation(plyStr.charAt(1));
+
+                return ply;
             }
             else
             {
                 if (plyStr.charAt(0) == "X")
                     plyStr = plyStr.substr(1);
 
-                ply.to = Notation.parseIntPoint(plyStr.substr(0, 2));
+                ply.to = Notation.parseHexCoords(plyStr.substr(0, 2));
                 plyStr = plyStr.substr(2);
 
-                for (p => hex in context.collectOccupiedHexes())
-                    if (hex.color == context.turnColor && hex.type == movingPiece)
-                        if (Lambda.exists(Rules.possibleFields(p, context.get), p -> p.equals(ply.to)))
-                        {
-                            ply.from = p.copy();
-                            break;
-                        }
+                if (plyStr.charAt(0) == "=")
+                    ply.morphInto = Notation.pieceFromAbbreviation(plyStr.charAt(1));
+
+                for (coords => piece in context.collectPieces())
+                    if (piece.color == context.turnColor && piece.type == movingPiece)
+                    {
+                        ply.from = coords;
+                        if (Rules.isPossible(ply, context))
+                            return ply;
+                    }
+
+                return null;
             }
-
-            if (plyStr.charAt(0) == "=")
-                ply.morphInto = Notation.pieceFromAbbreviation(plyStr.charAt(1));
         }
-
-        return ply;
     }
 
-    public static function plyToNotation(ply:Ply, context:Situation, ?indicateColor:Bool):String
+    public static function plyToNotation(ply:RawPly, context:Situation, ?indicateColor:Bool):String
     {
         var hexFrom = context.get(ply.from);
         var hexTo = context.get(ply.to);
 
         var castle = hexFrom.color == hexTo.color;
         var capture = !castle && !hexTo.isEmpty();
-        var mate = capture && hexTo.type == Intellector;
+        var mate = capture && hexTo.type() == Intellector;
 
         var str:String = "";
 
@@ -82,20 +102,20 @@ class Notation
                 str += '⬢';
 
         if (castle)
-            if (hexTo.type == Intellector)
+            if (hexTo.type() == Intellector)
                 return str + Notation.hexNotation(ply.to).toUpperCase() + ":" + Notation.hexNotation(ply.from).toUpperCase();
             else
                 return str + Notation.hexNotation(ply.from).toUpperCase() + ":" + Notation.hexNotation(ply.to).toUpperCase();
 
-        str += Notation.pieceAbbreviation(hexFrom.type);
+        str += Notation.pieceAbbreviation(hexFrom.type());
 
         var another = null;
-        for (p => hex in context.collectOccupiedHexes())
-            if (!p.equals(ply.from))
-                if (hex.type == hexFrom.type && hex.color == hexFrom.color)
-                    if (Lambda.exists(Rules.possibleFields(p, context.get), ply.to.equals))
+        for (coords => piece in context.collectPieces())
+            if (!coords.equals(ply.from))
+                if (piece.type == hexFrom.type() && piece.color == hexFrom.color())
+                    if (Lambda.exists(Rules.getPossibleDestinations(coords, context.pieces), ply.to.equals))
                     {
-                        another = p.copy();
+                        another = coords;
                         break;
                     }
 
@@ -146,17 +166,17 @@ class Notation
         }
     }
 
-    public static function hexNotation(pos:IntPoint):String
+    public static function hexNotation(pos:HexCoords):String
     {
         return getColumn(pos.i) + getRow(pos.i, pos.j);
     }
 
-    public static function parseIntPoint(s:String):IntPoint
+    public static function parseHexCoords(s:String):HexCoords
     {
         s = s.toLowerCase();
         var i = s.charCodeAt(0) - 'a'.code;
         var j = 7 - Std.parseInt(s.charAt(1)) - i % 2;
-        return new IntPoint(i, j);
+        return new HexCoords(i, j);
     }
 
     public static function getColumn(i:Int):String

@@ -7,7 +7,7 @@ import gfx.profile.simple_components.StudyWidget;
 import haxe.ui.events.MouseEvent;
 import net.Requests;
 import gfx.profile.simple_components.StudyWidget.StudyWidgetData;
-import net.shared.StudyInfo;
+import net.shared.dataobj.StudyInfo;
 import haxe.ui.components.Button;
 import haxe.ui.containers.ListView;
 import haxe.ui.containers.ScrollView;

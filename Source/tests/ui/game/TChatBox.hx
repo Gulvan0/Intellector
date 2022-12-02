@@ -6,7 +6,6 @@ import gfx.screens.LiveGame;
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.events.KeyboardEvent;
 import gfx.game.GameActionBar.ActionBtn;
-import struct.ActualizationData;
 import net.shared.ServerEvent;
 import gfx.game.Chatbox;
 import openfl.display.Sprite;

@@ -1,8 +1,5 @@
 package gameboard.states;
 
-import struct.IntPoint;
-import struct.Hex;
-
 class HexSelectionState extends BaseState
 {
     public final occupiedOnly:Bool;

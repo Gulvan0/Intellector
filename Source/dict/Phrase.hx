@@ -1,10 +1,10 @@
 package dict;
 
 import browser.Blinker.BlinkerNotification;
-import net.shared.StudyPublicity;
+import net.shared.dataobj.StudyPublicity;
 import net.shared.EloValue;
-import net.shared.UserStatus;
-import net.shared.UserRole;
+import net.shared.dataobj.UserStatus;
+import net.shared.dataobj.UserRole;
 import net.shared.Outcome;
 import net.shared.PieceColor;
 

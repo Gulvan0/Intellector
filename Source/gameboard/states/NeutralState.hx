@@ -1,7 +1,5 @@
 package gameboard.states;
 
-import struct.IntPoint;
-
 private enum Transition 
 {
     ToDragging(dragStartLocation:IntPoint);

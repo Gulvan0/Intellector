@@ -6,7 +6,7 @@ import haxe.ui.containers.menus.Menu.MenuEvent;
 import haxe.ui.containers.Stack;
 import struct.ChallengeParams;
 import haxe.ui.containers.ListView;
-import net.shared.ChallengeData;
+import net.shared.dataobj.ChallengeData;
 import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/menubar/challenge_list.xml'))

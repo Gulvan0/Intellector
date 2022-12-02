@@ -1,6 +1,5 @@
 package tests.ui.utils.components;
 
-import utils.MathUtils;
 import haxe.ui.events.UIEvent;
 import haxe.ui.core.Component;
 import haxe.ui.containers.VBox;

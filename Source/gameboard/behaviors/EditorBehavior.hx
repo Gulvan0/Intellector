@@ -1,14 +1,10 @@
 package gameboard.behaviors;
 
-import struct.Situation;
 import gameboard.states.HexSelectionState;
 import gameboard.states.NeutralState;
 import gfx.analysis.PeripheralEvent;
 import utils.exceptions.AlreadyInitializedException;
-import struct.Ply;
-import struct.IntPoint;
 import net.shared.ServerEvent;
-import struct.ReversiblePly;
 import net.shared.PieceColor;
 import utils.AssetManager;
 

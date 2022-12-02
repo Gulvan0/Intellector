@@ -1,7 +1,7 @@
 package gfx.profile;
 
 import haxe.ui.styles.Style;
-import net.shared.UserStatus;
+import net.shared.dataobj.UserStatus;
 import haxe.ui.components.Label;
 
 class Utils

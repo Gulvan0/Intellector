@@ -1,7 +1,7 @@
 package gfx.main;
 
 import serialization.GameLogParser;
-import net.shared.GameInfo;
+import net.shared.dataobj.GameInfo;
 import haxe.ui.containers.VBox;
 import dict.*;
 

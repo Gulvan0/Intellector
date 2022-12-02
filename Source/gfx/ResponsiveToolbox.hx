@@ -5,7 +5,6 @@ import haxe.ui.containers.Box;
 import haxe.ui.styles.Style;
 import haxe.ui.core.Component;
 import haxe.ui.core.Screen as HaxeUIScreen;
-using utils.MathUtils;
 
 enum ResponsiveStyleProperty
 {

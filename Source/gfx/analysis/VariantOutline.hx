@@ -5,9 +5,7 @@ import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
 import haxe.ui.containers.TreeViewNode;
 import struct.Variant;
-import struct.Situation;
 import struct.Variant.VariantPath;
-import struct.Ply;
 import gfx.utils.PlyScrollType;
 import haxe.ui.containers.TreeView;
 

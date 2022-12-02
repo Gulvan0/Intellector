@@ -1,12 +1,10 @@
 package gameboard;
 
-import struct.IntPoint;
 import openfl.display.Shape;
 import format.SVG;
 import openfl.geom.Point;
 import utils.AssetManager;
 import openfl.display.Bitmap;
-import struct.Hex;
 import net.shared.PieceType;
 import net.shared.PieceColor;
 import openfl.display.Sprite;

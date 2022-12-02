@@ -4,8 +4,6 @@ import net.shared.EloValue;
 import utils.TimeControl;
 import net.shared.Outcome;
 import net.shared.PieceColor;
-import struct.Ply;
-import struct.Situation;
 import net.shared.PieceType;
 import dict.*;
 using StringTools;

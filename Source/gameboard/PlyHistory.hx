@@ -1,8 +1,6 @@
 package gameboard;
 
 import haxe.exceptions.NotImplementedException;
-import struct.Ply;
-import struct.ReversiblePly;
 
 class PlyHistory
 {

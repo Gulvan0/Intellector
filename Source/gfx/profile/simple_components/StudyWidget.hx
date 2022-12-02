@@ -2,9 +2,7 @@ package gfx.profile.simple_components;
 
 import gfx.basic_components.BoardWrapper;
 import gameboard.Board;
-import struct.Situation;
 import gfx.profile.complex_components.StudyTagList;
-import net.shared.StudyInfo;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.core.ItemRenderer;
 import dict.Dictionary;

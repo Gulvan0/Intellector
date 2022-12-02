@@ -1,7 +1,6 @@
 package utils;
 
 import haxe.ui.util.ImageLoader;
-import net.shared.UserStatus;
 import gfx.menubar.ChallengesIconMode;
 import haxe.CallStack;
 import openfl.display.Sprite;
@@ -10,9 +9,6 @@ import net.shared.TimeControlType;
 import format.SVG;
 import gfx.analysis.PosEditMode;
 import openfl.geom.Matrix;
-import struct.Ply;
-import struct.Situation;
-import struct.Hex;
 import openfl.Assets;
 import openfl.display.BitmapData;
 import net.shared.PieceType;

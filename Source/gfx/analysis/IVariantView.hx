@@ -3,8 +3,6 @@ package gfx.analysis;
 import gfx.utils.PlyScrollType;
 import haxe.ui.core.Component;
 import struct.Variant.VariantPath;
-import struct.Situation;
-import struct.Ply;
 
 interface IVariantView
 {

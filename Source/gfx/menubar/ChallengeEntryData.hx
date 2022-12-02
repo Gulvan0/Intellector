@@ -1,7 +1,7 @@
 package gfx.menubar;
 
 import struct.ChallengeParams;
-import net.shared.ChallengeData;
+import net.shared.dataobj.ChallengeData;
 
 class ChallengeEntryData
 {

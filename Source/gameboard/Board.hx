@@ -2,16 +2,9 @@ package gameboard;
 
 import Preferences.Markup;
 import haxe.ui.components.Label;
-import struct.Ply;
-import utils.MathUtils;
 import openfl.display.Sprite;
 import gfx.utils.Colors;
-import utils.Notation;
 import openfl.geom.Point;
-import struct.ReversiblePly;
-import struct.Hex;
-import struct.Situation;
-import struct.IntPoint;
 import net.shared.PieceColor;
 
 /**

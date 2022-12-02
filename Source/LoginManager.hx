@@ -1,9 +1,9 @@
 package;
 
-import net.shared.ChallengeData;
+import net.shared.dataobj.ChallengeData;
 import serialization.GameLogParser;
 import gfx.SceneManager;
-import net.shared.SignInResult;
+import net.shared.dataobj.SignInResult;
 import net.shared.ServerEvent;
 import haxe.crypto.Md5;
 import browser.CredentialCookies;

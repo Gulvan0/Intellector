@@ -1,8 +1,5 @@
 package gameboard.states;
 
-import struct.Hex;
-import struct.IntPoint;
-
 private enum Transition
 {
     ToNeutral;

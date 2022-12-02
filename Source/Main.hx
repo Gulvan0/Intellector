@@ -2,10 +2,9 @@ package;
 
 import browser.Blinker;
 import gfx.ScreenNavigator;
-import net.shared.GreetingResponseData;
+import net.shared.dataobj.GreetingResponseData;
 import tests.SimpleTests;
 import gfx.basic_components.AutosizingLabel;
-import struct.Situation;
 import struct.ChallengeParams;
 import serialization.GameLogParser;
 import utils.Changelog;

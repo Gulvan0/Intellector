@@ -1,6 +1,5 @@
 package gfx.popups;
 
-import utils.MathUtils;
 import haxe.ui.containers.dialogs.Dialog;
 import utils.Changelog;
 import dict.Dictionary;

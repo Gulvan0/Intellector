@@ -2,7 +2,7 @@ package gfx;
 
 import haxe.ui.events.UIEvent;
 import gfx.game.LiveGameConstructor;
-import net.shared.StudyInfo;
+import net.shared.dataobj.StudyInfo;
 import gfx.game.LiveGameConstructor;
 import browser.CredentialCookies;
 import gfx.Dialogs;

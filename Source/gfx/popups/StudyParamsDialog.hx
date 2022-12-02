@@ -6,7 +6,7 @@ import net.Requests;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
 import struct.Variant;
-import net.shared.StudyInfo;
+import net.shared.dataobj.StudyInfo;
 import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.core.Screen as HaxeUIScreen;
 import utils.StringUtils;

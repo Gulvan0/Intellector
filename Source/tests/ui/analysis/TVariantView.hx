@@ -4,9 +4,7 @@ import tests.ui.analysis.variantviews.AugmentedVariantTree;
 import Preferences.BranchingTabType;
 import tests.ui.TestedComponent;
 import serialization.PlySerializer;
-import struct.Ply;
 import struct.Variant;
-import struct.Situation;
 import openfl.display.Sprite;
 import gfx.analysis.IVariantView;
 

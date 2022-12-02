@@ -1,6 +1,5 @@
 package tests.data;
 
-import struct.Situation;
 import struct.Variant;
 
 class Variants

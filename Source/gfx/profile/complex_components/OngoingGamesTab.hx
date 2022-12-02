@@ -1,6 +1,6 @@
 package gfx.profile.complex_components;
 
-import net.shared.GameInfo;
+import net.shared.dataobj.GameInfo;
 import net.Requests;
 import dict.Dictionary;
 import haxe.ui.components.Button;

@@ -1,6 +1,6 @@
-package net.shared;
+package net.shared.dataobj;
 
-import net.shared.UserStatus;
+import net.shared.dataobj.UserStatus;
 
 class MiniProfileData
 {

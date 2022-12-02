@@ -2,7 +2,6 @@ package struct;
 
 import serialization.SituationSerializer;
 import serialization.PlySerializer;
-import struct.Ply;
 
 abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
 {

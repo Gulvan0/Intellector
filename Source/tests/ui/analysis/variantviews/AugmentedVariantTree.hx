@@ -1,7 +1,6 @@
 package tests.ui.analysis.variantviews;
 
 import tests.ui.TestedComponent.ComponentGraphics;
-import struct.Situation;
 import tests.ui.analysis.TVariantView.ITestedVariantView;
 import gfx.analysis.VariantTree;
 

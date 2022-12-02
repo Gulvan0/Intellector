@@ -1,6 +1,6 @@
 package tests.data;
 
-import net.shared.StudyInfo;
+import net.shared.dataobj.StudyInfo;
 
 class StudyInfos
 {

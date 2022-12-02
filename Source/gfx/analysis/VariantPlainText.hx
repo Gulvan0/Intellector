@@ -2,10 +2,7 @@ package gfx.analysis;
 
 import haxe.ui.core.Component;
 import haxe.ui.components.Label;
-import struct.Situation;
 import struct.Variant;
-import utils.MathUtils;
-import struct.Ply;
 import gfx.utils.PlyScrollType;
 import struct.Variant.VariantPath;
 import haxe.ui.styles.Style;

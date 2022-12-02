@@ -11,7 +11,7 @@ import net.shared.EloValue;
 import utils.AssetManager;
 import gfx.basic_components.AnnotatedImage;
 import net.shared.TimeControlType;
-import net.shared.MiniProfileData;
+import net.shared.dataobj.MiniProfileData;
 import haxe.ds.BalancedTree;
 import dict.Dictionary;
 import gfx.profile.simple_components.PlayerLabel;

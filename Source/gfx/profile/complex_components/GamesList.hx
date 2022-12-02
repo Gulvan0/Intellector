@@ -1,6 +1,6 @@
 package gfx.profile.complex_components;
 
-import net.shared.GameInfo;
+import net.shared.dataobj.GameInfo;
 import gfx.profile.simple_components.TimeControlFilterDropdown;
 import gfx.common.GameWidget;
 import haxe.ui.containers.ListView;

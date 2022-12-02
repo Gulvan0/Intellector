@@ -19,7 +19,6 @@ import tests.ui.utils.data.EndpointArgument;
 import tests.ui.utils.data.ActionEndpointPrompt;
 import tests.ui.utils.data.TestCaseInfo;
 import tests.ui.FieldTraverser.FieldTraverserResults;
-import struct.Situation;
 import haxe.Timer;
 import haxe.ui.components.Label;
 import tests.ui.utils.data.MaterializedInitParameter;

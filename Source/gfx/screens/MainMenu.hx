@@ -2,8 +2,8 @@ package gfx.screens;
 
 import net.shared.ServerEvent;
 import net.EventProcessingQueue.INetObserver;
-import net.shared.GameInfo;
-import net.shared.ChallengeData;
+import net.shared.dataobj.GameInfo;
+import net.shared.dataobj.ChallengeData;
 import net.Requests;
 import haxe.ui.styles.Style;
 import gfx.ResponsiveToolbox;

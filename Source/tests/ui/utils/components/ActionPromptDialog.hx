@@ -2,10 +2,8 @@ package tests.ui.utils.components;
 
 import gfx.Dialogs;
 import haxe.ui.core.Screen;
-import struct.Ply;
 import haxe.exceptions.NotImplementedException;
 import gfx.basic_components.BoardWrapper;
-import struct.Situation;
 import gameboard.SelectableBoard;
 import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;

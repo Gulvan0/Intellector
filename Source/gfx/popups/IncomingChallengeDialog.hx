@@ -1,6 +1,6 @@
 package gfx.popups;
 
-import net.shared.ChallengeData;
+import net.shared.dataobj.ChallengeData;
 import haxe.ui.tooltips.ToolTipOptions;
 import gfx.basic_components.AnnotatedImage;
 import dict.Utils;

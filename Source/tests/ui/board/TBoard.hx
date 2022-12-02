@@ -2,11 +2,6 @@ package tests.ui.board;
 
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.display.Sprite;
-import struct.Ply;
-import struct.Hex;
-import struct.ReversiblePly;
-import struct.IntPoint;
-import struct.Situation;
 import gameboard.Board;
 
 class TBoard extends TestedComponent

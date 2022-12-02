@@ -3,7 +3,6 @@ package gfx.main;
 import dict.Dictionary;
 import haxe.ui.tooltips.ToolTipManager;
 import gfx.common.SituationTooltipRenderer;
-import struct.Situation;
 import utils.AssetManager;
 import net.shared.PieceColor;
 import utils.TimeControl;

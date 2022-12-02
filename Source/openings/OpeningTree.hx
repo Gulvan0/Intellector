@@ -1,6 +1,5 @@
 package openings;
 
-import struct.Ply;
 import dict.Dictionary;
 import net.shared.PieceType;
 

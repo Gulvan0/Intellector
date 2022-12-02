@@ -7,7 +7,7 @@ import gfx.profile.complex_components.StudiesTab;
 import gfx.profile.complex_components.PastGamesTab;
 import gfx.profile.complex_components.FriendList;
 import gfx.profile.complex_components.ProfileHeader;
-import net.shared.ProfileData;
+import net.shared.dataobj.ProfileData;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/profile/profile.xml"))
 class Profile extends Screen

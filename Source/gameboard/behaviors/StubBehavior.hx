@@ -1,9 +1,7 @@
 package gameboard.behaviors;
 
 import gfx.analysis.PeripheralEvent;
-import struct.Ply;
 import net.shared.ServerEvent;
-import struct.IntPoint;
 
 class StubBehavior implements IBehavior 
 {

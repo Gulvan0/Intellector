@@ -1,6 +1,6 @@
 package gfx.game;
 
-import net.shared.TimeReservesData;
+import net.shared.dataobj.TimeReservesData;
 import net.shared.ServerEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import gameboard.GameBoard.IGameBoardObserver;

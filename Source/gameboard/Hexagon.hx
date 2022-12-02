@@ -1,8 +1,6 @@
 package gameboard;
 
 import openfl.display.Graphics;
-import utils.MathUtils;
-import utils.Notation;
 import gfx.utils.Colors;
 import openfl.text.TextFormat;
 import openfl.text.TextField;

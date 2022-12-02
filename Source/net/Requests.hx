@@ -1,12 +1,12 @@
 package net;
 
-import net.shared.GreetingResponseData;
-import net.shared.Greeting;
-import net.shared.ChallengeData;
+import net.shared.dataobj.GreetingResponseData;
+import net.shared.dataobj.Greeting;
+import net.shared.dataobj.ChallengeData;
 import net.shared.TimeControlType;
-import net.shared.GameInfo;
-import net.shared.StudyInfo;
-import net.shared.ProfileData;
+import net.shared.dataobj.GameInfo;
+import net.shared.dataobj.StudyInfo;
+import net.shared.dataobj.ProfileData;
 import struct.ChallengeParams;
 import dict.Dictionary;
 import gfx.Dialogs;

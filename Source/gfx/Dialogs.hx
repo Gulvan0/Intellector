@@ -1,9 +1,7 @@
 package gfx;
 
 import gfx.popups.OpenChallengeCreated;
-import net.shared.ChallengeData;
 import gfx.popups.StudyParamsDialog;
-import net.shared.StudyInfo;
 import gfx.profile.complex_components.MiniProfile;
 import gfx.popups.IncomingChallengeDialog;
 import gfx.popups.ChangelogDialog;
@@ -14,7 +12,6 @@ import openfl.Assets;
 import js.Browser;
 import gfx.popups.LogIn;
 import gfx.popups.Settings;
-import utils.MathUtils;
 import haxe.ui.containers.ScrollView;
 import utils.Changelog;
 import haxe.ui.containers.dialogs.MessageBox;
@@ -41,7 +38,7 @@ import haxe.ui.containers.dialogs.MessageBox.MessageBoxType;
 import haxe.ui.containers.dialogs.Dialogs as DialogManager;
 import haxe.ui.core.Screen;
 import gfx.basic_components.SpriteWrapper;
-import net.shared.MiniProfileData;
+import net.shared.dataobj.MiniProfileData;
 
 enum SpaceRemoval
 {

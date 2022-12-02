@@ -10,7 +10,6 @@ import haxe.ui.Toolkit;
 import gfx.common.ShareDialog;
 import js.Browser;
 import gameboard.behaviors.AnalysisBehavior;
-import struct.Situation;
 import net.shared.PieceColor;
 import gfx.basic_components.BoardWrapper;
 import haxe.ui.core.Component;

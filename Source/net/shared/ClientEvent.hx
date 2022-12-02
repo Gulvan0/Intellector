@@ -1,5 +1,8 @@
 package net.shared;
 
+import net.shared.dataobj.*;
+import net.shared.board.RawPly;
+
 enum ClientEvent
 {
     Greet(greeting:Greeting);
@@ -10,7 +13,7 @@ enum ClientEvent
     CancelChallenge(challengeID:Int);
     AcceptChallenge(challengeID:Int); 
     DeclineDirectChallenge(challengeID:Int);
-    Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<PieceType>); 
+    Move(ply:RawPly); 
     RequestTimeoutCheck; 
     Message(text:String); 
     SimpleRematch;

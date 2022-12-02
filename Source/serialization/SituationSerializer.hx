@@ -1,10 +1,7 @@
 package serialization;
 
 import net.shared.PieceColor;
-import struct.Hex;
 import net.shared.PieceType;
-import struct.Situation;
-import struct.IntPoint;
 import net.shared.PieceType.letter as pieceLetter;
 import net.shared.PieceColor.letter as colorLetter;
 

@@ -5,7 +5,7 @@ import net.shared.TimeControlType;
 import dict.utils.TimePhrases;
 import dict.utils.OutcomePhrases;
 import utils.SpecialChar;
-import net.shared.UserStatus;
+import net.shared.dataobj.UserStatus;
 import gfx.game.LiveGameConstructor;
 import utils.StringUtils;
 import utils.TimeControl;

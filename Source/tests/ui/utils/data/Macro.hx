@@ -1,7 +1,6 @@
 package tests.ui.utils.data;
 
 import haxe.Json;
-import struct.Ply;
 import tests.ui.utils.data.MacroStep.constructMacroStep;
 
 class Macro

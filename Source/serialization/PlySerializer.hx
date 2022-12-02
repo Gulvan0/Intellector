@@ -1,10 +1,6 @@
 package serialization;
 
-import struct.Situation;
-import struct.Ply;
 import net.shared.PieceType;
-import struct.ReversiblePly;
-import struct.IntPoint;
 
 class PlySerializer 
 {

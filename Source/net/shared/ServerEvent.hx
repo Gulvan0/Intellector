@@ -1,5 +1,8 @@
 package net.shared;
 
+import net.shared.dataobj.*;
+import net.shared.board.RawPly;
+
 enum ServerEvent
 {
     GreetingResponse(data:GreetingResponseData); //Answer to Greeting
@@ -34,7 +37,7 @@ enum ServerEvent
     Message(authorRef:String, message:String); //New in-game player message
     SpectatorMessage(authorRef:String, message:String); //New in-game spectator message
     TimeCorrection(timeData:TimeReservesData); //Signals to update the in-game timers. Significant game events (Move, Rollback, TimeAdded, GameEnded) also contain the same data which should be processed in the exact same way
-    Move(fromI:Int, toI:Int, fromJ:Int, toJ:Int, morphInto:Null<PieceType>, timeData:Null<TimeReservesData>); //A move has been played. Sent both to opponent and to all of the spectators
+    Move(ply:RawPly, timeData:Null<TimeReservesData>); //A move has been played. Sent both to opponent and to all of the spectators
     Rollback(plysToUndo:Int, timeData:Null<TimeReservesData>); //Signal to undo a number of plys in a current game. Sent to both spectators and players
     TimeAdded(receiver:PieceColor, timeData:TimeReservesData);
     GameEnded(outcome:Outcome, rematchPossible:Bool, remainingTimeMs:Null<Map<PieceColor, Int>>, newPersonalElo:Null<EloValue>); //Game over. Sent both to players and to all of the spectators

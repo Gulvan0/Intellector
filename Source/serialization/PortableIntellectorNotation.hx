@@ -1,11 +1,9 @@
 package serialization;
 
 import dict.Utils;
-import struct.Situation;
 import net.shared.PieceColor;
 import net.shared.Outcome;
 import utils.TimeControl;
-import struct.Ply;
 using StringTools;
 
 class PortableIntellectorNotation 

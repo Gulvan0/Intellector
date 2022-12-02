@@ -1,9 +1,5 @@
 package gameboard.behaviors;
 
-import struct.Hex;
-import struct.Ply;
-import struct.IntPoint;
-
 class EditorFreeMoveBehavior extends EditorBehavior implements IBehavior 
 {
     public function onMoveChosen(ply:Ply):Void

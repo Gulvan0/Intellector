@@ -4,7 +4,6 @@ import haxe.ui.events.UIEvent;
 import haxe.Timer;
 import haxe.ui.Toolkit;
 import openfl.events.Event;
-import utils.MathUtils;
 import gameboard.Hexagon;
 import gameboard.Board;
 import haxe.ui.core.Component;

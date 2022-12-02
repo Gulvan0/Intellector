@@ -3,7 +3,7 @@ package gfx.profile.complex_components;
 import haxe.Timer;
 import dict.Dictionary;
 import net.shared.EloValue;
-import net.shared.GameInfo;
+import net.shared.dataobj.GameInfo;
 import serialization.GameLogParser;
 import net.shared.TimeControlType;
 import net.Requests;

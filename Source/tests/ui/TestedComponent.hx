@@ -14,7 +14,6 @@ import haxe.ui.containers.Box;
 import gameboard.Board;
 import gfx.Dialogs;
 import haxe.ui.core.Component;
-import struct.Situation;
 import openfl.display.Sprite;
 
 enum ComponentGraphics

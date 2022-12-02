@@ -1,8 +1,6 @@
 package gameboard.lightweight;
 
-import struct.IntPoint;
 import gfx.utils.Colors;
-import utils.MathUtils;
 import openfl.display.Shape;
 
 class LightHexagonGrid extends Shape

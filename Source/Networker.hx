@@ -14,7 +14,7 @@ import haxe.Serializer;
 import js.html.Event;
 import net.shared.ClientEvent;
 import net.shared.ServerEvent;
-import net.shared.SessionRestorationResult;
+import net.shared.dataobj.SessionRestorationResult;
 import net.EventProcessingQueue;
 import gfx.Dialogs;
 import gfx.SceneManager;

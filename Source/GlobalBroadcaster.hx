@@ -1,6 +1,6 @@
 package;
 
-import net.shared.ChallengeData;
+import net.shared.dataobj.ChallengeData;
 import Preferences.PreferenceName;
 
 enum GlobalEvent

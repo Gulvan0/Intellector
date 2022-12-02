@@ -1,7 +1,6 @@
 package gameboard.lightweight;
 
 import net.shared.PieceColor;
-import struct.Situation;
 import openfl.display.Sprite;
 
 class LightBoard extends Sprite

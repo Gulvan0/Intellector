@@ -1,8 +1,6 @@
 package gameboard.behaviors;
 
-import struct.IntPoint;
 import utils.AssetManager;
-import struct.Ply;
 import net.shared.ServerEvent;
 import utils.exceptions.AlreadyInitializedException;
 

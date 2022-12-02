@@ -1,4 +1,4 @@
-package net.shared;
+package net.shared.dataobj;
 
 class OngoingGameInfo
 {

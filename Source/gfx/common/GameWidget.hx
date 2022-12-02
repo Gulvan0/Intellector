@@ -9,8 +9,6 @@ import haxe.ui.containers.HBox;
 import haxe.ui.components.Label;
 import haxe.ui.events.UIEvent;
 import haxe.ui.events.MouseEvent;
-import struct.Situation;
-import net.shared.GameInfo;
 import net.shared.EloValue;
 import gameboard.Board;
 import gfx.basic_components.BoardWrapper;

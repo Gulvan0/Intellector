@@ -1,7 +1,7 @@
 package gfx.main;
 
 import dict.Utils;
-import net.shared.GameInfo;
+import net.shared.dataobj.GameInfo;
 import utils.StringUtils.eloToStr;
 import haxe.ui.containers.VBox;
 import haxe.ui.events.MouseEvent;

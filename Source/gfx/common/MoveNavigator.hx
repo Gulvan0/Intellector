@@ -1,15 +1,12 @@
 package gfx.common;
 
 import haxe.ui.constants.SelectionMode;
-import utils.MathUtils;
 import gfx.analysis.PeripheralEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import net.shared.ServerEvent;
 import haxe.ui.styles.Style;
 import net.shared.PieceColor;
 import gfx.utils.PlyScrollType;
-import struct.Situation;
-import struct.Ply;
 import haxe.Timer;
 import haxe.ui.components.VerticalScroll;
 import haxe.ui.components.Button;

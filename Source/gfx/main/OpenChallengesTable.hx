@@ -1,7 +1,7 @@
 package gfx.main;
 
 import utils.StringUtils.eloToStr;
-import net.shared.ChallengeData;
+import net.shared.dataobj.ChallengeData;
 import haxe.ui.events.UIEvent;
 import struct.ChallengeParams;
 import haxe.ui.containers.VBox;

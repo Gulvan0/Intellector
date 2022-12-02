@@ -9,7 +9,6 @@ import haxe.ui.components.Button;
 import haxe.ui.events.UIEvent;
 import gfx.Dialogs;
 import gameboard.GameBoard.GameBoardEvent;
-import struct.Situation;
 import net.shared.PieceColor;
 import js.Browser;
 import haxe.ui.events.MouseEvent;

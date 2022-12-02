@@ -2,7 +2,7 @@ package gfx.menubar;
 
 import browser.Clipboard;
 import js.Browser;
-import net.shared.ChallengeData;
+import net.shared.dataobj.ChallengeData;
 import gfx.basic_components.AutosizingLabel;
 import gfx.basic_components.CopyableText;
 import dict.Utils;

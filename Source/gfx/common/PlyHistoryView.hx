@@ -2,7 +2,6 @@ package gfx.common;
 
 import haxe.ui.events.UIEvent;
 import serialization.GameLogParser.GameLogParserOutput;
-import struct.IntPoint;
 import net.EventProcessingQueue.INetObserver;
 import gfx.analysis.IAnalysisPeripheralEventObserver;
 import gameboard.GameBoard.IGameBoardObserver;
@@ -12,8 +11,6 @@ import gfx.analysis.PeripheralEvent;
 import gameboard.GameBoard.GameBoardEvent;
 import net.shared.ServerEvent;
 import gfx.utils.PlyScrollType;
-import struct.Ply;
-import struct.Situation;
 import haxe.ui.containers.VBox;
 import net.shared.PieceColor;
 

@@ -1,8 +1,8 @@
 package gfx;
 
-import net.shared.ChallengeData;
-import net.shared.StudyInfo;
-import net.shared.ProfileData;
+import net.shared.dataobj.ChallengeData;
+import net.shared.dataobj.StudyInfo;
+import net.shared.dataobj.ProfileData;
 import struct.ChallengeParams;
 import struct.Variant.VariantPath;
 import gfx.game.LiveGameConstructor;

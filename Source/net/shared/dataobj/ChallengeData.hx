@@ -1,4 +1,4 @@
-package net.shared;
+package net.shared.dataobj;
 
 import net.shared.EloValue.serialize;
 

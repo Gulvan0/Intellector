@@ -1,8 +1,5 @@
 package tests.ui.utils.data;
 
-import struct.Situation;
-import struct.Ply;
-
 class EndpointArgument
 {
     public final value:Dynamic;

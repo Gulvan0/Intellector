@@ -1,0 +1,224 @@
+package net.shared.board;
+
+import net.shared.utils.MathUtils;
+import net.shared.converters.SituationSerializer;
+import net.shared.PieceColor;
+import net.shared.PieceType.letter as pieceLetter;
+
+class Situation
+{
+    public var pieces:PieceArrangement;
+    public var turnColor(default, null):PieceColor;
+    private var intellectorPos:Map<PieceColor, HexCoords>;
+
+    private static var defaultStartingHash:String = defaultStarting().getHash();
+
+    public static function defaultStarting():Situation
+    {
+        return new Situation(PieceArrangement.defaultStarting(), White, [White => new HexCoords(4, 6), Black => new HexCoords(4, 0)]);
+    }
+
+    public static function empty():Situation
+    {
+        return new Situation(PieceArrangement.emptyArrangement(), White, []);
+    }
+
+    public static function randomPlay(plyCount:Int):Situation 
+    {
+        var sit:Situation = Situation.defaultStarting();
+        for (i in 0...plyCount)
+        {
+            var allPlys = sit.availablePlys();
+            var randomPly = MathUtils.randomElement(allPlys);
+            sit.performRawPly(randomPly);
+        }
+        return sit;
+    }
+
+    public static function deserialize(sip:String):Null<Situation>
+    {
+        return SituationSerializer.deserialize(sip);
+    }
+
+    public function serialize():String
+    {
+        return SituationSerializer.serialize(this);
+    }
+
+    public function collectPieces():Map<HexCoords, PieceData>
+    {
+        var map:Map<HexCoords, PieceData> = [];
+
+        for (coords in HexCoords.enumerate()) 
+        {
+            switch get(coords) 
+            {
+                case Occupied(piece):
+                    map.set(coords, piece);
+                default:
+            }
+        }
+
+        return map;
+    }
+
+    public function isDefaultStarting():Bool
+    {
+        return getHash() == defaultStartingHash;
+    }
+
+    public function getHash():String
+    {
+        var hash:String = "";
+
+        for (coords in HexCoords.enumerate())
+        {
+            switch get(coords) 
+            {
+                case Occupied(piece):
+                    hash += coords.toScalarCoord();
+                    hash += pieceLetter(piece.type);
+                    if (piece.color == Black)
+                        hash += "!";
+                default:
+            }
+        }
+
+        return hash;
+    }
+
+    public function intellectorCoords(color:PieceColor):HexCoords 
+    {
+        return intellectorPos.get(color);
+    }
+
+    public function availablePlys():Array<RawPly>
+    {
+        return Rules.possiblePlys(this);
+    }
+
+    public function situationAfterRawPly(ply:RawPly):Situation
+    {
+        return situationAfterPly(ply.toMaterialized(this));
+    }
+
+    public function situationAfterPly(ply:MaterializedPly):Situation
+    {
+        var situation:Situation = copy();
+        situation.performPly(ply);
+        return situation;
+    }
+
+    public function performRawPly(ply:RawPly):PerformPlyResult
+    {
+        return performPly(ply.toMaterialized(this));
+    }
+
+    public function performPly(ply:MaterializedPly):PerformPlyResult
+    {
+        if (!Rules.isPossible(ply.toRaw(), this))
+            return FailedToPerform;
+        
+        var isMate:Bool = ply.isMating();
+        var isBreakthrough:Bool = isMate? false : ply.isBreakthrough(pieces, turnColor);
+        var isProgressive:Bool = isBreakthrough? false : ply.isProgressive();
+
+        switch ply 
+        {
+            case NormalMove(from, to, movingPiece):
+                set(from, Empty);
+                set(to, Hex.construct(movingPiece, turnColor));
+            case NormalCapture(from, to, capturingPiece, _):
+                set(from, Empty);
+                set(to, Hex.construct(capturingPiece, turnColor));
+            case ChameleonCapture(from, to, _, capturedPiece):
+                set(from, Empty);
+                set(to, Hex.construct(capturedPiece, turnColor));
+            case Promotion(from, to, promotedTo), PromotionWithCapture(from, to, _, promotedTo):
+                set(from, Empty);
+                set(to, Hex.construct(promotedTo, turnColor));
+            case Castling(from, to):
+                var tmp:Hex = get(from);
+                set(from, get(to));
+                set(to, tmp);
+        }
+
+        turnColor = opposite(turnColor);
+        
+        if (isMate)
+            return MateReached;
+        else if (isBreakthrough)
+            return BreakthroughReached;
+        else if (isProgressive)
+            return ProgressivePlyPerformed(ply);
+        else
+            return NormalPlyPerformed(ply);
+    }
+
+    public function revertPly(ply:MaterializedPly)
+    {
+        turnColor = opposite(turnColor);
+
+        switch ply 
+        {
+            case NormalMove(from, to, _):
+                set(from, get(to));
+                set(to, Empty);
+            case NormalCapture(from, to, _, capturedPiece):
+                set(from, get(to));
+                set(to, Hex.construct(capturedPiece, opposite(turnColor)));
+            case ChameleonCapture(from, to, capturingPiece, capturedPiece):
+                set(from, Hex.construct(capturingPiece, turnColor));
+                set(to, Hex.construct(capturedPiece, opposite(turnColor)));
+            case Promotion(from, to, _):
+                set(from, Hex.construct(Progressor, turnColor));
+                set(to, Empty);
+            case PromotionWithCapture(from, to, capturedPiece, _):
+                set(from, Hex.construct(Progressor, turnColor));
+                set(to, Hex.construct(capturedPiece, opposite(turnColor)));
+            case Castling(from, to):
+                var tmp:Hex = get(from);
+                set(from, get(to));
+                set(to, tmp);
+        }
+    }
+
+    public inline function getS(scalarCoord:Int):Hex
+    {
+        return get(HexCoords.fromScalarCoord(scalarCoord));
+    }
+
+    public inline function get(coords:HexCoords):Hex
+    {
+        return pieces.get(coords);
+    }
+
+    public inline function set(coords:HexCoords, hex:Hex, ?adjustToConsistency:Bool = true) 
+    {
+        pieces.set(coords, hex);
+        if (adjustToConsistency)
+        {
+            if (get(coords).type() == Intellector)
+                intellectorPos.remove(get(coords).color());
+            if (hex.type() == Intellector)
+                intellectorPos.set(hex.color(), coords);
+        }  
+    }
+
+    public function copy():Situation
+    {
+        return new Situation(pieces.copy(), turnColor, intellectorPos.copy());
+    }
+
+    public function toString():String
+    {
+        return 'Situation';  
+    }
+
+    public function new(pieces:PieceArrangement, turnColor:PieceColor, intellectorPos:Map<PieceColor, HexCoords>)
+    {
+        this.pieces = pieces;
+        this.turnColor = turnColor;
+        this.intellectorPos = intellectorPos;
+    }
+}

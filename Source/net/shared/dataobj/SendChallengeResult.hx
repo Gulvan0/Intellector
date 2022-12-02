@@ -1,6 +1,6 @@
-package net.shared;
+package net.shared.dataobj;
 
-import net.shared.ChallengeData;
+import net.shared.dataobj.ChallengeData;
 
 enum SendChallengeResult
 {

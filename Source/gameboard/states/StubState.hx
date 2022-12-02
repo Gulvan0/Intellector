@@ -1,7 +1,5 @@
 package gameboard.states;
 
-import struct.IntPoint;
-
 class StubState extends BaseState
 {
     public function onEntered()

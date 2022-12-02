@@ -1,8 +1,8 @@
 package tests.data;
 
-import net.shared.FriendData;
-import net.shared.MiniProfileData;
-import net.shared.ProfileData;
+import net.shared.dataobj.FriendData;
+import net.shared.dataobj.MiniProfileData;
+import net.shared.dataobj.ProfileData;
 
 class ProfileInfos
 {

@@ -1,6 +1,5 @@
 package gfx.common;
 
-import utils.MathUtils;
 import haxe.Timer;
 import haxe.ui.components.HorizontalScroll;
 import net.shared.ServerEvent;
