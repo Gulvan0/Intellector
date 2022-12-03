@@ -1,5 +1,7 @@
 package gameboard.states;
 
+import net.shared.board.HexCoords;
+
 class StubState extends BaseState
 {
     public function onEntered()
@@ -7,12 +9,12 @@ class StubState extends BaseState
         //* Do nothing
     }
     
-    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }
 
-    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBReleased(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }
@@ -22,7 +24,7 @@ class StubState extends BaseState
         //* Do nothing
     }
 
-    public function reactsToHover(location:IntPoint):Bool
+    public function reactsToHover(location:HexCoords):Bool
     {
         return false;
     }

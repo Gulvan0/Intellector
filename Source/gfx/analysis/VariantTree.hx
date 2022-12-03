@@ -1,5 +1,8 @@
 package gfx.analysis;
 
+import net.shared.board.RawPly;
+import net.shared.utils.MathUtils;
+import net.shared.board.Situation;
 import haxe.ui.events.MouseEvent;
 import gfx.utils.PlyScrollType;
 import openfl.events.Event;
@@ -216,7 +219,7 @@ class VariantTree extends Sprite implements IVariantView
         refreshLayout();
     }
 
-    public function addChildNode(parentPath:VariantPath, ply:Ply, selectChild:Bool)
+    public function addChildNode(parentPath:VariantPath, ply:RawPly, selectChild:Bool)
     {
         var nodeNum:Int = variantRef.childCount(parentPath);
         var nodePath:VariantPath = parentPath.child(nodeNum);
@@ -327,7 +330,7 @@ class VariantTree extends Sprite implements IVariantView
         return info;
     }
 
-    public function addChildToSelectedNode(ply:Ply, selectChild:Bool) 
+    public function addChildToSelectedNode(ply:RawPly, selectChild:Bool) 
     {
         addChildNode(selectedBranch.subpath(selectedMove), ply, selectChild);
     }

@@ -7,20 +7,23 @@ import utils.exceptions.AlreadyInitializedException;
 import net.shared.ServerEvent;
 import net.shared.PieceColor;
 import utils.AssetManager;
+import net.shared.board.RawPly;
+import net.shared.board.Hex;
+import net.shared.board.HexCoords;
 
 class EditorDeleteBehavior extends EditorBehavior implements IBehavior 
 {
-    public function onMoveChosen(ply:Ply):Void
+    public function onMoveChosen(ply:RawPly):Void
 	{
         //* Do nothing
     }
     
-    public function onHexChosen(coords:IntPoint)
+    public function onHexChosen(coords:HexCoords)
     {
-        boardInstance.setHexDirectly(coords, Hex.empty());
+        boardInstance.setHexDirectly(coords, Empty);
     }
     
-    public function movePossible(from:IntPoint, to:IntPoint):Bool
+    public function movePossible(from:HexCoords, to:HexCoords):Bool
 	{
         return true;
     }

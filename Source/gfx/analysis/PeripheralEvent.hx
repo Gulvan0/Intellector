@@ -1,11 +1,13 @@
 package gfx.analysis;
 
+import net.shared.board.RawPly;
+import net.shared.board.Situation;
 import gfx.utils.PlyScrollType;
 import net.shared.PieceColor;
 
 enum PeripheralEvent
 {
-    BranchSelected(branch:Array<Ply>, branchStr:Array<String>, pointer:Int);
+    BranchSelected(branch:Array<RawPly>, branchStr:Array<String>, pointer:Int);
     RevertNeeded(plyCnt:Int);
     ClearRequested;
     ResetRequested;

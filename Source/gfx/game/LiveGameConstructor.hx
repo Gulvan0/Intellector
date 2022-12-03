@@ -1,5 +1,7 @@
 package gfx.game;
 
+import net.shared.dataobj.TimeReservesData;
+import net.shared.board.Situation;
 import net.shared.PieceColor;
 import net.shared.EloValue;
 import serialization.GameLogParser.GameLogParserOutput;

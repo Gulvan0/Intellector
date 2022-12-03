@@ -1,5 +1,13 @@
 package gameboard;
 
+import net.shared.utils.MathUtils;
+import net.shared.converters.Notation;
+import net.shared.PieceType;
+import net.shared.board.MaterializedPly;
+import net.shared.board.RawPly;
+import net.shared.board.Hex;
+import net.shared.board.HexCoords;
+import net.shared.board.Situation;
 import Preferences.Markup;
 import haxe.ui.components.Label;
 import openfl.display.Sprite;
@@ -41,9 +49,9 @@ class Board extends Sprite
     public function resize(newHexSideLength:Float)
     {
         this.hexSideLength = newHexSideLength;
-        for (s in 0...IntPoint.hexCount)
+        for (s in HexCoords.enumerateScalar())
         {
-            var coords = hexCoords(IntPoint.fromScalar(s));
+            var coords = hexCoords(HexCoords.fromScalarCoord(s));
 
             var hexagon = hexagons[s];
             var piece = pieces[s];
@@ -71,9 +79,9 @@ class Board extends Sprite
         {
             orientationColor = val;
 
-            for (s in 0...IntPoint.hexCount)
+            for (s in HexCoords.enumerateScalar())
             {
-                var coords = hexCoords(IntPoint.fromScalar(s));
+                var coords = hexCoords(HexCoords.fromScalarCoord(s));
 
                 var hexagon = hexagons[s];
                 var piece = pieces[s];
@@ -104,26 +112,26 @@ class Board extends Sprite
         setShownSituation(Situation.empty());
     }
 
-    public function setHexDirectly(location:IntPoint, hex:Hex)
+    public function setHexDirectly(location:HexCoords, hex:Hex)
     {
-        if (hex.type == Intellector)
+        if (hex.type() == Intellector)
         {
-            var oldIntellectorPosition:Null<IntPoint> = _shownSituation.intellectorPos[hex.color];
+            var oldIntellectorPosition:Null<HexCoords> = _shownSituation.intellectorCoords(hex.color());
             if (oldIntellectorPosition != null)
             {
                 pieceLayer.removeChild(getPiece(oldIntellectorPosition));
-                pieces[oldIntellectorPosition.toScalar()] = null;
-                _shownSituation.set(oldIntellectorPosition, Hex.empty());
+                pieces[oldIntellectorPosition.toScalarCoord()] = null;
+                _shownSituation.set(oldIntellectorPosition, Empty);
             }
         }
         var formerPiece = getPiece(location);
         if (formerPiece != null)
             pieceLayer.removeChild(formerPiece);
         producePiece(location, hex);
-        _shownSituation.set(location, hex.copy());
+        _shownSituation.set(location, hex);
     }
 
-    public function applyPremoveTransposition(ply:Ply) 
+    public function applyPremoveTransposition(ply:RawPly) 
     {
         var departurePiece = getPiece(ply.from);
         var destinationPiece = getPiece(ply.to);
@@ -131,88 +139,191 @@ class Board extends Sprite
         if (ply.morphInto != null)
         {
             pieceLayer.removeChild(departurePiece);
-            pieces[ply.from.toScalar()] = null;
-            _shownSituation.set(ply.from, Hex.empty());
+            pieces[ply.from.toScalarCoord()] = null;
+            _shownSituation.set(ply.from, Empty);
 
             if (destinationPiece != null)
                 pieceLayer.removeChild(destinationPiece);
-            producePiece(ply.to, Hex.occupied(ply.morphInto, departurePiece.color));
-            _shownSituation.set(ply.to, Hex.occupied(ply.morphInto, departurePiece.color));
+            producePiece(ply.to, Hex.construct(ply.morphInto, departurePiece.color));
+            _shownSituation.set(ply.to, Hex.construct(ply.morphInto, departurePiece.color));
         }
         else
         {
             departurePiece.reposition(ply.to, this);
-            pieces[ply.to.toScalar()] = departurePiece;
-            _shownSituation.set(ply.to, Hex.occupied(departurePiece.type, departurePiece.color));
+            pieces[ply.to.toScalarCoord()] = departurePiece;
+            _shownSituation.set(ply.to, Hex.construct(departurePiece.type, departurePiece.color));
 
             if (destinationPiece == null)
             {
-                pieces[ply.from.toScalar()] = null;
-                _shownSituation.set(ply.from, Hex.empty());
+                pieces[ply.from.toScalarCoord()] = null;
+                _shownSituation.set(ply.from, Empty);
             }
             else if (departurePiece.color == destinationPiece.color && (departurePiece.type == Intellector && destinationPiece.type == Defensor || departurePiece.type == Defensor && destinationPiece.type == Intellector))
             {
                 destinationPiece.reposition(ply.from, this);
-                pieces[ply.from.toScalar()] = destinationPiece;
-                _shownSituation.set(ply.from, Hex.occupied(destinationPiece.type, destinationPiece.color));
+                pieces[ply.from.toScalarCoord()] = destinationPiece;
+                _shownSituation.set(ply.from, Hex.construct(destinationPiece.type, destinationPiece.color));
             }
             else
             {
                 pieceLayer.removeChild(destinationPiece);
-                pieces[ply.from.toScalar()] = null;
-                _shownSituation.set(ply.from, Hex.empty());
+                pieces[ply.from.toScalarCoord()] = null;
+                _shownSituation.set(ply.from, Empty);
             }
         }
     }
 
-    public function applyMoveTransposition(ply:ReversiblePly, backInTime:Bool = false)
+    public function applyMoveTransposition(ply:MaterializedPly, backInTime:Bool = false)
     {
-        for (transform in ply)
+        switch ply
         {
-            var currentHex = backInTime? transform.latter : transform.former;
-            var goalHex = backInTime? transform.former : transform.latter;
-            if (!currentHex.isEmpty())
-                pieceLayer.removeChild(getPiece(transform.coords));
-            producePiece(transform.coords, goalHex);
-            _shownSituation.set(transform.coords, goalHex);
+            case NormalMove(from, to, _):
+                if (!backInTime)
+                    movePiece(from, to);
+                else
+                    movePiece(to, from);
+            case NormalCapture(from, to, _, capturedPiece):
+                if (!backInTime)
+                    movePiece(from, to);
+                else
+                {
+                    movePiece(to, from);
+                    addPiece(to, Hex.construct(capturedPiece, _shownSituation.turnColor));
+                }
+            case ChameleonCapture(from, to, capturingPiece, capturedPiece):
+                if (!backInTime)
+                    movePiece(from, to, capturedPiece);
+                else
+                {
+                    movePiece(to, from, capturingPiece);
+                    addPiece(to, Hex.construct(capturedPiece, _shownSituation.turnColor));
+                }
+            case Promotion(from, to, promotedTo):
+                if (!backInTime)
+                    movePiece(from, to, promotedTo);
+                else
+                    movePiece(to, from, Progressor);
+            case PromotionWithCapture(from, to, capturedPiece, promotedTo):
+                if (!backInTime)
+                    movePiece(from, to, promotedTo);
+                else
+                {
+                    movePiece(to, from, Progressor);
+                    addPiece(to, Hex.construct(capturedPiece, _shownSituation.turnColor));
+                }
+            case Castling(from, to):
+                swapPieces(from, to);
         }
-        _shownSituation.turnColor = opposite(_shownSituation.turnColor);
+       
+        if (!backInTime)
+            _shownSituation.performPly(ply);
+        else
+            _shownSituation.revertPly(ply);
     }
 
-    public function getHex(coords:Null<IntPoint>):Null<Hexagon>
+    public function getHex(coords:Null<HexCoords>):Null<Hexagon>
     {
         if (hexExists(coords))
-            return hexagons[coords.toScalar()];
+            return hexagons[coords.toScalarCoord()];
         else
             return null;
     }
     
-    public function getPiece(coords:Null<IntPoint>):Null<Piece>
+    public function getPiece(coords:Null<HexCoords>):Null<Piece>
     {
         if (hexExists(coords))
-            return pieces[coords.toScalar()];
+            return pieces[coords.toScalarCoord()];
         else
             return null;
     }
 
-    public static function hexExists(p:Null<IntPoint>):Bool
+    private function movePiece(coords:HexCoords, newCoords:HexCoords, ?newType:PieceType)
+    {
+        var s = coords.toScalarCoord();
+        var newS = newCoords.toScalarCoord();
+        var piece = pieces[s];
+        var capturedPiece = pieces[newS];
+
+        if (piece == null)
+            return;
+
+        if (capturedPiece != null)
+            pieceLayer.removeChild(capturedPiece);
+
+        pieces[s] = null;
+
+        if (newType != null)
+        {
+            pieceLayer.removeChild(piece);
+
+            var hex:Hex = Hex.construct(newType, piece.color);
+            producePiece(newCoords, hex);
+        }
+        else
+        {
+            piece.reposition(newCoords, this);
+            pieces[newS] = piece;
+        }
+    }
+
+    private function swapPieces(coords1:HexCoords, coords2:HexCoords)
+    {
+        var piece1 = getPiece(coords1);
+        var piece2 = getPiece(coords2);
+
+        if (piece1 == null || piece2 == null)
+            return;
+
+        piece1.reposition(coords2, this);
+        piece2.reposition(coords1, this);
+
+        pieces[coords2.toScalarCoord()] = piece1;
+        pieces[coords1.toScalarCoord()] = piece2;
+    }
+
+    private function addPiece(coords:HexCoords, hex:Hex)
+    {
+        var s = coords.toScalarCoord();
+        
+        removePiece(coords);
+
+        if (!hex.isEmpty())
+        {
+            producePiece(coords, hex);
+        }
+    }
+
+    private function removePiece(coords:HexCoords)
+    {
+        var s = coords.toScalarCoord();
+        var piece = pieces[s];
+
+        if (piece == null)
+            return;
+
+        pieceLayer.removeChild(piece);
+
+        pieces[s] = null;
+    }
+
+    public static function hexExists(p:Null<HexCoords>):Bool
     {
         if (p != null)
-            return p.i >= 0 && p.i < 9 && p.j >= 0 && p.j < 7 - p.i % 2;
+            return p.isValid();
         else
             return null;
     }
     
-    private function posToIndexes(stageX:Float, stageY:Float):Null<IntPoint>
+    private function posToIndexes(stageX:Float, stageY:Float):Null<HexCoords>
     {
         var localEventCoords:Point = globalToLocal(new Point(stageX, stageY));
-        var closest:Null<IntPoint> = null;
+        var closest:Null<HexCoords> = null;
         var distanceSqr:Float = hexSideLength * hexSideLength;
 
         for (j in 0...7)
             for (i in 0...9)
             {
-                var loc = new IntPoint(i, j);
+                var loc = new HexCoords(i, j);
                 if (!hexExists(loc))
                     continue;
                 var coords:Point = hexCoords(loc);
@@ -227,7 +338,7 @@ class Board extends Sprite
         return closest;
     }
 
-    public function hexCoords(location:IntPoint):Point
+    public function hexCoords(location:HexCoords):Point
     {
         return absHexCoords(location.i, location.j, orientationColor == White);
     }
@@ -259,9 +370,9 @@ class Board extends Sprite
     {
         hexagons = [];
 
-        for (s in 0...IntPoint.hexCount)
+        for (s in HexCoords.enumerateScalar())
         {
-            var p:IntPoint = IntPoint.fromScalar(s);
+            var p:HexCoords = HexCoords.fromScalarCoord(s);
             var hexagon:Hexagon = new Hexagon(hexSideLength, p.i, p.j, displayRowNumbers);
             var coords = hexCoords(p);
             hexagon.x = coords.x;
@@ -277,22 +388,24 @@ class Board extends Sprite
 
         for (s in 0...59)
         {
-            var p = IntPoint.fromScalar(s);
+            var p = HexCoords.fromScalarCoord(s);
             producePiece(p, _shownSituation.get(p));
         }
     }
 
-    private function producePiece(location:IntPoint, hex:Hex)
+    private function producePiece(location:HexCoords, hex:Hex)
     {
-        var scalarCoord = location.toScalar();
-        if (hex.isEmpty())
-            pieces[scalarCoord] = null;
-        else
+        var scalarCoord = location.toScalarCoord();
+
+        switch hex 
         {
-            var piece:Piece = Piece.fromHex(hex, hexSideLength);
-            piece.reposition(location, this);
-            pieceLayer.addChild(piece);
-            pieces[scalarCoord] = piece;
+            case Empty:
+                pieces[scalarCoord] = null;
+            case Occupied(pieceData):
+                var piece:Piece = Piece.fromData(pieceData, hexSideLength);
+                piece.reposition(location, this);
+                pieceLayer.addChild(piece);
+                pieces[scalarCoord] = piece;
         }
     }
 
@@ -310,7 +423,7 @@ class Board extends Sprite
     {
         for (i in 0...9)
         {
-            var bottomHexLocation:IntPoint = new IntPoint(i, orientationColor == White? 6 - i % 2 : 0);
+            var bottomHexLocation:HexCoords = new HexCoords(i, orientationColor == White? 6 - i % 2 : 0);
             var bottomHexCoords:Point = hexCoords(bottomHexLocation);
             var letter:Label = createLetter(Notation.getColumn(i), hexSideLength);
             letter.width = 2 * hexSideLength;

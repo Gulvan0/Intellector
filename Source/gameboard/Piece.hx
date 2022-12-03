@@ -1,5 +1,8 @@
 package gameboard;
 
+import net.shared.board.Hex;
+import net.shared.board.HexCoords;
+import net.shared.board.PieceData;
 import openfl.display.Shape;
 import format.SVG;
 import openfl.geom.Point;
@@ -14,12 +17,17 @@ class Piece extends Sprite
     public var type(default, null):PieceType;
     public var color(default, null):PieceColor;
     
-    public static function fromHex(hex:Hex, hexSideLength:Float):Piece
+    public static function fromData(data:PieceData, hexSideLength:Float):Piece
     {
-        return new Piece(hex.type, hex.color, hexSideLength);
+        return new Piece(data.type, data.color, hexSideLength);
     }
 
-    public function reposition(location:IntPoint, board:Board) 
+    public function toHex():Hex
+    {
+        return Occupied(new PieceData(type, color));
+    }
+
+    public function reposition(location:HexCoords, board:Board) 
     {
         repositionExact(board.hexCoords(location));
     }

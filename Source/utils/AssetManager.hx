@@ -1,5 +1,8 @@
 package utils;
 
+import net.shared.dataobj.UserStatus;
+import net.shared.board.MaterializedPly;
+import net.shared.board.RawPly;
 import haxe.ui.util.ImageLoader;
 import gfx.menubar.ChallengesIconMode;
 import haxe.CallStack;
@@ -13,6 +16,7 @@ import openfl.Assets;
 import openfl.display.BitmapData;
 import net.shared.PieceType;
 import net.shared.PieceColor;
+import net.shared.board.Situation;
 
 enum SingleAsset
 {
@@ -109,15 +113,15 @@ class AssetManager
         return 'assets/symbols/upper_menu/challenges/item_arrow_img/$filename.svg';
     }
 
-    public static function playPlySound(ply:Ply, situation:Situation)
+    public static function playPlySound(ply:MaterializedPly)
     {
-        var isCastle:Bool = Rules.isCastle(ply, situation);
-        var isNotCapture:Bool = situation.get(ply.to).isEmpty() || isCastle;
+        var filename:String = switch ply 
+        {
+            case NormalMove(_, _, _), Promotion(_, _, _), Castling(_, _): "move";
+            case NormalCapture(_, _, _, _), ChameleonCapture(_, _, _, _), PromotionWithCapture(_, _, _, _): "capture";
+        }
 
-        if (isNotCapture)
-            Assets.getSound("sounds/move.mp3").play();
-        else 
-            Assets.getSound("sounds/capture.mp3").play();
+        Assets.getSound('sounds/$filename.mp3').play();
     }
 
     private static function onResourceLoaded() 

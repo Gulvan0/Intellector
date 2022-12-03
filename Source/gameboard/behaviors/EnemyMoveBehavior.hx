@@ -1,5 +1,9 @@
 package gameboard.behaviors;
 
+import net.shared.board.Rules;
+import net.shared.board.Hex;
+import net.shared.board.HexCoords;
+import net.shared.board.RawPly;
 import gfx.Dialogs;
 import gfx.analysis.PeripheralEvent;
 import utils.exceptions.AlreadyInitializedException;
@@ -14,7 +18,7 @@ class EnemyMoveBehavior implements IBehavior
 {
     private var boardInstance:GameBoard;
     private var playerColor:PieceColor;
-    private var premoves:Array<Ply>;
+    private var premoves:Array<RawPly>;
 
     private function resetPremoves()
     {
@@ -28,42 +32,42 @@ class EnemyMoveBehavior implements IBehavior
         premoves = [];
     }
 
-    private function handleOpponentMove(ply:Ply)
+    private function handleOpponentMove(ply:RawPly)
     {
         if (Preferences.autoScrollOnMove.get() != Never || !Lambda.empty(premoves))
             boardInstance.applyScrolling(End);
 
         if (Lambda.empty(premoves))
         {
+            AssetManager.playPlySound(ply.toMaterialized(boardInstance.currentSituation));
             boardInstance.makeMove(ply);
-            AssetManager.playPlySound(ply, boardInstance.currentSituation);
 
             boardInstance.state.exitToNeutral();
             boardInstance.behavior = new PlayerMoveBehavior(playerColor);
         }
         else
         {
-            var activatedPremove:Ply = premoves[0];
-            var followingPremoves:Array<Ply> = premoves.slice(1);
+            var activatedPremove:RawPly = premoves[0];
+            var followingPremoves:Array<RawPly> = premoves.slice(1);
     
             resetPremoves();
     
+            AssetManager.playPlySound(ply.toMaterialized(boardInstance.currentSituation));
             boardInstance.makeMove(ply);
-            AssetManager.playPlySound(ply, boardInstance.currentSituation);
 
             var premoveDeparture:Hex = boardInstance.currentSituation.get(activatedPremove.from);
+
+            if (premoveDeparture.type() != Progressor && premoveDeparture.type() != Intellector && activatedPremove.morphInto != null)
+                activatedPremove.morphInto = boardInstance.currentSituation.get(activatedPremove.to).type();
     
-            if (premoveDeparture.color != playerColor || !Rules.possible(activatedPremove.from, activatedPremove.to, boardInstance.currentSituation.get))
+            if (premoveDeparture.color() != playerColor || !Rules.isPossible(activatedPremove, boardInstance.currentSituation))
             {
                 boardInstance.state.exitToNeutral();
                 boardInstance.behavior = new PlayerMoveBehavior(playerColor);
             }
             else
             {
-                if (premoveDeparture.type != Progressor && premoveDeparture.type != Intellector && activatedPremove.morphInto != null)
-                    activatedPremove.morphInto = boardInstance.currentSituation.get(activatedPremove.to).type;
-
-                AssetManager.playPlySound(activatedPremove, boardInstance.currentSituation);
+                AssetManager.playPlySound(activatedPremove.toMaterialized(boardInstance.currentSituation));
                 boardInstance.emit(ContinuationMove(activatedPremove, activatedPremove.toNotation(boardInstance.currentSituation), playerColor));
                 boardInstance.makeMove(activatedPremove);
     
@@ -71,7 +75,7 @@ class EnemyMoveBehavior implements IBehavior
                     displayPlannedPremove(premove);
                 premoves = followingPremoves;
     
-                Networker.emitEvent(Move(activatedPremove.from.i, activatedPremove.to.i, activatedPremove.from.j, activatedPremove.to.j, activatedPremove.morphInto));
+                Networker.emitEvent(Move(activatedPremove));
             }
         }
     }
@@ -98,11 +102,10 @@ class EnemyMoveBehavior implements IBehavior
                 resetPremoves();
                 boardInstance.state = new StubState();
 
-            case Move(fromI, toI, fromJ, toJ, morphInto, _):
+            case Move(ply, _):
                 boardInstance.state.exitToNeutral();
                 if (!Preferences.premoveEnabled.get())
                     boardInstance.state = new StubState();
-                var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
                 handleOpponentMove(ply);
 
             default:
@@ -125,9 +128,9 @@ class EnemyMoveBehavior implements IBehavior
         //* Do nothing
     }
     
-    public function movePossible(from:IntPoint, to:IntPoint):Bool
+    public function movePossible(from:HexCoords, to:HexCoords):Bool
 	{
-        return Rules.premovePossible(from, to, boardInstance.shownSituation.get(from));
+        return Rules.isPremovePossible(from, to, boardInstance.shownSituation.pieces);
     }
     
     public function allowedToMove(piece:Piece):Bool
@@ -150,7 +153,7 @@ class EnemyMoveBehavior implements IBehavior
         resetPremoves();
     }
     
-    public function onMoveChosen(ply:Ply):Void
+    public function onMoveChosen(ply:RawPly):Void
 	{
         //No premoveEnabled check because it is impossible to get here from the StubState
         displayPlannedPremove(ply);
@@ -158,12 +161,12 @@ class EnemyMoveBehavior implements IBehavior
         boardInstance.state = new NeutralState();
     }
     
-    public function onHexChosen(coords:IntPoint)
+    public function onHexChosen(coords:HexCoords)
     {
         throw "onHexChosen() called while in EnemyMoveBehavior";
     }
 
-    private function displayPlannedPremove(ply:Ply)
+    private function displayPlannedPremove(ply:RawPly)
     {
         boardInstance.applyPremoveTransposition(ply);
         boardInstance.getHex(ply.from).showLayer(Premove);

@@ -1,5 +1,7 @@
 package gfx.common;
 
+import net.shared.board.RawPly;
+import net.shared.board.Situation;
 import haxe.ui.events.UIEvent;
 import serialization.GameLogParser.GameLogParserOutput;
 import net.EventProcessingQueue.INetObserver;
@@ -20,7 +22,7 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
     private var onScrollRequested:PlyScrollType->Void;
     private var startingSituation:Situation;
     private var currentSituation:Situation;
-    private var moveHistory:Array<Ply>;
+    private var moveHistory:Array<RawPly>;
     public var shownMove(default, null):Int;
 
     private abstract function postInit():Void;
@@ -74,8 +76,7 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
     {
         switch event 
         {
-            case Move(fromI, toI, fromJ, toJ, morphInto, _):
-                var ply:Ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
+            case Move(ply, _):
                 var selectMove:Bool = switch Preferences.autoScrollOnMove.get() 
                 {
                     case Always: true;
@@ -108,10 +109,10 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
         };
     }
 
-    private function appendPly(ply:Ply, ?selectAfterwards:Bool = true)
+    private function appendPly(ply:RawPly, ?selectAfterwards:Bool = true)
     {
         appendPlyStr(ply.toNotation(currentSituation));
-        currentSituation.makeMove(ply, true);
+        currentSituation.performRawPly(ply);
         moveHistory.push(ply);
         if (selectAfterwards)
             performScroll(End);
@@ -125,7 +126,7 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
         onHistoryDropped();
     }
 
-    private function rewrite(newPlySequence:Array<Ply>, newShownMove:Int):Void
+    private function rewrite(newPlySequence:Array<RawPly>, newShownMove:Int):Void
     {
         clear();
         for (ply in newPlySequence)

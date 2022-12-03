@@ -89,7 +89,7 @@ class Notation
         var hexFrom = context.get(ply.from);
         var hexTo = context.get(ply.to);
 
-        var castle = hexFrom.color == hexTo.color;
+        var castle = hexFrom.color() == hexTo.color();
         var capture = !castle && !hexTo.isEmpty();
         var mate = capture && hexTo.type() == Intellector;
 

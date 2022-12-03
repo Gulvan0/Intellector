@@ -1,5 +1,8 @@
 package gfx.analysis;
 
+import net.shared.utils.MathUtils;
+import net.shared.board.RawPly;
+import net.shared.board.Situation;
 import haxe.ui.core.Component;
 import haxe.ui.components.Label;
 import struct.Variant;
@@ -37,7 +40,7 @@ private class PlyNode extends Link
         return v;
     }
 
-    public function new(path:VariantPath, ply:Ply, onNodeSelectRequest:VariantPath->Void, onNodeRemoveRequest:VariantPath->Void, variantRef:Variant) 
+    public function new(path:VariantPath, ply:RawPly, onNodeSelectRequest:VariantPath->Void, onNodeRemoveRequest:VariantPath->Void, variantRef:Variant) 
     {
         super();
         
@@ -152,7 +155,7 @@ class VariantPlainText extends HBox implements IVariantView
     **/
     private function pack()
     {
-        #if debug
+        #if test_var_plain_text
         trace("Before pack(): ");
         for (child in childComponents)
             if (Std.isOfType(child, HBox))
@@ -249,7 +252,7 @@ class VariantPlainText extends HBox implements IVariantView
             }
         }
 
-        #if debug
+        #if test_var_plain_text
         trace("After pack(): ");
         for (child in childComponents)
             if (Std.isOfType(child, HBox))
@@ -279,7 +282,7 @@ class VariantPlainText extends HBox implements IVariantView
     **/
     private function unpack()
     {
-        #if debug
+        #if test_var_plain_text
         trace("Before unpack(): ");
         for (child in childComponents)
             if (Std.isOfType(child, HBox))
@@ -351,7 +354,7 @@ class VariantPlainText extends HBox implements IVariantView
                 childIndex++;
         }
 
-        #if debug
+        #if test_var_plain_text
         trace("After unpack(): ");
         for (child in childComponents)
             if (Std.isOfType(child, HBox))
@@ -436,7 +439,7 @@ class VariantPlainText extends HBox implements IVariantView
         }
     }
 
-    public function addChildNode(parentPath:VariantPath, ply:Ply, selectChild:Bool)
+    public function addChildNode(parentPath:VariantPath, ply:RawPly, selectChild:Bool)
     {
         unpack();
 
@@ -482,7 +485,7 @@ class VariantPlainText extends HBox implements IVariantView
         pack();
     }
 
-    public function addChildToSelectedNode(ply:Ply, selectChild:Bool)
+    public function addChildToSelectedNode(ply:RawPly, selectChild:Bool)
     {
         var selectedPath:VariantPath = selectedNode == null? [] : selectedNode.path;
         addChildNode(selectedPath, ply, selectChild);
@@ -507,7 +510,7 @@ class VariantPlainText extends HBox implements IVariantView
 
             selectBranchUnsafe(newSelectedBranch, parentPath.length);
 
-            var branch:Array<Ply> = variantRef.getBranchByPath(selectedBranch);
+            var branch:Array<RawPly> = variantRef.getBranchByPath(selectedBranch);
             var branchStr:Array<String> = variantRef.getBranchNotationByPath(selectedBranch);
             var pointer:Int = parentPath.length;
             eventHandler(BranchSelected(branch, branchStr, pointer)); //We emit BranchSelected instead of ScrollBtnPressed intentionally: the FULL selected branch DOES change (it gets shortened)

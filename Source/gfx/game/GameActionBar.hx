@@ -101,7 +101,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
             case TakebackAccepted(_), TakebackDeclined(_):
                 cancelTakebackBtn.hidden = true;
                 offerTakebackBtn.hidden = false;
-            case Move(_, _, _, _, _, _):
+            case Move(_, _):
                 move++;
             case Rollback(plysToUndo, _):
                 shutAllTakebackRequests();

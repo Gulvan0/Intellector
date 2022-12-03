@@ -1,10 +1,12 @@
 package gameboard.states;
 
+import net.shared.board.HexCoords;
+
 class HexSelectionState extends BaseState
 {
     public final occupiedOnly:Bool;
 
-    private function possibleLocation(location:Null<IntPoint>):Bool
+    private function possibleLocation(location:Null<HexCoords>):Bool
     {
         return (location != null) && (!occupiedOnly || !boardInstance.shownSituation.get(location).isEmpty());
     }
@@ -19,13 +21,13 @@ class HexSelectionState extends BaseState
         throw "Invalid transition";
     }
 
-    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         if (possibleLocation(location))
             boardInstance.behavior.onHexChosen(location);
     }
 
-    public function reactsToHover(location:IntPoint):Bool
+    public function reactsToHover(location:HexCoords):Bool
     {
         return possibleLocation(location);
     }
@@ -35,7 +37,7 @@ class HexSelectionState extends BaseState
         return true;
     }
 
-    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBReleased(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }

@@ -67,7 +67,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         {
             case TimeCorrection(timeData):
                 correctTime(timeData);
-            case Move(_, _, _, _, _, timeData):
+            case Move(_, timeData):
                 correctTime(timeData);
                 moveNum++;
                 toggleTurnColor();

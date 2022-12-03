@@ -6,7 +6,7 @@ import js.Browser;
 import serialization.GameLogParser;
 import gfx.ScreenNavigator;
 import browser.CredentialCookies;
-import net.shared.GreetingResponseData;
+import net.shared.dataobj.GreetingResponseData;
 import net.Requests;
 import hx.ws.Types.MessageType;
 import haxe.Unserializer;

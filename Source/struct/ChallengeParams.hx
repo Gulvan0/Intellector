@@ -2,6 +2,7 @@ package struct;
 
 import net.shared.PieceColor;
 import utils.TimeControl;
+import net.shared.board.Situation;
 import js.Cookie;
 
 enum ChallengeType
@@ -78,7 +79,7 @@ class ChallengeParams
         var timeControl:TimeControl = new TimeControl(Std.parseInt(splitted[0]), Std.parseInt(splitted[1]));
         var type:ChallengeType = splitted[2] == "p"? Public : splitted[2] == "l"? ByLink : Direct(splitted[2]);
         var acceptorColor:Null<PieceColor> = splitted[3] == "w"? White : splitted[3] == "b"? Black : null;
-        var customStartingSituation:Null<Situation> = splitted[4] == ""? null : Situation.fromSIP(splitted[4]);
+        var customStartingSituation:Null<Situation> = splitted[4] == ""? null : Situation.deserialize(splitted[4]);
         var rated:Bool = splitted[5] == "t";
         return new ChallengeParams(timeControl, type, acceptorColor, customStartingSituation, rated);
     }

@@ -1,5 +1,8 @@
 package gameboard;
 
+import net.shared.board.Rules;
+import net.shared.board.HexCoords;
+import net.shared.board.Situation;
 import gfx.Dialogs;
 import Preferences.Markup;
 import openfl.display.Graphics;
@@ -29,13 +32,13 @@ class SelectableBoard extends Board
 
     private var arrowLayer:Sprite;
     private var drawnArrows:Map<String, Sprite> = [];
-    private var arrowStartLocation:Null<IntPoint>;
+    private var arrowStartLocation:Null<HexCoords>;
     private var redSelectedHexIndices:Array<Int> = [];
     private var lastMoveSelectedHexes:Array<Hexagon> = [];
 
     public var suppressRMBHandler:Bool = false;
 
-    public function getAnyDrawnArrow():Null<{from:IntPoint, to:IntPoint}>
+    public function getAnyDrawnArrow():Null<{from:HexCoords, to:HexCoords}>
     {
         var keys = drawnArrows.keys();
         if (keys.hasNext())
@@ -44,10 +47,10 @@ class SelectableBoard extends Board
             return null;
     }
 
-    private function decodeArrowKey(code:String):{from:IntPoint, to:IntPoint}
+    private function decodeArrowKey(code:String):{from:HexCoords, to:HexCoords}
     {
-        var from:IntPoint = new IntPoint(Std.parseInt(code.charAt(0)), Std.parseInt(code.charAt(1)));
-        var to:IntPoint = new IntPoint(Std.parseInt(code.charAt(2)), Std.parseInt(code.charAt(3)));
+        var from:HexCoords = new HexCoords(Std.parseInt(code.charAt(0)), Std.parseInt(code.charAt(1)));
+        var to:HexCoords = new HexCoords(Std.parseInt(code.charAt(2)), Std.parseInt(code.charAt(3)));
         return {from: from, to: to};
     }
 
@@ -74,7 +77,7 @@ class SelectableBoard extends Board
         updateAllArrows();
     }
 
-    private function highlightMove(hexesCoords:Array<IntPoint>) 
+    private function highlightMove(hexesCoords:Array<HexCoords>) 
     {
         for (hex in lastMoveSelectedHexes)
             hex.hideLayer(LastMove);
@@ -85,26 +88,28 @@ class SelectableBoard extends Board
             hex.showLayer(LastMove);
     }
 
-    public function addMarkers(from:IntPoint) 
+    public function addMarkers(from:HexCoords) 
     {
-        for (destination in Rules.possibleFields(from, shownSituation.get))
+        var possibleDestinations = Rules.getPossibleDestinations(from, shownSituation.pieces);
+        for (destination in possibleDestinations)
             if (shownSituation.get(destination).isEmpty())
                 getHex(destination).addDot();
             else
                 getHex(destination).addRound();
     }
 
-    //* Doesn't check whether a marker belongs to a different departure IntPoint since there is normally no more than 1 departure present
-    public function removeMarkers(from:IntPoint) 
+    // Doesn't check whether a marker belongs to a different departure HexCoords since there is normally no more than 1 departure present
+    public function removeMarkers(from:HexCoords) 
     {
         if (shownSituation.get(from).isEmpty())
             throw "Only non-empty hex may be passed as a removeMarkers() argument";
-
-        for (destination in Rules.possibleFields(from, shownSituation.get))
+        
+        var possibleDestinations = Rules.getPossibleDestinations(from, shownSituation.pieces);
+        for (destination in possibleDestinations)
             getHex(destination).removeMarkers();
     }
 
-    public function removeSingleMarker(location:IntPoint)
+    public function removeSingleMarker(location:HexCoords)
     {
         getHex(location).removeMarkers();
     }
@@ -199,10 +204,10 @@ class SelectableBoard extends Board
         stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightRelease);
     }
 
-    public function toggleHexSelection(location:IntPoint) 
+    public function toggleHexSelection(location:HexCoords) 
     {
         var hexToSelect = getHex(location);
-        var hexScalarIndex = location.toScalar();
+        var hexScalarIndex = location.toScalarCoord();
 
         if (redSelectedHexIndices.has(hexScalarIndex))
         {
@@ -218,7 +223,7 @@ class SelectableBoard extends Board
         }
     }
 
-    public function drawArrow(from:IntPoint, to:IntPoint)
+    public function drawArrow(from:HexCoords, to:HexCoords)
     {
         if (arrowMode == EnsureSingle)
             removeArrows();

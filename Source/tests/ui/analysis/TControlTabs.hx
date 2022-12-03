@@ -1,6 +1,7 @@
 package tests.ui.analysis;
 
 import tests.ui.TestedComponent.ComponentGraphics;
+import net.shared.board.Situation;
 
 class TControlTabs extends TestedComponent //TODO: Add more tests
 {
@@ -11,8 +12,8 @@ class TControlTabs extends TestedComponent //TODO: Add more tests
         var resp:String = Browser.window.prompt("Input the serialized ply");
         if (resp == null)
             return;
-        var ply:Ply = PlySerializer.deserialize(resp);
-        var situation:Situation = Situation.starting();
+        var ply:RawPly = PlySerializer.deserialize(resp);
+        var situation:Situation = Situation.defaultStarting();
         var plyStr:String = ply.toNotation(situation);
         var performedBy:PieceColor = situation.get(ply.from).color;
 
@@ -28,8 +29,8 @@ class TControlTabs extends TestedComponent //TODO: Add more tests
         var resp:String = Browser.window.prompt("Input the serialized ply");
         if (resp == null)
             return;
-        var ply:Ply = PlySerializer.deserialize(resp);
-        var situation:Situation = Situation.starting();
+        var ply:RawPly = PlySerializer.deserialize(resp);
+        var situation:Situation = Situation.defaultStarting();
         var plyStr:String = ply.toNotation(situation);
         var performedBy:PieceColor = situation.get(ply.from).color;
 

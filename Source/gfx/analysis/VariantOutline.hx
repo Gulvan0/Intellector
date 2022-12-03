@@ -1,5 +1,7 @@
 package gfx.analysis;
 
+import net.shared.board.RawPly;
+import net.shared.board.Situation;
 import haxe.Timer;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
@@ -82,7 +84,7 @@ class VariantOutline extends TreeView implements IVariantView
         variantRef.clear(newStartingSituation);
     }
 
-    private function addChildToSpecificNode(parentNode:TreeViewNode, ply:Ply, selectChild:Bool):TreeViewNode
+    private function addChildToSpecificNode(parentNode:TreeViewNode, ply:RawPly, selectChild:Bool):TreeViewNode
     {
         parentNode.expanded = true;
 
@@ -104,12 +106,12 @@ class VariantOutline extends TreeView implements IVariantView
         return childNode;
     }
 
-    public function addChildNode(parentPath:VariantPath, ply:Ply, selectChild:Bool) 
+    public function addChildNode(parentPath:VariantPath, ply:RawPly, selectChild:Bool) 
     {
         addChildToSpecificNode(rootNode.findNodeByPath(parentPath.asArray().join('/')), ply, selectChild);
     }
 
-    public function addChildToSelectedNode(ply:Ply, selectChild:Bool) 
+    public function addChildToSelectedNode(ply:RawPly, selectChild:Bool) 
     {
         addChildToSpecificNode(selectedNode == null? rootNode : selectedNode, ply, selectChild);
     }
@@ -127,7 +129,7 @@ class VariantOutline extends TreeView implements IVariantView
             {
                 selectedBranch = variantRef.extendPathLeftmost(nodePath);
 
-                var branch:Array<Ply> = variantRef.getBranchByPath(selectedBranch);
+                var branch:Array<RawPly> = variantRef.getBranchByPath(selectedBranch);
                 var branchStr:Array<String> = variantRef.getBranchNotationByPath(selectedBranch);
                 eventHandler(BranchSelected(branch, branchStr, selectedMove));
             }
@@ -177,7 +179,7 @@ class VariantOutline extends TreeView implements IVariantView
 
             selectBranchUnsafe(newSelectedBranch, parentPath.length);
 
-            var branch:Array<Ply> = variantRef.getBranchByPath(selectedBranch);
+            var branch:Array<RawPly> = variantRef.getBranchByPath(selectedBranch);
             var branchStr:Array<String> = variantRef.getBranchNotationByPath(selectedBranch);
             eventHandler(BranchSelected(branch, branchStr, selectedMove)); //We emit BranchSelected instead of ScrollBtnPressed intentionally: the FULL selected branch DOES change (it gets shortened)
         }

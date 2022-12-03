@@ -1,5 +1,6 @@
 package net.shared.board;
 
+import net.shared.converters.Notation;
 import net.shared.board.Direction;
 
 //To handle null;null case nicely
@@ -173,7 +174,7 @@ class HexCoords
 
     public function toString():String
     {
-        return '($i; $j)';     
+        return Notation.hexNotation(this) + ' ($i; $j)';     
     }
 
     public function new(i:Int, j:Int)

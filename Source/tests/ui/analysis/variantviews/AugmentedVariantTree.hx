@@ -3,6 +3,7 @@ package tests.ui.analysis.variantviews;
 import tests.ui.TestedComponent.ComponentGraphics;
 import tests.ui.analysis.TVariantView.ITestedVariantView;
 import gfx.analysis.VariantTree;
+import net.shared.board.Situation;
 
 class AugmentedVariantTree extends VariantTree implements ITestedVariantView
 {

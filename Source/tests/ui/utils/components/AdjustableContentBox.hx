@@ -3,6 +3,7 @@ package tests.ui.utils.components;
 import haxe.ui.events.UIEvent;
 import haxe.ui.core.Component;
 import haxe.ui.containers.VBox;
+import net.shared.utils.MathUtils;
 
 enum Dimension
 {

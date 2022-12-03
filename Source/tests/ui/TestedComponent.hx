@@ -15,6 +15,7 @@ import gameboard.Board;
 import gfx.Dialogs;
 import haxe.ui.core.Component;
 import openfl.display.Sprite;
+import net.shared.board.Situation;
 
 enum ComponentGraphics
 {
@@ -35,7 +36,7 @@ class TestedComponent extends Box
     //To be overriden in the subclasses as well
     public function _provide_situation():Situation
     {
-        return Situation.starting();
+        return Situation.defaultStarting();
     }
 
     public function imitateEvent(encodedEvent:String)

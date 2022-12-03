@@ -53,7 +53,7 @@ abstract PieceArrangement(Vector<Vector<Hex>>) from Vector<Vector<Hex>>
 
     public function empty(coords:HexCoords):Bool
     {
-        return get(coords) == null;
+        return get(coords) == Empty;
     }
 
     public function is(coords:HexCoords, type:PieceType, color:PieceColor):Bool

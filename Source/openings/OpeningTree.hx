@@ -1,5 +1,6 @@
 package openings;
 
+import net.shared.board.RawPly;
 import dict.Dictionary;
 import net.shared.PieceType;
 
@@ -38,7 +39,7 @@ class OpeningTree
     public var isMirrored:Null<Bool>;
     private var prevNodes:Array<Branch>;
 
-    public static function getOpening(moves:Array<Ply>):String
+    public static function getOpening(moves:Array<RawPly>):String
     {
         var tree:OpeningTree = new OpeningTree();
         for (ply in moves)

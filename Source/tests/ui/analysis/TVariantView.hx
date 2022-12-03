@@ -1,12 +1,14 @@
 package tests.ui.analysis;
 
+import net.shared.utils.MathUtils;
 import tests.ui.analysis.variantviews.AugmentedVariantTree;
 import Preferences.BranchingTabType;
 import tests.ui.TestedComponent;
-import serialization.PlySerializer;
+import net.shared.converters.PlySerializer;
 import struct.Variant;
 import openfl.display.Sprite;
 import gfx.analysis.IVariantView;
+import net.shared.board.Situation;
 
 interface ITestedVariantView extends IVariantView
 {
@@ -37,7 +39,8 @@ class TVariantView extends TestedComponent
 
     private function _act_addOneRandomToSelected() 
     {
-        variantView.addChildToSelectedNode(variantView.getCurrentSituation().randomContinuation(1)[0].ply, false);
+        var randomPly = MathUtils.randomElement(variantView.getCurrentSituation().availablePlys());
+        variantView.addChildToSelectedNode(randomPly, false);
     }
 
     private function _act_clear() 
@@ -52,15 +55,17 @@ class TVariantView extends TestedComponent
 
     private override function rebuildComponent()
     {
-        var startingVariant:Variant = new Variant(Situation.starting());
+        var startingVariant:Variant = new Variant(Situation.defaultStarting());
         var selectedPath:VariantPath = [];
         switch _initparam_variant 
         {
             case StraightSequence:
                 var parentPath:Array<Int> = [];
-                for (plyInfo in Situation.starting().randomContinuation(12))
+                var sit:Situation = Situation.defaultStarting();
+                for (i in 0...12)
                 {
-                    startingVariant.addChildToNode(plyInfo.ply, parentPath);
+                    var randomPly = MathUtils.randomElement(sit.availablePlys());
+                    startingVariant.addChildToNode(randomPly, parentPath);
                     parentPath.push(0);
                 }
                 selectedPath = [0,0,0,0,0,0];

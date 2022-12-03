@@ -1,5 +1,6 @@
 package gameboard.lightweight;
 
+import net.shared.board.Situation;
 import net.shared.PieceColor;
 import openfl.display.Sprite;
 
@@ -11,7 +12,7 @@ class LightBoard extends Sprite
         cacheAsBitmap = true;
 
         addChild(new LightHexagonGrid(hexSideLength));
-        for (coords => hex in situation.collectOccupiedHexes())
+        for (coords => pieceData in situation.collectPieces())
         {
             var i:Int = coords.i;
             var j:Int = coords.j;
@@ -25,7 +26,7 @@ class LightBoard extends Sprite
             var hexWidth:Float = Hexagon.sideToWidth(hexSideLength);
             var hexHeight:Float = Hexagon.sideToHeight(hexSideLength);
 
-            var piece:LightPiece = new LightPiece(hex.type, hex.color, hexSideLength);
+            var piece:LightPiece = new LightPiece(pieceData.type, pieceData.color, hexSideLength);
 
             piece.x = hexWidth / 2;
             piece.y = hexHeight / 2;

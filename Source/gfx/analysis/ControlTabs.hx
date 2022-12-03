@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import net.shared.board.Situation;
 import gameboard.GameBoard.IGameBoardObserver;
 import Preferences.BranchingTabType;
 import haxe.ui.core.Screen;

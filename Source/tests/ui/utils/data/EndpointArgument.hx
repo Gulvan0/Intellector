@@ -1,5 +1,8 @@
 package tests.ui.utils.data;
 
+import net.shared.board.Situation;
+import net.shared.board.RawPly;
+
 class EndpointArgument
 {
     public final value:Dynamic;
@@ -24,7 +27,7 @@ class EndpointArgument
         return switch type 
         {
             case AInt, AFloat, AString, AEnumerable: Std.string(value);
-            case APly: cast(value, Ply).serialize();
+            case APly: cast(value, RawPly).serialize();
         }
     }
 
@@ -33,7 +36,7 @@ class EndpointArgument
         return switch type 
         {
             case AInt, AFloat, AString, AEnumerable: Std.string(value);
-            case APly: cast(value, Ply).toNotation(currentSituation);
+            case APly: cast(value, RawPly).toNotation(currentSituation);
         }
     }
 
@@ -45,7 +48,7 @@ class EndpointArgument
             case AFloat: Std.parseFloat(serializedValue);
             case AString: serializedValue;
             case AEnumerable: serializedValue;
-            case APly: Ply.deserialize(serializedValue);
+            case APly: RawPly.deserialize(serializedValue);
         }
         return new EndpointArgument(type, value);
     }

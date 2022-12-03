@@ -49,7 +49,7 @@ class Rules
                         var proceed:Bool = true;
                         while (proceed)
                         {
-                            destination = departure.step(dir);
+                            destination = destination.step(dir);
 
                             if (!destination.isValid())
                                 break;
@@ -96,7 +96,7 @@ class Rules
                         while (destination.isValid())
                         {
                             possibleDestinations.push(destination);
-                            destination = departure.step(dir);
+                            destination = destination.step(dir);
                         }
                     case Swap(_):
                         var destination:HexCoords = departure.step(dir);
@@ -105,6 +105,15 @@ class Rules
                 }
 
         return possibleDestinations;
+    }
+
+    public static function isMovementPossible(from:HexCoords, to:HexCoords, pieceArrangement:PieceArrangement):Bool
+    {
+        var movingPiece = pieceArrangement.get(from).piece();
+        if (movingPiece == null)
+            return false;
+        else
+            return getPossibleDestinations(from, pieceArrangement).exists(x -> x.equals(to));
     }
 
     public static function isPossible(ply:RawPly, situation:Situation):Bool
@@ -134,13 +143,13 @@ class Rules
         return getPossibleDestinations(ply.from, situation.pieces).exists(x -> x.equals(ply.to));
     }
 
-    public static function isPremovePossible(ply:RawPly, pieceArrangement:PieceArrangement):Bool 
+    public static function isPremovePossible(from:HexCoords, to:HexCoords, pieceArrangement:PieceArrangement):Bool 
     {
-        var movingPiece = pieceArrangement.get(ply.from).piece();
+        var movingPiece = pieceArrangement.get(from).piece();
         if (movingPiece == null)
             return false;
         else
-            return getPossiblePremoveDestinations(ply.from, movingPiece).exists(x -> x.equals(ply.to));
+            return getPossiblePremoveDestinations(from, movingPiece).exists(x -> x.equals(to));
     }
 
     public static function possiblePromotionTypes():Array<PieceType>

@@ -1,5 +1,6 @@
 package gfx.game;
 
+import net.shared.board.RawPly;
 import browser.Clipboard;
 import openfl.events.Event;
 import haxe.ui.events.FocusEvent;
@@ -15,11 +16,13 @@ import js.Browser;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.Box;
 import dict.Dictionary;
+import net.shared.board.Situation;
+import net.shared.utils.MathUtils;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/live/share_game_tab.xml"))
 class ShareGameTab extends Box
 {
-    private var plySequence:Array<Ply>;
+    private var plySequence:Array<RawPly>;
     private var startingSituation:Situation;
     
     private var gifExportParams:{board:Board, gifWidth:Int, gifHeight:Int, gifInterval:Float, bgColor:Int};
@@ -111,7 +114,7 @@ class ShareGameTab extends Box
             intervalTF.text = "" + MathUtils.clampI(value, 100, 10000);
     }
 
-    public function init(gameLink:String, pin:String, startingSituation:Situation, plySequence:Array<Ply>)
+    public function init(gameLink:String, pin:String, startingSituation:Situation, plySequence:Array<RawPly>)
     {
         linkText.copiedText = gameLink;
         pinTextArea.text = pin;

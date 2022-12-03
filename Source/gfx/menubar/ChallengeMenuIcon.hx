@@ -1,5 +1,6 @@
 package gfx.menubar;
 
+import net.shared.utils.MathUtils;
 import ds.IntHashSet;
 import ds.Set;
 import utils.AssetManager;

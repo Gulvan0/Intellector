@@ -1,5 +1,6 @@
 package gameboard.states;
 
+import net.shared.board.HexCoords;
 import gameboard.Hexagon.HexagonSelectionState;
 import utils.exceptions.AlreadyInitializedException;
 import net.shared.ServerEvent;
@@ -7,13 +8,13 @@ import net.shared.ServerEvent;
 abstract class BaseState
 {
     private var boardInstance:GameBoard;
-    public var cursorLocation(default, null):Null<IntPoint>;
+    public var cursorLocation(default, null):Null<HexCoords>;
     
     private abstract function onEntered():Void;
     
     public abstract function exitToNeutral():Void;
 
-    public abstract function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool):Void;
+    public abstract function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool):Void;
 
     private final function updateHoverEffects()
     {
@@ -26,7 +27,7 @@ abstract class BaseState
                 boardInstance.getHex(cursorLocation).hideLayer(hoverLayer);
     }
 
-    public final function onMouseMoved(newCursorLocation:Null<IntPoint>)
+    public final function onMouseMoved(newCursorLocation:Null<HexCoords>)
     {
         var hoverLayer:HexagonSelectionState = isHoverStrong()? StrongHover : PaleHover;
 
@@ -44,11 +45,11 @@ abstract class BaseState
 
     private abstract function isHoverStrong():Bool;
 
-    public abstract function reactsToHover(location:IntPoint):Bool;
+    public abstract function reactsToHover(location:HexCoords):Bool;
 
-    public abstract function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool):Void;
+    public abstract function onLMBReleased(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool):Void;
 
-    public function init(board:GameBoard, ?cursorLocation:IntPoint)
+    public function init(board:GameBoard, ?cursorLocation:HexCoords)
     {
         if (boardInstance != null)
             throw new AlreadyInitializedException();

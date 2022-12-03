@@ -1,12 +1,16 @@
 package tests.ui.board;
 
+import net.shared.converters.Notation;
+import utils.TimeControl;
+import net.shared.board.RawPly;
+import net.shared.board.HexCoords;
 import tests.ui.TestedComponent;
 import openfl.events.MouseEvent;
 import gfx.Dialogs;
 import gfx.utils.PlyScrollType;
 import tests.ui.ArgumentType;
 import haxe.Timer;
-import serialization.PlySerializer;
+import net.shared.converters.PlySerializer;
 import gameboard.behaviors.AnalysisBehavior;
 import net.shared.PieceColor;
 import gameboard.behaviors.EnemyMoveBehavior;
@@ -15,6 +19,7 @@ import gameboard.behaviors.PlayerMoveBehavior;
 import gameboard.states.NeutralState;
 import gameboard.GameBoard;
 import openfl.display.Sprite;
+import net.shared.board.Situation;
 
 class AugmentedGameBoard extends GameBoard
 {
@@ -77,7 +82,7 @@ class AugmentedGameBoard extends GameBoard
         var event = new MouseEvent(MouseEvent.CLICK);
         if (parts.length == 5)
         {
-            var pos = hexCoords(new IntPoint(Std.parseInt(parts[3]), Std.parseInt(parts[4])));
+            var pos = hexCoords(new HexCoords(Std.parseInt(parts[3]), Std.parseInt(parts[4])));
             event.shiftKey = parts[1] == "T";
             event.ctrlKey = parts[2] == "T";
             event.stageX = pos.x;
@@ -85,7 +90,7 @@ class AugmentedGameBoard extends GameBoard
         }
         else if (parts.length == 3)
         {
-            var pos = hexCoords(new IntPoint(Std.parseInt(parts[1]), Std.parseInt(parts[2])));
+            var pos = hexCoords(new HexCoords(Std.parseInt(parts[1]), Std.parseInt(parts[2])));
             event.stageX = pos.x;
             event.stageY = pos.y;
         }
@@ -142,27 +147,27 @@ class TGameBoard extends TestedComponent
         else
         {
             board.state = new NeutralState();
-            board.behavior = new AnalysisBehavior(playerColor);
+            board.behavior = new AnalysisBehavior();
         }
         board.plyHistory.clear();
     }
 
     @prompt("APly", "Enemy move")
-    private function _act_enemyMove(ply:Ply) 
+    private function _act_enemyMove(ply:RawPly) 
     {
-        board.handleNetEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto));
+        board.handleNetEvent(Move(ply, null));
     }
 
     @prompt("AInt", "Moves to cancel")
     private function _act_rollback(cnt:Int) 
     {
-        board.handleNetEvent(Rollback(cnt));
+        board.handleNetEvent(Rollback(cnt, null));
     }
 
     @prompt("AInt", "Delay in ms")
     private function _act_endGame(delay:Int) 
     {
-        Timer.delay(() -> {board.handleNetEvent(GameEnded('NONE', 'NONE'));}, delay);
+        Timer.delay(() -> {board.handleNetEvent(GameEnded(Drawish(Abort), true, null, null));}, delay);
     }
 
     //TODO: Deprecate when there will be a way to edit settings in testing environment
@@ -173,7 +178,7 @@ class TGameBoard extends TestedComponent
 
     private function _act_printHistory() 
     {
-        output(Ply.plySequenceToNotation(board.plyHistory.getPlySequence(), Situation.starting()).join(" > "));
+        output(Notation.plySequenceToNotation(board.plyHistory.getPlySequence(), Situation.defaultStarting()).join(" > "));
     }
 
     @split("<<", "<", ">", ">>")
@@ -202,7 +207,7 @@ class TGameBoard extends TestedComponent
 
     private override function rebuildComponent()
     {
-        board = new AugmentedGameBoard(Situation.starting(), White, new EnemyMoveBehavior(White), false, 50);
+        board = new AugmentedGameBoard(Live(New('gulvan', 'kartoved', null, TimeControl.correspondence(), Situation.defaultStarting(), Date.now())));
     }
 
     public override function imitateEvent(encodedEvent:String)

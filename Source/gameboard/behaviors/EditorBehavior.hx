@@ -1,5 +1,6 @@
 package gameboard.behaviors;
 
+import net.shared.board.Situation;
 import gameboard.states.HexSelectionState;
 import gameboard.states.NeutralState;
 import gfx.analysis.PeripheralEvent;
@@ -31,14 +32,13 @@ abstract class EditorBehavior implements IBehavior
             case ResetRequested:
                 boardInstance.setShownSituation(boardInstance.currentSituation);
             case StartPosRequested:
-                boardInstance.setShownSituation(Situation.starting());
+                boardInstance.setShownSituation(Situation.defaultStarting());
             case OrientationChangeRequested:
                 boardInstance.revertOrientation();
             case ConstructSituationRequested(situation):
                 boardInstance.setShownSituation(situation);
             case TurnColorChanged(newTurnColor):
-                var updatedSituation = boardInstance.shownSituation;
-                updatedSituation.turnColor = newTurnColor;
+                var updatedSituation = boardInstance.shownSituation.copy(newTurnColor);
                 boardInstance.setShownSituation(updatedSituation);
             case ApplyChangesRequested:
                 onChangesApplied();

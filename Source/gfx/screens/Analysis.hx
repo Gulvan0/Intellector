@@ -20,6 +20,7 @@ import gfx.analysis.PositionEditor;
 import gameboard.GameBoard.IGameBoardObserver;
 import gfx.analysis.PeripheralEvent;
 import haxe.ui.containers.HBox;
+import net.shared.board.Situation;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/analysis/analysis_layout.xml'))
 class Analysis extends Screen implements IGameBoardObserver implements IGlobalEventObserver
@@ -139,7 +140,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
         customEnterHandler = onEnter;
         customCloseHandler = onClose;
 
-        variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.starting());
+        variant = initialVariantStr != null? Variant.deserialize(initialVariantStr) : new Variant(Situation.defaultStarting());
 
         board = new GameBoard(Analysis(variant));
         controlTabs = new ControlTabs(variant, handlePeripheralEvent);

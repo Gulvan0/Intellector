@@ -1,11 +1,13 @@
 package gfx.profile.simple_components;
 
+import net.shared.dataobj.StudyInfo;
 import gfx.basic_components.BoardWrapper;
 import gameboard.Board;
 import gfx.profile.complex_components.StudyTagList;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.core.ItemRenderer;
 import dict.Dictionary;
+import net.shared.board.Situation;
 
 typedef StudyWidgetData =
 {
@@ -54,7 +56,7 @@ class StudyWidget extends ItemRenderer
     {
         boardContainer.removeAllComponents();
 
-        var keySituation:Situation = Situation.fromSIP(keyPositionSIP);
+        var keySituation:Situation = Situation.deserialize(keyPositionSIP);
         var board:Board = new Board(keySituation, keySituation.turnColor, 40, None);
         var wrapper:BoardWrapper = new BoardWrapper(board, boardContainer);
 

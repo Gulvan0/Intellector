@@ -1,14 +1,18 @@
 package gameboard.states;
 
+import net.shared.board.RawPly;
+import net.shared.board.HexCoords;
+import net.shared.board.Hex;
+
 private enum Transition
 {
     ToNeutral;
-    ToDragging(dragStartLocation:IntPoint);
+    ToDragging(dragStartLocation:HexCoords);
 }
 
 class SelectedState extends BasePlayableState
 {
-    public var selectedDepartureLocation:IntPoint;
+    public var selectedDepartureLocation:HexCoords;
 
     public function onEntered()
     {
@@ -39,7 +43,7 @@ class SelectedState extends BasePlayableState
         exit(ToNeutral);
     }
 
-    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         var pressedDestinationHex:Null<Hex> = location == null? null : boardInstance.shownSituation.get(location);
         var selectedDepartureHex:Hex = boardInstance.shownSituation.get(selectedDepartureLocation);
@@ -51,13 +55,13 @@ class SelectedState extends BasePlayableState
             exit(ToNeutral);
             askMoveDetails(selectedDepartureLocation, location, shiftPressed, ctrlPressed);
         }
-        else if (pressedDestinationHex.color == selectedDepartureHex.color)
+        else if (pressedDestinationHex.color() == selectedDepartureHex.color())
             exit(ToDragging(location));
         else
             exit(ToNeutral);
     }
 
-    public function reactsToHover(location:IntPoint):Bool
+    public function reactsToHover(location:HexCoords):Bool
     {
         return boardInstance.behavior.movePossible(selectedDepartureLocation, location);
     }
@@ -67,12 +71,12 @@ class SelectedState extends BasePlayableState
         return false;
     }
 
-    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBReleased(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }
 
-    public function new(selectedDepartureLocation:IntPoint)
+    public function new(selectedDepartureLocation:HexCoords)
     {
         this.selectedDepartureLocation = selectedDepartureLocation;
     }

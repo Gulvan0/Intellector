@@ -1,14 +1,16 @@
 package serialization;
 
+import net.shared.board.RawPly;
 import dict.Utils;
 import net.shared.PieceColor;
 import net.shared.Outcome;
 import utils.TimeControl;
+import net.shared.board.Situation;
 using StringTools;
 
 class PortableIntellectorNotation 
 {
-    public static function serialize(startingSituation:Situation, movesPlayed:Array<Ply>, ?whiteRef:String = "Anonymous", ?blackRef:String = "Anonymous", ?timeControl:TimeControl, ?datetime:Date, ?outcome:Outcome):String
+    public static function serialize(startingSituation:Situation, movesPlayed:Array<RawPly>, ?whiteRef:String = "Anonymous", ?blackRef:String = "Anonymous", ?timeControl:TimeControl, ?datetime:Date, ?outcome:Outcome):String
     {
         var pin:String = "";
         var whitePlayer:String = Utils.playerRef(whiteRef);
@@ -20,7 +22,7 @@ class PortableIntellectorNotation
             pin += '#DateTime: ${datetime.toString()};\n';
 
         var startingSIP:String = startingSituation.serialize();
-        if (startingSIP != Situation.starting().serialize())
+        if (startingSIP != Situation.defaultStarting().serialize())
             pin += '#CustomStartPosSIP: $startingSIP;\n';
 
         var moveNum:Int = 1;
@@ -29,7 +31,7 @@ class PortableIntellectorNotation
         {
             var plyStr:String = ply.toNotation(situation, false);
             pin += '$moveNum. $plyStr;\n';
-            situation.makeMove(ply, true);
+            situation.performRawPly(ply);
             moveNum++;
         }
 

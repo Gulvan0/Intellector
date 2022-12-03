@@ -1,5 +1,7 @@
 package gameboard.lightweight;
 
+import net.shared.board.HexCoords;
+import net.shared.utils.MathUtils;
 import gfx.utils.Colors;
 import openfl.display.Shape;
 
@@ -37,7 +39,7 @@ class LightHexagonGrid extends Shape
         var y:Float = hexHalfHeight;
         var upper:Bool = true;
 
-        for (s in 0...IntPoint.hexCount)
+        for (s in HexCoords.enumerateScalar())
         {
             graphics.beginFill(Colors.hexFill(Normal, isDark(s)));
             graphics.moveTo(x-rationalStep, y-irrationalStep);

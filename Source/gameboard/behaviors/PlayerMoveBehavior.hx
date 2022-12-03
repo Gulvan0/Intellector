@@ -1,5 +1,9 @@
 package gameboard.behaviors;
 
+import net.shared.board.Rules;
+import net.shared.board.Hex;
+import net.shared.board.HexCoords;
+import net.shared.board.RawPly;
 import gfx.analysis.PeripheralEvent;
 import utils.exceptions.AlreadyInitializedException;
 import net.shared.ServerEvent;
@@ -44,9 +48,9 @@ class PlayerMoveBehavior implements IBehavior
         //* Do nothing
     }
     
-    public function movePossible(from:IntPoint, to:IntPoint):Bool
+    public function movePossible(from:HexCoords, to:HexCoords):Bool
 	{
-        return Rules.possible(from, to, boardInstance.currentSituation.get);
+        return Rules.isMovementPossible(from, to, boardInstance.shownSituation.pieces);
     }
     
     public function allowedToMove(piece:Piece):Bool
@@ -69,11 +73,11 @@ class PlayerMoveBehavior implements IBehavior
         //* Do nothing
     }
     
-    public function onMoveChosen(ply:Ply):Void
+    public function onMoveChosen(ply:RawPly):Void
 	{
-        AssetManager.playPlySound(ply, boardInstance.shownSituation);
+        AssetManager.playPlySound(ply.toMaterialized(boardInstance.shownSituation));
         boardInstance.emit(ContinuationMove(ply, ply.toNotation(boardInstance.shownSituation), playerColor));
-        Networker.emitEvent(Move(ply.from.i, ply.to.i, ply.from.j, ply.to.j, ply.morphInto));
+        Networker.emitEvent(Move(ply));
         boardInstance.makeMove(ply);
         if (Preferences.premoveEnabled.get())
             boardInstance.state = new NeutralState();
@@ -82,7 +86,7 @@ class PlayerMoveBehavior implements IBehavior
         boardInstance.behavior = new EnemyMoveBehavior(playerColor);
     }
     
-    public function onHexChosen(coords:IntPoint)
+    public function onHexChosen(coords:HexCoords)
     {
         throw "onHexChosen() called while in PlayerMoveBehavior";
     }

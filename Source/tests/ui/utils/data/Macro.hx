@@ -2,6 +2,7 @@ package tests.ui.utils.data;
 
 import haxe.Json;
 import tests.ui.utils.data.MacroStep.constructMacroStep;
+import net.shared.board.RawPly;
 
 class Macro
 {
@@ -75,7 +76,7 @@ class Macro
                             case AEnumerable:
                                 stepStr += 'e' + cast(arg.value, String);
                             case APly:
-                                stepStr += 'p' + cast(arg.value, Ply).serialize();
+                                stepStr += 'p' + cast(arg.value, RawPly).serialize();
                         }
                     }
                 case Event(serializedEvent):
@@ -159,7 +160,7 @@ class Macro
                     {
                         var value:Dynamic = switch arg.type 
                         {
-                            case APly: cast(arg.value, Ply).serialize();
+                            case APly: cast(arg.value, RawPly).serialize();
                             default: arg.value;
                         }
                         argsJson.push(value);

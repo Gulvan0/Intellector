@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import net.shared.board.Situation;
 import gameboard.GameBoard.IGameBoardObserver;
 import gameboard.Piece;
 import utils.AssetManager;
@@ -106,7 +107,7 @@ class PositionEditor extends VBox implements IGameBoardObserver implements IAnal
         var deserializedSituation:Null<Situation> = null;
         var response:Null<String> = Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_INPUT_SIP_PROMPT_TEXT));
         if (response != null)
-            deserializedSituation = Situation.fromSIP(response);
+            deserializedSituation = Situation.deserialize(response);
        
         if (deserializedSituation != null)
         {

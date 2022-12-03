@@ -7,6 +7,7 @@ import openfl.events.Event;
 import gameboard.Hexagon;
 import gameboard.Board;
 import haxe.ui.core.Component;
+import net.shared.utils.MathUtils;
 
 class BoardWrapper extends Component 
 {

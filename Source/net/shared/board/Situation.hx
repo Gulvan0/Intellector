@@ -27,11 +27,7 @@ class Situation
     {
         var sit:Situation = Situation.defaultStarting();
         for (i in 0...plyCount)
-        {
-            var allPlys = sit.availablePlys();
-            var randomPly = MathUtils.randomElement(allPlys);
-            sit.performRawPly(randomPly);
-        }
+            sit.performRandomPly();
         return sit;
     }
 
@@ -43,6 +39,21 @@ class Situation
     public function serialize():String
     {
         return SituationSerializer.serialize(this);
+    }
+
+    public function isValidStarting():Bool
+    {
+        var whiteIntPos = intellectorPos.get(White);
+        var blackIntPos = intellectorPos.get(Black);
+
+        if (whiteIntPos == null || whiteIntPos.isFinal(White))
+            return false;
+        else if (blackIntPos == null || blackIntPos.isFinal(Black))
+            return false;
+        else if (whiteIntPos.equals(blackIntPos))
+            return false;
+        else
+            return true;
     }
 
     public function collectPieces():Map<HexCoords, PieceData>
@@ -71,17 +82,12 @@ class Situation
     {
         var hash:String = "";
 
-        for (coords in HexCoords.enumerate())
+        for (coords => piece in collectPieces())
         {
-            switch get(coords) 
-            {
-                case Occupied(piece):
-                    hash += coords.toScalarCoord();
-                    hash += pieceLetter(piece.type);
-                    if (piece.color == Black)
-                        hash += "!";
-                default:
-            }
+            hash += coords.toScalarCoord();
+            hash += pieceLetter(piece.type);
+            if (piece.color == Black)
+                hash += "!";
         }
 
         return hash;
@@ -107,6 +113,13 @@ class Situation
         var situation:Situation = copy();
         situation.performPly(ply);
         return situation;
+    }
+
+    public function performRandomPly()
+    {
+        var allPlys = availablePlys();
+        var randomPly = MathUtils.randomElement(allPlys);
+        performRawPly(randomPly);
     }
 
     public function performRawPly(ply:RawPly):PerformPlyResult
@@ -205,9 +218,9 @@ class Situation
         }  
     }
 
-    public function copy():Situation
+    public function copy(?newTurnColor:PieceColor):Situation
     {
-        return new Situation(pieces.copy(), turnColor, intellectorPos.copy());
+        return new Situation(pieces.copy(), newTurnColor != null? newTurnColor : turnColor, intellectorPos.copy());
     }
 
     public function toString():String

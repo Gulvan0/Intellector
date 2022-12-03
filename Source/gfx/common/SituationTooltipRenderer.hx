@@ -6,6 +6,7 @@ import gfx.basic_components.BoardWrapper;
 import dict.Dictionary;
 import gameboard.Board;
 import haxe.ui.core.ItemRenderer;
+import net.shared.board.Situation;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/common/situation_tooltip_renderer.xml"))
 class SituationTooltipRenderer extends ItemRenderer
@@ -51,7 +52,7 @@ class SituationTooltipRenderer extends ItemRenderer
         onWidthChanged();
 
         if (situation == null)
-            setSituation(Situation.starting());
+            setSituation(Situation.defaultStarting());
         else
             setSituation(situation);
     }

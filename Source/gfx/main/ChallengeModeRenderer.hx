@@ -7,6 +7,7 @@ import utils.AssetManager;
 import net.shared.PieceColor;
 import utils.TimeControl;
 import haxe.ui.core.ItemRenderer;
+import net.shared.board.Situation;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/main_menu/renderers/challenge_mode_renderer.xml"))
 class ChallengeModeRenderer extends ItemRenderer

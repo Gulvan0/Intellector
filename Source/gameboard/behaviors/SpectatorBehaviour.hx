@@ -19,13 +19,12 @@ class SpectatorBehavior extends StubBehavior
     {
         switch event 
         {
-            case Move(fromI, toI, fromJ, toJ, morphInto, _):
+            case Move(rawPly, _):
                 if (Preferences.autoScrollOnMove.get() == Always)
                     boardInstance.applyScrolling(End);
 
-                var ply = Ply.construct(new IntPoint(fromI, fromJ), new IntPoint(toI, toJ), morphInto);
-                boardInstance.makeMove(ply);
-                AssetManager.playPlySound(ply, boardInstance.currentSituation);
+                AssetManager.playPlySound(rawPly.toMaterialized(boardInstance.currentSituation));
+                boardInstance.makeMove(rawPly);
             case Rollback(plysToUndo, _):
                 boardInstance.revertPlys(plysToUndo);
             default:

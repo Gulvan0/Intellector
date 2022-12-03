@@ -1,5 +1,7 @@
 package gameboard.states;
 
+import net.shared.board.HexCoords;
+
 private enum Transition
 {
     ToNeutral;
@@ -8,7 +10,7 @@ private enum Transition
 
 class DraggingState extends BasePlayableState
 {
-    private var dragStartLocation:IntPoint;
+    private var dragStartLocation:HexCoords;
     private var draggedPiece:Piece;
 
     public function onEntered()
@@ -49,12 +51,12 @@ class DraggingState extends BasePlayableState
         exit(ToNeutral);
     }
 
-    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }
 
-    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBReleased(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         if (location != null && location.equals(dragStartLocation))
             exit(ToSelected);
@@ -65,7 +67,7 @@ class DraggingState extends BasePlayableState
             askMoveDetails(dragStartLocation, location, shiftPressed, ctrlPressed);
     }
 
-    public function reactsToHover(location:IntPoint):Bool
+    public function reactsToHover(location:HexCoords):Bool
     {
         return boardInstance.behavior.movePossible(dragStartLocation, location);
     }
@@ -75,7 +77,7 @@ class DraggingState extends BasePlayableState
         return false;
     }
 
-    public function new(dragStartLocation:IntPoint)
+    public function new(dragStartLocation:HexCoords)
     {
         this.dragStartLocation = dragStartLocation;
     }

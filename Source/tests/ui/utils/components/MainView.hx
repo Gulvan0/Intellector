@@ -27,6 +27,7 @@ import gameboard.SelectableBoard;
 import gfx.basic_components.BoardWrapper;
 import tests.ui.utils.data.MacroStep;
 import haxe.ui.containers.HBox;
+import net.shared.board.Situation;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/testenv/main.xml"))
 class MainView extends HBox
@@ -276,7 +277,7 @@ class MainView extends HBox
             }
         }
 
-        board = new SelectableBoard(Situation.starting(), Disabled, Disabled, White, 40, None);
+        board = new SelectableBoard(Situation.defaultStarting(), Disabled, Disabled, White, 40, None);
         var boardWrapper:BoardWrapper = new BoardWrapper(board, boardContainer);
         boardWrapper.maxPercentHeight = 100;
         boardWrapper.percentWidth = 100;

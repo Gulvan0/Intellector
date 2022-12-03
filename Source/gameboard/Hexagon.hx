@@ -1,10 +1,12 @@
 package gameboard;
 
+import net.shared.converters.Notation;
 import openfl.display.Graphics;
 import gfx.utils.Colors;
 import openfl.text.TextFormat;
 import openfl.text.TextField;
 import openfl.display.Sprite;
+import net.shared.utils.MathUtils;
 
 enum HexagonSelectionState
 {

@@ -13,6 +13,8 @@ import tests.ui.utils.data.EndpointArgument;
 import haxe.ui.containers.HBox;
 import tests.ui.utils.data.ActionEndpointPrompt;
 import haxe.ui.containers.dialogs.Dialog;
+import net.shared.board.Situation;
+import net.shared.board.RawPly;
 
 class ActionPromptDialog extends Dialog
 {
@@ -72,7 +74,7 @@ class ActionPromptDialog extends Dialog
                         if (value == null)
                             return null;
                         else
-                            arguments.push(new EndpointArgument(prompt.type, Ply.construct(value.from, value.to)));  //TODO: Enable chameleon
+                            arguments.push(new EndpointArgument(prompt.type, RawPly.construct(value.from, value.to)));  //TODO: Enable chameleon
                     }   
             }
         }
@@ -98,7 +100,7 @@ class ActionPromptDialog extends Dialog
                 if (prompt.type == APly)
                     if (inputBoards.exists(promptKey))
                     {
-                        var ply:Ply = cast(arg.value, Ply);
+                        var ply:RawPly = cast(arg.value, RawPly);
                         inputBoards.get(promptKey).drawArrow(ply.from, ply.to);
                     }
                     else

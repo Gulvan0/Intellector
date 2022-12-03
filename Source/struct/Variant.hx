@@ -1,7 +1,9 @@
 package struct;
 
-import serialization.SituationSerializer;
-import serialization.PlySerializer;
+import net.shared.converters.PlySerializer;
+import net.shared.board.RawPly;
+import net.shared.converters.SituationSerializer;
+import net.shared.board.Situation;
 
 abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
 {
@@ -106,12 +108,12 @@ abstract VariantPath(Array<Int>) from Array<Int> to Array<Int>
 
 class VariantNode
 {
-    public var ply:Ply;
+    public var ply:RawPly;
     public var situationBefore:Situation;
     public var situationAfter:Situation;
     public var children:Array<VariantNode>;
 
-    public function addChild(ply:Ply) 
+    public function addChild(ply:RawPly) 
     {
         var child = new VariantNode(ply, situationAfter);
         children.push(child);
@@ -122,11 +124,11 @@ class VariantNode
         return ply.toNotation(situationBefore, indicateColor);
     }
 
-    public function new(ply:Ply, situationBefore:Situation) 
+    public function new(ply:RawPly, situationBefore:Situation) 
     {
         this.ply = ply;
         this.situationBefore = situationBefore;
-        this.situationAfter = ply != null? situationBefore.makeMove(ply) : situationBefore;
+        this.situationAfter = ply != null? situationBefore.situationAfterRawPly(ply) : situationBefore;
         this.children = [];
     }
 }
@@ -162,7 +164,7 @@ class Variant extends VariantNode
         var variantStrParts:Array<String> = s.split(";");
         var startingSituationSIP:String = variantStrParts.pop();
         var startingSituation:Situation = SituationSerializer.deserialize(startingSituationSIP);
-        var nodesByPathLength:Map<Int, Array<{parentPath:VariantPath, nodeNum:Int, ply:Ply}>> = [];
+        var nodesByPathLength:Map<Int, Array<{parentPath:VariantPath, nodeNum:Int, ply:RawPly}>> = [];
         var maxPathLength:Int = 0;
 
         for (nodeStr in variantStrParts)
@@ -194,7 +196,7 @@ class Variant extends VariantNode
         return variant;
     }
 
-    public function addChildToNode(ply:Ply, parentPath:VariantPath) 
+    public function addChildToNode(ply:RawPly, parentPath:VariantPath) 
     {
         getByPath(parentPath).addChild(ply);
     }
@@ -262,9 +264,9 @@ class Variant extends VariantNode
         return paths;
     }
 
-    public function getBranchByPath(branchPath:VariantPath):Array<Ply>
+    public function getBranchByPath(branchPath:VariantPath):Array<RawPly>
     {
-        var branch:Array<Ply> = [];
+        var branch:Array<RawPly> = [];
         var node:VariantNode = this;
         for (childNum in branchPath.asArray())
         {
@@ -274,7 +276,7 @@ class Variant extends VariantNode
         return branch;
     }
 
-    public function getMainLineBranch():Array<Ply>
+    public function getMainLineBranch():Array<RawPly>
     {
         return getBranchByPath(extendPathLeftmost([]));
     }

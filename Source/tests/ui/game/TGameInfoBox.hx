@@ -1,5 +1,10 @@
 package tests.ui.game;
 
+import net.shared.Outcome.DrawishOutcomeType;
+import net.shared.Outcome.DecisiveOutcomeType;
+import net.shared.board.RawPly;
+import net.shared.board.HexCoords;
+import net.shared.PieceColor;
 import tests.ui.TestedComponent;
 import haxe.ui.components.HorizontalSlider;
 import haxe.ui.components.Slider;
@@ -13,6 +18,7 @@ import haxe.Timer;
 import utils.TimeControl;
 import gfx.game.GameInfoBox;
 import openfl.display.Sprite;
+import net.shared.board.Situation;
 
 class TGameInfoBox extends TestedComponent
 {
@@ -36,25 +42,9 @@ class TGameInfoBox extends TestedComponent
         return playthrough_sit;
     }
 
-    @iterations(3)
-    private function _seq_playthrough(i:Int) 
-    {
-        if (i == 0)
-            update();
-
-        var plyInfo = playthrough_sit.randomContinuation(1)[0];
-        if (i % 2 == 1)
-            gameinfobox.handleGameBoardEvent(ContinuationMove(plyInfo.ply, plyInfo.plyStr, Black));
-        else
-            gameinfobox.handleNetEvent(Move(plyInfo.ply.from.i, plyInfo.ply.to.i, plyInfo.ply.from.j, plyInfo.ply.to.j, plyInfo.ply.morphInto));
-        
-        previousSituations.push(playthrough_sit.copy());
-        playthrough_sit.makeMove(plyInfo.ply, true);
-    }
-
     private function _act_rollback() 
     {
-        gameinfobox.handleNetEvent(Rollback(1));
+        gameinfobox.handleNetEvent(Rollback(1, null));
         playthrough_sit = previousSituations.pop();
     }
 
@@ -64,16 +54,17 @@ class TGameInfoBox extends TestedComponent
         if (i == 0)
             update();
 
-        var decisiveOutcomes:Array<String> = ['mat', 'bre', 'res', 'aba', 'tim'];
-        var drawishOutcomes:Array<String> = ['agr', 'rep', '100', 'abo'];
+        var decisiveOutcomes:Array<DecisiveOutcomeType> = DecisiveOutcomeType.createAll();
+        var drawishOutcomes:Array<DrawishOutcomeType> = DrawishOutcomeType.createAll();
+
         if (i < decisiveOutcomes.length * 2)
         {
-            var winner = i % 2 == 0? 'w' : 'b';
+            var winner:PieceColor = i % 2 == 0? White : Black;
             var outcome = decisiveOutcomes[Math.floor(i/2)];
-            gameinfobox.handleNetEvent(GameEnded(winner, outcome));
+            gameinfobox.handleNetEvent(GameEnded(Decisive(outcome, winner), true, null, null));
         }
         else
-            gameinfobox.handleNetEvent(GameEnded('d', drawishOutcomes[i - decisiveOutcomes.length * 2]));
+            gameinfobox.handleNetEvent(GameEnded(Drawish(drawishOutcomes[i - decisiveOutcomes.length * 2]), true, null, null));
     }
 
     private override function getComponent():ComponentGraphics
@@ -84,32 +75,30 @@ class TGameInfoBox extends TestedComponent
     private override function rebuildComponent()
     {
         previousSituations = [];
-        playthrough_sit = Situation.starting();
+        playthrough_sit = Situation.defaultStarting();
 
         if (!_initparam_actualization)
         {
-            gameinfobox = new GameInfoBox(_initparam_timeControl, _initparam_whiteLogin, _initparam_blackLogin);
+            gameinfobox = new GameInfoBox();
+            gameinfobox.init(New(_initparam_whiteLogin, _initparam_blackLogin, null, _initparam_timeControl, null, Date.now()));
             return;
         }
         
         var po:GameLogParserOutput = new GameLogParserOutput();
-        po.whiteLogin = _initparam_whiteLogin;
-        po.blackLogin = _initparam_blackLogin;
+        po.whiteRef = _initparam_whiteLogin;
+        po.blackRef = _initparam_blackLogin;
         po.datetime = Date.now();
         po.timeControl = _initparam_timeControl;
-        po.movesPlayed = [Ply.construct(new IntPoint(1, 5), new IntPoint(1, 3)), Ply.construct(new IntPoint(1, 0), new IntPoint(1, 2))];
-        po.outcome = Resign;
-        po.winnerColor = Black;
+        po.movesPlayed = [RawPly.construct(new HexCoords(1, 5), new HexCoords(1, 3)), RawPly.construct(new HexCoords(1, 0), new HexCoords(1, 2))];
+        po.outcome = Decisive(Resign, Black);
 
-        var actualizationData:ActualizationData = new ActualizationData();
-        actualizationData.logParserOutput = po;
-
-        gameinfobox = GameInfoBox.constructFromActualizationData(actualizationData);
+        gameinfobox = new GameInfoBox();
+        gameinfobox.init(Past(po, null));
 
         for (ply in po.movesPlayed)
         {
             previousSituations.push(playthrough_sit.copy());
-            playthrough_sit.makeMove(ply, true);
+            playthrough_sit.performRawPly(ply);
         }
     }
 }

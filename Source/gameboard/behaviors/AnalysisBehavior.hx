@@ -1,11 +1,15 @@
 package gameboard.behaviors;
 
+import net.shared.board.Rules;
+import net.shared.board.HexCoords;
+import net.shared.board.RawPly;
 import gfx.analysis.PeripheralEvent;
 import gameboard.states.NeutralState;
 import utils.exceptions.AlreadyInitializedException;
 import net.shared.ServerEvent;
 import net.shared.PieceColor;
 import utils.AssetManager;
+import net.shared.board.MaterializedPly;
 
 class AnalysisBehavior implements IBehavior 
 {
@@ -42,7 +46,7 @@ class AnalysisBehavior implements IBehavior
         }
     }
 
-    private function onBranchSelected(plySequence:Array<Ply>, selectedPlyNum:Int)
+    private function onBranchSelected(plySequence:Array<RawPly>, selectedPlyNum:Int)
     {
         boardInstance.removeArrowsAndSelections();
 
@@ -56,9 +60,9 @@ class AnalysisBehavior implements IBehavior
         boardInstance.applyScrolling(Precise(selectedPlyNum));
     }
     
-    public function movePossible(from:IntPoint, to:IntPoint):Bool
+    public function movePossible(from:HexCoords, to:HexCoords):Bool
 	{
-        return Rules.possible(from, to, boardInstance.shownSituation.get);
+        return Rules.isMovementPossible(from, to, boardInstance.shownSituation.pieces);
     }
     
     public function allowedToMove(piece:Piece):Bool
@@ -76,20 +80,20 @@ class AnalysisBehavior implements IBehavior
         //* Do nothing
     }
     
-    public function onMoveChosen(ply:Ply):Void
+    public function onMoveChosen(ply:RawPly):Void
 	{
         var plyStr:String = ply.toNotation(boardInstance.shownSituation);
         var performedBy:PieceColor = boardInstance.shownSituation.turnColor;
-        var revPly:ReversiblePly = ply.toReversible(boardInstance.shownSituation);
+        var matPly:MaterializedPly = ply.toMaterialized(boardInstance.shownSituation);
 
-        AssetManager.playPlySound(ply, boardInstance.shownSituation);
+        AssetManager.playPlySound(matPly);
 
         if (boardInstance.plyHistory.isAtEnd())
         {
             boardInstance.makeMove(ply);
             boardInstance.emit(ContinuationMove(ply, plyStr, performedBy));
         }
-        else if (boardInstance.plyHistory.equalsNextMove(revPly))
+        else if (boardInstance.plyHistory.equalsNextMove(matPly))
         {
             boardInstance.next();
             boardInstance.emit(SubsequentMove(plyStr, performedBy));
@@ -105,7 +109,7 @@ class AnalysisBehavior implements IBehavior
         boardInstance.state = new NeutralState();
     }
     
-    public function onHexChosen(coords:IntPoint)
+    public function onHexChosen(coords:HexCoords)
     {
         throw "onHexChosen() called while in AnalysisBehavior";
     }

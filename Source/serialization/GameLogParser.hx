@@ -1,11 +1,14 @@
 package serialization;
 
+import net.shared.converters.PlySerializer;
+import net.shared.board.RawPly;
 import net.shared.EloValue;
 import utils.TimeControl;
 import net.shared.Outcome;
 import net.shared.PieceColor;
 import net.shared.PieceType;
 import dict.*;
+import net.shared.board.Situation;
 using StringTools;
 using Lambda;
 
@@ -23,10 +26,10 @@ class GameLogParserOutput
     public var elo:Null<Map<PieceColor, EloValue>>;
     public var outcome:Null<Outcome>;
     public var msLeftWhenEnded:Null<Map<PieceColor, Int>>;
-    public var movesPlayed:Array<Ply> = [];
+    public var movesPlayed:Array<RawPly> = [];
     public var chatEntries:Array<ChatEntry> = [];
     public var datetime:Null<Date>;
-    public var startingSituation:Situation = Situation.starting();
+    public var startingSituation:Situation = Situation.defaultStarting();
     public var msLeftOnMove:Map<PieceColor, Array<Null<Int>>> = [White => [], Black => []];
     public var msPerMoveDataAvailable:Bool;
 
@@ -41,7 +44,7 @@ class GameLogParserOutput
         for (ply in movesPlayed)
         {
             moveCount++;
-            currentSituation.makeMove(ply, true);
+            currentSituation.performRawPly(ply);
         }
 
         msPerMoveDataAvailable = msLeftOnMove[White].exists(x -> x != null) || msLeftOnMove[Black].exists(x -> x != null);
@@ -143,7 +146,7 @@ class GameLogParser
     {
         var splitted:Array<String> = trimmedEntry.split("/");
 
-        var ply:Ply = PlySerializer.deserialize(splitted[0]);
+        var ply:RawPly = PlySerializer.deserialize(splitted[0]);
         parserOutput.movesPlayed.push(ply);
 
         parserOutput.msLeftOnMove[White].push(Std.parseInt(splitted[1]));
@@ -165,7 +168,7 @@ class GameLogParser
             case "L":
                 parserOutput.msLeftWhenEnded = [White => Std.parseInt(args[0]), Black => Std.parseInt(args[1])];
             case "S":
-                parserOutput.startingSituation = Situation.fromSIP(args[0]);
+                parserOutput.startingSituation = Situation.deserialize(args[0]);
             case "T":
                 parserOutput.timeControl = new TimeControl(Std.parseInt(args[0]), Std.parseInt(args[1]));
             case "C":

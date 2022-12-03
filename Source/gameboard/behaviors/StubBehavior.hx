@@ -1,5 +1,7 @@
 package gameboard.behaviors;
 
+import net.shared.board.HexCoords;
+import net.shared.board.RawPly;
 import gfx.analysis.PeripheralEvent;
 import net.shared.ServerEvent;
 
@@ -9,12 +11,12 @@ class StubBehavior implements IBehavior
     public function handleNetEvent(event:ServerEvent) {}
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent) {}
     public function onPremovePreferenceUpdated() {}
-    public function onMoveChosen(ply:Ply) {}
-    public function onHexChosen(coords:IntPoint) {}
+    public function onMoveChosen(ply:RawPly) {}
+    public function onHexChosen(coords:HexCoords) {}
     public function onAboutToScrollAway() {}
     public function onVoidClick() {}
 
-    public function movePossible(from:IntPoint, to:IntPoint):Bool
+    public function movePossible(from:HexCoords, to:HexCoords):Bool
     {
         return false;
     }

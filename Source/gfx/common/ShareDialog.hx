@@ -1,5 +1,7 @@
 package gfx.common;
 
+import net.shared.dataobj.StudyInfo;
+import net.shared.board.RawPly;
 import struct.Variant;
 import gfx.popups.StudyParamsDialog.StudyParamsDialogMode;
 import haxe.ui.util.Color;
@@ -26,6 +28,8 @@ import gfx.basic_components.BoardWrapper;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.dialogs.Dialog;
 import dict.Dictionary;
+import net.shared.board.Situation;
+import net.shared.utils.MathUtils;
 
 class ImageExportData
 {
@@ -179,7 +183,7 @@ class ShareDialog extends Dialog
         }
     }
 
-    public function initInGame(situation:Situation, orientation:PieceColor, gameLink:String, pin:String, startingSituation:Situation, plySequence:Array<Ply>)
+    public function initInGame(situation:Situation, orientation:PieceColor, gameLink:String, pin:String, startingSituation:Situation, plySequence:Array<RawPly>)
     {
         init(situation, orientation);
         tabView.removeComponent(shareExportTab);

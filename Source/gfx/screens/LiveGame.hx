@@ -36,6 +36,10 @@ import utils.TimeControl;
 import net.shared.PieceColor;
 import haxe.exceptions.NotImplementedException;
 import haxe.ui.containers.VBox;
+import net.shared.board.RawPly;
+import net.shared.board.HexCoords;
+import net.shared.board.Hex;
+import net.shared.utils.MathUtils;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/live_layout.xml"))
 class LiveGame extends Screen implements INetObserver implements IGameBoardObserver implements IGlobalEventObserver
@@ -164,7 +168,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         switch event 
         {
             case ContinuationMove(ply, _, _):
-                Networker.emitEvent(Move(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto));
+                Networker.emitEvent(Move(ply));
             default:
         }
     }
@@ -221,7 +225,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                     Networker.emitEvent(SimpleRematch);
             case Share:
                 var gameLink:String = Url.getGameLink(gameID);
-                var playedMoves:Array<Ply> = board.plyHistory.getPlySequence();
+                var playedMoves:Array<RawPly> = board.plyHistory.getPlySequence();
                 var pin:String = PortableIntellectorNotation.serialize(board.startingSituation, playedMoves, whiteRef, blackRef, timeControl, datetime, outcome);
 
                 var shareDialog:ShareDialog = new ShareDialog();

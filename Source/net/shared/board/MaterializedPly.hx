@@ -22,11 +22,46 @@ abstract MaterializedPly(InternalMaterializedPly) from InternalMaterializedPly t
             else if (pieces.typeAt(from) == Progressor)
                 return PromotionWithCapture(from, to, pieces.typeAt(to), morphInto);
             else
-                return ChameleonCapture(from, to, pieces.typeAt(from), pieces.typeAt(from));
+                return ChameleonCapture(from, to, pieces.typeAt(from), pieces.typeAt(to));
         else if (morphInto != null)
             return Promotion(from, to, morphInto);
         else
             return NormalMove(from, to, pieces.typeAt(from));
+    }
+
+    public function underlying():InternalMaterializedPly
+    {
+        return this;
+    }
+
+    public function equals(other:MaterializedPly):Bool
+    {
+        return switch [this, other]
+        {
+            case [NormalMove(from, to, movingPiece), NormalMove(from2, to2, movingPiece2)]: 
+                from.equals(from2) && to.equals(to2) && movingPiece == movingPiece2;
+            case [NormalCapture(from, to, capturingPiece, capturedPiece), NormalCapture(from2, to2, capturingPiece2, capturedPiece2)]:
+                from.equals(from2) && to.equals(to2) && capturingPiece == capturingPiece2 && capturedPiece == capturedPiece2;
+            case [ChameleonCapture(from, to, capturingPiece, capturedPiece), ChameleonCapture(from2, to2, capturingPiece2, capturedPiece2)]:
+                from.equals(from2) && to.equals(to2) && capturingPiece == capturingPiece2 && capturedPiece == capturedPiece2;
+            case [Promotion(from, to, promotedTo), Promotion(from2, to2, promotedTo2)]:
+                from.equals(from2) && to.equals(to2) && promotedTo == promotedTo2;
+            case [PromotionWithCapture(from, to, capturedPiece, promotedTo), PromotionWithCapture(from2, to2, capturedPiece2, promotedTo2)]:
+                from.equals(from2) && to.equals(to2) && promotedTo == promotedTo2 && capturedPiece == capturedPiece2;
+            case [Castling(from, to), Castling(from2, to2)]:
+                from.equals(from2) && to.equals(to2) || from.equals(to2) && to.equals(from2);
+            default:
+                false;
+        }
+    }
+
+    public function affectedCoords():Array<HexCoords>
+    {
+        switch this 
+        {
+            case NormalMove(from, to, _), NormalCapture(from, to, _, _), ChameleonCapture(from, to, _, _), Promotion(from, to, _), PromotionWithCapture(from, to, _, _), Castling(from, to):
+                return [from, to];
+        }
     }
 
     public function isMating():Bool

@@ -1,11 +1,13 @@
 package tests.ui.board;
 
+import net.shared.board.HexCoords;
 import net.shared.PieceColor;
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.events.MouseEvent;
 import openfl.display.Sprite;
 import net.shared.PieceColor.opposite;
 import gameboard.SelectableBoard;
+import net.shared.board.Situation;
 
 class AugmentedSelectableBoard extends SelectableBoard
 {
@@ -42,7 +44,7 @@ class AugmentedSelectableBoard extends SelectableBoard
         var event = new MouseEvent(MouseEvent.CLICK);
         if (parts.length > 1)
         {
-            var pos = hexCoords(new IntPoint(Std.parseInt(parts[1]), Std.parseInt(parts[2])));
+            var pos = hexCoords(new HexCoords(Std.parseInt(parts[1]), Std.parseInt(parts[2])));
             event.stageX = pos.x;
             event.stageY = pos.y;
         }
@@ -86,12 +88,12 @@ class TSelectableBoard extends TestedComponent
         switch i
         {
             case 0: update();
-            case 1: board.highlightMove([new IntPoint(0, 0), new IntPoint(2, 1)]);
-            case 2: board.addMarkers(new IntPoint(0, 1));
-            case 3: board.highlightMove([new IntPoint(2, 1), new IntPoint(4, 2)]);
+            case 1: board.highlightMove([new HexCoords(0, 0), new HexCoords(2, 1)]);
+            case 2: board.addMarkers(new HexCoords(0, 1));
+            case 3: board.highlightMove([new HexCoords(2, 1), new HexCoords(4, 2)]);
             case 4: board.setOrientation(Black);
-            case 5: board.removeMarkers(new IntPoint(0, 1));
-            case 6: board.addMarkers(new IntPoint(4, 0));
+            case 5: board.removeMarkers(new HexCoords(0, 1));
+            case 6: board.addMarkers(new HexCoords(4, 0));
             case 7: board.highlightMove([]);
         }
     }
@@ -102,21 +104,21 @@ class TSelectableBoard extends TestedComponent
         if (i == 0)
             update();
         else if (i == 1)
-            board.addMarkers(IntPoint.fromScalar(0));
+            board.addMarkers(HexCoords.fromScalarCoord(0));
         else if (i <= 14)
         {
-            board.removeMarkers(IntPoint.fromScalar(i-2));
-            board.addMarkers(IntPoint.fromScalar(i-1));
+            board.removeMarkers(HexCoords.fromScalarCoord(i-2));
+            board.addMarkers(HexCoords.fromScalarCoord(i-1));
         }
         else if (i == 15)
         {
-            board.removeMarkers(IntPoint.fromScalar(i-2));
-            board.addMarkers(IntPoint.fromScalar(IntPoint.hexCount - 14));
+            board.removeMarkers(HexCoords.fromScalarCoord(i-2));
+            board.addMarkers(HexCoords.fromScalarCoord(HexCoords.hexCount() - 14));
         }
         else if (i <= 28)
         {
-            board.removeMarkers(IntPoint.fromScalar(IntPoint.hexCount - 14 + i - 16));
-            board.addMarkers(IntPoint.fromScalar(IntPoint.hexCount - 14 + i - 15));
+            board.removeMarkers(HexCoords.fromScalarCoord(HexCoords.hexCount() - 14 + i - 16));
+            board.addMarkers(HexCoords.fromScalarCoord(HexCoords.hexCount() - 14 + i - 15));
         }
     }
 
@@ -132,7 +134,7 @@ class TSelectableBoard extends TestedComponent
 
     private override function rebuildComponent()
     {
-        board = new AugmentedSelectableBoard(Situation.starting(), _initparam_arrowSelectionMode, _initparam_hexSelectionMode, _initparam_orientationColor, 50);
+        board = new AugmentedSelectableBoard(Situation.defaultStarting(), _initparam_arrowSelectionMode, _initparam_hexSelectionMode, _initparam_orientationColor, 50);
     }
 
     public override function imitateEvent(encodedEvent:String)

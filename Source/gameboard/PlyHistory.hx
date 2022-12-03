@@ -1,14 +1,16 @@
 package gameboard;
 
+import net.shared.board.RawPly;
+import net.shared.board.MaterializedPly;
 import haxe.exceptions.NotImplementedException;
 
 class PlyHistory
 {
-    private var plys:Array<Ply> = [];
-    private var revPlys:Array<ReversiblePly> = [];
+    private var plys:Array<RawPly> = [];
+    private var matPlys:Array<MaterializedPly> = [];
     public var pointer(default, null):Int = 0;
 
-    public function getPlySequence():Array<Ply> 
+    public function getPlySequence():Array<RawPly> 
     {
         return plys.copy();
     }
@@ -16,13 +18,13 @@ class PlyHistory
     public function clear()
     {
         plys = [];
-        revPlys = [];
+        matPlys = [];
         pointer = 0;
     }
 
     public function length():Int
     {
-        return revPlys.length;
+        return matPlys.length;
     }
 
     public function isAtBeginning():Bool
@@ -32,76 +34,77 @@ class PlyHistory
 
     public function isAtEnd():Bool
     {
-        return pointer == revPlys.length;
+        return pointer == length();
     }
 
-    public function equalsNextMove(ply:ReversiblePly):Bool
+    public function equalsNextMove(ply:MaterializedPly):Bool
     {
-        return !isAtEnd() && revPlys[pointer].equals(ply);
+        return !isAtEnd() && matPlys[pointer].equals(ply);
     }
 
-    public function getLastMove():Null<ReversiblePly>
+    public function getLastMove():Null<MaterializedPly>
     {
-        return isAtBeginning()? null : revPlys[pointer-1];
+        return isAtBeginning()? null : matPlys[pointer-1];
     }
 
-    public function home():Array<ReversiblePly>
+    public function home():Array<MaterializedPly>
     {
         var oldPointer:Int = pointer;
         pointer = 0;
-        return revPlys.slice(0, oldPointer);
+        return matPlys.slice(0, oldPointer);
     }
 
-    public function prev():Null<ReversiblePly>
+    public function prev():Null<MaterializedPly>
     {
         if (pointer > 0)
         {
             pointer--;
-            return revPlys[pointer];
+            return matPlys[pointer];
         }
         else 
             return null;
     }
 
-    public function next():Null<ReversiblePly>
+    public function next():Null<MaterializedPly>
     {
-        if (pointer < revPlys.length)
+        if (pointer < matPlys.length)
         {
             pointer++;
-            return revPlys[pointer-1];
+            return matPlys[pointer-1];
         }
         else 
             return null;
     }
 
-    public function end():Array<ReversiblePly>
+    public function end():Array<MaterializedPly>
     {
         var oldPointer:Int = pointer;
-        pointer = revPlys.length;
-        return revPlys.slice(oldPointer);
+        pointer = matPlys.length;
+        return matPlys.slice(oldPointer);
     }
 
     public function dropSinceShown()
     {
         plys = plys.slice(0, pointer);
-        revPlys = revPlys.slice(0, pointer);
+        matPlys = matPlys.slice(0, pointer);
     }
 
-    public function dropLast(cnt:Int):Array<ReversiblePly>
+    public function dropLast(cnt:Int):Array<MaterializedPly>
     {
-        var newLength = revPlys.length - cnt;
+        var newLength = matPlys.length - cnt;
         if (pointer > newLength)
             pointer = newLength;
         plys.splice(newLength, cnt);
-        return revPlys.splice(newLength, cnt);
+        return matPlys.splice(newLength, cnt);
     }
 
-    public function append(ply:Ply, reversible:ReversiblePly) 
+    public function append(raw:RawPly, materialized:MaterializedPly) 
     {
         if (isAtEnd())
             pointer++;
-        plys.push(ply);
-        revPlys.push(reversible);
+        plys.push(raw);
+        matPlys.push(materialized);
+        trace(raw, materialized);
     }
 
     public function new()

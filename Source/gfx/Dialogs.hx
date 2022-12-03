@@ -1,5 +1,6 @@
 package gfx;
 
+import net.shared.dataobj.ChallengeData;
 import gfx.popups.OpenChallengeCreated;
 import gfx.popups.StudyParamsDialog;
 import gfx.profile.complex_components.MiniProfile;

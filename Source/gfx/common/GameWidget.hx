@@ -1,5 +1,7 @@
 package gfx.common;
 
+import net.shared.dataobj.GameInfo;
+import net.shared.board.Situation;
 import gameboard.lightweight.LighttBoard.LightBoard;
 import haxe.CallStack;
 import utils.StringUtils.eloToStr;

@@ -1,8 +1,13 @@
 package tests.ui.board;
 
+import net.shared.board.MaterializedPly;
+import net.shared.board.Hex;
+import net.shared.board.RawPly;
+import net.shared.board.HexCoords;
 import tests.ui.TestedComponent.ComponentGraphics;
 import openfl.display.Sprite;
 import gameboard.Board;
+import net.shared.board.Situation;
 
 class TBoard extends TestedComponent
 {
@@ -27,7 +32,7 @@ class TBoard extends TestedComponent
             board.clearPieces();
         }
         else
-            board.setHexDirectly(IntPoint.fromScalar(i-1), Hex.occupied(Intellector, White));
+            board.setHexDirectly(HexCoords.fromScalarCoord(i-1), Hex.construct(Intellector, White));
     }
 
     @iterations(10)
@@ -38,19 +43,19 @@ class TBoard extends TestedComponent
             case 0:
                 update(); 
                 board.clearPieces();
-            case 1: board.setHexDirectly(new IntPoint(3, 3), Hex.occupied(Intellector, White));
-            case 2: board.setHexDirectly(new IntPoint(5, 5), Hex.occupied(Intellector, White));
-            case 3: board.setHexDirectly(new IntPoint(3, 3), Hex.occupied(Intellector, Black));
-            case 4: board.setHexDirectly(new IntPoint(0, 1), Hex.occupied(Liberator, Black));
-            case 5: board.setHexDirectly(new IntPoint(0, 1), Hex.occupied(Defensor, White));
-            case 6: board.setHexDirectly(new IntPoint(5, 5), Hex.occupied(Intellector, White));
-            case 7: board.setHexDirectly(new IntPoint(3, 4), Hex.occupied(Intellector, Black));
-            case 8: board.setHexDirectly(new IntPoint(3, 5), Hex.occupied(Intellector, Black));
-            case 9: board.setHexDirectly(new IntPoint(3, 5), Hex.occupied(Intellector, White));
+            case 1: board.setHexDirectly(new HexCoords(3, 3), Hex.construct(Intellector, White));
+            case 2: board.setHexDirectly(new HexCoords(5, 5), Hex.construct(Intellector, White));
+            case 3: board.setHexDirectly(new HexCoords(3, 3), Hex.construct(Intellector, Black));
+            case 4: board.setHexDirectly(new HexCoords(0, 1), Hex.construct(Liberator, Black));
+            case 5: board.setHexDirectly(new HexCoords(0, 1), Hex.construct(Defensor, White));
+            case 6: board.setHexDirectly(new HexCoords(5, 5), Hex.construct(Intellector, White));
+            case 7: board.setHexDirectly(new HexCoords(3, 4), Hex.construct(Intellector, Black));
+            case 8: board.setHexDirectly(new HexCoords(3, 5), Hex.construct(Intellector, Black));
+            case 9: board.setHexDirectly(new HexCoords(3, 5), Hex.construct(Intellector, White));
         }
     }
 
-    private var revPly:ReversiblePly;
+    private var matPly:MaterializedPly;
 
     @iterations(8)
     private function _seq_transpositions(i:Int)
@@ -60,27 +65,27 @@ class TBoard extends TestedComponent
             case 0: 
                 update();
                 board.clearPieces();
-                board.setHexDirectly(new IntPoint(5, 5), Hex.occupied(Intellector, White));
-                board.setHexDirectly(new IntPoint(3, 3), Hex.occupied(Intellector, Black));
-                board.setHexDirectly(new IntPoint(0, 1), Hex.occupied(Defensor, White));
-                board.setHexDirectly(new IntPoint(2, 2), Hex.occupied(Liberator, Black));
-                revPly = Ply.construct(new IntPoint(5, 5), new IntPoint(5, 4)).toReversible(board.shownSituation);
+                board.setHexDirectly(new HexCoords(5, 5), Hex.construct(Intellector, White));
+                board.setHexDirectly(new HexCoords(3, 3), Hex.construct(Intellector, Black));
+                board.setHexDirectly(new HexCoords(0, 1), Hex.construct(Defensor, White));
+                board.setHexDirectly(new HexCoords(2, 2), Hex.construct(Liberator, Black));
+                matPly = RawPly.construct(new HexCoords(5, 5), new HexCoords(5, 4)).toMaterialized(board.shownSituation);
             case 1: 
-                board.applyMoveTransposition(revPly);
+                board.applyMoveTransposition(matPly);
             case 2: 
-                board.applyMoveTransposition(revPly, true);
+                board.applyMoveTransposition(matPly, true);
             case 3: 
-                revPly = Ply.construct(new IntPoint(5, 5), new IntPoint(5, 4)).toReversible(board.shownSituation);
-                board.applyMoveTransposition(revPly);
+                matPly = RawPly.construct(new HexCoords(5, 5), new HexCoords(5, 4)).toMaterialized(board.shownSituation);
+                board.applyMoveTransposition(matPly);
             case 4:
                 board.setOrientation(Black);
             case 5:
-                revPly = Ply.construct(new IntPoint(2, 2), new IntPoint(0, 1)).toReversible(board.shownSituation);
-                board.applyMoveTransposition(revPly);
+                matPly = RawPly.construct(new HexCoords(2, 2), new HexCoords(0, 1)).toMaterialized(board.shownSituation);
+                board.applyMoveTransposition(matPly);
             case 6:
                 board.setOrientation(White);
             case 7:
-                board.applyMoveTransposition(revPly, true);
+                board.applyMoveTransposition(matPly, true);
         }
     }
 
@@ -91,6 +96,6 @@ class TBoard extends TestedComponent
 
     private override function rebuildComponent()
     {
-        board = new Board(Situation.starting());
+        board = new Board(Situation.defaultStarting());
     }
 }

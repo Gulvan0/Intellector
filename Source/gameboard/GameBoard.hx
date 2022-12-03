@@ -1,5 +1,8 @@
 package gameboard;
 
+import net.shared.board.MaterializedPly;
+import net.shared.board.RawPly;
+import net.shared.board.Situation;
 import gameboard.behaviors.SpectatorBehaviour;
 import GlobalBroadcaster;
 import GlobalBroadcaster.IGlobalEventObserver;
@@ -25,9 +28,9 @@ using Lambda;
 
 enum GameBoardEvent
 {
-    ContinuationMove(ply:Ply, plyStr:String, performedBy:PieceColor);
+    ContinuationMove(ply:RawPly, plyStr:String, performedBy:PieceColor);
     SubsequentMove(plyStr:String, performedBy:PieceColor);
-    BranchingMove(ply:Ply, plyStr:String, performedBy:PieceColor, droppedMovesCount:Int);
+    BranchingMove(ply:RawPly, plyStr:String, performedBy:PieceColor, droppedMovesCount:Int);
 }
 
 interface IGameBoardObserver
@@ -122,8 +125,10 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
         
         end();
 
-        var toRevert:Array<ReversiblePly> = plyHistory.dropLast(cnt);
-        _currentSituation.unmakeMoves(toRevert, true);
+        var toRevert:Array<MaterializedPly> = plyHistory.dropLast(cnt);
+        toRevert.reverse();
+        for (matPly in toRevert)
+            _currentSituation.revertPly(matPly);
         setShownSituation(currentSituation);
         highlightLastMove();
     }
@@ -155,14 +160,14 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
         
         Except for premoves, transposes pieces accordingly
     **/
-    public function makeMove(ply:Ply)
+    public function makeMove(ply:RawPly)
     {
-        var revPly:ReversiblePly = ply.toReversible(currentSituation);
-        plyHistory.append(ply, revPly);
-        _currentSituation.makeMove(ply, true);
+        var matPly:MaterializedPly = ply.toMaterialized(currentSituation);
+        plyHistory.append(ply, matPly);
+        _currentSituation.performPly(matPly);
         if (plyHistory.isAtEnd())
         {
-            applyMoveTransposition(revPly);
+            applyMoveTransposition(matPly);
             highlightMove([ply.from, ply.to]);
         }
     }
@@ -214,16 +219,16 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
     
     private function prev() 
     {
-        var ply = plyHistory.prev(); 
-        applyMoveTransposition(ply, true);
+        var matPly = plyHistory.prev(); 
+        applyMoveTransposition(matPly, true);
         highlightLastMove();
     }
 
     public function next()
     {
-        var ply = plyHistory.next(); 
-        applyMoveTransposition(ply);
-        highlightMove(ply.affectedCoords());
+        var matPly = plyHistory.next(); 
+        applyMoveTransposition(matPly);
+        highlightMove(matPly.affectedCoords());
     }
 
     private function end()

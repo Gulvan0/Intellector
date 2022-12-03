@@ -14,6 +14,7 @@ import haxe.ui.containers.HBox;
 import haxe.ui.containers.TableView;
 import haxe.ui.containers.VBox;
 import openfl.display.Sprite;
+import net.shared.utils.MathUtils;
 using utils.CallbackTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/plynavigator.xml"))

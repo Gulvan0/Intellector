@@ -1,8 +1,10 @@
 package gameboard.states;
 
+import net.shared.board.HexCoords;
+
 private enum Transition 
 {
-    ToDragging(dragStartLocation:IntPoint);
+    ToDragging(dragStartLocation:HexCoords);
 }
 
 class NeutralState extends BasePlayableState
@@ -26,7 +28,7 @@ class NeutralState extends BasePlayableState
         }
     }
 
-    public function onLMBPressed(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         if (boardInstance.behavior.returnToCurrentOnLMB() && !boardInstance.plyHistory.isAtEnd())
         {
@@ -42,7 +44,7 @@ class NeutralState extends BasePlayableState
             boardInstance.behavior.onVoidClick();
     }
 
-    public function reactsToHover(location:IntPoint):Bool
+    public function reactsToHover(location:HexCoords):Bool
     {
         var piece = boardInstance.getPiece(location);
         if (piece == null)
@@ -56,7 +58,7 @@ class NeutralState extends BasePlayableState
         return true;
     }
 
-    public function onLMBReleased(location:Null<IntPoint>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBReleased(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }

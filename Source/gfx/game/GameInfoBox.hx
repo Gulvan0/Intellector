@@ -1,5 +1,6 @@
 package gfx.game;
 
+import net.shared.board.RawPly;
 import utils.SpecialChar;
 import net.shared.EloValue;
 import GlobalBroadcaster.GlobalEvent;
@@ -45,11 +46,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
     {
         switch event 
         {
-            case Move(fromI, toI, fromJ, toJ, morphInto, _):
-                var ply:Ply = new Ply();
-                ply.from = new IntPoint(fromI, fromJ);
-                ply.to = new IntPoint(toI, toJ);
-                ply.morphInto = morphInto;
+            case Move(ply, _):
                 accountMove(ply);
             case Rollback(plysToUndo, _):
                 revertPlys(plysToUndo);
@@ -84,7 +81,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         }
     }
 
-    private function accountMove(ply:Ply)
+    private function accountMove(ply:RawPly)
     {
         if (!openingTree.currentNode.terminal)
         {

@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import net.shared.utils.MathUtils;
 import net.shared.TimeControlType;
 import haxe.ui.locale.LocaleManager;
 import haxe.ui.components.Image;
@@ -16,6 +17,7 @@ import struct.ChallengeParams;
 import haxe.ui.containers.dialogs.Dialog;
 import dict.Dictionary;
 import haxe.ui.core.Screen as HaxeUIScreen;
+import net.shared.board.Situation;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/popups/challenge_params_popup.xml'))
 class ChallengeParamsDialog extends Dialog
@@ -95,7 +97,7 @@ class ChallengeParamsDialog extends Dialog
     @:bind(applySIPBtn, MouseEvent.CLICK)
     private function onSIPApplied(e)
     {
-        var deserializedSituation:Null<Situation> = Situation.fromSIP(sipTF.text);
+        var deserializedSituation:Null<Situation> = Situation.deserialize(sipTF.text);
 
         if (deserializedSituation == null)
             Dialogs.alert(CHALLENGE_PARAMS_INVALID_SIP_WARNING_TEXT, CHALLENGE_PARAMS_INVALID_SIP_WARNING_TITLE);
@@ -257,7 +259,7 @@ class ChallengeParamsDialog extends Dialog
         if (hasCustomStartPos)
             approvedStartPos = initialParams.customStartingSituation; 
         else
-            approvedStartPos = Situation.starting();
+            approvedStartPos = Situation.defaultStarting();
 
         startPosBoard = new Board(approvedStartPos, White, 40, None);
 
