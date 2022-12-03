@@ -210,7 +210,7 @@ class GameLogParser
 
     private static function decodeOutcome(winnerColorCode:String, reasonCode:String):Null<Outcome>
     {
-        var winnerColor:PieceColor = decodeColor(winnerColorCode);
+        var winnerColor:Null<PieceColor> = decodeColor(winnerColorCode);
         return switch reasonCode 
         {
             case "mat": Decisive(Mate, winnerColor);
@@ -221,7 +221,8 @@ class GameLogParser
             case "rep": Drawish(Repetition);
             case "100": Drawish(NoProgress);
             case "agr": Drawish(DrawAgreement);
-            case "abo": Drawish(Abort); 
+            case "abo": Drawish(Abort);
+            case "unk": winnerColor != null? Decisive(Abandon, winnerColor) : Drawish(Abort);
             default: null;
         }
     }

@@ -67,9 +67,12 @@ class Rules
                         }
                     case Swap(partner):
                         var destination:HexCoords = departure.step(dir);
+                        if (!destination.isValid())
+                            continue;
+
                         var destinationHex:Hex = pieceArrangement.get(destination);
                         var desiredHex:Hex = Occupied(new PieceData(partner, departureHex.color()));
-                        if (destination.isValid() && destinationHex.equals(desiredHex))
+                        if (destinationHex.equals(desiredHex))
                             possibleDestinations.push(destination);
 
                 }
@@ -122,12 +125,11 @@ class Rules
 
         if (movingPiece == null || movingPiece.color != situation.turnColor)
             return false;
-        else if (ply.morphInto != null && movingPiece.type == Progressor)
+        else if (ply.morphInto != null && movingPiece.type == Progressor && ply.to.isFinal(movingPiece.color))
         {
             var impossiblePromotionType:Bool = ply.morphInto == Intellector || ply.morphInto == Progressor;
-            var notFinalHex:Bool = !ply.to.isFinal(movingPiece.color);
 
-            if (impossiblePromotionType || notFinalHex)
+            if (impossiblePromotionType)
                 return false;
         }
         else if (ply.morphInto != null)
