@@ -21,6 +21,9 @@ class CurrentGamesTable extends VBox
     {
         for (gameData in data)
         {
+            if (Lambda.has(gameIDs, gameData.id))
+                continue;
+
             var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.log);
 
             var whiteLabel:String = Utils.playerRef(parsedData.whiteRef);

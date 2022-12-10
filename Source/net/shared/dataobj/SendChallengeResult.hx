@@ -12,4 +12,5 @@ enum SendChallengeResult
     RematchExpired; //sent simple rematch request, but the challenge params TTL has already expired
     Impossible; //some other crucial condition is not met (e. g., a player isn't in Browsing state)
     Merged; //merged with other compatible challenge
+    ServerShutdown; //server is preparing to shutdown, challenge creation is disabled
 }

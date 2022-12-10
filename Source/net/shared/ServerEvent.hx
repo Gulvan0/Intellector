@@ -24,6 +24,7 @@ enum ServerEvent
     ChallengeCancelledByOwner; //Answer to AcceptChallenge: it was cancelled before the recipient answered
     ChallengeOwnerOffline(owner:String); //Answer to AcceptChallenge: caller went offline before the recipient answered
     ChallengeOwnerInGame(owner:String); //Answer to AcceptChallenge: caller joined a different game before the recipient answered
+    ChallengeNotAcceptedServerShutdown; //Answer to AcceptChallenge: can't accept a challenge, server is shutting down
     
     OpenChallengeInfo(data:ChallengeData); //Answer to GetOpenChallenge when it exists with challenge parameters
     OpenChallengeHostPlaying(data:OngoingGameInfo); //Answer to GetOpenChallenge: the challenge has already been accepted by other player, the game is in progress
@@ -71,7 +72,7 @@ enum ServerEvent
     OpenChallenges(data:Array<ChallengeData>); //Answer to GetOpenChallenges
     CurrentGames(data:Array<GameInfo>); //Answer to GetCurrentGames
     RecentGames(data:Array<GameInfo>); //Answer to GetRecentGames
-    MainMenuData(openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>); //Answer to MainMenuEntered. Contains the data of all three events above
+    MainMenuData(openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>); //Answer to PageUpdated(MainMenu). Contains the data of all three events above
     MainMenuNewOpenChallenge(data:ChallengeData);
     MainMenuOpenChallengeRemoved(id:Int);
     MainMenuNewGame(data:GameInfo);

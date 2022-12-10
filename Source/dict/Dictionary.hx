@@ -445,6 +445,9 @@ class Dictionary
                 return ["Failed to accept challenge: $0 has already started another game", "Не удалось принять вызов: $0 уже участвует в другой партии"];
             case INCOMING_CHALLENGE_ACCEPT_ERROR_CHALLENGE_CANCELLED:
                 return ["Failed to accept challenge: the challenge was cancelled", "Не удалось принять вызов: вызов был отменен"];
+            case INCOMING_CHALLENGE_ACCEPT_ERROR_SERVER_SHUTDOWN:
+                return ["Failed to accept challenge: server is restarting", "Не удалось принять вызов: сервер перезапускается"];
+
             case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TITLE:
                 return ["Challenge sent!", "Вызов отправлен!"];
             case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(opponentLogin):
@@ -467,6 +470,8 @@ class Dictionary
                 return ["Failed to create challenge: rematch time has expired. Create a new challenge instead", "Не удалось создать вызов: время на предложение реванша истекло. Создайте новый вызов"];
             case SEND_CHALLENGE_ERROR_IMPOSSIBLE:
                 return ["Failed to create challenge: impossible challenge. Please try again", "Не удалось создать вызов: невозможный вызов. Попробуйте снова"];
+            case SEND_CHALLENGE_ERROR_SERVER_SHUTDOWN:
+                return ["Server is restarting. Creating new challenges is disabled until the restart is complete. Please try later", "Сервер перезапускается. Создание новых вызовов отключено до завершения перезапуска. Попробуйте позже"];
             case CHALLENGE_PARAMS_DIALOG_TITLE:
                 return ["Challenge Parameters", "Параметры Вызова"];
             case CHALLENGE_PARAMS_TYPE_OPTION_NAME:
@@ -650,6 +655,20 @@ class Dictionary
                 return ["Reconnecting...", "Восстанавливаем соединение..."];
             case RECONNECTION_POP_UP_TITLE:
                 return ["Connection lost", "Потеряно соединение"];
+
+            case SERVER_IS_SHUTTING_DOWN_WARNING_TITLE:
+                return ["Server is shutting down", "Сервер перезапускается"];
+            case SERVER_IS_SHUTTING_DOWN_WARNING_TEXT:
+                return ["Server is restarting. Challenges are disabled until the restart is complete.", "Сервер перезапускается. Вызовы отключены до окончания перезагрузки."];
+
+            case OUTDATED_CLIENT_ERROR_TITLE:
+                return ["Outdated client", "Клиент устарел"];
+            case OUTDATED_CLIENT_ERROR_TEXT:
+                return ["Outdated client. Try forceful reload (Ctrl+F5)", "Клиент устарел. Попробуйте перезагрузить страницу с очисткой кэша (Ctrl+F5)"];
+            case OUTDATED_SERVER_ERROR_TITLE:
+                return ["Outdated server", "Сервер устарел"];
+            case OUTDATED_SERVER_ERROR_TEXT:
+                return ["Outdated server. Please contact the administrator", "Сервер устарел. Пожалуйста, уведомите администратора."];
 
             case CLIPBOARD_ERROR_ALERT_TITLE:
                 return ["Clipboard Error", "Ошибка буфера обмена"];

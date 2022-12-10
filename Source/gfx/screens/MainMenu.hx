@@ -18,14 +18,12 @@ class MainMenu extends Screen implements INetObserver
 {
     public function onEnter()
     {
-        Requests.getMainMenuData(onMainMenuData);
         Networker.addObserver(this);
     }
 
     public function onClose()
     {
         Networker.removeObserver(this);
-        Networker.emitEvent(MainMenuLeft);
         SceneManager.removeResizeHandler(onResize);
     }
 
@@ -33,6 +31,10 @@ class MainMenu extends Screen implements INetObserver
     {
         switch event 
         {
+            case MainMenuData(openChallenges, currentGames, recentGames):
+                openChallengesTable.appendChallenges(openChallenges);
+                currentGamesTable.appendGames(currentGames);
+                pastGamesList.appendGames(recentGames);
             case MainMenuNewOpenChallenge(data):
                 openChallengesTable.appendChallenges([data]);
             case MainMenuNewGame(data):
@@ -44,13 +46,6 @@ class MainMenu extends Screen implements INetObserver
                 openChallengesTable.removeChallenge(id);
             default:
         }
-    }
-
-    private function onMainMenuData(openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>)
-    {
-        openChallengesTable.appendChallenges(openChallenges);
-        currentGamesTable.appendGames(currentGames);
-        pastGamesList.appendGames(recentGames);
     }
 
     @:bind(createGameBtn, MouseEvent.CLICK)

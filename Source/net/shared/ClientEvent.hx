@@ -5,7 +5,7 @@ import net.shared.board.RawPly;
 
 enum ClientEvent
 {
-    Greet(greeting:Greeting);
+    Greet(greeting:Greeting, clientBuild:Int, minServerBuild:Int);
     Login(login:String, password:String);
     Register(login:String, password:String);
     LogOut;
@@ -29,7 +29,6 @@ enum ClientEvent
     AddTime; 
     GetOpenChallenge(id:Int); 
     FollowPlayer(login:String);
-    LeaveGame(id:Int);
     StopFollowing;
     CreateStudy(info:StudyInfo);
     OverwriteStudy(overwrittenStudyID:Int, info:StudyInfo);
@@ -46,6 +45,5 @@ enum ClientEvent
     GetOpenChallenges;
     GetCurrentGames;
     GetRecentGames;
-    MainMenuEntered;
-    MainMenuLeft;
+    PageUpdated(page:ViewedScreen);
 }

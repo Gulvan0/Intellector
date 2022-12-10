@@ -1,5 +1,6 @@
 package net;
 
+import net.shared.utils.Build;
 import net.shared.dataobj.GreetingResponseData;
 import net.shared.dataobj.Greeting;
 import net.shared.dataobj.ChallengeData;
@@ -26,7 +27,7 @@ class Requests
     public static function greet(greeting:Greeting, callback:GreetingResponseData->Void)
     {
         Networker.addHandler(greet_handler.bind(callback));
-        Networker.emitEvent(Greet(greeting));
+        Networker.emitEvent(Greet(greeting, Build.buildTime(), Config.dict.getInt("min-server-build")));
     }
 
     private static function greet_handler(callback:GreetingResponseData->Void, event:ServerEvent):Bool
@@ -345,24 +346,6 @@ class Requests
         {
             case RecentGames(data):
                 callback(data);
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    public static function getMainMenuData(callback:MainMenuEnteredCallback)
-    {
-        Networker.addHandler(getMainMenuData_handler.bind(callback));
-        Networker.emitEvent(MainMenuEntered);
-    }
-
-    private static function getMainMenuData_handler(callback:MainMenuEnteredCallback, event:ServerEvent)
-    {
-        switch event
-        {
-            case MainMenuData(openChallenges, currentGames, recentGames):
-                callback(openChallenges, currentGames, recentGames);
                 return true;
             default:
                 return false;

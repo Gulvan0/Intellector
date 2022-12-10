@@ -19,6 +19,9 @@ class OpenChallengesTable extends VBox
     {
         for (data in challenges)
         {
+            if (Lambda.exists(challengeData, x -> x.id == data.id))
+                continue;
+            
             var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
             var bracketText:String = Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated));
             var modeData = {color: params.acceptorColor, situation: params.customStartingSituation};

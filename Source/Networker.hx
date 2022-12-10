@@ -1,5 +1,6 @@
 package;
 
+import browser.Url;
 import js.html.XMLHttpRequest;
 import haxe.Http;
 import js.Browser;
@@ -22,8 +23,8 @@ import hx.ws.WebSocket;
 import haxe.Timer;
 
 using utils.CallbackTools;
-using StringTools;
 using Lambda;
+using hx.strings.Strings;
 
 class Networker
 {
@@ -199,14 +200,16 @@ class Networker
 	{
 		switch data 
 		{
-			case ConnectedAsGuest(token, invalidCredentials):
+			case ConnectedAsGuest(token, invalidCredentials, isShuttingDown):
                 SceneManager.onConnected();
                 reconnectionToken = token;
                 if (invalidCredentials)
                     CredentialCookies.removeLoginDetails();
                 if (!dontLeave)
-				    ScreenNavigator.navigate();
-			case Logged(token, incomingChallenges, ongoingFiniteGame):
+                    ScreenNavigator.navigate();
+                if (isShuttingDown)
+                    Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE);
+			case Logged(token, incomingChallenges, ongoingFiniteGame, isShuttingDown):
                 SceneManager.onConnected();
                 reconnectionToken = token;
                 LoginManager.assignCredentials(CredentialCookies.getLogin(), CredentialCookies.getPassword(), None);
@@ -216,13 +219,28 @@ class Networker
                     var parsedData:GameLogParserOutput = GameLogParser.parse(ongoingFiniteGame.currentLog);
                     SceneManager.toScreen(LiveGame(ongoingFiniteGame.id, Ongoing(parsedData, ongoingFiniteGame.timeData, null)));
                 }
-                else if (!dontLeave)
-				    ScreenNavigator.navigate();
+                else
+                {
+                    if (!dontLeave)
+                        ScreenNavigator.navigate();
+                    if (isShuttingDown)
+                        Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE); 
+                }
 			case Reconnected(missedEvents):
                 Dialogs.closeReconnectionDialog();
                 SceneManager.onConnected();
                 for (missedEvent in missedEvents)
                     eventQueue.processEvent(missedEvent);
+            case OutdatedClient:
+                if (Url.isFallback())
+                    Browser.window.location.replace(Url.toActual());
+                else
+                    Dialogs.alert(OUTDATED_CLIENT_ERROR_TEXT, OUTDATED_CLIENT_ERROR_TITLE); 
+            case OutdatedServer:
+                if (!Url.isFallback())
+                    Browser.window.location.replace(Url.toFallback());
+                else
+                    Dialogs.alert(OUTDATED_SERVER_ERROR_TEXT, OUTDATED_SERVER_ERROR_TITLE);
             case NotReconnected:
                 Browser.location.reload(false);
 		}

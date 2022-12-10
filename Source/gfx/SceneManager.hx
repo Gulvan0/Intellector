@@ -1,5 +1,6 @@
 package gfx;
 
+import net.shared.dataobj.ViewedScreen;
 import haxe.ui.events.UIEvent;
 import gfx.game.LiveGameConstructor;
 import net.shared.dataobj.StudyInfo;
@@ -72,6 +73,20 @@ class SceneManager
         scene.toScreen(type);
         currentScreenType = type;
         Url.setPathByScreen(type);
+        Networker.emitEvent(PageUpdated(getPageByScreenType(type)));
+    }
+
+    private static function getPageByScreenType(type:ScreenType):ViewedScreen
+    {
+        return switch type 
+        {
+            case MainMenu: MainMenu;
+            case Analysis(_, _, _, _): Analysis;
+            case LanguageSelectIntro(_): Other;
+            case LiveGame(gameID, _): Game(gameID);
+            case PlayerProfile(ownerLogin, _): Profile(ownerLogin);
+            case ChallengeJoining(_): Other;
+        }
     }
 
     public static function clearScreen()

@@ -17,6 +17,7 @@
 	<haxelib name="FileSaver" />
 	<haxelib name="gif" />
 	<haxelib name="format" />
+	<haxelib name="haxe-strings" />
 	
 	<template path="template.html" rename="index.html" />
 	<library path="Assets/preloader.swf" generate="true"  id="preloader" preload="true" embed="false" />

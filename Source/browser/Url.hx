@@ -5,6 +5,7 @@ import dict.Utils;
 import js.html.URLSearchParams;
 import gfx.ScreenType;
 import js.Browser;
+using hx.strings.Strings;
 
 class Url 
 {
@@ -46,6 +47,39 @@ class Url
         return Browser.location.host + ingameToUrlPath('live/$id');
     }
 
+    public static function isFallback():Bool
+    {
+        var actualVerPathPrefix:Null<String> = Config.dict.getString("actual-path-prefix");
+        var prevVerPathPrefix:Null<String> = Config.dict.getString("prev-path-prefix");
+
+        if (actualVerPathPrefix != null && prevVerPathPrefix != null)
+            return Browser.window.location.pathname.startsWith(prevVerPathPrefix);
+        else
+            return false;
+    }
+
+    public static function toFallback():String
+    {
+        var actualVerPathPrefix:Null<String> = Config.dict.getString("actual-path-prefix");
+        var prevVerPathPrefix:Null<String> = Config.dict.getString("prev-path-prefix");
+
+        if (actualVerPathPrefix != null && prevVerPathPrefix != null)
+            return Browser.window.location.href.replaceFirstIgnoreCase(actualVerPathPrefix, prevVerPathPrefix);
+        else
+            return Browser.window.location.href;
+    }
+
+    public static function toActual():String
+    {
+        var actualVerPathPrefix:Null<String> = Config.dict.getString("actual-path-prefix");
+        var prevVerPathPrefix:Null<String> = Config.dict.getString("prev-path-prefix");
+
+        if (actualVerPathPrefix != null && prevVerPathPrefix != null)
+            return Browser.window.location.href.replaceFirstIgnoreCase(prevVerPathPrefix, actualVerPathPrefix);
+        else
+            return Browser.window.location.href;
+    }
+
     private static function getURLPath(type:ScreenType):String
     {
         return switch type 
@@ -66,9 +100,6 @@ class Url
 
     private static function basepath():String
     {
-        if (Browser.location.hostname == "intellector.info")
-            return "/game/";
-        else 
-            return "/";
+        return Browser.location.pathname.split("/").slice(0, 2).join("/") + "/";
     }
 }

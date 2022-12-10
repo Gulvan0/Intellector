@@ -79,8 +79,6 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function onClose()
     {
-        Networker.emitEvent(LeaveGame(gameID));
-
         FollowManager.stopFollowing();
 
         cWhiteClock.deactivate();

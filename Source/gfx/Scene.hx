@@ -139,6 +139,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 Dialogs.info(SEND_CHALLENGE_ERROR_REMATCH_EXPIRED, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
             case Impossible:
                 Dialogs.info(SEND_CHALLENGE_ERROR_IMPOSSIBLE, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+            case ServerShutdown:
+                Dialogs.info(SEND_CHALLENGE_ERROR_SERVER_SHUTDOWN, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
             case Merged:
                 //* Do nothing
         }
@@ -148,7 +150,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     {
         switch event
         {
-            case GreetingResponse(Logged(_, _, ongoingFiniteGame)):
+            case GreetingResponse(Logged(_, _, ongoingFiniteGame, _)):
                 if (ongoingFiniteGame != null)
                     setIngameStatus(true);
             case LoginResult(ReconnectionNeeded(_, _)):
@@ -175,6 +177,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_OFFLINE, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [owner]);
             case ChallengeOwnerInGame(owner):
                 Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_CALLER_INGAME, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE, [owner]);
+            case ChallengeNotAcceptedServerShutdown:
+                Dialogs.info(INCOMING_CHALLENGE_ACCEPT_ERROR_SERVER_SHUTDOWN, INCOMING_CHALLENGE_ACCEPT_ERROR_DIALOG_TITLE);
             default:
         }
     }
