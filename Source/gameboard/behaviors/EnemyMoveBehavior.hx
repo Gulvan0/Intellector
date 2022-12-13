@@ -42,8 +42,8 @@ class EnemyMoveBehavior implements IBehavior
             AssetManager.playPlySound(ply.toMaterialized(boardInstance.currentSituation));
             boardInstance.makeMove(ply);
 
-            boardInstance.state.exitToNeutral();
             boardInstance.behavior = new PlayerMoveBehavior(playerColor);
+            boardInstance.state = new NeutralState();
         }
         else
         {
@@ -62,8 +62,8 @@ class EnemyMoveBehavior implements IBehavior
     
             if (premoveDeparture.color() != playerColor || !Rules.isPossible(activatedPremove, boardInstance.currentSituation))
             {
-                boardInstance.state.exitToNeutral();
                 boardInstance.behavior = new PlayerMoveBehavior(playerColor);
+                boardInstance.state = new NeutralState();
             }
             else
             {
@@ -76,6 +76,8 @@ class EnemyMoveBehavior implements IBehavior
                 premoves = followingPremoves;
     
                 Networker.emitEvent(Move(activatedPremove));
+                
+                boardInstance.state = new NeutralState();
             }
         }
     }
@@ -104,8 +106,7 @@ class EnemyMoveBehavior implements IBehavior
 
             case Move(ply, _):
                 boardInstance.state.exitToNeutral();
-                if (!Preferences.premoveEnabled.get())
-                    boardInstance.state = new StubState();
+                boardInstance.state = new StubState();
                 handleOpponentMove(ply);
 
             default:

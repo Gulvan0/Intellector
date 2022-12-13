@@ -1,5 +1,6 @@
 package gfx.common;
 
+import gfx.popups.StudyParamsDialog;
 import net.shared.dataobj.StudyInfo;
 import net.shared.board.RawPly;
 import struct.Variant;
@@ -205,7 +206,7 @@ class ShareDialog extends Dialog
     
             exportStudyBtn.onClick = e -> {
                 hideDialog(null);
-                Dialogs.studyParams(studyParamsDialogMode);
+                Dialogs.getQueue().add(new StudyParamsDialog(studyParamsDialogMode));
             }
         }
         else

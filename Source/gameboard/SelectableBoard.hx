@@ -138,7 +138,7 @@ class SelectableBoard extends Board
 
     private function onClick(e:MouseEvent)
     {
-        if (suppressRMBHandler || Dialogs.hasActiveDialog())
+        if (suppressRMBHandler || Dialogs.getQueue().hasActiveDialog())
             return;
 
         removeArrowsAndSelections();
@@ -146,7 +146,7 @@ class SelectableBoard extends Board
 
     private function onRightPress(e:MouseEvent)
     {
-        if (suppressRMBHandler || Dialogs.hasActiveDialog())
+        if (suppressRMBHandler || Dialogs.getQueue().hasActiveDialog())
             return;
 
         arrowStartLocation = posToIndexes(e.stageX, e.stageY);

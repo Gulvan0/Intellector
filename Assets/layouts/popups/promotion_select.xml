@@ -1,0 +1,6 @@
+<dialog title="${Dictionary.getPhrase(PROMOTION_DIALOG_TITLE)}">
+    <vbox>
+        <label style="text-align: center" text="${Dictionary.getPhrase(PROMOTION_DIALOG_QUESTION)}" horizontalAlign="center" />
+        <hbox id="btnsBox" horizontalAlign="center" />
+    </vbox>
+</dialog>

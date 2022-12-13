@@ -11,7 +11,7 @@ class MiniProfileData
 
     public function toString():String 
     {
-        return 'MiniProfileData {\ngamesCntByTimeControl: $gamesCntByTimeControl\nelo: $elo\nstatus: $status\nisFriend: $isFriend\n}';
+        return 'MiniProfileData';
     }
 
     public function new()

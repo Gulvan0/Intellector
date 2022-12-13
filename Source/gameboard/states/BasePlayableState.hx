@@ -1,11 +1,11 @@
 package gameboard.states;
 
+import gfx.popups.PromotionSelect;
 import net.shared.board.RawPly;
 import net.shared.board.HexCoords;
 import net.shared.board.Hex;
 import net.shared.PieceType;
 import gfx.Dialogs;
-import net.shared.ServerEvent;
 
 abstract class BasePlayableState extends BaseState
 {
@@ -29,14 +29,14 @@ abstract class BasePlayableState extends BaseState
             if (shiftPressed)
                 onMoveChosen(dominatorPromotionPly);
             else
-                Dialogs.promotionSelect(departureHex.color(), onPromotionSelected);
+                Dialogs.getQueue().add(new PromotionSelect(departureHex.color(), onPromotionSelected));
         else if (chameleonPossible)
             if (ctrlPressed)
                 onMoveChosen(simplePly);
             else if (shiftPressed)
                 onMoveChosen(chameleonPly);
             else
-                Dialogs.chameleonConfirm(onChameleonDecisionMade);
+                Dialogs.confirm(CHAMELEON_DIALOG_QUESTION, CHAMELEON_DIALOG_TITLE, onChameleonDecisionMade.bind(true), onChameleonDecisionMade.bind(false));
         else
             onMoveChosen(simplePly);
     }

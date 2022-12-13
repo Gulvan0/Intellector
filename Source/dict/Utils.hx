@@ -44,7 +44,7 @@ class Utils
 
     public static function opponentRef(whiteRef:String, blackRef:String):String
     {
-        return LoginManager.isPlayer(whiteRef)? playerRef(whiteRef) : playerRef(blackRef);
+        return LoginManager.isPlayer(whiteRef)? playerRef(blackRef) : playerRef(whiteRef);
     }
 
     public static function getTimeControlName(type:TimeControlType):String
@@ -80,7 +80,7 @@ class Utils
                 var opponent:String = opponentRef(whiteRef, blackRef);
                 return ['Playing vs $opponent', 'Игра против $opponent'];
             case Ongoing(parsedData, _, _):
-                if (parsedData.isPlayerParticipant())
+                if (!parsedData.isPlayerParticipant())
                 {
                     var whiteStr:String = playerRef(parsedData.whiteRef);
                     var blackStr:String = playerRef(parsedData.blackRef);

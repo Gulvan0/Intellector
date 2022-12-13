@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.basic_components.BaseDialog;
 import net.shared.utils.MathUtils;
 import net.shared.TimeControlType;
 import haxe.ui.locale.LocaleManager;
@@ -20,7 +21,7 @@ import haxe.ui.core.Screen as HaxeUIScreen;
 import net.shared.board.Situation;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/popups/challenge_params_popup.xml'))
-class ChallengeParamsDialog extends Dialog
+class ChallengeParamsDialog extends BaseDialog
 {
     private static inline final MAX_START_SECS_ALLOWED:Int = 60 * 60 * 6;
     private static inline final MAX_BONUS_SECS_ALLOWED:Int = 120;
@@ -64,34 +65,34 @@ class ChallengeParamsDialog extends Dialog
                 btn.customStyle = {paddingLeft: 3, paddingRight: 3};
     }
 
-    public function onClose(?e)
+    private function onClose(btn)
     {
-        SceneManager.removeResizeHandler(resize);
+        //* Do nothing
     }
 
     @:bind(typeStepper, UIEvent.CHANGE)
     private function onTypeChanged(e)
     {
         typeSpecificStack.selectedIndex = typeStepper.selectedIndex;
-        Dialogs.updatePosition(this);
+        correctPositionLater();
     }
 
     @:bind(rankedCheck, UIEvent.CHANGE)
     private function onBracketChanged(e)
     {
         if (rankedCheck.selected)
-            unrankedParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
+            unrankedParamsBox.fadeOut(correctPositionLater);
         else
-            unrankedParamsBox.fadeIn(Dialogs.updatePosition.bind(this));
+            unrankedParamsBox.fadeIn(correctPositionLater);
     }
 
     @:bind(startposDropdown, UIEvent.CHANGE)
     private function onStartPosTypeChanged(e)
     {
         if (startposDropdown.selectedIndex == 0)
-            customStartposBox.fadeOut(Dialogs.updatePosition.bind(this));
+            customStartposBox.fadeOut(correctPositionLater);
         else
-            customStartposBox.fadeIn(Dialogs.updatePosition.bind(this));
+            customStartposBox.fadeIn(correctPositionLater);
     }
 
     @:bind(applySIPBtn, MouseEvent.CLICK)
@@ -115,11 +116,11 @@ class ChallengeParamsDialog extends Dialog
     private function toggleTimeControlEditor(e)
     {
         if (tcParamsBox.hidden)
-            tcParamsBox.fadeIn(Dialogs.updatePosition.bind(this));
+            tcParamsBox.fadeIn(correctPositionLater);
         else
         {
             restoreTimeControlInputValues();
-            tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
+            tcParamsBox.fadeOut(correctPositionLater);
         }
     }
 
@@ -133,7 +134,7 @@ class ChallengeParamsDialog extends Dialog
     private function onApplyTCPressed(e)
     {
         approveTimeControl();
-        tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
+        tcParamsBox.fadeOut(correctPositionLater);
     }
     
     private function approveTimeControl()
@@ -145,7 +146,7 @@ class ChallengeParamsDialog extends Dialog
             if (startMinsTF.text == "" && startSecsTF.text == "")
             {
                 restoreTimeControlInputValues();
-                tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
+                tcParamsBox.fadeOut(correctPositionLater);
                 return;
             }
             else if (startMinsTF.text == "")
@@ -163,7 +164,7 @@ class ChallengeParamsDialog extends Dialog
             if (startMins == null || startSecs == null || bonusSecs == null || startMins < 0 || startSecs < 0 || bonusSecs < 0 || startMins + startSecs == 0)
             {
                 restoreTimeControlInputValues();
-                tcParamsBox.fadeOut(Dialogs.updatePosition.bind(this));
+                tcParamsBox.fadeOut(correctPositionLater);
                 return;
             }
 
@@ -214,9 +215,13 @@ class ChallengeParamsDialog extends Dialog
         hideDialog(DialogButton.OK);
     }
 
-    public function new(initialParams:ChallengeParams, ?dontCacheParams:Bool = false)
+    public function new(?initialParams:ChallengeParams, ?dontCacheParams:Bool = false)
     {
-        super();
+        super(null, true);
+
+        if (initialParams == null)
+            initialParams = ChallengeParams.loadFromCookies();
+
         this.dontCacheParams = dontCacheParams;
 
         var commonTimeControls:Map<Button, TimeControl> = [
@@ -304,8 +309,5 @@ class ChallengeParamsDialog extends Dialog
                 typeStepper.selectedIndex = 0;
                 usernameTF.text = calleeLogin;
         }
-
-        SceneManager.addResizeHandler(resize);
-        resize();
     }
 }

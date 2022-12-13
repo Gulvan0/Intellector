@@ -1,5 +1,6 @@
 package;
 
+import gfx.popups.ReconnectionDialog;
 import browser.Url;
 import js.html.XMLHttpRequest;
 import haxe.Http;
@@ -37,12 +38,13 @@ class Networker
     private static var backoffDelay:Float;
     private static var doNotReconnect:Bool = false;
     private static var reconnectionToken:String = "not_set";
+    private static var sid:Int = -1;
     private static var isConnected:Bool = false;
     public static var ignoreEmitCalls:Bool = false; 
 
-    public static function getSessionID():String
+    public static function getSessionID():Int
     {
-        return reconnectionToken.split('_')[1];
+        return sid;
     }
 
     public static function isConnectedToServer():Bool
@@ -148,7 +150,7 @@ class Networker
                 suppressAlert = true;
                 Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
             case ServerError(message):
-                Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
+                Dialogs.alert(SERVER_ERROR_DIALOG_TITLE, SERVER_ERROR_DIALOG_TEXT(message));
             default:
                 eventQueue.processEvent(event);
         }
@@ -173,7 +175,7 @@ class Networker
         else
         {
             SceneManager.onDisconnected();
-            Dialogs.reconnectionDialog();
+            Dialogs.getQueue().add(new ReconnectionDialog());
             startReconnectionAttempts(onConnectionReopened);
         }
     }
@@ -200,18 +202,20 @@ class Networker
 	{
 		switch data 
 		{
-			case ConnectedAsGuest(token, invalidCredentials, isShuttingDown):
+			case ConnectedAsGuest(sessionID, token, invalidCredentials, isShuttingDown):
                 SceneManager.onConnected();
                 reconnectionToken = token;
+                sid = sessionID;
                 if (invalidCredentials)
                     CredentialCookies.removeLoginDetails();
                 if (!dontLeave)
                     ScreenNavigator.navigate();
                 if (isShuttingDown)
                     Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE);
-			case Logged(token, incomingChallenges, ongoingFiniteGame, isShuttingDown):
+			case Logged(sessionID, token, incomingChallenges, ongoingFiniteGame, isShuttingDown):
                 SceneManager.onConnected();
                 reconnectionToken = token;
+                sid = sessionID;
                 LoginManager.assignCredentials(CredentialCookies.getLogin(), CredentialCookies.getPassword(), None);
                 GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
                 if (ongoingFiniteGame != null)
@@ -227,7 +231,7 @@ class Networker
                         Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE); 
                 }
 			case Reconnected(missedEvents):
-                Dialogs.closeReconnectionDialog();
+                Dialogs.getQueue().closeGroup(ReconnectionPopUp);
                 SceneManager.onConnected();
                 for (missedEvent in missedEvents)
                     eventQueue.processEvent(missedEvent);

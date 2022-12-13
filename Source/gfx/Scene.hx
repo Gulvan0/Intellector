@@ -1,5 +1,10 @@
 package gfx;
 
+import gfx.popups.OpenChallengeCreated;
+import gfx.popups.IncomingChallengeDialog;
+import gfx.popups.Settings;
+import gfx.popups.LogIn;
+import gfx.popups.ChallengeParamsDialog;
 import browser.Blinker;
 import js.Browser;
 import browser.Url;
@@ -102,12 +107,12 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onIncomingChallenge(data:ChallengeData)
     {
-        if (isPlayerInGame || Preferences.silentChallenges.get())
-            challengesMenu.appendEntry(data);
-        else
+        challengesMenu.appendEntry(data);
+
+        if (!isPlayerInGame && !Preferences.silentChallenges.get())
         {
             Blinker.blink(IncomingChallenge);
-            Dialogs.incomingChallenge(data);
+            Dialogs.getQueue().add(new IncomingChallengeDialog(data, challengesMenu.removeEntryByID.bind(data.id)));
             Assets.getSound("sounds/social.mp3").play();
         }
     }
@@ -122,25 +127,25 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 switch challengeParams.type 
                 {
                     case Public, ByLink:
-                        Dialogs.openChallengeCreated(data.id);
+                        Dialogs.getQueue().add(new OpenChallengeCreated(data.id));
                     case Direct(calleeLogin):
-                        Dialogs.info(SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(calleeLogin), SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TITLE);
+                        Dialogs.info(SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(calleeLogin), SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TITLE, null, RemovedOnGameStarted);
                 }
                 Assets.getSound("sounds/challenge_sent.mp3").play();
             case ToOneself:
-                Dialogs.info(SEND_CHALLENGE_ERROR_TO_ONESELF, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+                Dialogs.info(SEND_CHALLENGE_ERROR_TO_ONESELF, SEND_CHALLENGE_ERROR_DIALOG_TITLE, null, RemovedOnGameStarted);
             case PlayerNotFound:
-                Dialogs.info(SEND_CHALLENGE_ERROR_NOT_FOUND, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+                Dialogs.info(SEND_CHALLENGE_ERROR_NOT_FOUND, SEND_CHALLENGE_ERROR_DIALOG_TITLE, null, RemovedOnGameStarted);
             case AlreadyExists:
-                Dialogs.info(SEND_CHALLENGE_ERROR_ALREADY_EXISTS, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+                Dialogs.info(SEND_CHALLENGE_ERROR_ALREADY_EXISTS, SEND_CHALLENGE_ERROR_DIALOG_TITLE, null, RemovedOnGameStarted);
             case Duplicate:
-                Dialogs.info(SEND_CHALLENGE_ERROR_DUPLICATE, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+                Dialogs.info(SEND_CHALLENGE_ERROR_DUPLICATE, SEND_CHALLENGE_ERROR_DIALOG_TITLE, null, RemovedOnGameStarted);
             case RematchExpired:
-                Dialogs.info(SEND_CHALLENGE_ERROR_REMATCH_EXPIRED, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+                Dialogs.info(SEND_CHALLENGE_ERROR_REMATCH_EXPIRED, SEND_CHALLENGE_ERROR_DIALOG_TITLE, null, RemovedOnGameStarted);
             case Impossible:
-                Dialogs.info(SEND_CHALLENGE_ERROR_IMPOSSIBLE, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+                Dialogs.info(SEND_CHALLENGE_ERROR_IMPOSSIBLE, SEND_CHALLENGE_ERROR_DIALOG_TITLE, null, RemovedOnGameStarted);
             case ServerShutdown:
-                Dialogs.info(SEND_CHALLENGE_ERROR_SERVER_SHUTDOWN, SEND_CHALLENGE_ERROR_DIALOG_TITLE);
+                Dialogs.info(SEND_CHALLENGE_ERROR_SERVER_SHUTDOWN, SEND_CHALLENGE_ERROR_DIALOG_TITLE, null, RemovedOnGameStarted);
             case Merged:
                 //* Do nothing
         }
@@ -156,10 +161,12 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             case LoginResult(ReconnectionNeeded(_, _)):
                 setIngameStatus(true);
             case GameStarted(_, logPreamble):
+                Dialogs.getQueue().closeGroup(RemovedOnGameStarted);
                 Blinker.blink(GameStarted);
                 setIngameStatus(true);
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
                 var opponentLogin:String = parsedData.getPlayerOpponentRef();
+                challengesMenu.removeOwnEntries();
                 challengesMenu.removeEntriesByPlayer(opponentLogin);
             case GameEnded(_, _, _, _):
                 setIngameStatus(false);
@@ -226,14 +233,14 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     private function onCreateChallengePressed(e)
     {
         if (!LoginManager.isLogged())
-            Dialogs.login(displayChallengeParamsDialog);
+            Dialogs.getQueue().add(new LogIn(displayChallengeParamsDialog));
         else
             displayChallengeParamsDialog();
     }
 
     private function displayChallengeParamsDialog()
     {
-        Dialogs.specifyChallengeParams();
+        Dialogs.getQueue().add(new ChallengeParamsDialog());
     }
 
     private function onOpenChallengesPressed(e)
@@ -273,7 +280,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onLogInPressed(e)
     {
-        Dialogs.login();
+        Dialogs.getQueue().add(new LogIn());
     }
 
     private function onMyProfilePressed(e)
@@ -283,7 +290,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onSettingsPressed(e)
     {
-        Dialogs.settings();
+        Dialogs.getQueue().add(new Settings());
     }
 
     private function onLogOutPressed(e)

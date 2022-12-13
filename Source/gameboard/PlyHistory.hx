@@ -104,7 +104,6 @@ class PlyHistory
             pointer++;
         plys.push(raw);
         matPlys.push(materialized);
-        trace(raw, materialized);
     }
 
     public function new()

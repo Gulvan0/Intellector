@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import gfx.popups.ChallengeParamsDialog;
 import struct.ChallengeParams;
 import haxe.ui.validation.InvalidationFlags;
 import GlobalBroadcaster;
@@ -162,13 +163,6 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     {
         for (obs in gameboardObservers)
             obs.handleGameBoardEvent(event);
-
-        switch event 
-        {
-            case ContinuationMove(ply, _, _):
-                Networker.emitEvent(Move(ply));
-            default:
-        }
     }
 
     public function handleGlobalEvent(event:GlobalEvent)
@@ -217,7 +211,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 if (opponentRef.charAt(0) != "_")
                 {
                     var params:ChallengeParams = ChallengeParams.rematchParams(opponentRef, playerColor, timeControl, rated, board.startingSituation);
-                    Dialogs.specifyChallengeParams(params, true);
+                    Dialogs.getQueue().add(new ChallengeParamsDialog(params, true));
                 }
                 else
                     Networker.emitEvent(SimpleRematch);
@@ -231,7 +225,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 shareDialog.showShareDialog(board);
             case PlayFromHere:
                 var params:ChallengeParams = ChallengeParams.playFromPosParams(board.shownSituation);
-                Dialogs.specifyChallengeParams(params, true);
+                Dialogs.getQueue().add(new ChallengeParamsDialog(params, true));
             case Analyze:
                 SceneManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null, null));
             case AcceptDraw:

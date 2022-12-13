@@ -35,6 +35,20 @@ class AssetManager
     private static var totalResourcesCnt:Int = PieceType.createAll().length * PieceColor.createAll().length;
     private static var onLoadedCallback:Void->Void;
 
+    public static function pieceAspectRatio(type:PieceType, color:PieceColor):Float
+    {
+        return pieces[type][color].data.width / pieces[type][color].data.height;
+    }
+
+    public static function pieceRelativeScale(type:PieceType):Float
+    {
+        return switch type {
+            case Progressor: 0.7;
+            case Liberator, Defensor: 0.9;
+            default: 1;
+        }
+    }
+
     public static inline function singleAssetPath(asset:SingleAsset):String
     {
         var symbolsDir:String = "assets/symbols/";

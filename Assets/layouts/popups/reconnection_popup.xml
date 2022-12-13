@@ -1,0 +1,6 @@
+<dialog title="${Dictionary.getPhrase(RECONNECTION_POP_UP_TITLE)}" closable="false">
+    <vbox verticalAlign="center">
+        <box id="animContainer" width="240" height="264" horizontalAlign="center" />
+        <label style="font-size: 14; font-italic: true" text="${Dictionary.getPhrase(RECONNECTION_POP_UP_TEXT)}"  horizontalAlign="center" />
+    </vbox>
+</dialog>

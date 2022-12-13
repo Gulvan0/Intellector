@@ -71,7 +71,7 @@ class LoginManager
     public static function isPlayer(suspectedRef:String)
     {
         if (suspectedRef.charAt(0) == "_")
-            return Networker.getSessionID() == suspectedRef.substr(1);
+            return Networker.getSessionID() == Std.parseInt(suspectedRef.substr(1));
         else
             return login != null && login.toLowerCase() == suspectedRef.toLowerCase();
     }

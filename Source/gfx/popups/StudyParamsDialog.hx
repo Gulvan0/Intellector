@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.basic_components.BaseDialog;
 import gfx.ResponsiveToolbox.Dimension;
 import gfx.profile.complex_components.StudyFilterList;
 import net.Requests;
@@ -9,7 +10,6 @@ import struct.Variant;
 import net.shared.dataobj.StudyInfo;
 import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.core.Screen as HaxeUIScreen;
-import utils.StringUtils;
 
 using utils.StringUtils;
 using StringTools;
@@ -22,7 +22,7 @@ enum StudyParamsDialogMode
 }
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/popups/study_params_dialog.xml'))
-class StudyParamsDialog extends Dialog
+class StudyParamsDialog extends BaseDialog
 {
     private static inline final MAX_TAG_COUNT:Int = 10;
 
@@ -40,9 +40,9 @@ class StudyParamsDialog extends Dialog
         ResponsiveToolbox.resizeComponent(descTextArea, [Height => Min([Exact(200), VH(35)])]);
     }
 
-    public function onClose(?e)
+    private function onClose(button)
     {
-        SceneManager.removeResizeHandler(resize);
+        //* Do nothing
     }
 
     private function generateKeySIP(variant:Variant):String
@@ -130,7 +130,7 @@ class StudyParamsDialog extends Dialog
 
     public function new(mode:StudyParamsDialogMode)
     {
-        super();
+        super(null, false);
         
         descOptionName.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_PARAM_DESCRIPTION(StudyDescription));
         tagsOptionName.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_PARAM_TAGS(MAX_TAG_COUNT));
@@ -178,8 +178,5 @@ class StudyParamsDialog extends Dialog
 
                 fillParams(currentParams);
         }
-
-        resize();
-        SceneManager.addResizeHandler(resize);
     }
 }

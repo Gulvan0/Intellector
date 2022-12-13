@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import gfx.popups.BranchingHelp;
 import net.shared.board.Situation;
 import gameboard.GameBoard.IGameBoardObserver;
 import Preferences.BranchingTabType;
@@ -147,10 +148,10 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
         super();
 
         this.eventHandler = eventHandler;
-        actionBar.eventHandler = eventHandler;
+        actionBar.init(false, eventHandler);
 
         branchingHelpLink.onClick = e -> {
-            Dialogs.branchingHelp();
+            Dialogs.getQueue().addBasic(new BranchingHelp(), null, true);
         };
 
         drawBranchingTab(initialVariant);

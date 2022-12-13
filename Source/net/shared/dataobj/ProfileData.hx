@@ -33,7 +33,7 @@ class ProfileData
 
     public function toString():String 
     {
-        return 'ProfileData {\ngamesCntByTimeControl: $gamesCntByTimeControl\nelo: $elo\nstatus: $status\nisFriend: $isFriend\nfriends: $friends\npreloadedGames: $preloadedGames\npreloadedStudies: $preloadedStudies\ngamesInProgress: $gamesInProgress\ntotalPastGames: $totalPastGames\ntotalStudies: $totalStudies\ngamesCntByTimeControl: $gamesCntByTimeControl\n}';
+        return 'ProfileData';
     }
 
     public function new()

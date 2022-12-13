@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import gfx.popups.ChallengeParamsDialog;
 import struct.ChallengeParams;
 import GlobalBroadcaster;
 import gfx.common.PlyHistoryView;
@@ -110,7 +111,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
         if (event.match(ShareRequested))
             displayShareDialog();
         else if (event.match(PlayFromHereRequested))
-            Dialogs.specifyChallengeParams(ChallengeParams.playFromPosParams(board.shownSituation), true);
+            Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.playFromPosParams(board.shownSituation), true));
         else if (event.match(ApplyChangesRequested))
         {
             for (view in plyHistoryViews)
@@ -154,7 +155,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
         for (view in plyHistoryViews)
             view.init(type -> {handlePeripheralEvent(ScrollBtnPressed(type));}, Analysis(variant));
 
-        actionBar.eventHandler = handlePeripheralEvent;
+        actionBar.init(true, handlePeripheralEvent);
         
         boardWrapper = new BoardWrapper(board, boardContainer);
         boardWrapper.percentHeight = 100;

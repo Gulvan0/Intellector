@@ -7,7 +7,7 @@ class PieceData
 
     public function toString():String
     {
-        return '[$type;$color]';
+        return '<$type;$color>';
     }
 
     public function new(type:PieceType, color:PieceColor)

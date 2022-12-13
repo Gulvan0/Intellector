@@ -242,7 +242,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
 
     private function onLMBPressed(e:MouseEvent)
     {
-        if (suppressLMBHandler || Dialogs.hasActiveDialog())
+        if (suppressLMBHandler || Dialogs.getQueue().hasActiveDialog())
             return;
 
         if (getBounds(stage).contains(e.stageX, e.stageY))
@@ -251,7 +251,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
 
     private function onMouseMoved(e:MouseEvent)
     {
-        if (suppressLMBHandler || Dialogs.hasActiveDialog())
+        if (suppressLMBHandler || Dialogs.getQueue().hasActiveDialog())
             return;
 
         state.onMouseMoved(posToIndexes(e.stageX, e.stageY));
@@ -260,7 +260,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
 
     private function onLMBReleased(e:MouseEvent)
     {
-        if (suppressLMBHandler || Dialogs.hasActiveDialog())
+        if (suppressLMBHandler || Dialogs.getQueue().hasActiveDialog())
             return;
 
         state.onLMBReleased(posToIndexes(e.stageX, e.stageY), e.shiftKey, e.ctrlKey);

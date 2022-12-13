@@ -1,5 +1,8 @@
 package gfx.screens;
 
+import gfx.popups.LogIn;
+import gfx.popups.ChallengeParamsDialog;
+import gfx.popups.ChangelogDialog;
 import net.shared.ServerEvent;
 import net.EventProcessingQueue.INetObserver;
 import net.shared.dataobj.GameInfo;
@@ -52,20 +55,20 @@ class MainMenu extends Screen implements INetObserver
     private function onCreateGamePressed(?e)
     {
         if (!LoginManager.isLogged())
-            Dialogs.login(displayChallengeParamsDialog);
+            Dialogs.getQueue().add(new LogIn(displayChallengeParamsDialog));
         else
             displayChallengeParamsDialog();
     }
 
     private function displayChallengeParamsDialog()
     {
-        Dialogs.specifyChallengeParams();
+        Dialogs.getQueue().add(new ChallengeParamsDialog());
     }
 
     @:bind(changelogLabel, MouseEvent.CLICK)
     private function onChangelogRequested(?e)
     {
-        Dialogs.changelog();
+        Dialogs.getQueue().addBasic(new ChangelogDialog());
     }
 
     private override function onReady()

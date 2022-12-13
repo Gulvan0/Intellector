@@ -1,5 +1,7 @@
 package gfx.profile.complex_components;
 
+import gfx.popups.ChallengeParamsDialog;
+import gfx.basic_components.BaseDialog;
 import utils.StringUtils;
 import struct.ChallengeParams;
 import net.Requests;
@@ -20,7 +22,7 @@ import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/common/mini_profile.xml"))
-class MiniProfile extends Dialog
+class MiniProfile extends BaseDialog
 {
     private var username:String;
 
@@ -29,9 +31,9 @@ class MiniProfile extends Dialog
         width = Math.min(400, HaxeUIScreen.instance.actualWidth * 0.98);
     }
 
-    public function onClose(?e)
+    private function onClose(btn)
     {
-        SceneManager.removeResizeHandler(resize);
+        //* Do nothing
     }
 
     private function eloOrdinalNumber(gamesCnt:Int, tc:TimeControlType):Float
@@ -71,7 +73,7 @@ class MiniProfile extends Dialog
     private function onChallengePressed(e)
     {
         hideDialog(null);
-        Dialogs.specifyChallengeParams(ChallengeParams.directChallengeParams(username));
+        Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.directChallengeParams(username)));
     }
 
     @:bind(toProfileBtn, MouseEvent.CLICK)
@@ -83,7 +85,7 @@ class MiniProfile extends Dialog
 
     public function new(username:String, data:MiniProfileData)
     {
-        super();
+        super(null, false);
         this.username = username;
 
         title = Dictionary.getPhrase(MINIPROFILE_DIALOG_TITLE(username));
@@ -122,8 +124,5 @@ class MiniProfile extends Dialog
 
         if (SceneManager.playerInGame())
             btnBar.disabled = true;
-
-        resize();
-        SceneManager.addResizeHandler(resize);
     }
 }

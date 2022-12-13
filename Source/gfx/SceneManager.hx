@@ -121,8 +121,6 @@ class SceneManager
 
             for (handler in resizeHandlers)
                 handler();
-
-            Dialogs.onScreenResized();
         }
         else if (resizeTimeout == null)
             resizeTimeout = Timer.delay(onDelayedResizeTimerFired, Math.ceil(100 - msSinceLastResize));

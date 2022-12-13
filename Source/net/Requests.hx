@@ -1,5 +1,6 @@
 package net;
 
+import gfx.profile.complex_components.MiniProfile;
 import net.shared.utils.Build;
 import net.shared.dataobj.GreetingResponseData;
 import net.shared.dataobj.Greeting;
@@ -159,7 +160,7 @@ class Requests
         switch event
         {
             case MiniProfile(data):
-                Dialogs.miniProfile(login, data);
+                Dialogs.getQueue().add(new MiniProfile(login, data));
             case PlayerNotFound:
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:

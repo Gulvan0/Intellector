@@ -11,7 +11,7 @@ class ChallengeData
 
     public function toString() 
     {
-        return 'ChallengeData {\nID: $id\nSerialized params: $serializedParams\nOwner: $ownerLogin (${serialize(ownerELO)})\n}';
+        return 'ChallengeData(ID=$id, Owner=$ownerLogin)';
     }
 
     public function new()

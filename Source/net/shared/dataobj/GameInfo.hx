@@ -15,7 +15,7 @@ class GameInfo
 
     public function toString():String
     {
-        return 'GameInfo {\nID: $id\nLog:\n$log}';    
+        return 'GameInfo(ID=$id)';    
     }
 
     public function new()

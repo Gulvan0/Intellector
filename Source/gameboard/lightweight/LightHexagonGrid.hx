@@ -33,7 +33,7 @@ class LightHexagonGrid extends Shape
         var rationalStep:Float = hexHalfSide;
         var irrationalStep:Float = rationalStep * Math.sqrt(3);
 
-        graphics.lineStyle(MathUtils.scaleLike(3, 40, hexSideLength), Colors.border);
+        graphics.lineStyle(Math.min(MathUtils.scaleLike(3, 40, hexSideLength), 1), Colors.border);
 
         var x:Float = hexHalfWidth;
         var y:Float = hexHalfHeight;

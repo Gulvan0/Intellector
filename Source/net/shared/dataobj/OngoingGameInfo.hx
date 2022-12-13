@@ -17,7 +17,7 @@ class OngoingGameInfo
 
     public function toString():String 
     {
-        return 'OngoingGameInfo {\nid: $id\ntimeData: $timeData\ncurrentLog:\n$currentLog}';
+        return 'OngoingGameInfo(ID=$id, $timeData)';
     }
 
     public function new()

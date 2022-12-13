@@ -1,5 +1,7 @@
 package tests;
 
+import gfx.popups.IncomingChallengeDialog;
+import gfx.profile.complex_components.MiniProfile;
 import net.shared.dataobj.ChallengeData;
 import haxe.ui.containers.Grid;
 import gfx.menubar.ChallengeEntryRenderer;
@@ -168,7 +170,7 @@ class SimpleTests
 
 	public static function miniProfile()
 	{
-		Dialogs.miniProfile("gulvan", ProfileInfos.miniData1());
+		Dialogs.getQueue().add(new MiniProfile("gulvan", ProfileInfos.miniData1()));
 	}
 
 	public function playerLabel()
@@ -282,19 +284,19 @@ class SimpleTests
 	public static function newStudyDialog()
 	{
 		var mode:StudyParamsDialogMode = Create(Variants.variant1());
-		Dialogs.studyParams(mode);
+		Dialogs.getQueue().add(new StudyParamsDialog(mode));
 	}
 
 	public static function overwriteStudyDialog()
 	{
 		var mode:StudyParamsDialogMode = CreateOrOverwrite(Variants.variant1(), 23, StudyInfos.info1());
-		Dialogs.studyParams(mode);
+		Dialogs.getQueue().add(new StudyParamsDialog(mode));
 	}
 
 	public static function editStudyDialog()
 	{
 		var mode:StudyParamsDialogMode = Edit(111, StudyInfos.info1(), traceArg);
-		Dialogs.studyParams(mode);
+		Dialogs.getQueue().add(new StudyParamsDialog(mode));
 	}
 
 	public static function incomingChallengeDialog(i:Int)
@@ -313,7 +315,7 @@ class SimpleTests
 		challengeData.ownerLogin = "kaz";
 		challengeData.ownerELO = Normal(1345);
 
-		Dialogs.incomingChallenge(challengeData);
+		Dialogs.getQueue().add(new IncomingChallengeDialog(challengeData, ()->{}));
 	}
 
 	public static function challengeEntryRenderer(i:Int) 

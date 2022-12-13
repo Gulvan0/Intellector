@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import gfx.popups.StudyParamsDialog;
 import tests.SimpleTests;
 import haxe.ds.BalancedTree;
 import dict.Dictionary;
@@ -59,7 +60,7 @@ class StudiesTab extends ScrollView
 
     private function onEditStudyRequested(id:Int)
     {
-        Dialogs.studyParams(Edit(id, loadedStudies.get(id), onStudyEdited.bind(id)));
+		Dialogs.getQueue().add(new StudyParamsDialog(Edit(id, loadedStudies.get(id), onStudyEdited.bind(id))));
     }
 
     private function onStudyEdited(id:Int, newParams:StudyInfo)

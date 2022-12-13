@@ -13,7 +13,7 @@ class TimeReservesData
 
     public function toString():String 
     {
-        return 'TimeReservesData {\n whiteSeconds: $whiteSeconds\n blackSeconds: $blackSeconds\n timestamp:$timestamp\n}';
+        return 'TimeReservesData(whiteSeconds=$whiteSeconds, blackSeconds=$blackSeconds, timestamp=$timestamp)';
     }
 
     public function new(whiteSeconds:Float, blackSeconds:Float, timestamp:Float)

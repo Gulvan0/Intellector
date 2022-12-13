@@ -1,5 +1,6 @@
 package gfx.game;
 
+import haxe.ui.events.MouseEvent;
 import net.Requests;
 import haxe.ui.styles.Style;
 import utils.StringUtils;
@@ -91,7 +92,7 @@ class Chatbox extends VBox implements INetObserver
 
     private function appendMessage(authorRef:String, text:String, isNotFromSpectator:Bool) 
     {
-        var normalAuthorStyle:Style = {fontBold: true, fontItalic: !isNotFromSpectator, pointerEvents: 'true'};
+        var normalAuthorStyle:Style = {fontBold: true, fontItalic: !isNotFromSpectator, pointerEvents: 'true', backgroundColor: 0, backgroundOpacity: 0, cursor: 'pointer'};
         var hoverAuthorStyle:Style = normalAuthorStyle.clone();
         hoverAuthorStyle.color = 0x428fd8;
 
@@ -146,6 +147,12 @@ class Chatbox extends VBox implements INetObserver
                 send();
     }
 
+    @:bind(sendBtn, MouseEvent.CLICK)
+    private function onSendBtnPressed(e)
+    {
+        send();
+    }
+
     private function send() 
     {
         var ownRef:String = LoginManager.getRef();
@@ -166,6 +173,7 @@ class Chatbox extends VBox implements INetObserver
     private function onGameEnded(outcome:Outcome) 
     {
         messageInput.disabled = true;
+        sendBtn.disabled = true;
         removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
         appendLog(dict.Utils.chatboxGameOverMessage(outcome));
     }
@@ -209,7 +217,10 @@ class Chatbox extends VBox implements INetObserver
         if (LoginManager.isLogged())
             addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
         else
+        {
             messageInput.disabled = true;
+            sendBtn.disabled = true;
+        }
     }
 
     public function new() 

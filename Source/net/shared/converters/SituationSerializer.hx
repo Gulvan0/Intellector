@@ -38,7 +38,7 @@ class SituationSerializer
             var pieceType:Null<PieceType> = pieceByLetter(sip.charAt(ci + 1));
             var pieceColor:PieceColor = exclamationMarkPassed? Black : White;
 
-            if (pieceType != null)
+            if (pieceType == null)
                 return null; //Invalid PieceType code
             else
             {

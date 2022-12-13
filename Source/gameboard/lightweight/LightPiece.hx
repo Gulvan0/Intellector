@@ -14,7 +14,7 @@ class LightPiece extends Shape
 
         var svg:SVG = AssetManager.pieces[type][color];
 
-        var scale:Float = (Hexagon.sideToHeight(hexSideLength) * 0.85 / svg.data.height) * Piece.pieceRelativeScale(type);
+        var scale:Float = (Hexagon.sideToHeight(hexSideLength) * 0.85 / svg.data.height) * AssetManager.pieceRelativeScale(type);
 
         var targetWidth:Int = Math.round(svg.data.width * scale);
         var targetHeight:Int = Math.round(svg.data.height * scale);

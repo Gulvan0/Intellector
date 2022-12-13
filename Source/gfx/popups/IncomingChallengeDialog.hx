@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.basic_components.BaseDialog;
 import net.shared.dataobj.ChallengeData;
 import haxe.ui.tooltips.ToolTipOptions;
 import gfx.basic_components.AnnotatedImage;
@@ -16,18 +17,19 @@ import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/popups/incoming_challenge_popup.xml'))
-class IncomingChallengeDialog extends Dialog
+class IncomingChallengeDialog extends BaseDialog
 {
     private var challengeID:Int;
+    private var additionalCloseCallback:Void->Void;
 
     private function resize()
     {
         width = Math.min(350, HaxeUIScreen.instance.actualWidth * 0.98);
     }
 
-    public function onClose(?e)
+    private function onClose(btn)
     {
-        SceneManager.removeResizeHandler(resize);
+        additionalCloseCallback();
     }
 
     @:bind(acceptBtn, MouseEvent.CLICK)
@@ -44,11 +46,13 @@ class IncomingChallengeDialog extends Dialog
         hideDialog(null);
     }
 
-    public function new(data:ChallengeData)
+    public function new(data:ChallengeData, additionalCloseCallback:Void->Void)
     {
-        super();
+        super(RemovedOnGameStarted, false);
+
         this.closable = false;
         this.challengeID = data.id;
+        this.additionalCloseCallback = additionalCloseCallback;
 
         var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
         
@@ -81,8 +85,5 @@ class IncomingChallengeDialog extends Dialog
         }
         else
             customStartPosIcon.hidden = true;
-
-        resize();
-        SceneManager.addResizeHandler(resize);
     }
 }

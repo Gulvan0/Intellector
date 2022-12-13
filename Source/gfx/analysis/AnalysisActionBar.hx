@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import haxe.ui.components.Button;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
 import dict.Dictionary;
@@ -7,7 +8,7 @@ import dict.Dictionary;
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/analysis/action_bar.xml"))
 class AnalysisActionBar extends VBox implements IAnalysisPeripheralEventObserver
 {
-    public var eventHandler:PeripheralEvent->Void;
+    private var eventHandler:PeripheralEvent->Void;
 
     public function handleAnalysisPeripheralEvent(event:PeripheralEvent)
     {
@@ -46,9 +47,41 @@ class AnalysisActionBar extends VBox implements IAnalysisPeripheralEventObserver
     {
         eventHandler(PlayFromHereRequested);
     }
+    
+    @:bind(prevMoveBtn, MouseEvent.CLICK)
+    private function onPrevPressed(e)
+    {
+        eventHandler(ScrollBtnPressed(Prev));
+    }
+    
+    @:bind(nextMoveBtn, MouseEvent.CLICK)
+    private function onNextPressed(e)
+    {
+        eventHandler(ScrollBtnPressed(Next));
+    }
+
+    public function init(compact:Bool, eventHandler:PeripheralEvent->Void)
+    {
+        this.eventHandler = eventHandler;
+        
+        var shownButtons:Array<Button> = [changeOrientationBtn, editPositionBtn, shareBtn, playFromPosBtn];
+
+        if (compact)
+        {
+            shownButtons.push(prevMoveBtn);
+            shownButtons.push(nextMoveBtn);
+        }
+
+        var btnWidth:Float = 100 / shownButtons.length;
+        for (btn in shownButtons)
+        {
+            btn.hidden = false;
+            btn.percentWidth = btnWidth;
+        }
+    }
 
     public function new() 
     {
-        super();    
+        super();
     }
 }

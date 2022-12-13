@@ -23,7 +23,9 @@ class Url
 
     public static function setPathByScreen(type:ScreenType)
     {
-        setPath(getURLPath(type), Utils.getScreenTitle(type));
+        var newPath:Null<String> = getURLPath(type);
+        if (newPath != null)
+            setPath(newPath, Utils.getScreenTitle(type));
     }
 
     private static function setPath(path:String, ?title:String)
@@ -80,16 +82,16 @@ class Url
             return Browser.window.location.href;
     }
 
-    private static function getURLPath(type:ScreenType):String
+    private static function getURLPath(type:ScreenType):Null<String>
     {
         return switch type 
         {
             case MainMenu: "home";
             case Analysis(_, _, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
-            case LanguageSelectIntro(_): "";
+            case LanguageSelectIntro(_): null;
             case LiveGame(gameID, _): 'live/$gameID';
             case PlayerProfile(ownerLogin, _): 'player/$ownerLogin';
-            case ChallengeJoining(data): 'join/${data.ownerLogin}';
+            case ChallengeJoining(data): 'join/${data.id}';
         }
     }
 
@@ -100,6 +102,6 @@ class Url
 
     private static function basepath():String
     {
-        return Browser.location.pathname.split("/").slice(0, 2).join("/") + "/";
+        return Browser.location.pathname.appendIfMissing("/");
     }
 }

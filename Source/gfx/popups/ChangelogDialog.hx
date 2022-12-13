@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.basic_components.BaseDialog;
 import net.shared.utils.MathUtils;
 import haxe.ui.containers.dialogs.Dialog;
 import utils.Changelog;
@@ -7,7 +8,7 @@ import dict.Dictionary;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/popups/changelog_popup.xml'))
-class ChangelogDialog extends Dialog
+class ChangelogDialog extends BaseDialog
 {
     private function resize()
     {
@@ -16,15 +17,13 @@ class ChangelogDialog extends Dialog
         changesLabel.customStyle = {fontSize: MathUtils.clamp(0.013 * HaxeUIScreen.instance.actualHeight, 12, 36)};
     }
 
-    public function onClose(?e)
+    private function onClose(btn)
     {
-        SceneManager.removeResizeHandler(resize);
+        //* Do nothing
     }
 
     public function new()
     {
-        super();
-        SceneManager.addResizeHandler(resize);
-        resize();
+        super(null, false);
     }
 }

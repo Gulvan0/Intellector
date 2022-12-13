@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.basic_components.BaseDialog;
 import browser.CredentialCookies;
 import net.Requests;
 import utils.StringUtils;
@@ -8,17 +9,32 @@ import dict.Dictionary;
 import haxe.ui.containers.dialogs.Dialog;
 
 @:build(haxe.ui.macros.ComponentMacros.build("Assets/layouts/popups/login_popup.xml"))
-class LogIn extends Dialog 
+class LogIn extends BaseDialog 
 {
-    public function new() 
+    private var onLoggedIn:Void->Void;
+
+    public function new(?onLoggedIn:Void->Void) 
     {
-        super();
+        super(null, true);
+        this.onLoggedIn = onLoggedIn;
+
         buttons = DialogButton.CANCEL | DialogButton.OK;
         if (CredentialCookies.hasLoginDetails())
         {
             signInUsernameField.text = CredentialCookies.getLogin();
             signInPasswordField.text = CredentialCookies.getPassword();
         }
+    }
+
+    private function resize()
+    {
+        //* Do nothing
+    }
+
+    private function onClose(button)
+    {
+        if (onLoggedIn != null && button == DialogButton.OK)
+            onLoggedIn();
     }
     
     public override function validateDialog(button:DialogButton, fn:Bool->Void) 

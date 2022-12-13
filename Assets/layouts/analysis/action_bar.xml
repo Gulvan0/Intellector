@@ -21,9 +21,11 @@
         }
     </style>
     <button-bar id="btnBar" width="100%" toggle="false">
-        <button id="changeOrientationBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="25%" height="36px" icon="assets/symbols/analysis/flip.svg" styleName="analysis-actionbar-button"/>
-        <button id="editPositionBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SET_POSITION_BTN_TOOLTIP)}" width="25%" height="36px" icon="assets/symbols/common/edit.svg" styleName="analysis-actionbar-button"/>
-        <button id="shareBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SHARE_BTN_TOOLTIP)}" width="25%" height="36px" icon="assets/symbols/common/share.svg" styleName="analysis-actionbar-button"/>
-        <button id="playFromPosBtn" tooltip="${Dictionary.getPhrase(PLAY_FROM_POS_BTN_TOOLTIP)}" width="25%" height="36px" icon="assets/symbols/common/play_from_pos.svg" styleName="analysis-actionbar-button"/>
+        <button id="changeOrientationBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" hidden="true" height="36px" icon="assets/symbols/analysis/flip.svg" styleName="analysis-actionbar-button"/>
+        <button id="editPositionBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SET_POSITION_BTN_TOOLTIP)}" hidden="true" height="36px" icon="assets/symbols/common/edit.svg" styleName="analysis-actionbar-button"/>
+        <button id="shareBtn" tooltip="${Dictionary.getPhrase(ANALYSIS_SHARE_BTN_TOOLTIP)}" hidden="true" height="36px" icon="assets/symbols/common/share.svg" styleName="analysis-actionbar-button"/>
+        <button id="playFromPosBtn" tooltip="${Dictionary.getPhrase(PLAY_FROM_POS_BTN_TOOLTIP)}" hidden="true" height="36px" icon="assets/symbols/common/play_from_pos.svg" styleName="analysis-actionbar-button"/>
+        <button id="prevMoveBtn" hidden="true" height="36px" icon="assets/symbols/common/prev.svg" styleName="analysis-actionbar-button"/>
+        <button id="nextMoveBtn" hidden="true" height="36px" icon="assets/symbols/common/next.svg" styleName="analysis-actionbar-button"/>
     </button-bar>
 </vbox>

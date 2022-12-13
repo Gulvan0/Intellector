@@ -73,11 +73,11 @@ class PositionEditor extends VBox implements IGameBoardObserver implements IAnal
                     icon.width = iconMaxSide;
                     icon.height = iconMaxSide;
                 case Set(Progressor, color):
-                    icon.width = Piece.pieceRelativeScale(Progressor) * iconMaxSide;
-                    icon.height = icon.width / Piece.pieceAspectRatio(Progressor, color);
+                    icon.width = AssetManager.pieceRelativeScale(Progressor) * iconMaxSide;
+                    icon.height = icon.width / AssetManager.pieceAspectRatio(Progressor, color);
                 case Set(type, color):
-                    icon.height = Piece.pieceRelativeScale(type) * iconMaxSide;
-                    icon.width = icon.height * Piece.pieceAspectRatio(type, color);
+                    icon.height = AssetManager.pieceRelativeScale(type) * iconMaxSide;
+                    icon.width = icon.height * AssetManager.pieceAspectRatio(type, color);
             }
         }
 
@@ -106,9 +106,10 @@ class PositionEditor extends VBox implements IGameBoardObserver implements IAnal
     {
         var deserializedSituation:Null<Situation> = null;
         var response:Null<String> = Browser.window.prompt(Dictionary.getPhrase(ANALYSIS_INPUT_SIP_PROMPT_TEXT));
+        
         if (response != null)
             deserializedSituation = Situation.deserialize(response);
-       
+        
         if (deserializedSituation != null)
         {
             setTurnColor(deserializedSituation.turnColor);

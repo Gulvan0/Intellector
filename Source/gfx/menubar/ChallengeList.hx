@@ -113,8 +113,10 @@ class ChallengeList extends Menu
 
     public function removeEntriesByPlayer(login:String)
     {
-        for (id in idsByOwnerLogin.get(login.toLowerCase()))
-            removeEntryByID(id);
+        var playerIDs:Null<Array<Int>> = idsByOwnerLogin.get(login.toLowerCase());
+        if (playerIDs != null)
+            for (id in playerIDs.copy())
+                removeEntryByID(id);
     }
 
     public function removeOwnEntries()

@@ -11,7 +11,7 @@ class StudyInfo
 
     public function toString():String 
     {
-        return 'StudyInfo {\n name: $name\n description: $description\n tags:$tags\n publicity:$publicity\n keyPositionSIP:$keyPositionSIP\n variantStr:$variantStr\n}';
+        return 'StudyInfo(Name=$name)';
     }
 
     public function new()

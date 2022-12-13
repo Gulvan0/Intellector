@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.basic_components.BaseDialog;
 import dict.Language;
 import js.Browser;
 import haxe.ui.components.SectionHeader;
@@ -14,7 +15,7 @@ import Preferences.BranchingTabType;
 import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/popups/settings_popup.xml'))
-class Settings extends Dialog
+class Settings extends BaseDialog
 {
     private var oldLanguage:Language;
 
@@ -40,24 +41,15 @@ class Settings extends Dialog
         }
     }
 
-    public function onClose(?e)
+    private function onClose(button)
     {
         if (Preferences.language.get() != oldLanguage)
             Browser.location.reload();
-        else
-            SceneManager.removeResizeHandler(resize);
-    }
-
-    private override function onReady()
-    {
-        super.onReady();
-        resize();
-        SceneManager.addResizeHandler(resize);
     }
 
     public function new()
     {
-        super();
+        super(null, false);
 
         oldLanguage = Preferences.language.get();
         switch oldLanguage

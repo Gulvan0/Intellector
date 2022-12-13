@@ -43,26 +43,12 @@ class Piece extends Sprite
         graphics.clear();
         var svg:SVG = AssetManager.pieces[type][color];
 
-        var scale:Float = (Hexagon.sideToHeight(hexSideLength) * 0.85 / svg.data.height) * pieceRelativeScale(type);
+        var scale:Float = (Hexagon.sideToHeight(hexSideLength) * 0.85 / svg.data.height) * AssetManager.pieceRelativeScale(type);
 
         var targetWidth:Int = Math.round(svg.data.width * scale);
         var targetHeight:Int = Math.round(svg.data.height * scale);
         
         svg.render(graphics, -targetWidth/2, -targetHeight/2, targetWidth, targetHeight);
-    }
-
-    public static function pieceAspectRatio(type:PieceType, color:PieceColor):Float
-    {
-        return AssetManager.pieces[type][color].data.width / AssetManager.pieces[type][color].data.height;
-    }
-
-    public static function pieceRelativeScale(type:PieceType):Float
-    {
-        return switch type {
-            case Progressor: 0.7;
-            case Liberator, Defensor: 0.9;
-            default: 1;
-        }
     }
 
     public function new(type:PieceType, color:PieceColor, hexSideLength:Float) 
