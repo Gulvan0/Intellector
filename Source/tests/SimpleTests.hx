@@ -1,5 +1,6 @@
 package tests;
 
+import gfx.profile.data.StudyData;
 import gfx.popups.IncomingChallengeDialog;
 import gfx.profile.complex_components.MiniProfile;
 import net.shared.dataobj.ChallengeData;
@@ -379,11 +380,11 @@ class SimpleTests
 
 	public static function simpleAnalysis()
 	{
-		SceneManager.toScreen(Analysis(Variants.variant1().serialize(), 0, null, null));
+		SceneManager.toScreen(Analysis(Variants.variant1().serialize(), 0, null));
 	}
 
 	public static function studyAnalysis()
 	{
-		SceneManager.toScreen(Analysis(Variants.variant1().serialize(), 0, 111, StudyInfos.info1()));
+		SceneManager.toScreen(Analysis(Variants.variant1().serialize(), 0, new StudyData(111, LoginManager.getLogin(), StudyInfos.info1())));
 	}
 }

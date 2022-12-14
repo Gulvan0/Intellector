@@ -87,7 +87,7 @@ class Url
         return switch type 
         {
             case MainMenu: "home";
-            case Analysis(_, _, exploredStudyID, _): exploredStudyID == null? "analysis" : 'study/$exploredStudyID';
+            case Analysis(_, _, exploredStudyData): exploredStudyData == null? "analysis" : 'study/${exploredStudyData.id}';
             case LanguageSelectIntro(_): null;
             case LiveGame(gameID, _): 'live/$gameID';
             case PlayerProfile(ownerLogin, _): 'player/$ownerLogin';

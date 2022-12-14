@@ -1,5 +1,6 @@
 package gfx.profile.simple_components;
 
+import gameboard.lightweight.LighttBoard.LightBoard;
 import net.shared.dataobj.StudyInfo;
 import gfx.basic_components.BoardWrapper;
 import gameboard.Board;
@@ -54,18 +55,13 @@ class StudyWidget extends ItemRenderer
 
     private function reloadBoard(keyPositionSIP:String) 
     {
-        boardContainer.removeAllComponents();
+        boardContainer.removeChildren();
 
         var keySituation:Situation = Situation.deserialize(keyPositionSIP);
-        var board:Board = new Board(keySituation, keySituation.turnColor, 40, None);
-        var wrapper:BoardWrapper = new BoardWrapper(board, boardContainer);
-
-        wrapper.percentWidth = 100;
-        wrapper.maxPercentHeight = 100;
-        wrapper.horizontalAlign = 'center';
-        wrapper.verticalAlign = 'center';
-
-        boardContainer.addComponent(wrapper);
+        var board:LightBoard = new LightBoard(keySituation, keySituation.turnColor, 10, true);
+        board.x = (boardContainer.width - board.width) / 2;
+        board.y = (boardContainer.height - board.height) / 2;
+        boardContainer.addChild(board);
     }
 
     private override function onDataChanged(data:Dynamic)

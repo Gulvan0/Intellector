@@ -49,7 +49,10 @@ class VariantOutline extends TreeView implements IVariantView
         if (selectedNodePath != null)
             selectBranchUnsafe(variant.extendPathLeftmost(selectedNodePath), selectedNodePath.length);
         else
-            selectBranchUnsafe(variant.extendPathLeftmost([]), 0);
+        {
+            var branch:VariantPath = variant.getLastMainLineDescendantPath([]);
+            selectBranchUnsafe(branch, branch.length);
+        }
 
         this.variantRef = variant;
     }

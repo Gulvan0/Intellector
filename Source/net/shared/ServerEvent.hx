@@ -57,7 +57,7 @@ enum ServerEvent
     TakebackAccepted(color:PieceColor);
     TakebackDeclined(color:PieceColor);
 
-    SingleStudy(info:StudyInfo); //Answer to GetStudy
+    SingleStudy(info:StudyInfo, ownerLogin:String); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy
     StudyCreated(studyID:Int, info:StudyInfo); //Answer to CreateStudy
     MiniProfile(data:MiniProfileData); //Answer to GetPlayerProfile

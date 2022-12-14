@@ -1,5 +1,6 @@
 package gfx.common;
 
+import gfx.profile.data.StudyData;
 import gfx.popups.StudyParamsDialog;
 import net.shared.dataobj.StudyInfo;
 import net.shared.board.RawPly;
@@ -191,7 +192,7 @@ class ShareDialog extends Dialog
         shareGameTab.init(gameLink, pin, startingSituation, plySequence);
     }
 
-    public function initInAnalysis(situation:Situation, orientation:PieceColor, variant:Variant, ?oldStudyID:Int, ?oldStudyInfo:StudyInfo)
+    public function initInAnalysis(situation:Situation, orientation:PieceColor, variant:Variant, ?exploredStudyData:StudyData)
     {
         init(situation, orientation);
         tabView.removeComponent(shareGameTab);
@@ -199,8 +200,8 @@ class ShareDialog extends Dialog
         if (Networker.isConnectedToServer())
         {
             var studyParamsDialogMode:StudyParamsDialogMode;
-            if (oldStudyID != null && oldStudyInfo != null)
-                studyParamsDialogMode = CreateOrOverwrite(variant, oldStudyID, oldStudyInfo);
+            if (exploredStudyData != null && LoginManager.isPlayer(exploredStudyData.ownerLogin))
+                studyParamsDialogMode = CreateOrOverwrite(variant, exploredStudyData.id, exploredStudyData.info);
             else
                 studyParamsDialogMode = Create(variant);
     

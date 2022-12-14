@@ -106,11 +106,11 @@ class Utils
         {
             case MainMenu: 
                 translations = ["Home", "Главная"];
-            case Analysis(_, _, exploredStudyID, exploredStudyInfo):
-                if (exploredStudyInfo != null)
+            case Analysis(_, _, exploredStudyData):
+                if (exploredStudyData != null)
                 {
-                    var shortenedName:String = StringUtils.shorten(exploredStudyInfo.name);
-                    translations = ['Study $shortenedName ($exploredStudyID) | Analysis Board', 'Студия $shortenedName ($exploredStudyID) | Доска анализа'];
+                    var shortenedName:String = StringUtils.shorten(exploredStudyData.info.name);
+                    translations = ['Study $shortenedName (${exploredStudyData.id}) | Analysis Board', 'Студия $shortenedName (${exploredStudyData.id}) | Доска анализа'];
                 }
                 else
                     translations = ["Analysis Board", "Доска анализа"];

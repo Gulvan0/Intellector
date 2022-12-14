@@ -43,7 +43,7 @@ class ScreenNavigator
 
 	public static function toAnalysis() 
 	{
-		SceneManager.toScreen(Analysis(null, null, null, null));
+		SceneManager.toScreen(Analysis(null, null, null));
 	}
 
 	private static function toOpenChallengeJoining(idStr:String) 

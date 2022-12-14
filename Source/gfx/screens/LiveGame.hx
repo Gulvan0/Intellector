@@ -227,7 +227,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
                 var params:ChallengeParams = ChallengeParams.playFromPosParams(board.shownSituation);
                 Dialogs.getQueue().add(new ChallengeParamsDialog(params, true));
             case Analyze:
-                SceneManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null, null));
+                SceneManager.toScreen(Analysis(getSerializedVariant(), board.plyHistory.pointer, null));
             case AcceptDraw:
                 Networker.emitEvent(AcceptDraw);
             case DeclineDraw:

@@ -1,5 +1,6 @@
 package gfx;
 
+import gfx.profile.data.StudyData;
 import net.shared.dataobj.ViewedScreen;
 import haxe.ui.events.UIEvent;
 import gfx.game.LiveGameConstructor;
@@ -81,7 +82,7 @@ class SceneManager
         return switch type 
         {
             case MainMenu: MainMenu;
-            case Analysis(_, _, _, _): Analysis;
+            case Analysis(_, _, _): Analysis;
             case LanguageSelectIntro(_): Other;
             case LiveGame(gameID, _): Game(gameID);
             case PlayerProfile(ownerLogin, _): Profile(ownerLogin);
@@ -132,12 +133,12 @@ class SceneManager
         onResized();
     }
 
-    public static function updateAnalysisStudyInfo(studyID:Null<Int>, studyInfo:Null<StudyInfo>)
+    public static function updateAnalysisStudyInfo(studyData:Null<StudyData>)
     {
         switch currentScreenType 
         {
-            case Analysis(initialVariantStr, selectedMainlineMove, _, _):
-                var newScreenType:ScreenType = Analysis(initialVariantStr, selectedMainlineMove, studyID, studyInfo);
+            case Analysis(initialVariantStr, selectedMainlineMove, _):
+                var newScreenType:ScreenType = Analysis(initialVariantStr, selectedMainlineMove, studyData);
                 Url.setPathByScreen(newScreenType);
                 currentScreenType = newScreenType;
             default:

@@ -1,5 +1,6 @@
 package net;
 
+import gfx.profile.data.StudyData;
 import gfx.profile.complex_components.MiniProfile;
 import net.shared.utils.Build;
 import net.shared.dataobj.GreetingResponseData;
@@ -243,12 +244,12 @@ class Requests
         Networker.emitEvent(GetStudy(id));
     }
 
-    private static function getStudy_handler(id:Int,  event:ServerEvent) 
+    private static function getStudy_handler(id:Int, event:ServerEvent) 
     {
         switch event
         {
-            case SingleStudy(info):
-                SceneManager.toScreen(Analysis(info.variantStr, 0, id, info));
+            case SingleStudy(info, ownerLogin):
+                SceneManager.toScreen(Analysis(info.variantStr, 0, new StudyData(id, ownerLogin, info)));
             case StudyNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_STUDY_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
@@ -269,7 +270,7 @@ class Requests
         switch event
         {
             case StudyCreated(id, info):
-                SceneManager.updateAnalysisStudyInfo(id, info);
+                SceneManager.updateAnalysisStudyInfo(new StudyData(id, LoginManager.getLogin(), info));
             default:
                 return false;
         }

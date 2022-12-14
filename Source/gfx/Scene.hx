@@ -265,7 +265,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onAnalysisBoardPressed(e)
     {
-        SceneManager.toScreen(Analysis(null, null, null, null));
+        SceneManager.toScreen(Analysis(null, null, null));
     }
 
     private function onPlayerProfilePressed(e)

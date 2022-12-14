@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import gfx.profile.data.StudyData;
 import gfx.popups.StudyParamsDialog;
 import tests.SimpleTests;
 import haxe.ds.BalancedTree;
@@ -55,7 +56,7 @@ class StudiesTab extends ScrollView
     private function onStudyClicked(id:Int)
     {
         var info:StudyInfo = loadedStudies.get(id);
-        SceneManager.toScreen(Analysis(info.variantStr, null, id, info));
+        SceneManager.toScreen(Analysis(info.variantStr, null, new StudyData(id, profileOwner, info)));
     }
 
     private function onEditStudyRequested(id:Int)

@@ -47,7 +47,7 @@ class Screen extends Component
         {
             case MainMenu:
                 new MainMenu();
-            case Analysis(initialVariantStr, selectedMainlineMove, _, _):
+            case Analysis(initialVariantStr, selectedMainlineMove, _):
                 new Analysis(initialVariantStr, selectedMainlineMove);
             case LanguageSelectIntro(languageReadyCallback):
                 new LanguageSelectIntro(languageReadyCallback);
