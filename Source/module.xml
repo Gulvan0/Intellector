@@ -35,6 +35,12 @@
                 .dropdown-popup {
                     filter: none;
                 }
+                .dropdown-popup .item-renderer:selected {
+                    background-color: #ddddf1
+                }
+                .dropdown-popup .item-renderer:selected .label {
+                    color: #666666
+                }
             </style>
         </global>
     </themes>
