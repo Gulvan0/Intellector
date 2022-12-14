@@ -44,10 +44,14 @@ class PastGamesTab extends VBox
 
     private function onScrolled()
     {
-        if (hasNext && canLoad && list.vscrollPos >= list.vscrollMax) 
+        if (hasNext && canLoad) 
         {
-            canLoad = false;
-            Requests.getPlayerPastGames(profileOwnerLogin, list.loadedGamesCount, GAMES_PAGE_SIZE, activeTimeControlFilter, onGamesLoaded);
+            var loadedCnt:Int = list.loadedGamesCount;
+            if (list.vscrollPos * loadedCnt >= list.vscrollMax * (loadedCnt - 1))
+            {
+                canLoad = false;
+                Requests.getPlayerPastGames(profileOwnerLogin, loadedCnt, GAMES_PAGE_SIZE, activeTimeControlFilter, onGamesLoaded);
+            }
         }
     }
 

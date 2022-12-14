@@ -23,7 +23,7 @@ class LightHexagonGrid extends Shape
             return i % 2 == 1;
     }
 
-    public function new(hexSideLength:Float) 
+    public function new(hexSideLength:Float, useHinting:Bool) 
     {
         super();
         
@@ -33,14 +33,15 @@ class LightHexagonGrid extends Shape
         var rationalStep:Float = hexHalfSide;
         var irrationalStep:Float = rationalStep * Math.sqrt(3);
 
-        graphics.lineStyle(Math.min(MathUtils.scaleLike(3, 40, hexSideLength), 1), Colors.border);
-
         var x:Float = hexHalfWidth;
         var y:Float = hexHalfHeight;
         var upper:Bool = true;
 
+        var thickness:Float = MathUtils.scaleLike(3, 40, hexSideLength);
+
         for (s in HexCoords.enumerateScalar())
         {
+            graphics.lineStyle(thickness, Colors.border, 1, useHinting);
             graphics.beginFill(Colors.hexFill(Normal, isDark(s)));
             graphics.moveTo(x-rationalStep, y-irrationalStep);
             graphics.lineTo(x+rationalStep, y-irrationalStep);

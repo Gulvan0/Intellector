@@ -79,8 +79,9 @@ class GameWidget extends ItemRenderer
     private function loadBoard(shownSituation:Situation, watchedColor:Null<PieceColor>) 
     {
         var orientationColor:PieceColor = watchedColor == null? shownSituation.turnColor : watchedColor;
-        var board:LightBoard = new LightBoard(shownSituation, orientationColor, 9.14);
-
+        var board:LightBoard = new LightBoard(shownSituation, orientationColor, 10, true);
+        board.x = (boardContainer.width - board.width) / 2;
+        board.y = (boardContainer.height - board.height) / 2;
         boardContainer.addChild(board);
     }
 

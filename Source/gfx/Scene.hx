@@ -155,7 +155,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
     {
         switch event
         {
-            case GreetingResponse(Logged(_, _, ongoingFiniteGame, _)):
+            case GreetingResponse(Logged(_, _, _, ongoingFiniteGame, _)):
                 if (ongoingFiniteGame != null)
                     setIngameStatus(true);
             case LoginResult(ReconnectionNeeded(_, _)):

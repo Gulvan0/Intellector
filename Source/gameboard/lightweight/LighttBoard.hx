@@ -6,12 +6,12 @@ import openfl.display.Sprite;
 
 class LightBoard extends Sprite
 {
-    public function new(situation:Situation, orientation:PieceColor, hexSideLength:Float) 
+    public function new(situation:Situation, orientation:PieceColor, hexSideLength:Float, useHinting:Bool) 
     {
         super();
         cacheAsBitmap = true;
 
-        addChild(new LightHexagonGrid(hexSideLength));
+        addChild(new LightHexagonGrid(hexSideLength, useHinting));
         for (coords => pieceData in situation.collectPieces())
         {
             var i:Int = coords.i;

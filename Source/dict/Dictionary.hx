@@ -664,11 +664,11 @@ class Dictionary
             case OUTDATED_CLIENT_ERROR_TITLE:
                 return ["Outdated client", "Клиент устарел"];
             case OUTDATED_CLIENT_ERROR_TEXT:
-                return ["Outdated client. Try forceful reload (Ctrl+F5)", "Клиент устарел. Попробуйте перезагрузить страницу с очисткой кэша (Ctrl+F5)"];
+                return ["Outdated client. Try forceful reload (Ctrl+F5). If a problem persists, please contact the administrator (Telegram: @gulvan).", "Клиент устарел. Попробуйте перезагрузить страницу с очисткой кэша (Ctrl+F5). Если проблема сохраняется, пожалуйста, сообщите администратору (Telegram: @gulvan)."];
             case OUTDATED_SERVER_ERROR_TITLE:
                 return ["Outdated server", "Сервер устарел"];
             case OUTDATED_SERVER_ERROR_TEXT:
-                return ["Outdated server. Please contact the administrator", "Сервер устарел. Пожалуйста, уведомите администратора."];
+                return ["Outdated server. Please contact the administrator (Telegram: @gulvan).", "Сервер устарел. Пожалуйста, сообщите администратору (Telegram: @gulvan)."];
 
             case CLIPBOARD_ERROR_ALERT_TITLE:
                 return ["Clipboard Error", "Ошибка буфера обмена"];

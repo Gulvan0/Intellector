@@ -96,7 +96,6 @@ class Hexagon extends Sprite
         for (state in HexagonSelectionState.createAll())
         {
             sprites[state] = new Sprite();
-            sprites[state].cacheAsBitmap = true;
             if (state != Normal)
                 sprites[state].visible = false;
             addChild(sprites[state]);
