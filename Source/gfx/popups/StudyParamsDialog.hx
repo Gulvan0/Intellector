@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import gfx.profile.data.StudyData;
 import gfx.basic_components.BaseDialog;
 import gfx.ResponsiveToolbox.Dimension;
 import gfx.profile.complex_components.StudyFilterList;
@@ -93,7 +94,7 @@ class StudyParamsDialog extends BaseDialog
     {
         var info = constructStudyInfo();
         Networker.emitEvent(OverwriteStudy(oldStudyID, info));
-        SceneManager.updateAnalysisStudyInfo(oldStudyID, info);
+        SceneManager.updateAnalysisStudyInfo(new StudyData(oldStudyID, LoginManager.getLogin(), info));
         hideDialog(null);
     }
 
