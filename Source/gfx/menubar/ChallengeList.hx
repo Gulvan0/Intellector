@@ -15,7 +15,7 @@ class ChallengeList extends Menu
     public var flagIcon:ChallengeMenuIcon;
     private var menuShown:Bool = false;
 
-    private var indexByID:Map<Int, Int> = [];
+    private var entryDataByID:Map<Int, ChallengeEntryData> = [];
     private var idsByOwnerLogin:Map<String, Array<Int>> = [];
     private var ownIDs:Array<Int> = [];
 
@@ -48,13 +48,11 @@ class ChallengeList extends Menu
 
     public function appendEntry(data:ChallengeData)
     {
-        actualList.dataSource.add(new ChallengeEntryData(data, this));
+        var entryData = new ChallengeEntryData(data, this);
+        entryDataByID.set(entryData.id, entryData);
+        actualList.dataSource.add(entryData);
 
-        var newItemCount:Int = actualList.dataSource.size;
-
-        updateItemCount(newItemCount);
-
-        indexByID.set(data.id, newItemCount - 1);
+        updateItemCount(actualList.dataSource.size);
 
         if (!LoginManager.isPlayer(data.ownerLogin))
         {
@@ -77,22 +75,22 @@ class ChallengeList extends Menu
         flagIcon.clear();
         actualList.dataSource.clear();
         updateItemCount(0);
-        indexByID = [];
+        entryDataByID = [];
         idsByOwnerLogin = [];
         ownIDs = [];
     }
 
     public function removeEntryByID(id:Int)
     {
-        var index:Null<Int> = indexByID.get(id);
+        var data:Null<ChallengeEntryData> = entryDataByID.get(id);
 
-        if (index == null)
+        if (data == null)
             return;
 
-        actualList.dataSource.removeAt(index);
+        actualList.dataSource.remove(data);
         updateItemCount(actualList.dataSource.size);
 
-        indexByID.remove(id);
+        entryDataByID.remove(id);
 
         var isOwn:Bool = ownIDs.remove(id);
 
@@ -121,7 +119,7 @@ class ChallengeList extends Menu
 
     public function removeOwnEntries()
     {
-        for (id in ownIDs)
+        for (id in ownIDs.copy())
             removeEntryByID(id);
     }
 

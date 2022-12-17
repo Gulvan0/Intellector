@@ -85,7 +85,7 @@ class DialogQueue
 
     public function closeGroup(group:DialogGroup) 
     {
-        for (dialog in groupMap[group])
+        for (dialog in groupMap[group].copy())
             dialog.hideDialog(DialogButton.CANCEL);
     }
 
