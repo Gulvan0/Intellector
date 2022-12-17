@@ -5,6 +5,18 @@ import net.shared.converters.SituationSerializer;
 import net.shared.PieceColor;
 import net.shared.PieceType.letter as pieceLetter;
 
+class OccupiedHexData
+{
+    public final scalarCoord:Int;
+    public final piece:PieceData;
+
+    public function new(scalarCoord:Int, piece:PieceData) 
+    {
+        this.scalarCoord = scalarCoord;
+        this.piece = piece;
+    }
+}
+
 class Situation
 {
     public var pieces:PieceArrangement;
@@ -73,6 +85,26 @@ class Situation
         return map;
     }
 
+    /**
+        Always the same order of hexes, but the returned structure is less convenient
+    **/
+    public function collectPiecesStable():Array<OccupiedHexData>
+    {
+        var list:Array<OccupiedHexData> = [];
+
+        for (coord in HexCoords.enumerateScalar()) 
+        {
+            switch getS(coord) 
+            {
+                case Occupied(piece):
+                    list.push(new OccupiedHexData(coord, piece));
+                default:
+            }
+        }
+
+        return list;
+    }
+
     public function isDefaultStarting():Bool
     {
         return getHash() == defaultStartingHash;
@@ -82,11 +114,11 @@ class Situation
     {
         var hash:String = "";
 
-        for (coords => piece in collectPieces())
+        for (hexData in collectPiecesStable())
         {
-            hash += coords.toScalarCoord();
-            hash += pieceLetter(piece.type);
-            if (piece.color == Black)
+            hash += hexData.scalarCoord;
+            hash += pieceLetter(hexData.piece.type);
+            if (hexData.piece.color == Black)
                 hash += "!";
         }
 

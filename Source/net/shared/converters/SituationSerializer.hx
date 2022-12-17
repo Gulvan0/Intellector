@@ -60,13 +60,12 @@ class SituationSerializer
     public static function serialize(situation:Situation):String
     {
 		var playerPiecesStr:Map<PieceColor, String> = [White => '', Black => ''];
-
-        for (coords => piece in situation.collectPieces()) 
+        
+        for (hexData in situation.collectPiecesStable()) 
         {
-            var scalarCoord:Int = coords.toScalarCoord();
-            var pieceStr:String = String.fromCharCode(scalarCoord + 64) + pieceLetter(piece.type);
+            var pieceStr:String = String.fromCharCode(hexData.scalarCoord + 64) + pieceLetter(hexData.piece.type);
 
-            playerPiecesStr[piece.color] += pieceStr;
+            playerPiecesStr[hexData.piece.color] += pieceStr;
         }
 
         return colorLetter(situation.turnColor) + playerPiecesStr[White] + "!" + playerPiecesStr[Black];
