@@ -1,5 +1,6 @@
 package gfx.game;
 
+import net.shared.board.Situation;
 import net.shared.board.RawPly;
 import utils.SpecialChar;
 import net.shared.EloValue;
@@ -33,7 +34,7 @@ import net.shared.Outcome;
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/live/gameinfobox.xml'))
 class GameInfoBox extends Card implements IGameBoardObserver implements INetObserver
 {
-    private var openingTree:OpeningTree;
+    private var openingTree:Null<OpeningTree> = null;
     private var movesAfterTerminalOpeningNode:Int = 0;
 
     private var whitePlayerLabel:PlayerLabel;
@@ -83,6 +84,9 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     private function accountMove(ply:RawPly)
     {
+        if (openingTree == null)
+            return;
+
         if (!openingTree.currentNode.terminal)
         {
             openingTree.makeMove(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
@@ -94,6 +98,9 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     private function revertPlys(cnt:Int) 
     {
+        if (openingTree == null)
+            return;
+
         if (movesAfterTerminalOpeningNode < cnt)
         {
             openingTree.revertMoves(cnt - movesAfterTerminalOpeningNode);
@@ -177,7 +184,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         opponentsBox.addComponent(blackPlayerLabel);
     }
 
-    private function initNewGame(whiteRef:String, blackRef:String, playerElos:Null<Map<PieceColor, EloValue>>, timeControl:TimeControl, startDatetime:Date)
+    private function initNewGame(whiteRef:String, blackRef:String, playerElos:Null<Map<PieceColor, EloValue>>, timeControl:TimeControl, startingSituation:Situation, startDatetime:Date)
     {
         var tcType:TimeControlType = timeControl.getType();
 
@@ -190,8 +197,15 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         datetime.text = DateTools.format(startDatetime, "%d.%m.%Y %H:%M:%S");
         resolution.text = Utils.getResolution(null);
         fillOpponentsBox(whiteRef, blackRef, playerElos);
-        opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
+
+        if (startingSituation.isDefaultStarting())
+        {
+            this.openingTree = new OpeningTree();
+            opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+        }
+        else
+            opening.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);
     }
 
     private function initActualizedGame(parsedData:GameLogParserOutput)
@@ -206,11 +220,18 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
         fillOpponentsBox(parsedData.whiteRef, parsedData.blackRef, parsedData.elo);
         resolution.text = Utils.getResolution(parsedData.outcome);
-        opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
         timeControlIcon.resource = AssetManager.timeControlPath(tcType);
 
         if (parsedData.datetime != null)
             datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+
+        if (parsedData.startingSituation.isDefaultStarting())
+        {
+            this.openingTree = new OpeningTree();
+            opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
+        }
+        else
+            opening.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);
 
         for (ply in parsedData.movesPlayed)
             accountMove(ply);
@@ -233,12 +254,10 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     public function init(constructor:LiveGameConstructor)
     {
-        this.openingTree = new OpeningTree();
-
         switch constructor 
         {
-            case New(whiteRef, blackRef, playerElos, timeControl, _, startDatetime):
-                initNewGame(whiteRef, blackRef, playerElos, timeControl, startDatetime);
+            case New(whiteRef, blackRef, playerElos, timeControl, startingSituation, startDatetime):
+                initNewGame(whiteRef, blackRef, playerElos, timeControl, startingSituation, startDatetime);
             case Ongoing(parsedData, _, followedPlayerLogin):
                 initActualizedGame(parsedData);
                 if (followedPlayerLogin != null)
