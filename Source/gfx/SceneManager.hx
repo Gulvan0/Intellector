@@ -74,7 +74,8 @@ class SceneManager
         scene.toScreen(type);
         currentScreenType = type;
         Url.setPathByScreen(type);
-        Networker.emitEvent(PageUpdated(getPageByScreenType(type)));
+        if (Networker.isConnectedToServer())
+            Networker.emitEvent(PageUpdated(getPageByScreenType(type)));
     }
 
     private static function getPageByScreenType(type:ScreenType):ViewedScreen

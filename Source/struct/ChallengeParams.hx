@@ -9,7 +9,7 @@ enum ChallengeType
 {
     Public;
     ByLink;
-    Direct(calleeLogin:String);
+    Direct(calleeRef:String);
 }
 
 class ChallengeParams
@@ -49,10 +49,10 @@ class ChallengeParams
             return defaultParams();
     }
 
-    public static function directChallengeParams(calleeLogin:String):ChallengeParams
+    public static function directChallengeParams(calleeRef:String):ChallengeParams
     {
         var params:ChallengeParams = loadFromCookies();
-        params.type = Direct(calleeLogin);
+        params.type = Direct(calleeRef);
         return params;
     }
 
@@ -89,7 +89,7 @@ class ChallengeParams
         var typeStr = switch type {
             case Public: "p";
             case ByLink: "l";
-            case Direct(calleeLogin): calleeLogin;
+            case Direct(calleeRef): calleeRef;
         };
 
         var colorStr = switch acceptorColor {

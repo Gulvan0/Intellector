@@ -450,8 +450,11 @@ class Dictionary
 
             case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TITLE:
                 return ["Challenge sent!", "Вызов отправлен!"];
-            case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(opponentLogin):
-                return ['Your challenge has been successfully sent to $opponentLogin. You may cancel it at any time using the challenge menu at the top-right corner of your screen.', 'Вызов успешно отправлен игроку $opponentLogin. Чтобы отменить его, воспользуйтесь меню вызовов в правом верхнем углу экрана.'];
+            case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(opponentRef):
+                if (opponentRef.charAt(0) != "_")
+                    return ['Your challenge has been successfully sent to $opponentRef. You may cancel it at any time using the challenge menu at the top-right corner of your screen.', 'Вызов успешно отправлен игроку $opponentRef. Чтобы отменить его, воспользуйтесь меню вызовов в правом верхнем углу экрана.'];
+                else
+                    return ['Your challenge has been successfully sent. You may cancel it at any time using the challenge menu at the top-right corner of your screen.', 'Вызов успешно отправлен. Чтобы отменить его, воспользуйтесь меню вызовов в правом верхнем углу экрана.'];
             case SEND_OPEN_CHALLENGE_SUCCESS_DIALOG_TITLE:
                 return ["Challenge created!", "Вызов создан!"];
             case SEND_OPEN_CHALLENGE_SUCCESS_DIALOG_TEXT:

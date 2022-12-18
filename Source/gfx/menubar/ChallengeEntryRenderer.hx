@@ -74,8 +74,8 @@ class ChallengeEntryRenderer extends ItemRenderer
                 acceptBtn.hidden = true;
                 declineBtn.hidden = true;
 
-            case Direct(calleeLogin):
-                isIncoming = LoginManager.isPlayer(calleeLogin);
+            case Direct(calleeRef):
+                isIncoming = LoginManager.isPlayer(calleeRef);
 
                 secondRow.selectedIndex = 0;
 
@@ -87,7 +87,7 @@ class ChallengeEntryRenderer extends ItemRenderer
                 else
                 {
                     headerLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_HEADER_OUTGOING_CHALLENGE);
-                    fromToLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_TO_LINE_TEXT, [calleeLogin]);
+                    fromToLabel.text = Dictionary.getPhrase(MENUBAR_CHALLENGES_TO_LINE_TEXT, [Utils.playerRef(calleeRef)]);
                 }
 
                 acceptBtn.hidden = !isIncoming;

@@ -240,14 +240,14 @@ class Situation
 
     public inline function set(coords:HexCoords, hex:Hex, ?adjustToConsistency:Bool = true) 
     {
-        pieces.set(coords, hex);
         if (adjustToConsistency)
         {
             if (get(coords).type() == Intellector)
                 intellectorPos.remove(get(coords).color());
             if (hex.type() == Intellector)
                 intellectorPos.set(hex.color(), coords);
-        }  
+        }
+        pieces.set(coords, hex);  
     }
 
     public function copy(?newTurnColor:PieceColor):Situation

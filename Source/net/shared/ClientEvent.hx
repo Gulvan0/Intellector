@@ -14,7 +14,6 @@ enum ClientEvent
     AcceptChallenge(challengeID:Int); 
     DeclineDirectChallenge(challengeID:Int);
     Move(ply:RawPly); 
-    RequestTimeoutCheck; 
     Message(text:String); 
     SimpleRematch;
     Resign; 

@@ -154,7 +154,6 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         {
             removeEventListener(Event.ENTER_FRAME, updateTimeLeft);
             running = false;
-            Networker.emitEvent(RequestTimeoutCheck);
         }
 
         if (alertsEnabled)

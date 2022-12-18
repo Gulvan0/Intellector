@@ -326,12 +326,18 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         attachHandler(acceptTakebackBtn, AcceptTakeback, disableTakebackRequest);
         attachHandler(declineTakebackBtn, DeclineTakeback, disableTakebackRequest);
         attachHandler(addTimeBtn, AddTime);
-        attachHandler(rematchBtn, Rematch);
         attachHandler(shareBtn, Share);
         attachHandler(analyzeBtn, Analyze);
-        attachHandler(playFromPosBtn, PlayFromHere);
         attachHandler(prevMoveBtn, PrevMove);
         attachHandler(nextMoveBtn, NextMove);
+        attachHandler(rematchBtn, Rematch);
+        attachHandler(playFromPosBtn, PlayFromHere);
+
+        if (!LoginManager.isLogged())
+        {
+            rematchBtn.disabled = true;
+            playFromPosBtn.disabled = true;
+        }
     }
 
     public function new() 

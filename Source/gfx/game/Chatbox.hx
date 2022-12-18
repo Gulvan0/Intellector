@@ -92,6 +92,7 @@ class Chatbox extends VBox implements INetObserver
 
     private function appendMessage(authorRef:String, text:String, isNotFromSpectator:Bool) 
     {
+        var guestAuthorStyle:Style = {fontBold: true, fontItalic: !isNotFromSpectator};
         var normalAuthorStyle:Style = {fontBold: true, fontItalic: !isNotFromSpectator, pointerEvents: 'true', backgroundColor: 0, backgroundOpacity: 0, cursor: 'pointer'};
         var hoverAuthorStyle:Style = normalAuthorStyle.clone();
         hoverAuthorStyle.color = 0x428fd8;
@@ -99,18 +100,22 @@ class Chatbox extends VBox implements INetObserver
         var authorLabel:Label = new Label();
         authorLabel.percentWidth = 100;
         authorLabel.text = Utils.playerRef(authorRef);
-        authorLabel.customStyle = normalAuthorStyle;
 
-        authorLabel.onMouseOver = e -> {
-            authorLabel.customStyle = hoverAuthorStyle;
-        };
-        authorLabel.onMouseOut = e -> {
-            authorLabel.customStyle = normalAuthorStyle;
-        };
         if (authorRef.charAt(0) != "_")
+        {
+            authorLabel.customStyle = normalAuthorStyle;
+            authorLabel.onMouseOver = e -> {
+                authorLabel.customStyle = hoverAuthorStyle;
+            };
+            authorLabel.onMouseOut = e -> {
+                authorLabel.customStyle = normalAuthorStyle;
+            };
             authorLabel.onClick = e -> {
                 Requests.getMiniProfile(authorRef);
             };
+        }
+        else
+            authorLabel.customStyle = guestAuthorStyle;
 
         var textLabel:Label = new Label();
         textLabel.percentWidth = 100;
@@ -214,13 +219,7 @@ class Chatbox extends VBox implements INetObserver
                 addEventListener(Event.ADDED_TO_STAGE, actualize.bind(parsedData));
         }
 
-        if (LoginManager.isLogged())
-            addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-        else
-        {
-            messageInput.disabled = true;
-            sendBtn.disabled = true;
-        }
+        addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
     }
 
     public function new() 
