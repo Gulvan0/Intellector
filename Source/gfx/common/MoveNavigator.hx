@@ -117,6 +117,7 @@ class MoveNavigator extends PlyHistoryView
     {
         lastMovetableEntry = null;
         movetable.dataSource.clear();
+        updateScrollButtons();
     }
 
     private function scrollTo(relPos:Float)

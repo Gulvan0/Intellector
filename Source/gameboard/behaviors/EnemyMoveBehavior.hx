@@ -94,10 +94,10 @@ class EnemyMoveBehavior implements IBehavior
                 resetPremoves();
                 boardInstance.revertPlys(plysToUndo);
                 if (plysToUndo % 2 == 1)
+                {
                     boardInstance.behavior = new PlayerMoveBehavior(playerColor);
-
-                if (!Preferences.premoveEnabled.get() && plysToUndo % 2 == 0)
-                    boardInstance.state = new StubState();
+                    boardInstance.state = new NeutralState();
+                }
                 
             case GameEnded(_, _, _, _):
                 boardInstance.state.exitToNeutral();

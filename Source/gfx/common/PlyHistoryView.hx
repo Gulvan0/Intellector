@@ -69,6 +69,8 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
             case BranchingMove(ply, _, _, droppedMovesCount):
                 revertPlys(droppedMovesCount);
                 appendPly(ply, true);
+            case ReturnedToCurrentPosition:
+                performScroll(End);
         }
     }
 
@@ -137,8 +139,11 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
     private function revertPlys(cnt:Int):Void
     {
         var newLength:Int = moveHistory.length - cnt;
-        if (cnt > 0 && newLength > 0)
-            rewrite(moveHistory.slice(0, newLength), newLength);
+        if (cnt > 0)
+            if (newLength > 0)
+                rewrite(moveHistory.slice(0, newLength), newLength);
+            else
+                clear();
     }
 
     public function updateStartingSituation(newStartingSituation:Situation)

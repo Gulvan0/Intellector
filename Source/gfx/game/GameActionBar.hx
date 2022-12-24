@@ -104,7 +104,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
             case Move(_, _):
                 move++;
             case Rollback(plysToUndo, _):
-                shutAllTakebackRequests();
+                shutAllRequests();
                 move -= plysToUndo;
             default:
         }
@@ -158,13 +158,16 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         return move;
     }
 
-    private function shutAllTakebackRequests()
+    private function shutAllRequests()
     {
         if (mode != PlayerOngoingGame)
             return;
 
         cancelTakebackBtn.hidden = true;
         offerTakebackBtn.hidden = false;
+        cancelDrawBtn.hidden = true;
+        offerDrawBtn.hidden = false;
+        disableDrawRequest();
         disableTakebackRequest();
     }
 
@@ -301,14 +304,15 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
 
         switch constructor 
         {
-            case New(_, _, _, _, startingSituation, _):
+            case New(whiteRef, blackRef, _, _, startingSituation, _):
                 setMode(PlayerOngoingGame);
-                this.enableTakebackSinceMove = startingSituation.turnColor == White? 1 : 2;
+                var playerColor:PieceColor = LoginManager.isPlayer(whiteRef)? White : Black;
+                this.enableTakebackSinceMove = startingSituation.turnColor == playerColor? 1 : 2;
                 move = 0;
 
             case Ongoing(parsedData, _, followedPlayerLogin):
                 setMode(parsedData.isPlayerParticipant()? PlayerOngoingGame : Spectator);
-                this.enableTakebackSinceMove = parsedData.startingSituation.turnColor == White? 1 : 2;
+                this.enableTakebackSinceMove = parsedData.startingSituation.turnColor == parsedData.getPlayerColor()? 1 : 2;
                 move = parsedData.moveCount;
 
             case Past(parsedData, _):

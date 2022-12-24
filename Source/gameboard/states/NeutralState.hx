@@ -33,6 +33,7 @@ class NeutralState extends BasePlayableState
         if (boardInstance.behavior.returnToCurrentOnLMB() && !boardInstance.plyHistory.isAtEnd())
         {
             boardInstance.applyScrolling(End);
+            boardInstance.emit(ReturnedToCurrentPosition);
             return;
         }
         

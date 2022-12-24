@@ -1,5 +1,6 @@
 package;
 
+import utils.StringUtils;
 import gfx.popups.ReconnectionDialog;
 import browser.Url;
 import js.html.XMLHttpRequest;
@@ -150,7 +151,7 @@ class Networker
                 suppressAlert = true;
                 Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
             case ServerError(message):
-                Dialogs.alert(SERVER_ERROR_DIALOG_TITLE, SERVER_ERROR_DIALOG_TEXT(message));
+                Dialogs.alert(SERVER_ERROR_DIALOG_TITLE, SERVER_ERROR_DIALOG_TEXT(StringUtils.shorten(message, 500)));
             default:
                 eventQueue.processEvent(event);
         }

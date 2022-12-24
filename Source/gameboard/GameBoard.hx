@@ -31,6 +31,7 @@ enum GameBoardEvent
     ContinuationMove(ply:RawPly, plyStr:String, performedBy:PieceColor);
     SubsequentMove(plyStr:String, performedBy:PieceColor);
     BranchingMove(ply:RawPly, plyStr:String, performedBy:PieceColor, droppedMovesCount:Int);
+    ReturnedToCurrentPosition;
 }
 
 interface IGameBoardObserver

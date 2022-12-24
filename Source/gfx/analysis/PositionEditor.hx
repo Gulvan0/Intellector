@@ -160,6 +160,8 @@ class PositionEditor extends VBox implements IGameBoardObserver implements IAnal
                 setTurnColor(opposite(performedBy));
             case BranchingMove(_, _, performedBy, _):
                 setTurnColor(opposite(performedBy));
+            case ReturnedToCurrentPosition:
+                //* Should be unreachable
         }
     }
 

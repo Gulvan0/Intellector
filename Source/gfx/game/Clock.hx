@@ -208,7 +208,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
 
         if (moveNum >= 2 && ownerToMove)
             launchTimer();
-        else if (moveNum > 2 && !ownerToMove)
+        else if (!ownerToMove)
             pauseTimer();
     }
 
