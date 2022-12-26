@@ -79,12 +79,13 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
         switch event 
         {
             case Move(ply, _):
-                var selectMove:Bool = switch Preferences.autoScrollOnMove.get() 
+                var autoScrollEnabled:Bool = switch Preferences.autoScrollOnMove.get() 
                 {
                     case Always: true;
                     case OwnGameOnly: isGamePlayable;
                     case Never: false;
                 }
+                var selectMove:Bool = shownMove == moveHistory.length || autoScrollEnabled;
                 appendPly(ply, selectMove);
             case Rollback(plysToUndo, _):
                 revertPlys(plysToUndo);
@@ -113,9 +114,12 @@ abstract class PlyHistoryView extends VBox implements IGameBoardObserver impleme
 
     private function appendPly(ply:RawPly, ?selectAfterwards:Bool = true)
     {
-        appendPlyStr(ply.toNotation(currentSituation));
+        var plyStr:String = ply.toNotation(currentSituation);
+
         currentSituation.performRawPly(ply);
         moveHistory.push(ply);
+
+        appendPlyStr(plyStr);
         if (selectAfterwards)
             performScroll(End);
     }
