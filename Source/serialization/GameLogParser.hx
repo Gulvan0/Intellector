@@ -177,34 +177,39 @@ class GameLogParser
                 parserOutput.outcome = decodeOutcome(args[0], args[1]);
             case "E":
                 var eventCode:String = args[0];
-                var logMessage:String = switch eventCode 
+                var color:PieceColor = decodeColor(args[1]);
+                var logMessage:Null<Phrase> = null;
+                
+                switch eventCode 
                 {
                     case "dcn":
-                        Dictionary.getPhrase(PLAYER_DISCONNECTED_MESSAGE(decodeColor(args[1])));
+                        logMessage = PLAYER_DISCONNECTED_MESSAGE(color);
                     case "rcn":
-                        Dictionary.getPhrase(PLAYER_RECONNECTED_MESSAGE(decodeColor(args[1])));
+                        logMessage = PLAYER_RECONNECTED_MESSAGE(color);
                     case "dof":
-                        Dictionary.getPhrase(DRAW_OFFERED_MESSAGE(decodeColor(args[1])));
+                        logMessage = DRAW_OFFERED_MESSAGE(color);
                     case "dca":
-                        Dictionary.getPhrase(DRAW_CANCELLED_MESSAGE(decodeColor(args[1])));
+                        logMessage = DRAW_CANCELLED_MESSAGE(color);
                     case "dac":
-                        Dictionary.getPhrase(DRAW_ACCEPTED_MESSAGE(decodeColor(args[1])));
+                        logMessage = DRAW_ACCEPTED_MESSAGE(color);
                     case "dde":
-                        Dictionary.getPhrase(DRAW_DECLINED_MESSAGE(decodeColor(args[1])));
+                        logMessage = DRAW_DECLINED_MESSAGE(color);
                     case "tof":
-                        Dictionary.getPhrase(TAKEBACK_OFFERED_MESSAGE(decodeColor(args[1])));
+                        logMessage = TAKEBACK_OFFERED_MESSAGE(color);
                     case "tca":
-                        Dictionary.getPhrase(TAKEBACK_CANCELLED_MESSAGE(decodeColor(args[1])));
+                        logMessage = TAKEBACK_CANCELLED_MESSAGE(color);
                     case "tac":
-                        Dictionary.getPhrase(TAKEBACK_ACCEPTED_MESSAGE(decodeColor(args[1])));
+                        logMessage = TAKEBACK_ACCEPTED_MESSAGE(color);
                     case "tde":
-                        Dictionary.getPhrase(TAKEBACK_DECLINED_MESSAGE(decodeColor(args[1])));
+                        logMessage = TAKEBACK_DECLINED_MESSAGE(color);
                     case "tad":
-                        Dictionary.getPhrase(TIME_ADDED_MESSAGE(decodeColor(args[1])));
+                        logMessage = TIME_ADDED_MESSAGE(color);
                     default:
                         "";
                 }
-                parserOutput.chatEntries.push(Log(logMessage));
+
+                if (logMessage != null)
+                    parserOutput.chatEntries.push(Log(Dictionary.getPhrase(logMessage)));
         }        
     }
 

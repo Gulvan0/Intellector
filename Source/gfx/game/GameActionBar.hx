@@ -75,24 +75,11 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                 else
                     rematchBtn.disabled = true;
             case DrawOffered(_):
-                if (compact)
-                {
-                    btnBar.hidden = true;
-                    takebackRequestBox.hidden = true;
-                }
-                drawRequestBox.hidden = false;
-                incomingDrawRequestPending = true;
+                enableDrawRequest();
             case DrawCancelled(_):
                 disableDrawRequest();
             case TakebackOffered(_):
-                if (compact)
-                {
-                    btnBar.hidden = true;
-                    drawRequestBox.hidden = true;
-                }
-                offerTakebackBtn.disabled = true;
-                takebackRequestBox.hidden = false;
-                incomingTakebackRequestPending = true;
+                enableTakebackRequest();
             case TakebackCancelled(_):
                 disableTakebackRequest();
             case DrawAccepted(_), DrawDeclined(_):
@@ -102,9 +89,10 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                 cancelTakebackBtn.hidden = true;
                 offerTakebackBtn.hidden = false;
             case Move(_, _):
+                resetAllRequestsAndOffers();
                 move++;
             case Rollback(plysToUndo, _):
-                shutAllRequests();
+                resetAllRequestsAndOffers();
                 move -= plysToUndo;
             default:
         }
@@ -115,6 +103,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         switch event 
         {
             case ContinuationMove(_, _, _):
+                resetAllRequestsAndOffers();
                 move++;
             default:
         }
@@ -156,19 +145,6 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         }
 
         return move;
-    }
-
-    private function shutAllRequests()
-    {
-        if (mode != PlayerOngoingGame)
-            return;
-
-        cancelTakebackBtn.hidden = true;
-        offerTakebackBtn.hidden = false;
-        cancelDrawBtn.hidden = true;
-        offerDrawBtn.hidden = false;
-        disableDrawRequest();
-        disableTakebackRequest();
     }
 
     private function setMode(mode:Mode) 
@@ -231,19 +207,6 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         offerDrawBtn.hidden = false;
     }
 
-    private function disableDrawRequest()
-    {
-        drawRequestBox.hidden = true;
-        incomingDrawRequestPending = false;
-        if (compact)
-        {
-            if (incomingTakebackRequestPending)
-                takebackRequestBox.hidden = false;
-            else
-                btnBar.hidden = false;
-        }
-    }
-
     private function onOfferTakebackPressed()
     {
         if (!incomingTakebackRequestPending)
@@ -278,6 +241,55 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
             else
                 btnBar.hidden = false;
         }
+    }
+
+    private function disableDrawRequest()
+    {
+        drawRequestBox.hidden = true;
+        incomingDrawRequestPending = false;
+        if (compact)
+        {
+            if (incomingTakebackRequestPending)
+                takebackRequestBox.hidden = false;
+            else
+                btnBar.hidden = false;
+        }
+    }
+
+    private function enableDrawRequest()
+    {
+        if (compact)
+        {
+            btnBar.hidden = true;
+            takebackRequestBox.hidden = true;
+        }
+        drawRequestBox.hidden = false;
+        incomingDrawRequestPending = true;
+    }
+
+    private function enableTakebackRequest()
+    {
+        if (compact)
+        {
+            btnBar.hidden = true;
+            drawRequestBox.hidden = true;
+        }
+        offerTakebackBtn.disabled = true;
+        takebackRequestBox.hidden = false;
+        incomingTakebackRequestPending = true;
+    }
+
+    private function resetAllRequestsAndOffers()
+    {
+        if (mode != PlayerOngoingGame)
+            return;
+
+        cancelTakebackBtn.hidden = true;
+        offerTakebackBtn.hidden = false;
+        cancelDrawBtn.hidden = true;
+        offerDrawBtn.hidden = false;
+        disableDrawRequest();
+        disableTakebackRequest();
     }
 
     private function attachHandler(btn:Button, ?typeToForward:ActionBtn, ?localHandler:Void->Void) 
