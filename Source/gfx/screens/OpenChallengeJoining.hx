@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import GlobalBroadcaster.IGlobalEventObserver;
+import GlobalBroadcaster.GlobalEvent;
 import net.shared.dataobj.ChallengeData;
 import net.shared.TimeControlType;
 import haxe.ui.tooltips.ToolTipManager;
@@ -19,14 +21,47 @@ import dict.Utils;
 import utils.AssetManager;
 
 @:build(haxe.ui.macros.ComponentMacros.build('Assets/layouts/simple_screens/join_challenge.xml'))
-class OpenChallengeJoining extends Screen
+class OpenChallengeJoining extends Screen implements IGlobalEventObserver
 {
 	private final challengeID:Int;
+	private final ratedChallenge:Bool;
+	private final ownerLogin:String;
 	
+	private function onEnter()
+	{
+		GlobalBroadcaster.addObserver(this);
+	}
+	
+	private function onClose()
+	{
+		GlobalBroadcaster.removeObserver(this);
+	}
+	
+	public function handleGlobalEvent(event:GlobalEvent)
+	{
+		switch event 
+		{
+			case LoggedIn, LoggedOut:
+				refreshAcceptButton();
+			default:
+		}
+	}
+
+	private function canAccept():Bool
+	{
+		return !LoginManager.isPlayer(ownerLogin) && (LoginManager.isLogged() || !ratedChallenge);
+	}
+
+	private function refreshAcceptButton()
+	{
+		acceptBtn.disabled = !canAccept();
+	}
+
 	@:bind(acceptBtn, MouseEvent.CLICK)
 	private function onAccepted(e)
 	{
-		Networker.emitEvent(AcceptChallenge(challengeID));
+		if (canAccept())
+			Networker.emitEvent(AcceptChallenge(challengeID));
 	}
 
 	private override function onReady()
@@ -41,9 +76,14 @@ class OpenChallengeJoining extends Screen
     public function new(data:ChallengeData)
     {
 		super();
-		this.challengeID = data.id;
+		this.customEnterHandler = onEnter;
+		this.customCloseHandler = onClose;
 
 		var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
+
+		this.challengeID = data.id;
+		this.ownerLogin = data.ownerLogin;
+		this.ratedChallenge = params.rated;
 
 		var timeControlString:String = params.timeControl.toString();
 		var timeControlType:TimeControlType = params.timeControl.getType();
@@ -75,8 +115,7 @@ class OpenChallengeJoining extends Screen
         else
 			customStartPosIcon.hidden = true;
 		
-		if (LoginManager.isPlayer(data.ownerLogin))
-			acceptBtn.disabled = true;
+		refreshAcceptButton();
 
 		responsiveComponents = [
 			challengeByLabel => [StyleProp(FontSize) => VMIN(6)],

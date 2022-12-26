@@ -23,6 +23,7 @@ class LogIn extends BaseDialog
         {
             signInUsernameField.text = CredentialCookies.getLogin();
             signInPasswordField.text = CredentialCookies.getPassword();
+            signUpStayLoggedCheckbox.selected = true;
         }
     }
 
