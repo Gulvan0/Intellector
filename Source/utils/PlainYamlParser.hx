@@ -1,5 +1,6 @@
 package utils;
 
+import hx.strings.Strings;
 using StringTools;
 
 enum YamlNode
@@ -73,6 +74,8 @@ class PlainYamlDict
             map.set(key, BoolVal(true));
         else if (rawValue == "false")
             map.set(key, BoolVal(false));
+        else if (~/[\s\S]*[^\d\.][\s\S]*/g.match(rawValue) || Strings.countMatches(rawValue, ".") > 1)
+            map.set(key, StringVal(rawValue));
         else if (Std.parseInt(rawValue) != null)
             map.set(key, IntVal(Std.parseInt(rawValue)));
         else if (!Math.isNaN(Std.parseFloat(rawValue)))

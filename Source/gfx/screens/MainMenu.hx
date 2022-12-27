@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import openfl.ui.Keyboard;
+import tests.Interceptor;
 import gfx.popups.LogIn;
 import gfx.popups.ChallengeParamsDialog;
 import gfx.popups.ChangelogDialog;
@@ -76,6 +78,7 @@ class MainMenu extends Screen implements INetObserver
         super.onReady();
         onResize();
         SceneManager.addResizeHandler(onResize);
+        Interceptor.setHandler(Keyboard.M, onResize);
     }
 
     private function onResize() 

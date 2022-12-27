@@ -1,5 +1,6 @@
 package;
 
+import tests.Interceptor;
 import browser.Blinker;
 import gfx.ScreenNavigator;
 import net.shared.dataobj.GreetingResponseData;
@@ -60,6 +61,10 @@ class Main extends Sprite
 		OpeningTree.init();
 		Changelog.init();
 		Config.init();
+
+		#if debug
+		Interceptor.init();
+		#end
 		
 		Toolkit.init({container: stage});
 		Toolkit.scale = 1;
