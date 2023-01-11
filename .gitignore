@@ -1,4 +1,2 @@
-/Export/**
-/svg/**
 /deprecated/**
-/Assets/config.yaml
+/build/html5/config.yaml

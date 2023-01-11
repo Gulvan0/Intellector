@@ -19,7 +19,7 @@
             pointer-events: true;
             white-space: nowrap;
             color: #333333;
-            font-name: 'fonts/Futura.ttf';
+            font-name: 'assets/fonts/Futura.ttf';
             font-weight: 600;
             background-color: yellow;
             background-opacity: 0;

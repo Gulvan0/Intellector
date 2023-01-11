@@ -1,0 +1,16 @@
+-cp src
+-main Main
+
+-lib haxeui-core
+-lib haxeui-html5
+-lib howlerjs
+-lib hxWebSockets
+-lib polygonal-ds
+-lib format
+-lib haxe-strings
+#-lib utest
+
+--resource ./assets/resources/changelog.json@changelog
+#--resource ./src/tests/ui/test_case_infos.json@test_case_infos
+
+-js build/html5/1673476670.js

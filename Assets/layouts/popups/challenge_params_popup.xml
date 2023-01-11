@@ -116,7 +116,7 @@
                     <textfield id="sipTF" width="100%" verticalAlign="center" />
                     <button id="applySIPBtn" text="OK" verticalAlign="center" />
                 </hbox>
-                <box id="customStartposBoardContainer" width="200px" horizontalAlign="center" />
+                <box id="customStartposBoardContainer" width="200px" height="200px" horizontalAlign="center" />
                 <label id="customStartposTurnColorLabel" style="font-size:18px" horizontalAlign="center" />
             </vbox>
         </vbox>

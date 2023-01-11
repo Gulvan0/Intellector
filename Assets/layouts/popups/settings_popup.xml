@@ -15,10 +15,10 @@
                 <button id="langBtnRU" text="${Dictionary.getLanguageName(RU)}" onClick="Preferences.language.set(RU)" />
             </buttonbar>
             <section-header text="${Dictionary.getPhrase(SETTINGS_MARKUP_OPTION_NAME)}" />
-            <buttonbar id="markupBar" horizontalAlign="center">
-                <button id="markupBtnOver" text="${Dictionary.getPhrase(SETTINGS_MARKUP_ALL_OPTION_VALUE)}" onClick="Preferences.markup.set(Over)" />
-                <button id="markupBtnSide" text="${Dictionary.getPhrase(SETTINGS_MARKUP_LETTERS_OPTION_VALUE)}" onClick="Preferences.markup.set(Side)" />
-                <button id="markupBtnNone" text="${Dictionary.getPhrase(SETTINGS_MARKUP_NONE_OPTION_VALUE)}" onClick="Preferences.markup.set(None)" />
+            <buttonbar id="markingBar" horizontalAlign="center">
+                <button id="markingBtnOver" text="${Dictionary.getPhrase(SETTINGS_MARKUP_ALL_OPTION_VALUE)}" onClick="Preferences.marking.set(Over)" />
+                <button id="markingBtnSide" text="${Dictionary.getPhrase(SETTINGS_MARKUP_LETTERS_OPTION_VALUE)}" onClick="Preferences.marking.set(Side)" />
+                <button id="markingBtnNone" text="${Dictionary.getPhrase(SETTINGS_MARKUP_NONE_OPTION_VALUE)}" onClick="Preferences.marking.set(None)" />
             </buttonbar>
             <section-header text="${Dictionary.getPhrase(SETTINGS_PREMOVES_OPTION_NAME)}" />
             <hbox horizontalAlign="center">

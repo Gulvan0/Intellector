@@ -28,7 +28,7 @@
                 <label text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_BGCOLOR_LABEL_TEXT)}" verticalAlign="center" style="font-size: 16px" />
                 <color-picker-popup id="colorPicker" selectedItem="#ffffff" />
             </hbox>
-            <checkbox id="addMarkupCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_MARKUP_CHECKBOX_TEXT)}" selected="false" style="font-size: 14px" horizontalAlign="center" />
+            <checkbox id="addMarkingCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_MARKUP_CHECKBOX_TEXT)}" selected="false" style="font-size: 14px" horizontalAlign="center" />
         </vbox>
         <spacer height="5px" />
         <button id="downloadGifBtn" text="${Dictionary.getPhrase(SHARE_EXPORT_AND_DOWNLOAD_BTN_TEXT)}" horizontalAlign="center" />

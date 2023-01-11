@@ -28,7 +28,7 @@
                             <color-picker-popup id="colorPicker" selectedItem="#ffffff" verticalAlign="center" />
                         </hbox>
                         <spacer height="10px" />
-                        <checkbox id="addMarkupCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_MARKUP_CHECKBOX_TEXT)}" selected="false" horizontalAlign="center" />
+                        <checkbox id="addMarkingCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_MARKUP_CHECKBOX_TEXT)}" selected="false" horizontalAlign="center" />
                     </vbox>
                 </hbox>
                 <button id="downloadPNGBtn" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_BTN_TEXT)}" horizontalAlign="center"/>
