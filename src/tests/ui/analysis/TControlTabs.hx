@@ -15,7 +15,7 @@ class TControlTabs extends TestedComponent //TODO: Add more tests
         var ply:RawPly = PlySerializer.deserialize(resp);
         var situation:Situation = Situation.defaultStarting();
         var plyStr:String = ply.toNotation(situation);
-        var performedBy:PieceColor = situation.get(ply.from).color;
+        var performedBy:PieceColor = situation.get(ply.from).pieceColor;
 
         sidebox.handleGameBoardEvent(SubsequentMove(plyStr, performedBy));
     }
@@ -32,7 +32,7 @@ class TControlTabs extends TestedComponent //TODO: Add more tests
         var ply:RawPly = PlySerializer.deserialize(resp);
         var situation:Situation = Situation.defaultStarting();
         var plyStr:String = ply.toNotation(situation);
-        var performedBy:PieceColor = situation.get(ply.from).color;
+        var performedBy:PieceColor = situation.get(ply.from).pieceColor;
 
         var resp2:String = Browser.window.prompt("Input the pointer (number of moves before the specified ply)");
         if (resp2 == null)
