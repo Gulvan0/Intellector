@@ -1,4 +1,7 @@
-<module>
+<module preload="all">
+    <resources>
+        <resource path="assets" prefix="assets" />
+    </resources>
     <components>
         <component class="gfx.common.MoveNavigator" alias="movenavigator" />
         <component class="gfx.common.CreepingLine" alias="creepingline" />

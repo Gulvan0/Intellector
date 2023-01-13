@@ -1,5 +1,6 @@
 package gfx.analysis;
 
+import haxe.ui.containers.Box;
 import haxe.ui.containers.Absolute;
 import net.shared.board.RawPly;
 import net.shared.utils.MathUtils;
@@ -142,11 +143,14 @@ class VariantTree extends Absolute implements IVariantView
             var childNum = fullBranch[i];
             code += childNum;
             arrows[code].highlight(i < selectUpToMove);
-            addComponent(arrows[code]); //Brings highlighted arrows to the front to make them more visible
+            arrows[code].moveComponentToFront();
             if (i == selectUpToMove - 1)
                 nodes[code].select();
             code += ":";
         }
+
+        for (node in nodes)
+            node.moveComponentToFront();
 
         selectedBranch = fullBranch.copy();
         selectedMove = selectUpToMove;
@@ -234,6 +238,7 @@ class VariantTree extends Absolute implements IVariantView
         var arrow:Arrow = new Arrow();
         arrows.set(nodeCode, arrow);
         addComponent(arrow);
+        arrow.moveComponentToBack();
 
         refreshLayout();
 
@@ -361,6 +366,7 @@ class VariantTree extends Absolute implements IVariantView
 
             addComponent(node);
             addComponent(arrow);
+            arrow.moveComponentToBack();
         }
 
         if (selectedNodePath != null)

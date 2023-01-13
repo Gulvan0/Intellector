@@ -1,10 +1,10 @@
 package gfx.profile.simple_components;
 
+import haxe.ui.containers.Box;
 import net.shared.dataobj.StudyInfo;
 import gameboard.Board;
 import gfx.profile.complex_components.StudyTagList;
 import haxe.ui.events.MouseEvent;
-import haxe.ui.core.ItemRenderer;
 import dict.Dictionary;
 import net.shared.board.Situation;
 
@@ -20,9 +20,14 @@ typedef StudyWidgetData =
 }
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/profile/study_widget.xml"))
-class StudyWidget extends ItemRenderer
+class StudyWidget extends Box
 {
     private var typedData:StudyWidgetData;
+
+    public function studyID():Int
+    {
+        return typedData.id;
+    }
 
     @:bind(editBtn, MouseEvent.CLICK)
     private function edit(e)
@@ -51,25 +56,18 @@ class StudyWidget extends ItemRenderer
         tagListContainer.addComponent(tagList);
     }
 
-    private function reloadBoard(keyPositionSIP:String) 
+    private function loadBoard(keyPositionSIP:String) 
     {
-        boardContainer.removeAllComponents();
-
         var keySituation:Situation = Situation.deserialize(keyPositionSIP);
-        var board:Board = new Board(keySituation, keySituation.turnColor, None);
-        board.percentWidth = 100;
-        board.percentHeight = 100;
-        boardContainer.addComponent(board);
+        var board:Board = new Board(keySituation, keySituation.turnColor, None, 150, 150, true);
+        board.horizontalAlign = "center";
+        board.verticalAlign = "center";
+        contentBox.addComponentAt(board, 0);
     }
 
-    private override function onDataChanged(data:Dynamic)
+    public function updateData(data:StudyWidgetData)
     {
-        super.onDataChanged(data);
-        
-        if (data == null)
-            return;
-
-        typedData = data;
+        this.typedData = data;
 
         if (!LoginManager.isPlayer(typedData.ownerLogin))
         {
@@ -83,6 +81,27 @@ class StudyWidget extends ItemRenderer
         descriptionLabel.text = info.description;
 
         reloadTagList(info.tags);
-        reloadBoard(info.keyPositionSIP);
+        contentBox.removeComponentAt(0);
+        loadBoard(info.keyPositionSIP);
+    }
+
+    public function new(data:StudyWidgetData)
+    {
+        super();
+        this.typedData = data;
+
+        if (!LoginManager.isPlayer(typedData.ownerLogin))
+        {
+            editBtn.hidden = true;
+            deleteBtn.hidden = true;
+        }
+
+        var info:StudyInfo = typedData.info;
+
+        nameLabel.text = info.name;
+        descriptionLabel.text = info.description;
+
+        reloadTagList(info.tags);
+        loadBoard(info.keyPositionSIP);
     }
 }

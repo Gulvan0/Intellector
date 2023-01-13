@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import js.Browser;
 import haxe.Timer;
 import dict.Dictionary;
 import net.shared.EloValue;
@@ -30,7 +31,7 @@ class PastGamesTab extends VBox
 
     private function onTimeControlFilterChanged(newValue:Null<TimeControlType>)
     {
-        list.dataSource.clear();
+        list.clear();
         activeTimeControlFilter = newValue;
         Requests.getPlayerPastGames(profileOwnerLogin, 0, GAMES_PAGE_SIZE, activeTimeControlFilter, onGamesLoaded);
     }
@@ -47,7 +48,7 @@ class PastGamesTab extends VBox
         if (hasNext && canLoad) 
         {
             var loadedCnt:Int = list.loadedGamesCount;
-            if (list.vscrollPos * loadedCnt >= list.vscrollMax * (loadedCnt - 1))
+            if (Browser.window.scrollY * loadedCnt >= Browser.window.scrollMaxY * (loadedCnt - 1))
             {
                 canLoad = false;
                 Requests.getPlayerPastGames(profileOwnerLogin, loadedCnt, GAMES_PAGE_SIZE, activeTimeControlFilter, onGamesLoaded);
@@ -59,7 +60,6 @@ class PastGamesTab extends VBox
     {
         super();
         this.percentWidth = 100;
-        this.percentHeight = 100;
         this.text = Dictionary.getPhrase(PROFILE_GAMES_TAB_TITLE);
         this.profileOwnerLogin = profileOwnerLogin;
         this.activeTimeControlFilter = null;
@@ -72,6 +72,6 @@ class PastGamesTab extends VBox
         list = new GamesList(profileOwnerLogin, preloadedGames, onGameClicked);
         addComponent(list);
 
-        list.onScroll = _ -> {onScrolled();};
+        Browser.document.addEventListener('scroll', event -> {onScrolled();});
     }
 }

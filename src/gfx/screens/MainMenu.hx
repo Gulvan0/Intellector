@@ -69,7 +69,7 @@ class MainMenu extends Screen implements INetObserver
     @:bind(changelogLabel, MouseEvent.CLICK)
     private function onChangelogRequested(?e)
     {
-        Dialogs.getQueue().addBasic(new ChangelogDialog());
+        Dialogs.getQueue().add(new ChangelogDialog());
     }
 
     private override function onReady()
@@ -89,9 +89,7 @@ class MainMenu extends Screen implements INetObserver
 
         contentHBox.percentWidth = compact? 100 : 90;
         tablesBox.percentWidth = compact? 100 : 50;
-        tablesBox.percentHeight = compact? 66.66 : 100;
         pastGamesList.percentWidth = compact? 100 : 50;
-        pastGamesList.percentHeight = compact? 33.33 : 100;
 
         var tableHeaderHeightRule:ResponsivenessRule = Min([Exact(30), VMIN(5)]);
         var tableHeaderBoxHeightRule:ResponsivenessRule = Min([Exact(40), VMIN(6.66)]);

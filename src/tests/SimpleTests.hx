@@ -243,8 +243,7 @@ class SimpleTests
 			onDeletePressed: () -> {trace('Delete requested');}
 		};
 
-		var comp:StudyWidget = new StudyWidget();
-		comp.data = data;
+		var comp:StudyWidget = new StudyWidget(data);
 		add(comp, Percent(50), Exact(200));
 	}
 
@@ -260,8 +259,7 @@ class SimpleTests
 			onClicked: () -> {trace('Clicked');}
 		};
 
-		var comp:GameWidget = new GameWidget();
-		comp.data = data;
+		var comp:GameWidget = new GameWidget(data);
 		add(comp, Percent(50), Exact(200));
 	}
 

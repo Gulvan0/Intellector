@@ -14,5 +14,6 @@ class BranchingHelp extends MessageBox
         messageLabel.htmlText = Dictionary.getPhrase(ANALYSIS_BRANCHING_HELP_DIALOG_TEXT);
         messageLabel.customStyle = {fontSize: Math.max(HaxeUIScreen.instance.actualHeight * 0.02, 12)};
         width = Math.min(500, HaxeUIScreen.instance.actualWidth * 0.95);
+        height = 550;
     }
 }

@@ -80,4 +80,5 @@ enum ServerEvent
 
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created
     ServerError(message:String); //An error occured while processing the event on the server-side
+    KeepAliveBeat;
 }

@@ -53,14 +53,13 @@ class Main
 
 	private static function onAppReady()
 	{
-		init();
-		deriveLanguage();
+		init(start);
 	}
 
 	/**
 		Some purely technical aspects for the app to work correctly
 	**/
-	private static function init() 
+	private static function init(onInitFinished:Void->Void) 
 	{
 		Browser.window.onpopstate = ScreenNavigator.navigate;
 		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
@@ -68,18 +67,28 @@ class Main
 			if (event.ctrlKey)
 				event.preventDefault();
 		}, true);
-		Blinker.init();
-		OpeningTree.init();
-		Changelog.init();
-		Config.init();
+		Browser.document.body.style.overflow = "auto";
 
 		#if debug
 		Interceptor.init();
 		#end
 
+		Blinker.init();
+		OpeningTree.init();
+		Changelog.init();
+		Config.init(onInitFinished);
+	}
+
+	/**
+		Executed right after the initialization finishes completely
+	**/
+	private static function start()
+	{
 		var scene = SceneManager.launch();
 		app.addComponent(scene);
 		app.start();
+
+		deriveLanguage();
 	}
 
 	/**

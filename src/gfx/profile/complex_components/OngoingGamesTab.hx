@@ -21,7 +21,7 @@ class OngoingGamesTab extends VBox
     private function onGamesLoaded(games:Array<GameInfo>, hasNext:Bool)
     {
         reloadBtn.disabled = false;
-        list.dataSource.clear();
+        list.clear();
         list.appendGames(games);
     }
 
@@ -35,7 +35,6 @@ class OngoingGamesTab extends VBox
     {
         super();
         this.percentWidth = 100;
-        this.percentHeight = 100;
         this.text = Dictionary.getPhrase(PROFILE_ONGOING_MATCHES_TAB_TITLE);
         this.profileOwnerLogin = profileOwnerLogin;
 

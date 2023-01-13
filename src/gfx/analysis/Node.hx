@@ -46,6 +46,8 @@ class Node extends Link
         else
             deselect();
 
-        textSize = TextMeasurer.instance.measureText({text: text, isHtml: false, fontSize: style.fontSize == null? null : Std.string(style.fontSize), fontFamily: style.fontName});
+        textSize = {width: 12 * text.length, height: 20};
+        width = textSize.width;
+        height = textSize.height;
     }
 }

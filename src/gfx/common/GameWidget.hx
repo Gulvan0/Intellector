@@ -1,5 +1,6 @@
 package gfx.common;
 
+import haxe.ui.containers.Box;
 import net.shared.dataobj.GameInfo;
 import net.shared.board.Situation;
 import haxe.CallStack;
@@ -18,7 +19,6 @@ import openings.OpeningTree;
 import dict.Utils;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
-import haxe.ui.core.ItemRenderer;
 
 typedef GameWidgetData = 
 {
@@ -28,7 +28,7 @@ typedef GameWidgetData =
 } 
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/game_widget.xml"))
-class GameWidget extends ItemRenderer
+class GameWidget extends Box
 {
     private var typedData:GameWidgetData;
 
@@ -77,10 +77,10 @@ class GameWidget extends ItemRenderer
     private function loadBoard(shownSituation:Situation, watchedColor:Null<PieceColor>) 
     {
         var orientationColor:PieceColor = watchedColor == null? shownSituation.turnColor : watchedColor;
-        var board:Board = new Board(shownSituation, orientationColor, None);
-        board.percentWidth = 100;
-        board.percentHeight = 100;
-        boardContainer.addComponent(board);
+        var board:Board = new Board(shownSituation, orientationColor, None, 150, 150, true);
+        board.horizontalAlign = "center";
+        board.verticalAlign = "center";
+        fullBox.addComponentAt(board, 0);
     }
 
     @:bind(fullBox, MouseEvent.CLICK)
@@ -89,14 +89,10 @@ class GameWidget extends ItemRenderer
         typedData.onClicked();
     }
 
-    private override function onDataChanged(data:Dynamic) 
+    public function new(data:GameWidgetData) 
     {
-        super.onDataChanged(data);
-
-        if (data == null || typedData != null)
-            return;
-        
-        typedData = data;
+        super();
+        this.typedData = data;
 
         var parsedData:GameLogParserOutput = GameLogParser.parse(typedData.info.log);
 

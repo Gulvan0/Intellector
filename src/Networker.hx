@@ -43,6 +43,13 @@ class Networker
     private static var isConnected:Bool = false;
     public static var ignoreEmitCalls:Bool = false; 
 
+    private static var serverHeartbeatTimeoutTimer:Timer;
+    private static var clientHeartbeatTimer:Timer;
+    private static var clientHeartbeatIntervalMs:Int;
+    private static var serverHeartbeatTimeoutMs:Int;
+
+    private static var lastProcessedMessageTS:Float = 0;
+
     public static function getSessionID():Int
     {
         return sid;
@@ -69,6 +76,16 @@ class Networker
 
         address += Config.dict.getString("host") + ":" + Config.dict.getString("port");
 
+        clientHeartbeatIntervalMs = Config.dict.getInt("keep-alive-beat-interval-ms");
+
+        if (clientHeartbeatIntervalMs == null || clientHeartbeatIntervalMs <= 0)
+            clientHeartbeatIntervalMs = 5000;
+
+        serverHeartbeatTimeoutMs = Config.dict.getInt("keep-alive-timeout-ms");
+
+        if (serverHeartbeatTimeoutMs == null || serverHeartbeatTimeoutMs <= 0)
+            serverHeartbeatTimeoutMs = 10000;
+
         createWS();
         
         _ws.onopen = onConnectionOpen.bind(true);
@@ -90,8 +107,11 @@ class Networker
         {
             suppressAlert = true;
             isConnected = false;
+
             _ws.close();
             _ws = null;
+
+            onConnectionClosed();
         }
     }
 
@@ -144,12 +164,18 @@ class Networker
                 }
         }
 
+        lastProcessedMessageTS = Date.now().getTime();
+
         switch event
         {
             case DontReconnect:
                 doNotReconnect = true;
                 suppressAlert = true;
                 Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
+            case KeepAliveBeat:
+                if (serverHeartbeatTimeoutTimer != null)
+                    serverHeartbeatTimeoutTimer.stop();
+                serverHeartbeatTimeoutTimer = Timer.delay(dropConnection, serverHeartbeatTimeoutMs);
             case ServerError(message):
                 Dialogs.alert(SERVER_ERROR_DIALOG_TITLE, SERVER_ERROR_DIALOG_TEXT(StringUtils.shorten(message, 500)));
             default:
@@ -160,6 +186,14 @@ class Networker
     private static function onConnectionClosed()
     {
         isConnected = false;
+
+        if (serverHeartbeatTimeoutTimer != null)
+            serverHeartbeatTimeoutTimer.stop();
+        serverHeartbeatTimeoutTimer = null;
+
+        if (clientHeartbeatTimer != null)
+            clientHeartbeatTimer.stop();
+        clientHeartbeatTimer = null;
 
         if (doNotReconnect)
         {
@@ -196,7 +230,7 @@ class Networker
         _ws.onerror = onConnectionError;
 
         suppressAlert = false;
-        Requests.greet(Reconnect(reconnectionToken), onGreetingAnswered.bind(_, true));
+        Requests.greet(Reconnect(reconnectionToken, lastProcessedMessageTS), onGreetingAnswered.bind(_, true));
     }
 
 	private static function onGreetingAnswered(data:GreetingResponseData, ?dontLeave:Bool = false)
@@ -249,11 +283,24 @@ class Networker
             case NotReconnected:
                 Browser.location.reload(false);
 		}
+
+        if (data.match(ConnectedAsGuest(_, _, _, _) | Logged(_, _, _, _, _) | Reconnected(_)))
+        {
+            if (serverHeartbeatTimeoutTimer != null)
+                serverHeartbeatTimeoutTimer.stop();
+            serverHeartbeatTimeoutTimer = Timer.delay(dropConnection, serverHeartbeatTimeoutMs);
+
+            if (clientHeartbeatTimer != null)
+                clientHeartbeatTimer.stop();
+            clientHeartbeatTimer = new Timer(clientHeartbeatIntervalMs);
+            clientHeartbeatTimer.run = emitEvent.bind(KeepAliveBeat);
+        }
     }
     
     private static function retryConnecting(onOpen:Void->Void)
     {
-        _ws.close();
+        if (_ws != null)
+            _ws.close();
         isConnected = false;
 
         createWS();
@@ -303,7 +350,7 @@ class Networker
     {
         if (ignoreEmitCalls)
             trace(event.getName(), event.getParameters());
-        else
+        else if (_ws != null)
             _ws.send(Serializer.run(event));
     }
 }

@@ -45,4 +45,5 @@ enum ClientEvent
     GetCurrentGames;
     GetRecentGames;
     PageUpdated(page:ViewedScreen);
+    KeepAliveBeat;
 }

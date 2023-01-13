@@ -66,7 +66,6 @@ class Board extends Absolute
         return _shownSituation.copy();
     }
     
-    @:bind(this, UIEvent.RESIZE)
     public function resize(?e:UIEvent)
     {
         var now:Float = Timer.stamp();
@@ -519,7 +518,7 @@ class Board extends Absolute
     //TODO: Signature updated
     //TODO: Marking put in separate class
     //TODO: Default marking from preferences is now on the caller
-    public function new(situation:Situation, orientationColor:PieceColor = White, ?marking:Marking, ?initialWidth:Float = 250, ?initialHeight:Float = 250) 
+    public function new(situation:Situation, orientationColor:PieceColor = White, ?marking:Marking, ?initialWidth:Float = 250, ?initialHeight:Float = 250, ?dontResize:Bool = false) 
     {
         super();
         this.width = initialWidth;
@@ -544,6 +543,9 @@ class Board extends Absolute
         producePieces();
         if (lettersEnabled)
             drawLetters();
+
+        if (!dontResize)
+            registerEvent(UIEvent.RESIZE, resize);
     }
 
 }

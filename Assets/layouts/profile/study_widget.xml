@@ -1,4 +1,4 @@
-<item-renderer width="100%" height="200px">
+<box width="100%" height="200px">
     <style>
         #fullBox {
             background: #e7e7e7;
@@ -51,11 +51,10 @@
             </square>
         </hbox>
         <hbox id="contentBox" width="100%" height="100%">
-            <square id="boardContainer" height="100%" />
             <vbox width="100%" height="100%">
                 <label id="nameLabel" width="100%" style="font-size: 16" />
                 <label id="descriptionLabel" width="100%" height="100%" style="font-size: 12" />
             </vbox>
         </hbox>
     </vbox>
-</item-renderer>
+</box>

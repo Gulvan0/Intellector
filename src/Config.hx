@@ -7,10 +7,11 @@ class Config
 {
     public static var dict:PlainYamlDict;
     
-    public static function init() 
+    public static function init(onInitFinished:Void->Void) 
     {
-        FileLoader.loadText('./assets/config.yaml', s -> {
+        FileLoader.loadText('./config.yaml', s -> {
             dict = PlainYamlParser.parse(s);
+            onInitFinished();
         });
     }
 }

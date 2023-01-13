@@ -75,6 +75,6 @@ class Paths
 
     public static inline function sound(soundName:String)
     {
-        return 'sounds/$soundName.mp3';
+        return './sounds/$soundName.mp3';
     }
 }

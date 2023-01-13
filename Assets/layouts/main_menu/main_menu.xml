@@ -1,4 +1,4 @@
-<component width="100%" height="100%">
+<component width="100%">
     <style>
         #changelogLabel {
             font-size:26px;
@@ -10,15 +10,15 @@
             color: #333333;
         }
     </style>
-    <vbox width="100%" height="100%" style="spacing: 10px">
+    <vbox width="100%" style="spacing: 10px">
         <button id="createGameBtn" text="${Dictionary.getPhrase(MAIN_MENU_CREATE_GAME_BTN_TEXT)}" horizontalAlign="center" style="font-size:40px;font-name:'assets/fonts/Futura.ttf'" />
         <label id="changelogLabel" htmlText="${Changelog.getFirst()}" tooltip="${Dictionary.getPhrase(READ_FULL_CHANGELOG_TOOLTIP)}" horizontalAlign="center" />
-        <hbox id="contentHBox" horizontalAlign="center" width="90%" height="100%" continuous="true">
-            <vbox id="tablesBox" width="50%" height="100%">
+        <hbox id="contentHBox" horizontalAlign="center" width="90%" continuous="true">
+            <vbox id="tablesBox" width="50%" height="600px">
                 <open-challenges-table id="openChallengesTable" width="100%" height="50%" />
                 <current-games-table id="currentGamesTable" width="100%" height="50%" />
             </vbox>
-            <past-games-list id="pastGamesList" ownerLogin="${null}" width="50%" height="100%" />
+            <past-games-list id="pastGamesList" ownerLogin="${null}" width="50%" />
         </hbox>
     </vbox>
 </component>

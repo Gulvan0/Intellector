@@ -1,5 +1,6 @@
 package gfx.main;
 
+import gfx.profile.complex_components.GamesList;
 import serialization.GameLogParser;
 import net.shared.dataobj.GameInfo;
 import haxe.ui.containers.VBox;
@@ -9,6 +10,7 @@ import dict.*;
 class PastGamesList extends VBox
 {
     public var ownerLogin:Null<String>;
+    private var list:GamesList;
 
     private function onGameClicked(info:GameInfo)
     {
@@ -18,12 +20,20 @@ class PastGamesList extends VBox
 
     public function insertAtBeginning(info:GameInfo)
     {
-        list.dataSource.insert(0, {info: info, watchedLogin: ownerLogin, onClicked: onGameClicked.bind(info)});
+        list.insertAtBeginning(info);
     }
 
     public function appendGames(data:Array<GameInfo>)
     {
-        for (gameData in data)
-            list.dataSource.add({info: gameData, watchedLogin: ownerLogin, onClicked: onGameClicked.bind(gameData)});
+        list.appendGames(data);
+    }
+
+    public function new()
+    {
+        super();
+
+        list = new GamesList(ownerLogin, [], onGameClicked);
+        list.percentWidth = 100;
+        addComponent(list);
     }
 }

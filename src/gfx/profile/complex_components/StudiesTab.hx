@@ -24,6 +24,7 @@ class StudiesTab extends ScrollView
     private var profileOwner:String;
     private var activeTags:Array<String> = [];
     private var loadedStudies:Map<Int, StudyInfo> = [];
+    private var widgetByStudyID:Map<Int, StudyWidget> = [];
 
     private function onTagFilterAdded(tag:String)
     {
@@ -66,18 +67,18 @@ class StudiesTab extends ScrollView
 
     private function onStudyEdited(id:Int, newParams:StudyInfo)
     {
-        var itemIndex:Int = indexOf(id);
         var newWidgetData:StudyWidgetData = generateStudyWidgetData(id, newParams);
         
-        studiesList.dataSource.update(itemIndex, newWidgetData);
+        widgetByStudyID.get(id).updateData(newWidgetData);
         loadedStudies.set(id, newParams);
     }
 
     private function onDeleteStudyRequested(id:Int)
     {
         Networker.emitEvent(DeleteStudy(id));
-        studiesList.dataSource.removeAt(indexOf(id));
+        studiesList.removeComponent(widgetByStudyID.get(id));
         loadedStudies.remove(id);
+        widgetByStudyID.remove(id);
     }
 
     private function generateStudyWidgetData(id:Int, info:StudyInfo):StudyWidgetData
@@ -103,8 +104,10 @@ class StudiesTab extends ScrollView
         {
             var id:Int = -negID;
             var studyWidgetData:StudyWidgetData = generateStudyWidgetData(id, info);
-            studiesList.dataSource.add(studyWidgetData);
+            var studyWidget:StudyWidget = new StudyWidget(studyWidgetData);
+            studiesList.addComponent(studyWidget);
             loadedStudies.set(id, info);
+            widgetByStudyID.set(id, studyWidget);
         }
 
         loadMoreBtn.hidden = !hasNext;
@@ -113,8 +116,9 @@ class StudiesTab extends ScrollView
 
     private function reloadStudies()
     {
-        studiesList.dataSource.clear();
+        studiesList.removeAllComponents();
         loadedStudies = [];
+        widgetByStudyID = [];
         loadMore();
     }
 
@@ -123,17 +127,6 @@ class StudiesTab extends ScrollView
     {
         loadMoreBtn.disabled = true;
         Requests.getPlayerStudies(profileOwner, Lambda.count(loadedStudies), STUDIES_PAGE_SIZE, activeTags, appendStudies);
-    }
-
-    private function indexOf(id:Int):Int
-    {
-        for (i in 0...studiesList.dataSource.size)
-        {
-            var element:StudyWidgetData = studiesList.dataSource.get(i);
-            if (element.id == id)
-                return i;
-        }
-        return -1;
     }
 
     public function new(profileOwner:String, preloadedStudies:Map<Int, StudyInfo>, totalStudies:Int)
@@ -147,8 +140,6 @@ class StudiesTab extends ScrollView
 
         studyFilterList = new StudyFilterList(Percent(100), 27, onTagFilterAdded, onTagFilterRemoved, onFiltersCleared, PROFILE_TAG_FILTERS_PREPENDER, PROFILE_TAG_NO_FILTERS_PLACEHOLDER_TEXT, PROFILE_ADD_TAG_FILTER_BTN_TEXT, PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP, PROFILE_CLEAR_TAG_FILTERS_BTN_TEXT, PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT);
         addComponentAt(studyFilterList, 0);
-
-        studiesList.addComponent(new StudyWidget());
 
         appendStudies(preloadedStudies, Lambda.count(preloadedStudies) < totalStudies);
     }
