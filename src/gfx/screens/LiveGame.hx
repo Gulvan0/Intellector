@@ -305,7 +305,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         gameinfobox.init(constructor);
 
         this.gameID = gameID;
-        this.netObservers = [board, gameinfobox, chatbox, lActionBar, lNavigator, lBlackClock, lWhiteClock, cActionBar, cCreepingLine, cBlackClock, cWhiteClock];
+        this.netObservers = [gameinfobox, chatbox, lActionBar, lNavigator, lBlackClock, lWhiteClock, cActionBar, cCreepingLine, cBlackClock, cWhiteClock, board];
         this.gameboardObservers = [lActionBar, lNavigator, lBlackClock, lWhiteClock, cActionBar, cCreepingLine, cBlackClock, cWhiteClock];
 
         customEnterHandler = onEnter;

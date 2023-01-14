@@ -352,7 +352,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
 
                 super(_startingSituation, Free, Free, playerColor);
 
-                this.state = new NeutralState();
+                this.state = _startingSituation.turnColor == playerColor || Preferences.premoveEnabled.get()? new NeutralState() : new StubState();
                 this.behavior = _startingSituation.turnColor == playerColor? new PlayerMoveBehavior(playerColor) : new EnemyMoveBehavior(playerColor);
 
             case Live(Ongoing(parsedData, _, followedPlayerLogin)):
