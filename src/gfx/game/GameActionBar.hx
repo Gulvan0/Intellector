@@ -1,5 +1,6 @@
 package gfx.game;
 
+import assets.StandaloneAssetPath;
 import haxe.Timer;
 import net.shared.Constants;
 import gameboard.GameBoard.IGameBoardObserver;
@@ -133,13 +134,13 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
 
         if (move < changeAbortToResignAfterMove)
         {
-            resignBtn.text = "✖";
+            resignBtn.icon = AbortGameBtnIcon;
             resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_ABORT_TOOLTIP);
             resignConfirmationMessage = Dictionary.getPhrase(ABORT_CONFIRMATION_MESSAGE);
         }
         else
         {
-            resignBtn.text = "⚐";
+            resignBtn.icon = ResignBtnIcon;
             resignBtn.tooltip = Dictionary.getPhrase(RESIGN_BTN_TOOLTIP);
             resignConfirmationMessage = Dictionary.getPhrase(RESIGN_CONFIRMATION_MESSAGE);
         }

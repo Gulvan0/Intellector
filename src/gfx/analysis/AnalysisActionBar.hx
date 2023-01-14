@@ -78,6 +78,9 @@ class AnalysisActionBar extends VBox implements IAnalysisPeripheralEventObserver
             btn.hidden = false;
             btn.percentWidth = btnWidth;
         }
+
+        if (!LoginManager.isLogged())
+            playFromPosBtn.disabled = true;
     }
 
     public function new() 

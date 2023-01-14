@@ -1,5 +1,6 @@
 package gfx;
 
+import dict.Language;
 import gfx.profile.data.StudyData;
 import net.shared.dataobj.ViewedScreen;
 import haxe.ui.events.UIEvent;
@@ -124,6 +125,11 @@ class SceneManager
         }
         else if (resizeTimeout == null)
             resizeTimeout = Timer.delay(onDelayedResizeTimerFired, Math.ceil(100 - msSinceLastResize));
+    }
+
+	public static function updateLanguage() 
+    {
+        scene.updateLanguage();
     }
 
     private static function onDelayedResizeTimerFired()

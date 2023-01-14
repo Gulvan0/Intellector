@@ -114,9 +114,12 @@ class Arrow extends Canvas
         componentGraphics.lineTo(fracturePoint.x, fracturePoint.y);
         componentGraphics.lineTo(inputVertex.x, inputVertex.y);
 
+        componentGraphics.strokeStyle(null, null, 0);
+
         var builder = getBuilder();
         var path = builder.path(inputVertex.x, inputVertex.y);
 
+        path.stroke({alpha: 0});
         path.fill({color: color.toHex(), opacity: alpha});
         path.lineTo(vertex1.x, vertex1.y);
         path.lineTo(to.x, to.y);

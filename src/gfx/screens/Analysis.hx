@@ -51,6 +51,10 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
 
         switch event 
         {
+            case LoggedIn:
+                actionBar.playFromPosBtn.disabled = false;
+            case LoggedOut:
+                actionBar.playFromPosBtn.disabled = true;
             case PreferenceUpdated(Marking):
                 boardContainer.invalidateComponentLayout(true);
             case PreferenceUpdated(BranchingType):

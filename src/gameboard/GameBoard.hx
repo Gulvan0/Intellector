@@ -1,5 +1,7 @@
 package gameboard;
 
+import net.shared.board.HexCoords;
+import net.shared.board.HexCoords.equal;
 import gameboard.util.HexDimensions;
 import gameboard.components.Piece;
 import haxe.ui.core.Screen;
@@ -61,6 +63,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
 
     public var suppressLMBHandler:Bool = false;
     private var lastMouseMoveEvent:MouseEvent;
+    private var lastMousePress:{coords:Null<HexCoords>, ts:Float};
 
     private var observers:Array<IGameBoardObserver> = [];
 
@@ -242,8 +245,19 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
         if (suppressLMBHandler || Dialogs.getQueue().hasActiveDialog())
             return;
 
+        var eventTime:Float = Date.now().getTime();
+
         if (e.screenX >= screenLeft && e.screenX <= screenLeft + width && e.screenY >= screenTop && e.screenY <= screenTop + height)
-            state.onLMBPressed(posToIndexes(toLocalCoords(e.screenX, e.screenY)), e.shiftKey, e.ctrlKey);
+        {
+            var pressCoords:Null<HexCoords> = posToIndexes(toLocalCoords(e.screenX, e.screenY));
+
+            if (lastMousePress == null || eventTime - lastMousePress.ts >= 750 || !equal(lastMousePress.coords, pressCoords))
+                state.onLMBPressed(pressCoords, e.shiftKey, e.ctrlKey);
+
+            lastMousePress = {ts: eventTime, coords: pressCoords};
+        }
+        else
+            lastMousePress = {ts: eventTime, coords: null};
     }
 
     private function onMouseMoved(e:MouseEvent)

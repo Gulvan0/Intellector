@@ -51,7 +51,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     private var netObservers:Array<INetObserver>;
     private var gameboardObservers:Array<IGameBoardObserver>;
 
-    public static var MIN_SIDEBARS_WIDTH:Float = 200;
+    public static var MIN_SIDEBARS_WIDTH:Float = 250;
     public static var MAX_SIDEBARS_WIDTH:Float = 350;
 
     public function onEnter()
@@ -156,8 +156,19 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         board.handleGlobalEvent(event);
         gameinfobox.handleGlobalEvent(event);
 
-        if (event.match(PreferenceUpdated(Marking)))
-            boardContainer.invalidateComponentLayout(true);
+        switch event 
+        {
+            case LoggedIn:
+                cActionBar.playFromPosBtn.disabled = false;
+                lActionBar.playFromPosBtn.disabled = false;
+            case LoggedOut:
+                cActionBar.playFromPosBtn.disabled = true;
+                lActionBar.playFromPosBtn.disabled = true;
+            case PreferenceUpdated(Marking):
+                boardContainer.invalidateComponentLayout(true);
+            default:
+        }
+        
     }
 
     private function onPlyScrollRequested(type:PlyScrollType)

@@ -21,16 +21,16 @@ class Settings extends BaseDialog
 
     private function resize()
     {
-        width = Math.min(600, Screen.instance.actualWidth * 0.98);
+        width = Math.min(800, Screen.instance.actualWidth * 0.98);
 
         for (bar in stack3.findComponents(ButtonBar))
-            bar.customStyle = {fontSize: Math.min(16, Screen.instance.actualWidth * 0.02), horizontalAlign: "center"};
+            bar.customStyle = {fontSize: Math.min(14, Screen.instance.actualWidth * 0.02), horizontalAlign: "center"};
 
         for (header in stack3.findComponents(SectionHeader))
             header.customStyle = {fontSize: Math.min(16, Screen.instance.actualWidth * 0.02)};
 
         for (label in stack3.findComponents('pill-label'))
-            label.customStyle = {fontSize: Math.min(16, Screen.instance.actualWidth * 0.02)};
+            label.customStyle = {fontSize: Math.min(14, Screen.instance.actualWidth * 0.02)};
         
         for (btn in tabBar.findComponents(Button))
         {

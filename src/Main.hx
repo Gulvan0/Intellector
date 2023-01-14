@@ -1,5 +1,7 @@
 package;
 
+import gfx.popups.ChangelogDialog;
+import haxe.ui.containers.dialogs.Dialog;
 import assets.StandaloneAssetPath;
 import gfx.preloader.DefaultPreloader;
 import haxe.ui.HaxeUIApp;
@@ -114,6 +116,8 @@ class Main
 			LocaleManager.instance.language = "ru";
 		else
 			LocaleManager.instance.language = "en";
+
+		SceneManager.updateLanguage();
 
 		Networker.launch();
 		//test();

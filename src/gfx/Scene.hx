@@ -116,6 +116,30 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         }
     }
 
+	public function updateLanguage() 
+    {
+        playMenu.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_TITLE);
+        createChallengeBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM);
+        openChallengesBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM);
+        watchMenu.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_TITLE);
+        currentGamesBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM);
+        watchPlayerBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM);
+        learnMenu.text = Dictionary.getPhrase(MENUBAR_LEARN_MENU_TITLE);
+        analysisBoardBtn.text = Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM);
+        socialMenu.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_TITLE);
+        playerProfileBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM);
+        logInBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGIN_ITEM);
+        myProfileBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_MY_PROFILE_ITEM);
+        settingsBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_SETTINGS_ITEM);
+        logOutBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGOUT_ITEM);
+        sidemenu.createChallengeBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM);
+        sidemenu.openChallengesBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM);
+        sidemenu.currentGamesBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM);
+        sidemenu.watchPlayerBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM);
+        sidemenu.analysisBoardBtn.text = Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM);
+        sidemenu.playerProfileBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM);
+    }
+
     private function onSendChallengeResultReceived(result:SendChallengeResult)
     {
         switch result 
