@@ -76,19 +76,29 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                 else
                     rematchBtn.disabled = true;
             case DrawOffered(_):
-                enableDrawRequest();
+                if (mode == PlayerOngoingGame)
+                    enableDrawRequest();
             case DrawCancelled(_):
-                disableDrawRequest();
+                if (mode == PlayerOngoingGame)
+                    disableDrawRequest();
             case TakebackOffered(_):
-                enableTakebackRequest();
+                if (mode == PlayerOngoingGame)
+                    enableTakebackRequest();
             case TakebackCancelled(_):
-                disableTakebackRequest();
+                if (mode == PlayerOngoingGame)
+                    disableTakebackRequest();
             case DrawAccepted(_), DrawDeclined(_):
-                cancelDrawBtn.hidden = true;
-                offerDrawBtn.hidden = false;
+                if (mode == PlayerOngoingGame)
+                {
+                    cancelDrawBtn.hidden = true;
+                    offerDrawBtn.hidden = false;
+                }
             case TakebackAccepted(_), TakebackDeclined(_):
-                cancelTakebackBtn.hidden = true;
-                offerTakebackBtn.hidden = false;
+                if (mode == PlayerOngoingGame)
+                {
+                    cancelTakebackBtn.hidden = true;
+                    offerTakebackBtn.hidden = false;
+                }
             case Move(_, _):
                 resetAllRequestsAndOffers();
                 move++;
