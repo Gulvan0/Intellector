@@ -40,6 +40,7 @@ class OngoingGamesTab extends VBox
 
         reloadBtn = new Button();
         reloadBtn.text = Dictionary.getPhrase(PROFILE_ONGOING_RELOAD_BTN_TEXT);
+        reloadBtn.customStyle = {fontSize: 14};
         reloadBtn.horizontalAlign = 'center';
         reloadBtn.onClick = onReloadPressed;
         addComponent(reloadBtn);
