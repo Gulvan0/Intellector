@@ -351,9 +351,9 @@ class Dictionary
                 return ["Players", "Игроки"];
             case TABLEVIEW_BRACKET_COLUMN_NAME:
                 return ["Bracket", "Тип"];
-            case TABLEVIEW_BRACKET_RANKED(false):
-                return ["Rated", "На рейтинг"];
             case TABLEVIEW_BRACKET_RANKED(true):
+                return ["Rated", "На рейтинг"];
+            case TABLEVIEW_BRACKET_RANKED(false):
                 return ["Unrated", "Товарищеская"];
             case CURRENT_GAMES_TABLE_HEADER:
                 return ["Now Playing", "Текущие игры"];
