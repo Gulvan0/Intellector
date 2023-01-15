@@ -46,4 +46,6 @@ enum ClientEvent
     GetRecentGames;
     PageUpdated(page:ViewedScreen);
     KeepAliveBeat;
+    ResendRequest(from:Int, to:Int);
+    MissedEvents(map:Map<Int, ClientEvent>);
 }

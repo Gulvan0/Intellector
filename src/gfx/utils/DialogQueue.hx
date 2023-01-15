@@ -11,9 +11,12 @@ class DialogQueue
     private var groupMap:Map<DialogGroup, Array<Dialog>> = [for (group in DialogGroup.createAll()) group => []];
     private var modalCount:Int = 0;
 
-    public function hasActiveDialog():Bool
+    public function hasActiveDialog(?group:DialogGroup):Bool
     {
-        return !Lambda.empty(shownDialogs);
+        if (group == null)
+            return !Lambda.empty(shownDialogs);
+        else
+            return groupMap.exists(group) && !Lambda.empty(groupMap.get(group));
     }
 
     private function onDialogClosed(dialog:BaseDialog)

@@ -1,5 +1,8 @@
 package;
 
+import net.shared.ServerMessage;
+import net.shared.ClientMessage;
+import net.IncomingEventBuffer;
 import utils.StringUtils;
 import gfx.popups.ReconnectionDialog;
 import browser.Url;
@@ -33,7 +36,10 @@ class Networker
     private static var _ws:WebSocket;
     private static var address:String;
 
-    public static var eventQueue:EventProcessingQueue = new EventProcessingQueue();
+    private static var eventQueue:EventProcessingQueue;
+    private static var incomingBuffer:IncomingEventBuffer;
+    private static var sentEvents:Map<Int, ClientEvent>;
+    private static var lastSentMessageID:Int;
 
     private static var suppressAlert:Bool;
     private static var backoffDelay:Float;
@@ -47,8 +53,6 @@ class Networker
     private static var clientHeartbeatTimer:Timer;
     private static var clientHeartbeatIntervalMs:Int;
     private static var serverHeartbeatTimeoutMs:Int;
-
-    private static var lastProcessedMessageTS:Float = 0;
 
     public static function getSessionID():Int
     {
@@ -85,6 +89,11 @@ class Networker
 
         if (serverHeartbeatTimeoutMs == null || serverHeartbeatTimeoutMs <= 0)
             serverHeartbeatTimeoutMs = 10000;
+
+        eventQueue = new EventProcessingQueue();
+        incomingBuffer = new IncomingEventBuffer(eventQueue.processEvent, requestResend);
+        sentEvents = [];
+        lastSentMessageID = 0;
 
         createWS();
         
@@ -144,7 +153,7 @@ class Networker
 
     private static function onMessageRecieved(msg:MessageType)
     {
-        var event:ServerEvent;
+        var message:ServerMessage;
 
         switch msg 
         {
@@ -154,7 +163,7 @@ class Networker
             case StrMessage(content):
                 try
                 {
-                    event = Unserializer.run(content);
+                    message = Unserializer.run(content);
                 }
                 catch (e)
                 {
@@ -164,9 +173,7 @@ class Networker
                 }
         }
 
-        lastProcessedMessageTS = Date.now().getTime();
-
-        switch event
+        switch message.event
         {
             case DontReconnect:
                 doNotReconnect = true;
@@ -178,8 +185,18 @@ class Networker
                 serverHeartbeatTimeoutTimer = Timer.delay(dropConnection, serverHeartbeatTimeoutMs);
             case ServerError(message):
                 Dialogs.alert(SERVER_ERROR_DIALOG_TITLE, SERVER_ERROR_DIALOG_TEXT(StringUtils.shorten(message, 500)));
+            case ResendRequest(from, to):
+                var map:Map<Int, ClientEvent> = [];
+                for (i in from...(to+1))
+                    if (sentEvents.exists(i))
+                        map.set(i, sentEvents.get(i));
+                emitEvent(MissedEvents(map));
+            case MissedEvents(map):
+                incomingBuffer.pushMissed(map);
+                if (!incomingBuffer.isWaiting())
+                    Dialogs.getQueue().closeGroup(ReconnectionPopUp);
             default:
-                eventQueue.processEvent(event);
+                incomingBuffer.push(message);
         }
     }
 
@@ -210,7 +227,8 @@ class Networker
         else
         {
             SceneManager.onDisconnected();
-            Dialogs.getQueue().add(new ReconnectionDialog());
+            if (!Dialogs.getQueue().hasActiveDialog(ReconnectionPopUp))
+                Dialogs.getQueue().add(new ReconnectionDialog());
             startReconnectionAttempts(onConnectionReopened);
         }
     }
@@ -230,7 +248,7 @@ class Networker
         _ws.onerror = onConnectionError;
 
         suppressAlert = false;
-        Requests.greet(Reconnect(reconnectionToken, lastProcessedMessageTS), onGreetingAnswered.bind(_, true));
+        Requests.greet(Reconnect(reconnectionToken, incomingBuffer.lastProcessedEventID), onGreetingAnswered.bind(_, true));
     }
 
 	private static function onGreetingAnswered(data:GreetingResponseData, ?dontLeave:Bool = false)
@@ -268,8 +286,7 @@ class Networker
 			case Reconnected(missedEvents):
                 Dialogs.getQueue().closeGroup(ReconnectionPopUp);
                 SceneManager.onConnected();
-                for (missedEvent in missedEvents)
-                    eventQueue.processEvent(missedEvent);
+                incomingBuffer.pushMissed(missedEvents);
             case OutdatedClient:
                 if (Url.isFallback())
                     Browser.window.location.replace(Url.toActual());
@@ -351,6 +368,30 @@ class Networker
         if (ignoreEmitCalls)
             trace(event.getName(), event.getParameters());
         else if (_ws != null)
-            _ws.send(Serializer.run(event));
+        {
+            var messageID:Int = -1;
+
+            switch event 
+            {
+                case Greet(_, _, _), KeepAliveBeat, ResendRequest(_, _), MissedEvents(_):
+                default:
+                    messageID = lastSentMessageID + 1;
+                    lastSentMessageID = messageID;
+                    sentEvents.set(messageID, event);
+            }
+
+            _ws.send(Serializer.run(new ClientMessage(messageID, event)));
+        }
+    }
+
+    private static function requestResend(from:Int, to:Int) 
+    {
+        if (from > to)
+            return;
+
+        if (!Dialogs.getQueue().hasActiveDialog(ReconnectionPopUp))
+            Dialogs.getQueue().add(new ReconnectionDialog());
+
+        emitEvent(ResendRequest(from, to));
     }
 }

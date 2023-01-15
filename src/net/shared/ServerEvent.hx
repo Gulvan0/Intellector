@@ -80,5 +80,8 @@ enum ServerEvent
 
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created
     ServerError(message:String); //An error occured while processing the event on the server-side
-    KeepAliveBeat;
+
+    KeepAliveBeat; //Notify that the connection is still active
+    ResendRequest(from:Int, to:Int); //Ask client to resend messages with ids between from and to inclusively
+    MissedEvents(map:Map<Int, ServerEvent>); //Resend events missed by client
 }
