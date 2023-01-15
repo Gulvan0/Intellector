@@ -36,7 +36,7 @@ class Networker
     private static var _ws:WebSocket;
     private static var address:String;
 
-    private static var eventQueue:EventProcessingQueue;
+    private static var eventQueue:EventProcessingQueue = new EventProcessingQueue();
     private static var incomingBuffer:IncomingEventBuffer;
     private static var sentEvents:Map<Int, ClientEvent>;
     private static var lastSentMessageID:Int;
@@ -90,7 +90,6 @@ class Networker
         if (serverHeartbeatTimeoutMs == null || serverHeartbeatTimeoutMs <= 0)
             serverHeartbeatTimeoutMs = 10000;
 
-        eventQueue = new EventProcessingQueue();
         incomingBuffer = new IncomingEventBuffer(eventQueue.processEvent, requestResend);
         sentEvents = [];
         lastSentMessageID = 0;
