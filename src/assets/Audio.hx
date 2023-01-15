@@ -1,5 +1,6 @@
 package assets;
 
+import js.html.audio.AudioContext;
 import net.shared.board.MaterializedPly;
 import howler.Howl;
 import howler.Howl.HowlOptions;
@@ -19,6 +20,9 @@ class Audio
 
     public static function playSound(soundName:String)
     {
+        if (new AudioContext().state != RUNNING)
+            return;
+        
         var options:HowlOptions = {};
         options.src = [Paths.sound(soundName)];
 
