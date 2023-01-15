@@ -48,7 +48,7 @@ class PastGamesTab extends VBox
         if (hasNext && canLoad) 
         {
             var loadedCnt:Int = list.loadedGamesCount;
-            if (Browser.window.scrollY * loadedCnt >= Browser.window.scrollMaxY * (loadedCnt - 1))
+            if (Browser.window.scrollY * loadedCnt >= (Browser.document.body.scrollHeight - Browser.window.innerHeight) * (loadedCnt - 1))
             {
                 canLoad = false;
                 Requests.getPlayerPastGames(profileOwnerLogin, loadedCnt, GAMES_PAGE_SIZE, activeTimeControlFilter, onGamesLoaded);
