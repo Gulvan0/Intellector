@@ -1,21 +1,4 @@
-<scrollview id="sv" width="100%" contentWidth="100%">
-    <style>
-        #sv {
-            border: 1px solid #aaaaaa;
-            background-color: #f6f6f6;
-            padding: 4px;
-        }
-        
-        #sv .scrollview-contents {
-            background-opacity: 0;
-            padding: 0px;
-            border: none;
-        }
-        
-        #sv:active {
-            border: 1px solid #aaaaaa;
-        }
-    </style>
+<vbox width="100%">
     <vbox id="studiesList" width="100%" />
     <button id="loadMoreBtn" text="${Dictionary.getPhrase(PROFILE_LOAD_MORE_BTN_TEXT)}" horizontalAlign="center"/>
-</scrollview>
+</vbox>

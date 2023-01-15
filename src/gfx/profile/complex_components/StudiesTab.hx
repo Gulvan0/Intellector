@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import haxe.ui.containers.VBox;
 import gfx.profile.data.StudyData;
 import gfx.popups.StudyParamsDialog;
 import tests.SimpleTests;
@@ -15,7 +16,7 @@ import haxe.ui.containers.ListView;
 import haxe.ui.containers.ScrollView;
 
 @:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/profile/studies_tab.xml'))
-class StudiesTab extends ScrollView
+class StudiesTab extends VBox
 {
     private static inline final STUDIES_PAGE_SIZE:Int = 10;
 
@@ -105,6 +106,7 @@ class StudiesTab extends ScrollView
             var id:Int = -negID;
             var studyWidgetData:StudyWidgetData = generateStudyWidgetData(id, info);
             var studyWidget:StudyWidget = new StudyWidget(studyWidgetData);
+            
             studiesList.addComponent(studyWidget);
             loadedStudies.set(id, info);
             widgetByStudyID.set(id, studyWidget);
@@ -133,7 +135,6 @@ class StudiesTab extends ScrollView
     {
         super();
         this.percentWidth = 100;
-        this.percentHeight = 100;
         this.text = Dictionary.getPhrase(PROFILE_STUDIES_TAB_TITLE);
         
         this.profileOwner = profileOwner;
