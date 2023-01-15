@@ -1,5 +1,7 @@
 package gfx.profile.complex_components;
 
+import haxe.ui.events.UIEvent;
+import haxe.Timer;
 import haxe.ui.containers.VBox;
 import net.shared.dataobj.GameInfo;
 import gfx.profile.simple_components.TimeControlFilterDropdown;
@@ -11,6 +13,9 @@ class GamesList extends VBox
     private var loadedGames:Map<Int, GameInfo> = [];
     private var profileOwnerLogin:String;
     private var onGameSelected:(info:GameInfo)->Void;
+
+    private var queuedGames:Array<GameInfo> = [];
+    private var loadingTimer:Null<Timer> = null;
 
     public var loadedGamesCount(get, never):Int;
 
@@ -26,7 +31,12 @@ class GamesList extends VBox
 
     public function clear()
     {
+        if (loadingTimer != null)
+            loadingTimer.stop();
+        loadingTimer = null;
+
         removeAllComponents();
+        queuedGames = [];
         loadedGames = [];
     }
 
@@ -44,17 +54,40 @@ class GamesList extends VBox
 
     public function appendGames(games:Array<GameInfo>)
     {
-        for (info in games)
-        {
-            var gameWidgetData:GameWidgetData = {
-                info: info,
-                onClicked: onGameClicked.bind(info.id),
-                watchedLogin: profileOwnerLogin
-            };
+        queuedGames = queuedGames.concat(games);
 
-            addComponent(new GameWidget(gameWidgetData));
-            loadedGames.set(info.id, info);
+        if (loadingTimer == null)
+            appendQueuedGame();
+    }
+
+    private function appendQueuedGame()
+    {
+        if (Lambda.empty(queuedGames))
+        {
+            loadingTimer = null;
+            return;
         }
+
+        var info = queuedGames.shift();
+
+        var gameWidgetData:GameWidgetData = {
+            info: info,
+            onClicked: onGameClicked.bind(info.id),
+            watchedLogin: profileOwnerLogin
+        };
+
+        addComponent(new GameWidget(gameWidgetData));
+        loadedGames.set(info.id, info);
+
+        loadingTimer = Timer.delay(appendQueuedGame, 30);
+    }
+
+    @:bind(this, UIEvent.HIDDEN)
+    private function onHidden(e) 
+    {
+        if (loadingTimer != null)
+            loadingTimer.stop();
+        loadingTimer = null;
     }
 
     public function new(profileOwnerLogin:String, preloadedGames:Array<GameInfo>, onGameSelected:(info:GameInfo)->Void)
