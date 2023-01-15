@@ -11,28 +11,15 @@ import haxe.ui.components.DropDown;
 
 @:xml('
     <item-renderer layoutName="horizontal" width="100%" height="71px">
-        <square height="100%">
-            <arp-image id="img" horizontalAlign="center" verticalAlign="center" />
-        </square>
+        <image width="71px" height="71px" id="img" />
         <vbox verticalAlign="center" style="spacing:0px">
             <label id="tc" style="font-size: 20px;" />
-            <label id="games" style="color: #888888;" />
-            <label id="elo" style="color: #888888;" />
+            <label id="games" style="font-size: 16px;color: #888888;" />
+            <label id="elo" style="font-size: 16px;color: #888888;" />
         </vbox>
-    </item-renderer>
+    </item-renderer>16
 ')
-private class TimeControlFilterRenderer extends ItemRenderer
-{
-    private override function onDataChanged(data:Dynamic)
-    {
-        super.onDataChanged(data);
-
-        if (img.originalWidth < img.originalHeight)
-            img.percentHeight = 100;
-        else
-            img.percentWidth = 100;
-    }
-}
+private class TimeControlFilterRenderer extends ItemRenderer {}
 
 class TimeControlFilterDropdown extends DropDown
 {

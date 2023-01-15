@@ -70,6 +70,7 @@ class PastGamesTab extends VBox
         addComponent(tcFilterDropdown);
 
         list = new GamesList(profileOwnerLogin, preloadedGames, onGameClicked);
+        list.percentWidth = 100;
         addComponent(list);
 
         Browser.document.addEventListener('scroll', event -> {onScrolled();});

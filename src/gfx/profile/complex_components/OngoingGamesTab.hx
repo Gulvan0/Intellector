@@ -45,6 +45,7 @@ class OngoingGamesTab extends VBox
         addComponent(reloadBtn);
 
         list = new GamesList(profileOwnerLogin, gamesInProgress, onGameClicked);
+        list.percentWidth = 100;
         addComponent(list);
     }
 }
