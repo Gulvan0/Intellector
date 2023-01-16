@@ -127,6 +127,7 @@ class ChallengeParamsDialog extends BaseDialog
     private function onCorrespondenceCheckChange(e)
     {
         tcValuesBox.disabled = correspondenceCheck.selected;
+        approveTimeControl();
     }
 
     @:bind(applyTcParamsBtn, MouseEvent.CLICK)
@@ -142,13 +143,7 @@ class ChallengeParamsDialog extends BaseDialog
             approvedTimeControl = TimeControl.correspondence();
         else
         {
-            if (startMinsTF.text == "" && startSecsTF.text == "")
-            {
-                restoreTimeControlInputValues();
-                tcParamsBox.fadeOut(correctPositionLater);
-                return;
-            }
-            else if (startMinsTF.text == "")
+            if (startMinsTF.text == "")
                 startMinsTF.text = "0";
             else if (startSecsTF.text == "")
                 startSecsTF.text = "0";
@@ -162,9 +157,19 @@ class ChallengeParamsDialog extends BaseDialog
 
             if (startMins == null || startSecs == null || bonusSecs == null || startMins < 0 || startSecs < 0 || bonusSecs < 0 || startMins + startSecs == 0)
             {
-                restoreTimeControlInputValues();
-                tcParamsBox.fadeOut(correctPositionLater);
-                return;
+                if (approvedTimeControl.getType() == Correspondence)
+                {
+                    restoreTimeControlInputValues(TimeControl.normal(10, 5));
+                    startMins = 10;
+                    startSecs = 0;
+                    bonusSecs = 5;
+                }
+                else
+                {
+                    restoreTimeControlInputValues();
+                    tcParamsBox.fadeOut(correctPositionLater);
+                    return;
+                }
             }
 
             var finalStartSecs:Int = MathUtils.minInt(startMins * 60 + startSecs, MAX_START_SECS_ALLOWED);
