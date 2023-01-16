@@ -247,7 +247,6 @@ class SelectableBoard extends Board
         Screen.instance.unregisterEvent(MouseEvent.RIGHT_MOUSE_UP, rightReleaseSelectableHandler);
     }
 
-    //TODO: Signature updated
     public function new(initialSit:Situation, arrowMode:SelectionMode, hexMode:SelectionMode, orientation:PieceColor = White, ?marks:Marking, ?initialW:Float, ?initialH:Float) 
     {
         super(initialSit, orientation, marks, initialW, initialH);

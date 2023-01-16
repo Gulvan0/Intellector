@@ -18,13 +18,14 @@ enum Highlighting
 
 class Arrow extends Canvas
 {
-    private static var ARROW_THICKNESS:Float = 2;
-    private static var ARROW_TRIANGLE_SIDE:Float = 12;
-    private static var STRAIGHT_ARROW_SEGMENT_SIZE:Float = 5;
+    private static var NORMAL_ARROW_THICKNESS:Float = 2;
+    private static var NORMAL_ARROW_TRIANGLE_SIDE:Float = 12;
+    private static var NORMAL_STRAIGHT_ARROW_SEGMENT_SIZE:Float = 5;
 
     public var from(default, null):Point;
     public var to(default, null):Point;
     public var highlighting(default, null):Highlighting;
+    public var scale(default, null):Float;
 
     public function highlight(fully:Bool) 
     {
@@ -84,11 +85,11 @@ class Arrow extends Canvas
 
     private function drawArrow() 
     {
-        var vertex1:Point = rotatedPoint(new Point(0, -ARROW_TRIANGLE_SIDE), - Math.PI / 8).sum(to);
-        var vertex2:Point = rotatedPoint(new Point(0, -ARROW_TRIANGLE_SIDE), Math.PI / 8).sum(to);
+        var vertex1:Point = rotatedPoint(new Point(0, -NORMAL_ARROW_TRIANGLE_SIDE * scale), - Math.PI / 8).sum(to);
+        var vertex2:Point = rotatedPoint(new Point(0, -NORMAL_ARROW_TRIANGLE_SIDE * scale), Math.PI / 8).sum(to);
         var upperSideVector = vertex2.diff(vertex1).product(0.5);
         var inputVertex:Point = vertex1.sum(upperSideVector);
-        var fracturePoint:Point = inputVertex.diff(new Point(0, STRAIGHT_ARROW_SEGMENT_SIZE));
+        var fracturePoint:Point = inputVertex.diff(new Point(0, NORMAL_STRAIGHT_ARROW_SEGMENT_SIZE * scale));
 
         var color:Color;
         var alpha:Float;
@@ -106,10 +107,10 @@ class Arrow extends Canvas
                 alpha = 1;
         }
 
-        width = MathUtils.arrmax([inputVertex.x, fracturePoint.x, from.x, to.x, vertex1.x, vertex2.x]) + ARROW_THICKNESS;
-        height = MathUtils.arrmax([inputVertex.y, fracturePoint.y, from.y, to.y, vertex1.y, vertex2.y]) + ARROW_THICKNESS;
+        width = MathUtils.arrmax([inputVertex.x, fracturePoint.x, from.x, to.x, vertex1.x, vertex2.x]) + NORMAL_ARROW_THICKNESS * scale;
+        height = MathUtils.arrmax([inputVertex.y, fracturePoint.y, from.y, to.y, vertex1.y, vertex2.y]) + NORMAL_ARROW_THICKNESS * scale;
 
-        componentGraphics.strokeStyle(color, ARROW_THICKNESS, alpha);
+        componentGraphics.strokeStyle(color, NORMAL_ARROW_THICKNESS * scale, alpha);
         componentGraphics.moveTo(from.x, from.y);
         componentGraphics.lineTo(fracturePoint.x, fracturePoint.y);
         componentGraphics.lineTo(inputVertex.x, inputVertex.y);
@@ -128,9 +129,10 @@ class Arrow extends Canvas
         path.close();
     }
 
-    public function new() 
+    public function new(scale:Float) 
     {
         super();
         this.highlighting = Off;
+        this.scale = scale;
     }
 }

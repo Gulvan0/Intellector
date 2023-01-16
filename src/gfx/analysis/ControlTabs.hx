@@ -70,22 +70,15 @@ class ControlTabs extends TabView implements IGameBoardObserver implements IAnal
         variantView.clear(newStartingSituation);
     }
 
-    //TODO: Implement properly
-    private function onWheel(obj:Component, e:MouseEvent)
+    private function onWheel(tree:VariantTree, e:MouseEvent)
     {
         if (e.ctrlKey) 
         {
             e.cancel();
-            /*if (e.delta > 0 && obj.scaleX < 8)
-            {
-                obj.scaleX *= 2;
-                obj.scaleY *= 2;
-            }
-            else if (e.delta < 0 && obj.scaleX > 0.125)
-            {
-                obj.scaleX /= 2;
-                obj.scaleY /= 2;
-            }*/
+            if (e.delta > 0 && tree.scale < 8)
+                tree.setScale(tree.scale * 2);
+            else if (e.delta < 0 && tree.scale > 0.125)
+                tree.setScale(tree.scale / 2);
         } 
     }
 

@@ -34,8 +34,10 @@ class DisplacementInfo
 
 class VariantTree extends Absolute implements IVariantView
 {
-    private static var BLOCK_INTERVAL_X:Float = 15;
-    private static var PERIOD_Y:Float = 50;
+    private static var NORMAL_BLOCK_INTERVAL_X:Float = 15;
+    private static var NORMAL_PERIOD_Y:Float = 50;
+
+    public var scale(default, null):Float = 1;
 
     private var arrows:Map<String, Arrow> = [];
     private var nodes:Map<String, Node> = [];
@@ -59,13 +61,13 @@ class VariantTree extends Absolute implements IVariantView
     {
         var s:Float = 0;
         for (i in 1...column)
-            s += columnWidths.get(i) + BLOCK_INTERVAL_X;
+            s += columnWidths.get(i) + NORMAL_BLOCK_INTERVAL_X * scale;
         return s;
     }
 
     private function rowY(row:Int):Float
     {
-        return row * PERIOD_Y;
+        return row * NORMAL_PERIOD_Y * scale;
     }
 
     public function handlePlyScrolling(type:PlyScrollType)
@@ -231,11 +233,11 @@ class VariantTree extends Absolute implements IVariantView
 
         variantRef.addChildToNode(ply, parentPath);
 
-        var node:Node = new Node(nodeCode, plyStr, selectChild, onNodeSelectRequest, onNodeRemoveRequest);
+        var node:Node = new Node(scale, nodeCode, plyStr, selectChild, onNodeSelectRequest, onNodeRemoveRequest);
         nodes.set(nodeCode, node);
         addComponent(node);
 
-        var arrow:Arrow = new Arrow();
+        var arrow:Arrow = new Arrow(scale);
         arrows.set(nodeCode, arrow);
         addComponent(arrow);
         arrow.moveComponentToBack();
@@ -338,18 +340,25 @@ class VariantTree extends Absolute implements IVariantView
         addChildNode(selectedBranch.subpath(selectedMove), ply, selectChild);
     }
 
-    public function init(eventHandler:PeripheralEvent->Void)
+    public function setScale(scale:Float)
     {
-        this.eventHandler = eventHandler;
+        removeAllComponents();
+
+        arrows = [];
+        nodes = [];
+        selectedBranch = [];
+        selectedMove = 0;
+        columnWidths = [];
+
+        this.scale = scale;
+
+        drawFromScratch(variantRef, selectedBranch.subpath(selectedMove));
+        refreshLayout();
     }
 
-    public function new(variant:Variant, ?selectedNodePath:VariantPath) 
+    private function drawFromScratch(variant:Variant, ?selectedNodePath:VariantPath)
     {
-        super();
-        this.variantRef = variant;
-        this.indicateColors = Preferences.branchingTurnColorIndicators.get();
-
-        var startingNode:Node = new Node('', Dictionary.getPhrase(OPENING_STARTING_POSITION), false, onNodeSelectRequest, v->{});
+        var startingNode:Node = new Node(scale, '', Dictionary.getPhrase(OPENING_STARTING_POSITION), false, onNodeSelectRequest, v->{});
         nodes.set('', startingNode);
         addComponent(startingNode);
 
@@ -358,8 +367,8 @@ class VariantTree extends Absolute implements IVariantView
             if (code == '')
                 continue;
 
-            var node = new Node(code, nodeInfo.getPlyStr(indicateColors), false, onNodeSelectRequest, onNodeRemoveRequest);
-            var arrow = new Arrow();
+            var node = new Node(scale, code, nodeInfo.getPlyStr(indicateColors), false, onNodeSelectRequest, onNodeRemoveRequest);
+            var arrow = new Arrow(scale);
 
             nodes.set(code, node);
             arrows.set(code, arrow);
@@ -376,5 +385,19 @@ class VariantTree extends Absolute implements IVariantView
             var branch:VariantPath = variant.getLastMainLineDescendantPath([]);
             selectBranchUnsafe(branch, branch.length);
         }
+    }
+
+    public function init(eventHandler:PeripheralEvent->Void)
+    {
+        this.eventHandler = eventHandler;
+    }
+
+    public function new(variant:Variant, ?selectedNodePath:VariantPath) 
+    {
+        super();
+        this.variantRef = variant;
+        this.indicateColors = Preferences.branchingTurnColorIndicators.get();
+
+        drawFromScratch(variant, selectedNodePath);
     }
 }

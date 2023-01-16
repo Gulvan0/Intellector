@@ -21,15 +21,19 @@ class Node extends Link
 
     public function select()
     {
-        this.customStyle = {fontBold: true, textAlign: 'center'/*, backgroundOpacity: 0.5, backgroundColor: 0x00FF00*/};
+        var newStyle = this.customStyle.clone();
+        newStyle.fontBold = true;
+        this.customStyle = newStyle;
     }
 
     public function deselect()
     {
-        this.customStyle = {fontBold: false, textAlign: 'center'/*, backgroundOpacity: 0.5, backgroundColor: 0x00FF00*/};
+        var newStyle = this.customStyle.clone();
+        newStyle.fontBold = false;
+        this.customStyle = newStyle;
     }
 
-    public function new(code:String, text:String, selected:Bool, onBranchSelect:(code:String)->Void, onBranchRemove:(code:String)->Void)
+    public function new(scale:Float, code:String, text:String, selected:Bool, onBranchSelect:(code:String)->Void, onBranchRemove:(code:String)->Void)
     {
         super();
         this.code = code;
@@ -41,12 +45,19 @@ class Node extends Link
                 onBranchSelect(this.code);
         };
 
+        this.customStyle = {
+            textAlign: 'center', 
+            backgroundOpacity: 0.5, 
+            backgroundColor: 0x00FF00,
+            fontSize: 13 * scale
+        };
+
         if (selected)
             select();
         else
             deselect();
 
-        textSize = {width: 12 * text.length, height: 20};
+        textSize = {width: 12 * text.length * scale, height: 20 * scale};
         width = textSize.width;
         height = textSize.height;
     }

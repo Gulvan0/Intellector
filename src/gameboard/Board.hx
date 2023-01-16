@@ -515,9 +515,6 @@ class Board extends Absolute
         this.lettersEnabled = lettersWillBePresent;
     }
 
-    //TODO: Signature updated
-    //TODO: Marking put in separate class
-    //TODO: Default marking from preferences is now on the caller
     public function new(situation:Situation, orientationColor:PieceColor = White, ?marking:Marking, ?initialWidth:Float = 250, ?initialHeight:Float = 250, ?dontResize:Bool = false) 
     {
         super();
