@@ -55,6 +55,6 @@ class Changelog
 
     public static function getAll():String
     {
-        return changelog.map(x -> x.format()).join('\n');
+        return changelog.map(x -> x.format()).join('<br>');
     }
 }
