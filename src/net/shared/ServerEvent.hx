@@ -65,6 +65,7 @@ enum ServerEvent
     Games(games:Array<GameInfo>, hasNext:Bool); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
     Studies(studies:Map<Int, StudyInfo>, hasNext:Bool); //Answer to GetStudiesByLogin
 
+    FollowAlreadySpectating(id:Int); //Answer to FollowPlayer: added to follower list, but the game is already viewed by client
     FollowSuccess; //Answer to FollowPlayer: no current game to spectate, but the player will be notified when the followed player starts playing
 
     PlayerNotFound; //Answer to FollowPlayer, GetPlayerProfile, GetGamesByLogin, GetOngoingGamesByLogin and GetStudiesByLogin: no such player exists

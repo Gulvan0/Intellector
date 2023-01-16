@@ -29,7 +29,7 @@ class ProfileHeader extends VBox
     @:bind(followBtn, MouseEvent.CLICK)
     private function onFollowPressed(e)
     {
-        Requests.followPlayer(username);
+        FollowManager.followPlayer(username);
     }
 
     @:bind(addFriendBtn, MouseEvent.CLICK)

@@ -26,6 +26,8 @@ class IncomingEventBuffer
 
             maxReceivedEventID = message.id;
         }
+        else if (message.id == -1)
+            eventProcessorCallback(message.event);
     }
 
     public function pushMissed(missedEvents:Map<Int, ServerEvent>) 

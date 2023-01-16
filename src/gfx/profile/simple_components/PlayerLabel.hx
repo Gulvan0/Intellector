@@ -17,19 +17,16 @@ class PlayerLabel extends HBox
 {
     public final playerRef:String;
 
-    @:bind(lbl, MouseEvent.MOUSE_OVER)
     private function onHover(e)
     {
         lbl.setFontBold(true);
     }
 
-    @:bind(lbl, MouseEvent.MOUSE_OUT)
     private function onOut(e)
     {
         lbl.setFontBold(false);
     }
 
-    @:bind(lbl, MouseEvent.CLICK)
     private function onClicked(e)
     {
         Requests.getMiniProfile(playerRef);
@@ -51,8 +48,13 @@ class PlayerLabel extends HBox
         }
         else
             lbl.text = '$displayedName';
-
+        
         if (interactive && playerRef.charAt(0) != "_")
+        {
             lbl.enablePointerEvents();
+            lbl.registerEvent(MouseEvent.CLICK, onClicked);
+            lbl.registerEvent(MouseEvent.MOUSE_OVER, onHover);
+            lbl.registerEvent(MouseEvent.MOUSE_OUT, onOut);
+        }
     }
 }

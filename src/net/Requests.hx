@@ -277,20 +277,24 @@ class Requests
         return true;
     }
 
-    public static function followPlayer(login:String)
+    public static function followPlayer(login:String, onStartedFollowing:(login:String, activeGameID:Null<Int>)->Void)
     {
-        Networker.addHandler(followPlayer_handler.bind(login));
+        Networker.addHandler(followPlayer_handler.bind(login, onStartedFollowing));
         Networker.emitEvent(FollowPlayer(login));
     }
 
-    private static function followPlayer_handler(login:String, event:ServerEvent)
+    private static function followPlayer_handler(login:String, onStartedFollowing:(login:String, activeGameID:Null<Int>)->Void, event:ServerEvent)
     {
         switch event
         {
             case SpectationData(data): 
 		        var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
+                onStartedFollowing(login, data.id);
                 SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, login)));
+            case FollowAlreadySpectating(id):
+                onStartedFollowing(login, id);
             case FollowSuccess:
+                onStartedFollowing(login, null);
                 Dialogs.info(REQUESTS_FOLLOW_PLAYER_SUCCESS_DIALOG_TEXT, REQUESTS_FOLLOW_PLAYER_SUCCESS_DIALOG_TITLE);
             case PlayerNotFound:
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);

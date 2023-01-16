@@ -164,7 +164,10 @@ class SceneManager
                     constructor = New(parsedData.whiteRef, parsedData.blackRef, parsedData.elo, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
                 }
                 else
+                {
+                    FollowManager.followedGameID = gameID;
                     constructor = Ongoing(parsedData, null, FollowManager.getFollowedPlayerLogin());
+                }
                 toScreen(LiveGame(gameID, constructor));
             default:
         }

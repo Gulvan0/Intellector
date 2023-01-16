@@ -184,13 +184,19 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             case LoginResult(ReconnectionNeeded(_, _)):
                 setIngameStatus(true);
             case GameStarted(_, logPreamble):
-                Dialogs.getQueue().closeGroup(RemovedOnGameStarted);
-                Blinker.blink(GameStarted);
-                setIngameStatus(true);
                 var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
-                var opponentLogin:String = parsedData.getPlayerOpponentRef();
-                challengesMenu.removeOwnEntries();
-                challengesMenu.removeEntriesByPlayer(opponentLogin);
+
+                if (parsedData.isPlayerParticipant())
+                {
+                    Dialogs.getQueue().closeGroup(RemovedOnGameStarted);
+                    Blinker.blink(GameStarted);
+                    if (parsedData.timeControl.getType() != Correspondence)
+                        setIngameStatus(true);
+
+                    var opponentLogin:String = parsedData.getPlayerOpponentRef();
+                    challengesMenu.removeOwnEntries();
+                    challengesMenu.removeEntriesByPlayer(opponentLogin);
+                }
             case GameEnded(_, _, _, _):
                 setIngameStatus(false);
             case IncomingDirectChallenge(data):
@@ -283,7 +289,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function startSpectating(requestedLogin:String)
     {
-        Requests.followPlayer(requestedLogin);
+        FollowManager.followPlayer(requestedLogin);
     }
 
     private function onAnalysisBoardPressed(e)

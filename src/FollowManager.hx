@@ -5,8 +5,19 @@ import net.Requests;
 class FollowManager 
 {
     private static var followedLogin:Null<String> = null;
-    
-    public static function followPlayer(login:String) 
+    public static var followedGameID:Null<Int> = null;
+
+    public static function followPlayer(login:String)
+    {
+        if (login == null)
+            throw "login can't be null";
+
+        login = login.toLowerCase();
+
+        Requests.followPlayer(login, onStartedFollowing);
+    }
+
+    private static function onStartedFollowing(login:String, activeGameID:Null<Int>) 
     {
         if (login == null)
             throw "login can't be null";
@@ -17,7 +28,7 @@ class FollowManager
             return;
 
         followedLogin = login;
-        Requests.followPlayer(login);
+        followedGameID = activeGameID;
         GlobalBroadcaster.broadcast(FollowedPlayerUpdated(login));
     }
 
@@ -27,6 +38,7 @@ class FollowManager
             return;
 
         followedLogin = null;
+        followedGameID = null;
         Networker.emitEvent(StopFollowing);
         GlobalBroadcaster.broadcast(FollowedPlayerUpdated(null));
     }
