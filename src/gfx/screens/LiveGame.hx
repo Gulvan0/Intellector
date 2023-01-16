@@ -83,7 +83,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         var availableWidth:Float = HaxeUIScreen.instance.actualWidth;
         var availableHeight:Float = HaxeUIScreen.instance.actualHeight * 0.95;
 
-        var compact:Bool = availableWidth / availableHeight < 1.16;
+        var compact:Bool = availableWidth / availableHeight < 1.3;
         var compactBoardHeight:Float = availableWidth * BoardSize.inverseAspectRatio(board.lettersEnabled);
         var largeBoardMaxWidth:Float = availableHeight / BoardSize.inverseAspectRatio(board.lettersEnabled);
         var bothBarsVisible:Bool = availableWidth >= largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
@@ -101,7 +101,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         if (compact)
         {
             boardContainer.percentHeight = null;
-            boardContainer.height = compactBoardHeight + 20;
+            boardContainer.height = Math.min(compactBoardHeight + 10, availableHeight - cCreepingLine.height - cActionBar.height - cBlackPlayerHBox.height - cWhitePlayerHBox.height - 45);
         }
         else
         {

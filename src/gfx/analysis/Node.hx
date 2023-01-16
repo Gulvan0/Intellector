@@ -47,8 +47,6 @@ class Node extends Link
 
         this.customStyle = {
             textAlign: 'center', 
-            backgroundOpacity: 0.5, 
-            backgroundColor: 0x00FF00,
             fontSize: 13 * scale
         };
 
