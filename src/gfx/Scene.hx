@@ -128,6 +128,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         analysisBoardBtn.text = Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM);
         socialMenu.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_TITLE);
         playerProfileBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM);
+        vkBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_VK_ITEM);
+        discordBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_DISCORD_ITEM);
         logInBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGIN_ITEM);
         myProfileBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_MY_PROFILE_ITEM);
         settingsBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_SETTINGS_ITEM);
@@ -138,6 +140,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         sidemenu.watchPlayerBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM);
         sidemenu.analysisBoardBtn.text = Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM);
         sidemenu.playerProfileBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM);
+        sidemenu.vkBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_VK_ITEM);
+        sidemenu.discordBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_DISCORD_ITEM);
     }
 
     private function onSendChallengeResultReceived(result:SendChallengeResult)
@@ -302,6 +306,16 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         Dialogs.prompt(INPUT_PLAYER_LOGIN, All, navigateToProfile);
     }
 
+    private function onVKBtnPressed(e) 
+    {
+        Browser.window.open("https://vk.com/intellectorgroup", "_blank");
+    }
+
+    private function onDiscordBtnPressed(e) 
+    {
+        Browser.window.open("https://discord.gg/f8chehcnV5", "_blank");
+    }
+
     private function navigateToProfile(requestedLogin:String)
     {
         Requests.getPlayerProfile(requestedLogin);
@@ -351,6 +365,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         watchPlayerBtn.onClick = onWatchPlayerPressed;
         analysisBoardBtn.onClick = onAnalysisBoardPressed;
         playerProfileBtn.onClick = onPlayerProfilePressed;
+        vkBtn.onClick = onVKBtnPressed;
+        discordBtn.onClick = onDiscordBtnPressed;
 
         sidemenu.siteName.onClick = e -> {sidemenu.hide(); onSiteNamePressed(e);};
         sidemenu.createChallengeBtn.onClick = e -> {sidemenu.hide(); onCreateChallengePressed(e);};
@@ -359,6 +375,8 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         sidemenu.watchPlayerBtn.onClick = e -> {sidemenu.hide(); onWatchPlayerPressed(e);};
         sidemenu.analysisBoardBtn.onClick = e -> {sidemenu.hide(); onAnalysisBoardPressed(e);};
         sidemenu.playerProfileBtn.onClick = e -> {sidemenu.hide(); onPlayerProfilePressed(e);};
+        sidemenu.vkBtn.onClick = e -> {sidemenu.hide(); onVKBtnPressed(e);};
+        sidemenu.discordBtn.onClick = e -> {sidemenu.hide(); onDiscordBtnPressed(e);};
 
         logInBtn.onClick = onLogInPressed;
         myProfileBtn.onClick = onMyProfilePressed;

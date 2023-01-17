@@ -146,6 +146,10 @@ class Dictionary
                 return ["Social", "Сообщество"];
             case MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM:
                 return ["Player Profile", "Профиль игрока"];
+            case MENUBAR_SOCIAL_MENU_VK_ITEM:
+                return ["VK Group", "Группа VK"];
+            case MENUBAR_SOCIAL_MENU_DISCORD_ITEM:
+                return ["Discord Server", "Сервер Discord"];
             case MENUBAR_CHALLENGES_NO_CHALLENGES_PLACEHOLDER:
                 return ["No challenges", "Нет вызовов"];
             case MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE:

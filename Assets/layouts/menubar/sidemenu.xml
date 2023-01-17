@@ -54,5 +54,7 @@
         <spacer styleName="sectionSpacer" />
         <label text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_TITLE)}" styleName="mobileMenuHeader" />
             <label id="playerProfileBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM)}" styleName="mobileMenuItem" />
+            <label id="vkBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_VK_ITEM)}" styleName="mobileMenuItem" />
+            <label id="discordBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_DISCORD_ITEM)}" styleName="mobileMenuItem" />
     </vbox>
 </sidebar>
