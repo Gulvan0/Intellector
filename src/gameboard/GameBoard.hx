@@ -336,7 +336,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
                 this._startingSituation = initialVariant.startingSituation.copy();
                 this._currentSituation = _startingSituation.copy();
 
-                super(_startingSituation, Free, Free, _startingSituation.turnColor);
+                super(_startingSituation, Free, Free, _startingSituation.turnColor, Preferences.marking.get());
 
                 for (ply in initialVariant.getMainLineBranch())
                     makeMove(ply);
@@ -350,7 +350,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
                 
                 var playerColor:PieceColor = LoginManager.isPlayer(whiteRef)? White : Black;
 
-                super(_startingSituation, Free, Free, playerColor);
+                super(_startingSituation, Free, Free, playerColor, Preferences.marking.get());
 
                 this.state = _startingSituation.turnColor == playerColor || Preferences.premoveEnabled.get()? new NeutralState() : new StubState();
                 this.behavior = _startingSituation.turnColor == playerColor? new PlayerMoveBehavior(playerColor) : new EnemyMoveBehavior(playerColor);
@@ -362,9 +362,9 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
                 var playerColor:Null<PieceColor> = parsedData.getPlayerColor();
 
                 if (followedPlayerLogin != null)
-                    super(_startingSituation, Free, Free, parsedData.getParticipantColor(followedPlayerLogin));
+                    super(_startingSituation, Free, Free, parsedData.getParticipantColor(followedPlayerLogin), Preferences.marking.get());
                 else
-                    super(_startingSituation, Free, Free, playerColor);
+                    super(_startingSituation, Free, Free, playerColor, Preferences.marking.get());
                 
                 for (ply in parsedData.movesPlayed)
                     makeMove(ply);
@@ -389,7 +389,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
                 this._startingSituation = parsedData.startingSituation.copy();
                 this._currentSituation = _startingSituation.copy();
 
-                super(_startingSituation, Free, Free, watchedPlayerLogin != null? parsedData.getParticipantColor(watchedPlayerLogin) : White);
+                super(_startingSituation, Free, Free, watchedPlayerLogin != null? parsedData.getParticipantColor(watchedPlayerLogin) : White, Preferences.marking.get());
                 
                 for (ply in parsedData.movesPlayed)
                     makeMove(ply);

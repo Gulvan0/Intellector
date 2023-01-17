@@ -1,5 +1,6 @@
 package gfx.game;
 
+import utils.TimeControl;
 import assets.StandaloneAssetPath;
 import haxe.Timer;
 import net.shared.Constants;
@@ -47,6 +48,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
 {
     private var mode:Mode;
 
+    private var isCorrespondence:Bool;
     private var move(default, set):Int;
 
     private var enableDrawSinceMove:Int;
@@ -139,7 +141,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
 
         if (move < enableAddTimeSinceMove)
             addTimeBtn.disabled = true;
-        else
+        else if (!isCorrespondence)
             addTimeBtn.disabled = false;
 
         if (move < changeAbortToResignAfterMove)
@@ -325,21 +327,26 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         this.incomingDrawRequestPending = false;
         this.incomingTakebackRequestPending = false;
 
+        var tc:TimeControl;
+
         switch constructor 
         {
-            case New(whiteRef, blackRef, _, _, startingSituation, _):
+            case New(whiteRef, blackRef, _, timeControl, startingSituation, _):
                 setMode(PlayerOngoingGame);
                 var playerColor:PieceColor = LoginManager.isPlayer(whiteRef)? White : Black;
                 this.enableTakebackSinceMove = startingSituation.turnColor == playerColor? 1 : 2;
                 move = 0;
+                tc = timeControl;
 
             case Ongoing(parsedData, _, followedPlayerLogin):
                 setMode(parsedData.isPlayerParticipant()? PlayerOngoingGame : Spectator);
                 this.enableTakebackSinceMove = parsedData.startingSituation.turnColor == parsedData.getPlayerColor()? 1 : 2;
                 move = parsedData.moveCount;
+                tc = parsedData.timeControl;
 
             case Past(parsedData, _):
                 setMode(Spectator);
+                tc = parsedData.timeControl;
         }
 
         attachHandler(resignBtn, onResignPressed);
@@ -365,6 +372,10 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
             rematchBtn.disabled = true;
             playFromPosBtn.disabled = true;
         }
+
+        this.isCorrespondence = tc.getType() == Correspondence;
+        if (isCorrespondence)
+            addTimeBtn.disabled = true;
     }
 
     public function new() 

@@ -135,7 +135,7 @@ class Rules
         else if (ply.morphInto != null)
         {
             var intChameleon:Bool = movingPiece.type == Intellector;
-            var noAura:Bool = !situation.intellectorCoords(movingPiece.color).isLaterallyNear(ply.from);
+            var noAura:Bool = situation.intellectorCoords(movingPiece.color) == null || !situation.intellectorCoords(movingPiece.color).isLaterallyNear(ply.from);
             var wrongChameleonType:Bool = ply.morphInto != situation.pieces.get(ply.to).type();
 
             if (intChameleon || noAura || wrongChameleonType)

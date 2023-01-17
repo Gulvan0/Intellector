@@ -26,6 +26,6 @@ class TCEloEntry extends GenAnnotatedImage<EloData>
     
     public function new(data:EloData)
     {
-        super(data, Exact(85), Exact(35));
+        super(data, Exact(100), Exact(35));
     }
 }

@@ -618,15 +618,15 @@ class Dictionary
                 return ["Draw declined", "Ничья отклонена"];
             case TAKEBACK_OFFERED_MESSAGE(color):
                 if (color != null)
-                    return ['${Utils.getColorName(color, EN)} requested a takeback', '${Utils.getColorName(color, RU)} запросили тейкбек'];
+                    return ['${Utils.getColorName(color, EN)} requested a takeback', '${Utils.getColorName(color, RU)} запросили возврат хода'];
                 else
-                    return ['Takeback requested', 'Тейкбек запрошен'];
+                    return ['Takeback requested', 'Возврат хода запрошен'];
             case TAKEBACK_CANCELLED_MESSAGE(_):
-                return ["Takeback cancelled", "Запрос тейкбека отменен"];
+                return ["Takeback cancelled", "Запрос возврата хода отменен"];
             case TAKEBACK_ACCEPTED_MESSAGE(_):
-                return ["Takeback accepted", "Тейкбек принят"];
+                return ["Takeback accepted", "Возврат хода принят"];
             case TAKEBACK_DECLINED_MESSAGE(_):
-                return ["Takeback declined", "Тейкбек отклонен"];
+                return ["Takeback declined", "Возврат хода отклонен"];
             case PLAYER_DISCONNECTED_MESSAGE(color):
                 return ['${Utils.getColorName(color, EN)} disconnected', '${Utils.getColorName(color, RU)} отключились'];
             case PLAYER_RECONNECTED_MESSAGE(color):

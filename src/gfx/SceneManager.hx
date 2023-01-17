@@ -70,6 +70,9 @@ class SceneManager
 
     public static function toScreen(type:ScreenType)
     {
+        if (type.equals(currentScreenType))
+            return;
+        
         scene.toScreen(type);
         currentScreenType = type;
         Url.setPathByScreen(type);

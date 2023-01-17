@@ -31,7 +31,7 @@ class CurrentGamesTable extends VBox
             if (parsedData.elo != null)
             {
                 whiteLabel += ' (${eloToStr(parsedData.elo[White])})';
-                whiteLabel += ' (${eloToStr(parsedData.elo[Black])})';
+                blackLabel += ' (${eloToStr(parsedData.elo[Black])})';
             }
 
             table.dataSource.add({timeControl: parsedData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});
