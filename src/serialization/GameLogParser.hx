@@ -6,7 +6,6 @@ import net.shared.EloValue;
 import utils.TimeControl;
 import net.shared.Outcome;
 import net.shared.PieceColor;
-import net.shared.PieceType;
 import dict.*;
 import net.shared.board.Situation;
 using StringTools;
