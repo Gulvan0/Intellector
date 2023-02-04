@@ -1,5 +1,7 @@
 package;
 
+import lzstring.LZString;
+import js.lib.Uint8Array;
 import net.shared.ServerMessage;
 import net.shared.ClientMessage;
 import net.IncomingEventBuffer;
@@ -157,7 +159,11 @@ class Networker
         switch msg 
         {
             case BytesMessage(content):
-                trace("Unexpected bytes: " + content.readAllAvailableBytes().toString());
+                var lz = new LZString();
+                var bytesData = content.readAllAvailableBytes().getData();
+                var array = new Uint8Array(bytesData);
+                var s:String = lz.decompressFromUint8Array(array);
+                onMessageRecieved(StrMessage(s));
                 return;
             case StrMessage(content):
                 try
