@@ -160,9 +160,8 @@ class Networker
         {
             case BytesMessage(content):
                 var lz = new LZString();
-                var bytesData = content.readAllAvailableBytes().getData();
-                var array = new Uint8Array(bytesData);
-                var s:String = lz.decompressFromUint8Array(array);
+                var base64:String = content.readAllAvailableBytes().toString();
+                var s:String = lz.decompressFromBase64(base64);
                 onMessageRecieved(StrMessage(s));
                 return;
             case StrMessage(content):
