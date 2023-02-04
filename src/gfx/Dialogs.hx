@@ -52,21 +52,23 @@ class Dialogs
         infoRaw(Dictionary.getPhrase(message, messageSubstitutions), Dictionary.getPhrase(title), group);
     }
 
-    public static function confirmRaw(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void)
+    public static function confirmRaw(message:String, title:String, onConfirmed:Void->Void, onDeclined:Void->Void, ?onCancelled:Void->Void)
     {
         var dialog = DialogManager.messageBox(message, title, MessageBoxType.TYPE_QUESTION, true);
 
         queue.addBasic(dialog, btn -> {
             if (btn == DialogButton.YES)
                 onConfirmed();
-            else
+            else if (btn == DialogButton.NO || onCancelled == null)
                 onDeclined();
+            else
+                onCancelled();
         });
     }
 
-    public static function confirm(message:Phrase, title:Phrase, onConfirmed:Void->Void, onDeclined:Void->Void)
+    public static function confirm(message:Phrase, title:Phrase, onConfirmed:Void->Void, onDeclined:Void->Void, ?onCancelled:Void->Void)
     {
-        confirmRaw(Dictionary.getPhrase(message), Dictionary.getPhrase(title), onConfirmed, onDeclined);
+        confirmRaw(Dictionary.getPhrase(message), Dictionary.getPhrase(title), onConfirmed, onDeclined, onCancelled);
     }
 
     public static function prompt(message:Phrase, removeSpaces:SpaceRemoval, onInput:String->Void, ?onCancel:Null<Void->Void>, ?emptyIsCancel:Bool = true) 

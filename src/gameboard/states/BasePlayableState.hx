@@ -36,7 +36,7 @@ abstract class BasePlayableState extends BaseState
             else if (shiftPressed)
                 onMoveChosen(chameleonPly);
             else
-                Dialogs.confirm(CHAMELEON_DIALOG_QUESTION, CHAMELEON_DIALOG_TITLE, onChameleonDecisionMade.bind(true), onChameleonDecisionMade.bind(false));
+                Dialogs.confirm(CHAMELEON_DIALOG_QUESTION, CHAMELEON_DIALOG_TITLE, onChameleonDecisionMade.bind(true), onChameleonDecisionMade.bind(false), ()->{});
         else
             onMoveChosen(simplePly);
     }
