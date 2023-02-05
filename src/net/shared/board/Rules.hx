@@ -134,8 +134,10 @@ class Rules
         }
         else if (ply.morphInto != null)
         {
+            var intCoords:Null<HexCoords> = situation.intellectorCoords(movingPiece.color);
+            
+            var noAura:Bool = intCoords == null? true : !intCoords.isLaterallyNear(ply.from);
             var intChameleon:Bool = movingPiece.type == Intellector;
-            var noAura:Bool = situation.intellectorCoords(movingPiece.color) == null || !situation.intellectorCoords(movingPiece.color).isLaterallyNear(ply.from);
             var wrongChameleonType:Bool = ply.morphInto != situation.pieces.get(ply.to).type();
 
             if (intChameleon || noAura || wrongChameleonType)

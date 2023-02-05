@@ -1,5 +1,6 @@
 package gameboard.states;
 
+import haxe.ui.geom.Point;
 import net.shared.board.HexCoords;
 
 class StubState extends BaseState
@@ -9,7 +10,7 @@ class StubState extends BaseState
         //* Do nothing
     }
     
-    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, screenCoords:Point, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }

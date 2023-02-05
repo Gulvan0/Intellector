@@ -1,5 +1,6 @@
 package gameboard.states;
 
+import haxe.ui.geom.Point;
 import net.shared.board.HexCoords;
 
 class HexSelectionState extends BaseState
@@ -21,7 +22,7 @@ class HexSelectionState extends BaseState
         throw "Invalid transition";
     }
 
-    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, screenCoords:Point, shiftPressed:Bool, ctrlPressed:Bool)
     {
         if (possibleLocation(location))
             boardInstance.behavior.onHexChosen(location);

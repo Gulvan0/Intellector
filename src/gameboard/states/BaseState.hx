@@ -1,5 +1,6 @@
 package gameboard.states;
 
+import haxe.ui.geom.Point;
 import net.shared.board.HexCoords;
 import gameboard.util.HexagonSelectionState;
 import utils.exceptions.AlreadyInitializedException;
@@ -14,7 +15,7 @@ abstract class BaseState
     
     public abstract function exitToNeutral():Void;
 
-    public abstract function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool):Void;
+    public abstract function onLMBPressed(location:Null<HexCoords>, screenCoords:Point, shiftPressed:Bool, ctrlPressed:Bool):Void;
 
     private final function updateHoverEffects()
     {

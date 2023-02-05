@@ -1,5 +1,6 @@
 package gameboard;
 
+import haxe.ui.geom.Point;
 import net.shared.board.HexCoords;
 import net.shared.board.HexCoords.equal;
 import gameboard.util.HexDimensions;
@@ -252,7 +253,7 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
             var pressCoords:Null<HexCoords> = posToIndexes(toLocalCoords(e.screenX, e.screenY));
 
             if (lastMousePress == null || eventTime - lastMousePress.ts >= 750 || !equal(lastMousePress.coords, pressCoords))
-                state.onLMBPressed(pressCoords, e.shiftKey, e.ctrlKey);
+                state.onLMBPressed(pressCoords, new Point(e.screenX, e.screenY), e.shiftKey, e.ctrlKey);
 
             lastMousePress = {ts: eventTime, coords: pressCoords};
         }
@@ -262,11 +263,12 @@ class GameBoard extends SelectableBoard implements INetObserver implements IAnal
 
     private function onMouseMoved(e:MouseEvent)
     {
+        lastMouseMoveEvent = e;
+        
         if (suppressLMBHandler || Dialogs.getQueue().hasActiveDialog())
             return;
 
         state.onMouseMoved(posToIndexes(toLocalCoords(e.screenX, e.screenY)));
-        lastMouseMoveEvent = e;
     }
 
     private function onLMBReleased(e:MouseEvent)

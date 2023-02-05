@@ -1,5 +1,6 @@
 package gameboard.states;
 
+import haxe.ui.geom.Point;
 import net.shared.board.RawPly;
 import net.shared.board.HexCoords;
 import net.shared.board.Hex;
@@ -7,7 +8,7 @@ import net.shared.board.Hex;
 private enum Transition
 {
     ToNeutral;
-    ToDragging(dragStartLocation:HexCoords);
+    ToDragging(dragStartLocation:HexCoords, screenCoords:Point);
 }
 
 class SelectedState extends BasePlayableState
@@ -33,8 +34,8 @@ class SelectedState extends BasePlayableState
         {
             case ToNeutral:
                 boardInstance.state = new NeutralState();
-            case ToDragging(dragStartLocation):
-                boardInstance.state = new DraggingState(dragStartLocation);
+            case ToDragging(dragStartLocation, screenCoords):
+                boardInstance.state = new DraggingState(dragStartLocation, screenCoords);
         }
     }
 
@@ -43,7 +44,7 @@ class SelectedState extends BasePlayableState
         exit(ToNeutral);
     }
 
-    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, screenCoords:Point, shiftPressed:Bool, ctrlPressed:Bool)
     {
         var pressedDestinationHex:Null<Hex> = location == null? null : boardInstance.shownSituation.get(location);
         var selectedDepartureHex:Hex = boardInstance.shownSituation.get(selectedDepartureLocation);
@@ -56,7 +57,7 @@ class SelectedState extends BasePlayableState
             askMoveDetails(selectedDepartureLocation, location, shiftPressed, ctrlPressed);
         }
         else if (pressedDestinationHex.color() == selectedDepartureHex.color())
-            exit(ToDragging(location));
+            exit(ToDragging(location, screenCoords));
         else
             exit(ToNeutral);
     }

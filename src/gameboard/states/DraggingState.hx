@@ -13,6 +13,7 @@ private enum Transition
 class DraggingState extends BasePlayableState
 {
     private var dragStartLocation:HexCoords;
+    private var dragStartScreenCoords:Point;
     private var draggedPiece:Piece;
     private var dragOffset:Point;
     private var dragBlocked:Bool;
@@ -21,7 +22,7 @@ class DraggingState extends BasePlayableState
     {
         draggedPiece = boardInstance.getPiece(dragStartLocation);
         draggedPiece.moveComponentToFront();
-        dragOffset = new Point(draggedPiece.left - boardInstance.lastMouseMoveEvent.screenX, draggedPiece.top - boardInstance.lastMouseMoveEvent.screenY);
+        dragOffset = new Point(draggedPiece.left - dragStartScreenCoords.x, draggedPiece.top - dragStartScreenCoords.y);
         dragBlocked = false;
 
         boardInstance.getHex(dragStartLocation).showLayer(LMB);
@@ -54,7 +55,7 @@ class DraggingState extends BasePlayableState
         exit(ToNeutral);
     }
 
-    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, screenCoords:Point, shiftPressed:Bool, ctrlPressed:Bool)
     {
         //* Do nothing
     }
@@ -92,8 +93,9 @@ class DraggingState extends BasePlayableState
         return false;
     }
 
-    public function new(dragStartLocation:HexCoords)
+    public function new(dragStartLocation:HexCoords, dragStartScreenCoords:Point)
     {
         this.dragStartLocation = dragStartLocation;
+        this.dragStartScreenCoords = dragStartScreenCoords;
     }
 }

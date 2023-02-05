@@ -1,11 +1,12 @@
 package gameboard.states;
 
+import haxe.ui.geom.Point;
 import gameboard.components.Piece;
 import net.shared.board.HexCoords;
 
 private enum Transition 
 {
-    ToDragging(dragStartLocation:HexCoords);
+    ToDragging(dragStartLocation:HexCoords, screenCoords:Point);
 }
 
 class NeutralState extends BasePlayableState
@@ -24,12 +25,12 @@ class NeutralState extends BasePlayableState
     {
         switch transition 
         {
-            case ToDragging(dragStartLocation):
-                boardInstance.state = new DraggingState(dragStartLocation);
+            case ToDragging(dragStartLocation, screenCoords):
+                boardInstance.state = new DraggingState(dragStartLocation, screenCoords);
         }
     }
 
-    public function onLMBPressed(location:Null<HexCoords>, shiftPressed:Bool, ctrlPressed:Bool)
+    public function onLMBPressed(location:Null<HexCoords>, screenCoords:Point, shiftPressed:Bool, ctrlPressed:Bool)
     {
         if (boardInstance.behavior.returnToCurrentOnLMB() && !boardInstance.plyHistory.isAtEnd())
         {
@@ -41,7 +42,7 @@ class NeutralState extends BasePlayableState
         var pressedPiece:Null<Piece> = boardInstance.getPiece(location);
 
         if (pressedPiece != null && boardInstance.behavior.allowedToMove(pressedPiece))
-            exit(ToDragging(location));
+            exit(ToDragging(location, screenCoords));
         else
             boardInstance.behavior.onVoidClick();
     }
