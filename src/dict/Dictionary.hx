@@ -110,6 +110,12 @@ class Dictionary
                 return ["Copied!", "Скопировано!"];
             case LIVE_SHARE_BTN_TOOLTIP:
                 return ["Share", "Поделиться"];
+
+            case BOT_ANACONDA_THINKING:
+                return ["Calculating my next move...", "Думаю над следующим ходом..."];
+            case BOT_ANACONDA_PARTIAL_RESULT_ACHIEVED(depth):
+                return ['Partial result for depth $depth achieved', 'Расчеты на глубине $depth завершены'];
+
             case OPENJOIN_CHALLENGE_BY_HEADER:
                 return ["Challenge by $0", "Вызов $0"];
             case OPENJOIN_COLOR_WHITE_OWNER:
@@ -126,12 +132,15 @@ class Dictionary
                 return ["Accept Challenge", "Принять вызов"];
             case OPENJOIN_ESSENTIAL_PARAMS_LABEL_TEXT:
                 return ["Features:", "Особенности:"];
+
             case MENUBAR_PLAY_MENU_TITLE:
                 return ["Play", "Играть"];
             case MENUBAR_PLAY_MENU_CREATE_GAME_ITEM:
                 return ["Create Game", "Создать игру"];
             case MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM:
                 return ["Open Challenges", "Открытые вызовы"];
+            case MENUBAR_PLAY_MENU_VERSUS_BOT_ITEM:
+                return ["Versus Bot", "Против компьютера"];
             case MENUBAR_SPECTATE_MENU_TITLE:
                 return ["Spectate", "Смотреть"];
             case MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM:
@@ -455,10 +464,13 @@ class Dictionary
             case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TITLE:
                 return ["Challenge sent!", "Вызов отправлен!"];
             case SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(opponentRef):
-                if (opponentRef.charAt(0) != "_")
-                    return ['Your challenge has been successfully sent to $opponentRef. You may cancel it at any time using the challenge menu at the top-right corner of your screen.', 'Вызов успешно отправлен игроку $opponentRef. Чтобы отменить его, воспользуйтесь меню вызовов в правом верхнем углу экрана.'];
-                else
-                    return ['Your challenge has been successfully sent. You may cancel it at any time using the challenge menu at the top-right corner of your screen.', 'Вызов успешно отправлен. Чтобы отменить его, воспользуйтесь меню вызовов в правом верхнем углу экрана.'];
+                switch opponentRef.concretize() 
+                {
+                    case Normal(login):
+                        return ['Your challenge has been successfully sent to $login. You may cancel it at any time using the challenge menu at the top-right corner of your screen.', 'Вызов успешно отправлен игроку $login. Чтобы отменить его, воспользуйтесь меню вызовов в правом верхнем углу экрана.'];
+                    default:
+                        return ['Your challenge has been successfully sent. You may cancel it at any time using the challenge menu at the top-right corner of your screen.', 'Вызов успешно отправлен. Чтобы отменить его, воспользуйтесь меню вызовов в правом верхнем углу экрана.'];    
+                }
             case SEND_OPEN_CHALLENGE_SUCCESS_DIALOG_TITLE:
                 return ["Challenge created!", "Вызов создан!"];
             case SEND_OPEN_CHALLENGE_SUCCESS_DIALOG_TEXT:
@@ -487,6 +499,8 @@ class Dictionary
                 return ["Direct", "Прямой"];
             case CHALLENGE_PARAMS_TYPE_OPEN:
                 return ["Open", "Открытый"];
+            case CHALLENGE_PARAMS_TYPE_BOT:
+                return ["Against Bot", "Против компьютера"];
             case CHALLENGE_PARAMS_DIRECT_USERNAME_OPTION_NAME:
                 return ["Username", "Ник"];
             case CHALLENGE_PARAMS_OPEN_VISIBILITY:

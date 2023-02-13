@@ -1,8 +1,11 @@
 <component width="100%" height="100%">
     <hbox width="100%" height="100%" style="spacing:15px">
         <vbox id="lLeftBox" style="spacing:10px" height="98%">
-            <gameinfobox id="gameinfobox" />
-            <chatbox id="chatbox" />
+            <gameinfobox id="gameinfobox" width="100%" />
+            <stack id="chatstack" width="100%" height="100%">
+                <chatbox id="chatbox" width="100%" height="100%" />
+                <botchat id="botchat" width="100%" height="100%" />
+            </stack>
         </vbox>
         <vbox id="centerBox" width="100%" height="100%">
             <creepingline id="cCreepingLine" width="100%" />

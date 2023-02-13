@@ -79,7 +79,6 @@ class PlayerMoveBehavior implements IBehavior
 	{
         Audio.playPlySound(ply.toMaterialized(boardInstance.shownSituation));
         boardInstance.emit(ContinuationMove(ply, ply.toNotation(boardInstance.shownSituation), playerColor));
-        Networker.emitEvent(Move(ply));
         boardInstance.makeMove(ply);
         if (Preferences.premoveEnabled.get())
             boardInstance.state = new NeutralState();

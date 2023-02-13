@@ -121,6 +121,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         playMenu.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_TITLE);
         createChallengeBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM);
         openChallengesBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM);
+        versusBotBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_VERSUS_BOT_ITEM);
         watchMenu.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_TITLE);
         currentGamesBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM);
         watchPlayerBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM);
@@ -136,6 +137,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logOutBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGOUT_ITEM);
         sidemenu.createChallengeBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM);
         sidemenu.openChallengesBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM);
+        sidemenu.versusBotBtn.text = Dictionary.getPhrase(MENUBAR_PLAY_MENU_VERSUS_BOT_ITEM);
         sidemenu.currentGamesBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM);
         sidemenu.watchPlayerBtn.text = Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM);
         sidemenu.analysisBoardBtn.text = Dictionary.getPhrase(MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM);
@@ -150,13 +152,15 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         {
             case Success(data):
                 var challengeParams:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
-                challengesMenu.appendEntry(data);
                 switch challengeParams.type 
                 {
                     case Public, ByLink:
+                        challengesMenu.appendEntry(data);
                         Dialogs.getQueue().add(new OpenChallengeCreated(data.id));
                     case Direct(calleeLogin):
+                        challengesMenu.appendEntry(data);
                         Dialogs.info(SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TEXT(calleeLogin), SEND_DIRECT_CHALLENGE_SUCCESS_DIALOG_TITLE, null, RemovedOnGameStarted);
+                    default:
                 }
                 Audio.playSound("challenge_sent");
             case ToOneself:
@@ -281,6 +285,14 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         SceneManager.toScreen(MainMenu);
     }
 
+    private function onVersusBotPressed(e)
+    {
+        if (!LoginManager.isLogged())
+            Dialogs.getQueue().add(new LogIn(displayChallengeParamsDialog));
+        else
+            Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.anacondaChallengeParams()));
+    }
+
     private function onCurrentGamesPressed(e)
     {
         SceneManager.toScreen(MainMenu);
@@ -361,6 +373,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         siteName.onClick = onSiteNamePressed;
         createChallengeBtn.onClick = onCreateChallengePressed;
         openChallengesBtn.onClick = onOpenChallengesPressed;
+        versusBotBtn.onClick = onVersusBotPressed;
         currentGamesBtn.onClick = onCurrentGamesPressed;
         watchPlayerBtn.onClick = onWatchPlayerPressed;
         analysisBoardBtn.onClick = onAnalysisBoardPressed;
@@ -371,6 +384,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         sidemenu.siteName.onClick = e -> {sidemenu.hide(); onSiteNamePressed(e);};
         sidemenu.createChallengeBtn.onClick = e -> {sidemenu.hide(); onCreateChallengePressed(e);};
         sidemenu.openChallengesBtn.onClick = e -> {sidemenu.hide(); onOpenChallengesPressed(e);};
+        sidemenu.versusBotBtn.onClick = e -> {sidemenu.hide(); onVersusBotPressed(e);};
         sidemenu.currentGamesBtn.onClick = e -> {sidemenu.hide(); onCurrentGamesPressed(e);};
         sidemenu.watchPlayerBtn.onClick = e -> {sidemenu.hide(); onWatchPlayerPressed(e);};
         sidemenu.analysisBoardBtn.onClick = e -> {sidemenu.hide(); onAnalysisBoardPressed(e);};

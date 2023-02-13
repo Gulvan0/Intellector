@@ -44,6 +44,7 @@
         <label text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_TITLE)}" styleName="mobileMenuHeader" />
             <label id="createChallengeBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_CREATE_GAME_ITEM)}" styleName="mobileMenuItem" />
             <label id="openChallengesBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM)}" styleName="mobileMenuItem" />
+            <label id="versusBotBtn" text="${Dictionary.getPhrase(MENUBAR_PLAY_MENU_VERSUS_BOT_ITEM)}" styleName="mobileMenuItem" />
         <spacer styleName="sectionSpacer" />
         <label text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_TITLE)}" styleName="mobileMenuHeader" />
             <label id="currentGamesBtn" text="${Dictionary.getPhrase(MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM)}" styleName="mobileMenuItem" />

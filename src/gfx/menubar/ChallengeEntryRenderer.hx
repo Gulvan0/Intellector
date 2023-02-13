@@ -93,6 +93,8 @@ class ChallengeEntryRenderer extends ItemRenderer
                 acceptBtn.hidden = !isIncoming;
                 declineBtn.hidden = !isIncoming;
                 cancelBtn.hidden = isIncoming;
+            default:
+                throw "Cannot create challenge entry for bot challenge";
         }
 
         incomingIcon.resource = Paths.challengesMenuItemArrow(isIncoming);

@@ -1,5 +1,7 @@
 package dict;
 
+import engine.BotFactory;
+import net.shared.utils.PlayerRef;
 import net.shared.EloValue;
 import net.shared.TimeControlType;
 import dict.utils.TimePhrases;
@@ -33,12 +35,14 @@ class Utils
         return 'Guest $guestID';
     }
 
-    public static function playerRef(ref:String):String 
+    public static function playerRef(ref:PlayerRef):String 
     {
-        if (ref.charAt(0) == "_")
-            return guestName(ref.substr(1));
-        else
-            return ref;
+        return switch ref.concretize() 
+        {
+            case Normal(login): login;
+            case Guest(guestID): guestName(guestID);
+            case Bot(botHandle): BotFactory.botNameByHandle(botHandle);
+        }
     }
 
     public static function opponentRef(whiteRef:String, blackRef:String):String

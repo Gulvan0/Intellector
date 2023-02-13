@@ -11,6 +11,22 @@ class TimeReservesData
         return [White => whiteSeconds, Black => blackSeconds];
     }
 
+    public function getSecsLeftAtTimestamp(color:PieceColor):Float
+    {
+        return color == White? whiteSeconds : blackSeconds;
+    }
+
+    public function getSecsLeftNow(color:PieceColor, nowTS:Float, timeRunning:Bool):Float
+    {
+        var secsAtTimestamp:Float = getSecsLeftAtTimestamp(color);
+
+        if (!timeRunning)
+            return secsAtTimestamp;
+
+        var elapsedSecs:Float = (nowTS - timestamp) / 1000;
+        return secsAtTimestamp - elapsedSecs;
+    }
+
     public function toString():String 
     {
         return 'TimeReservesData(whiteSeconds=$whiteSeconds, blackSeconds=$blackSeconds, timestamp=$timestamp)';

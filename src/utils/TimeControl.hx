@@ -42,6 +42,11 @@ class TimeControl
     public var startSecs:Int;
     public var bonusSecs:Int;
 
+    public function isCorrespondence():Bool
+    {
+        return getType() == Correspondence;
+    }
+
     public function toString() 
     {
         if (startSecs == 0 && bonusSecs == 0)

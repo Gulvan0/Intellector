@@ -6,12 +6,13 @@ import net.shared.board.Situation;
 
 abstract class Engine 
 {
-    public abstract function evalutateByTime(situation:Situation, timeLimitSecs:Float, ?partialResultCallback:EvaluationResult->Void):Promise<EvaluationResult>;
-    public abstract function evalutateByDepth(situation:Situation, depth:Int, ?partialResultCallback:EvaluationResult->Void):Promise<EvaluationResult>;
+    public abstract function evalutateByTime(situation:Situation, timeLimitSecs:Float, fullResultCallback:EvaluationResult->Void, ?partialResultCallback:EvaluationResult->Void):Void;
+    public abstract function evalutateByDepth(situation:Situation, depth:Int, fullResultCallback:EvaluationResult->Void, ?partialResultCallback:EvaluationResult->Void):Void;
+    public abstract function interrupt():Void;
 
     public function analyzeMove(situation:Situation, depth:Int, move:RawPly, callback:MoveReport->Void)
     {
-        evalutateByDepth(situation, depth).then(result -> {
+        evalutateByDepth(situation, depth, result -> {
             var bestMove:RawPly = result.mainLine[0];
             var optimalScore:Float = result.score;
             var optimalMainline:Array<RawPly> = result.mainLine.slice(1);
@@ -21,7 +22,7 @@ abstract class Engine
             else
             {
                 var nextSituation:Situation = situation.situationAfterRawPly(move);
-                evalutateByDepth(nextSituation, depth).then(suboptimalResult -> {
+                evalutateByDepth(nextSituation, depth, suboptimalResult -> {
                     callback(Suboptimal(suboptimalResult.score, suboptimalResult.mainLine, bestMove, optimalScore, optimalMainline));
                 });
             }

@@ -1,5 +1,6 @@
 package gfx.game;
 
+import net.shared.utils.PlayerRef;
 import utils.TimeControl;
 import assets.StandaloneAssetPath;
 import haxe.Timer;
@@ -18,6 +19,7 @@ import dict.Dictionary;
 enum Mode
 {
     PlayerOngoingGame;
+    PlayerOngoingVersusBot;
     PlayerGameEnded;
     Spectator;
 }
@@ -71,7 +73,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                 btnBar.hidden = false;
                 drawRequestBox.hidden = true;
                 takebackRequestBox.hidden = true;
-                if (mode == PlayerOngoingGame)
+                if (mode == PlayerOngoingGame || mode == PlayerOngoingVersusBot)
                     setMode(PlayerGameEnded);
                 if (rematchPossible)
                     Timer.delay(() -> {if (rematchBtn != null) rematchBtn.disabled = true;}, 1000 * 60 * Constants.minutesBeforeRematchExpires);
@@ -96,7 +98,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
                     offerDrawBtn.hidden = false;
                 }
             case TakebackAccepted(_), TakebackDeclined(_):
-                if (mode == PlayerOngoingGame)
+                if (mode == PlayerOngoingGame || mode == PlayerOngoingVersusBot)
                 {
                     cancelTakebackBtn.hidden = true;
                     offerTakebackBtn.hidden = false;
@@ -126,7 +128,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
     {
         move = value;
 
-        if (mode != PlayerOngoingGame)
+        if (mode.match(PlayerGameEnded | Spectator))
             return move;
 
         if (move < enableTakebackSinceMove)
@@ -166,6 +168,7 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         var shownButtons:Array<Button> = switch mode 
         {
             case PlayerOngoingGame: [changeOrientationBtn, offerDrawBtn, offerTakebackBtn, resignBtn, addTimeBtn];
+            case PlayerOngoingVersusBot: [changeOrientationBtn, offerTakebackBtn, resignBtn, addTimeBtn];
             case PlayerGameEnded: [changeOrientationBtn, analyzeBtn, shareBtn, playFromPosBtn, rematchBtn];
             case Spectator: [changeOrientationBtn, analyzeBtn, shareBtn, playFromPosBtn];
         }
@@ -224,8 +227,11 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
     {
         if (!incomingTakebackRequestPending)
         {
-            offerTakebackBtn.hidden = true;
-            cancelTakebackBtn.hidden = false;
+            if (mode != PlayerOngoingVersusBot)
+            {
+                offerTakebackBtn.hidden = true;
+                cancelTakebackBtn.hidden = false;
+            }
             onBtnPressed(OfferTakeback);
         }
         else
@@ -332,14 +338,30 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
         switch constructor 
         {
             case New(whiteRef, blackRef, _, timeControl, startingSituation, _):
-                setMode(PlayerOngoingGame);
                 var playerColor:PieceColor = LoginManager.isPlayer(whiteRef)? White : Black;
+                var opponentRef:PlayerRef = playerColor == White? blackRef : whiteRef;
+                switch opponentRef.concretize() 
+                {
+                    case Bot(_):
+                        setMode(PlayerOngoingVersusBot);
+                    default:
+                        setMode(PlayerOngoingGame);
+                }
                 this.enableTakebackSinceMove = startingSituation.turnColor == playerColor? 1 : 2;
                 move = 0;
                 tc = timeControl;
 
             case Ongoing(parsedData, _, followedPlayerLogin):
-                setMode(parsedData.isPlayerParticipant()? PlayerOngoingGame : Spectator);
+                if (!parsedData.isPlayerParticipant())
+                    setMode(Spectator);
+                else 
+                    switch parsedData.getPlayerOpponentRef().concretize() 
+                    {
+                        case Bot(_):
+                            setMode(PlayerOngoingVersusBot);
+                        default:
+                            setMode(PlayerOngoingGame);
+                    }
                 this.enableTakebackSinceMove = parsedData.startingSituation.turnColor == parsedData.getPlayerColor()? 1 : 2;
                 move = parsedData.moveCount;
                 tc = parsedData.timeControl;
@@ -372,6 +394,9 @@ class GameActionBar extends VBox implements INetObserver implements IGameBoardOb
             rematchBtn.disabled = true;
             playFromPosBtn.disabled = true;
         }
+
+        if (mode == PlayerOngoingVersusBot)
+            cancelTakebackBtn.disabled = true;
 
         this.isCorrespondence = tc.getType() == Correspondence;
         if (isCorrespondence)

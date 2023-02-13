@@ -73,6 +73,15 @@ class ChallengeParamsDialog extends BaseDialog
     private function onTypeChanged(e)
     {
         typeSpecificStack.selectedIndex = typeStepper.selectedIndex;
+
+        if (typeStepper.selectedIndex == 2)
+        {
+            rankedCheck.selected = false;
+            rankedCheck.disabled = true;
+        }
+        else
+            rankedCheck.disabled = false;
+        
         correctPositionLater();
     }
 
@@ -193,9 +202,9 @@ class ChallengeParamsDialog extends BaseDialog
     @:bind(confirmBtn, MouseEvent.CLICK)
     private function createChallenge(e)
     {
-        var challengeType:ChallengeType = typeStepper.selectedIndex == 0? Direct(usernameTF.text) : visibilityDropdown.selectedIndex == 0? Public : ByLink;
+        var challengeType:ChallengeType = typeStepper.selectedIndex == 0? Direct(usernameTF.text) : typeStepper.selectedIndex == 2? ToBot("stconda") : visibilityDropdown.selectedIndex == 0? Public : ByLink;
         var timeControl:TimeControl = approvedTimeControl;
-        var rated:Bool = rankedCheck.selected;
+        var rated:Bool = typeStepper.selectedIndex != 2 && rankedCheck.selected;
         
         var acceptorColor:Null<PieceColor> = null;
         var customStartingSituation:Null<Situation> = null;
@@ -312,6 +321,9 @@ class ChallengeParamsDialog extends BaseDialog
                 typeSpecificStack.selectedIndex = 0;
                 typeStepper.selectedIndex = 0;
                 usernameTF.text = calleeLogin;
+            case ToBot(handle):
+                typeSpecificStack.selectedIndex = 2;
+                typeStepper.selectedIndex = 2;
         }
     }
 }

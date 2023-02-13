@@ -57,6 +57,8 @@ enum ServerEvent
     TakebackAccepted(color:PieceColor);
     TakebackDeclined(color:PieceColor);
 
+    BotMove(timeData:Null<TimeReservesData>); //Sent to a player when a bot move starts
+
     SingleStudy(info:StudyInfo, ownerLogin:String); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy
     StudyCreated(studyID:Int, info:StudyInfo); //Answer to CreateStudy

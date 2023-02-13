@@ -75,8 +75,6 @@ class EnemyMoveBehavior implements IBehavior
                 for (premove in followingPremoves)
                     displayPlannedPremove(premove);
                 premoves = followingPremoves;
-    
-                Networker.emitEvent(Move(activatedPremove));
                 
                 boardInstance.state = new NeutralState();
             }

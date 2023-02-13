@@ -1,5 +1,12 @@
 package gfx.screens;
 
+import haxe.ds.Option;
+import net.shared.dataobj.TimeReservesData;
+import engine.BotFactory;
+import engine.BotTimeData;
+import dict.Phrase;
+import engine.Bot;
+import net.shared.utils.PlayerRef;
 import gameboard.util.BoardSize;
 import GlobalBroadcaster;
 import browser.Url;
@@ -39,9 +46,10 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     private var orientationColor:PieceColor = White;
 
     private var isPastGame:Bool;
+    private var botOpponent:Null<Bot> = null;
     private var gameID:Int;
-    private var whiteRef:String;
-    private var blackRef:String;
+    private var whiteRef:PlayerRef;
+    private var blackRef:PlayerRef;
     private var timeControl:TimeControl;
     private var datetime:Date;
     private var outcome:Null<Outcome> = null;
@@ -66,6 +74,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function onClose()
     {
+        if (botOpponent != null)
+            botOpponent.interrupt();
+
         if (FollowManager.followedGameID == gameID)
             FollowManager.stopFollowing();
 
@@ -124,6 +135,58 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     //================================================================================================================================================================
 
+    private function onRematchRequested()
+    {
+        var opponentRef:PlayerRef = playerColor == White? blackRef : whiteRef;
+
+        switch opponentRef.concretize() 
+        {
+            case Normal(login):
+                var params:ChallengeParams = ChallengeParams.rematchParams(login, playerColor, timeControl, rated, board.startingSituation);
+                Dialogs.getQueue().add(new ChallengeParamsDialog(params, true));
+            case Bot(handle):
+                var params:ChallengeParams = ChallengeParams.botRematchParams(handle, playerColor, timeControl, rated, board.startingSituation);
+                Dialogs.getQueue().add(new ChallengeParamsDialog(params, true));
+            case Guest(_):
+                Networker.emitEvent(SimpleRematch);
+        }
+    }
+    
+    private function onContinuationMovePlayed(ply:RawPly)
+    {
+        if (botOpponent != null)
+        {
+            var reaction:Null<Phrase> = botOpponent.getReactionToMove(ply, board.currentSituation);
+            if (reaction != null)
+                botchat.appendBotMessage(botOpponent.name, Dictionary.getPhrase(reaction));
+        }
+        
+        Networker.emitEvent(Move(ply));
+    }
+
+    private function makeBotMove(timeData:TimeReservesData)
+    {
+        var botTimeData:Null<BotTimeData> = null;
+        if (!timeControl.isCorrespondence())
+        {
+            var moveNum:Int = board.plyHistory.length() + 1;
+            var secsLeft:Float = timeData.getSecsLeftNow(board.currentSituation.turnColor, Date.now().getTime(), moveNum >= 3);
+            botTimeData = new BotTimeData(secsLeft, timeControl.bonusSecs, moveNum, playerColor == Black);
+        }
+
+        var onBotMessage:Phrase->Void = phrase -> {
+            botchat.appendBotMessage(botOpponent.name, Dictionary.getPhrase(phrase));
+        };
+        var onMoveChosen:RawPly->Void = ply -> {
+            Networker.emitEvent(Move(ply));
+            handleNetEvent(Move(ply, null));
+        };
+        
+        botOpponent.playMove(board.currentSituation, botTimeData, onBotMessage, onMoveChosen);
+    }
+
+    //=================================================================================================================================================================
+
     public function handleNetEvent(event:ServerEvent)
     {
         for (obs in netObservers)
@@ -131,6 +194,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         switch event 
         {
+            case BotMove(timeData):
+                makeBotMove(timeData);
             case GameEnded(outcome, _, _, newPersonalElo):
                 Audio.playSound("notify");
                 this.outcome = outcome;
@@ -150,6 +215,13 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
     {
         for (obs in gameboardObservers)
             obs.handleGameBoardEvent(event);
+
+        switch event 
+        {
+            case ContinuationMove(ply, _, _):
+                onContinuationMovePlayed(ply);
+            default:
+        }
     }
 
     public function handleGlobalEvent(event:GlobalEvent)
@@ -191,6 +263,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         switch btn 
         {
             case Resign:
+                if (botOpponent != null)
+                    botOpponent.interrupt();
                 Networker.emitEvent(Resign);
             case ChangeOrientation:
                 setOrientation(opposite(orientationColor));
@@ -199,20 +273,15 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case CancelDraw:
                 Networker.emitEvent(CancelDraw);
             case OfferTakeback:
+                if (botOpponent != null)
+                    botOpponent.interrupt();
                 Networker.emitEvent(OfferTakeback);
             case CancelTakeback:
                 Networker.emitEvent(CancelTakeback);
             case AddTime:
                 Networker.emitEvent(AddTime);
             case Rematch:
-                var opponentRef:String = playerColor == White? blackRef : whiteRef;
-                if (opponentRef.charAt(0) != "_")
-                {
-                    var params:ChallengeParams = ChallengeParams.rematchParams(opponentRef, playerColor, timeControl, rated, board.startingSituation);
-                    Dialogs.getQueue().add(new ChallengeParamsDialog(params, true));
-                }
-                else
-                    Networker.emitEvent(SimpleRematch);
+                onRematchRequested();
             case Share:
                 var gameLink:String = Url.getGameLink(gameID);
                 var playedMoves:Array<RawPly> = board.plyHistory.getPlySequence();
@@ -315,6 +384,8 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         cWhiteClock.resize(30);
         cBlackClock.resize(30);
 
+        var ongoingTimeData:Option<TimeReservesData> = None;
+
         switch constructor 
         {
             case New(whiteRef, blackRef, playerElos, timeControl, _, startDatetime):
@@ -330,7 +401,9 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
                 setOrientation(playerColor);
 
-            case Ongoing(parsedData, _, followedPlayerLogin):
+            case Ongoing(parsedData, timeData, followedPlayerLogin):
+                ongoingTimeData = Some(timeData);
+
                 this.isPastGame = false;
                 this.playerColor = parsedData.getPlayerColor();
                 this.whiteRef = parsedData.whiteRef;
@@ -371,6 +444,25 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
         boardContainer.percentHeight = 100;
         boardContainer.addComponent(board);
+
+        var opponentRef:PlayerRef = playerColor == White? blackRef : whiteRef;
+        switch opponentRef.concretize() 
+        {
+            case Bot(botHandle):
+                if (!isPastGame)
+                {
+                    botOpponent = BotFactory.build(botHandle);
+                    switch ongoingTimeData 
+                    {
+                        case Some(v):
+                            makeBotMove(v);
+                        default:
+                    }
+                }
+                chatstack.selectedIndex = 1;
+            default:
+                chatstack.selectedIndex = 0;
+        }
 
         cWhiteLoginLabel.text = lWhiteLoginLabel.text = Utils.playerRef(whiteRef);
         cBlackLoginLabel.text = lBlackLoginLabel.text = Utils.playerRef(blackRef);

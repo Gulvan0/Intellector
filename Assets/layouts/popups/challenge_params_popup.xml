@@ -10,6 +10,7 @@
             <data>
                 <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TYPE_DIRECT)}" />
                 <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TYPE_OPEN)}" />
+                <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_TYPE_BOT)}" />
             </data>
         </option-stepper>
     </hbox>
@@ -27,6 +28,8 @@
                     <item text="${Dictionary.getPhrase(CHALLENGE_PARAMS_OPEN_VISIBILITY_BY_LINK)}" />
                 </data>
             </dropdown>
+        </hbox>
+        <hbox width="100%">
         </hbox>
     </stack>
     

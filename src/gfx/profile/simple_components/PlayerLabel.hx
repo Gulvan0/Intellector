@@ -1,5 +1,6 @@
 package gfx.profile.simple_components;
 
+import net.shared.utils.PlayerRef;
 import net.Requests;
 import gfx.basic_components.utils.DimValue;
 import haxe.ui.events.MouseEvent;
@@ -32,7 +33,7 @@ class PlayerLabel extends HBox
         Requests.getMiniProfile(playerRef);
     }
 
-    public function new(height:DimValue, playerRef:String, displayedELO:Null<EloValue>, interactive:Bool)
+    public function new(height:DimValue, playerRef:PlayerRef, displayedELO:Null<EloValue>, interactive:Bool)
     {
         super();
         this.playerRef = playerRef; 
@@ -49,7 +50,7 @@ class PlayerLabel extends HBox
         else
             lbl.text = '$displayedName';
         
-        if (interactive && playerRef.charAt(0) != "_")
+        if (interactive && playerRef.concretize().match(Normal(_)))
         {
             lbl.enablePointerEvents();
             lbl.registerEvent(MouseEvent.CLICK, onClicked);

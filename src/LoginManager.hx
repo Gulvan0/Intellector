@@ -1,5 +1,6 @@
 package;
 
+import net.shared.utils.PlayerRef;
 import net.shared.dataobj.ChallengeData;
 import serialization.GameLogParser;
 import gfx.SceneManager;
@@ -68,11 +69,16 @@ class LoginManager
         return login != null;
     }
 
-    public static function isPlayer(suspectedRef:String)
+    public static function isPlayer(suspectedRef:PlayerRef):Bool
     {
-        if (suspectedRef.charAt(0) == "_")
-            return Networker.getSessionID() == Std.parseInt(suspectedRef.substr(1));
-        else
-            return login != null && login.toLowerCase() == suspectedRef.toLowerCase();
+        switch suspectedRef.concretize() 
+        {
+            case Normal(refLogin):
+                return login != null && login.toLowerCase() == refLogin.toLowerCase();
+            case Guest(guestID):
+                return Networker.getSessionID() == Std.parseInt(guestID);
+            case Bot(botHandle):
+                return false;
+        }
     }
 }

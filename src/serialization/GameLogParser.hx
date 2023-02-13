@@ -1,5 +1,6 @@
 package serialization;
 
+import net.shared.utils.PlayerRef;
 import net.shared.converters.PlySerializer;
 import net.shared.board.RawPly;
 import net.shared.EloValue;
@@ -105,7 +106,7 @@ class GameLogParserOutput
         return getPlayerColor() != null;
     }
 
-    public function getPlayerOpponentRef():Null<String>
+    public function getPlayerOpponentRef():Null<PlayerRef>
     {
         if (LoginManager.isPlayer(whiteRef))
             return blackRef;

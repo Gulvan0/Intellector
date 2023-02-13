@@ -10,6 +10,7 @@ enum ChallengeType
     Public;
     ByLink;
     Direct(calleeRef:String);
+    ToBot(botHandle:String);
 }
 
 class ChallengeParams
@@ -56,6 +57,18 @@ class ChallengeParams
         return params;
     }
 
+    public static function anacondaChallengeParams():ChallengeParams
+    {
+        var params:ChallengeParams = loadFromCookies();
+        params.type = ToBot("stconda");
+        return params;
+    }
+
+    public static function botRematchParams(botHandle:String, playerColor:PieceColor, timeControl:TimeControl, rated:Bool, ?startingSituation:Null<Situation>):ChallengeParams
+    {
+        return new ChallengeParams(timeControl, ToBot(botHandle), playerColor, startingSituation, rated);
+    }
+
     public static function rematchParams(opponentLogin:String, playerColor:PieceColor, timeControl:TimeControl, rated:Bool, ?startingSituation:Null<Situation>):ChallengeParams
     {
         return new ChallengeParams(timeControl, Direct(opponentLogin), playerColor, startingSituation, rated);
@@ -77,7 +90,7 @@ class ChallengeParams
     {
         var splitted:Array<String> = s.split(";");
         var timeControl:TimeControl = new TimeControl(Std.parseInt(splitted[0]), Std.parseInt(splitted[1]));
-        var type:ChallengeType = splitted[2] == "p"? Public : splitted[2] == "l"? ByLink : Direct(splitted[2]);
+        var type:ChallengeType = splitted[2] == "p"? Public : splitted[2] == "l"? ByLink : splitted[2].charAt(0) == "+"? ToBot(splitted[2].substr(1)) : Direct(splitted[2]);
         var acceptorColor:Null<PieceColor> = splitted[3] == "w"? White : splitted[3] == "b"? Black : null;
         var customStartingSituation:Null<Situation> = splitted[4] == ""? null : Situation.deserialize(splitted[4]);
         var rated:Bool = splitted[5] == "t";
@@ -90,6 +103,7 @@ class ChallengeParams
             case Public: "p";
             case ByLink: "l";
             case Direct(calleeRef): calleeRef;
+            case ToBot(botHandle): "+" + botHandle;
         };
 
         var colorStr = switch acceptorColor {
