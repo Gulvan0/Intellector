@@ -28,7 +28,7 @@ class StandardAnaconda extends Bot
         onResponse(BOT_ANACONDA_THINKING);
 
         if (botTimeData != null)
-            engine.evalutateByTime(situation, botTimeData.getSecsToMove(), onResultReady, onPartialResult);
+            engine.evalutateByTime(situation, botTimeData.getSecsToMove(situation), onResultReady, onPartialResult);
         else
         {
             engine.evalutateByTime(situation, 120, onResultReady, onPartialResult);

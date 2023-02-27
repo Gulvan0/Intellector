@@ -16,6 +16,22 @@ class TimeReservesData
         return color == White? whiteSeconds : blackSeconds;
     }
 
+    public function setSecsLeftAtTimestamp(color:PieceColor, secs:Float)
+    {
+        if (color == White) 
+            whiteSeconds = secs;
+        else
+            blackSeconds = secs;
+    }
+
+    public function addSecsLeftAtTimestamp(color:PieceColor, secs:Float)
+    {
+        if (color == White) 
+            whiteSeconds += secs;
+        else
+            blackSeconds += secs;
+    }
+
     public function getSecsLeftNow(color:PieceColor, nowTS:Float, timeRunning:Bool):Float
     {
         var secsAtTimestamp:Float = getSecsLeftAtTimestamp(color);

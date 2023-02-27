@@ -68,6 +68,23 @@ class Situation
             return true;
     }
 
+    public function countPieces():Int
+    {
+        var cnt:Int = 0;
+
+        for (coords in HexCoords.enumerate()) 
+        {
+            switch get(coords) 
+            {
+                case Occupied(_):
+                    cnt++;
+                default:
+            }
+        }
+
+        return cnt;
+    }
+
     public function collectPieces():Map<HexCoords, PieceData>
     {
         var map:Map<HexCoords, PieceData> = [];
