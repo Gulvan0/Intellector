@@ -48,6 +48,11 @@ class TimeReservesData
         return 'TimeReservesData(whiteSeconds=$whiteSeconds, blackSeconds=$blackSeconds, timestamp=$timestamp)';
     }
 
+    public function copy():TimeReservesData 
+    {
+        return new TimeReservesData(whiteSeconds, blackSeconds, timestamp);    
+    }
+
     public function new(whiteSeconds:Float, blackSeconds:Float, timestamp:Float)
     {
         this.whiteSeconds = whiteSeconds;
