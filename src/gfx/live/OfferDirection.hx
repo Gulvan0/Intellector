@@ -1,4 +1,4 @@
-package gameboard_revamped;
+package gfx.live;
 
 enum OfferDirection 
 {

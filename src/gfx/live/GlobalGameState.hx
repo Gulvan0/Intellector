@@ -1,10 +1,10 @@
-package gameboard_revamped;
+package gfx.live;
 
 import net.shared.PieceColor;
 import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
-import gameboard_revamped.interfaces.IReadOnlyGlobalState;
-import gameboard_revamped.interfaces.IReadOnlyHistory;
+import gfx.live.interfaces.IReadOnlyGlobalState;
+import gfx.live.interfaces.IReadOnlyHistory;
 import net.shared.board.Situation;
 
 class GlobalGameState implements IReadOnlyGlobalState

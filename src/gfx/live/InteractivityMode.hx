@@ -1,4 +1,4 @@
-package gameboard_revamped;
+package gfx.live;
 
 import haxe.ds.ReadOnlyArray;
 import net.shared.board.Hex;
@@ -10,7 +10,7 @@ typedef HexSelectabilityChecker = (candidateLocation:HexCoords, hexRetriever:Hex
 
 enum InteractivityMode 
 {
-    MoveSelection(controllablePieces:ReadOnlyArray<PieceColor>, markerLocations:Null<MarkerLocationsGetter>);
+    MoveSelection(controllablePieces:ReadOnlyArray<PieceColor>, allowedDestinations:Null<MarkerLocationsGetter>);
     HexSelection(selectabilityChecker:HexSelectabilityChecker);
     NotInteractive;    
 }

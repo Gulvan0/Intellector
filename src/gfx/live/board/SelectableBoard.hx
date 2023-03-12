@@ -1,15 +1,17 @@
-package gameboard_revamped;
+package gfx.live.board;
 
+import gfx.live.board.util.HexSelectionMode;
+import gfx.live.board.util.ArrowSelectionMode;
 import net.shared.board.Hex;
-import gameboard_revamped.board_subcomponents.util.ArrowParams;
+import gfx.live.board.subcomponents.util.ArrowParams;
 import haxe.ui.util.Color;
 import gfx.Dialogs;
 import haxe.ui.core.Component;
-import gameboard.components.Hexagon;
-import gameboard.util.HexagonSelectionState;
+import gfx.live.board.subcomponents.Hexagon;
+import gfx.live.board.util.HexagonLayer;
 import net.shared.board.Rules;
-import gameboard.util.Marking;
-import gameboard_revamped.board_subcomponents.canvas.ArrowCanvas;
+import gfx.live.board.util.Marking;
+import gfx.live.board.subcomponents.canvas.ArrowCanvas;
 import haxe.ui.events.UIEvent;
 import haxe.ui.core.Screen;
 import haxe.ui.events.MouseEvent;
@@ -22,26 +24,10 @@ import haxe.ui.containers.Absolute;
 
 using Lambda;
 
-enum HexSelectionMode
-{
-    Disabled;
-    EnsureSingle;
-    Free;
-}
-
-enum ArrowSelectionMode
-{
-    Disabled;
-    EnsureSingle;
-    FreeConstSize;
-    FreeDiminishing;
-}
-
-/**A basic Board with automatic RMB selection handling plus option to highlight last moves and add hex markers**/
 class SelectableBoard extends Board
 {
     public final arrowMode:Map<Color, ArrowSelectionMode>;
-    public final hexMode:Map<HexagonSelectionState, HexSelectionMode>;
+    public final hexMode:Map<HexagonLayer, HexSelectionMode>;
 
     public var diminishmentOrder:Map<Color, Int>;
     public var arrowThicknessMultipliers:Map<String, Float> = [];
@@ -100,22 +86,43 @@ class SelectableBoard extends Board
             diminishmentOrder[key] = 0;
     }
 
-    public function displayHexLayer(hexCoords:HexCoords, layer:HexagonSelectionState) 
+    public function showHexLayer(hexCoords:HexCoords, layer:HexagonLayer) 
     {
+        switch hexMode.get(layer) 
+        {
+            case null | Disabled:
+                return;
+            case EnsureSingle:
+                hideLayerForEveryHex(layer);
+            case Free:
+                //* Do nothing
+        }
+
         getHex(hexCoords).showLayer(layer);
     }
 
-    public function hideHexLayer(hexCoords:HexCoords, layer:HexagonSelectionState) 
+    public function hideHexLayer(hexCoords:HexCoords, layer:HexagonLayer) 
     {
         getHex(hexCoords).hideLayer(layer);
     }
 
-    public function toggleHexLayer(hexCoords:HexCoords, layer:HexagonSelectionState) 
+    public function toggleHexLayer(hexCoords:HexCoords, layer:HexagonLayer) 
     {
+        switch hexMode.get(layer) 
+        {
+            case null | Disabled:
+                return;
+            case EnsureSingle:
+                if (!getHex(hexCoords).layerVisible(layer))
+                    hideLayerForEveryHex(layer);
+            case Free:
+                //* Do nothing
+        }
+
         getHex(hexCoords).toggleLayer(layer);
     }
 
-    public function hideLayerForEveryHex(layer:HexagonSelectionState) 
+    public function hideLayerForEveryHex(layer:HexagonLayer) 
     {
         for (hexagon in hexagons)
             hexagon.hideLayer(layer);
@@ -135,6 +142,12 @@ class SelectableBoard extends Board
     public function removeMarker(hexCoords:HexCoords) 
     {
         getHex(hexCoords).removeMarkers();
+    }
+
+    public function removeAllMarkers() 
+    {
+        for (hexagon in hexagons)
+            hexagon.removeMarkers();
     }
 
     public function getAnyDrawnArrow(?color:Color):Null<ArrowParams>
@@ -168,7 +181,7 @@ class SelectableBoard extends Board
         updateAllArrows();
     }
 
-    public function new(initialSit:Situation, arrowMode:Map<Color, ArrowSelectionMode>, hexMode:Map<HexagonSelectionState, HexSelectionMode>, orientation:PieceColor = White, ?marks:Marking, ?initialW:Float, ?initialH:Float) 
+    public function new(initialSit:Situation, arrowMode:Map<Color, ArrowSelectionMode>, hexMode:Map<HexagonLayer, HexSelectionMode>, orientation:PieceColor = White, ?marks:Marking, ?initialW:Float, ?initialH:Float) 
     {
         super(initialSit, orientation, marks, initialW, initialH);
         this.arrowMode = arrowMode;

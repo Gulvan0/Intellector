@@ -1,11 +1,11 @@
-package gameboard.components;
+package gfx.live.board.subcomponents;
 
 import gfx.utils.Colors;
-import gameboard.components.graphics.HexagonCircleCanvas;
-import gameboard.components.graphics.HexagonDotCanvas;
-import gameboard.components.graphics.HexagonCanvas;
-import gameboard.util.HexDimensions;
-import gameboard.util.HexagonSelectionState;
+import gfx.live.board.subcomponents.canvas.HexagonCircleCanvas;
+import gfx.live.board.subcomponents.canvas.HexagonDotCanvas;
+import gfx.live.board.subcomponents.canvas.HexagonCanvas;
+import gfx.live.board.util.HexDimensions;
+import gfx.live.board.util.HexagonLayer;
 import haxe.ui.geom.Point;
 import net.shared.board.HexCoords;
 import net.shared.converters.Notation;
@@ -17,7 +17,7 @@ import haxe.ui.components.Canvas;
 
 class Hexagon extends Absolute
 {
-    private var layers:Map<HexagonSelectionState, HexagonCanvas> = [];
+    private var layers:Map<HexagonLayer, HexagonCanvas> = [];
 
     private var number:Label;
     private var dot:HexagonDotCanvas;
@@ -36,22 +36,22 @@ class Hexagon extends Absolute
         number.hidden = displayedRowNumber == null;
     }
 
-    public function showLayer(state:HexagonSelectionState)
+    public function showLayer(state:HexagonLayer)
     {
         layers[state].hidden = false;
     }
 
-    public function hideLayer(state:HexagonSelectionState)
+    public function hideLayer(state:HexagonLayer)
     {
         layers[state].hidden = true;
     }
 
-    public function toggleLayer(state:HexagonSelectionState)
+    public function toggleLayer(state:HexagonLayer)
     {
         layers[state].hidden = !layers[state].hidden;
     }
 
-    public function layerVisible(state:HexagonSelectionState):Bool
+    public function layerVisible(state:HexagonLayer):Bool
     {
         return !layers[state].hidden;
     }
@@ -101,7 +101,7 @@ class Hexagon extends Absolute
 
     private function drawChildren()
     {
-        for (state in HexagonSelectionState.createAll())
+        for (state in [Normal, LastMove, Premove, SelectedForMove, HighlightedByPlayer, Hover])
         {
             var stateHexagon:HexagonCanvas = new HexagonCanvas(dimensions, state, dark);
 

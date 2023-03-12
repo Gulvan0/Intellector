@@ -1,7 +1,7 @@
-package gameboard_revamped.board_subcomponents.canvas;
+package gfx.live.board.subcomponents.canvas;
 
-import gameboard_revamped.board_subcomponents.util.ArrowParams;
-import gameboard.util.HexDimensions;
+import gfx.live.board.subcomponents.util.ArrowParams;
+import gfx.live.board.util.HexDimensions;
 import haxe.ui.backend.html5.svg.SVGBuilder;
 import haxe.ui.backend.html5.graphics.SVGGraphicsImpl;
 import gfx.utils.Colors;

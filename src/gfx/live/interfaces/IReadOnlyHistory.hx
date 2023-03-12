@@ -1,4 +1,4 @@
-package gameboard_revamped.interfaces;
+package gfx.live.interfaces;
 
 import net.shared.board.RawPly;
 import net.shared.board.Situation;

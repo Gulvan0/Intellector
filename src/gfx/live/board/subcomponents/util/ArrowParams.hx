@@ -1,4 +1,4 @@
-package gameboard_revamped.board_subcomponents.util;
+package gfx.live.board.subcomponents.util;
 
 import haxe.ui.geom.Point;
 import net.shared.board.HexCoords;

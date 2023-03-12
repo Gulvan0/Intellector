@@ -1,7 +1,7 @@
-package gameboard_revamped.events;
+package gfx.live.events;
 
-import gameboard_revamped.OfferDirection;
-import gameboard_revamped.OfferKind;
+import gfx.live.OfferDirection;
+import gfx.live.OfferKind;
 
 enum GlobalStateEvent 
 {
@@ -17,4 +17,7 @@ enum GlobalStateEvent
     TimeDataUpdated;
     ViewedMoveNumUpdated;
     InteractivityModeUpdated;
+    EntryAddedToChatHistory;
+    PlayerOnlineStatusUpdated;
+    SpectatorListUpdated;
 }

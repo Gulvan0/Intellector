@@ -1,6 +1,6 @@
-package gameboard_revamped;
+package gfx.live;
 
-import gameboard_revamped.interfaces.IReadOnlyHistory;
+import gfx.live.interfaces.IReadOnlyHistory;
 import net.shared.board.Situation;
 import net.shared.board.RawPly;
 

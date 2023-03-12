@@ -1,10 +1,10 @@
-package gameboard_revamped;
+package gfx.live.board;
 
 import gfx.utils.Colors;
-import gameboard.util.Marking;
-import gameboard.components.Hexagon;
-import gameboard.components.Piece;
-import gameboard.util.HexDimensions;
+import gfx.live.board.util.Marking;
+import gfx.live.board.subcomponents.Hexagon;
+import gfx.live.board.subcomponents.Piece;
+import gfx.live.board.util.HexDimensions;
 import haxe.ui.util.Color;
 import haxe.ui.core.Screen;
 import js.Browser;
