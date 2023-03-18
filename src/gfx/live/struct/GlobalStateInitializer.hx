@@ -1,5 +1,6 @@
-package gfx.game;
+package gfx.live.struct;
 
+import struct.Variant;
 import net.shared.dataobj.TimeReservesData;
 import net.shared.board.Situation;
 import net.shared.PieceColor;
@@ -7,9 +8,10 @@ import net.shared.EloValue;
 import serialization.GameLogParser.GameLogParserOutput;
 import utils.TimeControl;
 
-enum LiveGameConstructor
+enum GlobalStateInitializer
 {
-    New(whiteRef:String, blackRef:String, playerElos:Null<Map<PieceColor, EloValue>>, timeControl:TimeControl, startingSituation:Situation, startDatetime:Date);
+    New(parsedData:GameLogParserOutput);
     Ongoing(parsedData:GameLogParserOutput, timeData:Null<TimeReservesData>, followedPlayerLogin:Null<String>);
     Past(parsedData:GameLogParserOutput, watchedPlyerLogin:Null<String>);
+    Analysis(initialVariant:Variant, selectedBranch:VariantPath, shownMoveNum:Int);
 }

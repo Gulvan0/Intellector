@@ -1,7 +1,10 @@
 package gfx.live.board;
 
+import gfx.live.board.subcomponents.util.ArrowParams;
+import gfx.live.board.util.HexSelectionMode;
+import gfx.live.board.util.ArrowSelectionMode;
 import Preferences.PreferenceName;
-import gfx.live.board.util.HexagonSelectionState;
+import gfx.live.board.util.HexagonLayer;
 import gfx.live.board.util.Marking;
 import gfx.live.board.states.IState;
 import gfx.live.board.states.NeutralState;
@@ -30,6 +33,7 @@ class GameBoard extends SelectableBoard
     public var globalStateRef:IReadOnlyGlobalState;
 
     public var lastMouseMoveEvent(default, null):MouseEvent;
+    private var rmbPressLocation:Null<HexCoords>;
 
     private function set_state(newState:IState):IState
     {
@@ -77,8 +81,36 @@ class GameBoard extends SelectableBoard
         state.onLMBReleased(posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop)), e);
     }
 
+    @:bind(this, MouseEvent.RIGHT_MOUSE_DOWN)
+    private function onRMBPressed(e:MouseEvent) 
+    {
+        if (Dialogs.getQueue().hasActiveDialog())
+            return;
+
+        rmbPressLocation = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
+    }
+
+    @:bind(this, MouseEvent.RIGHT_MOUSE_UP)
+    private function onRMBReleased(e:MouseEvent) 
+    {
+        if (Dialogs.getQueue().hasActiveDialog())
+            return;
+
+        var rmbReleaseLocation = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
+
+        if (rmbPressLocation != null && rmbReleaseLocation != null)
+        {
+            if (equal(rmbPressLocation, rmbReleaseLocation))
+                toggleHexLayer(rmbPressLocation, HighlightedByPlayer);
+            else
+                toggleArrow(new ArrowParams(Colors.arrow, rmbPressLocation, rmbReleaseLocation));
+        }
+        
+        rmbPressLocation = null;
+    }
+
     @:bind(this, UIEvent.SHOWN)
-    private function onAddedGB(e)
+    private function onAdded(e)
     {
         Screen.instance.registerEvent(MouseEvent.MOUSE_DOWN, onLMBPressed);
         Screen.instance.registerEvent(MouseEvent.MOUSE_MOVE, onMouseMoved);
@@ -86,7 +118,7 @@ class GameBoard extends SelectableBoard
     }
 
     @:bind(this, UIEvent.HIDDEN)
-    private function onRemovedGB(e)
+    private function onRemoved(e)
     {
         Screen.instance.unregisterEvent(MouseEvent.MOUSE_DOWN, onLMBPressed);
         Screen.instance.unregisterEvent(MouseEvent.MOUSE_MOVE, onMouseMoved);
@@ -130,7 +162,7 @@ class GameBoard extends SelectableBoard
     {
         var shownSituation:Situation = globalStateRef.getShownSituation();
         var arrowMode:Map<Color, ArrowSelectionMode> = [Colors.arrow => FreeConstSize]; //TODO: In the future, account for diminishing arrows & alt arrow colors
-        var hexMode:Map<HexagonSelectionState, HexSelectionMode> = [
+        var hexMode:Map<HexagonLayer, HexSelectionMode> = [
             HighlightedByPlayer => Free,
             LastMove => Free,
             Premove => Free,
