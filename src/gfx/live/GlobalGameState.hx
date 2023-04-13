@@ -115,9 +115,29 @@ class GlobalGameState implements IReadOnlyGlobalState
         return spectatorRefs.copy();
     }
 
+    /*public var orientation:PieceColor;
+    public var shownSituation:Situation;
+    public var shownMove:Int;
+    public var plannedPremoves:Array<RawPly>;
+    public var timeData:TimeReservesData;
+
+    public var currentSituation:Situation;
+    public var history:History;
+    public var offerActive:Map<OfferKind, Map<OfferDirection, Bool>>;
+    public var perMoveTimeRemaindersData:MsRemaindersData;
+    public var activeTimerColor:PieceColor;
+    public var boardInteractivityMode:InteractivityMode;
+    public var chatHistory:Array<ChatEntry>;
+    public var studyVariant:Variant;
+    public var playerOnline:Map<PieceColor, Bool>;
+    public var spectatorRefs:Array<PlayerRef>;*/
+
     private function processCommonParsedData(parsedData:GameLogParserOutput) 
     {
-        //TODO: Fill
+        constantParams = new ConstantGameParameters(parsedData);
+        currentSituation = parsedData.currentSituation;
+        history = History.fromPlayedMoves(parsedData.startingSituation, parsedData.movesPlayed);
+
     }
 
     public function new(initializer:GlobalStateInitializer) 

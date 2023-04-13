@@ -9,6 +9,20 @@ class History implements IReadOnlyHistory
     private var situationsPriorToPly:Array<Situation> = [];
     private var plys:Array<RawPly> = [];
 
+    public static function fromPlayedMoves(startingSituation:Situation, plys:Array<RawPly>):History
+    {
+        var history:History = new History();
+
+        var sit = startingSituation.copy();
+        for (ply in plys)
+        {
+            history.append(sit, ply);
+            sit = sit.situationAfterRawPly(ply);
+        }
+
+        return history;
+    }
+
     public function append(priorSituation:Situation, ply:RawPly) 
     {
         situationsPriorToPly.push(priorSituation.copy());

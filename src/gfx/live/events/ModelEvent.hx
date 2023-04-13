@@ -3,7 +3,7 @@ package gfx.live.events;
 import gfx.live.OfferDirection;
 import gfx.live.OfferKind;
 
-enum GlobalStateEvent 
+enum ModelEvent 
 {
     OrientationUpdated;
     ShownSituationUpdated;

@@ -77,6 +77,11 @@ class TimeControl
             return Classic;
     }
 
+    public function copy():TimeControl
+    {
+        return new TimeControl(startSecs, bonusSecs);
+    }
+
     public function new(startSecs:Int, bonusSecs:Int)
     {
         this.startSecs = startSecs;
