@@ -1,5 +1,6 @@
 package net.shared.variation;
 
+import gfx.live.interfaces.ReadOnlyVariationNode;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
 import haxe.Unserializer;
@@ -127,12 +128,20 @@ abstract Variation(VariationNode)
         this = new VariationNode([], null, newStartingSituation, null);
     }
 
-    public function depthFirst(includeStarting:Bool, ?startingPath:VariationPath):DepthFirstIterator
+    public function depthFirst(includeStarting:Bool, ?startingPath:VariationPath):DepthFirstIterator<VariationNode>
     {
         if (startingPath == null)
             startingPath = VariationPath.root();
 
-        return new DepthFirstIterator(getNode(startingPath), includeStarting);    
+        return new DepthFirstIterator<VariationNode>(getNode(startingPath), includeStarting);    
+    }
+
+    public function readOnlyDepthFirst(includeStarting:Bool, ?startingPath:VariationPath):DepthFirstIterator<ReadOnlyVariationNode>
+    {
+        if (startingPath == null)
+            startingPath = VariationPath.root();
+
+        return new DepthFirstIterator<ReadOnlyVariationNode>(getNode(startingPath), includeStarting);    
     }
 
     public function serialize():String

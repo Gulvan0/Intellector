@@ -21,13 +21,10 @@ class SpectationModel implements IReadOnlySpectationModel
     private var elo:Null<Map<PieceColor, EloValue>>;
     private var outcome:Null<Outcome>;
     private var datetime:Null<Date>;
-    private var startingSituation:Situation;
     
     private var orientation:PieceColor;
-    private var shownSituation:Situation;
-    private var currentSituation:Situation;
     private var history:History;
-    private var shownMove:Int;
+    private var shownMovePointer:Int;
     private var outgoingOfferActive:Map<PieceColor, Map<OfferKind, Bool>>;
     private var timeData:TimeReservesData;
     private var perMoveTimeRemaindersData:MsRemaindersData;
@@ -78,11 +75,6 @@ class SpectationModel implements IReadOnlySpectationModel
         return datetime;
     }
 
-    public function getStartingSituation():Situation
-    {
-        return startingSituation.copy();
-    }
-
     public function getOrientation():PieceColor
     {
         return startingSituation.copy();
@@ -90,12 +82,7 @@ class SpectationModel implements IReadOnlySpectationModel
 
     public function getShownSituation():Situation
     {
-        return shownSituation.copy();
-    }
-
-    public function getCurrentSituation():Situation
-    {
-        return currentSituation.copy();
+        return history.getShownSituationByPointer(shownMovePointer);
     }
 
     public function getHistory():IReadOnlyHistory
@@ -103,9 +90,9 @@ class SpectationModel implements IReadOnlySpectationModel
         return history;
     }
 
-    public function getShownMove():Int
+    public function getShownMovePointer():Int
     {
-        return shownMove;
+        return shownMovePointer;
     }
 
     public function isOutgoingOfferActive(color:PieceColor, kind:OfferKind):Bool

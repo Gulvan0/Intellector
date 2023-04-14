@@ -21,13 +21,10 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
     private var elo:Null<Map<PieceColor, EloValue>>;
     private var outcome:Null<Outcome>;
     private var datetime:Null<Date>;
-    private var startingSituation:Situation;
     
     private var orientation:PieceColor;
-    private var shownSituation:Situation;
-    private var currentSituation:Situation;
     private var history:History;
-    private var shownMove:Int;
+    private var shownMovePointer:Int;
     private var plannedPremoves:Array<RawPly>;
     private var offerActive:Map<OfferKind, Map<OfferDirection, Bool>>;
     private var timeData:TimeReservesData;
@@ -79,11 +76,6 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
         return datetime;
     }
 
-    public function getStartingSituation():Situation
-    {
-        return startingSituation.copy();
-    }
-
     public function getOrientation():PieceColor
     {
         return startingSituation.copy();
@@ -91,12 +83,7 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
 
     public function getShownSituation():Situation
     {
-        return shownSituation.copy();
-    }
-
-    public function getCurrentSituation():Situation
-    {
-        return currentSituation.copy();
+        return history.getShownSituationByPointer(shownMovePointer);
     }
 
     public function getHistory():IReadOnlyHistory
@@ -104,9 +91,9 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
         return history;
     }
 
-    public function getShownMove():Int
+    public function getShownMovePointer():Int
     {
-        return shownMove;
+        return shownMovePointer;
     }
 
     public function getPlannedPremoves():Array<RawPly>

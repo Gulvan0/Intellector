@@ -1,5 +1,7 @@
 package gfx.live.models;
 
+import gfx.live.interfaces.IReadOnlyAnalysisBoardModel;
+import gfx.live.interfaces.ReadOnlyVariation;
 import gfx.live.struct.AnalysisBoardBehaviorType;
 import net.shared.variation.VariationPath;
 import net.shared.variation.Variation;
@@ -16,7 +18,7 @@ import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 
-class AnalysisBoardModel
+class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
 {
     private var variation:Variation;
     private var selectedNodePath:VariationPath;
@@ -25,5 +27,33 @@ class AnalysisBoardModel
     private var behaviourType:AnalysisBoardBehaviorType;
     private var boardInteractivityMode:InteractivityMode;
 
-    
+    public function getVariation():ReadOnlyVariation
+    {
+        return variation;
+    }
+
+    public function getMultableVariation():Variation
+    {
+        return variation;
+    }
+
+    public function getSelectedNodePath():VariationPath
+    {
+        return selectedNodePath;
+    }
+
+    public function getOrientation():PieceColor
+    {
+        return orientation;
+    }
+
+    public function getBehaviourType():AnalysisBoardBehaviorType
+    {
+        return behaviourType;
+    }
+
+    public function getBoardInteractivityMode():InteractivityMode
+    {
+        return boardInteractivityMode;
+    }
 }

@@ -1,6 +1,6 @@
 package net.shared.variation;
 
-class DepthFirstIterator
+class DepthFirstIterator<T>
 {
     private var currentNode:VariationNode;
     private var startingLevel:Int;
@@ -34,12 +34,12 @@ class DepthFirstIterator
             this.currentNode = null;
     }
 
-    public function hasNext()
+    public function hasNext():Bool
     {
         return currentNode != null;
     }
 
-    public function next()
+    public function next():T
     {
         var returnedNode = currentNode;
 
