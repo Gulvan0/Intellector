@@ -1,5 +1,6 @@
 package gfx.live.board;
 
+import gfx.live.board.util.BoardSize;
 import gfx.utils.Colors;
 import gfx.live.board.util.Marking;
 import gfx.live.board.subcomponents.Hexagon;
@@ -57,6 +58,11 @@ class Board extends Absolute
     private var orientation:PieceColor;
     private var lettersShown:Bool;
     
+    public function inverseAspectRatio():Float
+    {
+        return BoardSize.inverseAspectRatio(lettersShown);
+    }
+
     public function resize(?e:UIEvent)
     {
         var now:Float = Timer.stamp();
@@ -294,7 +300,7 @@ class Board extends Absolute
 
     private function getDimensions():HexDimensions
     {
-        var sideLengthByWidth:Float = width / 14.15;
+        var sideLengthByWidth:Float = BoardSize.widthToHexSideLength(width);
         var sideLengthByHeight:Float = HexDimensions.heightToSide(height / (lettersShown? 7.5 : 7)) / 1.15;
         var sideLength:Float = Math.min(sideLengthByWidth, sideLengthByHeight);
 

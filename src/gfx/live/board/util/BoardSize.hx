@@ -27,6 +27,6 @@ class BoardSize
 
     public static function widthToHexSideLength(w:Float):Float 
     {
-        return w / 14;
+        return w / 14.15;
     }
 }

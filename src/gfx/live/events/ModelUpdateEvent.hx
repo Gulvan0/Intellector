@@ -3,10 +3,10 @@ package gfx.live.events;
 import gfx.live.OfferDirection;
 import gfx.live.OfferKind;
 
-enum ModelEvent 
+enum ModelUpdateEvent 
 {
     OrientationUpdated;
-    ShownSituationUpdated;
+    /*ShownSituationUpdated;
     PlannedPremovesUpdated;
     CurrentSituationUpdated;
     MoveAddedToHistory;
@@ -19,5 +19,5 @@ enum ModelEvent
     InteractivityModeUpdated;
     EntryAddedToChatHistory;
     PlayerOnlineStatusUpdated;
-    SpectatorListUpdated;
+    SpectatorListUpdated;*/
 }

@@ -42,6 +42,11 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
         return selectedNodePath;
     }
 
+    public function getShownSituation():Situation
+    {
+        return variation.getNode(selectedNodePath).situation.copy();
+    }
+
     public function getOrientation():PieceColor
     {
         return orientation;
