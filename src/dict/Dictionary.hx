@@ -598,6 +598,11 @@ class Dictionary
 
             case OPENING_STARTING_POSITION:
                 return ["Starting position", "Начальная позиция"];
+            case OPENING_UNORTHODOX_STARTING_POSITION:
+                return ["Unorthodox starting position", "Нестандартная начальная позиция"];
+            case OPENING_UNORTHODOX_LINE:
+                return ["Unorthodox line", "Нестандартная линия"];
+
             case RESIGN_BTN_ABORT_TOOLTIP:
                 return ["Abort", "Прервать"];
             case REMATCH_BTN_TOOLTIP:

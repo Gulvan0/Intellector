@@ -12,5 +12,5 @@
         <vbox id="opponentsBox" width="100%" style="spacing:0px;margin-left:5px" verticalAlign="center" />
     </hbox>
     <label id="watchingLabel" hidden="true" tooltip="${Dictionary.getPhrase(LIVE_WATCHING_LABEL_TOOLTIP)}" width="100%" style="font-size:16px;margin-top:10px;margin-bottom:10px;text-align:center;pointer-events:true" />
-    <label id="opening" width="100%" horizontalAlign="center" style="font-size:14px;margin-top:10px;font-style:italic;text-align:left" />
+    <label id="openingLabel" width="100%" horizontalAlign="center" style="font-size:14px;margin-top:10px;font-style:italic;text-align:left" />
 </card>

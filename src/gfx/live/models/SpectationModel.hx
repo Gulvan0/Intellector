@@ -57,7 +57,7 @@ class SpectationModel implements IReadOnlySpectationModel
 
     public function getELO(color:PieceColor):EloValue
     {
-        return elo.get(color);
+        return isRated()? elo.get(color) : null;
     }
 
     public function hasEnded():Bool

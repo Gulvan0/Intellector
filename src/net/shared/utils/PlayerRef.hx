@@ -20,4 +20,19 @@ abstract PlayerRef(String) from String to String
             default: Normal(this);
         }
     }
+
+    public function equals(ref:PlayerRef)
+    {
+        return switch [concretize(), ref.concretize()] 
+        {
+            case [Normal(login1), Normal(login2)]:
+                login1.toLowerCase() == login2.toLowerCase();
+            case [Guest(guestID1), Guest(guestID2)]:
+                guestID1 == guestID2;
+            case [Bot(botHandle1), Bot(botHandle2)]:
+                botHandle1 == botHandle2;
+            default:
+                false;
+        }
+    }
 }

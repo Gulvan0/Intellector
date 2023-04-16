@@ -8,7 +8,10 @@ import net.shared.variation.VariationPath;
 interface IReadOnlyAnalysisBoardModel 
 {
     public function getVariation():ReadOnlyVariation;
+    public function getSelectedBranch():VariationPath;
+    public function getShownMovePointer():Int;
     public function getSelectedNodePath():VariationPath;
+    public function getSituationAtLineEnd():Situation;
     public function getShownSituation():Situation;
     public function getOrientation():PieceColor;
     public function getBehaviourType():AnalysisBoardBehaviorType;

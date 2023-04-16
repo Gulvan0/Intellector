@@ -48,7 +48,7 @@ class FollowManager
         return followedLogin != null;
     }
     
-    public static function getFollowedPlayerLogin():String
+    public static function getFollowedPlayerLogin():Null<String>
     {
         return followedLogin;
     }

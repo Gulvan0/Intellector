@@ -1,5 +1,6 @@
 package gfx.common;
 
+import gfx.live.board.Board;
 import haxe.ui.containers.Box;
 import net.shared.dataobj.GameInfo;
 import net.shared.board.Situation;
@@ -12,7 +13,6 @@ import haxe.ui.components.Label;
 import haxe.ui.events.UIEvent;
 import haxe.ui.events.MouseEvent;
 import net.shared.EloValue;
-import gameboard.Board;
 import net.shared.PieceColor;
 import dict.Dictionary;
 import openings.OpeningTree;

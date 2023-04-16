@@ -1,5 +1,9 @@
 package gfx.live.models;
 
+import net.shared.EloValue;
+import net.shared.utils.PlayerRef;
+import net.shared.board.RawPly;
+import net.shared.Outcome;
 import utils.TimeControl;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
 import net.shared.dataobj.TimeReservesData;
@@ -49,10 +53,7 @@ class CommonModelExtractors
             case Spectation(model):
                 return model.getCurrentSituation();
             case AnalysisBoard(model):
-                var variation = model.getVariation();
-                var selectedPath = model.getSelectedNodePath();
-                var lastMainlineNodePath = variation.getFullMainlinePath(selectedPath);
-                return variation.getNode(lastMainlineNodePath).getSituation();
+                return model.getSituationAtLineEnd();
         }
     }
 
@@ -188,7 +189,7 @@ class CommonModelExtractors
             case Spectation(model):
                 model.getHistory().getMoveCount();
             case AnalysisBoard(model):
-                model.getVariation().getFullMainlinePath(model.getSelectedNodePath()).length;
+                model.getSelectedBranch().length;
         }
     }
 
@@ -203,7 +204,7 @@ class CommonModelExtractors
             case Spectation(model):
                 model.getShownMove();
             case AnalysisBoard(model):
-                model.getSelectedNodePath().length;
+                model.getShownMovePointer();
         }
     }
 
@@ -220,5 +221,96 @@ class CommonModelExtractors
             case AnalysisBoard(model):
                 null;
         }
+    }
+
+    public static function getOutcome(genericModel:ReadOnlyModel):Null<Outcome>
+    {
+        return switch genericModel 
+        {
+            case MatchVersusPlayer(model):
+                model.getOutcome();
+            case MatchVersusBot(model):
+                model.getOutcome();
+            case Spectation(model):
+                model.getOutcome();
+            case AnalysisBoard(model):
+                null;
+        }
+    }
+
+    public static function getLine(genericModel:ReadOnlyModel):Array<{incomingPly:RawPly, situation:Situation}>
+    {
+        return switch genericModel 
+        {
+            case MatchVersusPlayer(model):
+                model.getStartingSituation();
+            case MatchVersusBot(model):
+                model.getStartingSituation();
+            case Spectation(model):
+                model.getStartingSituation();
+            case AnalysisBoard(model):
+                model.getVariation().getFullMainline(false, model.getSelectedBranch()).map(x -> {incomingPly: x.getIncomingPly(), situation: x.getSituation()});
+        }
+    }
+
+    public static function getStartingSituation(genericModel:ReadOnlyModel):Situation
+    {
+        return switch genericModel 
+        {
+            case MatchVersusPlayer(model):
+                model.getStartingSituation();
+            case MatchVersusBot(model):
+                model.getStartingSituation();
+            case Spectation(model):
+                model.getStartingSituation();
+            case AnalysisBoard(model):
+                model.getVariation().rootNode().getSituation();
+        }
+    }
+
+    public static function getPlayerRef(genericModel:ReadOnlyModel, color:PieceColor):Null<PlayerRef>
+    {
+        return switch genericModel 
+        {
+            case MatchVersusPlayer(model):
+                model.getPlayerRef(color);
+            case MatchVersusBot(model):
+                model.getPlayerRef(color);
+            case Spectation(model):
+                model.getPlayerRef(color);
+            case AnalysisBoard(model):
+                null;
+        }
+    }
+
+    public static function getELO(genericModel:ReadOnlyModel, color:PieceColor):Null<EloValue>
+    {
+        return switch genericModel 
+        {
+            case MatchVersusPlayer(model):
+                model.getELO(color);
+            case MatchVersusBot(model):
+                null;
+            case Spectation(model):
+                model.getELO(color);
+            case AnalysisBoard(model):
+                null;
+        }
+    }
+
+    public static function getColorByRef(genericModel:ReadOnlyModel, ref:PlayerRef):Null<PieceColor>
+    {
+        var whiteRef = getPlayerRef(genericModel, White);
+        var blackRef = getPlayerRef(genericModel, Black);
+
+        if (whiteRef == null || blackRef == null)
+            return null;
+
+        if (whiteRef.equals(ref))
+            return White;
+        else if (blackRef.equals(ref))
+            return Black;
+        else
+            return null;
     }
 }

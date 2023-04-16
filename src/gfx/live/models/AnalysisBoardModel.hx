@@ -21,7 +21,8 @@ import gfx.live.interfaces.IReadOnlyHistory;
 class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
 {
     public var variation:Variation;
-    public var selectedNodePath:VariationPath;
+    public var selectedBranch:VariationPath;
+    public var shownMovePointer:Int;
     public var orientation:PieceColor;
 
     public var behaviourType:AnalysisBoardBehaviorType;
@@ -32,14 +33,29 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
         return variation;
     }
 
+    public function getSelectedBranch():VariationPath
+    {
+        return selectedBranch;
+    }
+
+    public function getShownMovePointer():Int
+    {
+        return shownMovePointer;
+    }
+
     public function getSelectedNodePath():VariationPath
     {
-        return selectedNodePath;
+        return selectedBranch.subpath(shownMovePointer);
     }
 
     public function getShownSituation():Situation
     {
-        return variation.getNode(selectedNodePath).situation.copy();
+        return variation.getNode(getSelectedNodePath()).situation.copy();
+    }
+
+    public function getSituationAtLineEnd():Situation
+    {
+        return variation.getNode(selectedBranch).situation.copy();
     }
 
     public function getOrientation():PieceColor

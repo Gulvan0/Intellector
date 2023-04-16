@@ -1,5 +1,6 @@
 package gfx.live.live;
 
+import haxe.ui.core.Component;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
 import gfx.live.interfaces.IGameComponentObserver;
 import gfx.live.events.ModelUpdateEvent;

@@ -58,7 +58,7 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
 
     public function getELO(color:PieceColor):EloValue
     {
-        return elo.get(color);
+        return isRated()? elo.get(color) : null;
     }
 
     public function hasEnded():Bool
