@@ -46,22 +46,17 @@ class Chatbox extends VBox implements IGameComponent
         for (entry in history)
             appendEntry(entry);
 
-        var disableInput:Bool = switch model 
+        switch model 
         {
             case MatchVersusPlayer(model):
-                model.hasEnded();
+                if (model.hasEnded())
+                    inputBox.disabled = true;
             case MatchVersusBot(model):
-                true;
+                inputBox.hidden = true;
             case Spectation(model):
-                model.hasEnded();
-            case AnalysisBoard(model):
-                true;
-        }
-        
-        if (disableInput)
-        {
-            messageInput.disabled = true;
-            sendBtn.disabled = true;
+                if (model.hasEnded())
+                    inputBox.disabled = true;
+            default:
         }
 
         HaxeUIScreen.instance.registerEvent(KeyboardEvent.KEY_DOWN, onKeyPress);
@@ -76,8 +71,7 @@ class Chatbox extends VBox implements IGameComponent
                 if (lastEntry != null)
                     appendEntry(lastEntry);
             case GameEnded:
-                messageInput.disabled = true;
-                sendBtn.disabled = true;
+                inputBox.disabled = true;
             default:
         }
     }
