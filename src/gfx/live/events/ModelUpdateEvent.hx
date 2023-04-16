@@ -6,6 +6,8 @@ import gfx.live.OfferKind;
 enum ModelUpdateEvent 
 {
     OrientationUpdated;
+    EntryAddedToChatHistory;
+    GameEnded;
     /*ShownSituationUpdated;
     PlannedPremovesUpdated;
     CurrentSituationUpdated;
@@ -17,7 +19,7 @@ enum ModelUpdateEvent
     TimeDataUpdated;
     ViewedMoveNumUpdated;
     InteractivityModeUpdated;
-    EntryAddedToChatHistory;
+    
     PlayerOnlineStatusUpdated;
     SpectatorListUpdated;*/
 }

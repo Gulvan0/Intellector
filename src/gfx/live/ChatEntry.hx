@@ -5,6 +5,7 @@ import net.shared.utils.PlayerRef;
 
 enum ChatEntry 
 {
-    Message(playerRef:PlayerRef, messageText:String);
+    PlayerMessage(playerRef:PlayerRef, messageText:String);
+    SpectatorMessage(playerRef:PlayerRef, messageText:String);
     Log(phrase:Phrase);
 }

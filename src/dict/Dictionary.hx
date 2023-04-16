@@ -381,6 +381,9 @@ class Dictionary
             case CHALLENGE_COLOR_ICON_TOOLTIP(Black):
                 return ["You will play as Black", "Вы будете играть за черных"];
 
+            case CHATBOX_GAME_OVER_MESSAGE(outcome):
+                return Utils.chatboxGameOverMessage(outcome);
+
             case INVALID_MOVE_DIALOG_TITLE:
                 return ["Invalid move", "Недопустимый ход"];
             case INVALID_MOVE_DIALOG_MESSAGE:

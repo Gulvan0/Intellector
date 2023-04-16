@@ -20,19 +20,14 @@ import gfx.live.interfaces.IReadOnlyHistory;
 
 class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
 {
-    private var variation:Variation;
-    private var selectedNodePath:VariationPath;
-    private var orientation:PieceColor;
+    public var variation:Variation;
+    public var selectedNodePath:VariationPath;
+    public var orientation:PieceColor;
 
-    private var behaviourType:AnalysisBoardBehaviorType;
-    private var boardInteractivityMode:InteractivityMode;
+    public var behaviourType:AnalysisBoardBehaviorType;
+    public var boardInteractivityMode:InteractivityMode;
 
     public function getVariation():ReadOnlyVariation
-    {
-        return variation;
-    }
-
-    public function getMultableVariation():Variation
     {
         return variation;
     }

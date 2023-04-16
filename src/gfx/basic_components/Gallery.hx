@@ -1,4 +1,4 @@
-package gfx.game;
+package gfx.basic_components;
 
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;

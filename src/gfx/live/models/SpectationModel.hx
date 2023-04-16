@@ -15,25 +15,25 @@ import gfx.live.interfaces.IReadOnlyHistory;
 
 class SpectationModel implements IReadOnlySpectationModel
 {
-    private var gameID:Int;
-    private var timeControl:TimeControl;
-    private var playerRefs:Map<PieceColor, PlayerRef>;
-    private var elo:Null<Map<PieceColor, EloValue>>;
-    private var outcome:Null<Outcome>;
-    private var datetime:Null<Date>;
+    public var gameID:Int;
+    public var timeControl:TimeControl;
+    public var playerRefs:Map<PieceColor, PlayerRef>;
+    public var elo:Null<Map<PieceColor, EloValue>>;
+    public var outcome:Null<Outcome>;
+    public var datetime:Null<Date>;
     
-    private var orientation:PieceColor;
-    private var history:History;
-    private var shownMovePointer:Int;
-    private var outgoingOfferActive:Map<PieceColor, Map<OfferKind, Bool>>;
-    private var timeData:TimeReservesData;
-    private var perMoveTimeRemaindersData:MsRemaindersData;
-    private var activeTimerColor:PieceColor;
-    private var boardInteractivityMode:InteractivityMode;
+    public var orientation:PieceColor;
+    public var history:History;
+    public var shownMovePointer:Int;
+    public var outgoingOfferActive:Map<PieceColor, Map<OfferKind, Bool>>;
+    public var timeData:TimeReservesData;
+    public var perMoveTimeRemaindersData:MsRemaindersData;
+    public var activeTimerColor:PieceColor;
+    public var boardInteractivityMode:InteractivityMode;
 
-    private var chatHistory:Array<ChatEntry>;
-    private var playerOnline:Map<PieceColor, Bool>;
-    private var spectatorRefs:Array<PlayerRef>;   
+    public var chatHistory:Array<ChatEntry>;
+    public var playerOnline:Map<PieceColor, Bool>;
+    public var spectatorRefs:Array<PlayerRef>;   
 
     public function getGameID():Int
     {
@@ -120,7 +120,7 @@ class SpectationModel implements IReadOnlySpectationModel
         return boardInteractivityMode;
     }
 
-    public function getChatHistory():PieceColor
+    public function getChatHistory():Array<ChatEntry>
     {
         return chatHistory.copy();
     }

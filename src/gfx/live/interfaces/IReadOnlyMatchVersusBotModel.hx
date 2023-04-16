@@ -1,5 +1,14 @@
 package gfx.live.interfaces;
 
+import engine.Bot;
+import utils.TimeControl;
+import net.shared.Outcome;
+import net.shared.board.Situation;
+import net.shared.board.RawPly;
+import net.shared.dataobj.TimeReservesData;
+import net.shared.PieceColor;
+import net.shared.utils.PlayerRef;
+
 interface IReadOnlyMatchVersusBotModel 
 {
     public function getGameID():Int;
@@ -20,7 +29,7 @@ interface IReadOnlyMatchVersusBotModel
     public function getMsRemainders():IReadOnlyMsRemainders;
     public function getActiveTimerColor():PieceColor;
     public function getBoardInteractivityMode():InteractivityMode;
-    public function getChatHistory():PieceColor;
+    public function getChatHistory():Array<ChatEntry>;
     public function getSpectators():Array<PlayerRef>;
 
 }

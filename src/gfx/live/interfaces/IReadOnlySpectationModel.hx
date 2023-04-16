@@ -1,5 +1,13 @@
 package gfx.live.interfaces;
 
+import net.shared.dataobj.TimeReservesData;
+import net.shared.board.Situation;
+import net.shared.Outcome;
+import net.shared.EloValue;
+import net.shared.PieceColor;
+import net.shared.utils.PlayerRef;
+import utils.TimeControl;
+
 interface IReadOnlySpectationModel 
 {
     public function getGameID():Int;
@@ -21,7 +29,7 @@ interface IReadOnlySpectationModel
     public function getMsRemainders():IReadOnlyMsRemainders;
     public function getActiveTimerColor():PieceColor;
     public function getBoardInteractivityMode():InteractivityMode;
-    public function getChatHistory():PieceColor;
+    public function getChatHistory():Array<ChatEntry>;
     public function isPlayerOnline(color:PieceColor):Bool;
     public function getSpectators():Array<PlayerRef>;
 

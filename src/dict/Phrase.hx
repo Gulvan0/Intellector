@@ -76,6 +76,7 @@ enum Phrase
     SHARE_COMING_SOON;
 
     //Bot phrases
+
     BOT_ANACONDA_THINKING;
     BOT_ANACONDA_PARTIAL_RESULT_ACHIEVED(depth:Int);
 
@@ -246,6 +247,8 @@ enum Phrase
     CHALLENGE_COLOR_ICON_TOOLTIP(color:Null<PieceColor>);
 
     //Live Game
+
+    CHATBOX_GAME_OVER_MESSAGE(outcome:Outcome);
 
     INVALID_MOVE_DIALOG_TITLE;
     INVALID_MOVE_DIALOG_MESSAGE;

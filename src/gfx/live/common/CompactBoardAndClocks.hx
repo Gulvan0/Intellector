@@ -11,6 +11,7 @@ import gfx.live.models.ReadOnlyModel;
 import gfx.live.events.ModelUpdateEvent;
 import gfx.live.events.GameboardEvent;
 import gfx.live.interfaces.IGameComponentObserver;
+import haxe.ui.core.Component;
 
 using gfx.live.models.CommonModelExtractors;
 
@@ -41,6 +42,11 @@ class CompactBoardAndClocks extends VBox implements IGameComponent
     public function destroy()
     {
         GlobalBroadcaster.removeObserver(this);
+    }
+
+    public function asComponent():Component
+    {
+        return this;
     }
 
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent)

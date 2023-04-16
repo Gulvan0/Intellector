@@ -1,5 +1,6 @@
 package gfx.live.common;
 
+import haxe.ui.core.Component;
 import gfx.live.board.GameBoard;
 import gfx.live.interfaces.IGameComponent;
 import haxe.ui.containers.Box;
@@ -26,6 +27,11 @@ class GameBoardWrapper extends Box implements IGameComponent
     public function destroy()
     {
         GlobalBroadcaster.removeObserver(gameboard);
+    }
+
+    public function asComponent():Component
+    {
+        return this;
     }
 
     public function new()

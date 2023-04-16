@@ -15,26 +15,26 @@ import gfx.live.interfaces.IReadOnlyHistory;
 
 class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
 {
-    private var gameID:Int;
-    private var timeControl:TimeControl;
-    private var playerRefs:Map<PieceColor, PlayerRef>;
-    private var elo:Null<Map<PieceColor, EloValue>>;
-    private var outcome:Null<Outcome>;
-    private var datetime:Null<Date>;
+    public var gameID:Int;
+    public var timeControl:TimeControl;
+    public var playerRefs:Map<PieceColor, PlayerRef>;
+    public var elo:Null<Map<PieceColor, EloValue>>;
+    public var outcome:Null<Outcome>;
+    public var datetime:Null<Date>;
     
-    private var orientation:PieceColor;
-    private var history:History;
-    private var shownMovePointer:Int;
-    private var plannedPremoves:Array<RawPly>;
-    private var offerActive:Map<OfferKind, Map<OfferDirection, Bool>>;
-    private var timeData:TimeReservesData;
-    private var perMoveTimeRemaindersData:MsRemaindersData;
-    private var activeTimerColor:PieceColor;
-    private var boardInteractivityMode:InteractivityMode;
+    public var orientation:PieceColor;
+    public var history:History;
+    public var shownMovePointer:Int;
+    public var plannedPremoves:Array<RawPly>;
+    public var offerActive:Map<OfferKind, Map<OfferDirection, Bool>>;
+    public var timeData:TimeReservesData;
+    public var perMoveTimeRemaindersData:MsRemaindersData;
+    public var activeTimerColor:PieceColor;
+    public var boardInteractivityMode:InteractivityMode;
 
-    private var chatHistory:Array<ChatEntry>;
-    private var opponentOnline:Bool;
-    private var spectatorRefs:Array<PlayerRef>;
+    public var chatHistory:Array<ChatEntry>;
+    public var opponentOnline:Bool;
+    public var spectatorRefs:Array<PlayerRef>;
 
     public function getGameID():Int
     {
