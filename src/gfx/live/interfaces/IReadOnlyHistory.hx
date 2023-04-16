@@ -10,4 +10,5 @@ interface IReadOnlyHistory
     public function getPly(plyNum:Int):RawPly;
     public function getStartingSituation():Situation;
     public function getMostRecentSituation():Situation;
+    public function getMoveCount():Int;
 }

@@ -28,7 +28,7 @@ class SpectationModel implements IReadOnlySpectationModel
     public var outgoingOfferActive:Map<PieceColor, Map<OfferKind, Bool>>;
     public var timeData:TimeReservesData;
     public var perMoveTimeRemaindersData:MsRemaindersData;
-    public var activeTimerColor:PieceColor;
+    public var activeTimerColor:Null<PieceColor>;
     public var boardInteractivityMode:InteractivityMode;
 
     public var chatHistory:Array<ChatEntry>;
@@ -110,7 +110,7 @@ class SpectationModel implements IReadOnlySpectationModel
         return perMoveTimeRemaindersData;
     }
 
-    public function getActiveTimerColor():PieceColor
+    public function getActiveTimerColor():Null<PieceColor>
     {
         return activeTimerColor;
     }

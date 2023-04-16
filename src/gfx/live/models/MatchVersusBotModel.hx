@@ -29,7 +29,7 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
     public var plannedPremoves:Array<RawPly>;
     public var timeData:TimeReservesData;
     public var perMoveTimeRemaindersData:MsRemaindersData;
-    public var activeTimerColor:PieceColor;
+    public var activeTimerColor:Null<PieceColor>;
     public var boardInteractivityMode:InteractivityMode;
 
     public var chatHistory:Array<ChatEntry>;
@@ -105,7 +105,7 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
         return perMoveTimeRemaindersData;
     }
 
-    public function getActiveTimerColor():PieceColor
+    public function getActiveTimerColor():Null<PieceColor>
     {
         return activeTimerColor;
     }
@@ -115,7 +115,7 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
         return boardInteractivityMode;
     }
 
-    public function getChatHistory():PieceColor
+    public function getChatHistory():Array<ChatEntry>
     {
         return chatHistory.copy();
     }

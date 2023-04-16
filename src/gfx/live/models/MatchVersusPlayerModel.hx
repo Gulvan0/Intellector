@@ -29,7 +29,7 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
     public var offerActive:Map<OfferKind, Map<OfferDirection, Bool>>;
     public var timeData:TimeReservesData;
     public var perMoveTimeRemaindersData:MsRemaindersData;
-    public var activeTimerColor:PieceColor;
+    public var activeTimerColor:Null<PieceColor>;
     public var boardInteractivityMode:InteractivityMode;
 
     public var chatHistory:Array<ChatEntry>;
@@ -116,7 +116,7 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
         return perMoveTimeRemaindersData;
     }
 
-    public function getActiveTimerColor():PieceColor
+    public function getActiveTimerColor():Null<PieceColor>
     {
         return activeTimerColor;
     }
@@ -126,7 +126,7 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
         return boardInteractivityMode;
     }
 
-    public function getChatHistory():PieceColor
+    public function getChatHistory():Array<ChatEntry>
     {
         return chatHistory.copy();
     }

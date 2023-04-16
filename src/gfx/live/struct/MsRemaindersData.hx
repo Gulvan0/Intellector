@@ -38,6 +38,11 @@ class MsRemaindersData implements IReadOnlyMsRemainders
         return initialSecs;
     }
 
+    public function getSecsLeftWhenEnded(side:PieceColor):Null<Float>
+    {
+        return msLeftWhenEnded == null? null : msLeftWhenEnded[side] / 1000;
+    }
+
     public function appendRemainders(whiteSecs:Int, blackSecs:Int) 
     {
         msLeftOnMove[White].push(whiteSecs);

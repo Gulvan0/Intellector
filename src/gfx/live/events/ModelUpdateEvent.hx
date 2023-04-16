@@ -8,6 +8,10 @@ enum ModelUpdateEvent
     OrientationUpdated;
     EntryAddedToChatHistory;
     GameEnded;
+    ViewedMoveNumUpdated;
+    TimeDataUpdated;
+    ActiveTimerColorUpdated;
+
     /*ShownSituationUpdated;
     PlannedPremovesUpdated;
     CurrentSituationUpdated;
@@ -16,8 +20,6 @@ enum ModelUpdateEvent
     HistoryRewritten;
     OfferActive(kind:OfferKind, direction:OfferDirection);
     OfferInactive(kind:OfferKind, direction:OfferDirection);
-    TimeDataUpdated;
-    ViewedMoveNumUpdated;
     InteractivityModeUpdated;
     
     PlayerOnlineStatusUpdated;

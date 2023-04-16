@@ -67,3 +67,48 @@
         appendMessage(ownRef, text, false);
     else 
         appendMessage(ownRef, text, true);
+
+//! Clock.hx:
+
+    public function handleNetEvent(event:ServerEvent) //Move moveNum logic to LiveGame
+    {
+        if (!active)
+            return;
+
+        switch event 
+        {
+            case Move(_, timeData):
+                if (timeData != null)
+                    correctTime(timeData);
+                moveNum++;
+                toggleTurnColor();
+            case Rollback(plysToUndo, timeData):
+                correctTime(timeData);
+                moveNum -= plysToUndo;
+                if (plysToUndo % 2 == 1)
+                    toggleTurnColor();
+            case TimeAdded(_, timeData):
+                correctTime(timeData);
+            case GameEnded(_, _, remainingTimeMs, _):
+                active = false;
+                pauseTimer();
+                if (remainingTimeMs != null)
+                    label.text = TimeControl.secsToString(remainingTimeMs[ownerColor] / 1000);
+                refreshColoring();
+            default:
+        }
+    }
+
+    public function handleGameBoardEvent(event:GameBoardEvent)
+    {
+        if (!active)
+            return;
+
+        switch event 
+        {
+            case ContinuationMove(_, _, _):
+                moveNum++;
+                toggleTurnColor();
+            default:
+        }
+    }

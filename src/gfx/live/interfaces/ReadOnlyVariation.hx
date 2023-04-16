@@ -1,5 +1,8 @@
 package gfx.live.interfaces;
 
+import net.shared.variation.DepthFirstIterator;
+import net.shared.variation.VariationMap;
+import net.shared.variation.VariationPath;
 import net.shared.variation.Variation;
 
 abstract ReadOnlyVariation(Variation)

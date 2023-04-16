@@ -19,7 +19,7 @@ class History implements IReadOnlyHistory
 
     public function dropLast(cnt:Int) 
     {
-        currentSituation = situationsPriorToPly[situationsPriorToPly.length - cnt];
+        currentSituation = situationsPriorToPly[getMoveCount() - cnt];
         situationsPriorToPly = situationsPriorToPly.slice(0, -cnt);
         plys = plys.slice(0, -cnt);
     }
@@ -33,7 +33,7 @@ class History implements IReadOnlyHistory
 
     public function getShownSituationByPointer(pointer:Int):Situation 
     {
-        if (situationsPriorToPly.length == pointer)
+        if (getMoveCount() == pointer)
             return currentSituation.copy();
         else
             return situationsPriorToPly[pointer].copy();
@@ -65,6 +65,11 @@ class History implements IReadOnlyHistory
     public function getMostRecentSituation():Situation 
     {
         return currentSituation.copy();
+    }
+
+    public function getMoveCount():Int
+    {
+        return plys.length;
     }
     
     public function new(startingSituation:Situation, plys:Array<RawPly>) 

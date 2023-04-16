@@ -4,7 +4,7 @@ abstract VariationPath(Array<Int>) from Array<Int> to Array<Int>
 {
     public var length(get, never):Int;
 
-    public function get_length():Int
+    private function get_length():Int
     {
         return this.length;
     }
