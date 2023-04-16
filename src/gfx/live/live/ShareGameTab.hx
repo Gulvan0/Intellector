@@ -1,11 +1,10 @@
-package gfx.game;
+package gfx.live.live;
 
-import gameboard.util.BoardSize;
+import gfx.live.board.util.BoardSize;
 import net.shared.board.RawPly;
 import browser.Clipboard;
 import haxe.ui.events.FocusEvent;
 import haxe.ui.util.Color;
-import gameboard.Board;
 import haxe.Timer;
 import gfx.Dialogs;
 import js.Browser;
