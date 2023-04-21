@@ -609,6 +609,10 @@ class Dictionary
                 return ["Rematch", "Реванш"];
             case EXPLORE_IN_ANALYSIS_BTN_TOOLTIP:
                 return ["Explore on analysis board", "На доску анализа"];
+            case PREV_BTN_TOOLTIP:
+                return ["Previous move", "Предыдущий ход"];
+            case NEXT_BTN_TOOLTIP:
+                return ["Next move", "Следующий ход"];
             case ADD_TIME_BTN_TOOLTIP:
                 return ["Add time", "Добавить время"];
             case PLAY_FROM_POS_BTN_TOOLTIP:
