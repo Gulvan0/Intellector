@@ -1,0 +1,29 @@
+<hbox width="100%" height="36px" styleName="request-box">
+    <style>
+        .accept-decline-button {
+            padding: 0px;
+        }
+
+        .accept-decline-button .icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .accept-decline-question {
+            font-style: italic;
+            text-align:center;
+            font-size:22px;
+            color: #444444;
+        }
+
+        .request-box {
+            background-color: #f7f7f7;
+            border-bottom: 1;
+            border-color: #dddddd;
+            padding: 0 0 0 1;
+        }
+    </style>
+    <button id="declineBtn" width="13.5%" height="100%" icon="assets/symbols/live/decline_offer.svg" styleName="accept-decline-button" horizontalAlign="left"/>
+    <label id="questionLabel" width="73%" styleName="accept-decline-question" horizontalAlign="center" verticalAlign="center"/>
+    <button id="acceptBtn" width="13.5%" height="100%" icon="assets/symbols/live/accept_offer.svg" styleName="accept-decline-button" horizontalAlign="right"/>
+</hbox>  
