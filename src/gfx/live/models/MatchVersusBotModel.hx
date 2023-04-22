@@ -158,4 +158,9 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel implements IRe
     {
         return getHistory().getLine();
     }
+
+    public function getStartingSituation():Situation
+    {
+        return getHistory().getStartingSituation();
+    }
 }

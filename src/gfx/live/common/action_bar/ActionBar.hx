@@ -67,10 +67,26 @@ class ActionBar extends VBox
         }
     }
 
-    public function new(buttonSets:Array<Array<ActionButton>>, eventHandler:ActionBarEvent->Void)
+    private function replaceButton(oldBtn:ActionButton, newBtn:ActionButton)
     {
-        super();
-        this.eventHandler = eventHandler;
+        for (bar in buttonBars)
+            bar.replaceButton(oldBtn, newBtn);
+    }
+
+    private function setBtnDisabled(button:ActionButton, disabled:Bool)
+    {
+        for (bar in buttonBars)
+            bar.setBtnDisabled(button, disabled);
+    }
+
+    public function asComponent():Component
+    {
+        return this;
+    }
+
+    private function updateButtonSets(buttonSets:Array<Array<ActionButton>>)
+    {
+        buttonsContainer.removeAllComponents();
 
         if (buttonSets.length > 1)
         {
@@ -96,6 +112,17 @@ class ActionBar extends VBox
             buttonsContainer.addComponent(buttonRow);
             buttonBars.push(buttonRow);
         }
+    }
+
+    public function new(?eventHandler:ActionBarEvent->Void, ?buttonSets:Array<Array<ActionButton>>)
+    {
+        super();
+
+        if (eventHandler != null)
+            this.eventHandler = eventHandler;
+
+        if (buttonSets != null)
+            updateButtonSets(buttonSets);
 
         for (offerKind in [Draw, Takeback])
         {

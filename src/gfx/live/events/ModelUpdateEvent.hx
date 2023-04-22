@@ -12,14 +12,13 @@ enum ModelUpdateEvent
     TimeDataUpdated;
     ActiveTimerColorUpdated;
     ShownSituationUpdated;
+    OfferStateUpdated(kind:OfferKind, direction:OfferDirection, active:Bool);
+    MoveAddedToHistory;
+    HistoryRollback;
 
     /* PlannedPremovesUpdated;
     CurrentSituationUpdated;
-    OfferActive(kind:OfferKind, direction:OfferDirection);
-    OfferInactive(kind:OfferKind, direction:OfferDirection);
     InteractivityModeUpdated;
-    MoveAddedToHistory;
-    HistoryRollback;
     HistoryRewritten;
     
     PlayerOnlineStatusUpdated;

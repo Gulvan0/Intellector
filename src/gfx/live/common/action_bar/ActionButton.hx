@@ -19,6 +19,11 @@ enum ActionButtonInternal
     PrevMove;
     NextMove;
     EditPosition;
+    ViewReport;
+    OpenChat;
+    OpenBranching;
+    OpenSpecialControlSettings;
+    OpenGameInfo;
 }
 
 abstract ActionButton(ActionButtonInternal) from ActionButtonInternal to ActionButtonInternal
@@ -52,6 +57,11 @@ abstract ActionButton(ActionButtonInternal) from ActionButtonInternal to ActionB
             case PrevMove: "assets/symbols/common/prev.svg";
             case NextMove: "assets/symbols/common/next.svg";
             case EditPosition: "assets/symbols/common/edit.svg";
+            case ViewReport: "assets/symbols/common/report.svg";
+            case OpenChat: "assets/symbols/common/chat.svg";
+            case OpenBranching: "assets/symbols/common/branching.svg";
+            case OpenSpecialControlSettings: "assets/symbols/common/special_settings.svg";
+            case OpenGameInfo: "assets/symbols/common/gameinfo.svg";
         }
     }
 
@@ -74,6 +84,21 @@ abstract ActionButton(ActionButtonInternal) from ActionButtonInternal to ActionB
             case PrevMove: PREV_BTN_TOOLTIP;
             case NextMove: NEXT_BTN_TOOLTIP;
             case EditPosition: ANALYSIS_SET_POSITION_BTN_TOOLTIP;
+            case ViewReport: VIEW_REPORT_BTN_TOOLTIP;
+            case OpenChat: OPEN_CHAT_BTN_TOOLTIP;
+            case OpenBranching: OPEN_BRANCHING_BTN_TOOLTIP;
+            case OpenSpecialControlSettings: OPEN_GAME_INFO_BTN_TOOLTIP;
+            case OpenGameInfo: OPEN_SPECIAL_CONTROL_SETTINGS_TOOLTIP;
+        }
+    }
+
+    public function confirmation():Null<Phrase>
+    {
+        return switch this 
+        {
+            case Resign: RESIGN_CONFIRMATION_MESSAGE;
+            case Abort: ABORT_CONFIRMATION_MESSAGE;
+            default: null;
         }
     }
 }

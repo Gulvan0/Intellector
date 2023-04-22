@@ -617,6 +617,26 @@ class Dictionary
                 return ["Add time", "Добавить время"];
             case PLAY_FROM_POS_BTN_TOOLTIP:
                 return ["Play from here", "Доиграть отсюда"];
+            case VIEW_REPORT_BTN_TOOLTIP:
+                return ["View Report", "Отчет о партии"];
+            case OPEN_CHAT_BTN_TOOLTIP:
+                return ["Chat", "Чат"];
+            case OPEN_BRANCHING_BTN_TOOLTIP:
+                return ["Branching", "Ветви"];
+            case OPEN_GAME_INFO_BTN_TOOLTIP:
+                return ["Game info", "Информация об игре"];
+            case OPEN_SPECIAL_CONTROL_SETTINGS_TOOLTIP:
+                return ["Special control settings", "Особые настройки управления"];
+
+            case CHAT_SUBSCREEN_NAME:
+                return ["Chat", "Чат"];
+            case BRANCHING_SUBSCREEN_NAME:
+                return ["Branching", "Ветви"];
+            case GAME_INFO_SUBSCREEN_NAME:
+                return ["Game info", "Об игре"];
+            case SPECIAL_CONTROL_SETTINGS_SUBSCREEN_NAME:
+                return ["Controls", "Управление"];
+
             case OFFER_DRAW_BTN_TOOLTIP:
                 return ["Offer draw", "Ничья"];
             case TAKEBACK_BTN_TOOLTIP:

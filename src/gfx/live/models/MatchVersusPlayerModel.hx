@@ -180,4 +180,9 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel implemen
     {
         return getHistory().getLine();
     }
+
+    public function getStartingSituation():Situation
+    {
+        return getHistory().getStartingSituation();
+    }
 }

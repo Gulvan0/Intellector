@@ -155,4 +155,9 @@ class SpectationModel implements IReadOnlySpectationModel implements IReadOnlyGa
     {
         return getHistory().getLine();
     }
+
+    public function getStartingSituation():Situation
+    {
+        return getHistory().getStartingSituation();
+    }
 }

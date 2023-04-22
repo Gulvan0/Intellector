@@ -1,5 +1,8 @@
 package gfx.live.common.action_bar;
 
+import dict.Dictionary;
+import js.Browser;
+import dict.Phrase;
 import haxe.ui.components.Button;
 import haxe.ui.containers.HorizontalButtonBar;
 
@@ -11,6 +14,7 @@ class ActionButtons extends HorizontalButtonBar
     public var btnPressHandler:ActionBtn->Void;
 
     private var buttonMap:Map<ActionButtonInternal, Button> = [];
+    private var buttonDisabled:Map<ActionButtonInternal, Bool> = [for (btn in ActionButtonInternal.createAll()) btn => false];
 
     public function setButtons(buttons:Array<ActionButton>) 
     {
@@ -42,6 +46,16 @@ class ActionButtons extends HorizontalButtonBar
         }
     }
 
+    public function setBtnDisabled(button:ActionButton, disabled:Bool)
+    {
+        buttonDisabled.set(button, disabled);
+
+        var buttonComponent:Null<Button> = buttonMap.get(button);
+
+        if (buttonComponent != null)
+            buttonComponent.disabled = disabled;
+    }
+
     private function constructButtonComponent(button:ActionButton, percentWidth:Float):Button
     {
         var buttonComponent:Button = new Button();
@@ -50,7 +64,14 @@ class ActionButtons extends HorizontalButtonBar
         buttonComponent.tooltip = button.tooltip();
         buttonComponent.icon = button.iconPath();
         buttonComponent.styleNames = "action-button";
-        buttonComponent.onClick = e -> {btnPressHandler(button);};
+        buttonComponent.disabled = buttonDisabled.get(button);
+        buttonComponent.onClick = e -> {
+            var confirmationMessage:Null<Phrase> = button.confirmation();
+            if (confirmationMessage == null)
+                btnPressHandler(button);
+            else if (Browser.window.confirm(Dictionary.getPhrase(confirmationMessage)))
+                btnPressHandler(button);
+        };
         return buttonComponent;
     }
 }
