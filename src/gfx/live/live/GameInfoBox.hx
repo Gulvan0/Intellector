@@ -1,5 +1,6 @@
 package gfx.live.live;
 
+import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import net.shared.openings.OpeningDatabase;
 import net.shared.openings.Opening;
 import GlobalBroadcaster.IGlobalEventObserver;
@@ -46,20 +47,22 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
 
     public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver)
     {
+        var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
+
         GlobalBroadcaster.addObserver(this);
 
-        var tcType:TimeControlType = model.getTimeControl().getType();
+        var tcType:TimeControlType = gameModel.getTimeControl().getType();
 
         var separator:String = " " + SpecialChar.Dot + " ";
         if (tcType == Correspondence)
             matchParameters.text = Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
         else
-            matchParameters.text = model.getTimeControl().toString() + separator + tcType.getName();
+            matchParameters.text = gameModel.getTimeControl().toString() + separator + tcType.getName();
 
-        var whiteRef = model.getPlayerRef(White);
-        var blackRef = model.getPlayerRef(Black);
-        var whiteELO = model.getELO(White);
-        var blackELO = model.getELO(Black);
+        var whiteRef = gameModel.getPlayerRef(White);
+        var blackRef = gameModel.getPlayerRef(Black);
+        var whiteELO = gameModel.getELO(White);
+        var blackELO = gameModel.getELO(Black);
 
         whitePlayerLabel = new PlayerLabel(Exact(20), whiteRef, whiteELO, true);
         whitePlayerLabel.horizontalAlign = "center";
@@ -75,38 +78,40 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
         opponentsBox.addComponent(crossSign);
         opponentsBox.addComponent(blackPlayerLabel);
         
-        resolution.text = Utils.getResolution(model.getOutcome());
+        resolution.text = Utils.getResolution(gameModel.getOutcome());
         timeControlIcon.resource = Paths.timeControl(tcType);
 
         if (parsedData.datetime != null)
             datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
 
-        updateOpeningLabel(model);
+        updateOpeningLabel(gameModel);
 
         if (FollowManager.isFollowing())
-            markFollowedPlayer(model.getColorByRef(FollowManager.getFollowedPlayerLogin()));
+            markFollowedPlayer(gameModel.getColorByRef(FollowManager.getFollowedPlayerLogin()));
     }
 
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent)
     {
+        var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
+
         switch event 
         {
             case ShownSituationUpdated:
-                updateOpeningLabel(model);
+                updateOpeningLabel(gameModel);
             case GameEnded:
-                resolution.text = Utils.getResolution(model.getOutcome());
-                updateOpeningLabel(model);
+                resolution.text = Utils.getResolution(gameModel.getOutcome());
+                updateOpeningLabel(gameModel);
             default:
         }
     }
 
-    private function updateOpeningLabel(model:ReadOnlyModel)
+    private function updateOpeningLabel(gameModel:IReadOnlyGameRelatedModel)
     {
-        var pointer:Int = model.getShownMovePointer();
+        var pointer:Int = gameModel.getShownMovePointer();
 
         if (pointer == 0)
         {
-            var startingSituation:Situation = model.getStartingSituation();
+            var startingSituation:Situation = gameModel.getStartingSituation();
 
             if (startingSituation.isDefaultStarting())
                 openingLabel.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
@@ -117,7 +122,7 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
 
                 if (opening != null)
                 {
-                    var hideRealName:Bool = model.playerColor() != null && !model.gameEnded();
+                    var hideRealName:Bool = gameModel.getPlayerColor() != null && !gameModel.hasEnded();
                     openingLabel.text = opening.renderName(hideRealName);
                 }
                 else
@@ -126,7 +131,7 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
         }
         else
         {
-            var line = model.getLine().slice(0, pointer);
+            var line = gameModel.getLine().slice(0, pointer);
             var i = line.length - 1;
 
             while (i >= 0)

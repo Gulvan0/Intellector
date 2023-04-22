@@ -1,5 +1,7 @@
 package gfx.live.models;
 
+import gfx.live.interfaces.IReadOnlyGenericModel;
+import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import gfx.live.interfaces.IReadOnlyMatchVersusBotModel;
 import engine.Bot;
 import net.shared.board.Situation;
@@ -14,7 +16,7 @@ import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 
-class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
+class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel implements IReadOnlyGameRelatedModel implements IReadOnlyGenericModel
 {
     public var gameID:Int;
     public var opponentBot:Bot;
@@ -123,5 +125,37 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
     public function getSpectators():Array<PlayerRef>
     {
         return spectatorRefs.copy();
+    }
+
+    //Additional methods to unify with IReadOnlyGameRelatedModel
+    
+    public function getPlayerColor():Null<PieceColor>
+    {
+        if (LoginManager.isPlayer(getPlayerRef(White)))
+            return White;
+        else
+            return Black;
+    }
+
+    public function isOutgoingOfferActive(color:PieceColor, kind:OfferKind):Bool
+    {
+        return false;
+    }
+    
+    public function isPlayerOnline(color:PieceColor):Bool
+    {
+        return true;
+    }
+
+    //Additional methods to unify with IReadOnlyGenericModel
+    
+    public function getLineLength():Int
+    {
+        return getHistory().getMoveCount();
+    }
+
+    public function getLine():Array<{incomingPly:RawPly, situation:Situation}>
+    {
+        return getHistory().getLine();
     }
 }

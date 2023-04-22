@@ -11,4 +11,5 @@ interface IReadOnlyHistory
     public function getStartingSituation():Situation;
     public function getMostRecentSituation():Situation;
     public function getMoveCount():Int;
+    public function getLine():Array<{incomingPly:RawPly, situation:Situation}>;
 }

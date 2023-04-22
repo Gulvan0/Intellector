@@ -23,7 +23,7 @@ interface IReadOnlyMatchVersusPlayerModel
     public function getShownSituation():Situation;
     public function getCurrentSituation():Situation;
     public function getHistory():IReadOnlyHistory;
-    public function getShownMove():Int;
+    public function getShownMovePointer():Int;
     public function getPlannedPremoves():Array<RawPly>;
     public function isOfferActive(kind:OfferKind, direction:OfferDirection):Bool;
     public function getTimeReservesData():TimeReservesData;

@@ -1,5 +1,6 @@
 package gfx.live.live;
 
+import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
 import gfx.live.interfaces.IGameComponentObserver;
@@ -42,47 +43,51 @@ class Clock extends Card implements IGameComponent
 
     public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver)
     {
-        if (model.gameEnded())
+        var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
+
+        if (gameModel.hasEnded())
         {
             this.active = false;
-            setTimeToAmountLeftWhenEnded(model.getMsRemainders());
+            setTimeToAmountLeftWhenEnded(gameModel.getMsRemainders());
         }
         else
         {
             this.active = true;
 
-            var timeControl = model.getTimeControl();
+            var timeControl = gameModel.getTimeControl();
 
             if (timeControl == null || timeControl.isCorrespondence())
                 throw "Cannot create clock: no allowed time control present";
 
             this.playSoundOnOneMinuteLeft = timeControl.startSecs >= 90;
-            this.alertsEnabled = model.playerColor() == ownerColor;
+            this.alertsEnabled = gameModel.getPlayerColor() == ownerColor;
 
-            correctTime(model.timeData());
-            onActiveTimerColorUpdated(model.activeTimerColor());
+            correctTime(gameModel.timeData());
+            onActiveTimerColorUpdated(gameModel.activeTimerColor());
         }
     }
 
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent)
     {
+        var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
+        
         switch event 
         {
             case GameEnded:
-                onGameEnded(model.getMsRemainders());
+                onGameEnded(gameModel.getMsRemainders());
             case ViewedMoveNumUpdated:
-                if (model.gameEnded())
+                if (gameModel.hasEnded())
                 {
-                    var shownMovePointer:Int = model.getShownMovePointer();
-                    if (shownMovePointer == model.getLineLength())
-                        setTimeToAmountLeftWhenEnded(model.getMsRemainders());
+                    var shownMovePointer:Int = gameModel.getShownMovePointer();
+                    if (shownMovePointer == gameModel.getLineLength())
+                        setTimeToAmountLeftWhenEnded(gameModel.getMsRemainders());
                     else
-                        label.text = TimeControl.secsToString(model.getMsRemainders().getSecsLeftAfterMove(ownerColor, shownMovePointer));
+                        label.text = TimeControl.secsToString(gameModel.getMsRemainders().getSecsLeftAfterMove(ownerColor, shownMovePointer));
                 }
             case TimeDataUpdated:
-                correctTime(model.timeData());
+                correctTime(gameModel.timeData());
             case ActiveTimerColorUpdated:
-                onActiveTimerColorUpdated(model.activeTimerColor());
+                onActiveTimerColorUpdated(gameModel.activeTimerColor());
             default:
         }
     }

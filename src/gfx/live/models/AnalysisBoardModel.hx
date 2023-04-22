@@ -1,5 +1,6 @@
 package gfx.live.models;
 
+import gfx.live.interfaces.IReadOnlyGenericModel;
 import gfx.live.interfaces.IReadOnlyAnalysisBoardModel;
 import gfx.live.interfaces.ReadOnlyVariation;
 import gfx.live.struct.AnalysisBoardBehaviorType;
@@ -18,7 +19,7 @@ import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 
-class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
+class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IReadOnlyGenericModel
 {
     public var variation:Variation;
     public var selectedBranch:VariationPath;
@@ -71,5 +72,27 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
     public function getBoardInteractivityMode():InteractivityMode
     {
         return boardInteractivityMode;
+    }
+
+    //Additional methods to unify with IReadOnlyGenericModel
+
+    public function getCurrentSituation():Situation
+    {
+        return getSituationAtLineEnd();
+    }
+
+    public function getStartingSituation():Situation
+    {
+        return getVariation().rootNode().getSituation();
+    }
+    
+    public function getLineLength():Int
+    {
+        return getSelectedBranch().length;
+    }
+
+    public function getLine():Array<{incomingPly:RawPly, situation:Situation}>
+    {
+        return getVariation().getFullMainline(false, model.getSelectedBranch()).map(x -> {incomingPly: x.getIncomingPly(), situation: x.getSituation()});
     }
 }

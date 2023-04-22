@@ -1,5 +1,6 @@
 package gfx.live.live;
 
+import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
 import gfx.live.events.ModelUpdateEvent;
 import gfx.live.models.ReadOnlyModel;
@@ -42,7 +43,7 @@ class Chatbox extends VBox implements IGameComponent
     {
         this.eventHandler = gameScreen.handleChatboxEvent;
 
-        var history:Array<ChatEntry> = model.getChatHistory();
+        var history:Array<ChatEntry> = model.asGameModel().getChatHistory();
 
         for (entry in history)
             appendEntry(entry);
@@ -68,7 +69,7 @@ class Chatbox extends VBox implements IGameComponent
         switch event 
         {
             case EntryAddedToChatHistory:
-                var lastEntry = model.getLastChatEntry();
+                var lastEntry = model.asGameModel().getLastChatEntry();
                 if (lastEntry != null)
                     appendEntry(lastEntry);
             case GameEnded:

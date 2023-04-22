@@ -1,5 +1,7 @@
 package gfx.live.models;
 
+import gfx.live.interfaces.IReadOnlyGenericModel;
+import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import gfx.live.interfaces.IReadOnlyMatchVersusPlayerModel;
 import net.shared.board.Situation;
 import net.shared.Outcome;
@@ -13,7 +15,7 @@ import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 
-class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
+class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel implements IReadOnlyGameRelatedModel implements IReadOnlyGenericModel
 {
     public var gameID:Int;
     public var timeControl:TimeControl;
@@ -139,5 +141,43 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
     public function getSpectators():Array<PlayerRef>
     {
         return spectatorRefs.copy();
+    }
+
+    //Additional methods to unify with IReadOnlyGameRelatedModel
+    
+    public function getPlayerColor():Null<PieceColor>
+    {
+        if (LoginManager.isPlayer(getPlayerRef(White)))
+            return White;
+        else
+            return Black;
+    }
+
+    public function isOutgoingOfferActive(color:PieceColor, kind:OfferKind):Bool
+    {
+        if (getPlayerColor() == color)
+            return isOfferActive(kind, Outgoing);
+        else
+            return isOfferActive(kind, Incoming);
+    }
+    
+    public function isPlayerOnline(color:PieceColor):Bool
+    {
+        if (getPlayerColor() == color)
+            return true;
+        else
+            return isOpponentOnline();
+    }
+
+    //Additional methods to unify with IReadOnlyGenericModel
+    
+    public function getLineLength():Int
+    {
+        return getHistory().getMoveCount();
+    }
+
+    public function getLine():Array<{incomingPly:RawPly, situation:Situation}>
+    {
+        return getHistory().getLine();
     }
 }

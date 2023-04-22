@@ -71,6 +71,16 @@ class History implements IReadOnlyHistory
     {
         return plys.length;
     }
+
+    public function getLine():Array<{incomingPly:RawPly, situation:Situation}>
+    {
+        var a:Array<{incomingPly:RawPly, situation:Situation}> = [];
+
+        for (plyNum in 1...(getMoveCount()+1))
+            a.push({incomingPly: getPly(plyNum), situation: getSituationAfterPly(plyNum)});
+
+        return a;
+    }
     
     public function new(startingSituation:Situation, plys:Array<RawPly>) 
     {
