@@ -1,18 +1,18 @@
 package gfx.live.analysis;
 
+import gfx.live.interfaces.ReadOnlyVariation;
+import gfx.live.models.AnalysisBoardModel;
+import haxe.ui.core.Component;
+import gfx.live.events.VariationViewEvent;
+import net.shared.variation.VariationPath;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
 import gfx.utils.PlyScrollType;
-import haxe.ui.core.Component;
-import struct.Variant.VariantPath;
 
-interface IVariantView
+interface IVariationView
 {
-    public function init(eventHandler:PeripheralEvent->Void):Void;
-    public function clear(?newStartingSituation:Situation):Void;
-    public function addChildNode(parentPath:VariantPath, ply:RawPly, selectChild:Bool):Void;
-    public function addChildToSelectedNode(ply:RawPly, selectChild:Bool):Void;
-    public function getSelectedNode():VariantPath;
-    public function removeNodeByPath(path:VariantPath):Void;
-    public function handlePlyScrolling(type:PlyScrollType):Void;
+    public function init(model:AnalysisBoardModel, eventHandler:VariationViewEvent->Void):Void;
+    public function updateVariation(variation:ReadOnlyVariation, selectedNodePath:VariationPath, fullSelectedBranch:VariationPath):Void;
+    public function updateSelectedNode(selectedNodePath:VariationPath, fullSelectedBranch:VariationPath):Void;
+    public function asComponent():Component;
 }

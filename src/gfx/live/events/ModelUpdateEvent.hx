@@ -17,6 +17,8 @@ enum ModelUpdateEvent
     HistoryRollback;
     HistoryRewritten;
     EditorActivenessUpdated;
+    VariationUpdated;
+    SelectedVariationNodeUpdated;
 
     /* PlannedPremovesUpdated;
     InteractivityModeUpdated;
