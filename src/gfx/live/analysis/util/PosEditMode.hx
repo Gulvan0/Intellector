@@ -1,4 +1,4 @@
-package gfx.analysis;
+package gfx.live.analysis.util;
 
 import net.shared.PieceType;
 import net.shared.PieceColor;

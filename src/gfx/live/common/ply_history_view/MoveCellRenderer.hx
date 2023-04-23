@@ -1,4 +1,4 @@
-package gfx.common;
+package gfx.live.common.ply_history_view;
 
 import haxe.ui.events.MouseEvent;
 import haxe.ui.styles.Style;

@@ -1,4 +1,4 @@
-package gfx.analysis;
+package gfx.live.analysis;
 
 import net.shared.board.RawPly;
 import net.shared.board.Situation;

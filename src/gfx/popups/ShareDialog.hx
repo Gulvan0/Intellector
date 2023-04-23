@@ -1,6 +1,5 @@
-package gfx.common;
+package gfx.popups;
 
-import gameboard.util.BoardSize;
 import gfx.profile.data.StudyData;
 import gfx.popups.StudyParamsDialog;
 import net.shared.dataobj.StudyInfo;
@@ -13,19 +12,20 @@ import haxe.ui.events.FocusEvent;
 import haxe.ui.events.UIEvent;
 import js.lib.ArrayBufferView;
 import js.lib.ArrayBuffer;
-import gameboard.GameBoard;
 import haxe.io.Bytes;
 import js.html.Blob;
 import haxe.Timer;
 import gfx.Dialogs;
 import js.Browser;
 import net.shared.PieceColor;
-import gameboard.Board;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.dialogs.Dialog;
 import dict.Dictionary;
 import net.shared.board.Situation;
 import net.shared.utils.MathUtils;
+import gfx.live.board.util.BoardSize;
+import gfx.live.board.Board;
+import gfx.live.board.GameBoard;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/share_dialog.xml"))
 class ShareDialog extends Dialog 

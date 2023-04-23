@@ -1,5 +1,6 @@
-package gfx.analysis;
+package gfx.live.analysis.variation_tree;
 
+import gfx.live.analysis.variation_tree.util.ArrowHighlighting;
 import haxe.ui.util.Color;
 import haxe.ui.backend.html5.graphics.SVGGraphicsImpl;
 import haxe.ui.backend.html5.svg.SVGBuilder;
@@ -9,13 +10,6 @@ import haxe.ui.geom.Point;
 import haxe.ui.components.Canvas;
 import gfx.utils.Colors;
 
-enum Highlighting
-{
-    Off;
-    Semi;
-    Full;
-}
-
 class Arrow extends Canvas
 {
     private static var NORMAL_ARROW_THICKNESS:Float = 2;
@@ -24,7 +18,7 @@ class Arrow extends Canvas
 
     public var from(default, null):Point;
     public var to(default, null):Point;
-    public var highlighting(default, null):Highlighting;
+    public var highlighting(default, null):ArrowHighlighting;
     public var scale(default, null):Float;
 
     public function highlight(fully:Bool) 

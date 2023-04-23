@@ -1,12 +1,13 @@
-package gfx.analysis;
+package gfx.live.analysis.variation_tree;
 
+import net.shared.variation.VariationPath;
 import haxe.ui.backend.html5.text.TextMeasurer;
 import haxe.ui.geom.Point;
 import haxe.ui.components.Link;
 
 class Node extends Link
 {
-    public var code:String;
+    public var path:VariationPath;
     public var textSize(default, null):{width:Float, height:Float};
 
     public function inputPos():Point
@@ -33,16 +34,16 @@ class Node extends Link
         this.customStyle = newStyle;
     }
 
-    public function new(scale:Float, code:String, text:String, selected:Bool, onBranchSelect:(code:String)->Void, onBranchRemove:(code:String)->Void)
+    public function new(scale:Float, path:VariationPath, text:String, selected:Bool, onSelectRequested:VariationPath->Void, onRemovalRequested:VariationPath->Void)
     {
         super();
-        this.code = code;
+        this.path = path;
         this.text = text;
         this.onClick = (e) -> {
             if (e.ctrlKey)
-                onBranchRemove(this.code);
+                onRemovalRequested(this.path);
             else
-                onBranchSelect(this.code);
+                onSelectRequested(this.path);
         };
 
         this.customStyle = {
