@@ -1,4 +1,4 @@
-package gfx.analysis;
+package gfx.live.analysis;
 
 import gfx.live.analysis.variation_tree.util.DisplacementInfo;
 import net.shared.variation.Variation;
