@@ -1,5 +1,6 @@
 package gfx.live;
 
+import net.shared.converters.Notation;
 import gfx.live.interfaces.IReadOnlyHistory;
 import net.shared.board.Situation;
 import net.shared.board.RawPly;
@@ -54,6 +55,15 @@ class History implements IReadOnlyHistory
         return plys[plyNum - 1].copy();
     }
 
+    public function getPlyStr(plyNum:Int, displayPlyNum:Bool, displayColor:Bool):String
+    {
+        var ply:RawPly = getPly(plyNum);
+        var context:Situation = getSituationBeforePly(plyNum);
+        var displayedPlyNum:Null<Int> = displayPlyNum? plyNum : null;
+
+        return Notation.plyToNotation(ply, context, displayColor, displayedPlyNum);
+    }
+
     public function getStartingSituation():Situation
     {
         if (Lambda.empty(situationsPriorToPly))
@@ -72,12 +82,12 @@ class History implements IReadOnlyHistory
         return plys.length;
     }
 
-    public function getLine():Array<{incomingPly:RawPly, situation:Situation}>
+    public function getLine():Array<{ply:RawPly, situationAfter:Situation}>
     {
-        var a:Array<{incomingPly:RawPly, situation:Situation}> = [];
+        var a:Array<{ply:RawPly, situationAfter:Situation}> = [];
 
         for (plyNum in 1...(getMoveCount()+1))
-            a.push({incomingPly: getPly(plyNum), situation: getSituationAfterPly(plyNum)});
+            a.push({ply: getPly(plyNum), situationAfter: getSituationAfterPly(plyNum)});
 
         return a;
     }

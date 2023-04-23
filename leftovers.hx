@@ -112,3 +112,22 @@
             default:
         }
     }
+
+//! PlyHistoryView.hx:
+
+    //To screen logic (whether to update shownMovePointer of a model on ServerEvent.Move)
+    public function handleNetEvent(event:ServerEvent)
+    {
+        switch event 
+        {
+            case Move(ply, _):
+                var autoScrollEnabled:Bool = switch Preferences.autoScrollOnMove.get() 
+                {
+                    case Always: true;
+                    case OwnGameOnly: isGamePlayable;
+                    case Never: false;
+                }
+                var selectMove:Bool = shownMove == moveHistory.length || autoScrollEnabled;
+                appendPly(ply, selectMove);
+        }
+    }

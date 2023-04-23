@@ -16,4 +16,5 @@ interface IReadOnlyAnalysisBoardModel
     public function getOrientation():PieceColor;
     public function getBehaviourType():AnalysisBoardBehaviorType;
     public function getBoardInteractivityMode():InteractivityMode;
+    public function isEditorActive():Bool;
 }

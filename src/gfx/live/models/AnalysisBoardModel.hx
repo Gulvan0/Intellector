@@ -28,6 +28,7 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
 
     public var behaviourType:AnalysisBoardBehaviorType;
     public var boardInteractivityMode:InteractivityMode;
+    public var editorActive:Bool;
 
     public function getVariation():ReadOnlyVariation
     {
@@ -74,6 +75,11 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
         return boardInteractivityMode;
     }
 
+    public function isEditorActive():Bool
+    {
+        return editorActive;
+    }
+
     //Additional methods to unify with IReadOnlyGenericModel
 
     public function getCurrentSituation():Situation
@@ -91,8 +97,8 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
         return getSelectedBranch().length;
     }
 
-    public function getLine():Array<{incomingPly:RawPly, situation:Situation}>
+    public function getLine():Array<{ply:RawPly, situationAfter:Situation}>
     {
-        return getVariation().getFullMainline(false, model.getSelectedBranch()).map(x -> {incomingPly: x.getIncomingPly(), situation: x.getSituation()});
+        return getVariation().getFullMainline(false, model.getSelectedBranch()).map(x -> {ply: x.getIncomingPly(), situationAfter: x.getSituation()});
     }
 }

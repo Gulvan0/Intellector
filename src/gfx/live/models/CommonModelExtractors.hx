@@ -34,6 +34,15 @@ class CommonModelExtractors
         }
     }
 
+    public static function getLastPlyInfo(genericModel:IReadOnlyGenericModel):{ply:RawPly, situationBefore:Situation}
+    {
+        var line = genericModel.getLine();
+        var lastMoveIndex = genericModel.getLineLength() - 1;
+        var secondToLastMoveIndex = lastMoveIndex - 1;
+
+        return {ply: line[lastMoveIndex].ply, situationBefore: line[secondToLastMoveIndex].situationAfter};
+    }
+
     public static function getLastChatEntry(genericModel:IReadOnlyGameRelatedModel):Null<ChatEntry>
     {
         var history:Array<ChatEntry> = genericModel.getChatHistory();

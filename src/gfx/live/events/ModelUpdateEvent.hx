@@ -15,11 +15,11 @@ enum ModelUpdateEvent
     OfferStateUpdated(kind:OfferKind, direction:OfferDirection, active:Bool);
     MoveAddedToHistory;
     HistoryRollback;
+    HistoryRewritten;
+    EditorActivenessUpdated;
 
     /* PlannedPremovesUpdated;
-    CurrentSituationUpdated;
     InteractivityModeUpdated;
-    HistoryRewritten;
     
     PlayerOnlineStatusUpdated;
     SpectatorListUpdated;*/

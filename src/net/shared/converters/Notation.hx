@@ -84,7 +84,7 @@ class Notation
         }
     }
 
-    public static function plyToNotation(ply:RawPly, context:Situation, ?indicateColor:Bool):String
+    public static function plyToNotation(ply:RawPly, context:Situation, ?indicateColor:Bool = false, ?displayedPlyNum:Null<Int>):String
     {
         var hexFrom = context.get(ply.from);
         var hexTo = context.get(ply.to);
@@ -100,6 +100,9 @@ class Notation
                 str += '⬡';
             else 
                 str += '⬢';
+
+        if (displayedPlyNum != null)
+            str += '$displayedPlyNum. ';
 
         if (castle)
             if (hexTo.type() == Intellector)

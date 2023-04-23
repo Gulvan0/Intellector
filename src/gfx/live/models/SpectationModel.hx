@@ -151,7 +151,7 @@ class SpectationModel implements IReadOnlySpectationModel implements IReadOnlyGa
         return getHistory().getMoveCount();
     }
 
-    public function getLine():Array<{incomingPly:RawPly, situation:Situation}>
+    public function getLine():Array<{ply:RawPly, situationAfter:Situation}>
     {
         return getHistory().getLine();
     }
