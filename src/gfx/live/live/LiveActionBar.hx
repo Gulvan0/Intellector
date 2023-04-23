@@ -178,6 +178,7 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
         if (gameModel.getTimeControl().isCorrespondence())
             setBtnDisabled(AddTime, true);
 
+        eventHandler = gameScreen.handleActionBarEvent;
         GlobalBroadcaster.addObserver(this);
     }
 
