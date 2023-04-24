@@ -77,7 +77,7 @@ abstract ReadOnlyVariationNode(VariationNode) from VariationNode
         return this.incomingPly == null? null : this.incomingPly.copy();
     }
 
-    public function getParent():IReadOnlyVariationNode
+    public function getParent():ReadOnlyVariationNode
     {
         return this.parent;
     }
