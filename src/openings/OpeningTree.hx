@@ -15,7 +15,7 @@ class Branch
     {
         var exactMove = successors.get(move);
         var otherMove = successors.get("");
-        return exactMove != null? exactMove : otherMove != null? otherMove : new Branch(name, "", []);
+        return exactMove ?? otherMove ?? new Branch(name, "", []);
     }
 
     public function new(name:String, move:String, packedSuccessors:Array<Array<Branch>>) 
@@ -66,7 +66,7 @@ class OpeningTree
             fromI = 8 - fromI;
             toI = 8 - toI;
         }
-        var collapsedMove:String = '$fromI$fromJ$toI$toJ' + (morphInto == null? "" : morphInto.getName());
+        var collapsedMove:String = '$fromI$fromJ$toI$toJ' + (morphInto?.getName() ?? "");
         prevNodes.push(currentNode);
         currentNode = currentNode.get(collapsedMove);
     }

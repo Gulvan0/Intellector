@@ -193,7 +193,7 @@ class ChallengeParamsDialog extends BaseDialog
 
     private function restoreTimeControlInputValues(?customTimeControl:TimeControl)
     {
-        var timeControl:TimeControl = customTimeControl == null? approvedTimeControl : customTimeControl;
+        var timeControl:TimeControl = customTimeControl ?? approvedTimeControl;
         startMinsTF.text = "" + Math.floor(timeControl.startSecs / 60);
         startSecsTF.text = "" + timeControl.startSecs % 60;
         bonusSecsTF.text = "" + timeControl.bonusSecs;

@@ -29,7 +29,7 @@ class VariationPathAncestorsIterator
 
     public function next():VariationPath
     {
-        currentPath = currentPath == null? [] : currentPath.childPath(path[i]);
+        currentPath = currentPath?.childPath(path[i]) ?? [];
         i++;
         return currentPath;
     }

@@ -61,8 +61,8 @@ abstract Variation(VariationNode)
 
     public function getFullMainlinePath(?parentPath:VariationPath):VariationPath
     {
-        var path:VariationPath = parentPath != null? parentPath : VariationPath.root();
-        var node:VariationNode = parentPath != null? getNode(parentPath) : rootNode();
+        var path:VariationPath = parentPath ?? VariationPath.root();
+        var node:VariationNode = getNode(path);
 
         while (node.hasChildren())
         {

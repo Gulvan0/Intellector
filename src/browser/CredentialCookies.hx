@@ -28,8 +28,8 @@ class CredentialCookies
     public static function saveLoginDetails(?login:String, ?password:String, expirable:Bool = false) 
     {
         var duration:Null<Int> = expirable? 60 * 60 * 6 : 60 * 60 * 24 * 365 * 5;
-        Cookie.set(LOGIN_COOKIE, login == null? LoginManager.getLogin() : login, duration, "/");
-		Cookie.set(PASSWORD_COOKIE, password == null? LoginManager.getPassword() : password, duration, "/");
+        Cookie.set(LOGIN_COOKIE, login ?? LoginManager.getLogin(), duration, "/");
+		Cookie.set(PASSWORD_COOKIE, password ?? LoginManager.getPassword(), duration, "/");
     }
 
     public static function removeLoginDetails() 

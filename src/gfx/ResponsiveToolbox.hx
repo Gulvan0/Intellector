@@ -101,14 +101,14 @@ class ResponsiveToolbox
     private static function recalcWidth(comp:Component, rule:ResponsivenessRule)
     {
         var parent:Null<Component> = comp.parentComponent;
-        var parentWidth:Null<Float> = parent != null? parent.width : null;
+        var parentWidth:Null<Float> = parent?.width;
         comp.width = evaluateRule(rule, parentWidth);
     }
 
     private static function recalcHeight(comp:Component, rule:ResponsivenessRule)
     {
         var parent:Null<Component> = comp.parentComponent;
-        var parentHeight:Null<Float> = parent != null? parent.height : null;
+        var parentHeight:Null<Float> = parent?.height;
         comp.height = evaluateRule(rule, parentHeight);
     }
 

@@ -76,7 +76,7 @@ class GameWidget extends Box
 
     private function loadBoard(shownSituation:Situation, watchedColor:Null<PieceColor>) 
     {
-        var orientationColor:PieceColor = watchedColor == null? shownSituation.turnColor : watchedColor;
+        var orientationColor:PieceColor = watchedColor ?? shownSituation.turnColor;
         var board:Board = new Board(shownSituation, orientationColor, None, 150, 150, true);
         board.horizontalAlign = "center";
         board.verticalAlign = "center";

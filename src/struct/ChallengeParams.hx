@@ -112,7 +112,7 @@ class ChallengeParams
             case Black: "b";
         }
 
-        var sitStr = customStartingSituation == null? "" : customStartingSituation.serialize();
+        var sitStr = customStartingSituation?.serialize() ?? "";
         var ratedStr = rated? "t" : "";
 
         return timeControl.startSecs + ";" + timeControl.bonusSecs + ";" + typeStr + ";" + colorStr + ";" + sitStr + ";" + ratedStr;

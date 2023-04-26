@@ -269,7 +269,7 @@ class Situation
 
     public function copy(?newTurnColor:PieceColor):Situation
     {
-        return new Situation(pieces.copy(), newTurnColor != null? newTurnColor : turnColor, intellectorPos.copy());
+        return new Situation(pieces.copy(), newTurnColor ?? turnColor, intellectorPos.copy());
     }
 
     public function toString():String

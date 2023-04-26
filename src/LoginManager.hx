@@ -34,7 +34,7 @@ class LoginManager
     
     public static function getRef():String
     {
-        return login != null? login : "_" + Networker.getSessionID();
+        return login ?? "_" + Networker.getSessionID();
     }
 
     public static function imitateLoggedState(?assumedLogin:String = "Tester")

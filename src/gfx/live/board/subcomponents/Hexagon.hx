@@ -32,7 +32,7 @@ class Hexagon extends Absolute
     public function setDisplayedRowNumber(displayedRowNumber:Null<String>)
     {
         this.displayedRowNumber = displayedRowNumber;
-        number.text = displayedRowNumber != null? displayedRowNumber : "";
+        number.text = displayedRowNumber ?? "";
         number.hidden = displayedRowNumber == null;
     }
 

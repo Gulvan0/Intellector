@@ -21,7 +21,7 @@ class PlySerializer
         s += ply.from.j;
         s += ply.to.i;
         s += ply.to.j;
-        s += ply.morphInto == null? "" : ply.morphInto.getName();
+        s += ply.morphInto?.getName() ?? "";
         return s;
     }
     
