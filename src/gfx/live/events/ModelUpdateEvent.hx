@@ -19,6 +19,8 @@ enum ModelUpdateEvent
     EditorActivenessUpdated;
     VariationUpdated;
     SelectedVariationNodeUpdated;
+    EditorSituationUpdated;
+    EditorModeUpdated;
 
     /* PlannedPremovesUpdated;
     InteractivityModeUpdated;

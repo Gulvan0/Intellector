@@ -131,3 +131,7 @@
                 appendPly(ply, selectMove);
         }
     }
+
+//! PositionEditor.hx
+
+//Hide position editor when it sends ApplyChangesRequested/DiscardChangesRequested event

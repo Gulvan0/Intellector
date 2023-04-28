@@ -17,4 +17,6 @@ interface IReadOnlyAnalysisBoardModel
     public function getBehaviourType():AnalysisBoardBehaviorType;
     public function getBoardInteractivityMode():InteractivityMode;
     public function isEditorActive():Bool;
+    public function getEditorSituation():Null<Situation>;
+    public function getEditorMode():Null<PosEditMode>;
 }

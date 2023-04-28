@@ -1,5 +1,6 @@
 package gfx.live.models;
 
+import gfx.live.analysis.util.PosEditMode;
 import gfx.live.interfaces.IReadOnlyGenericModel;
 import gfx.live.interfaces.IReadOnlyAnalysisBoardModel;
 import gfx.live.interfaces.ReadOnlyVariation;
@@ -28,7 +29,9 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
 
     public var behaviourType:AnalysisBoardBehaviorType;
     public var boardInteractivityMode:InteractivityMode;
-    public var editorActive:Bool;
+
+    public var editorSituation:Null<Situation>;
+    public var editorMode:Null<PosEditMode>;
 
     public function getVariation():ReadOnlyVariation
     {
@@ -77,7 +80,17 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
 
     public function isEditorActive():Bool
     {
-        return editorActive;
+        return editorSituation != null;
+    }
+
+    public function getEditorSituation():Null<Situation>
+    {
+        return editorSituation.copy();
+    }
+
+    public function getEditorMode():Null<PosEditMode>
+    {
+        return editorMode;
     }
 
     //Additional methods to unify with IReadOnlyGenericModel

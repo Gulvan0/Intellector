@@ -36,6 +36,12 @@ class AnalysisActionBar extends ActionBar implements IGameComponent implements I
         GlobalBroadcaster.removeObserver(this);
     }
 
+    public function asComponent():Component
+    {
+        return this;
+    }
+
+
     public function handleGlobalEvent(event:GlobalEvent)
     {
         switch event 
