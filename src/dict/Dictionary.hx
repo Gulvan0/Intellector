@@ -397,6 +397,11 @@ class Dictionary
             case LIVE_WATCHING_LABEL_TOOLTIP:
                 return ["You follow this player. Each time he/she starts a new game, you'll be automatically redirected to watch it. To unfollow, simply leave this screen.", "Вы наблюдаете за этим игроком. Если игрок начнет новую игру, вы автоматически последуете за ним. Чтобы прекратить наблюдение, просто покиньте этот экран"];
 
+            case SPECTATOR_COUNT_HEADER(cnt):
+                return ['Spectating: $cnt', 'Наблюдателей: $cnt'];
+            case FULL_SPECTATOR_LIST_DIALOG_TITLE:
+                return ["All spectators", "Все наблюдатели"];
+
             case INPUT_PLAYER_LOGIN:
                 return ["Input player's username", "Введите ник игрока"];
 

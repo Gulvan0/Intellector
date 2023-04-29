@@ -258,6 +258,9 @@ enum Phrase
     LIVE_WATCHING_LABEL_TEXT(watchedPlayerLogin:String);
     LIVE_WATCHING_LABEL_TOOLTIP;
 
+    SPECTATOR_COUNT_HEADER(cnt:Int);
+    FULL_SPECTATOR_LIST_DIALOG_TITLE;
+
     //Dialogs
 
     INPUT_PLAYER_LOGIN;
