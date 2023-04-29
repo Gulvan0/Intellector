@@ -134,4 +134,44 @@
 
 //! PositionEditor.hx
 
-//Hide position editor when it sends ApplyChangesRequested/DiscardChangesRequested event
+    //Hide position editor when it sends ApplyChangesRequested/DiscardChangesRequested event
+
+//! ControlTabs.hx
+
+    private function drawBranchingTab(initialVariant:Variant, ?selectedNode:VariantPath)
+    {
+        branchingTabType = Preferences.branchingTabType.get();
+        switch branchingTabType
+        {
+            case Tree: 
+                var tree:VariantTree = new VariantTree(initialVariant, selectedNode);
+                variantView = tree;
+                variantViewSV.hidden = false;
+                variantViewSV.percentContentWidth = null;
+                variantViewSV.addComponent(tree);
+                variantViewSV.registerEvent(MouseEvent.MOUSE_WHEEL, onWheel.bind(tree), 100);
+                onChange = e -> {
+                    if (selectedPage == branchingTab)
+                        tree.refreshLayout();
+                };
+                tree.refreshLayout();
+            case Outline: 
+                var comp:VariantOutline = new VariantOutline(initialVariant, selectedNode);
+                variantView = comp;
+                variantViewSV.hidden = true;
+                variantViewSV.percentContentWidth = null;
+                branchingTabContentsBox.addComponent(comp);
+                onChange = e -> {
+                    if (selectedPage == branchingTab)
+                        comp.refreshSelection();
+                };
+            case PlainText: 
+                var box:VariantPlainText = new VariantPlainText(initialVariant, selectedNode);
+                variantView = box;
+                variantViewSV.hidden = false;
+                variantViewSV.percentContentWidth = 100;
+                variantViewSV.addComponent(box);
+                onChange = null;
+        };
+        variantView.init(eventHandler);
+    }

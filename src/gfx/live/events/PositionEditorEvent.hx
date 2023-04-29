@@ -9,6 +9,10 @@ enum PositionEditorEvent
     EditModeChangeRequested(mode:PosEditMode);
     TurnColorChangeRequested(color:PieceColor);
     SituationImported(situation:Situation);
+    ClearRequested;
+    ResetRequested;
+    StartPosRequested;
+    OrientationChangeRequested;
     ApplyChangesRequested;
     DiscardChangesRequested;
 }

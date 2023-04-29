@@ -19,7 +19,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/analysis/position_editor.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/position_editor.xml"))
 class PositionEditor extends VBox implements IGameComponent
 {
     private var eventHandler:PositionEditorEvent->Void;
@@ -64,7 +64,7 @@ class PositionEditor extends VBox implements IGameComponent
             case AnalysisBoard(model):
                 analysisModel = model;
             default:
-                throw "PositionEditor is only available for AnalysisBoardModel"
+                throw "PositionEditor is only available for AnalysisBoardModel";
         }
 
         switch event 

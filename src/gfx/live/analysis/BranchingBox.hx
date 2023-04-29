@@ -1,5 +1,8 @@
 package gfx.live.analysis;
 
+import gfx.popups.BranchingHelp;
+import haxe.ui.events.MouseEvent;
+import haxe.ui.core.Component;
 import gfx.live.models.AnalysisBoardModel;
 import gfx.live.events.VariationViewEvent;
 import gfx.live.interfaces.IGameComponentObserver;
@@ -9,12 +12,15 @@ import GlobalBroadcaster.GlobalEvent;
 import gfx.live.interfaces.IGameComponent;
 import haxe.ui.containers.Box;
 
-class VariationViewWrapper extends Box implements IGameComponent
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/branching_box.xml"))
+class BranchingBox extends Box implements IGameComponent
 {
     private var variationView:IVariationView;
 
     private var analysisModel:AnalysisBoardModel;
     private var eventHandler:VariationViewEvent->Void;
+
+    private var activeWheelHandler:Null<MouseEvent->Void>;
 
     public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver):Void
     {
@@ -24,7 +30,7 @@ class VariationViewWrapper extends Box implements IGameComponent
                 analysisModel = model;
                 eventHandler = gameScreen.handleVariationViewEvent;
             default:
-                throw "VariationViewWrapper can only be used with AnalysisBoardModel";
+                throw "BranchingBox can only be used with AnalysisBoardModel";
         }
 
         refreshVariationView();
@@ -48,6 +54,11 @@ class VariationViewWrapper extends Box implements IGameComponent
     {
         GlobalBroadcaster.removeObserver(this);
     }
+    
+    public function asComponent():Component
+    {
+        return this;
+    }
 
     public function handleGlobalEvent(event:GlobalEvent)
     {
@@ -59,19 +70,45 @@ class VariationViewWrapper extends Box implements IGameComponent
         }
     }
 
+    private function treeProcessWheel(tree:VariationTree, e:MouseEvent)
+    {
+        if (e.ctrlKey) 
+        {
+            e.cancel();
+            if (e.delta > 0 && tree.scale < 8)
+                tree.setScale(tree.scale * 2);
+            else if (e.delta < 0 && tree.scale > 0.125)
+                tree.setScale(tree.scale / 2);
+        } 
+    }
+
     private function refreshVariationView()
     {
-        removeAllComponents();
+        variationViewSV.removeAllComponents();
+        variationViewSV.unregisterEvent(MouseEvent.MOUSE_WHEEL, activeWheelHandler);
 
-        /* TODO: variationView = switch Preferences.branchingTabType.get() 
+        switch Preferences.branchingTabType.get() 
         {
             case Tree:
-            case Outline:
-            case PlainText:
-        }*/
+                var tree:VariationTree = new VariationTree();
+                activeWheelHandler = treeProcessWheel.bind(tree);
+                variationViewSV.registerEvent(MouseEvent.MOUSE_WHEEL, activeWheelHandler, 100);
 
-        addComponent(variationView.asComponent());
+                variationView = tree;
+            case Outline:
+                variationView = new VariationOutline();
+            case PlainText:
+                variationView = new VariationPlainText();
+        }
+
+        variationViewSV.addComponent(variationView.asComponent());
         variationView.init(analysisModel, eventHandler);
+    }
+
+    @:bind(branchingHelpLink, MouseEvent.CLICK)
+    private function onBranchingHelpClicked(e)
+    {
+        Dialogs.getQueue().addBasic(new BranchingHelp(), null, true);
     }
 
     public function new()
