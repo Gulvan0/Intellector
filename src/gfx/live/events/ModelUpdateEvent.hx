@@ -1,7 +1,7 @@
 package gfx.live.events;
 
-import gfx.live.OfferDirection;
-import gfx.live.OfferKind;
+import net.shared.dataobj.OfferDirection;
+import net.shared.dataobj.OfferKind;
 
 enum ModelUpdateEvent 
 {

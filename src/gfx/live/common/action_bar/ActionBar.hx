@@ -4,7 +4,7 @@ import gfx.basic_components.Gallery;
 import dict.Phrase;
 import gfx.live.events.ActionBarEvent;
 import haxe.ui.containers.VBox;
-import gfx.live.OfferKind;
+import net.shared.dataobj.OfferKind;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/action_bar.xml"))
 class ActionBar extends VBox

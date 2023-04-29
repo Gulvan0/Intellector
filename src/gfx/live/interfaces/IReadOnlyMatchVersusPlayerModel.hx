@@ -7,6 +7,8 @@ import utils.TimeControl;
 import net.shared.utils.PlayerRef;
 import net.shared.board.Situation;
 import net.shared.PieceColor;
+import net.shared.dataobj.OfferDirection;
+import net.shared.dataobj.OfferKind;
 
 interface IReadOnlyMatchVersusPlayerModel 
 {
@@ -33,5 +35,4 @@ interface IReadOnlyMatchVersusPlayerModel
     public function getChatHistory():Array<ChatEntry>;
     public function isOpponentOnline():Bool;
     public function getSpectators():Array<PlayerRef>;
-
 }

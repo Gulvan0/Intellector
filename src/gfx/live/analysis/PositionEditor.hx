@@ -8,7 +8,6 @@ import gfx.live.interfaces.IGameScreen;
 import gfx.live.models.ReadOnlyModel;
 import gfx.live.interfaces.IGameComponent;
 import net.shared.board.Situation;
-import haxe.ui.util.Variant;
 import haxe.ui.components.Image;
 import haxe.ui.components.Button;
 import haxe.ui.events.UIEvent;

@@ -1,4 +1,4 @@
-package gfx.live;
+package net.shared.dataobj;
 
 enum OfferKind
 {

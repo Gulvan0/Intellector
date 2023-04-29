@@ -1,6 +1,6 @@
 package gfx.live.events;
 
-import gfx.live.OfferKind;
+import net.shared.dataobj.OfferKind;
 import gfx.live.common.action_bar.ActionButton;
 
 enum ActionBarEvent

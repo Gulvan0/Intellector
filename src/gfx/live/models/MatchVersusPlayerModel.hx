@@ -14,6 +14,8 @@ import gfx.live.struct.MsRemaindersData;
 import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
+import net.shared.dataobj.OfferKind;
+import net.shared.dataobj.OfferDirection;
 
 class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel implements IReadOnlyGameRelatedModel implements IReadOnlyGenericModel
 {

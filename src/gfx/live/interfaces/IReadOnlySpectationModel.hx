@@ -7,6 +7,7 @@ import net.shared.EloValue;
 import net.shared.PieceColor;
 import net.shared.utils.PlayerRef;
 import utils.TimeControl;
+import net.shared.dataobj.OfferKind;
 
 interface IReadOnlySpectationModel 
 {
