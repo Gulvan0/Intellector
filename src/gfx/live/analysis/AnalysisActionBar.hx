@@ -2,7 +2,7 @@ package gfx.live.analysis;
 
 import GlobalBroadcaster.GlobalEvent;
 import gfx.live.events.ModelUpdateEvent;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.models.ReadOnlyModel;
 import GlobalBroadcaster.IGlobalEventObserver;
 import gfx.live.interfaces.IGameComponent;
@@ -12,7 +12,7 @@ class AnalysisActionBar extends ActionBar implements IGameComponent implements I
 {
     private final compact:Bool;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver):Void
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void
     {
         if (compact)
             updateButtonSets([[ChangeOrientation, EditPosition, Share, PlayFromPos, PrevMove, NextMove]]);

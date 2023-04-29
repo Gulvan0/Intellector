@@ -4,7 +4,7 @@ import gfx.live.interfaces.IReadOnlyAnalysisBoardModel;
 import gfx.live.events.PositionEditorEvent;
 import haxe.ui.core.Component;
 import gfx.live.events.ModelUpdateEvent;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.models.ReadOnlyModel;
 import gfx.live.interfaces.IGameComponent;
 import net.shared.board.Situation;
@@ -27,7 +27,7 @@ class PositionEditor extends VBox implements IGameComponent
     private var editModeBtns:Map<PosEditMode, Button>;
     private var toolBtns:Array<Button>;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver):Void
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void
     {
         this.eventHandler = gameScreen.handlePositionEditorEvent;
 

@@ -4,7 +4,7 @@ import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
 import gfx.live.events.ModelUpdateEvent;
 import gfx.live.models.ReadOnlyModel;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.events.ChatboxEvent;
 import gfx.live.interfaces.IGameComponent;
 import haxe.ui.core.Platform;
@@ -17,7 +17,7 @@ import dict.Phrase;
 import gfx.game.GameActionBar.ActionBtn;
 import net.shared.Outcome;
 import serialization.GameLogParser;
-import net.EventProcessingQueue.INetObserver;
+import net.INetObserver;
 import haxe.ui.containers.VBox;
 import net.shared.ServerEvent;
 import net.shared.PieceColor;
@@ -39,7 +39,7 @@ class Chatbox extends VBox implements IGameComponent
 {
     private var eventHandler:ChatboxEvent->Void;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver)
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
     {
         this.eventHandler = gameScreen.handleChatboxEvent;
 

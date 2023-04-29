@@ -24,7 +24,7 @@ import haxe.ui.containers.Card;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.core.Screen as HaxeUIScreen;
-import net.EventProcessingQueue.INetObserver;
+import net.INetObserver;
 import net.shared.Outcome;
 import net.shared.PieceColor;
 import net.shared.ServerEvent;

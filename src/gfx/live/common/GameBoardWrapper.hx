@@ -9,7 +9,7 @@ class GameBoardWrapper extends Box implements IGameComponent
 {
     private var gameboard:GameBoard;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver)
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
     {
         gameboard = new GameBoard(model, gameScreen);
         gameboard.percentWidth = 100;

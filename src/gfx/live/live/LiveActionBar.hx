@@ -5,7 +5,7 @@ import GlobalBroadcaster.IGlobalEventObserver;
 import GlobalBroadcaster.GlobalEvent;
 import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import gfx.live.events.ModelUpdateEvent;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.models.ReadOnlyModel;
 import gfx.live.interfaces.IGameComponent;
 import gfx.live.common.action_bar.ActionBar;
@@ -18,7 +18,7 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
 
     private final compact:Bool;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver):Void
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 

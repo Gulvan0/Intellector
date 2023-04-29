@@ -18,7 +18,7 @@ import js.html.Element;
 import dict.Utils;
 import js.Browser;
 import js.html.URLSearchParams;
-import net.EventProcessingQueue.INetObserver;
+import net.INetObserver;
 import net.shared.ServerEvent;
 import net.shared.PieceColor;
 import browser.Url;

@@ -6,7 +6,7 @@ import net.shared.openings.Opening;
 import GlobalBroadcaster.IGlobalEventObserver;
 import haxe.ui.core.Component;
 import gfx.live.events.ModelUpdateEvent;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.models.ReadOnlyModel;
 import gfx.live.interfaces.IGameComponent;
 import net.shared.board.Situation;
@@ -18,7 +18,7 @@ import gfx.profile.simple_components.PlayerLabel;
 import net.shared.TimeControlType;
 import dict.Utils;
 import assets.Paths;
-import net.EventProcessingQueue.INetObserver;
+import net.INetObserver;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
 import net.shared.ServerEvent;
@@ -45,7 +45,7 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
 
     private var renderedForWidth:Float = 0;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver)
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 

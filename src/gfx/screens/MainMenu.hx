@@ -5,7 +5,7 @@ import gfx.popups.LogIn;
 import gfx.popups.ChallengeParamsDialog;
 import gfx.popups.ChangelogDialog;
 import net.shared.ServerEvent;
-import net.EventProcessingQueue.INetObserver;
+import net.INetObserver;
 import net.shared.dataobj.GameInfo;
 import net.shared.dataobj.ChallengeData;
 import net.Requests;

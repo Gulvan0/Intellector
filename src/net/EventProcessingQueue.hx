@@ -2,11 +2,6 @@ package net;
 
 import net.shared.ServerEvent;
 
-interface INetObserver 
-{
-    public function handleNetEvent(event:ServerEvent):Void;
-}
-
 class EventProcessingQueue
 {
     private var observers:Array<INetObserver> = [];

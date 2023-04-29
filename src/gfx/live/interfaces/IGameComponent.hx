@@ -6,7 +6,7 @@ import gfx.live.models.ReadOnlyModel;
 
 interface IGameComponent 
 {
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver):Void;
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void;
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent):Void;
     public function destroy():Void;
     public function asComponent():Component;

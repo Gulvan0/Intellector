@@ -1,7 +1,7 @@
 package gfx.live.board;
 
 import GlobalBroadcaster.IGlobalEventObserver;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.models.ReadOnlyModel;
 import gfx.live.board.subcomponents.util.ArrowParams;
 import gfx.live.board.util.HexSelectionMode;
@@ -162,7 +162,7 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         }
     }
 
-    public function new(model:ReadOnlyModel, gameScreen:IGameComponentObserver) 
+    public function new(model:ReadOnlyModel, gameScreen:IGameScreen) 
     {
         var shownSituation:Situation = model.getShownSituation();
         var orientation:PieceColor = model.getOrientation();

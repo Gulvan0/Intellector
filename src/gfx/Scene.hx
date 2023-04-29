@@ -17,7 +17,7 @@ import haxe.ui.containers.SideBar;
 import dict.Dictionary;
 import GlobalBroadcaster.IGlobalEventObserver;
 import GlobalBroadcaster.GlobalEvent;
-import net.EventProcessingQueue.INetObserver;
+import net.INetObserver;
 import net.shared.ServerEvent;
 import utils.StringUtils;
 import serialization.GameLogParser;

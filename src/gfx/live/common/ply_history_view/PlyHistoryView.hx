@@ -2,7 +2,7 @@ package gfx.live.common.ply_history_view;
 
 import gfx.live.interfaces.IReadOnlyGenericModel;
 import gfx.live.events.ModelUpdateEvent;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.models.ReadOnlyModel;
 import gfx.live.interfaces.IReadOnlyHistory;
 import gfx.live.events.PlyHistoryViewEvent;
@@ -78,7 +78,7 @@ abstract class PlyHistoryView extends VBox implements IGameComponent
         refreshElements();
     }
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver):Void
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void
     {
         genericModel = model.asGenericModel();
         eventHandler = gameScreen.handlePlyHistoryViewEvent;

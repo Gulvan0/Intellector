@@ -5,7 +5,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.core.Component;
 import gfx.live.models.AnalysisBoardModel;
 import gfx.live.events.VariationViewEvent;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.events.ModelUpdateEvent;
 import gfx.live.models.ReadOnlyModel;
 import GlobalBroadcaster.GlobalEvent;
@@ -22,7 +22,7 @@ class BranchingBox extends Box implements IGameComponent
 
     private var activeWheelHandler:Null<MouseEvent->Void>;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver):Void
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void
     {
         switch model 
         {

@@ -10,7 +10,7 @@ import haxe.Timer;
 import gfx.live.models.ReadOnlyModel;
 import gfx.live.events.ModelUpdateEvent;
 import gfx.live.events.GameboardEvent;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import haxe.ui.core.Component;
 
 using gfx.live.models.CommonModelExtractors;
@@ -34,7 +34,7 @@ class CompactBoardAndClocks extends VBox implements IGameComponent
         blackClock.resize(30);
     }
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver)
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
     {
         GlobalBroadcaster.addObserver(this);
     }

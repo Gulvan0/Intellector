@@ -3,13 +3,13 @@ package gfx.live.live;
 import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
-import gfx.live.interfaces.IGameComponentObserver;
+import gfx.live.interfaces.IGameScreen;
 import gfx.live.events.ModelUpdateEvent;
 import gfx.live.models.ReadOnlyModel;
 import gfx.live.interfaces.IGameComponent;
 import net.shared.dataobj.TimeReservesData;
 import net.shared.ServerEvent;
-import net.EventProcessingQueue.INetObserver;
+import net.INetObserver;
 import net.shared.PieceColor;
 import assets.Audio;
 import haxe.ui.containers.Box;
@@ -41,7 +41,7 @@ class Clock extends Card implements IGameComponent
 
     private var timer:Timer;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameComponentObserver)
+    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 
