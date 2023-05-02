@@ -26,6 +26,26 @@ class Profile extends Screen
         SceneManager.removeResizeHandler(onResize);
     }
 
+    public abstract function getTitle():Null<Phrase>
+    {
+        return PLAYER_PROFILE_SCREEN_TITLE(profileOwnerLogin);
+    }
+
+    public abstract function getURLPath():Null<String>
+    {
+        return 'player/$profileOwnerLogin';
+    }
+
+    public abstract function getPage():ViewedScreen
+    {
+        return Profile(profileOwnerLogin);
+    }
+
+    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
+    {
+        return [];
+    }
+
     private function onResize()
     {
         if (haxe.ui.core.Screen.instance.actualWidth > 800)
@@ -59,8 +79,5 @@ class Profile extends Screen
         tabView.addComponent(ongoingGamesTab);
 
         assignWidth(header, Percent(100));
-
-        customEnterHandler = onEnter;
-        customCloseHandler = onClose;
     }
 }

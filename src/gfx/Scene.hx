@@ -99,7 +99,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logOutBtn.disabled = ingame;
 
         if (ingame)
-            Browser.window.onpopstate = () -> {Url.setPathByScreen(SceneManager.getCurrentScreenType());};
+            Browser.window.onpopstate = () -> {Url.setPathByScreen(currentScreen.getURLPath());};
         else
             Browser.window.onpopstate = ScreenNavigator.navigate;
     }
@@ -243,7 +243,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         }
     }
 
-    public function toScreen(type:Null<ScreenType>)
+    public function toScreen(initializer:Null<ScreenInitializer>)
     {
         if (currentScreen != null)
         {
@@ -251,13 +251,25 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             content.removeComponent(currentScreen);
         }
 
-        if (type == null)
+        if (initializer == null)
+        {
             currentScreen = null;
+            Url.clear();
+        }
         else
         {
-            currentScreen = Screen.build(type);
+            currentScreen = Screen.build(initializer);
+
             menubar.hidden = currentScreen.menuHidden;
             content.addComponent(currentScreen);
+            
+            var titlePhrase:Null<Phrase> = currentScreen.getTitle();
+            var titleStr:Null<String> = titlePhrase == null? null : Dictionary.getPhrase(titlePhrase);
+
+            Url.setPath(currentScreen.getURLPath(), titleStr);
+            if (Networker.isConnectedToServer())
+                Networker.emitEvent(PageUpdated(currentScreen.getPage()));
+
             currentScreen.onEntered();
         }
     }

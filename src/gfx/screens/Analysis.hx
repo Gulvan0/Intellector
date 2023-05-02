@@ -93,7 +93,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
         switch SceneManager.getCurrentScreenType()
         {
             case Analysis(_, _, exploredStudyData):
-                shareDialog.initInAnalysis(board.shownSituation, board.orientationColor, variant, exploredStudyData);
+                shareDialog.initInAnalysis(board.shownSituation, board.orientationColor, variant, exploredStudyData); //TODO: Use model property
             default:
                 throw "ShareRequested happened outside of Analysis screen!";
         }

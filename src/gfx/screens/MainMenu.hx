@@ -20,15 +20,35 @@ import haxe.ui.core.Screen as HaxeUIScreen;
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main_menu/main_menu.xml"))
 class MainMenu extends Screen implements INetObserver
 {
-    public function onEnter()
+    private function onEnter()
     {
         Networker.addObserver(this);
     }
 
-    public function onClose()
+    private function onClose()
     {
         Networker.removeObserver(this);
         SceneManager.removeResizeHandler(onResize);
+    }
+
+    public abstract function getTitle():Null<Phrase>
+    {
+        return MAIN_MENU_SCREEN_TITLE;
+    }
+
+    public abstract function getURLPath():Null<String>
+    {
+        return "home";
+    }
+
+    public abstract function getPage():ViewedScreen
+    {
+        return MainMenu;
+    }
+
+    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
+    {
+        return [];
     }
 
     public function handleNetEvent(event:ServerEvent) 
@@ -112,8 +132,5 @@ class MainMenu extends Screen implements INetObserver
     public function new()
     {
         super();
-        
-        customEnterHandler = onEnter;
-        customCloseHandler = onClose;
     }
 }

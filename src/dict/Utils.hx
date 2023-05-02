@@ -8,12 +8,10 @@ import dict.utils.TimePhrases;
 import dict.utils.OutcomePhrases;
 import utils.SpecialChar;
 import net.shared.dataobj.UserStatus;
-import gfx.game.LiveGameConstructor;
 import utils.StringUtils;
 import utils.TimeControl;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
-import gfx.ScreenType;
 import net.shared.Outcome;
 import net.shared.PieceColor;
 
@@ -73,60 +71,6 @@ class Utils
     public static function getTimePassedString(secsPassed:Float):String
     {
         return TimePhrases.getTimePassedString(secsPassed);
-    }
-
-    private static function getLiveGameScreenTitle(id:Int, constructor:LiveGameConstructor):Array<String>
-    {
-        switch constructor 
-        {
-            case New(whiteRef, blackRef, _, _, _, _):
-                var opponent:String = opponentRef(whiteRef, blackRef);
-                return ['Playing vs $opponent', 'Игра против $opponent'];
-            case Ongoing(parsedData, _, _):
-                if (!parsedData.isPlayerParticipant())
-                {
-                    var whiteStr:String = playerRef(parsedData.whiteRef);
-                    var blackStr:String = playerRef(parsedData.blackRef);
-                    return ['Spectating: $whiteStr vs $blackStr', 'Наблюдение: $whiteStr против $blackStr'];
-                }
-                else
-                {
-                    var opponent:String = opponentRef(parsedData.whiteRef, parsedData.blackRef);
-                    return ['Playing vs $opponent', 'Игра против $opponent'];
-                }
-            case Past(parsedData, _):
-                var whiteStr:String = playerRef(parsedData.whiteRef);
-                var blackStr:String = playerRef(parsedData.blackRef);
-                return ['Game $id: $whiteStr vs $blackStr', 'Игра $id: $whiteStr против $blackStr'];
-        }
-    }
-
-    public static function getScreenTitle(type:ScreenType):String
-    {
-        var translations = [null, null];
-        
-        switch type 
-        {
-            case MainMenu: 
-                translations = ["Home", "Главная"];
-            case Analysis(_, _, exploredStudyData):
-                if (exploredStudyData != null)
-                {
-                    var shortenedName:String = StringUtils.shorten(exploredStudyData.info.name);
-                    translations = ['Study $shortenedName (${exploredStudyData.id}) | Analysis Board', 'Студия $shortenedName (${exploredStudyData.id}) | Доска анализа'];
-                }
-                else
-                    translations = ["Analysis Board", "Доска анализа"];
-            case LiveGame(gameID, constructor): 
-                translations = getLiveGameScreenTitle(gameID, constructor);
-            case PlayerProfile(ownerLogin, _): 
-                translations = ['$ownerLogin\'s profile', 'Профиль $ownerLogin'];
-            case ChallengeJoining(data):
-                translations = ['Challenge by ${data.ownerLogin}', 'Вызов ${data.ownerLogin}'];
-            default:
-        }
-
-        return Dictionary.chooseTranslation(translations);
     }
 
     public static function getSpectatorGameOverDialogMessage(outcome:Outcome, whiteRef:String, blackRef:String)

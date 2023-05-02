@@ -13,6 +13,30 @@ class Dictionary
         {
             case LANGUAGE_NAME:
                 return ["English", "Русский"];
+
+            case MAIN_MENU_SCREEN_TITLE:
+                return ["Home", "Главная"];
+            case ANALYSIS_BOARD_NO_STUDY_SCREEN_TITLE:
+                return ["Analysis Board", "Доска анализа"];
+            case STUDY_SCREEN_TITLE(studyID, studyName):
+                var shortenedName:String = StringUtils.shorten(studyName);
+                return ['Study $shortenedName ($studyID) | Analysis Board', 'Студия $shortenedName ($studyID) | Доска анализа'];
+            case PLAYER_PROFILE_SCREEN_TITLE(ownerLogin):
+                return ['$ownerLogin\'s profile', 'Профиль $ownerLogin'];
+            case CHALLENGE_JOINING_SCREEN_TITLE(ownerLogin):
+                return ['Challenge by $ownerLogin', 'Вызов $ownerLogin'];
+            case OWN_MATCH_SCREEN_TITLE(opponentRef):
+                var opponentStr:String = Utils.playerRef(opponentRef);
+                return ['Playing vs $opponentStr', 'Игра против $opponentStr'];
+            case SPECTATING_SCREEN_TITLE(whiteRef, blackRef):
+                var whiteStr:String = Utils.playerRef(whiteRef);
+                var blackStr:String = Utils.playerRef(blackRef);
+                return ['Spectating: $whiteStr vs $blackStr', 'Наблюдение: $whiteStr против $blackStr'];
+            case PAST_GAME_SCREEN_TITLE(id, whiteRef, blackRef):
+                var whiteStr:String = Utils.playerRef(whiteRef);
+                var blackStr:String = Utils.playerRef(blackRef);
+                return ['Game $id: $whiteStr vs $blackStr', 'Игра $id: $whiteStr против $blackStr'];      
+
             case ANALYSIS_SET_POSITION_BTN_TOOLTIP:
                 return ["Set position", "Задать позицию"];
             case ANALYSIS_SHARE_BTN_TOOLTIP:

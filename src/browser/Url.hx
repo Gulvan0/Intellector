@@ -3,7 +3,6 @@ package browser;
 import haxe.CallStack;
 import dict.Utils;
 import js.html.URLSearchParams;
-import gfx.ScreenType;
 import js.Browser;
 using hx.strings.Strings;
 
@@ -19,13 +18,6 @@ class Url
     public static function clear() 
     {
         setPath("");
-    }
-
-    public static function setPathByScreen(type:ScreenType)
-    {
-        var newPath:Null<String> = getURLPath(type);
-        if (newPath != null)
-            setPath(newPath, Utils.getScreenTitle(type));
     }
 
     private static function setPath(path:String, ?title:String)
@@ -80,19 +72,6 @@ class Url
             return Browser.window.location.href.replaceFirstIgnoreCase(prevVerPathPrefix, actualVerPathPrefix);
         else
             return Browser.window.location.href;
-    }
-
-    private static function getURLPath(type:ScreenType):Null<String>
-    {
-        return switch type 
-        {
-            case MainMenu: "home";
-            case Analysis(_, _, exploredStudyData): exploredStudyData == null? "analysis" : 'study/${exploredStudyData.id}';
-            case LanguageSelectIntro(_): null;
-            case LiveGame(gameID, _): 'live/$gameID';
-            case PlayerProfile(ownerLogin, _): 'player/$ownerLogin';
-            case ChallengeJoining(data): 'join/${data.id}';
-        }
     }
 
     private static function ingameToUrlPath(ingamePath:String)

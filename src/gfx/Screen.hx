@@ -8,56 +8,66 @@ import haxe.ui.styles.Style;
 import gfx.screens.*;
 using Lambda;
 
-class Screen extends Component
+abstract class Screen extends Component
 {
     public final menuHidden:Bool;
-    private var responsiveComponents:Map<Component, Map<ResponsiveProperty, ResponsivenessRule>> = [];
-    private var customEnterHandler:Null<Void->Void> = null;
-    private var customCloseHandler:Null<Void->Void> = null;
+
+    public abstract function getTitle():Null<Phrase>;
+    public abstract function getURLPath():Null<String>;
+    public abstract function getPage():ViewedScreen;
+
+    private abstract function onEnter():Void;
+    private abstract function onClose():Void;
+
+    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>;
 
     public function onEntered()
     {
-        if (!responsiveComponents.empty())
+        if (!getResponsiveComponents().empty())
         {
             resize();
             SceneManager.addResizeHandler(resize);
         }
 
-        if (customEnterHandler != null)
-            customEnterHandler();
+        onEnter();
     }
 
     public function onClosed()
     {
         SceneManager.removeResizeHandler(resize);
 
-        if (customCloseHandler != null)
-            customCloseHandler();
+        onClose();
     }
 
     private function resize()
     {
-        for (comp => rules in responsiveComponents.keyValueIterator())
+        for (comp => rules in getResponsiveComponents().keyValueIterator())
             ResponsiveToolbox.resizeComponent(comp, rules);
     }
     
-    public static function build(type:ScreenType):Screen
+    public static function build(initializer:ScreenInitializer):Screen
     {
-        return switch type 
+        return switch initializer 
         {
-            case MainMenu:
-                new MainMenu();
-            case Analysis(initialVariantStr, selectedMainlineMove, _):
-                new Analysis(initialVariantStr, selectedMainlineMove);
             case LanguageSelectIntro(languageReadyCallback):
                 new LanguageSelectIntro(languageReadyCallback);
-            case LiveGame(id, constructor):
-                new LiveGame(id, constructor);
+            case MainMenu:
+                new MainMenu();
+            case GameFromModelData(data, orientationPariticipantLogin):
+                //TODO: Fill
+            case StartedGameVersusBot(params):
+                //TODO: Fill
+            case NewAnalysisBoard:
+                //TODO: Fill
+            case Study(info):
+                //TODO: Fill
+            case AnalysisForLine(startingSituation, plys, viewedMovePointer):
+                //TODO: Fill
             case PlayerProfile(ownerLogin, data):
                 new Profile(ownerLogin, data);
             case ChallengeJoining(data):
                 new OpenChallengeJoining(data);
-        };
+        }
     }
     
     public function new(?menuHidden:Bool = false) 

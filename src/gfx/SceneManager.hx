@@ -1,12 +1,9 @@
 package gfx;
 
 import dict.Language;
-import gfx.profile.data.StudyData;
 import net.shared.dataobj.ViewedScreen;
 import haxe.ui.events.UIEvent;
-import gfx.game.LiveGameConstructor;
 import net.shared.dataobj.StudyInfo;
-import gfx.game.LiveGameConstructor;
 import browser.CredentialCookies;
 import gfx.Dialogs;
 import serialization.GameLogParser;
@@ -30,18 +27,12 @@ using StringTools;
 class SceneManager
 {
     private static var scene:Scene;
-    private static var currentScreenType:Null<ScreenType> = null;
 
     private static var lastResizeTimestamp:Float;
     private static var cachedWidth:Float;
     private static var cachedHeight:Float;
     private static var resizeHandlers:Array<Void->Void> = [];
     private static var resizeTimeout:Null<Timer>;
-
-    public static function getCurrentScreenType():Null<ScreenType>
-    {
-        return currentScreenType;
-    }
 
     public static function playerInGame():Bool
     {
@@ -68,36 +59,14 @@ class SceneManager
         scene.disabled = false;
     }
 
-    public static function toScreen(type:ScreenType)
+    public static function toScreen(initializer:ScreenInitializer)
     {
-        if (type.equals(currentScreenType))
-            return;
-        
-        scene.toScreen(type);
-        currentScreenType = type;
-        Url.setPathByScreen(type);
-        if (Networker.isConnectedToServer())
-            Networker.emitEvent(PageUpdated(getPageByScreenType(type)));
-    }
-
-    private static function getPageByScreenType(type:ScreenType):ViewedScreen
-    {
-        return switch type 
-        {
-            case MainMenu: MainMenu;
-            case Analysis(_, _, _): Analysis;
-            case LanguageSelectIntro(_): Other;
-            case LiveGame(gameID, _): Game(gameID);
-            case PlayerProfile(ownerLogin, _): Profile(ownerLogin);
-            case ChallengeJoining(_): Other;
-        }
+        scene.toScreen(initializer);
     }
 
     public static function clearScreen()
     {
         scene.toScreen(null);
-        currentScreenType = null;
-        Url.clear();
     }
 
     public static function addResizeHandler(handler:Void->Void)
@@ -139,19 +108,6 @@ class SceneManager
     {
         resizeTimeout = null;
         onResized();
-    }
-
-    public static function updateAnalysisStudyInfo(studyData:Null<StudyData>)
-    {
-        switch currentScreenType 
-        {
-            case Analysis(initialVariantStr, selectedMainlineMove, _):
-                var newScreenType:ScreenType = Analysis(initialVariantStr, selectedMainlineMove, studyData);
-                Url.setPathByScreen(newScreenType);
-                currentScreenType = newScreenType;
-            default:
-                throw "Cannot update study info outside of analysis screen";
-        }
     }
 
     private static function handleNetEvent(event:ServerEvent):Bool

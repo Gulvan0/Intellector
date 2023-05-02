@@ -36,6 +36,38 @@ class OpenChallengeJoining extends Screen implements IGlobalEventObserver
 	{
 		GlobalBroadcaster.removeObserver(this);
 	}
+
+    public abstract function getTitle():Null<Phrase>
+    {
+        return CHALLENGE_JOINING_SCREEN_TITLE(ownerLogin);
+    }
+
+    public abstract function getURLPath():Null<String>
+    {
+        return 'join/$challengeID';
+    }
+
+    public abstract function getPage():ViewedScreen
+    {
+        return Other;
+    }
+
+    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
+    {
+        return [
+			challengeByLabel => [StyleProp(FontSize) => VMIN(6)],
+			challengeCard => [StyleProp(VerticalSpacing) => VMIN(1.75)],
+			descriptionHBox => [StyleProp(HorizontalSpacing) => VMIN(2)],
+			tcIconBox => [Width => VMIN(16), Height => VMIN(16)],
+			tcLabel => [StyleProp(FontSize) => VMIN(4)],
+			bracketLabel => [StyleProp(FontSize) => VMIN(4)],
+			paramsBox => [StyleProp(HorizontalSpacing) => VMIN(1.5)],
+			paramsLabel => [StyleProp(FontSize) => VMIN(4)],
+			colorIcon => [Width => VMIN(4), Height => VMIN(4)],
+			customStartPosIcon => [Width => VMIN(4), Height => VMIN(4)],
+			acceptBtn => [StyleProp(FontSize) => VMIN(4.5)]
+		];
+    }
 	
 	public function handleGlobalEvent(event:GlobalEvent)
 	{
@@ -76,8 +108,6 @@ class OpenChallengeJoining extends Screen implements IGlobalEventObserver
     public function new(data:ChallengeData)
     {
 		super();
-		this.customEnterHandler = onEnter;
-		this.customCloseHandler = onClose;
 
 		var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
 
@@ -116,19 +146,5 @@ class OpenChallengeJoining extends Screen implements IGlobalEventObserver
 			customStartPosIcon.hidden = true;
 		
 		refreshAcceptButton();
-
-		responsiveComponents = [
-			challengeByLabel => [StyleProp(FontSize) => VMIN(6)],
-			challengeCard => [StyleProp(VerticalSpacing) => VMIN(1.75)],
-			descriptionHBox => [StyleProp(HorizontalSpacing) => VMIN(2)],
-			tcIconBox => [Width => VMIN(16), Height => VMIN(16)],
-			tcLabel => [StyleProp(FontSize) => VMIN(4)],
-			bracketLabel => [StyleProp(FontSize) => VMIN(4)],
-			paramsBox => [StyleProp(HorizontalSpacing) => VMIN(1.5)],
-			paramsLabel => [StyleProp(FontSize) => VMIN(4)],
-			colorIcon => [Width => VMIN(4), Height => VMIN(4)],
-			customStartPosIcon => [Width => VMIN(4), Height => VMIN(4)],
-			acceptBtn => [StyleProp(FontSize) => VMIN(4.5)]
-		];
     }
 }

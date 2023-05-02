@@ -10,6 +10,42 @@ class LanguageSelectIntro extends Screen
 {
     private var onLangSelected:Void->Void;
 
+    public abstract function getTitle():Null<Phrase>
+    {
+        return null;
+    }
+
+    public abstract function getURLPath():Null<String>
+    {
+        return null;
+    }
+
+    public abstract function getPage():ViewedScreen
+    {
+        return Other;
+    }
+
+    private abstract function onEnter():Void
+    {
+        //* Do nothing
+    }
+
+    private abstract function onClose():Void
+    {
+        //* Do nothing
+    }
+
+    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
+    {
+        return [
+            this => [StyleProp(VerticalSpacing) => VMIN(8), StyleProp(PaddingTop) => VMIN(8)],
+            headerLabel => [StyleProp(FontSize) => VMIN(12)],
+            btnBox => [StyleProp(HorizontalSpacing) => VMIN(10)],
+            enBtn => [Width => VMIN(38), Height => VMIN(20)],
+            ruBtn => [Width => VMIN(30), Height => VMIN(20)]
+        ];
+    }
+
     @:bind(ruBtn, MouseEvent.CLICK)
     private function onRuPressed(e)
     {
@@ -28,12 +64,5 @@ class LanguageSelectIntro extends Screen
     {
         super(true);
         this.onLangSelected = onLangSelected;
-        responsiveComponents = [
-            this => [StyleProp(VerticalSpacing) => VMIN(8), StyleProp(PaddingTop) => VMIN(8)],
-            headerLabel => [StyleProp(FontSize) => VMIN(12)],
-            btnBox => [StyleProp(HorizontalSpacing) => VMIN(10)],
-            enBtn => [Width => VMIN(38), Height => VMIN(20)],
-            ruBtn => [Width => VMIN(30), Height => VMIN(20)]
-        ];
     }
 }

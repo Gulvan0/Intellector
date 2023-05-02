@@ -7,19 +7,17 @@ enum ServerEvent
 {
     GreetingResponse(data:GreetingResponseData); //Answer to Greeting
 
-    GameStarted(gameID:Int, logPreamble:String); //Sent when a game with one of the players being the user starts. Signals the app to navigate to the game screen. One of the answers to AcceptDirectChallenge. Also follows the DirectChallengeSent event unless DirectChallengeDeclined was emitted.
-    SpectationData(data:OngoingGameInfo); //Sent to a spectator joining the game. All the match details required may be derived from the currentLog arg. Signals the app to navigate to the game screen. 
+    GoToGame(data:GameModelData); //Signals the app to open the game screen. Depending on whether the user is a participant, it may either be a MatchVersusPlayer or a Spectation screen
     
-    GameIsOver(log:String); //Answer to GetGame: game has ended and now can be revisited
-    GameIsOngoing(timeData:Null<TimeReservesData>, currentLog:String); //Answer to GetGame: game is in process. Player should either spectate or reconnect based on whether the log contains their login
-    GameNotFound; //Answer to GetGame: no such game exists
+    GameRetrieved(data:GameModelData); //Answer to GetGame
+    GameNotFound; //Answer to GetGame when no such game exists
 
     CreateChallengeResult(result:SendChallengeResult);
 
     IncomingDirectChallenge(data:ChallengeData);
     DirectChallengeCancelled(id:Int);
 
-    DirectChallengeDeclined(id:Int); //Recipient has declined the challenge. Its 'accepted' counterpart doesn't exist, instead, GameStarted is sent right away
+    DirectChallengeDeclined(id:Int); //Recipient has declined the challenge. Its 'accepted' counterpart doesn't exist, instead, GoToGame is sent right away
 
     ChallengeCancelledByOwner; //Answer to AcceptChallenge: it was cancelled before the recipient answered
     ChallengeOwnerOffline(owner:String); //Answer to AcceptChallenge: caller went offline before the recipient answered
@@ -27,8 +25,8 @@ enum ServerEvent
     ChallengeNotAcceptedServerShutdown; //Answer to AcceptChallenge: can't accept a challenge, server is shutting down
     
     OpenChallengeInfo(data:ChallengeData); //Answer to GetOpenChallenge when it exists with challenge parameters
-    OpenChallengeHostPlaying(data:OngoingGameInfo); //Answer to GetOpenChallenge: the challenge has already been accepted by other player, the game is in progress
-    OpenChallengeGameEnded(gameID:Int, log:String); //Answer to GetOpenChallenge: the challenge has already been accepted by other player and the corresponding game has already ended
+    OpenChallengeAlreadyAccepted(data:GameModelData); //Answer to GetOpenChallenge: the challenge has already been accepted by other player
+    OpenChallengeCancelled; //Answer to GetOpenChallenge when it doesn't exist
     OpenChallengeNotFound; //Answer to GetOpenChallenge when it doesn't exist
     
     LoginResult(result:SignInResult); //Answer to Login
@@ -48,14 +46,10 @@ enum ServerEvent
     NewSpectator(ref:String); //Sent both to players and to all of the spectators when a new user starts spectating
     SpectatorLeft(ref:String); //Sent both to players and to all of the spectators when a user stops spectating
 
-    DrawOffered(color:PieceColor);
-    DrawCancelled(color:PieceColor);
-    DrawAccepted(color:PieceColor);
-    DrawDeclined(color:PieceColor);
-    TakebackOffered(color:PieceColor);
-    TakebackCancelled(color:PieceColor);
-    TakebackAccepted(color:PieceColor);
-    TakebackDeclined(color:PieceColor);
+    OfferSent(offerSentBy:PieceColor, offer:OfferKind);
+    OfferCancelled(offerSentBy:PieceColor, offer:OfferKind);
+    OfferAccepted(offerSentBy:PieceColor, offer:OfferKind);
+    OfferDeclined(offerSentBy:PieceColor, offer:OfferKind);
 
     BotMove(timeData:Null<TimeReservesData>); //Sent to a player when a bot move starts
 

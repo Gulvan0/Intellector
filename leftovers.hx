@@ -175,3 +175,26 @@
         };
         variantView.init(eventHandler);
     }
+
+//! Screen-related
+
+    private static function getURLPath(type:ScreenType):Null<String>
+    {
+        return switch type 
+        {
+            case Analysis(_, _, exploredStudyData): exploredStudyData == null? "analysis" : 'study/${exploredStudyData.id}';
+            case LiveGame(gameID, _): 'live/$gameID';
+        }
+    }
+
+    private static function getPageByScreenInitializer(initializer:ScreenInitializer):ViewedScreen
+    {
+        return switch initializer 
+        {
+            case GameFromModelData(data, orientationPariticipantLogin): Game(data.gameID);
+            case StartedGameVersusBot(params): Game(data.gameID);
+            case NewAnalysisBoard: Analysis;
+            case Study(info): Analysis;
+            case AnalysisForLine(startingSituation, plys, viewedMovePointer): Analysis;
+        }
+    }

@@ -19,6 +19,17 @@ enum Phrase
 
     CUSTOM_STARTING_POSITION;
 
+    //Screen titles
+
+    MAIN_MENU_SCREEN_TITLE;
+    ANALYSIS_BOARD_NO_STUDY_SCREEN_TITLE;
+    STUDY_SCREEN_TITLE(studyID:Int, studyName:String);
+    PLAYER_PROFILE_SCREEN_TITLE(ownerLogin:String);
+    CHALLENGE_JOINING_SCREEN_TITLE(ownerLogin:String);
+    OWN_MATCH_SCREEN_TITLE(opponentRef:String);
+    SPECTATING_SCREEN_TITLE(whiteRef:String, blackRef:String);
+    PAST_GAME_SCREEN_TITLE(id:Int, whiteRef:String, blackRef:String);
+
     //Analysis screen
 
     ANALYSIS_OVERVIEW_TAB_NAME;

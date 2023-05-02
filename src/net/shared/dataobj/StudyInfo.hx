@@ -6,6 +6,8 @@ import net.shared.variation.VariationMap;
 
 class StudyInfo
 {
+    public var id:Int;
+    public var ownerLogin:Stirng;
     public var name:String;
     public var description:String;
     public var tags:Array<String>;
