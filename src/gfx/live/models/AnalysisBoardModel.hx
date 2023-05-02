@@ -1,5 +1,6 @@
 package gfx.live.models;
 
+import net.shared.dataobj.StudyInfo;
 import gfx.live.analysis.util.PosEditMode;
 import gfx.live.interfaces.IReadOnlyGenericModel;
 import gfx.live.interfaces.IReadOnlyAnalysisBoardModel;
@@ -32,6 +33,8 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
 
     public var editorSituation:Null<Situation>;
     public var editorMode:Null<PosEditMode>;
+
+    public var exploredStudyInfo:Null<StudyInfo>;
 
     public function getVariation():ReadOnlyVariation
     {
@@ -91,6 +94,16 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
     public function getEditorMode():Null<PosEditMode>
     {
         return editorMode;
+    }
+
+    public function getExploredStudyID():Null<Int>
+    {
+        return exploredStudyInfo.id;
+    }
+
+    public function getExploredStudyOwnerLogin():Null<String>
+    {
+        return exploredStudyInfo.ownerLogin;
     }
 
     //Additional methods to unify with IReadOnlyGenericModel
