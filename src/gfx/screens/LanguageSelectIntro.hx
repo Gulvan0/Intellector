@@ -1,5 +1,9 @@
 package gfx.screens;
 
+import gfx.ResponsiveToolbox.ResponsivenessRule;
+import gfx.ResponsiveToolbox.ResponsiveProperty;
+import net.shared.dataobj.ViewedScreen;
+import dict.Phrase;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
@@ -10,32 +14,32 @@ class LanguageSelectIntro extends Screen
 {
     private var onLangSelected:Void->Void;
 
-    public abstract function getTitle():Null<Phrase>
+    public function getTitle():Null<Phrase>
     {
         return null;
     }
 
-    public abstract function getURLPath():Null<String>
+    public function getURLPath():Null<String>
     {
         return null;
     }
 
-    public abstract function getPage():ViewedScreen
+    public function getPage():ViewedScreen
     {
         return Other;
     }
 
-    private abstract function onEnter():Void
+    private function onEnter():Void
     {
         //* Do nothing
     }
 
-    private abstract function onClose():Void
+    private function onClose():Void
     {
         //* Do nothing
     }
 
-    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
+    private function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
     {
         return [
             this => [StyleProp(VerticalSpacing) => VMIN(8), StyleProp(PaddingTop) => VMIN(8)],

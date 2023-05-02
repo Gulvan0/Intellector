@@ -1,6 +1,5 @@
 package net;
 
-import gfx.profile.data.StudyData;
 import gfx.profile.complex_components.MiniProfile;
 import net.shared.utils.Build;
 import net.shared.dataobj.GreetingResponseData;
@@ -14,7 +13,6 @@ import struct.ChallengeParams;
 import dict.Dictionary;
 import gfx.Dialogs;
 import gfx.SceneManager;
-import serialization.GameLogParser;
 import net.shared.PieceColor;
 import utils.TimeControl;
 import net.shared.ClientEvent;
@@ -64,8 +62,9 @@ class Requests
                     case ReconnectionNeeded(incomingChallenges, gameInfo):
                         LoginManager.assignCredentials(login, password, remember? LongTerm : ShortTerm);
                         GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
-                        var parsedData:GameLogParserOutput = GameLogParser.parse(gameInfo.currentLog);
-                        SceneManager.toScreen(LiveGame(gameInfo.id, Ongoing(parsedData, gameInfo.timeData, null)));
+                        //TODO: Rewrite
+                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(gameInfo.currentLog);
+                        SceneManager.toScreen(LiveGame(gameInfo.id, Ongoing(parsedData, gameInfo.timeData, null)));*/
                     case Fail:
                         onFail();
                 }
@@ -110,11 +109,13 @@ class Requests
         switch event
         {
             case GameIsOver(log):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(log);
-		        SceneManager.toScreen(LiveGame(id, Past(parsedData, null)));
+                //TODO: Rewrite
+                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(log);
+		        SceneManager.toScreen(LiveGame(id, Past(parsedData, null)));*/
             case GameIsOngoing(timeData, currentLog):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, timeData, null)));
+                //TODO: Rewrite
+                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
+                SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, timeData, null)));*/
             case GameNotFound:
                 SceneManager.toScreen(MainMenu);
             default:
@@ -136,11 +137,13 @@ class Requests
             case OpenChallengeInfo(data):
                 SceneManager.toScreen(ChallengeJoining(data));
             case OpenChallengeHostPlaying(data):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
-                SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, null)));
+                //TODO: Rewrite
+                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
+                SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, null)));*/
             case OpenChallengeGameEnded(gameID, log):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(log);
-                SceneManager.toScreen(LiveGame(gameID, Past(parsedData, null)));
+                //TODO: Rewrite
+                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(log);
+                SceneManager.toScreen(LiveGame(gameID, Past(parsedData, null)));*/
             case OpenChallengeNotFound:
                 SceneManager.toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
@@ -246,7 +249,8 @@ class Requests
 
     private static function getStudy_handler(id:Int, event:ServerEvent) 
     {
-        switch event
+        //TODO: Rewrite
+        /*switch event
         {
             case SingleStudy(info, ownerLogin):
                 SceneManager.toScreen(Analysis(info.variantStr, 0, new StudyData(id, ownerLogin, info)));
@@ -255,7 +259,7 @@ class Requests
                 Dialogs.alert(REQUESTS_ERROR_STUDY_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
-        }
+        }*/
         return true;
     }
 
@@ -288,9 +292,10 @@ class Requests
         switch event
         {
             case SpectationData(data): 
-		        var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
+		        //TODO: Rewrite
+                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
                 onStartedFollowing(login, data.id);
-                SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, login)));
+                SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, login)));*/
             case FollowAlreadySpectating(id):
                 onStartedFollowing(login, id);
             case FollowSuccess:

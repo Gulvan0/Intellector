@@ -1,5 +1,9 @@
 package gfx.screens;
 
+import gfx.ResponsiveToolbox.ResponsivenessRule;
+import gfx.ResponsiveToolbox.ResponsiveProperty;
+import net.shared.dataobj.ViewedScreen;
+import dict.Phrase;
 import assets.Paths;
 import GlobalBroadcaster.IGlobalEventObserver;
 import GlobalBroadcaster.GlobalEvent;
@@ -37,22 +41,22 @@ class OpenChallengeJoining extends Screen implements IGlobalEventObserver
 		GlobalBroadcaster.removeObserver(this);
 	}
 
-    public abstract function getTitle():Null<Phrase>
+    public function getTitle():Null<Phrase>
     {
         return CHALLENGE_JOINING_SCREEN_TITLE(ownerLogin);
     }
 
-    public abstract function getURLPath():Null<String>
+    public function getURLPath():Null<String>
     {
         return 'join/$challengeID';
     }
 
-    public abstract function getPage():ViewedScreen
+    public function getPage():ViewedScreen
     {
         return Other;
     }
 
-    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
+    private function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
     {
         return [
 			challengeByLabel => [StyleProp(FontSize) => VMIN(6)],

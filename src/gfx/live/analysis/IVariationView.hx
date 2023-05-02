@@ -1,6 +1,6 @@
 package gfx.live.analysis;
 
-import gfx.live.interfaces.ReadOnlyVariation;
+import net.shared.variation.ReadOnlyVariation;
 import gfx.live.models.AnalysisBoardModel;
 import haxe.ui.core.Component;
 import gfx.live.events.VariationViewEvent;

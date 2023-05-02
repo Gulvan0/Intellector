@@ -2,7 +2,7 @@ package gfx.live.analysis.variation_plain_text;
 
 import net.shared.board.RawPly;
 import haxe.ui.styles.Style;
-import gfx.live.interfaces.ReadOnlyVariation;
+import net.shared.variation.ReadOnlyVariation;
 import net.shared.variation.VariationPath;
 import haxe.ui.components.Link;
 

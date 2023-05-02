@@ -9,7 +9,7 @@ import haxe.ui.components.Slider;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.containers.Box;
-import gameboard.Board;
+import gfx.live.board.Board;
 import gfx.Dialogs;
 import haxe.ui.core.Component;
 import net.shared.board.Situation;

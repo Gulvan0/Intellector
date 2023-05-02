@@ -1,11 +1,6 @@
-package gfx.live.interfaces;
+package net.shared.variation;
 
-import net.shared.variation.DepthFirstIterator;
-import net.shared.variation.VariationMap;
-import net.shared.variation.VariationPath;
-import net.shared.variation.Variation;
-
-abstract ReadOnlyVariation(Variation)
+abstract ReadOnlyVariation(Variation) from Variation
 {
     public function collectNodes(includeRoot:Bool):VariationMap<ReadOnlyVariationNode>
     {

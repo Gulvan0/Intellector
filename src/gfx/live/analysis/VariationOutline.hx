@@ -3,7 +3,7 @@ package gfx.live.analysis;
 import net.shared.variation.Variation;
 import gfx.live.events.VariationViewEvent;
 import gfx.live.models.AnalysisBoardModel;
-import gfx.live.interfaces.ReadOnlyVariation;
+import net.shared.variation.ReadOnlyVariation;
 import net.shared.variation.VariationPath;
 import haxe.ui.core.Component;
 import net.shared.board.RawPly;

@@ -91,13 +91,13 @@ class Arrow extends Canvas
         switch highlighting 
         {
             case Off: 
-                color = Colors.variantTreeUnselectedArrow;
+                color = Colors.variationTreeUnselectedArrow;
                 alpha = 1;
             case Semi:
-                color = Colors.variantTreeSelectedArrow;
+                color = Colors.variationTreeSelectedArrow;
                 alpha = 0.4;
             case Full: 
-                color = Colors.variantTreeSelectedArrow;
+                color = Colors.variationTreeSelectedArrow;
                 alpha = 1;
         }
 

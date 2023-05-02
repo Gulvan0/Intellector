@@ -1,5 +1,10 @@
 package gfx.screens;
 
+import gfx.ResponsiveToolbox.ResponsivenessRule;
+import gfx.ResponsiveToolbox.ResponsiveProperty;
+import haxe.ui.core.Component;
+import net.shared.dataobj.ViewedScreen;
+import dict.Phrase;
 import gfx.basic_components.utils.DimValue.assignWidth;
 import haxe.ui.events.UIEvent;
 import gfx.profile.complex_components.OngoingGamesTab;
@@ -26,22 +31,22 @@ class Profile extends Screen
         SceneManager.removeResizeHandler(onResize);
     }
 
-    public abstract function getTitle():Null<Phrase>
+    public function getTitle():Null<Phrase>
     {
         return PLAYER_PROFILE_SCREEN_TITLE(profileOwnerLogin);
     }
 
-    public abstract function getURLPath():Null<String>
+    public function getURLPath():Null<String>
     {
         return 'player/$profileOwnerLogin';
     }
 
-    public abstract function getPage():ViewedScreen
+    public function getPage():ViewedScreen
     {
         return Profile(profileOwnerLogin);
     }
 
-    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
+    private function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
     {
         return [];
     }

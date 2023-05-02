@@ -8,7 +8,6 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.events.UIEvent;
 import dict.Dictionary;
 import haxe.Timer;
-import serialization.GameLogParser;
 import net.Requests;
 import net.shared.PieceColor;
 
@@ -24,7 +23,8 @@ class CurrentGamesTable extends VBox
             if (Lambda.has(gameIDs, gameData.id))
                 continue;
 
-            var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.log);
+            //TODO: Rewrite
+            /*var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.log);
 
             var whiteLabel:String = Utils.playerRef(parsedData.whiteRef);
             var blackLabel:String = Utils.playerRef(parsedData.blackRef);
@@ -34,7 +34,7 @@ class CurrentGamesTable extends VBox
                 blackLabel += ' (${eloToStr(parsedData.elo[Black])})';
             }
 
-            table.dataSource.add({timeControl: parsedData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});
+            table.dataSource.add({timeControl: parsedData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});*/
             gameIDs.push(gameData.id);
         }
     }

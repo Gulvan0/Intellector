@@ -10,7 +10,6 @@ import gfx.live.interfaces.IGameComponent;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
 import haxe.ui.events.UIEvent;
-import serialization.GameLogParser.GameLogParserOutput;
 import haxe.Timer;
 import net.shared.ServerEvent;
 import gfx.utils.PlyScrollType;

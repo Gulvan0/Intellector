@@ -1,8 +1,8 @@
 package gfx.live.struct;
 
+import net.shared.dataobj.GameModelData;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
 import net.shared.PieceColor;
-import serialization.GameLogParser.GameLogParserOutput;
 
 class MsRemaindersData implements IReadOnlyMsRemainders
 {
@@ -79,12 +79,13 @@ class MsRemaindersData implements IReadOnlyMsRemainders
         msLeftWhenEnded = [White => whiteSecs, Black => blackSecs];
     }
 
-    public function new(parsedLog:GameLogParserOutput, newGame:Bool) 
+    public function new(data:GameModelData) 
     {
-        this.msLeftOnMove = parsedLog.msLeftOnMove;
+        //TODO: Rewrite
+        /*this.msLeftOnMove = parsedLog.msLeftOnMove;
         this.msLeftWhenEnded = parsedLog.msLeftWhenEnded;
         this.msPerMoveDataAvailable = newGame? true : parsedLog.msPerMoveDataAvailable;
         this.initialSecs = parsedLog.timeControl.startSecs;
-        this.moveCount = parsedLog.moveCount;
+        this.moveCount = parsedLog.moveCount;*/
     }
 }

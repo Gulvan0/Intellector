@@ -1,18 +1,19 @@
 package tests.data;
 
+import net.shared.variation.VariationPath;
+import net.shared.variation.Variation;
 import net.shared.board.RawPly;
 import net.shared.utils.MathUtils;
-import struct.Variant;
 import net.shared.board.Situation;
 
-class Variants
+class Variations
 {
-    public static function variant1() 
+    public static function variation1():Variation 
     {
         var sit:Situation = Situation.defaultStarting();
-        var variant:Variant = new Variant(sit);
+        var variation:Variation = new Variation(sit);
 
-        var path:VariantPath = [];
+        var path:VariationPath = [];
         var firstPly:RawPly = null;
 
         for (i in 0...5)
@@ -23,7 +24,7 @@ class Variants
                 firstPly = ply;
 
             sit.performRawPly(ply);
-            variant.addChildToNode(ply, path);
+            variation.addChild(path, ply);
             path = path.child(0);
         }
         
@@ -37,10 +38,10 @@ class Variants
                 ply = MathUtils.randomElement(sit.availablePlys());
 
             sit.performRawPly(ply);
-            variant.addChildToNode(ply, path);
+            variation.addChild(path, ply);
             path = path.child(i == 0? 1 : 0);
         }
 
-        return variant;
+        return variation;
     }
 }

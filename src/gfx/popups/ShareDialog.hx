@@ -1,10 +1,8 @@
 package gfx.popups;
 
-import gfx.profile.data.StudyData;
 import gfx.popups.StudyParamsDialog;
 import net.shared.dataobj.StudyInfo;
 import net.shared.board.RawPly;
-import struct.Variant;
 import gfx.popups.StudyParamsDialog.StudyParamsDialogMode;
 import haxe.ui.util.Color;
 import haxe.ui.core.Screen;
@@ -153,7 +151,7 @@ class ShareDialog extends Dialog
         shareGameTab.init(gameLink, pin, startingSituation, plySequence);
     }
 
-    public function initInAnalysis(situation:Situation, orientation:PieceColor, variant:Variant, ?exploredStudyData:StudyData)
+    public function initInAnalysis(situation:Situation, orientation:PieceColor, variation:ReadOnlyVariation, ?exploredStudyInfo:StudyInfo)
     {
         init(situation, orientation);
         tabView.removeComponent(shareGameTab);
@@ -161,10 +159,10 @@ class ShareDialog extends Dialog
         if (Networker.isConnectedToServer())
         {
             var studyParamsDialogMode:StudyParamsDialogMode;
-            if (exploredStudyData != null && LoginManager.isPlayer(exploredStudyData.ownerLogin))
-                studyParamsDialogMode = CreateOrOverwrite(variant, exploredStudyData.id, exploredStudyData.info);
+            if (exploredStudyInfo != null && LoginManager.isPlayer(exploredStudyInfo.ownerLogin))
+                studyParamsDialogMode = CreateOrOverwrite(variation, exploredStudyInfo);
             else
-                studyParamsDialogMode = Create(variant);
+                studyParamsDialogMode = Create(variation);
     
             exportStudyBtn.onClick = e -> {
                 hideDialog(null);

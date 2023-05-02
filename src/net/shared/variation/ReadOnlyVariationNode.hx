@@ -1,9 +1,7 @@
-package gfx.live.interfaces;
+package net.shared.variation;
 
-import net.shared.variation.VariationPath;
 import net.shared.board.Situation;
 import net.shared.board.RawPly;
-import net.shared.variation.VariationNode;
 
 abstract ReadOnlyVariationNode(VariationNode) from VariationNode
 {

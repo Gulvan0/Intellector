@@ -17,8 +17,6 @@ enum Phrase
 
     TURN_COLOR(color:PieceColor);
 
-    CUSTOM_STARTING_POSITION;
-
     //Screen titles
 
     MAIN_MENU_SCREEN_TITLE;

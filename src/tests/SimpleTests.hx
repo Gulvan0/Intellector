@@ -1,7 +1,6 @@
 package tests;
 
 import assets.Paths;
-import gfx.profile.data.StudyData;
 import gfx.popups.IncomingChallengeDialog;
 import gfx.profile.complex_components.MiniProfile;
 import net.shared.dataobj.ChallengeData;
@@ -10,8 +9,7 @@ import gfx.menubar.ChallengeEntryRenderer;
 import gfx.SceneManager;
 import tests.data.ChallengeParameters;
 import struct.ChallengeParams;
-import tests.data.Variants;
-import struct.Variant;
+import tests.data.Variations;
 import gfx.popups.StudyParamsDialog;
 import gfx.profile.complex_components.StudiesTab;
 import gfx.basic_components.utils.DimValue;
@@ -282,13 +280,13 @@ class SimpleTests
 
 	public static function newStudyDialog()
 	{
-		var mode:StudyParamsDialogMode = Create(Variants.variant1());
+		var mode:StudyParamsDialogMode = Create(Variations.variation1());
 		Dialogs.getQueue().add(new StudyParamsDialog(mode));
 	}
 
 	public static function overwriteStudyDialog()
 	{
-		var mode:StudyParamsDialogMode = CreateOrOverwrite(Variants.variant1(), 23, StudyInfos.info1());
+		var mode:StudyParamsDialogMode = CreateOrOverwrite(Variations.variation1(), StudyInfos.info1());
 		Dialogs.getQueue().add(new StudyParamsDialog(mode));
 	}
 
@@ -374,15 +372,5 @@ class SimpleTests
 		challengeData.ownerELO = Provisional(1250);
 
 		SceneManager.scene.challengesMenu.appendEntry(challengeData);
-	}
-
-	public static function simpleAnalysis()
-	{
-		SceneManager.toScreen(Analysis(Variants.variant1().serialize(), 0, null));
-	}
-
-	public static function studyAnalysis()
-	{
-		SceneManager.toScreen(Analysis(Variants.variant1().serialize(), 0, new StudyData(111, LoginManager.getLogin(), StudyInfos.info1())));
 	}
 }

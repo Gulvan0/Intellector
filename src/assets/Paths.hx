@@ -1,8 +1,8 @@
 package assets;
 
+import gfx.live.analysis.util.PosEditMode;
 import gfx.menubar.ChallengesIconMode;
 import net.shared.TimeControlType;
-import gfx.analysis.PosEditMode;
 import net.shared.PieceColor;
 import net.shared.PieceType;
 import net.shared.dataobj.UserStatus;

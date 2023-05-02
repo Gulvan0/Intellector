@@ -5,7 +5,7 @@ import net.shared.variation.Variation;
 import gfx.live.analysis.variation_tree.Arrow;
 import gfx.live.analysis.variation_tree.Node;
 import gfx.live.models.AnalysisBoardModel;
-import gfx.live.interfaces.ReadOnlyVariation;
+import net.shared.variation.ReadOnlyVariation;
 import net.shared.variation.VariationPath;
 import net.shared.variation.VariationMap;
 import gfx.live.events.VariationViewEvent;

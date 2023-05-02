@@ -3,7 +3,7 @@ package gfx.common;
 import haxe.ui.styles.Style;
 import net.shared.PieceColor;
 import dict.Dictionary;
-import gameboard.Board;
+import gfx.live.board.Board;
 import haxe.ui.core.ItemRenderer;
 import net.shared.board.Situation;
 

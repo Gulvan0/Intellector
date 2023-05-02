@@ -6,7 +6,6 @@ import haxe.Timer;
 import dict.Dictionary;
 import net.shared.EloValue;
 import net.shared.dataobj.GameInfo;
-import serialization.GameLogParser;
 import net.shared.TimeControlType;
 import net.Requests;
 import haxe.ui.containers.VBox;
@@ -26,8 +25,9 @@ class PastGamesTab extends VBox
 
     private function onGameClicked(info:GameInfo)
     {
-        var parsedData:GameLogParserOutput = GameLogParser.parse(info.log);
-        SceneManager.toScreen(LiveGame(info.id, Past(parsedData, profileOwnerLogin)));
+        //TODO: Rewrite
+        /*var parsedData:GameLogParserOutput = GameLogParser.parse(info.log);
+        SceneManager.toScreen(LiveGame(info.id, Past(parsedData, profileOwnerLogin)));*/
     }
 
     private function onTimeControlFilterChanged(newValue:Null<TimeControlType>)

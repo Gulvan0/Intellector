@@ -1,6 +1,6 @@
 package gfx.popups;
 
-import gameboard.util.Marking;
+import gfx.live.board.util.Marking;
 import gfx.basic_components.BaseDialog;
 import dict.Language;
 import js.Browser;

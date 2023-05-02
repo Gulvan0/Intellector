@@ -1,9 +1,9 @@
 package gfx.live.analysis;
 
-import gfx.live.interfaces.ReadOnlyVariationNode;
+import net.shared.variation.ReadOnlyVariationNode;
 import net.shared.variation.VariationMap;
 import net.shared.variation.VariationPath;
-import gfx.live.interfaces.ReadOnlyVariation;
+import net.shared.variation.ReadOnlyVariation;
 import gfx.live.models.AnalysisBoardModel;
 import gfx.live.events.VariationViewEvent;
 import gfx.live.analysis.variation_plain_text.NodeInfo;
@@ -19,7 +19,7 @@ import haxe.ui.styles.Style;
 import haxe.ui.components.Link;
 import haxe.ui.containers.HBox;
 
-class VariantPlainText extends HBox implements IVariationView
+class VariationPlainText extends HBox implements IVariationView
 {
     private var DEFAULT_STYLE:Style = {color: 0x333333, fontUnderline: false};
 
@@ -119,7 +119,7 @@ class VariantPlainText extends HBox implements IVariationView
         #end
 
         var itemsIndex:Int = 0;
-        var childIndex:Int = variantRef.startingSituation.turnColor == White? 0 : 1;
+        var childIndex:Int = hasLeadingDots? 1 : 0;
         
         var itemsLength:Int = items.length;
 

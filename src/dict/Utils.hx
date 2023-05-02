@@ -10,8 +10,6 @@ import utils.SpecialChar;
 import net.shared.dataobj.UserStatus;
 import utils.StringUtils;
 import utils.TimeControl;
-import serialization.GameLogParser;
-import serialization.GameLogParser.GameLogParserOutput;
 import net.shared.Outcome;
 import net.shared.PieceColor;
 

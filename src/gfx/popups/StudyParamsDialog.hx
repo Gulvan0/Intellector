@@ -1,13 +1,13 @@
 package gfx.popups;
 
-import gfx.profile.data.StudyData;
+import net.shared.variation.ReadOnlyVariation;
+import net.shared.variation.VariationPath;
 import gfx.basic_components.BaseDialog;
 import gfx.ResponsiveToolbox.Dimension;
 import gfx.profile.complex_components.StudyFilterList;
 import net.Requests;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
-import struct.Variant;
 import net.shared.dataobj.StudyInfo;
 import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.core.Screen as HaxeUIScreen;
@@ -17,8 +17,8 @@ using StringTools;
 
 enum StudyParamsDialogMode
 {
-    Create(variant:Variant);
-    CreateOrOverwrite(newVariant:Variant, existingStudyID:Int, existingStudyParams:StudyInfo);
+    Create(variation:ReadOnlyVariation);
+    CreateOrOverwrite(newVariation:ReadOnlyVariation, existingStudyParams:StudyInfo);
     Edit(studyID:Int, currentParams:StudyInfo, onNewParamsSent:StudyInfo->Void);
 }
 
@@ -29,7 +29,7 @@ class StudyParamsDialog extends BaseDialog
 
     private final oldStudyID:Null<Int>;
     private final onParamsEdited:Null<StudyInfo->Void>;
-    private final serializedVariant:String;
+    private final studyVariation:ReadOnlyVariation;
     private final keySIP:String;
 
     private var studyTagList:StudyFilterList;
@@ -46,14 +46,15 @@ class StudyParamsDialog extends BaseDialog
         //* Do nothing
     }
 
-    private function generateKeySIP(variant:Variant):String
+    private function generateKeySIP():String
     {
-        if (!variant.startingSituation.isDefaultStarting())
-            return variant.startingSituation.serialize();
+        var startingSituation:Situation = studyVariation.rootNone().getSituation();
+        if (!startingSituation.isDefaultStarting())
+            return startingSituation.serialize();
         else
         {
-            var path:VariantPath = variant.getLastMainLineDescendantPath([]);
-            return variant.getSituationByPath(path).serialize();
+            var path:VariationPath = studyVariation.getFullMainlinePath();
+            return studyVariation.getNode(path).getSituation().serialize();
         }
     }
 
@@ -61,8 +62,9 @@ class StudyParamsDialog extends BaseDialog
     {
         var info:StudyInfo = new StudyInfo();
 
+        info.excludeNonParameters();
+        info.assignVariation(studyVariation);
         info.keyPositionSIP = keySIP;
-        info.variantStr = serializedVariant;
         info.name = nameTF.text.trim().shorten(StudyName, false);
         info.description = descTextArea.text.trim().shorten(StudyDescription, false);
         info.publicity = StudyPublicity.createByIndex(accessDropdown.selectedIndex);
@@ -143,26 +145,26 @@ class StudyParamsDialog extends BaseDialog
 
         switch mode 
         {
-            case Create(variant):
+            case Create(variation):
                 title = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_CREATE_TITLE);
 
                 createBtn.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_CREATE_BUTTON_TEXT);
                 overwriteBtn.hidden = true;
                 saveParamsBtn.hidden = true;
 
-                serializedVariant = variant.serialize();
-                keySIP = generateKeySIP(variant);
+                studyVariation = variation;
+                keySIP = generateKeySIP();
 
-            case CreateOrOverwrite(newVariant, existingStudyID, existingStudyParams):
+            case CreateOrOverwrite(newVariation, existingStudyParams):
                 title = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_CREATE_TITLE);
 
                 createBtn.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_CREATE_AS_NEW_BUTTON_TEXT);
                 overwriteBtn.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_OVERWRITE_BUTTON_TEXT(existingStudyParams.name));
                 saveParamsBtn.hidden = true;
 
-                oldStudyID = existingStudyID;
-                serializedVariant = newVariant.serialize();
-                keySIP = generateKeySIP(newVariant);
+                oldStudyID = existingStudyParams.id;
+                studyVariation = newVariation;
+                keySIP = generateKeySIP();
 
                 fillParams(existingStudyParams);
             case Edit(studyID, currentParams, onNewParamsSent):
@@ -174,7 +176,7 @@ class StudyParamsDialog extends BaseDialog
 
                 oldStudyID = studyID;
                 onParamsEdited = onNewParamsSent;
-                serializedVariant = currentParams.variantStr;
+                studyVariation = currentParams.studyVariation;
                 keySIP = currentParams.keyPositionSIP;
 
                 fillParams(currentParams);

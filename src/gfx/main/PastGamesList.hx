@@ -1,7 +1,6 @@
 package gfx.main;
 
 import gfx.profile.complex_components.GamesList;
-import serialization.GameLogParser;
 import net.shared.dataobj.GameInfo;
 import haxe.ui.containers.VBox;
 import dict.*;
@@ -14,8 +13,9 @@ class PastGamesList extends VBox
 
     private function onGameClicked(info:GameInfo)
     {
-        var parsedData:GameLogParserOutput = GameLogParser.parse(info.log);
-        SceneManager.toScreen(LiveGame(info.id, Past(parsedData, ownerLogin)));
+        //TODO: Rewrite
+        /*var parsedData:GameLogParserOutput = GameLogParser.parse(info.log);
+        SceneManager.toScreen(LiveGame(info.id, Past(parsedData, ownerLogin)));*/
     }
 
     public function insertAtBeginning(info:GameInfo)

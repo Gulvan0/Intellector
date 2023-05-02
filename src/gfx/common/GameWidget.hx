@@ -15,10 +15,7 @@ import haxe.ui.events.MouseEvent;
 import net.shared.EloValue;
 import net.shared.PieceColor;
 import dict.Dictionary;
-import openings.OpeningTree;
 import dict.Utils;
-import serialization.GameLogParser;
-import serialization.GameLogParser.GameLogParserOutput;
 
 typedef GameWidgetData = 
 {
@@ -94,7 +91,8 @@ class GameWidget extends Box
         super();
         this.typedData = data;
 
-        var parsedData:GameLogParserOutput = GameLogParser.parse(typedData.info.log);
+        //TODO: Rewrite
+        /*var parsedData:GameLogParserOutput = GameLogParser.parse(typedData.info.log);
 
         var watchedColor:Null<PieceColor> = null;
         if (typedData.watchedLogin != null)
@@ -126,6 +124,6 @@ class GameWidget extends Box
         if (parsedData.startingSituation.isDefaultStarting())
             openingLabel.text = OpeningTree.getOpening(parsedData.movesPlayed);
         else
-            openingLabel.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);
+            openingLabel.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);*/
     }
 }

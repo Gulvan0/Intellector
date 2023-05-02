@@ -1,5 +1,8 @@
 package gfx.screens;
 
+import haxe.ui.core.Component;
+import dict.Phrase;
+import net.shared.dataobj.ViewedScreen;
 import tests.Interceptor;
 import gfx.popups.LogIn;
 import gfx.popups.ChallengeParamsDialog;
@@ -31,22 +34,22 @@ class MainMenu extends Screen implements INetObserver
         SceneManager.removeResizeHandler(onResize);
     }
 
-    public abstract function getTitle():Null<Phrase>
+    public function getTitle():Null<Phrase>
     {
         return MAIN_MENU_SCREEN_TITLE;
     }
 
-    public abstract function getURLPath():Null<String>
+    public function getURLPath():Null<String>
     {
         return "home";
     }
 
-    public abstract function getPage():ViewedScreen
+    public function getPage():ViewedScreen
     {
         return MainMenu;
     }
 
-    private abstract function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
+    private function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
     {
         return [];
     }

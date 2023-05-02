@@ -1,7 +1,6 @@
 package gfx.profile.complex_components;
 
 import haxe.ui.containers.VBox;
-import gfx.profile.data.StudyData;
 import gfx.popups.StudyParamsDialog;
 import tests.SimpleTests;
 import haxe.ds.BalancedTree;
@@ -57,8 +56,11 @@ class StudiesTab extends VBox
 
     private function onStudyClicked(id:Int)
     {
+        //TODO: Rewrite
+        /*
         var info:StudyInfo = loadedStudies.get(id);
         SceneManager.toScreen(Analysis(info.variantStr, null, new StudyData(id, profileOwner, info)));
+        */
     }
 
     private function onEditStudyRequested(id:Int)
@@ -68,10 +70,13 @@ class StudiesTab extends VBox
 
     private function onStudyEdited(id:Int, newParams:StudyInfo)
     {
+        //TODO: Rewrite
+        /*
         var newWidgetData:StudyWidgetData = generateStudyWidgetData(id, newParams);
         
         widgetByStudyID.get(id).updateData(newWidgetData);
         loadedStudies.set(id, newParams);
+        */
     }
 
     private function onDeleteStudyRequested(id:Int)
@@ -82,7 +87,7 @@ class StudiesTab extends VBox
         widgetByStudyID.remove(id);
     }
 
-    private function generateStudyWidgetData(id:Int, info:StudyInfo):StudyWidgetData
+    private function generateStudyWidgetData(id:Int, info:StudyInfo):StudyWidgetData //TODO: Remove unneeded fields from StudyWidgetData
     {
         return {
             id: id,

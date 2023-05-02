@@ -1,6 +1,6 @@
 package net.shared.dataobj;
 
-class GameInfo
+class GameInfo //TODO: Replace by GameModelData??
 {
     public var id:Int;
     public var log:String;

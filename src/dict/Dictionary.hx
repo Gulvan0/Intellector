@@ -5,6 +5,8 @@ import utils.StringUtils.eloToStr;
 import net.shared.PieceColor;
 import net.shared.Outcome;
 
+using utils.StringUtils;
+
 class Dictionary 
 {
     private static function getTranslations(phrase:Phrase):Array<String>
@@ -19,7 +21,7 @@ class Dictionary
             case ANALYSIS_BOARD_NO_STUDY_SCREEN_TITLE:
                 return ["Analysis Board", "Доска анализа"];
             case STUDY_SCREEN_TITLE(studyID, studyName):
-                var shortenedName:String = StringUtils.shorten(studyName);
+                var shortenedName:String = studyName.shorten();
                 return ['Study $shortenedName ($studyID) | Analysis Board', 'Студия $shortenedName ($studyID) | Доска анализа'];
             case PLAYER_PROFILE_SCREEN_TITLE(ownerLogin):
                 return ['$ownerLogin\'s profile', 'Профиль $ownerLogin'];
@@ -607,8 +609,6 @@ class Dictionary
                 return ["White to move", "Ход белых"];
             case TURN_COLOR(Black):
                 return ["Black to move", "Ход черных"];
-            case CUSTOM_STARTING_POSITION:
-                return ["Custom starting position", "Нестандартная начальная расстановка"];
             case CHATBOX_MESSAGE_PLACEHOLDER:
                 return ["Message text...", "Сообщение..."];
             case PROMOTION_DIALOG_QUESTION:

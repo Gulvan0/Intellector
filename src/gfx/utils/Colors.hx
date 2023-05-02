@@ -8,9 +8,9 @@ class Colors
     public static var border:Color = 0x664126;
     public static var arrow:Color = 0xFF0000;
 
-    public static var variantTreeBackground:Color = 0xEEEEEE;
-    public static var variantTreeUnselectedArrow:Color = 0x333333;
-    public static var variantTreeSelectedArrow:Color = 0xFF0000;
+    public static var variationTreeBackground:Color = 0xEEEEEE;
+    public static var variationTreeUnselectedArrow:Color = 0x333333;
+    public static var variationTreeSelectedArrow:Color = 0xFF0000;
 
     public static function hexFill(layer:HexagonLayer, isDark:Bool):Color
     {

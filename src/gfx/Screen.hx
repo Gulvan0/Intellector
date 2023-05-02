@@ -1,5 +1,7 @@
 package gfx;
 
+import net.shared.dataobj.ViewedScreen;
+import dict.Phrase;
 import haxe.Timer;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
 import gfx.ResponsiveToolbox.ResponsiveProperty;

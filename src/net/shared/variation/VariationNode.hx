@@ -12,11 +12,11 @@ class VariationNode
     public final incomingPly:Null<RawPly>;
 
     public final parent:Null<VariationNode>;
-    private final children:Array<VariantNode>;
+    private final children:Array<VariationNode>;
 
     public function addChild(ply:RawPly) 
     {
-        var child = new VariantNode(ply, situationAfter);
+        var child = new VariationNode(ply, situationAfter);
         children.push(child);
     }
 

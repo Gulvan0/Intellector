@@ -1,6 +1,6 @@
 package net.shared.variation;
 
-import gfx.live.interfaces.ReadOnlyVariationNode;
+import net.shared.variation.ReadOnlyVariationNode;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
 import haxe.Unserializer;

@@ -12,11 +12,9 @@ import net.shared.dataobj.GreetingResponseData;
 import tests.SimpleTests;
 import gfx.basic_components.AutosizingLabel;
 import struct.ChallengeParams;
-import serialization.GameLogParser;
 import utils.Changelog;
 import gfx.screens.OpenChallengeJoining;
 import gfx.Dialogs;
-import tests.ui.analysis.TAnalysisScreen;
 import haxe.ui.locale.LocaleManager;
 import net.shared.PieceColor;
 import utils.TimeControl;
@@ -24,11 +22,9 @@ import net.Requests;
 import js.html.URLSearchParams;
 import browser.CredentialCookies;
 import gfx.SceneManager;
-import gfx.screens.Analysis;
 import gfx.screens.LanguageSelectIntro;
 import haxe.ui.Toolkit;
 import js.Browser;
-import openings.OpeningTree;
 import tests.UITest;
 
 using StringTools;
@@ -76,7 +72,7 @@ class Main
 		#end
 
 		Blinker.init();
-		OpeningTree.init();
+		//TODO: OpeningDatabase.generate(_);
 		Changelog.init();
 		Config.init(onInitFinished);
 	}

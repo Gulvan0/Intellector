@@ -20,7 +20,6 @@ import GlobalBroadcaster.GlobalEvent;
 import net.INetObserver;
 import net.shared.ServerEvent;
 import utils.StringUtils;
-import serialization.GameLogParser;
 import net.Requests;
 import gfx.Dialogs;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
@@ -191,8 +190,9 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                     setIngameStatus(true);
             case LoginResult(ReconnectionNeeded(_, _)):
                 setIngameStatus(true);
-            case GameStarted(_, logPreamble):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
+            case GoToGame(data):
+                //TODO: Rewrite, add spectation case?
+                /*var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
 
                 if (parsedData.isPlayerParticipant())
                 {
@@ -204,7 +204,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                     var opponentLogin:String = parsedData.getPlayerOpponentRef();
                     challengesMenu.removeOwnEntries();
                     challengesMenu.removeEntriesByPlayer(opponentLogin);
-                }
+                }*/
             case GameEnded(_, _, _, _):
                 setIngameStatus(false);
             case IncomingDirectChallenge(data):

@@ -6,7 +6,6 @@ import haxe.ui.events.UIEvent;
 import net.shared.dataobj.StudyInfo;
 import browser.CredentialCookies;
 import gfx.Dialogs;
-import serialization.GameLogParser;
 import haxe.Timer;
 import haxe.ui.Toolkit;
 import js.html.VisualViewport;
@@ -114,10 +113,9 @@ class SceneManager
     {
         switch event 
         {
-            case GameStarted(gameID, logPreamble):
-                var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
-                var constructor:LiveGameConstructor;
-                if (parsedData.isPlayerParticipant())
+            case GoToGame(data):
+                //TODO: Rewrite
+                /*if (parsedData.isPlayerParticipant())
                 {
                     FollowManager.stopFollowing();
                     constructor = New(parsedData.whiteRef, parsedData.blackRef, parsedData.elo, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
@@ -127,7 +125,7 @@ class SceneManager
                     FollowManager.followedGameID = gameID;
                     constructor = Ongoing(parsedData, null, FollowManager.getFollowedPlayerLogin());
                 }
-                toScreen(LiveGame(gameID, constructor));
+                toScreen(LiveGame(gameID, constructor));*/
             default:
         }
         return false;

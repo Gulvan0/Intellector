@@ -1,5 +1,6 @@
 package;
 
+import net.INetObserver;
 import lzstring.LZString;
 import js.lib.Uint8Array;
 import net.shared.ServerMessage;
@@ -11,7 +12,6 @@ import browser.Url;
 import js.html.XMLHttpRequest;
 import haxe.Http;
 import js.Browser;
-import serialization.GameLogParser;
 import gfx.ScreenNavigator;
 import browser.CredentialCookies;
 import net.shared.dataobj.GreetingResponseData;
@@ -277,8 +277,9 @@ class Networker
                 GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
                 if (ongoingFiniteGame != null)
                 {
-                    var parsedData:GameLogParserOutput = GameLogParser.parse(ongoingFiniteGame.currentLog);
-                    SceneManager.toScreen(LiveGame(ongoingFiniteGame.id, Ongoing(parsedData, ongoingFiniteGame.timeData, null)));
+                    //TODO: Rewrite
+                    /*var parsedData:GameLogParserOutput = GameLogParser.parse(ongoingFiniteGame.currentLog);
+                    SceneManager.toScreen(LiveGame(ongoingFiniteGame.id, Ongoing(parsedData, ongoingFiniteGame.timeData, null)));*/
                 }
                 else
                 {

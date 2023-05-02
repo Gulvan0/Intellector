@@ -23,7 +23,7 @@ import haxe.Timer;
 import haxe.ui.components.Label;
 import tests.ui.utils.data.MaterializedInitParameter;
 import haxe.ui.events.MouseEvent;
-import gameboard.SelectableBoard;
+import gfx.live.board.SelectableBoard;
 import tests.ui.utils.data.MacroStep;
 import haxe.ui.containers.HBox;
 import net.shared.board.Situation;

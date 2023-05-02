@@ -4,7 +4,7 @@ import net.shared.dataobj.StudyInfo;
 import gfx.live.analysis.util.PosEditMode;
 import gfx.live.interfaces.IReadOnlyGenericModel;
 import gfx.live.interfaces.IReadOnlyAnalysisBoardModel;
-import gfx.live.interfaces.ReadOnlyVariation;
+import net.shared.variation.ReadOnlyVariation;
 import gfx.live.struct.AnalysisBoardBehaviorType;
 import net.shared.variation.VariationPath;
 import net.shared.variation.Variation;

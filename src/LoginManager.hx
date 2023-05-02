@@ -2,7 +2,6 @@ package;
 
 import net.shared.utils.PlayerRef;
 import net.shared.dataobj.ChallengeData;
-import serialization.GameLogParser;
 import gfx.SceneManager;
 import net.shared.dataobj.SignInResult;
 import net.shared.ServerEvent;
