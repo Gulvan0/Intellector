@@ -17,7 +17,7 @@ import gfx.live.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
 import net.shared.dataobj.OfferDirection;
 
-class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel implements IReadOnlyGameRelatedModel implements IReadOnlyGenericModel
+class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
 {
     public var gameID:Int;
     public var timeControl:TimeControl;
@@ -52,7 +52,7 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel implemen
 
     public function getPlayerRef(color:PieceColor):PlayerRef
     {
-        return gameID;
+        return playerRefs.get(color);
     }
 
     public function isRated():Bool
@@ -82,7 +82,7 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel implemen
 
     public function getOrientation():PieceColor
     {
-        return startingSituation.copy();
+        return orientation;
     }
 
     public function getShownSituation():Situation
@@ -186,5 +186,15 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel implemen
     public function getStartingSituation():Situation
     {
         return getHistory().getStartingSituation();
+    }
+
+	public function getMostRecentSituation():Situation 
+    {
+		return getHistory().getMostRecentSituation();
+	}
+
+    public function new()
+    {
+
     }
 }

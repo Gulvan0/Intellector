@@ -13,7 +13,7 @@ typedef GameModelData = {
     var datetime:Null<Date>;
     var startingSituation:Situation;
     
-    //Whole history
+    //Whole history, should be sorted
     var eventLog:Array<{ts:Date, entry:GameEventLogEntry}>;
     
     //Current state that cannot be deduced from history

@@ -2,13 +2,8 @@ package gfx.live.models;
 
 import gfx.live.interfaces.IReadOnlyGenericModel;
 import gfx.live.interfaces.IReadOnlyGameRelatedModel;
-import net.shared.EloValue;
 import net.shared.utils.PlayerRef;
 import net.shared.board.RawPly;
-import net.shared.Outcome;
-import utils.TimeControl;
-import gfx.live.interfaces.IReadOnlyMsRemainders;
-import net.shared.dataobj.TimeReservesData;
 import net.shared.board.Situation;
 import net.shared.PieceColor;
 
@@ -18,10 +13,10 @@ class CommonModelExtractors
     {
         return switch genericModel 
         {
-            case MatchVersusPlayer(model), MatchVersusBot(model), Spectation(model):
-                model;
-            case AnalysisBoard(model):
-                null;
+            case MatchVersusPlayer(model): model;
+            case MatchVersusBot(model): model;
+            case Spectation(model): model;
+            case AnalysisBoard(model): null;
         }
     }
 
@@ -29,8 +24,10 @@ class CommonModelExtractors
     {
         return switch genericModel 
         {
-            case MatchVersusPlayer(model), MatchVersusBot(model), Spectation(model), AnalysisBoard(model):
-                model;
+            case MatchVersusPlayer(model): model;
+            case MatchVersusBot(model): model;
+            case Spectation(model): model;
+            case AnalysisBoard(model): model;
         }
     }
 

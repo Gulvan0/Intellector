@@ -16,7 +16,7 @@ import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
 
-class SpectationModel implements IReadOnlySpectationModel implements IReadOnlyGameRelatedModel implements IReadOnlyGenericModel
+class SpectationModel implements IReadOnlySpectationModel
 {
     public var gameID:Int;
     public var timeControl:TimeControl;
@@ -50,7 +50,7 @@ class SpectationModel implements IReadOnlySpectationModel implements IReadOnlyGa
 
     public function getPlayerRef(color:PieceColor):PlayerRef
     {
-        return gameID;
+        return playerRefs.get(color);
     }
 
     public function isRated():Bool
@@ -80,7 +80,7 @@ class SpectationModel implements IReadOnlySpectationModel implements IReadOnlyGa
 
     public function getOrientation():PieceColor
     {
-        return startingSituation.copy();
+        return orientation;
     }
 
     public function getShownSituation():Situation
@@ -160,5 +160,15 @@ class SpectationModel implements IReadOnlySpectationModel implements IReadOnlyGa
     public function getStartingSituation():Situation
     {
         return getHistory().getStartingSituation();
+    }
+
+	public function getMostRecentSituation():Situation 
+    {
+		return getHistory().getMostRecentSituation();
+	}
+
+    public function new()
+    {
+
     }
 }

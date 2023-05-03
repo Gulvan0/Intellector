@@ -21,7 +21,7 @@ import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 
-class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IReadOnlyGenericModel
+class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
 {
     public var variation:Variation;
     public var selectedBranch:VariationPath;
@@ -108,7 +108,7 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
 
     //Additional methods to unify with IReadOnlyGenericModel
 
-    public function getCurrentSituation():Situation
+    public function getMostRecentSituation():Situation
     {
         return getSituationAtLineEnd();
     }
@@ -125,6 +125,11 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel implements IRead
 
     public function getLine():Array<{ply:RawPly, situationAfter:Situation}>
     {
-        return getVariation().getFullMainline(false, model.getSelectedBranch()).map(x -> {ply: x.getIncomingPly(), situationAfter: x.getSituation()});
+        return getVariation().getFullMainline(false, getSelectedBranch()).map(x -> {ply: x.getIncomingPly(), situationAfter: x.getSituation()});
+    }
+
+    public function new()
+    {
+
     }
 }

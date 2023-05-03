@@ -17,7 +17,7 @@ import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
 
-class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel implements IReadOnlyGameRelatedModel implements IReadOnlyGenericModel
+class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
 {
     public var gameID:Int;
     public var opponentBot:Bot;
@@ -55,8 +55,18 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel implements IRe
 
     public function getPlayerRef(color:PieceColor):PlayerRef
     {
-        return gameID;
+        return playerRefs.get(color);
     }
+
+	public function isRated():Bool 
+    {
+		return false;
+	}
+
+	public function getELO(color:PieceColor):EloValue 
+    {
+		return null;
+	}
 
     public function hasEnded():Bool
     {
@@ -163,5 +173,15 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel implements IRe
     public function getStartingSituation():Situation
     {
         return getHistory().getStartingSituation();
+    }
+
+	public function getMostRecentSituation():Situation 
+    {
+		return getHistory().getMostRecentSituation();
+	}
+
+    public function new()
+    {
+
     }
 }

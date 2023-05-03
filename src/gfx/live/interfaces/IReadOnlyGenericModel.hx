@@ -10,7 +10,7 @@ interface IReadOnlyGenericModel
     public function getShownSituation():Situation;
     public function getBoardInteractivityMode():InteractivityMode;
     public function getShownMovePointer():Int;
-    public function getCurrentSituation():Situation;
+    public function getMostRecentSituation():Situation;
     public function getStartingSituation():Situation;
     public function getLineLength():Int;
     public function getLine():Array<{ply:RawPly, situationAfter:Situation}>;
