@@ -1,5 +1,6 @@
 package serialization;
 
+import net.shared.utils.UnixTimestamp;
 import net.shared.board.RawPly;
 import dict.Utils;
 import net.shared.PieceColor;
@@ -10,7 +11,7 @@ using StringTools;
 
 class PortableIntellectorNotation 
 {
-    public static function serialize(startingSituation:Situation, movesPlayed:Array<RawPly>, ?whiteRef:String = "Anonymous", ?blackRef:String = "Anonymous", ?timeControl:TimeControl, ?datetime:Date, ?outcome:Outcome):String
+    public static function serialize(startingSituation:Situation, movesPlayed:Array<RawPly>, ?whiteRef:String = "Anonymous", ?blackRef:String = "Anonymous", ?timeControl:TimeControl, ?startTimestamp:UnixTimestamp, ?outcome:Outcome):String
     {
         var pin:String = "";
         var whitePlayer:String = Utils.playerRef(whiteRef);
@@ -18,8 +19,8 @@ class PortableIntellectorNotation
         pin += '#Players: $whitePlayer vs $blackPlayer;\n';
         if (timeControl != null)
             pin += '#TimeControl: ${timeControl.toString()};\n';
-        if (datetime != null)
-            pin += '#DateTime: ${datetime.toString()};\n';
+        if (startTimestamp != null)
+            pin += '#DateTime: ${startTimestamp.format(DashDelimitedDayWithSeparateTime)};\n';
 
         var startingSIP:String = startingSituation.serialize();
         if (startingSIP != Situation.defaultStarting().serialize())

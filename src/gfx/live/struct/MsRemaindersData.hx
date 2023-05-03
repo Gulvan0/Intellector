@@ -1,91 +1,58 @@
 package gfx.live.struct;
 
+import net.shared.utils.UnixTimestamp;
+import utils.TimeControl;
+import net.shared.dataobj.TimeReservesData;
 import net.shared.dataobj.GameModelData;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
 import net.shared.PieceColor;
 
 class MsRemaindersData implements IReadOnlyMsRemainders
 {
-    private var msLeftOnMove:Map<PieceColor, Array<Null<Int>>> = [White => [], Black => []];
-    private var msLeftWhenEnded:Null<Map<PieceColor, Int>> = null;
-    private var msPerMoveDataAvailable:Bool = true;
-    private var initialSecs:Int;
-    private var moveCount:Int;
+    private var reservesAfterMove:Array<TimeReservesData> = [];
+    private var reservesWhenEnded:TimeReservesData = null;
+    private var initialReserves:TimeReservesData;
 
-    public function getSecsLeftAfterMove(side:PieceColor, plyNum:Int):Null<Float>
+    public function getTimeLeftAfterMove(plyNum:Int):TimeReservesData
     {
-        if (!msPerMoveDataAvailable)
-            return null;
+        if (plyNum > 0)
+            return reservesAfterMove[plyNum - 1];
 
-        if (plyNum == moveCount && msLeftWhenEnded != null)
-            return msLeftWhenEnded[side] / 1000;
-
-        var index:Int = plyNum - 1;
-        while (index >= 0)
-        {
-            var msLeft:Null<Int> = msLeftOnMove[side][index];
-            if (msLeft != null)
-                return msLeft / 1000;
-            else
-                index--;
-        }
-
-        return initialSecs;
+        return initialReserves.copy();
     }
 
-    public function getSecsLeftAtStart(side:PieceColor):Float
+    public function getTimeLeftAtStart():TimeReservesData
     {
-        return initialSecs;
+        return initialReserves.copy();
     }
 
-    public function getSecsLeftWhenEnded(side:PieceColor):Null<Float>
+    public function getTimeLeftWhenEnded():TimeReservesData
     {
-        return msLeftWhenEnded == null? null : msLeftWhenEnded[side] / 1000;
+        return reservesWhenEnded.copy();
     }
 
-    public function appendRemainders(whiteSecs:Int, blackSecs:Int) 
+    public function append(timeData:TimeReservesData) 
     {
-        msLeftOnMove[White].push(whiteSecs);
-        msLeftOnMove[Black].push(blackSecs);
-        moveCount++;
+        reservesAfterMove.push(timeData.copy());
     }
 
-    public function appendRemainder(side:PieceColor, secs:Int) 
+    public function addTime(receivingSide:PieceColor, secs:Float) 
     {
-        var movedPlayerArray = msLeftOnMove[side];
-        var opponentArray = msLeftOnMove[opposite(side)];
-
-        movedPlayerArray.push(secs);
-        opponentArray.push(opponentArray[opponentArray.length - 1]);
-        moveCount++;
-    }
-
-    public function addTime(receivingSide:PieceColor, secs:Int) 
-    {
-        var receiverArray = msLeftOnMove[receivingSide];
-
-        receiverArray[receiverArray.length - 1] += secs;
+        reservesAfterMove[reservesAfterMove.length - 1].addSecsLeftAtTimestamp(receivingSide, secs);
     }
 
     public function rollback(newPlayedMovesCnt:Int) 
     {
-        msLeftOnMove[White] = msLeftOnMove[White].slice(0, newPlayedMovesCnt);
-        msLeftOnMove[Black] = msLeftOnMove[Black].slice(0, newPlayedMovesCnt);
-        moveCount = newPlayedMovesCnt;
+        reservesAfterMove = reservesAfterMove.slice(0, newPlayedMovesCnt);
     }
 
-    public function recordTimeOnGameEnded(whiteSecs:Int, blackSecs:Int)
+    public function recordTimeOnGameEnded(timeData:TimeReservesData)
     {
-        msLeftWhenEnded = [White => whiteSecs, Black => blackSecs];
+        reservesWhenEnded = timeData.copy();
     }
 
-    public function new(data:GameModelData) 
+    public function new(timeControl:TimeControl, gameStartedAt:UnixTimestamp) 
     {
-        //TODO: Rewrite
-        /*this.msLeftOnMove = parsedLog.msLeftOnMove;
-        this.msLeftWhenEnded = parsedLog.msLeftWhenEnded;
-        this.msPerMoveDataAvailable = newGame? true : parsedLog.msPerMoveDataAvailable;
-        this.initialSecs = parsedLog.timeControl.startSecs;
-        this.moveCount = parsedLog.moveCount;*/
+        this.initialReserves = new TimeReservesData(timeControl.startSecs, timeControl.startSecs, gameStartedAt);
     }
 }

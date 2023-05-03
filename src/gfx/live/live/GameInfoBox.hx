@@ -1,5 +1,6 @@
 package gfx.live.live;
 
+import net.shared.utils.UnixTimestamp;
 import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import net.shared.openings.OpeningDatabase;
 import net.shared.openings.Opening;
@@ -78,10 +79,13 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
         resolution.text = Utils.getResolution(gameModel.getOutcome());
         timeControlIcon.resource = Paths.timeControl(tcType);
 
-        if (parsedData.datetime != null)
-            datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+        var startTimestamp:UnixTimestamp = gameModel.getStartTimestamp();
+        if (startTimestamp != null)
+            datetime.text = startTimestamp.format(DotDelimitedDayWithSeparateTime);
+        else
+            datetime.text = Dictionary.getPhrase(OLD_GAME_DATETIME);
 
-        updateOpeningLabel(gameModel);
+        updateOpeningLabel(gameModel, !model.match(Spectation(_)));
 
         if (FollowManager.isFollowing())
             markFollowedPlayer(gameModel.getColorByRef(FollowManager.getFollowedPlayerLogin()));
@@ -94,15 +98,15 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
         switch event 
         {
             case ShownSituationUpdated:
-                updateOpeningLabel(gameModel);
+                updateOpeningLabel(gameModel, !model.match(Spectation(_)));
             case GameEnded:
                 resolution.text = Utils.getResolution(gameModel.getOutcome());
-                updateOpeningLabel(gameModel);
+                updateOpeningLabel(gameModel, !model.match(Spectation(_)));
             default:
         }
     }
 
-    private function updateOpeningLabel(gameModel:IReadOnlyGameRelatedModel)
+    private function updateOpeningLabel(gameModel:IReadOnlyGameRelatedModel, hideRealName:Bool)
     {
         var pointer:Int = gameModel.getShownMovePointer();
 
@@ -118,10 +122,7 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
                 var opening:Null<Opening> = OpeningDatabase.get(sip);
 
                 if (opening != null)
-                {
-                    var hideRealName:Bool = gameModel.getPlayerColor() != null && !gameModel.hasEnded();
                     openingLabel.text = opening.renderName(hideRealName);
-                }
                 else
                     openingLabel.text = Dictionary.getPhrase(OPENING_UNORTHODOX_STARTING_POSITION);
             }
@@ -133,12 +134,12 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
 
             while (i >= 0)
             {
-                var sip:String = line[i].situation.serialize();
+                var sip:String = line[i].situationAfter.serialize();
                 var opening:Null<Opening> = OpeningDatabase.get(sip);
 
                 if (opening != null)
                 {
-                    openingLabel.text = opening.renderName();
+                    openingLabel.text = opening.renderName(hideRealName);
                     return;
                 }
 

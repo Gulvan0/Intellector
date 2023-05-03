@@ -7,11 +7,11 @@ class Opening
     public final hiddenName:String;
     public final reminiscence:Bool;
 
-    public function renderName(forPlayer:Bool):String
+    public function renderName(hideRealName:Bool):String
     {
         var codeStr:String = renderCode();
         var namePrefix:String = reminiscence? "RM " : "";
-        var name:String = forPlayer? shownToPlayersName : hiddenName;
+        var name:String = hideRealName? shownToPlayersName : hiddenName;
         var fullName:String = namePrefix + name;
 
         return '$codeStr. $fullName';
@@ -20,6 +20,7 @@ class Opening
     private function renderCode():String
     {
         //TODO: Fill
+        return "";
     }
 
     public function new(code:OpeningCode, shownToPlayersName:String, hiddenName:String, reminiscence:Bool) 

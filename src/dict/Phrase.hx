@@ -1,5 +1,6 @@
 package dict;
 
+import net.shared.dataobj.OfferKind;
 import net.shared.utils.PlayerRef;
 import browser.Blinker.BlinkerNotification;
 import net.shared.dataobj.StudyPublicity;
@@ -419,19 +420,17 @@ enum Phrase
     SPECTATOR_LEFT_MESSAGE(displayName:String);
     PLAYER_DISCONNECTED_MESSAGE(color:PieceColor);
     PLAYER_RECONNECTED_MESSAGE(color:PieceColor);
-    DRAW_OFFERED_MESSAGE(color:Null<PieceColor>);
-    DRAW_CANCELLED_MESSAGE(color:Null<PieceColor>);
-    DRAW_ACCEPTED_MESSAGE(color:Null<PieceColor>);
-    DRAW_DECLINED_MESSAGE(color:Null<PieceColor>);
-    TAKEBACK_OFFERED_MESSAGE(color:Null<PieceColor>);
-    TAKEBACK_CANCELLED_MESSAGE(color:Null<PieceColor>);
-    TAKEBACK_ACCEPTED_MESSAGE(color:Null<PieceColor>);
-    TAKEBACK_DECLINED_MESSAGE(color:Null<PieceColor>);
-    TIME_ADDED_MESSAGE(color:PieceColor);
+    OFFER_SENT_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>);
+    OFFER_CANCELLED_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>);
+    OFFER_ACCEPTED_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>);
+    OFFER_DECLINED_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>);
+    TIME_ADDED_MESSAGE(receiverColor:PieceColor);
 
     OPENING_STARTING_POSITION;
     OPENING_UNORTHODOX_STARTING_POSITION;
     OPENING_UNORTHODOX_LINE;
+
+    OLD_GAME_DATETIME;
 
     PROMOTION_DIALOG_TITLE;
     PROMOTION_DIALOG_QUESTION;

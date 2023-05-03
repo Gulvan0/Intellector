@@ -1,5 +1,6 @@
 package gfx;
 
+import net.shared.utils.UnixTimestamp;
 import dict.Language;
 import net.shared.dataobj.ViewedScreen;
 import haxe.ui.events.UIEvent;
@@ -80,7 +81,7 @@ class SceneManager
 
     private static function onResized(?e)
     {
-        var timestamp:Float = Date.now().getTime();
+        var timestamp:Float = UnixTimestamp.now().toUnixMilliseconds();
         var msSinceLastResize:Float = timestamp - lastResizeTimestamp;
 
         if (msSinceLastResize > 100 && (cachedWidth != HaxeUIScreen.instance.actualWidth || cachedHeight != HaxeUIScreen.instance.actualHeight))
@@ -140,7 +141,7 @@ class SceneManager
         Networker.addHandler(handleNetEvent);
         Networker.addObserver(scene);
 
-        lastResizeTimestamp = Date.now().getTime();
+        lastResizeTimestamp = UnixTimestamp.now().toUnixMilliseconds();
         cachedWidth = HaxeUIScreen.instance.actualWidth;
         cachedHeight = HaxeUIScreen.instance.actualHeight;
 

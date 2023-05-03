@@ -204,16 +204,14 @@ class OutcomePhrases
         } 
     }
 
-    public static function chatboxGameOverMessage(outcome:Outcome):String
+    public static function chatboxGameOverMessage(outcome:Outcome):Array<String>
     {
-        var translations:Array<String> = switch outcome 
+        return switch outcome 
         {
             case Decisive(type, winnerColor):
                 getDecisiveChatboxGameOverMessageTL(type, winnerColor);
             case Drawish(type):
                 getDrawishChatboxGameOverMessageTL(type);
         }
-
-        return Dictionary.chooseTranslation(translations);
     }
 }

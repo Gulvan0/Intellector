@@ -1,5 +1,6 @@
 package gfx.live.live;
 
+import net.shared.utils.UnixTimestamp;
 import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
@@ -29,7 +30,7 @@ class Clock extends Card implements IGameComponent
     private var alertsEnabled:Bool;
 
     private var secondsLeftAtReliableTimestamp:Float;
-    private var reliableTimestamp:Float;
+    private var reliableTimestamp:UnixTimestamp;
     private var running:Bool = false;
 
     private var active:Bool;
@@ -62,8 +63,9 @@ class Clock extends Card implements IGameComponent
             this.playSoundOnOneMinuteLeft = timeControl.startSecs >= 90;
             this.alertsEnabled = gameModel.getPlayerColor() == ownerColor;
 
-            correctTime(gameModel.timeData());
-            onActiveTimerColorUpdated(gameModel.activeTimerColor());
+            onActiveTimerColorUpdated(gameModel.getActiveTimerColor());
+            var secsLeftData = gameModel.getActualSecsLeft(ownerColor);
+            correctTime(secsLeftData.secs, secsLeftData.calculatedAt);
         }
     }
 
@@ -82,19 +84,20 @@ class Clock extends Card implements IGameComponent
                     if (shownMovePointer == gameModel.getLineLength())
                         setTimeToAmountLeftWhenEnded(gameModel.getMsRemainders());
                     else
-                        label.text = TimeControl.secsToString(gameModel.getMsRemainders().getSecsLeftAfterMove(ownerColor, shownMovePointer));
+                        label.text = TimeControl.secsToString(gameModel.getMsRemainders().getTimeLeftAfterMove(shownMovePointer).getSecsLeftAtTimestamp(ownerColor));
                 }
             case TimeDataUpdated:
-                correctTime(gameModel.timeData());
+                var secsLeftData = gameModel.getActualSecsLeft(ownerColor);
+                correctTime(secsLeftData.secs, secsLeftData.calculatedAt);
             case ActiveTimerColorUpdated:
-                onActiveTimerColorUpdated(gameModel.activeTimerColor());
+                onActiveTimerColorUpdated(gameModel.getActiveTimerColor());
             default:
         }
     }
 
     private function setTimeToAmountLeftWhenEnded(msRemainders:IReadOnlyMsRemainders)
     {
-        var remainingSecs:Null<Float> = msRemainders.getSecsLeftWhenEnded(ownerColor);
+        var remainingSecs:Null<Float> = msRemainders.getTimeLeftWhenEnded().getSecsLeftAtTimestamp(ownerColor);
         
         if (remainingSecs != null)
             label.text = TimeControl.secsToString(remainingSecs);
@@ -192,7 +195,7 @@ class Clock extends Card implements IGameComponent
     private function updateTimeLeft() 
     {
         if (running)
-            secondsLeft = Math.max(secondsLeftAtReliableTimestamp - (Date.now().getTime() - reliableTimestamp) / 1000, 0);
+            secondsLeft = Math.max(secondsLeftAtReliableTimestamp - reliableTimestamp.getIntervalSecsToNow(), 0);
         else
             secondsLeft = secondsLeftAtReliableTimestamp;
 
@@ -234,10 +237,10 @@ class Clock extends Card implements IGameComponent
         running = false;
     }
 
-    private function correctTime(timeData:TimeReservesData) 
+    private function correctTime(secs:Float, calculatedAt:UnixTimestamp) 
     {
-        secondsLeftAtReliableTimestamp = ownerColor == White? timeData.whiteSeconds : timeData.blackSeconds;
-        reliableTimestamp = timeData.timestamp;
+        secondsLeftAtReliableTimestamp = secs;
+        reliableTimestamp = calculatedAt;
         updateTimeLeft();
     }
 

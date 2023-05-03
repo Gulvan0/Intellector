@@ -1,10 +1,12 @@
 package net.shared.dataobj;
 
+import net.shared.utils.UnixTimestamp;
+
 class TimeReservesData
 {
     public var whiteSeconds:Float;
     public var blackSeconds:Float;
-    public var timestamp:Float;
+    public var timestamp:UnixTimestamp;
 
     public function secsLeftMap():Map<PieceColor, Float> 
     {
@@ -39,7 +41,7 @@ class TimeReservesData
         if (!timeRunning)
             return secsAtTimestamp;
 
-        var elapsedSecs:Float = (nowTS - timestamp) / 1000;
+        var elapsedSecs:Float = timestamp.getIntervalSecsToNow();
         return secsAtTimestamp - elapsedSecs;
     }
 
@@ -53,7 +55,7 @@ class TimeReservesData
         return new TimeReservesData(whiteSeconds, blackSeconds, timestamp);    
     }
 
-    public function new(whiteSeconds:Float, blackSeconds:Float, timestamp:Float)
+    public function new(whiteSeconds:Float, blackSeconds:Float, timestamp:UnixTimestamp)
     {
         this.whiteSeconds = whiteSeconds;
         this.blackSeconds = blackSeconds;

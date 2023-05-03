@@ -1,5 +1,6 @@
 package net.shared.dataobj;
 
+import net.shared.utils.UnixTimestamp;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
 import net.shared.utils.PlayerRef;
@@ -10,11 +11,11 @@ typedef GameModelData = {
     var timeControl:{startSecs:Int, bonusSecs:Int};
     var playerRefs:Map<PieceColor, PlayerRef>;
     var elo:Null<Map<PieceColor, EloValue>>;
-    var datetime:Null<Date>;
+    var startTimestamp:Null<UnixTimestamp>;
     var startingSituation:Situation;
     
     //Whole history, should be sorted
-    var eventLog:Array<{ts:Date, entry:GameEventLogEntry}>;
+    var eventLog:Array<{ts:UnixTimestamp, entry:GameEventLogEntry}>;
     
     //Current state that cannot be deduced from history
     var playerOnline:Map<PieceColor, Bool>;

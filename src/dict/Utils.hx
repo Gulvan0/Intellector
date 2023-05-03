@@ -86,7 +86,7 @@ class Utils
         return OutcomePhrases.getResolution(outcome);
     }
 
-    public static function chatboxGameOverMessage(outcome:Outcome):String
+    public static function chatboxGameOverMessage(outcome:Outcome):Array<String>
     {
         return OutcomePhrases.chatboxGameOverMessage(outcome);
     }

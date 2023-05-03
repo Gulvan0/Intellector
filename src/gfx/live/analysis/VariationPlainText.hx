@@ -52,7 +52,7 @@ class VariationPlainText extends HBox implements IVariationView
         items = [];
 
         for (variationNode in variation.depthFirst(false))
-            addChildNode(variationNode.getPath(), variationNode.getIncomingPly());
+            addChildNode(variationNode, variationNode.getIncomingPly());
 
         pack();
 
@@ -268,7 +268,7 @@ class VariationPlainText extends HBox implements IVariationView
 
         var plyNodeText:String = path.length + ". " + node.getIncomingPlyStr(false);
         var plyNode:PlyNode = new PlyNode(path, plyNodeText, onNodeSelectRequest, onNodeRemovalRequest, DEFAULT_STYLE);
-        var nodeInfo:NodeInfo = {node: node, index: -1};
+        var nodeInfo:NodeInfo = {node: plyNode, index: -1};
         nodes.set(path, nodeInfo);
 
         if (nodeNum > 0)

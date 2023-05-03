@@ -1,5 +1,8 @@
 package gfx.live.models;
 
+import net.shared.utils.UnixTimestamp;
+import net.shared.dataobj.TimeReservesData;
+import gfx.live.interfaces.IReadOnlyMsRemainders;
 import gfx.live.interfaces.IReadOnlyGenericModel;
 import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import net.shared.utils.PlayerRef;
@@ -28,6 +31,17 @@ class CommonModelExtractors
             case MatchVersusBot(model): model;
             case Spectation(model): model;
             case AnalysisBoard(model): model;
+        }
+    }
+
+    public static function mutableGenericToReadOnly(mutableModel:Model):ReadOnlyModel
+    {
+        return switch mutableModel 
+        {
+            case MatchVersusPlayer(model): MatchVersusPlayer(model);
+            case MatchVersusBot(model): MatchVersusBot(model);
+            case Spectation(model): Spectation(model);
+            case AnalysisBoard(model): AnalysisBoard(model);
         }
     }
 
@@ -64,5 +78,27 @@ class CommonModelExtractors
             return Black;
         else
             return null;
+    }
+
+    public static function getActualSecsLeft(genericModel:IReadOnlyGameRelatedModel, side:PieceColor):Null<{secs:Float, calculatedAt:UnixTimestamp}>
+    {
+        var remainders:Null<IReadOnlyMsRemainders> = genericModel.getMsRemainders();
+
+        if (remainders == null)
+            return null;
+
+        var nowTimestamp:UnixTimestamp = UnixTimestamp.now();
+
+        if (genericModel.hasEnded())
+            return {secs: remainders.getTimeLeftWhenEnded().getSecsLeftAtTimestamp(side), calculatedAt: nowTimestamp};
+
+        var actualTimeData:TimeReservesData = remainders.getTimeLeftAfterMove(genericModel.getLineLength());
+        var secsLeftAtTimestamp:Float = actualTimeData.getSecsLeftAtTimestamp(side);
+
+
+        if (genericModel.getActiveTimerColor() != side)
+            return {secs: secsLeftAtTimestamp, calculatedAt: nowTimestamp};
+        else
+            return {secs: Math.max(secsLeftAtTimestamp - actualTimeData.timestamp.getIntervalSecsTo(nowTimestamp), 0), calculatedAt: nowTimestamp};
     }
 }

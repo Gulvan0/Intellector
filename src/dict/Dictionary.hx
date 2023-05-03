@@ -632,6 +632,9 @@ class Dictionary
             case OPENING_UNORTHODOX_LINE:
                 return ["Unorthodox line", "Нестандартная линия"];
 
+            case OLD_GAME_DATETIME:
+                return ["Before 17.01.2023", "Ранее 17.01.2023"];
+
             case RESIGN_BTN_ABORT_TOOLTIP:
                 return ["Abort", "Прервать"];
             case REMATCH_BTN_TOOLTIP:
@@ -684,35 +687,38 @@ class Dictionary
                 return ["Accept draw?", "Принять ничью?"];
             case TAKEBACK_QUESTION_TEXT:
                 return ["Accept takeback?", "Дать переходить?"];
-            case DRAW_OFFERED_MESSAGE(color):
-                if (color != null)
-                    return ['${Utils.getColorName(color, EN)} offered a draw', '${Utils.getColorName(color, RU)} предлагают ничью'];
+
+            case OFFER_SENT_MESSAGE(Draw, sentBy):
+                if (sentBy != null)
+                    return ['${Utils.getColorName(sentBy, EN)} offered a draw', '${Utils.getColorName(sentBy, RU)} предлагают ничью'];
                 else
                     return ['Draw offered', 'Ничья предложена'];
-            case DRAW_CANCELLED_MESSAGE(_):
+            case OFFER_CANCELLED_MESSAGE(Draw, _):
                 return ["Draw request cancelled", "Предложение ничьи отменено"];
-            case DRAW_ACCEPTED_MESSAGE(_):
+            case OFFER_ACCEPTED_MESSAGE(Draw, _):
                 return ["Draw accepted", "Ничья принята"];
-            case DRAW_DECLINED_MESSAGE(_):
+            case OFFER_DECLINED_MESSAGE(Draw, _):
                 return ["Draw declined", "Ничья отклонена"];
-            case TAKEBACK_OFFERED_MESSAGE(color):
-                if (color != null)
-                    return ['${Utils.getColorName(color, EN)} requested a takeback', '${Utils.getColorName(color, RU)} запросили возврат хода'];
+                
+            case OFFER_SENT_MESSAGE(Takeback, sentBy):
+                if (sentBy != null)
+                    return ['${Utils.getColorName(sentBy, EN)} requested a takeback', '${Utils.getColorName(sentBy, RU)} запросили возврат хода'];
                 else
                     return ['Takeback requested', 'Возврат хода запрошен'];
-            case TAKEBACK_CANCELLED_MESSAGE(_):
+            case OFFER_CANCELLED_MESSAGE(Takeback, _):
                 return ["Takeback cancelled", "Запрос возврата хода отменен"];
-            case TAKEBACK_ACCEPTED_MESSAGE(_):
+            case OFFER_ACCEPTED_MESSAGE(Takeback, _):
                 return ["Takeback accepted", "Возврат хода принят"];
-            case TAKEBACK_DECLINED_MESSAGE(_):
+            case OFFER_DECLINED_MESSAGE(Takeback, _):
                 return ["Takeback declined", "Возврат хода отклонен"];
+
             case PLAYER_DISCONNECTED_MESSAGE(color):
                 return ['${Utils.getColorName(color, EN)} disconnected', '${Utils.getColorName(color, RU)} отключились'];
             case PLAYER_RECONNECTED_MESSAGE(color):
                 return ['${Utils.getColorName(color, EN)} reconnected', '${Utils.getColorName(color, RU)} переподключились'];
-            case TIME_ADDED_MESSAGE(color):
+            case TIME_ADDED_MESSAGE(receiverColor):
                 var secsAdded:Int = Math.round(Constants.msAddedByOpponent / 1000);
-                return ['${Utils.getColorName(color, EN)}: +$secsAdded seconds', '${Utils.getColorName(color, RU)}: +$secsAdded секунд'];
+                return ['${Utils.getColorName(receiverColor, EN)}: +$secsAdded seconds', '${Utils.getColorName(receiverColor, RU)}: +$secsAdded секунд'];
             case ABORT_CONFIRMATION_MESSAGE:
                 return ["Are you sure you want to abort the game?", "Вы уверены, что хотите прервать игру?"];
 

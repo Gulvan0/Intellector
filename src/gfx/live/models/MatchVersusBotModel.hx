@@ -1,5 +1,6 @@
 package gfx.live.models;
 
+import net.shared.utils.UnixTimestamp;
 import gfx.live.interfaces.IReadOnlyGenericModel;
 import gfx.live.interfaces.IReadOnlyGameRelatedModel;
 import gfx.live.interfaces.IReadOnlyMatchVersusBotModel;
@@ -12,7 +13,6 @@ import utils.TimeControl;
 import net.shared.utils.PlayerRef;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
 import gfx.live.struct.MsRemaindersData;
-import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
@@ -24,14 +24,13 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
     public var timeControl:TimeControl;
     public var playerRefs:Map<PieceColor, PlayerRef>;
     public var outcome:Null<Outcome>;
-    public var datetime:Null<Date>;
+    public var startTimestamp:Null<UnixTimestamp>;
     
     public var orientation:PieceColor;
     public var history:History;
     public var shownMovePointer:Int;
     public var plannedPremoves:Array<RawPly>;
-    public var timeData:TimeReservesData;
-    public var perMoveTimeRemaindersData:MsRemaindersData;
+    public var perMoveTimeRemaindersData:Null<MsRemaindersData>;
     public var activeTimerColor:Null<PieceColor>;
     public var boardInteractivityMode:InteractivityMode;
 
@@ -78,9 +77,9 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
         return outcome;
     }
 
-    public function getDateTime():Date
+    public function getStartTimestamp():UnixTimestamp
     {
-        return datetime;
+        return startTimestamp;
     }
 
     public function getOrientation():PieceColor
@@ -108,12 +107,7 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
         return plannedPremoves.map(x -> x.copy());
     }
 
-    public function getTimeReservesData():TimeReservesData
-    {
-        return timeData.copy();
-    }
-
-    public function getMsRemainders():IReadOnlyMsRemainders
+    public function getMsRemainders():Null<IReadOnlyMsRemainders>
     {
         return perMoveTimeRemaindersData;
     }

@@ -6,7 +6,7 @@ class Build
 {
     public static macro function buildTime():ExprOf<Int>
     {
-        var unixtime:Int = Std.int(Date.now().getTime() / 1000);
+        var unixtime:Int = Std.int(UnixTimestamp.now().toUnixSeconds());
         return macro $v{unixtime};
     }
 }

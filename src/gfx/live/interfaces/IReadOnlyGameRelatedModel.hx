@@ -1,5 +1,6 @@
 package gfx.live.interfaces;
 
+import net.shared.utils.UnixTimestamp;
 import gfx.live.interfaces.IReadOnlySpectationModel;
 import net.shared.board.Situation;
 import net.shared.Outcome;
@@ -23,11 +24,10 @@ interface IReadOnlyGameRelatedModel extends IReadOnlyGenericModel
     public function getELO(color:PieceColor):EloValue;
     public function hasEnded():Bool;
     public function getOutcome():Outcome;
-    public function getDateTime():Date;
+    public function getStartTimestamp():UnixTimestamp;
     public function getHistory():IReadOnlyHistory;
     public function isOutgoingOfferActive(color:PieceColor, kind:OfferKind):Bool;
-    public function getTimeReservesData():TimeReservesData;
-    public function getMsRemainders():IReadOnlyMsRemainders;
+    public function getMsRemainders():Null<IReadOnlyMsRemainders>;
     public function getActiveTimerColor():PieceColor;
     public function getChatHistory():Array<ChatEntry>;
     public function isPlayerOnline(color:PieceColor):Bool;

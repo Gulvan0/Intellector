@@ -1,7 +1,6 @@
 package gfx.live.models;
 
-import gfx.live.interfaces.IReadOnlyGenericModel;
-import gfx.live.interfaces.IReadOnlyGameRelatedModel;
+import net.shared.utils.UnixTimestamp;
 import gfx.live.interfaces.IReadOnlySpectationModel;
 import net.shared.board.Situation;
 import net.shared.Outcome;
@@ -11,7 +10,6 @@ import utils.TimeControl;
 import net.shared.utils.PlayerRef;
 import gfx.live.interfaces.IReadOnlyMsRemainders;
 import gfx.live.struct.MsRemaindersData;
-import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.live.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
@@ -23,14 +21,13 @@ class SpectationModel implements IReadOnlySpectationModel
     public var playerRefs:Map<PieceColor, PlayerRef>;
     public var elo:Null<Map<PieceColor, EloValue>>;
     public var outcome:Null<Outcome>;
-    public var datetime:Null<Date>;
+    public var startTimestamp:Null<UnixTimestamp>;
     
     public var orientation:PieceColor;
     public var history:History;
     public var shownMovePointer:Int;
     public var outgoingOfferActive:Map<PieceColor, Map<OfferKind, Bool>>;
-    public var timeData:TimeReservesData;
-    public var perMoveTimeRemaindersData:MsRemaindersData;
+    public var perMoveTimeRemaindersData:Null<MsRemaindersData>;
     public var activeTimerColor:Null<PieceColor>;
     public var boardInteractivityMode:InteractivityMode;
 
@@ -73,9 +70,9 @@ class SpectationModel implements IReadOnlySpectationModel
         return outcome;
     }
 
-    public function getDateTime():Date
+    public function getStartTimestamp():UnixTimestamp
     {
-        return datetime;
+        return startTimestamp;
     }
 
     public function getOrientation():PieceColor
@@ -103,12 +100,7 @@ class SpectationModel implements IReadOnlySpectationModel
         return outgoingOfferActive[color][kind];
     }
 
-    public function getTimeReservesData():TimeReservesData
-    {
-        return timeData.copy();
-    }
-
-    public function getMsRemainders():IReadOnlyMsRemainders
+    public function getMsRemainders():Null<IReadOnlyMsRemainders>
     {
         return perMoveTimeRemaindersData;
     }
