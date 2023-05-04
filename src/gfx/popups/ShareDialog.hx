@@ -21,9 +21,9 @@ import haxe.ui.containers.dialogs.Dialog;
 import dict.Dictionary;
 import net.shared.board.Situation;
 import net.shared.utils.MathUtils;
-import gfx.live.board.util.BoardSize;
-import gfx.live.board.Board;
-import gfx.live.board.GameBoard;
+import gfx.game.board.util.BoardSize;
+import gfx.game.board.Board;
+import gfx.game.board.GameBoard;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/share_dialog.xml"))
 class ShareDialog extends Dialog 

@@ -12,7 +12,7 @@ abstract Variation(VariationNode)
 {
     public function collectNodes(includeRoot:Bool):VariationMap<VariationNode>
     {
-        return this.collectDescendants([], includeRoot);
+        return rootNode().collectDescendants(includeRoot);
     }
     
     public function collectNodesAlongsidePath(path:VariationPath, includeStartingNode:Bool, ?startingNodePath:VariationPath):Array<VariationNode>
@@ -120,10 +120,10 @@ abstract Variation(VariationNode)
         return output;
     }
 
-    public function clear(?newStartingSituation:Situation)
+    public inline function clear(?newStartingSituation:Situation)
     {
         if (newStartingSituation == null)
-            newStartingSituation = startingSituation;
+            newStartingSituation = rootNode().situation;
 
         this = new VariationNode([], null, newStartingSituation, null);
     }
@@ -155,7 +155,7 @@ abstract Variation(VariationNode)
     public static function deserialize(str:String):Variation
     {
         var serializableVariation:SerializableVariation = Unserializer.run(str);
-        var variation:Variation = new Variation(serializableVariation.startingSIP);
+        var variation:Variation = new Variation(Situation.deserialize(serializableVariation.startingSIP));
 
         for (nodeData in serializableVariation.orderedPlys)
             variation.addChild(VariationPath.deserialize(nodeData.serializedParentPath), RawPly.deserialize(nodeData.serializedPly));

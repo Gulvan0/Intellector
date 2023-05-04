@@ -3,7 +3,7 @@ package tests.ui.utils.components;
 import gfx.Dialogs;
 import haxe.ui.core.Screen;
 import haxe.exceptions.NotImplementedException;
-import gfx.live.board.SelectableBoard;
+import gfx.game.board.SelectableBoard;
 import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;
 import haxe.ui.components.Button;

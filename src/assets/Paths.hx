@@ -1,6 +1,6 @@
 package assets;
 
-import gfx.live.analysis.util.PosEditMode;
+import gfx.game.analysis.util.PosEditMode;
 import gfx.menubar.ChallengesIconMode;
 import net.shared.TimeControlType;
 import net.shared.PieceColor;

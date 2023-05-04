@@ -25,11 +25,11 @@ class Rules
         }
     }
     
-    public static function getPossibleDestinations(departure:HexCoords, pieceArrangement:PieceArrangement, ?excludeDefensorCastling:Bool = false):Array<HexCoords> 
+    public static function getPossibleDestinations(departure:HexCoords, hexRetriever:HexCoords->Hex, ?excludeDefensorCastling:Bool = false):Array<HexCoords> 
     {
         var possibleDestinations:Array<HexCoords> = [];
 
-        var departureHex:Hex = pieceArrangement.get(departure);
+        var departureHex:Hex = hexRetriever(departure);
         var allowedMovements:Map<MovementPattern, Array<Direction>> = getAllowedMovements(departureHex);
 
         for (pattern => directions in allowedMovements)
@@ -38,11 +38,11 @@ class Rules
                 {
                     case SimpleJump(distance):
                         var destination:HexCoords = departure.step(dir, distance);
-                        if (destination.isValid() && pieceArrangement.get(destination).color() != departureHex.color()) //Empty or occupied by enemy
+                        if (destination.isValid() && hexRetriever(destination).color() != departureHex.color()) //Empty or occupied by enemy
                             possibleDestinations.push(destination);
                     case NonCapturingJump(distance):
                         var destination:HexCoords = departure.step(dir, distance);
-                        if (destination.isValid() && pieceArrangement.get(destination).match(Empty))
+                        if (destination.isValid() && hexRetriever(destination).match(Empty))
                             possibleDestinations.push(destination);
                     case NormalSlide:
                         var destination:HexCoords = departure;
@@ -54,7 +54,7 @@ class Rules
                             if (!destination.isValid())
                                 break;
 
-                            var hexColor:Null<PieceColor> = pieceArrangement.get(destination).color();
+                            var hexColor:Null<PieceColor> = hexRetriever(destination).color();
                             if (hexColor == departureHex.color())
                                 proceed = false;
                             else if (hexColor == null)
@@ -70,7 +70,7 @@ class Rules
                         if (!destination.isValid())
                             continue;
 
-                        var destinationHex:Hex = pieceArrangement.get(destination);
+                        var destinationHex:Hex = hexRetriever(destination);
                         var desiredHex:Hex = Occupied(new PieceData(partner, departureHex.color()));
                         if (destinationHex.equals(desiredHex))
                             possibleDestinations.push(destination);

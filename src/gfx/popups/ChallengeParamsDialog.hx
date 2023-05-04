@@ -7,7 +7,7 @@ import haxe.ui.locale.LocaleManager;
 import haxe.ui.components.Image;
 import haxe.Timer;
 import haxe.ui.components.Button;
-import gfx.live.board.Board;
+import gfx.game.board.Board;
 import haxe.ui.events.UIEvent;
 import assets.Paths;
 import net.shared.PieceColor;

@@ -1,6 +1,6 @@
 package;
 
-import gfx.live.board.util.Marking;
+import gfx.game.board.util.Marking;
 import utils.StringUtils;
 import js.Cookie;
 import dict.Language;

@@ -1,7 +1,7 @@
 package gfx.utils;
 
 import haxe.ui.util.Color;
-import gfx.live.board.util.HexagonLayer;
+import gfx.game.board.util.HexagonLayer;
 
 class Colors
 {

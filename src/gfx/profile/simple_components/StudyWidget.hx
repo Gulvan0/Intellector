@@ -2,7 +2,7 @@ package gfx.profile.simple_components;
 
 import haxe.ui.containers.Box;
 import net.shared.dataobj.StudyInfo;
-import gfx.live.board.Board;
+import gfx.game.board.Board;
 import gfx.profile.complex_components.StudyTagList;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;

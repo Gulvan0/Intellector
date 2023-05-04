@@ -1,6 +1,6 @@
 package gfx.common;
 
-import gfx.live.board.Board;
+import gfx.game.board.Board;
 import haxe.ui.containers.Box;
 import net.shared.dataobj.GameInfo;
 import net.shared.board.Situation;
