@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import haxe.ui.events.UIEvent;
 import net.shared.utils.UnixTimestamp;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
@@ -24,7 +25,7 @@ import haxe.ui.macros.ComponentMacros;
 using gfx.game.models.CommonModelExtractors;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/clock.xml"))
-class Clock extends Card implements IGameComponent
+class Clock extends Box implements IGameComponent
 {
     private var playSoundOnOneMinuteLeft:Bool;
     private var alertsEnabled:Bool;
@@ -48,20 +49,20 @@ class Clock extends Card implements IGameComponent
 
         if (gameModel.hasEnded())
         {
-            this.active = false;
+            active = false;
             setTimeToAmountLeftWhenEnded(gameModel.getMsRemainders());
         }
         else
         {
-            this.active = true;
+            active = true;
 
             var timeControl = gameModel.getTimeControl();
 
             if (timeControl == null || timeControl.isCorrespondence())
                 throw "Cannot create clock: no allowed time control present";
 
-            this.playSoundOnOneMinuteLeft = timeControl.startSecs >= 90;
-            this.alertsEnabled = gameModel.getPlayerColor() == ownerColor;
+            playSoundOnOneMinuteLeft = timeControl.startSecs >= 90;
+            alertsEnabled = gameModel.getPlayerColor() == ownerColor;
 
             onActiveTimerColorUpdated(gameModel.getActiveTimerColor());
             var secsLeftData = gameModel.getActualSecsLeft(ownerColor);
@@ -132,20 +133,21 @@ class Clock extends Card implements IGameComponent
         return this;
     }
 
-    public function resize(newHeight:Float)
+    @:bind(this, UIEvent.RESIZE)
+    private function onResize(e)
     {
-        var unit:Float = newHeight / 11;
+        var unit:Float = this.height / 11;
 
         var newLabelStyle = label.customStyle.clone();
         newLabelStyle.fontSize = 9.6 * unit;
         label.customStyle = newLabelStyle;
 
-        var newCardStyle = this.customStyle.clone();
+        var newCardStyle = card.customStyle.clone();
         newCardStyle.paddingTop = unit;
         newCardStyle.paddingBottom = unit;
         newCardStyle.paddingLeft = 4 * unit;
         newCardStyle.paddingRight = 4 * unit;
-        this.customStyle = newCardStyle;
+        card.customStyle = newCardStyle;
     }
 
     public function setTimeManually(secondsLeft:Float)
@@ -187,9 +189,9 @@ class Clock extends Card implements IGameComponent
         newLabelStyle.color = textColor;
         label.customStyle = newLabelStyle;
 
-        var newCardStyle = this.customStyle.clone();
+        var newCardStyle = card.customStyle.clone();
         newCardStyle.backgroundColor = backgroundColor;
-        this.customStyle = newCardStyle;
+        card.customStyle = newCardStyle;
     }
 
     private function updateTimeLeft() 

@@ -1,3 +1,5 @@
-<card horizontalAlign="center" style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:20px;padding-right:20px">
-    <label id="label" text="00:00" verticalAlign="center" horizontalAlign="center" style="font-size:48px" />
-</card>
+<box>
+    <card id="card" verticalAlign="center" horizontalAlign="center" style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:20px;padding-right:20px">
+        <label id="label" text="00:00" verticalAlign="center" horizontalAlign="center" style="font-size:48px" />
+    </card>
+</box>

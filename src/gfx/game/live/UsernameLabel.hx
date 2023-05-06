@@ -1,4 +1,4 @@
-package game.live;
+package gfx.game.live;
 
 import haxe.ui.styles.Style;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
@@ -7,14 +7,14 @@ import gfx.game.events.ModelUpdateEvent;
 import gfx.game.interfaces.IGameScreen;
 import gfx.game.models.ReadOnlyModel;
 import gfx.game.interfaces.IGameComponent;
-import haxe.ui.containers.Card;
+import haxe.ui.containers.Box;
 import net.shared.PieceColor;
 import haxe.ui.events.UIEvent;
 
 using gfx.game.models.CommonModelExtractors;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/username_label.xml"))
-class UsernameLabel extends Card implements IGameComponent
+class UsernameLabel extends Box implements IGameComponent
 {
     private var ownerColor:PieceColor;
 

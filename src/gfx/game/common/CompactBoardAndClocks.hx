@@ -1,5 +1,10 @@
 package gfx.game.common;
 
+import gfx.basic_components.Spacers;
+import haxe.ui.containers.HBox;
+import gfx.game.live.UsernameLabel;
+import gfx.game.live.Clock;
+import gfx.game.board.util.BoardSize;
 import gfx.game.interfaces.IGameComponent;
 import GlobalBroadcaster.GlobalEvent;
 import gfx.game.board.GameBoard;
@@ -16,45 +21,81 @@ import haxe.ui.core.Component;
 using gfx.game.models.CommonModelExtractors;
 
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/compact_board_and_clocks.xml"))
-class CompactBoardAndClocks extends VBox implements IGameComponent
+class CompactBoardAndClocks extends GameComponentLayout
 {
-    private var orientation:PieceColor = White;
-
-    public var board:GameBoardWrapper;
+    private var board:GameBoardWrapper;
+    private var usernameLabels:Map<PieceColor, UsernameLabel> = [];
+    private var clocks:Map<PieceColor, Clock> = [];
 
     public function new() 
     {
         super();
-        this.board = new GameBoardWrapper();
+
+        board = new GameBoardWrapper();
         board.percentWidth = 100;
         board.percentHeight = 100;
         content.addComponent(board);
 
-        whiteClock.resize(30);
-        blackClock.resize(30);
+        for (color in PieceColor.createAll())
+        {
+            var usernameLabel:UsernameLabel = new UsernameLabel(color);
+            usernameLabel.percentHeight = 100;
+            usernameLabel.verticalAlign = 'center';
+            usernameLabels.set(color, usernameLabel);
+
+            var clock:Clock = new Clock(color);
+            clock.percentHeight = 100;
+            clock.verticalAlign = 'center';
+            clocks.set(color, clock);
+
+            var compContainer:HBox = color == White? whiteDetailsBox : blackDetailsBox;
+            compContainer.addComponent(usernameLabel);
+            compContainer.addComponent(Spacers.fullWidth());
+            compContainer.addComponent(clock);
+        }
     }
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
+    private function getChildGameComponents():Array<IGameComponent>
+    {
+        var a:Array<IGameComponent> = [board];
+
+        for (label in usernameLabels)
+            a.push(label);
+
+        for (clock in clocks)
+            a.push(clock);
+
+        return a;
+    }
+
+    private override function afterChildrenInitialized(model:ReadOnlyModel, gameScreen:IGameScreen)
     {
         GlobalBroadcaster.addObserver(this);
     }
     
-    public function destroy()
+    private override function destroyLayout()
     {
         GlobalBroadcaster.removeObserver(this);
     }
 
-    public function asComponent():Component
-    {
-        return this;
-    }
-
-    public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent)
+    private override function beforeUpdateProcessedByChildren(model:ReadOnlyModel, event:ModelUpdateEvent)
     {
         switch event
         {
             case OrientationUpdated:
-                setOrientation(model.getOrientation());
+                headerContainer.removeAllComponents(false);
+                footerContatiner.removeAllComponents(false);
+
+                if (model.getOrientation() == White)
+                {
+                    headerContainer.addComponent(blackDetailsBox);
+                    footerContatiner.addComponent(whiteDetailsBox);
+                }
+                else
+                {
+                    headerContainer.addComponent(whiteDetailsBox);
+                    footerContatiner.addComponent(blackDetailsBox);
+                }
             default:
         }
     }
@@ -64,48 +105,28 @@ class CompactBoardAndClocks extends VBox implements IGameComponent
         switch event 
         {
             case PreferenceUpdated(Marking):
-                Timer.delay(doLayout, 40);
+                var lettersEnabled:Bool = Preferences.marking.get().match(Side | Over);
+                doLayout(BoardSize.inverseAspectRatio(lettersEnabled));
             default:
         }
     }
 
-    @:bind(container, UIEvent.RESIZE)
-    private function onContainerResize(_) 
+    @:bind(this, UIEvent.RESIZE)
+    private function onResized(e) 
     {
         doLayout();
     }
 
-    private function setOrientation(newOrientation:PieceColor)
+    private function doLayout(?inverseAspectRatio:Float) 
     {
-        if (orientation == newOrientation)
-            return;
-
-        switch orientation 
-        {
-            case White:
-                headerContainer.removeComponent(blackDetailsBox, false);
-                footerContatiner.removeComponent(whiteDetailsBox, false);
-                headerContainer.addComponent(whiteDetailsBox);
-                footerContatiner.addComponent(blackDetailsBox);
-            case Black:
-                headerContainer.removeComponent(whiteDetailsBox, false);
-                footerContatiner.removeComponent(blackDetailsBox, false);
-                headerContainer.addComponent(blackDetailsBox);
-                footerContatiner.addComponent(whiteDetailsBox);
-        }
-
-        orientation = newOrientation;
-    }
-
-    private function doLayout() 
-    {
-        var aspectRatio:Float = board.inverseAspectRatio();
+        if (inverseAspectRatio == null)
+            inverseAspectRatio = board.inverseAspectRatio();
 
         var containerWidth:Float = container.width - 2; // account for padding
         var containerHeight:Float = container.height - 2 - 60; // account for padding, header, footer
 
         var proposedWidth:Float = containerWidth;
-        var proposedHeight:Float = proposedWidth * aspectRatio;
+        var proposedHeight:Float = proposedWidth * inverseAspectRatio;
 
         contentContainer.width = containerWidth;
 
@@ -116,7 +137,7 @@ class CompactBoardAndClocks extends VBox implements IGameComponent
         }
         else 
         {
-            content.width = containerHeight / aspectRatio;
+            content.width = containerHeight / inverseAspectRatio;
             content.height = containerHeight;
         }
     }
