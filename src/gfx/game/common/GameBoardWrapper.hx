@@ -1,5 +1,8 @@
 package gfx.game.common;
 
+import gfx.game.events.ModelUpdateEvent;
+import gfx.game.interfaces.IGameScreen;
+import gfx.game.models.ReadOnlyModel;
 import haxe.ui.core.Component;
 import gfx.game.board.GameBoard;
 import gfx.game.interfaces.IGameComponent;

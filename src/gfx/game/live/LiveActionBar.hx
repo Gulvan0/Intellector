@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import net.shared.PieceColor.opposite;
 import gfx.game.common.action_bar.ActionButton;
 import GlobalBroadcaster.IGlobalEventObserver;
 import GlobalBroadcaster.GlobalEvent;
@@ -30,19 +31,19 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
                 var activeDrawOfferButton:ActionButton = OfferDraw;
                 var activeTakebackOfferButton:ActionButton = OfferTakeback;
 
-                if (model.isOfferActive(Draw, Outgoing))
+                if (model.isOutgoingOfferActive(gameModel.getPlayerColor(), Draw))
                     activeDrawOfferButton = CancelDraw;
 
-                if (model.isOfferActive(Takeback, Outgoing))
+                if (model.isOutgoingOfferActive(gameModel.getPlayerColor(), Takeback))
                     activeTakebackOfferButton = CancelTakeback;
 
-                if (model.isOfferActive(Draw, Incoming))
+                if (model.isOutgoingOfferActive(opposite(gameModel.getPlayerColor()), Draw))
                 {
                     setBtnDisabled(OfferDraw, true);
                     displayRequestBox(Draw);
                 }
 
-                if (model.isOfferActive(Takeback, Incoming))
+                if (model.isOutgoingOfferActive(opposite(gameModel.getPlayerColor()), Takeback))
                 {
                     setBtnDisabled(OfferTakeback, true);
                     displayRequestBox(Takeback);
@@ -172,7 +173,7 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
         if (!LoginManager.isLogged())
         {
             setBtnDisabled(Rematch, true);
-            setBtnDisabled(PlayFromPos, true);
+            setBtnDisabled(PlayFromHere, true);
         }
 
         if (gameModel.getTimeControl().isCorrespondence())
@@ -191,19 +192,18 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
             case GameEnded:
                 if (compact)
                 {
-                    buttonSets = [
+                    updateButtonSets([
                         [ChangeOrientation, Rematch, PlayFromHere, Analyze, PrevMove, NextMove],
                         [OpenChat, OpenGameInfo, OpenSpecialControlSettings, Share]
-                    ];
+                    ]);
                 }
                 else
                 {
-                    buttonSets = [
+                    updateButtonSets([
                         [ChangeOrientation, Rematch, PlayFromHere, Analyze, Share]
-                    ];
+                    ]);
                 }
                 
-                updateButtonSets(buttonSets);
                 hideRequestBox(Draw);
                 hideRequestBox(Takeback);
             case OfferStateUpdated(kind, Incoming, active):
@@ -236,9 +236,10 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
         switch event 
         {
             case LoggedIn:
-                setBtnDisabled(PlayFromPos, false);
+                setBtnDisabled(PlayFromHere, false);
             case LoggedOut:
-                setBtnDisabled(PlayFromPos, true);
+                setBtnDisabled(PlayFromHere, true);
+            default:
         }
     }
 

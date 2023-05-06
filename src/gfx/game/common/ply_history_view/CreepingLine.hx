@@ -1,5 +1,8 @@
 package gfx.game.common.ply_history_view;
 
+import haxe.ui.core.Component;
+import net.shared.board.Situation;
+import net.shared.board.RawPly;
 import net.shared.converters.Notation;
 import net.shared.utils.MathUtils;
 import haxe.Timer;
@@ -82,6 +85,11 @@ class CreepingLine extends PlyHistoryView
         var newScrollPos = MathUtils.clamp((card.left + card.width / 2 - runwaySV.width / 2) / (lineBox.width - runwaySV.width), 0, 1);
         scrollTo(newScrollPos);
     }
+
+	public function asComponent():Component 
+    {
+		return this;
+	}
 
     public function new() 
     {

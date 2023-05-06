@@ -70,6 +70,7 @@ class CompactBoardAndClocks extends GameComponentLayout
 
     private override function afterChildrenInitialized(model:ReadOnlyModel, gameScreen:IGameScreen)
     {
+        setOrientation(model.asGenericModel().getOrientation());
         GlobalBroadcaster.addObserver(this);
     }
     
@@ -83,20 +84,25 @@ class CompactBoardAndClocks extends GameComponentLayout
         switch event
         {
             case OrientationUpdated:
-                headerContainer.removeAllComponents(false);
-                footerContatiner.removeAllComponents(false);
-
-                if (model.getOrientation() == White)
-                {
-                    headerContainer.addComponent(blackDetailsBox);
-                    footerContatiner.addComponent(whiteDetailsBox);
-                }
-                else
-                {
-                    headerContainer.addComponent(whiteDetailsBox);
-                    footerContatiner.addComponent(blackDetailsBox);
-                }
+                setOrientation(model.asGenericModel().getOrientation());
             default:
+        }
+    }
+
+    private function setOrientation(orientation:PieceColor)
+    {
+        headerContainer.removeAllComponents(false);
+        footerContatiner.removeAllComponents(false);
+
+        if (orientation == White)
+        {
+            headerContainer.addComponent(blackDetailsBox);
+            footerContatiner.addComponent(whiteDetailsBox);
+        }
+        else
+        {
+            headerContainer.addComponent(whiteDetailsBox);
+            footerContatiner.addComponent(blackDetailsBox);
         }
     }
 

@@ -1,5 +1,6 @@
 package gfx.game.common.action_bar;
 
+import gfx.game.common.action_bar.ActionButton.ActionButtonInternal;
 import dict.Dictionary;
 import js.Browser;
 import dict.Phrase;
@@ -11,7 +12,7 @@ class ActionButtons extends HorizontalButtonBar
 {
     private static inline final BUTTON_HEIGHT:Float = 36;
 
-    public var btnPressHandler:ActionBtn->Void;
+    public var btnPressHandler:ActionButton->Void;
 
     private var buttonMap:Map<ActionButtonInternal, Button> = [];
     private var buttonDisabled:Map<ActionButtonInternal, Bool> = [for (btn in ActionButtonInternal.createAll()) btn => false];
@@ -23,7 +24,7 @@ class ActionButtons extends HorizontalButtonBar
         
         for (button in buttons)
         {
-            var buttonComponent:Button = constructButtonComponent(button);
+            var buttonComponent:Button = constructButtonComponent(button, 100 / buttons.length);
             addComponent(buttonComponent);
             buttonMap.set(button, buttonComponent);
         }
@@ -31,8 +32,8 @@ class ActionButtons extends HorizontalButtonBar
 
     public function replaceButton(oldBtn:ActionButton, newBtn:ActionButton)
     {
-        var newBtnComponent:Button = constructButtonComponent(newBtn);
         var oldBtnComponent:Button = buttonMap.get(oldBtn);
+        var newBtnComponent:Button = constructButtonComponent(newBtn, oldBtnComponent.percentWidth);
 
         var index:Int = getComponentIndex(oldBtnComponent);
 

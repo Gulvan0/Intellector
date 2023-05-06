@@ -106,6 +106,7 @@ abstract class PlyHistoryView extends VBox implements IGameComponent
                     default:
                         throw "EditorActivenessUpdated can only be emitted by AnalysisBoard";
                 }
+            default:
         }
     }
 

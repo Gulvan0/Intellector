@@ -3,7 +3,7 @@
         <resource path="assets" prefix="assets" />
     </resources>
     <components>
-        <component class="gfx.game.common.MoveCellRenderer" alias="move-cell-renderer" />
+        <component class="gfx.game.common.ply_history_view.MoveCellRenderer" alias="move-cell-renderer" />
         <component class="gfx.game.ShareGameTab" alias="sharegametab" />
         <component class="gfx.main.ChallengeModeRenderer" alias="challengemoderenderer" />
         <component class="gfx.main.TimeControlRenderer" alias="timecontrolrenderer" />

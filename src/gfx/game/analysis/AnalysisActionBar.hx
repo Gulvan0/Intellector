@@ -1,5 +1,6 @@
 package gfx.game.analysis;
 
+import haxe.ui.core.Component;
 import GlobalBroadcaster.GlobalEvent;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.interfaces.IGameScreen;
@@ -15,12 +16,12 @@ class AnalysisActionBar extends ActionBar implements IGameComponent implements I
     public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void
     {
         if (compact)
-            updateButtonSets([[ChangeOrientation, EditPosition, Share, PlayFromPos, PrevMove, NextMove]]);
+            updateButtonSets([[ChangeOrientation, EditPosition, Share, PlayFromHere, PrevMove, NextMove]]);
         else
-            updateButtonSets([[ChangeOrientation, EditPosition, Share, PlayFromPos]]);
+            updateButtonSets([[ChangeOrientation, EditPosition, Share, PlayFromHere]]);
 
         if (!LoginManager.isLogged())
-            setBtnDisabled(PlayFromPos, true);
+            setBtnDisabled(PlayFromHere, true);
 
         eventHandler = gameScreen.handleActionBarEvent;
         GlobalBroadcaster.addObserver(this);
@@ -36,20 +37,15 @@ class AnalysisActionBar extends ActionBar implements IGameComponent implements I
         GlobalBroadcaster.removeObserver(this);
     }
 
-    public function asComponent():Component
-    {
-        return this;
-    }
-
-
     public function handleGlobalEvent(event:GlobalEvent)
     {
         switch event 
         {
             case LoggedIn:
-                setBtnDisabled(PlayFromPos, false);
+                setBtnDisabled(PlayFromHere, false);
             case LoggedOut:
-                setBtnDisabled(PlayFromPos, true);
+                setBtnDisabled(PlayFromHere, true);
+            default:
         }
     }
 

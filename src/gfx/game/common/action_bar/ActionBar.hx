@@ -1,5 +1,6 @@
 package gfx.game.common.action_bar;
 
+import haxe.ui.core.Component;
 import gfx.basic_components.Gallery;
 import dict.Phrase;
 import gfx.game.events.ActionBarEvent;

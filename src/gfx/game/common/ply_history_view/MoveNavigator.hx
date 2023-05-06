@@ -1,5 +1,6 @@
 package gfx.game.common.ply_history_view;
 
+import haxe.ui.core.Component;
 import net.shared.board.Situation;
 import net.shared.converters.Notation;
 import net.shared.board.RawPly;
@@ -59,17 +60,17 @@ class MoveNavigator extends PlyHistoryView
 
     private function postInit()
     {
-        homeBtn.onClick = onScrollRequested.bind(Home);
-        prevBtn.onClick = onScrollRequested.bind(Prev);
-        nextBtn.onClick = onScrollRequested.bind(Next);
-        endBtn.onClick = onScrollRequested.bind(End);
+        homeBtn.onClick = e -> {onScrollRequested(Home);};
+        prevBtn.onClick = e -> {onScrollRequested(Prev);};
+        nextBtn.onClick = e -> {onScrollRequested(Next);};
+        endBtn.onClick = e -> {onScrollRequested(End);};
     }
 
     private function appendPlyStr(moveNum:Int, ply:RawPly, situationBefore:Situation)
     {
         var plyStr:String = Notation.plyToNotation(ply, situationBefore, false, null);
 
-        if (lastPlyInfo.situationBefore.turnColor == White)
+        if (situationBefore.turnColor == White)
         {
             var whiteData = {plyStr: plyStr, selected: false, onMoveSelected: onPlySelectedManually.bind(moveNum)};
             var blackData = {plyStr: "", selected: false, onMoveSelected: onPlySelectedManually.bind(moveNum + 1)};
@@ -105,7 +106,7 @@ class MoveNavigator extends PlyHistoryView
     private function onShownMoveUpdated()
     {
         if (selectedMoveNum > 0)
-            setMoveBold(shownMove, false);
+            setMoveBold(selectedMoveNum, false);
 
         selectedMoveNum = genericModel.getShownMovePointer();
 
@@ -151,11 +152,16 @@ class MoveNavigator extends PlyHistoryView
         var neededRowCenterY:Float = neededRowIndex * rowHeight + rowHeight / 2;
         var relPos:Float = MathUtils.clamp((neededRowCenterY - windowHeight / 2) / (totalHeight - windowHeight), 0, 1);
         scrollTo(relPos);
-    }
+    } 
+
+	public function asComponent():Component 
+    {
+		return this;
+	}
     
     public function new()
     {
         super();
         movetable.selectionMode = SelectionMode.DISABLED;
-    }   
+    }  
 }
