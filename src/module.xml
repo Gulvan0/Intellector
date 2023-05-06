@@ -3,17 +3,8 @@
         <resource path="assets" prefix="assets" />
     </resources>
     <components>
-        <component class="gfx.common.MoveNavigator" alias="movenavigator" />
-        <component class="gfx.common.CreepingLine" alias="creepingline" />
-        <component class="gfx.common.GameWidget" alias="gamewidget" />
-        <component class="gfx.common.MoveCellRenderer" alias="movecellrenderer" />
-        <component class="gfx.game.Clock" alias="clock" />
-        <component class="gfx.game.GameActionBar" alias="gameactionbar" />
-        <component class="gfx.game.GameInfoBox" alias="gameinfobox" />
-        <component class="gfx.game.Chatbox" alias="chatbox" />
-        <component class="gfx.game.BotChat" alias="botchat" />
+        <component class="gfx.game.common.MoveCellRenderer" alias="move-cell-renderer" />
         <component class="gfx.game.ShareGameTab" alias="sharegametab" />
-        <component class="gfx.analysis.AnalysisActionBar" alias="analysisactionbar" />
         <component class="gfx.main.ChallengeModeRenderer" alias="challengemoderenderer" />
         <component class="gfx.main.TimeControlRenderer" alias="timecontrolrenderer" />
         <component class="gfx.main.OpenChallengesTable" alias="openchallengestable" />
