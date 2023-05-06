@@ -1,10 +1,12 @@
 package gfx.game.interfaces;
 
+import net.shared.variation.Variation;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
 
 interface IReadOnlyHistory 
 {
+    public function getShownSituationByPointer(pointer:Int):Situation;
     public function getSituationBeforePly(plyNum:Int):Situation;
     public function getSituationAfterPly(plyNum:Int):Situation;
     public function getPly(plyNum:Int):RawPly;
@@ -13,4 +15,5 @@ interface IReadOnlyHistory
     public function getMostRecentSituation():Situation;
     public function getMoveCount():Int;
     public function getLine():Array<{ply:RawPly, situationAfter:Situation}>;
+    public function asVariation():Variation;
 }

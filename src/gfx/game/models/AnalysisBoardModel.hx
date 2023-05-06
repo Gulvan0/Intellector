@@ -1,5 +1,8 @@
 package gfx.game.models;
 
+import net.shared.board.Rules;
+import net.shared.board.Hex;
+import net.shared.board.HexCoords;
 import net.shared.dataobj.StudyInfo;
 import gfx.game.analysis.util.PosEditMode;
 import gfx.game.interfaces.IReadOnlyAnalysisBoardModel;
@@ -104,6 +107,38 @@ class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
     public function getLine():Array<{ply:RawPly, situationAfter:Situation}>
     {
         return getVariation().getFullMainline(false, getSelectedBranch()).map(x -> {ply: x.getIncomingPly(), situationAfter: x.getSituation()});
+    }
+
+    public function deriveInteractivityModeFromOtherParams()
+    {
+        var shownSituation:Situation = getShownSituation();
+
+        switch editorMode 
+        {
+            case null:
+                var allowedDestinationsRetriever:HexCoords->Array<HexCoords> = (departureCoords:HexCoords) -> {
+                    var departureHex:Hex = shownSituation.get(departureCoords);
+                    if (departureHex.color() != shownSituation.turnColor)
+                        return [];
+                    else
+                        return Rules.getPossibleDestinations(departureCoords, shownSituation.get, false);
+                };
+                boardInteractivityMode = PlySelection(allowedDestinationsRetriever);
+            case Move:
+                var canBeMoved:HexCoords->Bool = (departureCoords:HexCoords) -> {
+                    var departureHex:Hex = shownSituation.get(departureCoords);
+                    return !departureHex.isEmpty();
+                };
+                boardInteractivityMode = FreeMove(canBeMoved);
+            case Delete:
+                var isSelectable:HexCoords->Bool = (departureCoords:HexCoords) -> {
+                    var departureHex:Hex = shownSituation.get(departureCoords);
+                    return !departureHex.isEmpty();
+                };
+                boardInteractivityMode = HexSelection(isSelectable);
+            case Set(type, color):
+                boardInteractivityMode = HexSelection(x -> true);
+        }
     }
 
     public function new()

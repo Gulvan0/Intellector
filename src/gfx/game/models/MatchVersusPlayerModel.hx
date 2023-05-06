@@ -1,5 +1,8 @@
 package gfx.game.models;
 
+import net.shared.board.Hex;
+import net.shared.board.HexCoords;
+import net.shared.board.Rules;
 import net.shared.utils.UnixTimestamp;
 import gfx.game.interfaces.IReadOnlyGenericModel;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
@@ -186,6 +189,25 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
     {
 		return getHistory().getMostRecentSituation();
 	}
+
+    public function deriveInteractivityModeFromOtherParams()
+    {
+        var shownSituation:Situation = getShownSituation();
+
+        if (!hasEnded() && (getPlayerColor() == shownSituation.turnColor || Preferences.premoveEnabled.get()))
+        {
+            var allowedDestinationsRetriever:HexCoords->Array<HexCoords> = (departureCoords:HexCoords) -> {
+                var departureHex:Hex = shownSituation.get(departureCoords);
+                if (departureHex.color() != shownSituation.turnColor)
+                    return [];
+                else
+                    return Rules.getPossibleDestinations(departureCoords, shownSituation.get, false);
+            };
+            boardInteractivityMode = PlySelection(allowedDestinationsRetriever);
+        }
+        else
+            boardInteractivityMode = NotInteractive;
+    }
 
     public function new()
     {

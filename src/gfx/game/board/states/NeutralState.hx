@@ -6,6 +6,8 @@ import gfx.game.events.GameboardEvent;
 import haxe.ui.events.MouseEvent;
 import net.shared.board.HexCoords;
 
+using Lambda;
+
 class NeutralState implements IState 
 {
 	private var boardInstance:GameBoard;
@@ -13,19 +15,7 @@ class NeutralState implements IState
 
     public function onEntered() 
     {
-        var hexRetriever:HexCoords->Hex = boardInstance.globalStateRef.getShownSituation().get;
-
-        var hoverNeeded:Bool = switch boardInstance.mode 
-        {
-            case MoveSelection(controllablePieces, _):
-                cursorLocation != null && controllablePieces.contains(hexRetriever(cursorLocation).color());
-            case HexSelection(selectabilityChecker):
-                cursorLocation != null && selectabilityChecker(cursorLocation, hexRetriever);
-            case NotInteractive: 
-                false;
-        }
-
-        if (hoverNeeded)
+        if (isHoverNeeded(cursorLocation))
             boardInstance.showHexLayer(cursorLocation, Hover);
         else
             boardInstance.hideLayerForEveryHex(Hover);
@@ -38,37 +28,38 @@ class NeutralState implements IState
 
 	public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
-        var hexRetriever:HexCoords->Hex = boardInstance.globalStateRef.getShownSituation().get;
-
-        var hexUnderCursor:Hex = Empty;
-        if (location != null)
-            hexUnderCursor = hexRetriever(location);
-
-        boardInstance.eventHandler(LMBPressed(hexUnderCursor));
+        boardInstance.eventHandler(LMBPressed(location));
 
         if (location == null)
             return;
 
         switch boardInstance.mode 
         {
-            case MoveSelection(controllablePieces, allowedDestinations):
-                var isControllable:Bool = controllablePieces.contains(hexUnderCursor.color());
-                if (isControllable)
+            case PlySelection(getAllowedDestinations):
+                var allowedDestinations:Array<HexCoords> = getAllowedDestinations(location);
+                if (!allowedDestinations.empty())
                 {
                     boardInstance.showHexLayer(location, SelectedForMove);
 
-                    if (allowedDestinations != null)
-                        for (markerLocation in allowedDestinations(location, hexRetriever))
-                            boardInstance.addMarker(markerLocation);
+                    for (markerLocation in allowedDestinations)
+                        boardInstance.addMarker(markerLocation);
 
                     var dragStartScreenCoords:Point = new Point(originalEvent.screenX, originalEvent.screenY);
-                    var isDestinationAllowed = dest -> allowedDestinations(location, hexRetriever).contains(dest);
+                    var isDestinationAllowed = dest -> allowedDestinations.exists(x -> x.equals(dest));
                     boardInstance.state = new DraggingState(boardInstance, cursorLocation, location, dragStartScreenCoords, isDestinationAllowed);
                 }
-            case HexSelection(selectabilityChecker):
-                var isSelectable:Bool = selectabilityChecker(location, hexRetriever);
-                if (isSelectable)
+            case HexSelection(isSelectable):
+                if (isSelectable(location))
                     boardInstance.eventHandler(HexSelected(location));
+            case FreeMove(canBeMoved):
+                if (canBeMoved(location))
+                {
+                    boardInstance.showHexLayer(location, SelectedForMove);
+
+                    var dragStartScreenCoords:Point = new Point(originalEvent.screenX, originalEvent.screenY);
+                    var isDestinationAllowed = dest -> !location.equals(dest);
+                    boardInstance.state = new DraggingState(boardInstance, cursorLocation, location, dragStartScreenCoords, isDestinationAllowed);
+                }
             case NotInteractive:
                 //* Do nothing
         }
@@ -79,19 +70,7 @@ class NeutralState implements IState
         if (equal(cursorLocation, newCursorLocation))
             return;
 
-        var hexRetriever:HexCoords->Hex = boardInstance.globalStateRef.getShownSituation().get;
-
-        var hoverNeeded:Bool = switch boardInstance.mode 
-        {
-            case MoveSelection(controllablePieces, _):
-                newCursorLocation != null && controllablePieces.contains(hexRetriever(newCursorLocation).color());
-            case HexSelection(selectabilityChecker):
-                newCursorLocation != null && selectabilityChecker(newCursorLocation, hexRetriever);
-            case NotInteractive: 
-                false;
-        }
-
-        if (hoverNeeded)
+        if (isHoverNeeded(newCursorLocation))
             boardInstance.showHexLayer(newCursorLocation, Hover);
         else
             boardInstance.hideLayerForEveryHex(Hover);
@@ -102,6 +81,21 @@ class NeutralState implements IState
 	public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         //* Do nothing
+    }
+
+    private function isHoverNeeded(hoverLocation:Null<HexCoords>)
+    {
+        return hoverLocation != null && switch boardInstance.mode 
+        {
+            case PlySelection(getAllowedDestinations):
+                !getAllowedDestinations(cursorLocation).empty();
+            case HexSelection(isSelectable):
+                isSelectable(cursorLocation);
+            case FreeMove(canBeMoved):
+                canBeMoved(cursorLocation);
+            case NotInteractive: 
+                false;
+        }
     }
 
     public function new(boardInstance:GameBoard, cursorLocation:Null<HexCoords>) 

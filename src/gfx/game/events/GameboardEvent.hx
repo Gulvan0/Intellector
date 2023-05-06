@@ -8,5 +8,6 @@ enum GameboardEvent
 {
     MoveAttempted(from:HexCoords, to:HexCoords, options:MoveIntentOptions);
     HexSelected(coords:HexCoords);
-    LMBPressed(hexUnderCursor:Hex);
+    FreeMovePerformed(from:HexCoords, to:HexCoords);
+    LMBPressed(hexUnderCursor:HexCoords);
 }

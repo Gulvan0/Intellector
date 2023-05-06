@@ -16,7 +16,9 @@ class VariationNode
 
     public function addChild(ply:RawPly) 
     {
-        var child = new VariationNode(ply, situationAfter);
+        var childPath:VariationPath = path.childPath(childCount());
+        var situationAfter:Situation = situation.situationAfterRawPly(ply);
+        var child:VariationNode = new VariationNode(childPath, ply, situationAfter, this);
         children.push(child);
     }
 
@@ -24,6 +26,8 @@ class VariationNode
     {
         if (incomingPly != null && parent != null)
             return incomingPly.toNotation(parent.situation, indicateColor);
+        else 
+            return "start";
     }
 
     public function collectDescendants(?includeSelf:Bool = true):VariationMap<VariationNode>
@@ -91,7 +95,7 @@ class VariationNode
             node = rightSibling();
         }
 
-        return node;
+        return nodes;
     }
 
     public function getLastChild():Null<VariationNode>

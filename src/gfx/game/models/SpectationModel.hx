@@ -159,6 +159,11 @@ class SpectationModel implements IReadOnlySpectationModel
 		return getHistory().getMostRecentSituation();
 	}
 
+    public function deriveInteractivityModeFromOtherParams()
+    {
+        boardInteractivityMode = NotInteractive;
+    }
+
     public function new()
     {
 

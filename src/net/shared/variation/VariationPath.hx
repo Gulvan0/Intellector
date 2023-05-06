@@ -81,17 +81,22 @@ abstract VariationPath(Array<Int>) from Array<Int> to Array<Int>
         return this.concat([num]);
     }
 
-    public function isDescendantOf(supposedAncestorPath:VariationPath)
+    public function isDescendantOf(supposedAncestorPath:VariationPath, ?admitEqualPaths:Bool = true)
     {
         for (level => childNum in supposedAncestorPath.keyValueIterator())
             if (childNum != this[level])
                 return false;
-        return true;
+
+        return admitEqualPaths || supposedAncestorPath.length < this.length;
     }
 
     public function equals(p:VariationPath):Bool
     {
-        return p.length == this.length && p.contains(this);
+        for (level => childNum in p.keyValueIterator())
+            if (childNum != this[level])
+                return false;
+
+        return p.length == this.length;
     }
 
     public function copy():VariationPath
@@ -102,6 +107,11 @@ abstract VariationPath(Array<Int>) from Array<Int> to Array<Int>
     public function serialize():String
     {
         return this.join(":");
+    }
+
+    public function toString():String
+    {
+        return serialize();
     }
 
     public static function deserialize(str:String):VariationPath

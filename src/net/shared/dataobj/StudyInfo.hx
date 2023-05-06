@@ -1,5 +1,6 @@
 package net.shared.dataobj;
 
+import net.shared.variation.PlainVariation;
 import net.shared.variation.ReadOnlyVariation;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
@@ -15,8 +16,7 @@ class StudyInfo
     public var publicity:StudyPublicity;
     public var keyPositionSIP:String;
 
-    public var startingSituationSIP:String;
-    public var lightVariation:VariationMap<RawPly>;
+    public var plainVariation:PlainVariation;
 
     public function toString():String 
     {
@@ -25,8 +25,7 @@ class StudyInfo
 
     public function assignVariation(variation:ReadOnlyVariation)
     {
-        this.lightVariation = variation.collectNodes(false).map(x -> x.getIncomingPly());
-        this.startingSituationSIP = variation.rootNode().getSituation();
+        this.plainVariation = PlainVariation.fromVariation(variation);
     }
 
     public function excludeNonParameters()

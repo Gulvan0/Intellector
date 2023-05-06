@@ -1,5 +1,7 @@
 package gfx.game;
 
+import net.shared.variation.VariationPath;
+import net.shared.variation.Variation;
 import net.shared.converters.Notation;
 import gfx.game.interfaces.IReadOnlyHistory;
 import net.shared.board.Situation;
@@ -90,6 +92,20 @@ class History implements IReadOnlyHistory
             a.push({ply: getPly(plyNum), situationAfter: getSituationAfterPly(plyNum)});
 
         return a;
+    }
+
+    public function asVariation():Variation
+    {
+        var variation:Variation = new Variation(getStartingSituation());
+        var currentParentPath:VariationPath = VariationPath.root();
+
+        for (ply in plys)
+        {
+            variation.addChild(currentParentPath, ply);
+            currentParentPath = currentParentPath.childPath(0);
+        }
+
+        return variation;
     }
     
     public function new(startingSituation:Situation, plys:Array<RawPly>) 

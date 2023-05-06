@@ -6,6 +6,8 @@ import net.shared.board.HexCoords;
 import haxe.ui.events.MouseEvent;
 import net.shared.board.Hex;
 
+using Lambda;
+
 class SelectedState implements IState
 {
     private var boardInstance:GameBoard;
@@ -31,38 +33,37 @@ class SelectedState implements IState
 
 	public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
-        var hexRetriever:HexCoords->Hex = boardInstance.globalStateRef.getShownSituation().get;
-
-        var pressedDestinationHex:Null<Hex> = location == null? null : hexRetriever(location);
-        var selectedDepartureHex:Hex = hexRetriever(selectedLocation);
-
         exit();
 
-        if (pressedDestinationHex == null || location.equals(selectedLocation))
+        if (location == null || location.equals(selectedLocation))                                          //Out of board or same => deselect
             boardInstance.state = new NeutralState(boardInstance, cursorLocation);
-        else if (location != null && isDestinationAllowed(location))
+        else if (isDestinationAllowed(location))                                                            //Allowed => perform move
         {
             boardInstance.state = new NeutralState(boardInstance, cursorLocation);
-            boardInstance.eventHandler(MoveAttempted(selectedLocation, location, {
-                fastPromotion: originalEvent.shiftKey? AutoPromoteToDominator : Ask,
-                fastChameleon: originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask
-            }));
+            if (boardInstance.mode.match(PlySelection(_)))
+                boardInstance.eventHandler(MoveAttempted(selectedLocation, location, {
+                    fastPromotion: originalEvent.shiftKey? AutoPromoteToDominator : Ask,
+                    fastChameleon: originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask
+                }));
+            else
+                boardInstance.eventHandler(FreeMovePerformed(selectedLocation, location));
         }
-        else
+        else                                                                                                //Not allowed, but on board => if draggable, start dragging, otherwise deselect
         {
             switch boardInstance.mode 
             {
-                case MoveSelection(controllablePieces, allowedDestinations):
-                    if (controllablePieces.contains(pressedDestinationHex.color()))
+                case PlySelection(getAllowedDestinations):
+                    var allowedDestinations:Array<HexCoords> = getAllowedDestinations(location);
+                    if (!allowedDestinations.empty())
                     {
                         var newDragStartScreenCoords:Point = new Point(originalEvent.screenX, originalEvent.screenY);
-                        var newIsDestinationAllowed = dest -> allowedDestinations(location, hexRetriever).contains(dest);
+                        var newIsDestinationAllowed = dest -> allowedDestinations.exists(x -> x.equals(dest));
                         boardInstance.state = new DraggingState(boardInstance, cursorLocation, location, newDragStartScreenCoords, newIsDestinationAllowed);
                     }
                     else
                         boardInstance.state = new NeutralState(boardInstance, cursorLocation);
                 default:
-                    return;
+                    return; //No FreeMove case because any destination is allowed in that mode
             }
         }
     }

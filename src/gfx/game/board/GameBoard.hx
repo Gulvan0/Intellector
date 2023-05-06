@@ -1,5 +1,7 @@
 package gfx.game.board;
 
+import gfx.game.events.ModelUpdateEvent;
+import GlobalBroadcaster.GlobalEvent;
 import GlobalBroadcaster.IGlobalEventObserver;
 import gfx.game.interfaces.IGameScreen;
 import gfx.game.models.ReadOnlyModel;
@@ -128,31 +130,36 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent)
     {
-        //TODO
-        /*
-
         switch event 
         {
             case OrientationUpdated:
-                setOrientation(globalStateRef.getOrientation());
+                setOrientation(model.asGenericModel().getOrientation());
             case ShownSituationUpdated:
-                setShownSituation(globalStateRef.getShownSituation());
+                setShownSituation(model.asGenericModel().getShownSituation());
+            case InteractivityModeUpdated:
+                mode = model.asGenericModel().getBoardInteractivityMode();
             case PlannedPremovesUpdated:
-                var premoves:Array<RawPly> = globalStateRef.getPlannedPremoves();
+                var premoves:Array<RawPly> = [];
+
+                switch model 
+                {
+                    case MatchVersusPlayer(model):
+                        premoves = model.getPlannedPremoves();
+                    case MatchVersusBot(model):
+                        premoves = model.getPlannedPremoves();
+                    default:
+                        throw 'PlannedPremovesUpdated can only occur for either MatchVersusPlayer or MatchVersusBot model. Got: ${model?.getName()}';
+                }
+                
                 hideLayerForEveryHex(Premove);
                 for (premove in premoves)
                     for (hexCoords in premove.modifiedHexes())
                         showHexLayer(hexCoords, Premove);
-            case InteractivityModeUpdated:
-                mode = globalStateRef.getBoardInteractivityMode();
             default:
-                //* Do nothing
         }
-
-        */
     }
 
-    private function handleGlobalEvent(event:GlobalEvent)
+    public function handleGlobalEvent(event:GlobalEvent)
     {
         switch event 
         {
@@ -164,9 +171,9 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
     public function new(model:ReadOnlyModel, gameScreen:IGameScreen) 
     {
-        var shownSituation:Situation = model.getShownSituation();
-        var orientation:PieceColor = model.getOrientation();
-        var mode:InteractivityMode = model.getBoardInteractivityMode();
+        var shownSituation:Situation = model.asGenericModel().getShownSituation();
+        var orientation:PieceColor = model.asGenericModel().getOrientation();
+        var mode:InteractivityMode = model.asGenericModel().getBoardInteractivityMode();
 
         var arrowMode:Map<Color, ArrowSelectionMode> = [Colors.arrow => FreeConstSize]; //TODO: In the future, account for diminishing arrows & alt arrow colors
         var hexMode:Map<HexagonLayer, HexSelectionMode> = [
@@ -182,7 +189,6 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
         this.state = new NeutralState(this, null);
         this.mode = mode;
-        this.globalStateRef = globalState;
-        this.eventHandler = eventHandler;
+        this.eventHandler = gameScreen.handleGameboardEvent;
     }
 }

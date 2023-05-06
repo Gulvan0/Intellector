@@ -91,9 +91,9 @@ abstract Variation(VariationNode)
         return node;
     }
 
-    public function addChild(path:VariationPath, ply:RawPly)
+    public function addChild(parentPath:VariationPath, ply:RawPly)
     {
-        getNode(path).addChild(ply);
+        getNode(parentPath).addChild(ply);
     }
 
     public function removeNode(path:VariationPath):NodeRemovalOutput

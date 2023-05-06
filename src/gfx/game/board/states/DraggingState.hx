@@ -75,10 +75,13 @@ class DraggingState implements IState
             boardInstance.state = new NeutralState(boardInstance, cursorLocation);
 
             if (location != null && isDestinationAllowed(location))
-                boardInstance.eventHandler(MoveAttempted(dragStartLocation, location, {
-                    fastPromotion: originalEvent.shiftKey? AutoPromoteToDominator : Ask,
-                    fastChameleon: originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask
-                }));
+                if (boardInstance.mode.match(PlySelection(_)))
+                    boardInstance.eventHandler(MoveAttempted(dragStartLocation, location, {
+                        fastPromotion: originalEvent.shiftKey? AutoPromoteToDominator : Ask,
+                        fastChameleon: originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask
+                    }));
+                else
+                    boardInstance.eventHandler(FreeMovePerformed(dragStartLocation, location));
         }
     }
 

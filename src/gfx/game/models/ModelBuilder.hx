@@ -58,12 +58,13 @@ class ModelBuilder
             processEventLog(data.eventLog, model.history, model.outgoingOfferActive, model.perMoveTimeRemaindersData, model.chatHistory, x -> {model.outcome = x;}, model.playerRefs);
 
             var totalMoves:Int = model.getLineLength();
-            model.boardInteractivityMode = NotInteractive;
             model.shownMovePointer = totalMoves;
             if (gameEnded || model.timeControl.isCorrespondence() || totalMoves < 2)
                 model.activeTimerColor = null;
             else
                 model.activeTimerColor = totalMoves % 2 == 0? White : Black;
+            
+            model.deriveInteractivityModeFromOtherParams();
 
             return Spectation(model);
         }
@@ -88,12 +89,13 @@ class ModelBuilder
             processEventLog(data.eventLog, model.history, null, model.perMoveTimeRemaindersData, model.chatHistory, x -> {model.outcome = x;}, data.playerRefs);
 
             var totalMoves:Int = model.getLineLength();
-            model.boardInteractivityMode = NotInteractive;
             model.shownMovePointer = totalMoves;
             if (gameEnded || model.timeControl.isCorrespondence() || totalMoves < 2)
                 model.activeTimerColor = null;
             else
                 model.activeTimerColor = totalMoves % 2 == 0? White : Black;
+
+            model.deriveInteractivityModeFromOtherParams();
 
             return MatchVersusBot(model);
         }
@@ -123,12 +125,13 @@ class ModelBuilder
             model.offerActive = [for (kind in OfferKind.createAll()) kind => [Incoming => outgoingOfferActive[opposite(playerColor)][kind], Outgoing => outgoingOfferActive[playerColor][kind]]];
 
             var totalMoves:Int = model.getLineLength();
-            model.boardInteractivityMode = NotInteractive;
             model.shownMovePointer = totalMoves;
             if (gameEnded || model.timeControl.isCorrespondence() || totalMoves < 2)
                 model.activeTimerColor = null;
             else
                 model.activeTimerColor = totalMoves % 2 == 0? White : Black;
+
+            model.deriveInteractivityModeFromOtherParams();
 
             return MatchVersusPlayer(model);
         }
@@ -184,10 +187,11 @@ class ModelBuilder
         model.selectedBranch = VariationPath.root();
         model.shownMovePointer = 0;
         model.orientation = White;
-        model.boardInteractivityMode = MoveSelection([White], Rules.getPossibleDestinations.bind(_, _, false));
         model.editorSituation = null;
         model.editorMode = null;
         model.exploredStudyInfo = null;
+
+        model.deriveInteractivityModeFromOtherParams();
 
         return model;
     }
@@ -196,20 +200,33 @@ class ModelBuilder
     {
         var model:AnalysisBoardModel = new AnalysisBoardModel();
 
-        model.variation = studyInfo.lightVariation;
+        model.variation = studyInfo.plainVariation.toVariation();
         model.selectedBranch = VariationPath.root();
         model.shownMovePointer = 0;
-        model.orientation = White;
-        model.boardInteractivityMode = MoveSelection([White], Rules.getPossibleDestinations.bind(_, _, false));
+        model.orientation = model.variation.rootNode().situation.turnColor;
         model.editorSituation = null;
         model.editorMode = null;
         model.exploredStudyInfo = null;
+
+        model.deriveInteractivityModeFromOtherParams();
 
         return model;
     }
 
     public static function fromExploredLine(history:IReadOnlyHistory, shownMovePointer:Int):AnalysisBoardModel
     {
+        var model:AnalysisBoardModel = new AnalysisBoardModel();
 
+        model.variation = history.asVariation();
+        model.selectedBranch = model.variation.getFullMainlinePath();
+        model.shownMovePointer = shownMovePointer;
+        model.orientation = history.getShownSituationByPointer(shownMovePointer).turnColor;
+        model.editorSituation = null;
+        model.editorMode = null;
+        model.exploredStudyInfo = null;
+
+        model.deriveInteractivityModeFromOtherParams();
+
+        return model;
     }
 }

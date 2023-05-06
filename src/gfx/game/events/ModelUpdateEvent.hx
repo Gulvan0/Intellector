@@ -21,10 +21,10 @@ enum ModelUpdateEvent
     SelectedVariationNodeUpdated;
     EditorSituationUpdated;
     EditorModeUpdated;
-
-    /* PlannedPremovesUpdated;
     InteractivityModeUpdated;
-    
+    PlannedPremovesUpdated;
+
+    /* 
     PlayerOnlineStatusUpdated;
     SpectatorListUpdated;*/
 }

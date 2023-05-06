@@ -14,4 +14,5 @@ interface IReadOnlyGenericModel
     public function getStartingSituation():Situation;
     public function getLineLength():Int;
     public function getLine():Array<{ply:RawPly, situationAfter:Situation}>;
+    public function deriveInteractivityModeFromOtherParams():Void;
 }
