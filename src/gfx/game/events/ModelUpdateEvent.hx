@@ -23,8 +23,6 @@ enum ModelUpdateEvent
     EditorModeUpdated;
     InteractivityModeUpdated;
     PlannedPremovesUpdated;
-
-    /* 
     PlayerOnlineStatusUpdated;
-    SpectatorListUpdated;*/
+    SpectatorListUpdated;
 }
