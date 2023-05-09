@@ -1,5 +1,6 @@
 package gfx.game.common;
 
+import gfx.game.interfaces.IGameComponent;
 import haxe.ui.containers.Box;
 import haxe.ui.core.Component;
 import haxe.ui.containers.Stack;
@@ -31,8 +32,16 @@ class Panel extends Stack
             return TabView;
     }
 
-    public function setPages(pages:Array<ComponentPageName>)
+    /**
+        @return All game components contained in this panel
+    **/
+    public function updatePages(pages:Array<ComponentPageName>):Array<IGameComponent>
     {
+        var allGameComponents:Array<IGameComponent> = [];
+
+        tabview.removeAllPages();
+        singlepage.removeAllComponents();
+
         this.pages = pages;
         currentMode = modeByPagesCount(pages.length);
 
@@ -45,8 +54,10 @@ class Panel extends Stack
                 var page:Box = builder.buildPage();
                 pageComponents.set(pages[0], page);
                 singlepage.addComponent(page);
+                allGameComponents = allGameComponents.concat(builder.allComponents());
 
                 selectedId = "singlepage";
+                hidden = false;
             case TabView:
                 for (pageName in pages)
                 {
@@ -54,10 +65,14 @@ class Panel extends Stack
                     var page:Box = builder.buildPage();
                     pageComponents.set(pageName, page);
                     tabview.addComponent(page);
+                    allGameComponents = allGameComponents.concat(builder.allComponents());
                 }
 
                 selectedId = "tabview";
+                hidden = false;
         }
+
+        return allGameComponents;
     }
 
     private function isPageActive(page:ComponentPageName):Bool

@@ -1,25 +1,10 @@
 package gfx;
 
+import haxe.ui.core.Component;
 import net.shared.utils.UnixTimestamp;
-import dict.Language;
-import net.shared.dataobj.ViewedScreen;
 import haxe.ui.events.UIEvent;
-import net.shared.dataobj.StudyInfo;
-import browser.CredentialCookies;
-import gfx.Dialogs;
 import haxe.Timer;
-import haxe.ui.Toolkit;
-import js.html.VisualViewport;
-import haxe.ui.containers.VBox;
-import js.html.Element;
-import dict.Utils;
-import js.Browser;
-import js.html.URLSearchParams;
-import net.INetObserver;
 import net.shared.ServerEvent;
-import net.shared.PieceColor;
-import browser.Url;
-import utils.TimeControl;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
 using StringTools;
@@ -67,6 +52,16 @@ class SceneManager
     public static function clearScreen()
     {
         scene.toScreen(null);
+    }
+
+    public static function returnToMainScene()
+    {
+        scene.returnToMainScene();
+    }
+
+    public static function displaySubscreen(subscreen:Component)
+    {
+        scene.displaySubscreen(subscreen);
     }
 
     public static function addResizeHandler(handler:Void->Void)

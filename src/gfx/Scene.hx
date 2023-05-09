@@ -1,5 +1,6 @@
 package gfx;
 
+import haxe.ui.core.Component;
 import dict.Phrase;
 import assets.Audio;
 import gfx.popups.OpenChallengeCreated;
@@ -81,6 +82,19 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         }
         
         ResponsiveToolbox.resizeComponent(challengesMenu.flagIcon, [Width => VH(3), Height => VH(3)]);
+    }
+
+    public function returnToMainScene()
+    {
+        subscreenContainer.removeAllComponents();
+        stack.selectedId = "mainScene";
+    }
+
+    public function displaySubscreen(subscreen:Component)
+    {
+        subscreenContainer.removeAllComponents();
+        subscreenContainer.addComponent(subscreen);
+        stack.selectedId = "subscreenContainer";
     }
 
     private function setIngameStatus(ingame:Bool)

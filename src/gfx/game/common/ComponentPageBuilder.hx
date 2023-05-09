@@ -46,6 +46,11 @@ class ComponentPageBuilder
         return page;
     }
 
+    public function allComponents():Array<IGameComponent>
+    {
+        return components.copy();
+    }
+
     private function wrap(comp:IGameComponent, percentWidth:Null<Float>, percentHeight:Null<Float>):IGameComponent
     {
         if (percentWidth != null)
