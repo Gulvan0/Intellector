@@ -1,6 +1,7 @@
 package gfx.screens;
 
 import gfx.scene.SceneManager;
+import gfx.scene.SceneManager;
 import gfx.scene.Screen;
 import haxe.ui.core.Component;
 import dict.Phrase;

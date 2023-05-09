@@ -1,6 +1,7 @@
 //! ???
 
 //Don't forget - LiveGame should listen to premovesEnabled preference updates. Handler should refresh model's boardInteractivityMode and emit InteractivityModeUpdated event
+//Don't forget - LiveGame should broadcast global events (InGame - entered when participant, NotInGame - left when participant & game ended when participant)
 
 //! Chatbox.hx:
 
