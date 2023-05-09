@@ -1,5 +1,6 @@
 package gfx.utils;
 
+import gfx.scene.SceneManager;
 import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.containers.dialogs.Dialog.DialogButton;
 import gfx.basic_components.utils.DialogGroup;
@@ -29,7 +30,7 @@ class DialogQueue
         {
             modalCount--;
             if (modalCount == 0)
-                SceneManager.onModalDialogHidden();
+                GlobalBroadcaster.broadcast(ModalDialogRemoved);
         }
 
         if (hasActiveDialog())
@@ -63,7 +64,8 @@ class DialogQueue
         if (dialog.modal)
         {
             modalCount++;
-            SceneManager.onModalDialogShown();
+            if (modalCount == 1)
+                GlobalBroadcaster.broadcast(ModalDialogShown);
         }
     }
 

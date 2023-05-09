@@ -276,7 +276,7 @@ class MainView extends HBox
             }
         }
 
-        board = new SelectableBoard(Situation.defaultStarting(), Disabled, Disabled, White, None);
+        board = new SelectableBoard(Situation.defaultStarting(), [], [], White, None);
         board.percentHeight = 100;
         board.percentWidth = 100;
         boardContainer.addComponent(board);

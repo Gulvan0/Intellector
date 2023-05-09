@@ -65,7 +65,7 @@ class StudiesTab extends VBox
 
     private function onEditStudyRequested(id:Int)
     {
-		Dialogs.getQueue().add(new StudyParamsDialog(Edit(id, loadedStudies.get(id), onStudyEdited.bind(id))));
+		Dialogs.getQueue().add(new StudyParamsDialog(Edit(id, loadedStudies.get(id), onStudyEdited.bind(id)), x -> {}));
     }
 
     private function onStudyEdited(id:Int, newParams:StudyInfo)
@@ -87,34 +87,27 @@ class StudiesTab extends VBox
         widgetByStudyID.remove(id);
     }
 
-    private function generateStudyWidgetData(id:Int, info:StudyInfo):StudyWidgetData //TODO: Remove unneeded fields from StudyWidgetData
+    private function generateStudyWidgetData(info:StudyInfo):StudyWidgetData
     {
         return {
-            id: id,
-            ownerLogin: profileOwner,
             info: info,
-            onStudyClicked: onStudyClicked.bind(id),
-            onDeletePressed: onDeleteStudyRequested.bind(id),
-            onEditPressed: onEditStudyRequested.bind(id),
+            onStudyClicked: onStudyClicked.bind(info.id),
+            onDeletePressed: onDeleteStudyRequested.bind(info.id),
+            onEditPressed: onEditStudyRequested.bind(info.id),
             onTagSelected: onTagSelectedFromStudyWidget
         };
     }
 
-    private function appendStudies(infos:Map<Int, StudyInfo>, hasNext:Bool)
+    private function appendStudies(infos:Array<StudyInfo>, hasNext:Bool)
     {
-        var infoTree:BalancedTree<Int, StudyInfo> = new BalancedTree();
-        for (id => info in infos.keyValueIterator())
-            infoTree.set(-id, info);
-
-        for (negID => info in infoTree.keyValueIterator())
+        for (info in infos)
         {
-            var id:Int = -negID;
-            var studyWidgetData:StudyWidgetData = generateStudyWidgetData(id, info);
+            var studyWidgetData:StudyWidgetData = generateStudyWidgetData(info);
             var studyWidget:StudyWidget = new StudyWidget(studyWidgetData);
             
             studiesList.addComponent(studyWidget);
-            loadedStudies.set(id, info);
-            widgetByStudyID.set(id, studyWidget);
+            loadedStudies.set(info.id, info);
+            widgetByStudyID.set(info.id, studyWidget);
         }
 
         loadMoreBtn.hidden = !hasNext;
@@ -136,7 +129,7 @@ class StudiesTab extends VBox
         Requests.getPlayerStudies(profileOwner, Lambda.count(loadedStudies), STUDIES_PAGE_SIZE, activeTags, appendStudies);
     }
 
-    public function new(profileOwner:String, preloadedStudies:Map<Int, StudyInfo>, totalStudies:Int)
+    public function new(profileOwner:String, preloadedStudies:Array<StudyInfo>, totalStudies:Int)
     {
         super();
         this.percentWidth = 100;

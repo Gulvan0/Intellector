@@ -2,7 +2,7 @@ package;
 
 import net.shared.utils.PlayerRef;
 import net.shared.dataobj.ChallengeData;
-import gfx.SceneManager;
+import gfx.scene.SceneManager;
 import net.shared.dataobj.SignInResult;
 import net.shared.ServerEvent;
 import haxe.crypto.Md5;

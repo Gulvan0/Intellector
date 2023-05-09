@@ -10,8 +10,6 @@ import net.shared.board.Situation;
 
 typedef StudyWidgetData =
 {
-    var id:Int;
-    var ownerLogin:String;
     var info:StudyInfo;
     var onTagSelected:String->Void;
     var onEditPressed:Void->Void;
@@ -26,7 +24,7 @@ class StudyWidget extends Box
 
     public function studyID():Int
     {
-        return typedData.id;
+        return typedData.info.id;
     }
 
     @:bind(editBtn, MouseEvent.CLICK)
@@ -69,7 +67,7 @@ class StudyWidget extends Box
     {
         this.typedData = data;
 
-        if (!LoginManager.isPlayer(typedData.ownerLogin))
+        if (!LoginManager.isPlayer(typedData.info.ownerLogin))
         {
             editBtn.hidden = true;
             deleteBtn.hidden = true;
@@ -90,7 +88,7 @@ class StudyWidget extends Box
         super();
         this.typedData = data;
 
-        if (!LoginManager.isPlayer(typedData.ownerLogin))
+        if (!LoginManager.isPlayer(typedData.info.ownerLogin))
         {
             editBtn.hidden = true;
             deleteBtn.hidden = true;

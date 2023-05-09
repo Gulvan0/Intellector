@@ -116,7 +116,7 @@ class Notation
         for (coords => piece in context.collectPieces())
             if (!coords.equals(ply.from))
                 if (piece.type == hexFrom.type() && piece.color == hexFrom.color())
-                    if (Lambda.exists(Rules.getPossibleDestinations(coords, context.pieces), ply.to.equals))
+                    if (Lambda.exists(Rules.getPossibleDestinations(coords, context.pieces.get), ply.to.equals))
                     {
                         another = coords;
                         break;

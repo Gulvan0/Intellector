@@ -116,7 +116,7 @@ class Rules
         if (movingPiece == null)
             return false;
         else
-            return getPossibleDestinations(from, pieceArrangement).exists(x -> x.equals(to));
+            return getPossibleDestinations(from, pieceArrangement.get).exists(x -> x.equals(to));
     }
 
     public static function isPossible(ply:RawPly, situation:Situation):Bool
@@ -144,7 +144,7 @@ class Rules
                 return false;
         }
 
-        return getPossibleDestinations(ply.from, situation.pieces).exists(x -> x.equals(ply.to));
+        return getPossibleDestinations(ply.from, situation.pieces.get).exists(x -> x.equals(ply.to));
     }
 
     public static function isPremovePossible(from:HexCoords, to:HexCoords, pieceArrangement:PieceArrangement):Bool 
@@ -168,7 +168,7 @@ class Rules
 
         for (coords => piece in allPieces)
             if (piece.color == situation.turnColor)
-                for (destination in getPossibleDestinations(coords, situation.pieces, true))
+                for (destination in getPossibleDestinations(coords, situation.pieces.get, true))
                     if (piece.type == Progressor && destination.isFinal(piece.color))
                         for (newType in possiblePromotionTypes())
                             plys.push(RawPly.construct(coords, destination, newType));

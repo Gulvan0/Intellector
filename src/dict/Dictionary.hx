@@ -184,32 +184,36 @@ class Dictionary
             case OPENJOIN_ESSENTIAL_PARAMS_LABEL_TEXT:
                 return ["Features:", "Особенности:"];
 
-            case MENUBAR_PLAY_MENU_TITLE:
+            case MENU_SECTION_TITLE(Play):
                 return ["Play", "Играть"];
-            case MENUBAR_PLAY_MENU_CREATE_GAME_ITEM:
-                return ["Create Game", "Создать игру"];
-            case MENUBAR_PLAY_MENU_OPEN_CHALLENGES_ITEM:
-                return ["Open Challenges", "Открытые вызовы"];
-            case MENUBAR_PLAY_MENU_VERSUS_BOT_ITEM:
-                return ["Versus Bot", "Против компьютера"];
-            case MENUBAR_SPECTATE_MENU_TITLE:
-                return ["Spectate", "Смотреть"];
-            case MENUBAR_SPECTATE_MENU_CURRENT_GAMES_ITEM:
-                return ["Current Games", "Текущие партии"];
-            case MENUBAR_SPECTATE_MENU_FOLLOW_PLAYER_ITEM:
-                return ["Follow Player", "Наблюдать за игроком"];
-            case MENUBAR_LEARN_MENU_TITLE:
+            case MENU_SECTION_TITLE(Watch):
+                return ["Watch", "Смотреть"];
+            case MENU_SECTION_TITLE(Learn):
                 return ["Learn", "Учёба"];
-            case MENUBAR_LEARN_MENU_ANALYSIS_BOARD_ITEM:
-                return ["Analysis Board", "Доска анализа"];
-            case MENUBAR_SOCIAL_MENU_TITLE:
+            case MENU_SECTION_TITLE(Social):
                 return ["Social", "Сообщество"];
-            case MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM:
+                
+            case MENU_ITEM_NAME(CreateChallenge):
+                return ["Create Game", "Создать игру"];
+            case MENU_ITEM_NAME(OpenChallenges):
+                return ["Open Challenges", "Открытые вызовы"];
+            case MENU_ITEM_NAME(PlayVersusBot):
+                return ["Versus Bot", "Против компьютера"];
+            case MENU_ITEM_NAME(CurrentGames):
+                return ["Current Games", "Текущие партии"];
+            case MENU_ITEM_NAME(FollowPlayer):
+                return ["Follow Player", "Наблюдать за игроком"];
+            case MENU_ITEM_NAME(AnalysisBoard):
+                return ["Analysis Board", "Доска анализа"];
+            case MENU_ITEM_NAME(PlayerProfile):
                 return ["Player Profile", "Профиль игрока"];
-            case MENUBAR_SOCIAL_MENU_VK_ITEM:
-                return ["VK Group", "Группа VK"];
-            case MENUBAR_SOCIAL_MENU_DISCORD_ITEM:
+            case MENU_ITEM_NAME(DiscordServer):
                 return ["Discord Server", "Сервер Discord"];
+            case MENU_ITEM_NAME(VKGroup):
+                return ["VK Group", "Группа VK"];
+            case MENU_ITEM_NAME(VKChat):
+                return ["VK Chat", "Чат VK"];
+
             case MENUBAR_CHALLENGES_NO_CHALLENGES_PLACEHOLDER:
                 return ["No challenges", "Нет вызовов"];
             case MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE:

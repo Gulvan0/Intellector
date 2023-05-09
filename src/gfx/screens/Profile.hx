@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import gfx.scene.SceneManager;
+import gfx.scene.Screen;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
 import gfx.ResponsiveToolbox.ResponsiveProperty;
 import haxe.ui.core.Component;

@@ -5,8 +5,8 @@ import gfx.popups.IncomingChallengeDialog;
 import gfx.profile.complex_components.MiniProfile;
 import net.shared.dataobj.ChallengeData;
 import haxe.ui.containers.Grid;
-import gfx.menubar.ChallengeEntryRenderer;
-import gfx.SceneManager;
+import gfx.menu.challenges.ChallengeEntryRenderer;
+import gfx.scene.SceneManager;
 import tests.data.ChallengeParameters;
 import struct.ChallengeParams;
 import tests.data.Variations;
@@ -232,8 +232,6 @@ class SimpleTests
 	public static function studyWidget()
 	{
 		var data:StudyWidgetData = {
-			id: 12,
-			ownerLogin: LoginManager.getLogin(),
 			info: StudyInfos.info1(),
 			onStudyClicked: () -> {trace('Clicked');},
 			onTagSelected: tag -> {trace('Tag: $tag');},
@@ -271,9 +269,9 @@ class SimpleTests
 	public static function studyTab()
 	{
 		var comp:StudiesTab = new StudiesTab("gulvan", [
-			111 => StudyInfos.info1(),
-			23 => StudyInfos.info2(),
-			21 => StudyInfos.info3()
+			StudyInfos.info1(),
+			StudyInfos.info2(),
+			StudyInfos.info3()
 		], 5);
 		add(comp, Percent(50), Percent(90));
 	}
@@ -281,19 +279,19 @@ class SimpleTests
 	public static function newStudyDialog()
 	{
 		var mode:StudyParamsDialogMode = Create(Variations.variation1());
-		Dialogs.getQueue().add(new StudyParamsDialog(mode));
+		Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
 	}
 
 	public static function overwriteStudyDialog()
 	{
 		var mode:StudyParamsDialogMode = CreateOrOverwrite(Variations.variation1(), StudyInfos.info1());
-		Dialogs.getQueue().add(new StudyParamsDialog(mode));
+		Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
 	}
 
 	public static function editStudyDialog()
 	{
 		var mode:StudyParamsDialogMode = Edit(111, StudyInfos.info1(), traceArg);
-		Dialogs.getQueue().add(new StudyParamsDialog(mode));
+		Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
 	}
 
 	public static function incomingChallengeDialog(i:Int)
@@ -351,7 +349,8 @@ class SimpleTests
 		add(contentBox);
 	}
 
-	@:access(gfx.SceneManager.scene)
+	@:access(gfx.scene.SceneManager.scene)
+	@:access(gfx.scene.Scene.menubar)
 	public static function challengeMenuEvent(i:Int) 
 	{
 		var challengeParams:ChallengeParams = switch i
@@ -371,6 +370,6 @@ class SimpleTests
 		challengeData.ownerLogin = i < 4? "kaz" : "gulvan";
 		challengeData.ownerELO = Provisional(1250);
 
-		SceneManager.scene.challengesMenu.appendEntry(challengeData);
+		SceneManager.scene.menubar.challengesMenu.appendEntry(challengeData);
 	}
 }

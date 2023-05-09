@@ -48,6 +48,6 @@ class DepthFirstIterator<T>
         else
             currentNode = rightShifted(currentNode);
 
-        return returnedNode;
+        return cast returnedNode;
     }
 }

@@ -1,5 +1,6 @@
 package gfx.game.common;
 
+import gfx.scene.SceneManager;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.VBox;
@@ -9,13 +10,13 @@ class CompactSubscreen extends VBox
 {
     public function displaySubscreen() 
     {
-        SceneManager.displaySubscreen(this);    
+        SceneManager.getScene().displaySubscreen(this);    
     }
 
     @:bind(backBtn, MouseEvent.CLICK)
     private function onBackPressed(e)
     {
-        SceneManager.returnToMainScene();
+        SceneManager.getScene().returnToMainScene();
     }
 
     public function new(contentPageName:ComponentPageName)

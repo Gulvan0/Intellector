@@ -1,5 +1,6 @@
 package gfx.basic_components;
 
+import gfx.scene.SceneManager;
 import gfx.basic_components.utils.DialogGroup;
 import gfx.utils.DialogQueue;
 import haxe.Timer;

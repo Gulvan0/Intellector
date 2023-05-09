@@ -7,7 +7,7 @@ import gfx.preloader.DefaultPreloader;
 import haxe.ui.HaxeUIApp;
 import tests.Interceptor;
 import browser.Blinker;
-import gfx.ScreenNavigator;
+import gfx.scene.ScreenNavigator;
 import net.shared.dataobj.GreetingResponseData;
 import tests.SimpleTests;
 import gfx.basic_components.AutosizingLabel;
@@ -21,7 +21,7 @@ import utils.TimeControl;
 import net.Requests;
 import js.html.URLSearchParams;
 import browser.CredentialCookies;
-import gfx.SceneManager;
+import gfx.scene.SceneManager;
 import gfx.screens.LanguageSelectIntro;
 import haxe.ui.Toolkit;
 import js.Browser;
@@ -100,7 +100,7 @@ class Main
 		if (langInitializedFromCookie)
 			onLanguageReady();
 		else
-			SceneManager.toScreen(LanguageSelectIntro(onLanguageReady));
+			SceneManager.getScene().toScreen(LanguageSelectIntro(onLanguageReady));
 	}
 
 	/**
@@ -113,7 +113,7 @@ class Main
 		else
 			LocaleManager.instance.language = "en";
 
-		SceneManager.updateLanguage();
+		SceneManager.getScene().refreshLanguage();
 
 		Networker.launch();
 		//test();

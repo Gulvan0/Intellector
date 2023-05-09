@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import net.shared.variation.ReadOnlyVariation;
 import gfx.popups.StudyParamsDialog;
 import net.shared.dataobj.StudyInfo;
 import net.shared.board.RawPly;
@@ -62,16 +63,8 @@ class ShareDialog extends Dialog
         Browser.window.open(url, "_blank");
     }
 
-    public function showShareDialog(mutedGameboard:GameBoard)
+    public function showShareDialog()
     {
-        mutedGameboard.suppressLMBHandler = true;
-        mutedGameboard.suppressRMBHandler = true;
-
-        onDialogClosed = e -> {
-            mutedGameboard.suppressLMBHandler = false;
-            mutedGameboard.suppressRMBHandler = false;
-        };
-
         if (Screen.instance.actualWidth < 600 || Screen.instance.actualHeight < 500)
         {
             pngExportParamsBox.hidden = true;
@@ -86,7 +79,7 @@ class ShareDialog extends Dialog
         this.percentWidth = MathUtils.clamp(900 / Screen.instance.actualWidth, 0.5, 0.95) * 100;
         this.percentHeight = MathUtils.clamp(600 / Screen.instance.actualHeight, 0.5, 0.95) * 100;
 
-        showDialog(false);
+        showDialog(true);
     }
     
     @:bind(preserveAspectRatioCheckbox, UIEvent.CHANGE)
@@ -151,7 +144,7 @@ class ShareDialog extends Dialog
         shareGameTab.init(gameLink, pin, startingSituation, plySequence);
     }
 
-    public function initInAnalysis(situation:Situation, orientation:PieceColor, variation:ReadOnlyVariation, ?exploredStudyInfo:StudyInfo)
+    public function initInAnalysis(situation:Situation, orientation:PieceColor, variation:ReadOnlyVariation, onExploredStudyUpdated:StudyInfo->Void, ?exploredStudyInfo:StudyInfo)
     {
         init(situation, orientation);
         tabView.removeComponent(shareGameTab);
@@ -166,7 +159,7 @@ class ShareDialog extends Dialog
     
             exportStudyBtn.onClick = e -> {
                 hideDialog(null);
-                Dialogs.getQueue().add(new StudyParamsDialog(studyParamsDialogMode));
+                Dialogs.getQueue().add(new StudyParamsDialog(studyParamsDialogMode, onExploredStudyUpdated));
             }
         }
         else

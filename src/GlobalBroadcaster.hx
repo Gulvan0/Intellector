@@ -7,6 +7,12 @@ enum GlobalEvent
 {
     LoggedIn;
     LoggedOut;
+    InGame;
+    NotInGame;
+    Disconnected;
+    Connected;
+    ModalDialogShown;
+    ModalDialogRemoved;
     IncomingChallengesBatch(incomingChallenges:Array<ChallengeData>);
     FollowedPlayerUpdated(followedLogin:String);
     PreferenceUpdated(name:PreferenceName);

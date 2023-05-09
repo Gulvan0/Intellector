@@ -1,7 +1,8 @@
 package assets;
 
+import gfx.menu.MenuItemName;
 import gfx.game.analysis.util.PosEditMode;
-import gfx.menubar.ChallengesIconMode;
+import gfx.menu.challenges.ChallengesIconMode;
 import net.shared.TimeControlType;
 import net.shared.PieceColor;
 import net.shared.PieceType;
@@ -76,5 +77,24 @@ class Paths
     public static inline function sound(soundName:String)
     {
         return './sounds/$soundName.mp3';
+    }
+
+    public static inline function menuItem(name:MenuItemName) 
+    {
+        var fileName:String = switch name 
+        {
+            case CreateChallenge: 'new_game';
+            case OpenChallenges: 'open_challenges';
+            case PlayVersusBot: 'versus_bot';
+            case CurrentGames: 'current_games';
+            case FollowPlayer: 'watch_player';
+            case AnalysisBoard: 'analysis_board';
+            case PlayerProfile: 'player_profile';
+            case DiscordServer: 'discord';
+            case VKGroup: 'vk';
+            case VKChat: 'vk';
+        }
+
+        return 'assets/symbols/upper_menu/menu_items/' + fileName + '.svg';
     }
 }

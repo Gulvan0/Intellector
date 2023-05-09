@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import gfx.scene.Screen;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
 import gfx.ResponsiveToolbox.ResponsiveProperty;
 import net.shared.dataobj.ViewedScreen;

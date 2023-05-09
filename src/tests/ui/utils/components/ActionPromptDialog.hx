@@ -1,5 +1,7 @@
 package tests.ui.utils.components;
 
+import gfx.game.board.subcomponents.util.ArrowParams;
+import gfx.utils.Colors;
 import gfx.Dialogs;
 import haxe.ui.core.Screen;
 import haxe.exceptions.NotImplementedException;
@@ -100,7 +102,7 @@ class ActionPromptDialog extends Dialog
                     if (inputBoards.exists(promptKey))
                     {
                         var ply:RawPly = cast(arg.value, RawPly);
-                        inputBoards.get(promptKey).drawArrow(ply.from, ply.to);
+                        inputBoards.get(promptKey).toggleArrow(new ArrowParams(Colors.arrow, ply.from, ply.to));
                     }
                     else
                         throw 'inputBoards has no mapping for prompt $promptKey';
@@ -159,7 +161,7 @@ class ActionPromptDialog extends Dialog
         vbox.percentWidth = 100;
         vbox.percentHeight = 100 / totalPlyInputs;
         
-        var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, EnsureSingle, Disabled, White, None);
+        var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, [Colors.arrow => EnsureSingle], [], White, None);
         inputBoard.percentWidth = 100;
         inputBoard.percentHeight = 100;
 

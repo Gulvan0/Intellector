@@ -1,7 +1,7 @@
 package tests;
 
 import haxe.ui.HaxeUIApp;
-import gfx.SceneManager;
+import gfx.scene.SceneManager;
 import tests.ui.utils.data.EndpointArgument;
 import tests.ui.utils.data.MacroStep;
 import tests.ui.utils.data.TestCaseInfo;

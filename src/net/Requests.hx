@@ -12,14 +12,14 @@ import net.shared.dataobj.ProfileData;
 import struct.ChallengeParams;
 import dict.Dictionary;
 import gfx.Dialogs;
-import gfx.SceneManager;
+import gfx.scene.SceneManager;
 import net.shared.PieceColor;
 import utils.TimeControl;
 import net.shared.ClientEvent;
 import net.shared.ServerEvent;
 
 typedef GetGamesCallback = (games:Array<GameInfo>, hasNext:Bool) -> Void;
-typedef GetStudiesCallback = (studyMap:Map<Int, StudyInfo>, hasNext:Bool) -> Void;
+typedef GetStudiesCallback = (studyMap:Array<StudyInfo>, hasNext:Bool) -> Void;
 typedef MainMenuEnteredCallback = (openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>) -> Void;
 
 class Requests
@@ -108,16 +108,14 @@ class Requests
     {
         switch event
         {
-            case GameIsOver(log):
+            case GameRetrieved(data):
                 //TODO: Rewrite
                         /*var parsedData:GameLogParserOutput = GameLogParser.parse(log);
 		        SceneManager.toScreen(LiveGame(id, Past(parsedData, null)));*/
-            case GameIsOngoing(timeData, currentLog):
-                //TODO: Rewrite
                         /*var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, timeData, null)));*/
             case GameNotFound:
-                SceneManager.toScreen(MainMenu);
+                SceneManager.getScene().toScreen(MainMenu);
             default:
                 return false;
         }
@@ -135,17 +133,15 @@ class Requests
         switch event
         {
             case OpenChallengeInfo(data):
-                SceneManager.toScreen(ChallengeJoining(data));
-            case OpenChallengeHostPlaying(data):
+                SceneManager.getScene().toScreen(ChallengeJoining(data));
+            case OpenChallengeAlreadyAccepted(data):
                 //TODO: Rewrite
                         /*var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
                 SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, null)));*/
-            case OpenChallengeGameEnded(gameID, log):
-                //TODO: Rewrite
                         /*var parsedData:GameLogParserOutput = GameLogParser.parse(log);
                 SceneManager.toScreen(LiveGame(gameID, Past(parsedData, null)));*/
             case OpenChallengeNotFound:
-                SceneManager.toScreen(MainMenu);
+                SceneManager.getScene().toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
@@ -184,10 +180,10 @@ class Requests
         switch event
         {
             case PlayerProfile(data):
-                SceneManager.toScreen(PlayerProfile(login, data));
+                SceneManager.getScene().toScreen(PlayerProfile(login, data));
             case PlayerNotFound:
                 if (returnToMainOnFailed)
-                    SceneManager.toScreen(MainMenu);
+                    SceneManager.getScene().toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_PLAYER_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
@@ -252,7 +248,7 @@ class Requests
         //TODO: Rewrite
         /*switch event
         {
-            case SingleStudy(info, ownerLogin):
+            case SingleStudy(info):
                 SceneManager.toScreen(Analysis(info.variantStr, 0, new StudyData(id, ownerLogin, info)));
             case StudyNotFound:
                 SceneManager.toScreen(MainMenu);
@@ -263,18 +259,18 @@ class Requests
         return true;
     }
 
-    public static function createStudy(params:StudyInfo) 
+    public static function createStudy(params:StudyInfo, onCreated:StudyInfo->Void) 
     {
-        Networker.addHandler(createStudy_handler);
+        Networker.addHandler(createStudy_handler.bind(onCreated));
         Networker.emitEvent(CreateStudy(params));
     }
 
-    private static function createStudy_handler(event:ServerEvent) 
+    private static function createStudy_handler(onCreated:StudyInfo->Void, event:ServerEvent) 
     {
         switch event
         {
-            case StudyCreated(id, info):
-                SceneManager.updateAnalysisStudyInfo(new StudyData(id, LoginManager.getLogin(), info));
+            case StudyCreated(info):
+                onCreated(info);
             default:
                 return false;
         }
@@ -291,11 +287,8 @@ class Requests
     {
         switch event
         {
-            case SpectationData(data): 
-		        //TODO: Rewrite
-                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
-                onStartedFollowing(login, data.id);
-                SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, login)));*/
+            case GoToGame(data):
+                onStartedFollowing(login, data.gameID);
             case FollowAlreadySpectating(id):
                 onStartedFollowing(login, id);
             case FollowSuccess:

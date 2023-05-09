@@ -128,7 +128,7 @@ class Board extends Absolute
             swapLetters();
     }
 
-    private function setShownSituation(newShownSituation:Situation)
+    public function setShownSituation(newShownSituation:Situation)
     {
         for (piece in pieces)
             pieceLayer.removeComponent(piece);

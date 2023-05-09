@@ -1,5 +1,6 @@
 package gfx.popups;
 
+import net.shared.board.Situation;
 import net.shared.variation.ReadOnlyVariation;
 import net.shared.variation.VariationPath;
 import gfx.basic_components.BaseDialog;
@@ -35,6 +36,8 @@ class StudyParamsDialog extends BaseDialog
     private var studyTagList:StudyFilterList;
     private var tags:Array<String> = [];
 
+    private var onExploredStudyUpdated:StudyInfo->Void;
+
     private function resize()
     {
         width = Math.min(400, HaxeUIScreen.instance.actualWidth * 0.98);
@@ -48,7 +51,7 @@ class StudyParamsDialog extends BaseDialog
 
     private function generateKeySIP():String
     {
-        var startingSituation:Situation = studyVariation.rootNone().getSituation();
+        var startingSituation:Situation = studyVariation.rootNode().getSituation();
         if (!startingSituation.isDefaultStarting())
             return startingSituation.serialize();
         else
@@ -87,7 +90,7 @@ class StudyParamsDialog extends BaseDialog
     private function onCreatePressed(e)
     {
         var info = constructStudyInfo();
-        Requests.createStudy(info); //will update study info automatically
+        Requests.createStudy(info, onExploredStudyUpdated); //will update study info automatically
         hideDialog(null);
     }
 
@@ -95,8 +98,10 @@ class StudyParamsDialog extends BaseDialog
     private function onOverwritePressed(e)
     {
         var info = constructStudyInfo();
+        info.id = oldStudyID;
+        info.ownerLogin = LoginManager.getLogin();
         Networker.emitEvent(OverwriteStudy(oldStudyID, info));
-        SceneManager.updateAnalysisStudyInfo(new StudyData(oldStudyID, LoginManager.getLogin(), info));
+        onExploredStudyUpdated(info);
         hideDialog(null);
     }
 
@@ -131,9 +136,10 @@ class StudyParamsDialog extends BaseDialog
         tags = [];
     }
 
-    public function new(mode:StudyParamsDialogMode)
+    public function new(mode:StudyParamsDialogMode, onExploredStudyUpdated:StudyInfo->Void)
     {
         super(null, false);
+        this.onExploredStudyUpdated = onExploredStudyUpdated;
         
         descOptionName.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_PARAM_DESCRIPTION(StudyDescription));
         tagsOptionName.text = Dictionary.getPhrase(STUDY_PARAMS_DIALOG_PARAM_TAGS(MAX_TAG_COUNT));
@@ -176,7 +182,7 @@ class StudyParamsDialog extends BaseDialog
 
                 oldStudyID = studyID;
                 onParamsEdited = onNewParamsSent;
-                studyVariation = currentParams.studyVariation;
+                studyVariation = currentParams.plainVariation.toVariation();
                 keySIP = currentParams.keyPositionSIP;
 
                 fillParams(currentParams);

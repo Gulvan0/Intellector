@@ -4,7 +4,7 @@
     </resources>
     <components>
         <component class="gfx.game.common.ply_history_view.MoveCellRenderer" alias="move-cell-renderer" />
-        <component class="gfx.game.ShareGameTab" alias="sharegametab" />
+        <component class="gfx.game.live.ShareGameTab" alias="sharegametab" />
         <component class="gfx.main.ChallengeModeRenderer" alias="challengemoderenderer" />
         <component class="gfx.main.TimeControlRenderer" alias="timecontrolrenderer" />
         <component class="gfx.main.OpenChallengesTable" alias="openchallengestable" />
@@ -14,8 +14,8 @@
         <component class="gfx.basic_components.ARPImage" alias="arpimage" />
         <component class="gfx.basic_components.CopyableText" alias="copyabletext" />
         <component class="gfx.basic_components.AutosizingLabel" alias="autosizinglabel" />
-        <component class="gfx.menubar.ChallengeEntryRenderer" alias="challengeentryrenderer" />
-        <component class="gfx.menubar.ChallengeList" alias="challengelist" />
+        <component class="gfx.menu.challenges.ChallengeEntryRenderer" alias="challengeentryrenderer" />
+        <component class="gfx.menu.challenges.ChallengeList" alias="challengelist" />
         <component class="gfx.profile.StudyWidget" alias="studywidget" />
     </components>
     <themes>

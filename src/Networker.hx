@@ -12,7 +12,7 @@ import browser.Url;
 import js.html.XMLHttpRequest;
 import haxe.Http;
 import js.Browser;
-import gfx.ScreenNavigator;
+import gfx.scene.ScreenNavigator;
 import browser.CredentialCookies;
 import net.shared.dataobj.GreetingResponseData;
 import net.Requests;
@@ -25,7 +25,7 @@ import net.shared.ServerEvent;
 import net.shared.dataobj.SessionRestorationResult;
 import net.EventProcessingQueue;
 import gfx.Dialogs;
-import gfx.SceneManager;
+import gfx.scene.SceneManager;
 import hx.ws.WebSocket;
 import haxe.Timer;
 
@@ -218,7 +218,7 @@ class Networker
 
         if (doNotReconnect)
         {
-            SceneManager.clearScreen();
+            SceneManager.getScene().toScreen(null);
 
             if (!suppressAlert)
             {
@@ -230,7 +230,7 @@ class Networker
         }
         else
         {
-            SceneManager.onDisconnected();
+            GlobalBroadcaster.broadcast(Disconnected);
             if (!Dialogs.getQueue().hasActiveDialog(ReconnectionPopUp))
                 Dialogs.getQueue().add(new ReconnectionDialog());
             startReconnectionAttempts(onConnectionReopened);
@@ -260,7 +260,7 @@ class Networker
 		switch data 
 		{
 			case ConnectedAsGuest(sessionID, token, invalidCredentials, isShuttingDown):
-                SceneManager.onConnected();
+                GlobalBroadcaster.broadcast(Connected);
                 reconnectionToken = token;
                 sid = sessionID;
                 if (invalidCredentials)
@@ -270,7 +270,7 @@ class Networker
                 if (isShuttingDown)
                     Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE);
 			case Logged(sessionID, token, incomingChallenges, ongoingFiniteGame, isShuttingDown):
-                SceneManager.onConnected();
+                GlobalBroadcaster.broadcast(Connected);
                 reconnectionToken = token;
                 sid = sessionID;
                 LoginManager.assignCredentials(CredentialCookies.getLogin(), CredentialCookies.getPassword(), None);
@@ -279,7 +279,7 @@ class Networker
                 {
                     //TODO: Rewrite
                     /*var parsedData:GameLogParserOutput = GameLogParser.parse(ongoingFiniteGame.currentLog);
-                    SceneManager.toScreen(LiveGame(ongoingFiniteGame.id, Ongoing(parsedData, ongoingFiniteGame.timeData, null)));*/
+                    SceneManager.getScene().toScreen(LiveGame(ongoingFiniteGame.id, Ongoing(parsedData, ongoingFiniteGame.timeData, null)));*/
                 }
                 else
                 {
@@ -290,7 +290,7 @@ class Networker
                 }
 			case Reconnected(missedEvents):
                 Dialogs.getQueue().closeGroup(ReconnectionPopUp);
-                SceneManager.onConnected();
+                GlobalBroadcaster.broadcast(Connected);
                 incomingBuffer.pushMissed(missedEvents);
             case OutdatedClient:
                 if (Url.isFallback())

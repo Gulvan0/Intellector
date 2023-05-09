@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import gfx.scene.SceneManager;
 import gfx.popups.ChallengeParamsDialog;
 import gfx.basic_components.BaseDialog;
 import utils.StringUtils;
@@ -121,7 +122,7 @@ class MiniProfile extends BaseDialog
         else
             unfriendBtn.hidden = true;
 
-        if (SceneManager.playerInGame())
+        if (SceneManager.getScene().isUserParticipatingInOngoingFiniteGame())
             btnBar.disabled = true;
     }
 }

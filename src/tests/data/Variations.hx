@@ -25,7 +25,7 @@ class Variations
 
             sit.performRawPly(ply);
             variation.addChild(path, ply);
-            path = path.child(0);
+            path = path.childPath(0);
         }
         
         path = [];
@@ -39,7 +39,7 @@ class Variations
 
             sit.performRawPly(ply);
             variation.addChild(path, ply);
-            path = path.child(i == 0? 1 : 0);
+            path = path.childPath(i == 0? 1 : 0);
         }
 
         return variation;
