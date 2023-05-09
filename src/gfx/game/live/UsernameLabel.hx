@@ -70,6 +70,7 @@ class UsernameLabel extends Box implements IGameComponent
 
     public function new(ownerColor:PieceColor) 
     {
+        super();
         this.ownerColor = ownerColor;
     }
 }

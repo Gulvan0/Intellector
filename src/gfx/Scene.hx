@@ -1,5 +1,6 @@
 package gfx;
 
+import dict.Phrase;
 import assets.Audio;
 import gfx.popups.OpenChallengeCreated;
 import gfx.popups.IncomingChallengeDialog;
@@ -98,7 +99,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         logOutBtn.disabled = ingame;
 
         if (ingame)
-            Browser.window.onpopstate = () -> {Url.setPathByScreen(currentScreen.getURLPath());};
+            Browser.window.onpopstate = refreshTitleAndUrl; //Revert the changes
         else
             Browser.window.onpopstate = ScreenNavigator.navigate;
     }
@@ -243,6 +244,14 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         }
     }
 
+    private function refreshTitleAndUrl()
+    {
+        var titlePhrase:Null<Phrase> = currentScreen.getTitle();
+        var titleStr:Null<String> = titlePhrase == null? null : Dictionary.getPhrase(titlePhrase);
+
+        Url.setPath(currentScreen.getURLPath(), titleStr);
+    }
+
     public function toScreen(initializer:Null<ScreenInitializer>)
     {
         if (currentScreen != null)
@@ -263,10 +272,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
             menubar.hidden = currentScreen.menuHidden;
             content.addComponent(currentScreen);
             
-            var titlePhrase:Null<Phrase> = currentScreen.getTitle();
-            var titleStr:Null<String> = titlePhrase == null? null : Dictionary.getPhrase(titlePhrase);
-
-            Url.setPath(currentScreen.getURLPath(), titleStr);
+            refreshTitleAndUrl();
             if (Networker.isConnectedToServer())
                 Networker.emitEvent(PageUpdated(currentScreen.getPage()));
 
@@ -322,7 +328,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
 
     private function onAnalysisBoardPressed(e)
     {
-        SceneManager.toScreen(Analysis(null, null, null));
+        SceneManager.toScreen(NewAnalysisBoard);
     }
 
     private function onPlayerProfilePressed(e)

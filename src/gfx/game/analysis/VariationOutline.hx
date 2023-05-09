@@ -1,5 +1,6 @@
 package gfx.game.analysis;
 
+import gfx.game.interfaces.IReadOnlyAnalysisBoardModel;
 import net.shared.variation.Variation;
 import gfx.game.events.VariationViewEvent;
 import gfx.game.models.AnalysisBoardModel;
@@ -21,12 +22,12 @@ class VariationOutline extends TreeView implements IVariationView
 
     private var eventHandler:VariationViewEvent->Void;
 
-    public function init(model:AnalysisBoardModel, eventHandler:VariationViewEvent->Void)
+    public function init(model:IReadOnlyAnalysisBoardModel, eventHandler:VariationViewEvent->Void)
     {
         this.eventHandler = eventHandler;
 
         rootNode = addNode({text: Dictionary.getPhrase(OPENING_STARTING_POSITION)});
-        rootNode.onClick = e -> {Timer.delay(onNodeChanged.bind(rootNode), 50);};
+        rootNode.onClick = e -> {Timer.delay(onNodeChanged.bind(rootNode, VariationPath.root()), 50);};
 
         updateVariation(model.getVariation(), model.getSelectedNodePath(), model.getSelectedBranch());
     }
@@ -40,6 +41,7 @@ class VariationOutline extends TreeView implements IVariationView
             var text:String = variationNode.getIncomingPlyStr(false);
             var childPath:VariationPath = variationNode.getPath();
             var childNum:Int = variationNode.getChildNum();
+            var parentNode:TreeViewNode = rootNode.findNodeByPath(childPath.parentPath().asArray().join('/'));
 
             var childNode:TreeViewNode = parentNode.addNode({text: text, nodeId: '$childNum'});
             childNode.expanded = true;

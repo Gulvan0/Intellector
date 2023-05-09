@@ -1,5 +1,7 @@
 package gfx.game.analysis;
 
+import gfx.game.board.subcomponents.Piece;
+import gfx.game.analysis.util.PosEditMode;
 import gfx.game.interfaces.IReadOnlyAnalysisBoardModel;
 import gfx.game.events.PositionEditorEvent;
 import haxe.ui.core.Component;
@@ -170,25 +172,25 @@ class PositionEditor extends VBox implements IGameComponent
     }
 
     @:bind(clearBtn, MouseEvent.CLICK)
-    private function onApplyChangesPressed(e)
+    private function onClearPressed(e)
     {
         eventHandler(ClearRequested);
     }
 
     @:bind(resetBtn, MouseEvent.CLICK)
-    private function onDiscardChangesPressed(e)
+    private function onResetPressed(e)
     {
         eventHandler(ResetRequested);
     }
 
     @:bind(startBtn, MouseEvent.CLICK)
-    private function onApplyChangesPressed(e)
+    private function onStartPosPressed(e)
     {
         eventHandler(StartPosRequested);
     }
 
     @:bind(orientationBtn, MouseEvent.CLICK)
-    private function onDiscardChangesPressed(e)
+    private function onChangeOrientationPressed(e)
     {
         eventHandler(OrientationChangeRequested);
     }

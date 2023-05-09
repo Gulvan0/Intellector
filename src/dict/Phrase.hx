@@ -1,5 +1,6 @@
 package dict;
 
+import gfx.game.common.ComponentPageName;
 import net.shared.dataobj.OfferKind;
 import net.shared.utils.PlayerRef;
 import browser.Blinker.BlinkerNotification;
@@ -28,6 +29,10 @@ enum Phrase
     OWN_MATCH_SCREEN_TITLE(opponentRef:String);
     SPECTATING_SCREEN_TITLE(whiteRef:String, blackRef:String);
     PAST_GAME_SCREEN_TITLE(id:Int, whiteRef:String, blackRef:String);
+
+    //Game screen (common)
+
+    GAME_COMPONENT_PAGE_TITLE(pageName:ComponentPageName);
 
     //Analysis screen
 

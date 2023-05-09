@@ -1,10 +1,10 @@
 package gfx.game.analysis;
 
+import gfx.game.interfaces.IReadOnlyAnalysisBoardModel;
 import net.shared.variation.ReadOnlyVariationNode;
 import net.shared.variation.VariationMap;
 import net.shared.variation.VariationPath;
 import net.shared.variation.ReadOnlyVariation;
-import gfx.game.models.AnalysisBoardModel;
 import gfx.game.events.VariationViewEvent;
 import gfx.game.analysis.variation_plain_text.NodeInfo;
 import gfx.game.analysis.variation_plain_text.PlyNode;
@@ -31,7 +31,7 @@ class VariationPlainText extends HBox implements IVariationView
     private var nodes:VariationMap<NodeInfo> = new VariationMap();
     private var items:Array<Item> = [];
 
-    public function init(model:AnalysisBoardModel, eventHandler:VariationViewEvent->Void)
+    public function init(model:IReadOnlyAnalysisBoardModel, eventHandler:VariationViewEvent->Void)
     {
         this.eventHandler = eventHandler;
 

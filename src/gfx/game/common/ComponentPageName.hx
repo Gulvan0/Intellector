@@ -1,6 +1,6 @@
 package gfx.game.common;
 
-enum PanelPageName
+enum ComponentPageName
 {
     LargeLeftPanelMain;
     UCMA;
@@ -9,5 +9,9 @@ enum PanelPageName
     PositionEditor;
     Board;
     CreepingLine;
-    CompactActionBar;
+    CompactLiveActionBar;
+    CompactAnalysisActionBar;
+    Chat;
+    GameInfoSubscreen;
+    BoardAndClocks;
 }

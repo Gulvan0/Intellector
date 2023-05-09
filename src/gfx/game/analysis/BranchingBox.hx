@@ -1,5 +1,8 @@
 package gfx.game.analysis;
 
+import GlobalBroadcaster.IGlobalEventObserver;
+import gfx.game.interfaces.IReadOnlyAnalysisBoardModel;
+import haxe.ui.containers.VBox;
 import gfx.popups.BranchingHelp;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.core.Component;
@@ -10,14 +13,14 @@ import gfx.game.events.ModelUpdateEvent;
 import gfx.game.models.ReadOnlyModel;
 import GlobalBroadcaster.GlobalEvent;
 import gfx.game.interfaces.IGameComponent;
-import haxe.ui.containers.Box;
+import dict.Dictionary;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/branching_box.xml"))
-class BranchingBox extends Box implements IGameComponent
+class BranchingBox extends VBox implements IGameComponent implements IGlobalEventObserver
 {
     private var variationView:IVariationView;
 
-    private var analysisModel:AnalysisBoardModel;
+    private var analysisModel:IReadOnlyAnalysisBoardModel;
     private var eventHandler:VariationViewEvent->Void;
 
     private var activeWheelHandler:Null<MouseEvent->Void>;

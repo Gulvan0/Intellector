@@ -4,7 +4,6 @@ import net.shared.dataobj.StudyInfo;
 import gfx.game.analysis.util.PosEditMode;
 import net.shared.variation.ReadOnlyVariation;
 import net.shared.board.Situation;
-import gfx.game.struct.AnalysisBoardBehaviorType;
 import net.shared.PieceColor;
 import net.shared.variation.VariationPath;
 

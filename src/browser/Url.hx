@@ -20,7 +20,7 @@ class Url
         setPath("");
     }
 
-    private static function setPath(path:String, ?title:String)
+    public static function setPath(path:String, ?title:String)
     {
         if (StringTools.startsWith(path, "/"))
             path = path.substr(1);

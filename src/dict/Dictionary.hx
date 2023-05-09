@@ -37,7 +37,32 @@ class Dictionary
             case PAST_GAME_SCREEN_TITLE(id, whiteRef, blackRef):
                 var whiteStr:String = Utils.playerRef(whiteRef);
                 var blackStr:String = Utils.playerRef(blackRef);
-                return ['Game $id: $whiteStr vs $blackStr', 'Игра $id: $whiteStr против $blackStr'];      
+                return ['Game $id: $whiteStr vs $blackStr', 'Игра $id: $whiteStr против $blackStr'];
+                
+            case GAME_COMPONENT_PAGE_TITLE(LargeLeftPanelMain):
+                return ["", ""];
+            case GAME_COMPONENT_PAGE_TITLE(UCMA):
+                return ["", ""];
+            case GAME_COMPONENT_PAGE_TITLE(AnalysisOverview):
+                return ["Overview", "Обзор"];
+            case GAME_COMPONENT_PAGE_TITLE(Branching):
+                return ["Branches", "Ветви"];
+            case GAME_COMPONENT_PAGE_TITLE(PositionEditor):
+                return ["Position Editor", "Редактор позиций"];
+            case GAME_COMPONENT_PAGE_TITLE(Board):
+                return ["", ""];
+            case GAME_COMPONENT_PAGE_TITLE(CreepingLine):
+                return ["", ""];
+            case GAME_COMPONENT_PAGE_TITLE(CompactLiveActionBar):
+                return ["", ""];
+            case GAME_COMPONENT_PAGE_TITLE(CompactAnalysisActionBar):
+                return ["", ""];
+            case GAME_COMPONENT_PAGE_TITLE(Chat):
+                return ["Chat", "Чат"];
+            case GAME_COMPONENT_PAGE_TITLE(GameInfoSubscreen):
+                return ["Game Info", "Об игре"];
+            case GAME_COMPONENT_PAGE_TITLE(BoardAndClocks):
+                return ["", ""];
 
             case ANALYSIS_SET_POSITION_BTN_TOOLTIP:
                 return ["Set position", "Задать позицию"];

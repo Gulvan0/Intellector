@@ -1,10 +1,10 @@
 package gfx.game.analysis;
 
+import gfx.game.interfaces.IReadOnlyAnalysisBoardModel;
 import gfx.game.analysis.variation_tree.util.DisplacementInfo;
 import net.shared.variation.Variation;
 import gfx.game.analysis.variation_tree.Arrow;
 import gfx.game.analysis.variation_tree.Node;
-import gfx.game.models.AnalysisBoardModel;
 import net.shared.variation.ReadOnlyVariation;
 import net.shared.variation.VariationPath;
 import net.shared.variation.VariationMap;
@@ -65,7 +65,7 @@ class VariationTree extends Absolute implements IVariationView
         this.nodes = new VariationMap();
     }
 
-    public function init(model:AnalysisBoardModel, eventHandler:VariationViewEvent->Void)
+    public function init(model:IReadOnlyAnalysisBoardModel, eventHandler:VariationViewEvent->Void)
     {
         this.eventHandler = eventHandler;
         this.variation = model.getVariation();
@@ -167,11 +167,15 @@ class VariationTree extends Absolute implements IVariationView
         {
             var path:VariationPath = variationNode.getPath();
             var row:Int = path.length;
-            var parentPath:String = path.parentPath();
+            var parentPath:VariationPath = path.parentPath();
 
             var maxDescendantRowLength:Int = 0;
-            for (mainlineDescendant in variation.getMainlineDescendants(false))
+            var iteratedRow:Int = row;
+            while (rowLengths.exists(iteratedRow))
+            {
                 maxDescendantRowLength = MathUtils.maxInt(maxDescendantRowLength, rowLengths.get(iteratedRow));
+                iteratedRow++;
+            }
 
             var column:Int = MathUtils.maxInt(maxDescendantRowLength + 1, info.cellularMapping.get(parentPath).column);
 
@@ -214,11 +218,12 @@ class VariationTree extends Absolute implements IVariationView
 
         for (variationNode in variation.depthFirst(false))
         {
-            var node = new Node(scale, variationNode.getPath(), variationNode.getIncomingPlyStr(indicateColors), false, onNodeSelectRequested, onNodeRemovalRequested);
-            var arrow = new Arrow(scale);
+            var path:VariationPath = variationNode.getPath();
+            var node:Node = new Node(scale, path, variationNode.getIncomingPlyStr(indicateColors), false, onNodeSelectRequested, onNodeRemovalRequested);
+            var arrow:Arrow = new Arrow(scale);
 
-            nodes.set(code, node);
-            arrows.set(code, arrow);
+            nodes.set(path, node);
+            arrows.set(path, arrow);
 
             addComponent(node);
             addComponent(arrow);
