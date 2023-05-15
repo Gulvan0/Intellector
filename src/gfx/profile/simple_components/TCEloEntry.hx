@@ -21,7 +21,7 @@ class TCEloEntry extends GenAnnotatedImage<EloData>
 
     private function generateImageTooltip(data:EloData):Null<String>
     {
-        return Utils.getTimeControlName(data.timeControl);
+        return Utils.getTimeControlTypeName(data.timeControl);
     }
     
     public function new(data:EloData)

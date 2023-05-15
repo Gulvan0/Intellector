@@ -1,5 +1,9 @@
 package gfx.popups;
 
+import browser.ChallengeParamsCookies;
+import net.shared.dataobj.ChallengeType;
+import net.shared.utils.PlayerRef.ConcretePlayerRef;
+import dict.Utils;
 import gfx.basic_components.BaseDialog;
 import net.shared.utils.MathUtils;
 import net.shared.TimeControlType;
@@ -11,13 +15,15 @@ import gfx.game.board.Board;
 import haxe.ui.events.UIEvent;
 import assets.Paths;
 import net.shared.PieceColor;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import haxe.ui.events.MouseEvent;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import haxe.ui.containers.dialogs.Dialog;
 import dict.Dictionary;
 import haxe.ui.core.Screen as HaxeUIScreen;
 import net.shared.board.Situation;
+
+using StringTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/challenge_params_popup.xml'))
 class ChallengeParamsDialog extends BaseDialog
@@ -162,16 +168,16 @@ class ChallengeParamsDialog extends BaseDialog
 
             var startMins:Null<Int> = Std.parseInt(startMinsTF.text);
             var startSecs:Null<Int> = Std.parseInt(startSecsTF.text);
-            var bonusSecs:Null<Int> = Std.parseInt(bonusSecsTF.text);
+            var incrementSecs:Null<Int> = Std.parseInt(bonusSecsTF.text);
 
-            if (startMins == null || startSecs == null || bonusSecs == null || startMins < 0 || startSecs < 0 || bonusSecs < 0 || startMins + startSecs == 0)
+            if (startMins == null || startSecs == null || incrementSecs == null || startMins < 0 || startSecs < 0 || incrementSecs < 0 || startMins + startSecs == 0)
             {
                 if (approvedTimeControl.getType() == Correspondence)
                 {
                     restoreTimeControlInputValues(TimeControl.normal(10, 5));
                     startMins = 10;
                     startSecs = 0;
-                    bonusSecs = 5;
+                    incrementSecs = 5;
                 }
                 else
                 {
@@ -182,13 +188,13 @@ class ChallengeParamsDialog extends BaseDialog
             }
 
             var finalStartSecs:Int = MathUtils.minInt(startMins * 60 + startSecs, MAX_START_SECS_ALLOWED);
-            var finalBonusSecs:Int = MathUtils.minInt(bonusSecs, MAX_BONUS_SECS_ALLOWED);
+            var finalIncrementSecs:Int = MathUtils.minInt(incrementSecs, MAX_BONUS_SECS_ALLOWED);
 
-            approvedTimeControl = new TimeControl(finalStartSecs, finalBonusSecs);
+            approvedTimeControl = new TimeControl(finalStartSecs, finalIncrementSecs);
         }
 
         tcIcon.resource = Paths.timeControl(approvedTimeControl.getType());
-        tcLabel.text = approvedTimeControl.toString();
+        tcLabel.text = Utils.getTimeControlName(approvedTimeControl);
     }
 
     private function restoreTimeControlInputValues(?customTimeControl:TimeControl)
@@ -196,13 +202,13 @@ class ChallengeParamsDialog extends BaseDialog
         var timeControl:TimeControl = customTimeControl ?? approvedTimeControl;
         startMinsTF.text = "" + Math.floor(timeControl.startSecs / 60);
         startSecsTF.text = "" + timeControl.startSecs % 60;
-        bonusSecsTF.text = "" + timeControl.bonusSecs;
+        bonusSecsTF.text = "" + timeControl.incrementSecs;
     }
 
     @:bind(confirmBtn, MouseEvent.CLICK)
     private function createChallenge(e)
     {
-        var challengeType:ChallengeType = typeStepper.selectedIndex == 0? Direct(usernameTF.text) : typeStepper.selectedIndex == 2? ToBot("stconda") : visibilityDropdown.selectedIndex == 0? Public : ByLink;
+        var challengeType:ChallengeType = typeStepper.selectedIndex == 0? Direct(usernameTF.text) : typeStepper.selectedIndex == 2? Direct("+stconda") : visibilityDropdown.selectedIndex == 0? Public : ByLink;
         var timeControl:TimeControl = approvedTimeControl;
         var rated:Bool = typeStepper.selectedIndex != 2 && rankedCheck.selected;
         
@@ -223,8 +229,8 @@ class ChallengeParamsDialog extends BaseDialog
 
         var params:ChallengeParams = new ChallengeParams(timeControl, challengeType, acceptorColor, customStartingSituation, rated);
         if (!dontCacheParams)
-            params.saveToCookies();
-        Networker.emitEvent(CreateChallenge(params.serialize()));
+            ChallengeParamsCookies.save(params);
+        Networker.emitEvent(CreateChallenge(params));
         hideDialog(DialogButton.OK);
     }
 
@@ -233,7 +239,7 @@ class ChallengeParamsDialog extends BaseDialog
         super(null, true);
 
         if (initialParams == null)
-            initialParams = ChallengeParams.loadFromCookies();
+            initialParams = ChallengeParamsCookies.load();
 
         this.dontCacheParams = dontCacheParams;
 
@@ -252,7 +258,7 @@ class ChallengeParamsDialog extends BaseDialog
 
         for (btn => tc in commonTimeControls)
         {
-            btn.text = tc.toString();
+            btn.text = Utils.getTimeControlName(tc);
             btn.icon = Paths.timeControl(tc.getType());
             btn.onClick = e -> {
                 tcValuesBox.disabled = false;
@@ -305,7 +311,7 @@ class ChallengeParamsDialog extends BaseDialog
         restoreTimeControlInputValues();
 
         tcIcon.resource = Paths.timeControl(timeControlType);
-        tcLabel.text = approvedTimeControl.toString();
+        tcLabel.text = Utils.getTimeControlName(approvedTimeControl);
 
         switch initialParams.type 
         {
@@ -317,13 +323,18 @@ class ChallengeParamsDialog extends BaseDialog
                 typeSpecificStack.selectedIndex = 1;
                 typeStepper.selectedIndex = 1;
                 visibilityDropdown.selectedIndex = 1;
-            case Direct(calleeLogin):
-                typeSpecificStack.selectedIndex = 0;
-                typeStepper.selectedIndex = 0;
-                usernameTF.text = calleeLogin;
-            case ToBot(handle):
-                typeSpecificStack.selectedIndex = 2;
-                typeStepper.selectedIndex = 2;
+            case Direct(calleeRef):
+                var concreteRef:ConcretePlayerRef = calleeRef.concretize();
+                switch concreteRef 
+                {
+                    case Bot(botHandle):
+                        typeSpecificStack.selectedIndex = 2;
+                        typeStepper.selectedIndex = 2;
+                    default:
+                        typeSpecificStack.selectedIndex = 0;
+                        typeStepper.selectedIndex = 0;
+                        usernameTF.text = calleeRef;
+                }
         }
     }
 }

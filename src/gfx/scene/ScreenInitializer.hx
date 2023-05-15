@@ -8,9 +8,9 @@ import net.shared.dataobj.StudyInfo;
 import net.shared.dataobj.ProfileData;
 import net.shared.variation.Variation;
 import net.shared.variation.VariationPath;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import net.shared.PieceColor;
-import utils.TimeControl;
+import net.shared.TimeControl;
 
 enum ScreenInitializer
 {

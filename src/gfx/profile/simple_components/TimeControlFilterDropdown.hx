@@ -54,7 +54,7 @@ class TimeControlFilterDropdown extends DropDown
 
         for (timeControlType in TimeControlType.createAll())
             dataSource.add({
-                tc: dict.Utils.getTimeControlName(timeControlType),
+                tc: dict.Utils.getTimeControlTypeName(timeControlType),
                 games: Dictionary.getPhrase(PROFILE_GAMES_TCFILTER_GAMECNT_LABEL_TEXT(gamesCntByTimeControl.get(timeControlType))),
                 elo: Dictionary.getPhrase(PROFILE_GAMES_TCFILTER_ELO_LABEL_TEXT(elo.get(timeControlType))),
                 img: Paths.timeControl(timeControlType)

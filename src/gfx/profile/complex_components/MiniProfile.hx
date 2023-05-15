@@ -4,7 +4,7 @@ import gfx.scene.SceneManager;
 import gfx.popups.ChallengeParamsDialog;
 import gfx.basic_components.BaseDialog;
 import utils.StringUtils;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import net.Requests;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.components.Button;

@@ -14,6 +14,6 @@
 --resource ./assets/resources/changelog.json@changelog
 #--resource ./src/tests/ui/test_case_infos.json@test_case_infos
 
--js build/html5/1682533153.js
+-js build/html5/1684184257.js
 
 -D rapid_text_metrics

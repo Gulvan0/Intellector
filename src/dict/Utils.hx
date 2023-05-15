@@ -9,7 +9,7 @@ import dict.utils.OutcomePhrases;
 import utils.SpecialChar;
 import net.shared.dataobj.UserStatus;
 import utils.StringUtils;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import net.shared.Outcome;
 import net.shared.PieceColor;
 
@@ -24,6 +24,11 @@ class Utils
             case EN: color.getName();
             case RU: color == White? "Белые" : "Черные";
         }
+    }
+
+    public static function getTimeControlName(timeControl:TimeControl):String
+    {
+        return timeControl.getDisplayName(Preferences.language.get() == RU);
     }
 
     public static function guestName(guestID:String):String
@@ -46,7 +51,7 @@ class Utils
         return LoginManager.isPlayer(whiteRef)? playerRef(blackRef) : playerRef(whiteRef);
     }
 
-    public static function getTimeControlName(type:TimeControlType):String
+    public static function getTimeControlTypeName(type:TimeControlType):String
     {
         return switch type {
             case Correspondence: Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);

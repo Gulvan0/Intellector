@@ -1,5 +1,7 @@
 package gfx.game.models;
 
+import engine.Bot;
+import net.shared.dataobj.ChallengeParams;
 import net.shared.board.Rules;
 import net.shared.board.Situation;
 import net.shared.variation.Variation;
@@ -17,14 +19,14 @@ import net.shared.dataobj.OfferKind;
 import net.shared.dataobj.TimeReservesData;
 import gfx.game.struct.MsRemaindersData;
 import net.shared.PieceColor;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import net.shared.dataobj.GameModelData;
 
 using Lambda;
 
 class ModelBuilder
 {
-    public static function fromGameModelData(data:GameModelData, ?orientation:PieceColor = White):Model
+    public static function fromGameModelData(data:GameModelData, ?orientation:Null<PieceColor>):Model
     {
         var gameEnded:Bool = data.eventLog.exists(item -> item.entry.match(GameEnded(_)));
         var playerColor:Null<PieceColor> = LoginManager.isPlayer(data.playerRefs[White])? White : LoginManager.isPlayer(data.playerRefs[Black])? Black : null;
@@ -41,11 +43,11 @@ class ModelBuilder
             var model:SpectationModel = new SpectationModel();
 
             model.gameID = data.gameID;
-            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.bonusSecs);
+            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.incrementSecs);
             model.playerRefs = data.playerRefs;
             model.elo = data.elo;
             model.startTimestamp = data.startTimestamp;
-            model.orientation = orientation;
+            model.orientation = orientation ?? White;
             model.playerOnline = data.playerOnline;
             model.spectatorRefs = data.activeSpectators;
 
@@ -73,10 +75,10 @@ class ModelBuilder
             var model:MatchVersusBotModel = new MatchVersusBotModel();
 
             model.gameID = data.gameID;
-            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.bonusSecs);
+            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.incrementSecs);
             model.playerRefs = data.playerRefs;
             model.startTimestamp = data.startTimestamp;
-            model.orientation = orientation;
+            model.orientation = orientation ?? playerColor;
             model.spectatorRefs = data.activeSpectators;
             model.plannedPremoves = [];
             model.opponentBot = BotFactory.build(botHandle);
@@ -104,11 +106,11 @@ class ModelBuilder
             var model:MatchVersusPlayerModel = new MatchVersusPlayerModel();
 
             model.gameID = data.gameID;
-            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.bonusSecs);
+            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.incrementSecs);
             model.playerRefs = data.playerRefs;
             model.elo = data.elo;
             model.startTimestamp = data.startTimestamp;
-            model.orientation = orientation;
+            model.orientation = orientation ?? playerColor;
             model.opponentOnline = data.playerOnline[opposite(playerColor)];
             model.spectatorRefs = data.activeSpectators;
             model.plannedPremoves = [];

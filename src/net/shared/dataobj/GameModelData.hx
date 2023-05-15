@@ -8,7 +8,7 @@ import net.shared.utils.PlayerRef;
 typedef GameModelData = {
     //Initial conditions
     var gameID:Int;
-    var timeControl:{startSecs:Int, bonusSecs:Int};
+    var timeControl:{startSecs:Int, incrementSecs:Int};
     var playerRefs:Map<PieceColor, PlayerRef>;
     var elo:Null<Map<PieceColor, EloValue>>;
     var startTimestamp:Null<UnixTimestamp>;

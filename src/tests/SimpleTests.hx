@@ -8,7 +8,7 @@ import haxe.ui.containers.Grid;
 import gfx.menu.challenges.ChallengeEntryRenderer;
 import gfx.scene.SceneManager;
 import tests.data.ChallengeParameters;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import tests.data.Variations;
 import gfx.popups.StudyParamsDialog;
 import gfx.profile.complex_components.StudiesTab;
@@ -306,7 +306,7 @@ class SimpleTests
 
 		var challengeData:ChallengeData = new ChallengeData();
 		challengeData.id = 42;
-		challengeData.serializedParams = challengeParams.serialize();
+		challengeData.params = challengeParams;
 		challengeData.ownerLogin = "kaz";
 		challengeData.ownerELO = Normal(1345);
 
@@ -332,7 +332,7 @@ class SimpleTests
 
 			var challengeData:ChallengeData = new ChallengeData();
 			challengeData.id = 12;
-			challengeData.serializedParams = challengeParams.serialize();
+			challengeData.params = challengeParams;
 			challengeData.ownerLogin = i % 2 == 0? "kaz" : "gulvan";
 			challengeData.ownerELO = Provisional(1250);
 
@@ -366,7 +366,7 @@ class SimpleTests
 
 		var challengeData:ChallengeData = new ChallengeData();
 		challengeData.id = 12;
-		challengeData.serializedParams = challengeParams.serialize();
+		challengeData.params = challengeParams;
 		challengeData.ownerLogin = i < 4? "kaz" : "gulvan";
 		challengeData.ownerELO = Provisional(1250);
 

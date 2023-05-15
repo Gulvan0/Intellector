@@ -12,11 +12,11 @@ import net.shared.dataobj.ChallengeData;
 import net.shared.TimeControlType;
 import haxe.ui.tooltips.ToolTipManager;
 import gfx.common.SituationTooltipRenderer;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import gfx.Dialogs;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import net.shared.PieceColor;
 import haxe.ui.components.Button;
 import haxe.ui.styles.Style;
@@ -114,35 +114,33 @@ class OpenChallengeJoining extends Screen implements IGlobalEventObserver
     {
 		super();
 
-		var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
-
 		this.challengeID = data.id;
 		this.ownerLogin = data.ownerLogin;
-		this.ratedChallenge = params.rated;
+		this.ratedChallenge = data.params.rated;
 
-		var timeControlString:String = params.timeControl.toString();
-		var timeControlType:TimeControlType = params.timeControl.getType();
+		var timeControlString:String = data.params.timeControl.toString();
+		var timeControlType:TimeControlType = data.params.timeControl.getType();
 
 		challengeByLabel.text = Dictionary.getPhrase(OPENJOIN_CHALLENGE_BY_HEADER, [data.ownerLogin]);
 
 		tcIcon.resource = Paths.timeControl(timeControlType);
 		tcLabel.text = timeControlString;
 		if (timeControlType != Correspondence)
-			tcLabel.text += ' (${Utils.getTimeControlName(timeControlType)})';
+			tcLabel.text += ' (${Utils.getTimeControlTypeName(timeControlType)})';
 
-		bracketLabel.text = Dictionary.getPhrase(params.rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
+		bracketLabel.text = Dictionary.getPhrase(data.params.rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
 
-		colorIcon.resource = Paths.challengeColor(params.acceptorColor);
-		colorIcon.tooltip = switch params.acceptorColor {
+		colorIcon.resource = Paths.challengeColor(data.params.acceptorColor);
+		colorIcon.tooltip = switch data.params.acceptorColor {
 			case White: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [data.ownerLogin]);
 			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [data.ownerLogin]);
 			case null: Dictionary.getPhrase(OPENJOIN_COLOR_RANDOM);
 		};
 
-        if (params.customStartingSituation != null)
+        if (data.params.customStartingSituation != null)
         {
             customStartPosIcon.hidden = false;
-            var renderer:SituationTooltipRenderer = new SituationTooltipRenderer(params.customStartingSituation);
+            var renderer:SituationTooltipRenderer = new SituationTooltipRenderer(data.params.customStartingSituation);
             ToolTipManager.instance.registerTooltip(customStartPosIcon, {
                 renderer: renderer
             });

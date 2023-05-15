@@ -1,5 +1,7 @@
 package net.shared.board;
 
+import haxe.Unserializer;
+import haxe.Serializer;
 import net.shared.utils.MathUtils;
 import net.shared.converters.SituationSerializer;
 import net.shared.PieceColor;
@@ -41,6 +43,22 @@ class Situation
         for (i in 0...plyCount)
             sit.performRandomPly();
         return sit;
+    }
+
+    @:keep
+    private function hxSerialize(s:Serializer) 
+    {
+        s.serialize(serialize());
+    }
+
+    @:keep
+    private function hxUnserialize(u:Unserializer) 
+    {
+        var sit:Situation = deserialize(u.unserialize());
+
+        pieces = sit.pieces;
+        turnColor = sit.turnColor;
+        intellectorPos = sit.intellectorPos;
     }
 
     public static function deserialize(sip:String):Null<Situation>

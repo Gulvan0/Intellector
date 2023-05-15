@@ -3,7 +3,7 @@ package gfx.main;
 import dict.Utils;
 import dict.Dictionary;
 import assets.Paths;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import haxe.ui.core.ItemRenderer;
 import net.shared.TimeControlType;
 
@@ -19,7 +19,7 @@ class TimeControlRenderer extends ItemRenderer
             var timeControlType:TimeControlType = timeControl.getType();
 
             tcIcon.resource = Paths.timeControl(timeControlType);
-            tcIcon.text = Utils.getTimeControlName(timeControlType);
+            tcIcon.text = Utils.getTimeControlTypeName(timeControlType);
 
             tcLabel.text = timeControl.toString();
         }

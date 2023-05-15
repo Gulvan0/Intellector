@@ -4,7 +4,7 @@ import gfx.popups.ChallengeParamsDialog;
 import haxe.Timer;
 import haxe.ui.containers.VBox;
 import net.Requests;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
 import net.shared.dataobj.ProfileData;

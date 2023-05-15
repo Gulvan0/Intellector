@@ -18,7 +18,7 @@ import browser.Url;
 import net.shared.dataobj.ChallengeData;
 import haxe.ui.components.Image;
 import net.shared.dataobj.SendChallengeResult;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import haxe.ui.containers.SideBar;
 import dict.Dictionary;
 import GlobalBroadcaster.IGlobalEventObserver;

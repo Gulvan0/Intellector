@@ -9,18 +9,17 @@ import net.shared.TimeControlType;
 import net.shared.dataobj.GameInfo;
 import net.shared.dataobj.StudyInfo;
 import net.shared.dataobj.ProfileData;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import dict.Dictionary;
 import gfx.Dialogs;
 import gfx.scene.SceneManager;
 import net.shared.PieceColor;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import net.shared.ClientEvent;
 import net.shared.ServerEvent;
 
 typedef GetGamesCallback = (games:Array<GameInfo>, hasNext:Bool) -> Void;
 typedef GetStudiesCallback = (studyMap:Array<StudyInfo>, hasNext:Bool) -> Void;
-typedef MainMenuEnteredCallback = (openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>) -> Void;
 
 class Requests
 {

@@ -1,17 +1,15 @@
 package net.shared.dataobj;
 
-import net.shared.EloValue.serialize;
-
 class ChallengeData
 {
     public var id:Int;
-    public var serializedParams:String;
+    public var params:ChallengeParams;
     public var ownerLogin:String;
     public var ownerELO:EloValue;
 
     public function toString() 
     {
-        return 'ChallengeData(ID=$id, Owner=$ownerLogin)';
+        return 'ChallengeData(ID=$id, Owner=$ownerLogin, $params)';
     }
 
     public function new()

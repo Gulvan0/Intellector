@@ -18,7 +18,7 @@ import haxe.ui.containers.Box;
 import haxe.Timer;
 import haxe.ui.styles.Style;
 import haxe.ui.containers.Card;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import haxe.ui.components.Label;
 import haxe.ui.macros.ComponentMacros;
 

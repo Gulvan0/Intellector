@@ -1,7 +1,7 @@
 package tests.data;
 
-import utils.TimeControl;
-import struct.ChallengeParams;
+import net.shared.TimeControl;
+import net.shared.dataobj.ChallengeParams;
 import net.shared.board.Situation;
 
 class ChallengeParameters 

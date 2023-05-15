@@ -1,6 +1,6 @@
 package gfx.menu.challenges;
 
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import net.shared.dataobj.ChallengeData;
 
 class ChallengeEntryData
@@ -13,7 +13,7 @@ class ChallengeEntryData
     public function new(data:ChallengeData, list:ChallengeList)
     {
         this.id = data.id;
-        this.params = ChallengeParams.deserialize(data.serializedParams);
+        this.params = data.params;
         this.ownerLogin = data.ownerLogin;
         this.list = list;
     }

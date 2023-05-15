@@ -11,7 +11,7 @@ import net.shared.board.Situation;
 import net.shared.Outcome;
 import net.shared.EloValue;
 import net.shared.PieceColor;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import net.shared.utils.PlayerRef;
 import gfx.game.interfaces.IReadOnlyMsRemainders;
 import gfx.game.struct.MsRemaindersData;

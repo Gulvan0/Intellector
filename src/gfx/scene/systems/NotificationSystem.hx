@@ -5,7 +5,7 @@ import gfx.popups.IncomingChallengeDialog;
 import net.INetObserver;
 import gfx.popups.OpenChallengeCreated;
 import assets.Audio;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import net.shared.ServerEvent;
 
 /**
@@ -18,8 +18,7 @@ class NotificationSystem implements INetObserver
         switch event
         {
             case CreateChallengeResult(Success(data)):
-                var challengeParams:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
-                switch challengeParams.type 
+                switch data.params.type 
                 {
                     case Public, ByLink:
                         Dialogs.getQueue().add(new OpenChallengeCreated(data.id));

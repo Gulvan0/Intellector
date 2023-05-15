@@ -21,7 +21,7 @@ import dict.Utils;
 import assets.Paths;
 import net.INetObserver;
 import net.shared.ServerEvent;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import haxe.ui.containers.Card;
 import haxe.ui.containers.VBox;
 import dict.Dictionary;

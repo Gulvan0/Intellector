@@ -1,7 +1,7 @@
 package gfx.game.struct;
 
 import net.shared.utils.UnixTimestamp;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import net.shared.dataobj.TimeReservesData;
 import net.shared.dataobj.GameModelData;
 import gfx.game.interfaces.IReadOnlyMsRemainders;

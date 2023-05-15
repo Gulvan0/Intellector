@@ -9,14 +9,14 @@ import dict.Utils;
 import net.shared.TimeControlType;
 import browser.Url;
 import net.shared.PieceColor;
-import utils.TimeControl;
+import net.shared.TimeControl;
 import gfx.common.SituationTooltipRenderer;
 import haxe.ui.tooltips.ToolTipManager;
 import assets.Paths;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.core.ItemRenderer;
 import dict.Dictionary;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/menu/challenge_entry.xml"))
 class ChallengeEntryRenderer extends ItemRenderer
@@ -109,7 +109,7 @@ class ChallengeEntryRenderer extends ItemRenderer
         };
 
         timeControlIcon.resource = Paths.timeControl(timeControlType);
-        timeControlIcon.tooltip = Utils.getTimeControlName(timeControlType);
+        timeControlIcon.tooltip = Utils.getTimeControlTypeName(timeControlType);
         paramsLabel.text = timeControl.toString() + ' • ' + Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated)) + ' • ';
         colorIcon.resource = Paths.challengeColor(color);
         colorIcon.tooltip = Dictionary.getPhrase(CHALLENGE_COLOR_ICON_TOOLTIP(color));

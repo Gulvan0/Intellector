@@ -9,7 +9,7 @@ enum ClientEvent
     Login(login:String, password:String);
     Register(login:String, password:String);
     LogOut;
-    CreateChallenge(serializedParams:String);
+    CreateChallenge(params:ChallengeParams);
     CancelChallenge(challengeID:Int);
     AcceptChallenge(challengeID:Int); 
     DeclineDirectChallenge(challengeID:Int);

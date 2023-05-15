@@ -3,7 +3,7 @@ package gfx.main;
 import utils.StringUtils.eloToStr;
 import net.shared.dataobj.ChallengeData;
 import haxe.ui.events.UIEvent;
-import struct.ChallengeParams;
+import net.shared.dataobj.ChallengeParams;
 import haxe.ui.containers.VBox;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
@@ -22,10 +22,9 @@ class OpenChallengesTable extends VBox
             if (Lambda.exists(challengeData, x -> x.id == data.id))
                 continue;
             
-            var params:ChallengeParams = ChallengeParams.deserialize(data.serializedParams);
-            var bracketText:String = Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(params.rated));
-            var modeData = {color: params.acceptorColor, situation: params.customStartingSituation};
-            table.dataSource.add({mode: modeData, timeControl: params.timeControl, player: '${data.ownerLogin} (${eloToStr(data.ownerELO)})', bracket: bracketText});
+            var bracketText:String = Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(data.params.rated));
+            var modeData = {color: data.params.acceptorColor, situation: data.params.customStartingSituation};
+            table.dataSource.add({mode: modeData, timeControl: data.params.timeControl, player: '${data.ownerLogin} (${eloToStr(data.ownerELO)})', bracket: bracketText});
             challengeData.push(data);
         }
     }
