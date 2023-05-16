@@ -85,14 +85,24 @@ class Panel extends Stack
             return !pageComponent.hidden;
     }
 
-    public function setPageHidden(page:ComponentPageName, hidden:Bool)
+    public function setPageDisabled(page:ComponentPageName, pageDisabled:Bool)
     {
         var pageComponent = pageComponents.get(page);
 
         if (pageComponent == null)
             return;
 
-        pageComponent.hidden = true;
+        pageComponent.disabled = pageDisabled;
+    }
+
+    public function setPageHidden(page:ComponentPageName, pageHidden:Bool)
+    {
+        var pageComponent = pageComponents.get(page);
+
+        if (pageComponent == null)
+            return;
+
+        pageComponent.hidden = pageHidden;
 
         var newMode:PanelDisplayMode = modeByPagesCount(pages.count(isPageActive));
 

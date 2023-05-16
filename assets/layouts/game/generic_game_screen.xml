@@ -1,55 +1,18 @@
 <component width="100%" height="100%">
     <stack id="layoutStack" width="100%" height="100%">
         <hbox id="largeLayout" width="100%" height="100%" style="spacing:15px">
-            <vbox id="leftBox" style="spacing:10px" height="98%" />
-            <vbox id="centerBox" width="100%" height="100%">
-                <box id="largeBoardContainer" width="100%" height="100%" />
-                <box id="largeExtrasBox" width="100%" />
+            <box id="largeLeftBox" style="spacing:10px" width="350px" height="100%" />
+            <vbox id="largeCenterContainer" width="100%" height="100%">
+                <box id="largeBoardBox" width="100%" height="100%" />
+                <box id="largeExtrasBox" width="100%" height="120px" />
             </vbox>
+            <box id="largeRightBox" style="spacing:10px" width="350px" height="100%" />
         </hbox>
-        <stack id="compactLayout" width="100%" height="100%">
-            <vbox id="mainSubscreen" width="100%" verticalAlign="center">
-                <creepingline id="creepingLine" width="100%" />
-                <hbox id="blackPlayerHBox" width="100%">
-                    <label id="compactBlackLoginLabel" style="color:#666666;font-size:24px" verticalAlign="center" />
-                    <spacer width="100%" />
-                    <clock id="compactBlackClock" verticalAlign="center" />
-                </hbox>
-                <box id="compactBoardContainer" width="100%" />
-                <hbox id="whitePlayerHBox" width="100%">
-                    <label id="compactWhiteLoginLabel" style="color:#666666;font-size:24px" verticalAlign="center" />
-                    <spacer width="100%" />
-                    <clock id="compactWhiteClock" verticalAlign="center" />
-                </hbox>
-            </vbox>
-        </stack>
+        <vbox id="compactLayout" width="100%" verticalAlign="center">
+            <box id="compactTopBox" width="100%" />
+            <box id="compactBoardBox" width="100%" />
+            <box id="compactExtrasBox" width="100%" height="120px" />
+            <box id="compactBottomBox" width="100%" />
+        </vbox>
     </stack>
-    <hbox width="100%" height="100%" style="spacing:15px">
-        
-            <gameinfobox id="gameinfobox" width="100%" />
-            <stack id="chatstack" width="100%" height="100%">
-                <chatbox id="chatbox" width="100%" height="100%" />
-                <botchat id="botchat" width="100%" height="100%" />
-            </stack>
-        </vbox>
-        <vbox id="centerBox" width="100%" height="100%">
-            <spacer id="cSpacer1" height="50%" />
-            
-            
-            <spacer id="cSpacer2" height="50%" />
-            <gameactionbar id="cActionBar" width="100%" />
-        </vbox>
-        <vbox id="lRightBox" height="98%">
-            <clock id="lBlackClock" />
-            <card id="lBlackLoginCard" style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px" width="100%" >
-                <label id="lBlackLoginLabel" text="player2" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
-            </card>
-            <movenavigator id="lNavigator" height="100%" />
-            <gameactionbar id="lActionBar" />
-            <card id="lWhiteLoginCard" style="background-color: #ffffff;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px" width="100%" >
-                <label id="lWhiteLoginLabel" text="player1" verticalAlign="center" horizontalAlign="center" style="font-size:24px" />
-            </card>
-            <clock id="lWhiteClock" />
-        </vbox>
-    </hbox>
 </component>
