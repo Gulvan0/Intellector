@@ -345,30 +345,19 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
 
     public function onEnter()
     {
-        Networker.addObserver(this);
-        GlobalBroadcaster.addObserver(this);
-        SceneManager.addResizeHandler(performValidation);
-        Audio.playSound("notify");
-        performValidation();
-        Timer.delay(boardContainer.validateNow, 25);
+        GlobalBroadcaster.addObserver(this); //TO SCREENS THAT NEED IT
+        Audio.playSound("notify"); //TO SCREENS THAT NEED IT
     }
 
     public function onClose()
     {
         if (botOpponent != null)
-            botOpponent.interrupt();
+            botOpponent.interrupt(); //TO BOT SCREEN
 
         if (FollowManager.followedGameID == gameID)
-            FollowManager.stopFollowing();
+            FollowManager.stopFollowing(); //TO SPEC SCREEN
 
-        cWhiteClock.deactivate();
-        cBlackClock.deactivate();
-        lWhiteClock.deactivate();
-        lBlackClock.deactivate();
-
-        SceneManager.removeResizeHandler(performValidation);
-        Networker.removeObserver(this);
-        GlobalBroadcaster.removeObserver(this);
+        GlobalBroadcaster.removeObserver(this); //TO SCREENS THAT NEED IT
     }
 
     private function performValidation() 

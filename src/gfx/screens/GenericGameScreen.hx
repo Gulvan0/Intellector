@@ -44,7 +44,7 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
 
     private abstract function getModel():ReadOnlyModel;
 
-    private abstract function syncBehaviour(updatesToProcess:Array<ModelUpdateEvent>):Void;
+    private abstract function processModelUpdatesAtTopLevel(updatesToProcess:Array<ModelUpdateEvent>):Void;
 
     private function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
     {
@@ -58,6 +58,8 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
     
     private function onClose()
     {
+        Networker.removeObserver(this);
+
         for (gameComponent in gameComponents)
             gameComponent.destroy();
 
@@ -101,7 +103,7 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
             for (gameComponent in gameComponents)
                 gameComponent.handleModelUpdate(model, updateEvent);
 
-        syncBehaviour(updatesToProcess);
+        processModelUpdatesAtTopLevel(updatesToProcess);
     }
 
     public function handleNetEvent(event:ServerEvent)
@@ -182,6 +184,8 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
 
         for (gameComponent in gameComponents)
             gameComponent.init(getModel(), this);
+
+        Networker.addObserver(this);
     }
 
     private function setPageDisabled(page:ComponentPageName, pageDisabled:Bool)
