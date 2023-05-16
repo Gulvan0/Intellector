@@ -1,5 +1,7 @@
 package gfx.screens;
 
+import net.shared.ServerEvent;
+import gfx.game.behaviours.IBehaviour;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.events.PositionEditorEvent;
 import gfx.game.events.VariationViewEvent;
@@ -31,6 +33,8 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
     private var subscreens:Map<ComponentPageName, CompactSubscreen> = [];
     private var gameComponents:Array<IGameComponent> = [];
 
+    private var behaviour:IBehaviour;
+
     public abstract function getTitle():Null<Phrase>;
     public abstract function getURLPath():Null<String>;
     public abstract function getPage():ViewedScreen;
@@ -40,12 +44,7 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
 
     private abstract function getModel():ReadOnlyModel;
 
-    public abstract function handleGameboardEvent(event:GameboardEvent):Void;
-    public abstract function handleChatboxEvent(event:ChatboxEvent):Void;
-    public abstract function handleActionBarEvent(event:ActionBarEvent):Void;
-    public abstract function handlePlyHistoryViewEvent(event:PlyHistoryViewEvent):Void;
-    public abstract function handleVariationViewEvent(event:VariationViewEvent):Void;
-    public abstract function handlePositionEditorEvent(event:PositionEditorEvent):Void;
+    private abstract function syncBehaviour(updatesToProcess:Array<ModelUpdateEvent>):Void;
 
     private function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
     {
@@ -94,6 +93,59 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
         largeRightBox.width = boxWidth;
     }
 
+    private function processModelUpdates(updatesToProcess:Array<ModelUpdateEvent>)
+    {
+        var model:ReadOnlyModel = getModel();
+
+        for (updateEvent in updatesToProcess)
+            for (gameComponent in gameComponents)
+                gameComponent.handleModelUpdate(model, updateEvent);
+
+        syncBehaviour(updatesToProcess);
+    }
+
+    public function handleNetEvent(event:ServerEvent)
+    {
+        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleNetEvent(event);
+        processModelUpdates(updatesToProcess);
+    }
+
+    public function handleGameboardEvent(event:GameboardEvent)
+    {
+        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleGameboardEvent(event);
+        processModelUpdates(updatesToProcess);
+    }
+
+    public function handleChatboxEvent(event:ChatboxEvent)
+    {
+        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleChatboxEvent(event);
+        processModelUpdates(updatesToProcess);
+    }
+    
+    public function handleActionBarEvent(event:ActionBarEvent)
+    {
+        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleActionBarEvent(event);
+        processModelUpdates(updatesToProcess);
+    }
+    
+    public function handlePlyHistoryViewEvent(event:PlyHistoryViewEvent)
+    {
+        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handlePlyHistoryViewEvent(event);
+        processModelUpdates(updatesToProcess);
+    }
+    
+    public function handleVariationViewEvent(event:VariationViewEvent)
+    {
+        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleVariationViewEvent(event);
+        processModelUpdates(updatesToProcess);
+    }
+    
+    public function handlePositionEditorEvent(event:PositionEditorEvent)
+    {
+        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handlePositionEditorEvent(event);
+        processModelUpdates(updatesToProcess);
+    }
+
     private function getPanelContainer(panelName:PanelName):Box
     {
         return switch panelName 
@@ -109,7 +161,7 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
         }
     }
 
-    private function fill(panelMap:Map<PanelName, Array<ComponentPageName>>, subscreenNames:Array<ComponentPageName>)
+    private function init(panelMap:Map<PanelName, Array<ComponentPageName>>, subscreenNames:Array<ComponentPageName>)
     {
         for (panelName => panelPages in panelMap.keyValueIterator())
         {
@@ -127,18 +179,9 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
             subscreens.set(pageName, subscreen);
             gameComponents = gameComponents.concat(childGameComponents);
         }
-    }
 
-    private function initAllComponents()
-    {
         for (gameComponent in gameComponents)
             gameComponent.init(getModel(), this);
-    }
-
-    private function emitModelUpdateEvent(event:ModelUpdateEvent)
-    {
-        for (gameComponent in gameComponents)
-            gameComponent.handleModelUpdate(getModel(), event);
     }
 
     private function setPageDisabled(page:ComponentPageName, pageDisabled:Bool)
