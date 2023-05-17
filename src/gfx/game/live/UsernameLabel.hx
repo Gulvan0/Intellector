@@ -4,7 +4,7 @@ import haxe.ui.styles.Style;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
 import gfx.game.events.ModelUpdateEvent;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.models.ReadOnlyModel;
 import gfx.game.interfaces.IGameComponent;
 import haxe.ui.containers.Box;
@@ -18,7 +18,7 @@ class UsernameLabel extends Box implements IGameComponent
 {
     private var ownerColor:PieceColor;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
+    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 

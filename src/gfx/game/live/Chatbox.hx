@@ -4,7 +4,7 @@ import gfx.game.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.models.ReadOnlyModel;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.events.ChatboxEvent;
 import gfx.game.interfaces.IGameComponent;
 import haxe.ui.core.Platform;
@@ -37,9 +37,9 @@ class Chatbox extends VBox implements IGameComponent
 {
     private var eventHandler:ChatboxEvent->Void;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
+    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
     {
-        this.eventHandler = gameScreen.handleChatboxEvent;
+        this.eventHandler = getBehaviour().handleChatboxEvent;
 
         var history:Array<ChatEntry> = model.asGameModel().getChatHistory();
 

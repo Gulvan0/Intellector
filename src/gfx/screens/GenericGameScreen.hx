@@ -1,7 +1,7 @@
 package gfx.screens;
 
 import net.shared.ServerEvent;
-import gfx.game.behaviours.IBehaviour;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.events.PositionEditorEvent;
 import gfx.game.events.VariationViewEvent;
@@ -9,7 +9,7 @@ import gfx.game.events.PlyHistoryViewEvent;
 import gfx.game.events.ActionBarEvent;
 import gfx.game.events.ChatboxEvent;
 import gfx.game.events.GameboardEvent;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.models.ReadOnlyModel;
 import gfx.game.interfaces.IGameComponent;
 import haxe.ui.containers.Box;
@@ -27,13 +27,13 @@ import net.shared.dataobj.ViewedScreen;
 import dict.Phrase;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/generic_game_screen.xml"))
-abstract class GenericGameScreen extends Screen implements IGameScreen
+abstract class GenericGameScreen extends Screen
 {
     private var panels:Map<PanelName, Panel> = [];
     private var subscreens:Map<ComponentPageName, CompactSubscreen> = [];
     private var gameComponents:Array<IGameComponent> = [];
 
-    private var behaviour:IBehaviour;
+    private var behaviour(default, set):IBehaviour;
 
     public abstract function getTitle():Null<Phrase>;
     public abstract function getURLPath():Null<String>;
@@ -44,7 +44,7 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
 
     private abstract function getModel():ReadOnlyModel;
 
-    private abstract function processModelUpdatesAtTopLevel(updatesToProcess:Array<ModelUpdateEvent>):Void;
+    private abstract function processModelUpdateAtTopLevel(update:ModelUpdateEvent):Void;
 
     private function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
     {
@@ -58,7 +58,8 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
     
     private function onClose()
     {
-        Networker.removeObserver(this);
+        if (behaviour != null)
+            Networker.removeObserver(behaviour);
 
         for (gameComponent in gameComponents)
             gameComponent.destroy();
@@ -95,57 +96,22 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
         largeRightBox.width = boxWidth;
     }
 
-    private function processModelUpdates(updatesToProcess:Array<ModelUpdateEvent>)
+    private function processModelUpdate(updateToProcess:ModelUpdateEvent)
     {
         var model:ReadOnlyModel = getModel();
 
-        for (updateEvent in updatesToProcess)
-            for (gameComponent in gameComponents)
-                gameComponent.handleModelUpdate(model, updateEvent);
+        for (gameComponent in gameComponents)
+            gameComponent.handleModelUpdate(model, updateToProcess);
 
-        processModelUpdatesAtTopLevel(updatesToProcess);
-    }
-
-    public function handleNetEvent(event:ServerEvent)
-    {
-        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleNetEvent(event);
-        processModelUpdates(updatesToProcess);
+        processModelUpdateAtTopLevel(updateToProcess);
     }
 
-    public function handleGameboardEvent(event:GameboardEvent)
+    private function set_behaviour(behaviour:IBehaviour):IBehaviour
     {
-        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleGameboardEvent(event);
-        processModelUpdates(updatesToProcess);
-    }
-
-    public function handleChatboxEvent(event:ChatboxEvent)
-    {
-        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleChatboxEvent(event);
-        processModelUpdates(updatesToProcess);
-    }
-    
-    public function handleActionBarEvent(event:ActionBarEvent)
-    {
-        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleActionBarEvent(event);
-        processModelUpdates(updatesToProcess);
-    }
-    
-    public function handlePlyHistoryViewEvent(event:PlyHistoryViewEvent)
-    {
-        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handlePlyHistoryViewEvent(event);
-        processModelUpdates(updatesToProcess);
-    }
-    
-    public function handleVariationViewEvent(event:VariationViewEvent)
-    {
-        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handleVariationViewEvent(event);
-        processModelUpdates(updatesToProcess);
-    }
-    
-    public function handlePositionEditorEvent(event:PositionEditorEvent)
-    {
-        var updatesToProcess:Array<ModelUpdateEvent> = behaviour.handlePositionEditorEvent(event);
-        processModelUpdates(updatesToProcess);
+        this.behaviour = behaviour;
+        Networker.addObserver(this.behaviour);
+        this.behaviour.onEntered(processModelUpdate);
+        return this.behaviour;
     }
 
     private function getPanelContainer(panelName:PanelName):Box
@@ -163,7 +129,7 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
         }
     }
 
-    private function init(panelMap:Map<PanelName, Array<ComponentPageName>>, subscreenNames:Array<ComponentPageName>)
+    private function init(initialBehaviour:IBehaviour, panelMap:Map<PanelName, Array<ComponentPageName>>, subscreenNames:Array<ComponentPageName>)
     {
         for (panelName => panelPages in panelMap.keyValueIterator())
         {
@@ -182,10 +148,13 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
             gameComponents = gameComponents.concat(childGameComponents);
         }
 
-        for (gameComponent in gameComponents)
-            gameComponent.init(getModel(), this);
+        var model:ReadOnlyModel = getModel();
+        var behaviourGetter:Void->IBehaviour = () -> this.behaviour;
 
-        Networker.addObserver(this);
+        for (gameComponent in gameComponents)
+            gameComponent.init(model, behaviourGetter);
+
+        this.behaviour = initialBehaviour;
     }
 
     private function setPageDisabled(page:ComponentPageName, pageDisabled:Bool)

@@ -1,7 +1,7 @@
 package gfx.game.common;
 
 import gfx.game.events.ModelUpdateEvent;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.models.ReadOnlyModel;
 import haxe.ui.core.Component;
 import gfx.game.board.GameBoard;
@@ -12,9 +12,9 @@ class GameBoardWrapper extends Box implements IGameComponent
 {
     private var gameboard:GameBoard;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
+    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
     {
-        gameboard = new GameBoard(model, gameScreen);
+        gameboard = new GameBoard(model, behaviour);
         gameboard.percentWidth = 100;
         gameboard.percentHeight = 100;
         addComponent(gameboard);

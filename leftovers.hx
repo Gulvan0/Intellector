@@ -360,49 +360,6 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         GlobalBroadcaster.removeObserver(this); //TO SCREENS THAT NEED IT
     }
 
-    private function performValidation() 
-    {
-        var availableWidth:Float = HaxeUIScreen.instance.actualWidth;
-        var availableHeight:Float = HaxeUIScreen.instance.actualHeight * 0.95;
-
-        var compact:Bool = availableWidth / availableHeight < 1.3;
-        var compactBoardHeight:Float = availableWidth * BoardSize.inverseAspectRatio(board.lettersEnabled);
-        var largeBoardMaxWidth:Float = availableHeight / BoardSize.inverseAspectRatio(board.lettersEnabled);
-        var bothBarsVisible:Bool = availableWidth >= largeBoardMaxWidth + 2 * MIN_SIDEBARS_WIDTH;
-
-        cBlackPlayerHBox.hidden = !compact;
-        cWhitePlayerHBox.hidden = !compact;
-        cActionBar.hidden = !compact;
-        cCreepingLine.hidden = !compact;
-        cSpacer1.hidden = !compact;
-        cSpacer2.hidden = !compact;
-
-        lLeftBox.hidden = compact || !bothBarsVisible;
-        lRightBox.hidden = compact;
-        
-        if (compact)
-        {
-            boardContainer.percentHeight = null;
-            boardContainer.height = Math.min(compactBoardHeight + 10, availableHeight - cCreepingLine.height - cActionBar.height - cBlackPlayerHBox.height - cWhitePlayerHBox.height - 45);
-        }
-        else
-        {
-            boardContainer.height = null;
-            boardContainer.percentHeight = 100;
-        }
-
-        if (bothBarsVisible)
-        {
-            lLeftBox.width = Math.min(MAX_SIDEBARS_WIDTH, (availableWidth - largeBoardMaxWidth) / 2);
-            lRightBox.width = Math.min(MAX_SIDEBARS_WIDTH, (availableWidth - largeBoardMaxWidth) / 2);
-        }
-        else
-        {
-            lLeftBox.width = 20;
-            lRightBox.width = MathUtils.clamp(availableWidth - largeBoardMaxWidth, MIN_SIDEBARS_WIDTH, MAX_SIDEBARS_WIDTH);
-        }
-    }
-
     //================================================================================================================================================================
 
     private function onRematchRequested()

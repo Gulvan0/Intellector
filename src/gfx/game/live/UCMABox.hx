@@ -1,6 +1,6 @@
 package gfx.game.live;
 
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.models.ReadOnlyModel;
 import gfx.game.interfaces.IGameComponent;
@@ -63,7 +63,7 @@ class UCMABox extends GameComponentLayout
         return a;
     }
 
-    private override function afterChildrenInitialized(model:ReadOnlyModel, gameScreen:IGameScreen)
+    private override function afterChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
     {
         setOrientation(model.asGenericModel().getOrientation());
     }

@@ -3,7 +3,7 @@ package gfx.game.analysis;
 import haxe.ui.core.Component;
 import GlobalBroadcaster.GlobalEvent;
 import gfx.game.events.ModelUpdateEvent;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.models.ReadOnlyModel;
 import GlobalBroadcaster.IGlobalEventObserver;
 import gfx.game.interfaces.IGameComponent;
@@ -13,7 +13,7 @@ class AnalysisActionBar extends ActionBar implements IGameComponent implements I
 {
     private final compact:Bool;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void
+    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour):Void
     {
         if (compact)
             updateButtonSets([[ChangeOrientation, EditPosition, Share, PlayFromHere, PrevMove, NextMove]]);
@@ -23,7 +23,7 @@ class AnalysisActionBar extends ActionBar implements IGameComponent implements I
         if (!LoginManager.isLogged())
             setBtnDisabled(PlayFromHere, true);
 
-        eventHandler = gameScreen.handleActionBarEvent;
+        eventHandler = getBehaviour().handleActionBarEvent;
         GlobalBroadcaster.addObserver(this);
     }
 

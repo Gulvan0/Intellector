@@ -15,7 +15,7 @@ import haxe.Timer;
 import gfx.game.models.ReadOnlyModel;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.events.GameboardEvent;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import haxe.ui.core.Component;
 
 using gfx.game.models.CommonModelExtractors;
@@ -68,7 +68,7 @@ class CompactBoardAndClocks extends GameComponentLayout
         return a;
     }
 
-    private override function afterChildrenInitialized(model:ReadOnlyModel, gameScreen:IGameScreen)
+    private override function afterChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
     {
         setOrientation(model.asGenericModel().getOrientation());
         GlobalBroadcaster.addObserver(this);

@@ -6,7 +6,7 @@ import GlobalBroadcaster.IGlobalEventObserver;
 import GlobalBroadcaster.GlobalEvent;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
 import gfx.game.events.ModelUpdateEvent;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.models.ReadOnlyModel;
 import gfx.game.interfaces.IGameComponent;
 import gfx.game.common.action_bar.ActionBar;
@@ -19,7 +19,7 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
 
     private final compact:Bool;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameScreen):Void
+    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour):Void
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 
@@ -179,7 +179,7 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
         if (gameModel.getTimeControl().isCorrespondence())
             setBtnDisabled(AddTime, true);
 
-        eventHandler = gameScreen.handleActionBarEvent;
+        eventHandler = getBehaviour().handleActionBarEvent;
         GlobalBroadcaster.addObserver(this);
     }
 

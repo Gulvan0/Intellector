@@ -7,7 +7,7 @@ import net.shared.openings.Opening;
 import GlobalBroadcaster.IGlobalEventObserver;
 import haxe.ui.core.Component;
 import gfx.game.events.ModelUpdateEvent;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.models.ReadOnlyModel;
 import gfx.game.interfaces.IGameComponent;
 import net.shared.board.Situation;
@@ -43,7 +43,7 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
 
     private var renderedForWidth:Float = 0;
 
-    public function init(model:ReadOnlyModel, gameScreen:IGameScreen)
+    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 

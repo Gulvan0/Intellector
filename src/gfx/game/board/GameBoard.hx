@@ -3,7 +3,7 @@ package gfx.game.board;
 import gfx.game.events.ModelUpdateEvent;
 import GlobalBroadcaster.GlobalEvent;
 import GlobalBroadcaster.IGlobalEventObserver;
-import gfx.game.interfaces.IGameScreen;
+import gfx.game.interfaces.IBehaviour;
 import gfx.game.models.ReadOnlyModel;
 import gfx.game.board.subcomponents.util.ArrowParams;
 import gfx.game.board.util.HexSelectionMode;
@@ -169,7 +169,7 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         }
     }
 
-    public function new(model:ReadOnlyModel, gameScreen:IGameScreen) 
+    public function new(model:ReadOnlyModel, getBehaviour:Void->IBehaviour) 
     {
         var shownSituation:Situation = model.asGenericModel().getShownSituation();
         var orientation:PieceColor = model.asGenericModel().getOrientation();
@@ -189,6 +189,6 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
         this.state = new NeutralState(this, null);
         this.mode = mode;
-        this.eventHandler = gameScreen.handleGameboardEvent;
+        this.eventHandler = getBehaviour().handleGameboardEvent;
     }
 }
