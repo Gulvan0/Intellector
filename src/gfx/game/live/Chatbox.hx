@@ -169,7 +169,6 @@ class Chatbox extends VBox implements IGameComponent
 
     private function send() 
     {
-        var ownRef:String = LoginManager.getRef();
         var text = StringUtils.clean(messageInput.text, 500);
 
         messageInput.text = "";

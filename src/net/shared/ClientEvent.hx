@@ -17,14 +17,10 @@ enum ClientEvent
     Message(text:String); 
     SimpleRematch;
     Resign; 
-    OfferDraw; 
-    CancelDraw; 
-    AcceptDraw; 
-    DeclineDraw; 
-    OfferTakeback; 
-    CancelTakeback; 
-    AcceptTakeback; 
-    DeclineTakeback;
+    SendOffer(kind:OfferKind);
+    CancelOffer(kind:OfferKind);
+    AcceptOffer(kind:OfferKind);
+    DeclineOffer(kind:OfferKind);
     AddTime; 
     GetOpenChallenge(id:Int); 
     FollowPlayer(login:String);

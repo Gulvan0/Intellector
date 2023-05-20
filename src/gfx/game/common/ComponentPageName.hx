@@ -14,4 +14,5 @@ enum ComponentPageName
     Chat;
     GameInfoSubscreen;
     BoardAndClocks;
+    SpecialControlSettings;
 }

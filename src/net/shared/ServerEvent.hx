@@ -32,14 +32,14 @@ enum ServerEvent
     LoginResult(result:SignInResult); //Answer to Login
     RegisterResult(result:RegisterResult); //Answer to Register
 
+    MoveAccepted(timeData:Null<TimeReservesData>); //timeData is only null in correspondence games
     InvalidMove; //Sent to the player who attempted to perform an invalid move
     Message(authorRef:String, message:String); //New in-game player message
     SpectatorMessage(authorRef:String, message:String); //New in-game spectator message
-    TimeCorrection(timeData:TimeReservesData); //Signals to update the in-game timers. Significant game events (Move, Rollback, TimeAdded, GameEnded) also contain the same data which should be processed in the exact same way
-    Move(ply:RawPly, timeData:Null<TimeReservesData>); //A move has been played. Sent both to opponent and to all of the spectators
-    Rollback(plysToUndo:Int, timeData:Null<TimeReservesData>); //Signal to undo a number of plys in a current game. Sent to both spectators and players
-    TimeAdded(receiver:PieceColor, timeData:TimeReservesData);
-    GameEnded(outcome:Outcome, rematchPossible:Bool, remainingTimeMs:Null<Map<PieceColor, Int>>, newPersonalElo:Null<EloValue>); //Game over. Sent both to players and to all of the spectators
+    Move(ply:RawPly, timeData:Null<TimeReservesData>); //A move has been played. Sent both to opponent and to all of the spectators. timeData is only null in correspondence games
+    Rollback(plysToUndo:Int, timeData:Null<TimeReservesData>); //Signal to undo a number of plys in a current game. Sent to both spectators and players. timeData is only null in correspondence games
+    TimeAdded(receiver:PieceColor, timeData:TimeReservesData); //A player has added some time to their opponent. timeData can't be null since this event isn't dispatched in correspondence games
+    GameEnded(outcome:Outcome, timeData:TimeReservesData, rematchPossible:Bool, newPersonalElo:Null<EloValue>); //Game over. Sent both to players and to all of the spectators
 
     PlayerDisconnected(color:PieceColor); //Sent to the players and the spectators when one of the players disconnects
     PlayerReconnected(color:PieceColor); //Sent to the players and the spectators when one of the players reconnects
@@ -50,8 +50,6 @@ enum ServerEvent
     OfferCancelled(offerSentBy:PieceColor, offer:OfferKind);
     OfferAccepted(offerSentBy:PieceColor, offer:OfferKind);
     OfferDeclined(offerSentBy:PieceColor, offer:OfferKind);
-
-    BotMove(timeData:Null<TimeReservesData>); //Sent to a player when a bot move starts
 
     SingleStudy(info:StudyInfo); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy

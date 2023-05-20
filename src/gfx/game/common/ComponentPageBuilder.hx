@@ -95,6 +95,10 @@ class ComponentPageBuilder
                 components = [wrap(new GameInfoBox(), 100, null), wrap(new SpectatorList(), 100, null)];
             case BoardAndClocks:
                 components = [wrap(new CompactBoardAndClocks(), 100, 100)];
+            case SpecialControlSettings:
+                autoHeight = true;
+                components = []; //TODO: Add corresponding component
+
         }
     }
 }

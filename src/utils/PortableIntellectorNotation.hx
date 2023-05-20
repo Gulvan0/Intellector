@@ -1,4 +1,4 @@
-package serialization;
+package utils;
 
 import net.shared.TimeControl;
 import net.shared.utils.PlayerRef;

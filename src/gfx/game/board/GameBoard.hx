@@ -134,11 +134,13 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         {
             case OrientationUpdated:
                 setOrientation(model.asGenericModel().getOrientation());
-            case ShownSituationUpdated:
+            case ViewedMoveNumUpdated:
                 setShownSituation(model.asGenericModel().getShownSituation());
             case InteractivityModeUpdated:
                 mode = model.asGenericModel().getBoardInteractivityMode();
             case PlannedPremovesUpdated:
+                setShownSituation(model.asGenericModel().getShownSituation());
+                
                 var premoves:Array<RawPly> = [];
 
                 switch model 

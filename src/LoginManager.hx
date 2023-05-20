@@ -31,7 +31,7 @@ class LoginManager
         return password;
     }
     
-    public static function getRef():String
+    public static function getRef():PlayerRef
     {
         return login ?? "_" + Networker.getSessionID();
     }

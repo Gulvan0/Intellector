@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import gfx.game.interfaces.IGameScreen;
 import net.shared.ServerEvent;
 import gfx.game.interfaces.IBehaviour;
 import gfx.game.events.ModelUpdateEvent;
@@ -27,7 +28,7 @@ import net.shared.dataobj.ViewedScreen;
 import dict.Phrase;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/generic_game_screen.xml"))
-abstract class GenericGameScreen extends Screen
+abstract class GenericGameScreen extends Screen implements IGameScreen
 {
     private var panels:Map<PanelName, Panel> = [];
     private var subscreens:Map<ComponentPageName, CompactSubscreen> = [];
@@ -110,7 +111,7 @@ abstract class GenericGameScreen extends Screen
     {
         this.behaviour = behaviour;
         Networker.addObserver(this.behaviour);
-        this.behaviour.onEntered(processModelUpdate);
+        this.behaviour.onEntered(processModelUpdate, this);
         return this.behaviour;
     }
 
@@ -157,7 +158,7 @@ abstract class GenericGameScreen extends Screen
         this.behaviour = initialBehaviour;
     }
 
-    private function setPageDisabled(page:ComponentPageName, pageDisabled:Bool)
+    public function setPageDisabled(page:ComponentPageName, pageDisabled:Bool)
     {
         for (panel in panels)
             panel.setPageDisabled(page, pageDisabled);
@@ -167,7 +168,7 @@ abstract class GenericGameScreen extends Screen
             subscreen.setDisabled(pageDisabled);
     }
 
-    private function setPageHidden(page:ComponentPageName, pageHidden:Bool)
+    public function setPageHidden(page:ComponentPageName, pageHidden:Bool)
     {
         for (panel in panels)
             panel.setPageHidden(page, pageHidden);
@@ -177,7 +178,7 @@ abstract class GenericGameScreen extends Screen
             subscreen.setHidden(pageHidden);
     }
 
-    private function displaySubscreen(page:ComponentPageName)
+    public function displaySubscreen(page:ComponentPageName)
     {
         var subscreen:Null<CompactSubscreen> = subscreens.get(page);
         if (subscreen != null)

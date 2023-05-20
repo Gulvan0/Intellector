@@ -89,7 +89,10 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
 
     public function getShownSituation():Situation
     {
-        return history.getShownSituationByPointer(shownMovePointer);
+        var actualShownSituation:Situation = history.getShownSituationByPointer(shownMovePointer);
+        for (premovePly in plannedPremoves)
+            actualShownSituation.performRawPly(premovePly);
+        return actualShownSituation;
     }
 
     public function getHistory():IReadOnlyHistory

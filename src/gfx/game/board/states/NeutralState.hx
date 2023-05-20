@@ -1,5 +1,6 @@
 package gfx.game.board.states;
 
+import gfx.utils.Colors;
 import haxe.ui.geom.Point;
 import net.shared.board.Hex;
 import gfx.game.events.GameboardEvent;
@@ -29,6 +30,7 @@ class NeutralState implements IState
 	public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         boardInstance.eventHandler(LMBPressed(location));
+        boardInstance.removeAllArrows(Colors.arrow);
 
         if (location == null)
             return;

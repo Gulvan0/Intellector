@@ -12,7 +12,7 @@ import gfx.game.events.GameboardEvent;
 
 interface IBehaviour extends INetObserver
 {
-    public function onEntered(modelUpdateHandler:ModelUpdateEvent->Void):Void;
+    public function onEntered(modelUpdateHandler:ModelUpdateEvent->Void, screenRef:IGameScreen):Void;
     public function handleGameboardEvent(event:GameboardEvent):Void;
     public function handleChatboxEvent(event:ChatboxEvent):Void;
     public function handleActionBarEvent(event:ActionBarEvent):Void;

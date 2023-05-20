@@ -97,7 +97,7 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
 
         switch event 
         {
-            case ShownSituationUpdated:
+            case ViewedMoveNumUpdated:
                 updateOpeningLabel(gameModel, !model.match(Spectation(_)));
             case GameEnded:
                 resolution.text = Utils.getResolution(gameModel.getOutcome());

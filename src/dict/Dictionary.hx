@@ -63,6 +63,8 @@ class Dictionary
                 return ["Game Info", "Об игре"];
             case GAME_COMPONENT_PAGE_TITLE(BoardAndClocks):
                 return ["", ""];
+            case GAME_COMPONENT_PAGE_TITLE(SpecialControlSettings):
+                return ["Controls", "Управление"];
 
             case ANALYSIS_SET_POSITION_BTN_TOOLTIP:
                 return ["Set position", "Задать позицию"];

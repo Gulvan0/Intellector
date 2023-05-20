@@ -41,6 +41,11 @@ class MsRemaindersData implements IReadOnlyMsRemainders
         reservesAfterMove[reservesAfterMove.length - 1].addSecsLeftAtTimestamp(receivingSide, secs);
     }
 
+    public function modifyLast(timeData:TimeReservesData) 
+    {
+        reservesAfterMove[reservesAfterMove.length - 1] = timeData.copy();
+    }
+
     public function rollback(newPlayedMovesCnt:Int) 
     {
         reservesAfterMove = reservesAfterMove.slice(0, newPlayedMovesCnt);
