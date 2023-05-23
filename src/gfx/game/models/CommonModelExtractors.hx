@@ -45,6 +45,19 @@ class CommonModelExtractors
         }
     }
 
+    public static function getPlannedPremoves(genericModel:ReadOnlyModel):Array<RawPly>
+    {
+        switch genericModel 
+        {
+            case MatchVersusPlayer(model): 
+                return model.getPlannedPremoves();
+            case MatchVersusBot(model): 
+                return model.getPlannedPremoves();
+            default:
+                throw 'getPlannedPremoves() call is only valid for either MatchVersusPlayer or MatchVersusBot model. Got: ${genericModel?.getName()}';
+        }
+    }
+
     public static function getLastPlyInfo(genericModel:IReadOnlyGenericModel):{ply:RawPly, situationBefore:Situation}
     {
         var line = genericModel.getLine();

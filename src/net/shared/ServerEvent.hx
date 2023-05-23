@@ -46,10 +46,7 @@ enum ServerEvent
     NewSpectator(ref:String); //Sent both to players and to all of the spectators when a new user starts spectating
     SpectatorLeft(ref:String); //Sent both to players and to all of the spectators when a user stops spectating
 
-    OfferSent(offerSentBy:PieceColor, offer:OfferKind);
-    OfferCancelled(offerSentBy:PieceColor, offer:OfferKind);
-    OfferAccepted(offerSentBy:PieceColor, offer:OfferKind);
-    OfferDeclined(offerSentBy:PieceColor, offer:OfferKind);
+    OfferActionPerformed(offerSentBy:PieceColor, offer:OfferKind, action:OfferAction);
 
     SingleStudy(info:StudyInfo); //Answer to GetStudy
     StudyNotFound; //Answer to GetStudy

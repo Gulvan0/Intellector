@@ -7,4 +7,5 @@ interface IGameScreen
     public function setPageDisabled(page:ComponentPageName, pageDisabled:Bool):Void;
     public function setPageHidden(page:ComponentPageName, pageHidden:Bool):Void;
     public function displaySubscreen(page:ComponentPageName):Void;
+    public function changeBehaviour(newBehaviour:IBehaviour):Void;
 }

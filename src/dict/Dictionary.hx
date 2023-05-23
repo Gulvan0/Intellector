@@ -444,7 +444,7 @@ class Dictionary
             case INVALID_MOVE_DIALOG_TITLE:
                 return ["Invalid move", "Недопустимый ход"];
             case INVALID_MOVE_DIALOG_MESSAGE:
-                return ["Server refused to process your move. Please reload the page and try again", "Ход, сделанный вами, не прошел проверку сервера. Перезагрузите страницу и попробуйте снова"];
+                return ["Server has refused to process your move. Please try again", "Ход, сделанный вами, не прошел проверку сервера. Попробуйте снова"];
 
             case GAME_ENDED_DIALOG_TITLE:
                 return ["Game over", "Игра окончена"];
@@ -719,28 +719,28 @@ class Dictionary
             case TAKEBACK_QUESTION_TEXT:
                 return ["Accept takeback?", "Дать переходить?"];
 
-            case OFFER_SENT_MESSAGE(Draw, sentBy):
+            case OFFER_ACTION_MESSAGE(Draw, sentBy, Create):
                 if (sentBy != null)
                     return ['${Utils.getColorName(sentBy, EN)} offered a draw', '${Utils.getColorName(sentBy, RU)} предлагают ничью'];
                 else
                     return ['Draw offered', 'Ничья предложена'];
-            case OFFER_CANCELLED_MESSAGE(Draw, _):
+            case OFFER_ACTION_MESSAGE(Draw, _, Cancel):
                 return ["Draw request cancelled", "Предложение ничьи отменено"];
-            case OFFER_ACCEPTED_MESSAGE(Draw, _):
+            case OFFER_ACTION_MESSAGE(Draw, _, Accept):
                 return ["Draw accepted", "Ничья принята"];
-            case OFFER_DECLINED_MESSAGE(Draw, _):
+            case OFFER_ACTION_MESSAGE(Draw, _, Decline):
                 return ["Draw declined", "Ничья отклонена"];
                 
-            case OFFER_SENT_MESSAGE(Takeback, sentBy):
+            case OFFER_ACTION_MESSAGE(Takeback, sentBy, Create):
                 if (sentBy != null)
                     return ['${Utils.getColorName(sentBy, EN)} requested a takeback', '${Utils.getColorName(sentBy, RU)} запросили возврат хода'];
                 else
                     return ['Takeback requested', 'Возврат хода запрошен'];
-            case OFFER_CANCELLED_MESSAGE(Takeback, _):
+            case OFFER_ACTION_MESSAGE(Takeback, _, Cancel):
                 return ["Takeback cancelled", "Запрос возврата хода отменен"];
-            case OFFER_ACCEPTED_MESSAGE(Takeback, _):
+            case OFFER_ACTION_MESSAGE(Takeback, _, Accept):
                 return ["Takeback accepted", "Возврат хода принят"];
-            case OFFER_DECLINED_MESSAGE(Takeback, _):
+            case OFFER_ACTION_MESSAGE(Takeback, _, Decline):
                 return ["Takeback declined", "Возврат хода отклонен"];
 
             case PLAYER_DISCONNECTED_MESSAGE(color):

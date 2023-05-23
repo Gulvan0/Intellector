@@ -1,5 +1,7 @@
 package gfx.game.behaviours;
 
+import net.shared.dataobj.OfferAction;
+import GlobalBroadcaster.GlobalEvent;
 import gfx.game.interfaces.IGameScreen;
 import gfx.popups.ShareDialog;
 import net.shared.board.RawPly;
@@ -121,33 +123,13 @@ class WaitingRealOpponentMoveNoPremoves implements IBehaviour
 			case SpectatorLeft(ref):
 				model.spectatorRefs.remove(ref);
 				modelUpdateHandler(SpectatorListUpdated);
-			case OfferSent(offerSentBy, offer):
+			case OfferActionPerformed(offerSentBy, offer, action):
 				var direction:OfferDirection = offerSentBy == model.getPlayerColor()? Outgoing : Incoming;
-				model.offerActive[offer][direction] = true;
-				modelUpdateHandler(OfferStateUpdated(offer, direction, true));
+				var active:Bool = action.match(Create);
+				model.offerActive[offer][direction] = active;
+				modelUpdateHandler(OfferStateUpdated(offer, direction, active));
 
-				model.chatHistory.push(Log(OFFER_SENT_MESSAGE(offer, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
-			case OfferCancelled(offerSentBy, offer):
-				var direction:OfferDirection = offerSentBy == model.getPlayerColor()? Outgoing : Incoming;
-				model.offerActive[offer][direction] = false;
-				modelUpdateHandler(OfferStateUpdated(offer, direction, false));
-
-				model.chatHistory.push(Log(OFFER_CANCELLED_MESSAGE(offer, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
-			case OfferAccepted(offerSentBy, offer):
-				var direction:OfferDirection = offerSentBy == model.getPlayerColor()? Outgoing : Incoming;
-				model.offerActive[offer][direction] = false;
-				modelUpdateHandler(OfferStateUpdated(offer, direction, false));
-
-				model.chatHistory.push(Log(OFFER_ACCEPTED_MESSAGE(offer, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
-			case OfferDeclined(offerSentBy, offer):
-				var direction:OfferDirection = offerSentBy == model.getPlayerColor()? Outgoing : Incoming;
-				model.offerActive[offer][direction] = false;
-				modelUpdateHandler(OfferStateUpdated(offer, direction, false));
-
-				model.chatHistory.push(Log(OFFER_DECLINED_MESSAGE(offer, offerSentBy)));
+				model.chatHistory.push(Log(OFFER_ACTION_MESSAGE(offer, offerSentBy, action)));
 				modelUpdateHandler(EntryAddedToChatHistory);
 			default:
 		}
@@ -185,6 +167,23 @@ class WaitingRealOpponentMoveNoPremoves implements IBehaviour
 		}
 	}
 
+	private function onOfferActionRequested(kind:OfferKind, action:OfferAction)
+	{
+		var playerColor:PieceColor = model.getPlayerColor();
+
+		var active:Bool = action.match(Create);
+		var direction:OfferDirection = action.match(Create | Cancel)? Outgoing : Incoming;
+		var offerSentBy:PieceColor = direction.match(Outgoing)? playerColor : opposite(playerColor);
+
+		Networker.emitEvent(PerformOfferAction(kind, action));
+
+		model.offerActive[kind][direction] = active;
+		modelUpdateHandler(OfferStateUpdated(kind, direction, active));
+
+		model.chatHistory.push(Log(OFFER_ACTION_MESSAGE(kind, offerSentBy, action)));
+		modelUpdateHandler(EntryAddedToChatHistory);
+	}
+
 	public function handleActionBarEvent(event:ActionBarEvent)
 	{
 		switch event 
@@ -192,23 +191,9 @@ class WaitingRealOpponentMoveNoPremoves implements IBehaviour
 			case ActionButtonPressed(btn):
 				onActionButtonPressed(btn);
 			case IncomingOfferAccepted(kind):
-				Networker.emitEvent(AcceptOffer(kind));
-
-				model.offerActive[kind][Incoming] = false;
-				modelUpdateHandler(OfferStateUpdated(kind, Incoming, false));
-
-				var offerSentBy:PieceColor = opposite(model.getPlayerColor());
-				model.chatHistory.push(Log(OFFER_ACCEPTED_MESSAGE(kind, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
+				onOfferActionRequested(kind, Accept);
 			case IncomingOfferDeclined(kind):
-				Networker.emitEvent(DeclineOffer(kind));
-
-				model.offerActive[kind][Incoming] = false;
-				modelUpdateHandler(OfferStateUpdated(kind, Incoming, false));
-
-				var offerSentBy:PieceColor = opposite(model.getPlayerColor());
-				model.chatHistory.push(Log(OFFER_DECLINED_MESSAGE(kind, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
+				onOfferActionRequested(kind, Decline);
 		}
 	}
 
@@ -222,41 +207,13 @@ class WaitingRealOpponentMoveNoPremoves implements IBehaviour
 				model.orientation = opposite(model.orientation);
 				modelUpdateHandler(OrientationUpdated);
 			case OfferDraw:
-				Networker.emitEvent(SendOffer(Draw));
-
-				model.offerActive[Draw][Outgoing] = true;
-				modelUpdateHandler(OfferStateUpdated(Draw, Outgoing, true));
-
-				var offerSentBy:PieceColor = model.getPlayerColor();
-				model.chatHistory.push(Log(OFFER_SENT_MESSAGE(Draw, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
+				onOfferActionRequested(Draw, Create);
 			case CancelDraw:
-				Networker.emitEvent(CancelOffer(Draw));
-
-				model.offerActive[Draw][Outgoing] = false;
-				modelUpdateHandler(OfferStateUpdated(Draw, Outgoing, false));
-
-				var offerSentBy:PieceColor = model.getPlayerColor();
-				model.chatHistory.push(Log(OFFER_CANCELLED_MESSAGE(Draw, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
+				onOfferActionRequested(Draw, Cancel);
 			case OfferTakeback:
-				Networker.emitEvent(SendOffer(Takeback));
-
-				model.offerActive[Takeback][Outgoing] = true;
-				modelUpdateHandler(OfferStateUpdated(Takeback, Outgoing, true));
-
-				var offerSentBy:PieceColor = model.getPlayerColor();
-				model.chatHistory.push(Log(OFFER_SENT_MESSAGE(Takeback, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
+				onOfferActionRequested(Takeback, Create);
 			case CancelTakeback:
-				Networker.emitEvent(CancelOffer(Takeback));
-
-				model.offerActive[Takeback][Outgoing] = false;
-				modelUpdateHandler(OfferStateUpdated(Takeback, Outgoing, false));
-
-				var offerSentBy:PieceColor = model.getPlayerColor();
-				model.chatHistory.push(Log(OFFER_CANCELLED_MESSAGE(Takeback, offerSentBy)));
-				modelUpdateHandler(EntryAddedToChatHistory);
+				onOfferActionRequested(Takeback, Cancel);
 			case AddTime:
 				Networker.emitEvent(AddTime);
 			case Rematch:
@@ -341,6 +298,16 @@ class WaitingRealOpponentMoveNoPremoves implements IBehaviour
 	public function handlePositionEditorEvent(event:PositionEditorEvent)
 	{
 		//* Do nothing (this component doesn't occur in real game)
+	}
+
+	public function handleGlobalEvent(event:GlobalEvent) 
+	{
+		switch event 
+		{
+			case PreferenceUpdated(Premoves):
+				//TODO: Change behaviour
+			default:
+		}
 	}
 
     public function new(model:MatchVersusPlayerModel)

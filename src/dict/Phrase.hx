@@ -1,5 +1,6 @@
 package dict;
 
+import net.shared.dataobj.OfferAction;
 import gfx.menu.MenuItemName;
 import gfx.menu.MenuSection;
 import gfx.game.common.ComponentPageName;
@@ -413,10 +414,7 @@ enum Phrase
     SPECTATOR_LEFT_MESSAGE(displayName:String);
     PLAYER_DISCONNECTED_MESSAGE(color:PieceColor);
     PLAYER_RECONNECTED_MESSAGE(color:PieceColor);
-    OFFER_SENT_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>);
-    OFFER_CANCELLED_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>);
-    OFFER_ACCEPTED_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>);
-    OFFER_DECLINED_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>);
+    OFFER_ACTION_MESSAGE(kind:OfferKind, sentBy:Null<PieceColor>, action:OfferAction);
     TIME_ADDED_MESSAGE(receiverColor:PieceColor);
 
     OPENING_STARTING_POSITION;

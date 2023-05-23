@@ -17,10 +17,7 @@ enum ClientEvent
     Message(text:String); 
     SimpleRematch;
     Resign; 
-    SendOffer(kind:OfferKind);
-    CancelOffer(kind:OfferKind);
-    AcceptOffer(kind:OfferKind);
-    DeclineOffer(kind:OfferKind);
+    PerformOfferAction(kind:OfferKind, action:OfferAction);
     AddTime; 
     GetOpenChallenge(id:Int); 
     FollowPlayer(login:String);

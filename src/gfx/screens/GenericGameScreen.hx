@@ -109,9 +109,19 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
 
     private function set_behaviour(behaviour:IBehaviour):IBehaviour
     {
+        if (this.behaviour != null)
+        {
+            Networker.removeObserver(this.behaviour);
+            GlobalBroadcaster.removeObserver(this.behaviour);
+        }
+
         this.behaviour = behaviour;
+
         Networker.addObserver(this.behaviour);
+        GlobalBroadcaster.addObserver(this.behaviour);
+        
         this.behaviour.onEntered(processModelUpdate, this);
+
         return this.behaviour;
     }
 
@@ -183,6 +193,11 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
         var subscreen:Null<CompactSubscreen> = subscreens.get(page);
         if (subscreen != null)
             subscreen.displaySubscreen();
+    }
+
+    public function changeBehaviour(newBehaviour:IBehaviour)
+    {
+        this.behaviour = newBehaviour;
     }
 
     public function new()

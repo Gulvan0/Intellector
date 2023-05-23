@@ -141,20 +141,8 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
             case PlannedPremovesUpdated:
                 setShownSituation(model.asGenericModel().getShownSituation());
                 
-                var premoves:Array<RawPly> = [];
-
-                switch model 
-                {
-                    case MatchVersusPlayer(model):
-                        premoves = model.getPlannedPremoves();
-                    case MatchVersusBot(model):
-                        premoves = model.getPlannedPremoves();
-                    default:
-                        throw 'PlannedPremovesUpdated can only occur for either MatchVersusPlayer or MatchVersusBot model. Got: ${model?.getName()}';
-                }
-                
                 hideLayerForEveryHex(Premove);
-                for (premove in premoves)
+                for (premove in model.getPlannedPremoves())
                     for (hexCoords in premove.modifiedHexes())
                         showHexLayer(hexCoords, Premove);
             default:

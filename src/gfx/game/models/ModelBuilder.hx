@@ -149,22 +149,10 @@ class ModelBuilder
                     history.append(ply);
                     if (perMoveTimeRemaindersData != null)
                         perMoveTimeRemaindersData.append(new TimeReservesData(whiteMsAfter / 1000, blackMsAfter / 1000, item.ts));
-                case OfferSent(kind, sentBy):
+                case OfferActionPerformed(kind, sentBy, action):
                     if (outgoingOfferActive != null)
-                        outgoingOfferActive[sentBy][kind] = true;
-                    chatHistory.push(Log(OFFER_SENT_MESSAGE(kind, sentBy)));
-                case OfferCancelled(kind, sentBy):
-                    if (outgoingOfferActive != null)
-                        outgoingOfferActive[sentBy][kind] = false;
-                    chatHistory.push(Log(OFFER_CANCELLED_MESSAGE(kind, sentBy)));
-                case OfferAccepted(kind, sentBy):
-                    if (outgoingOfferActive != null)
-                        outgoingOfferActive[sentBy][kind] = false;
-                    chatHistory.push(Log(OFFER_ACCEPTED_MESSAGE(kind, sentBy)));
-                case OfferDeclined(kind, sentBy):
-                    if (outgoingOfferActive != null)
-                        outgoingOfferActive[sentBy][kind] = false;
-                    chatHistory.push(Log(OFFER_DECLINED_MESSAGE(kind, sentBy)));
+                        outgoingOfferActive[sentBy][kind] = action.match(Create);
+                    chatHistory.push(Log(OFFER_ACTION_MESSAGE(kind, sentBy, action)));
                 case Message(sentBy, text):
                     if (playerRefs.has(sentBy))
                         chatHistory.push(PlayerMessage(sentBy, text));
