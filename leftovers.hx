@@ -424,16 +424,6 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
             case BotMove(timeData):
                 makeBotMove(timeData);
             case GameEnded(outcome, _, _, newPersonalElo):
-                Audio.playSound("notify");
-                this.outcome = outcome;
-
-                var message:String;
-                if (playerColor != null)
-                    message = Utils.getPlayerGameOverDialogMessage(outcome, playerColor, newPersonalElo);
-                else
-                    message = Utils.getSpectatorGameOverDialogMessage(outcome, whiteRef, blackRef);
-                
-                Dialogs.infoRaw(message, Dictionary.getPhrase(GAME_ENDED_DIALOG_TITLE));
             default:
         }
     }
@@ -550,7 +540,7 @@ class LiveGame extends Screen implements INetObserver implements IGameBoardObser
         }
 
         return variant.serialize();
-	}
+    }
 
     //================================================================================================================================================================
 

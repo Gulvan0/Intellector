@@ -1,5 +1,6 @@
 package gfx.game.models;
 
+import gfx.game.interfaces.IReadWriteGameRelatedModel;
 import net.shared.board.HexCoords;
 import net.shared.board.Hex;
 import net.shared.board.Rules;
@@ -20,7 +21,7 @@ import net.shared.board.RawPly;
 import gfx.game.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
 
-class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
+class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IReadOnlyMatchVersusBotModel
 {
     public var gameID:Int;
     public var opponentBot:Bot;
@@ -60,15 +61,15 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
         return playerRefs.get(color);
     }
 
-	public function isRated():Bool 
+    public function isRated():Bool 
     {
-		return false;
-	}
+        return false;
+    }
 
-	public function getELO(color:PieceColor):EloValue 
+    public function getELO(color:PieceColor):EloValue 
     {
-		return null;
-	}
+        return null;
+    }
 
     public function hasEnded():Bool
     {
@@ -175,10 +176,10 @@ class MatchVersusBotModel implements IReadOnlyMatchVersusBotModel
         return getHistory().getStartingSituation();
     }
 
-	public function getMostRecentSituation():Situation 
+    public function getMostRecentSituation():Situation 
     {
-		return getHistory().getMostRecentSituation();
-	}
+        return getHistory().getMostRecentSituation();
+    }
 
     public function deriveInteractivityModeFromOtherParams()
     {

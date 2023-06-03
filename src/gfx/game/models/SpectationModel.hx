@@ -1,5 +1,6 @@
 package gfx.game.models;
 
+import gfx.game.interfaces.IReadWriteGameRelatedModel;
 import net.shared.utils.UnixTimestamp;
 import gfx.game.interfaces.IReadOnlySpectationModel;
 import net.shared.board.Situation;
@@ -14,7 +15,7 @@ import net.shared.board.RawPly;
 import gfx.game.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
 
-class SpectationModel implements IReadOnlySpectationModel
+class SpectationModel implements IReadWriteGameRelatedModel implements IReadOnlySpectationModel
 {
     public var gameID:Int;
     public var timeControl:TimeControl;
@@ -154,10 +155,10 @@ class SpectationModel implements IReadOnlySpectationModel
         return getHistory().getStartingSituation();
     }
 
-	public function getMostRecentSituation():Situation 
+    public function getMostRecentSituation():Situation 
     {
-		return getHistory().getMostRecentSituation();
-	}
+        return getHistory().getMostRecentSituation();
+    }
 
     public function deriveInteractivityModeFromOtherParams()
     {

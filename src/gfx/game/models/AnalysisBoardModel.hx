@@ -1,5 +1,6 @@
 package gfx.game.models;
 
+import gfx.game.interfaces.IReadWriteGenericModel;
 import net.shared.board.Rules;
 import net.shared.board.Hex;
 import net.shared.board.HexCoords;
@@ -13,7 +14,7 @@ import net.shared.board.Situation;
 import net.shared.PieceColor;
 import net.shared.board.RawPly;
 
-class AnalysisBoardModel implements IReadOnlyAnalysisBoardModel
+class AnalysisBoardModel implements IReadWriteGenericModel implements IReadOnlyAnalysisBoardModel
 {
     public var variation:Variation;
     public var selectedBranch:VariationPath;

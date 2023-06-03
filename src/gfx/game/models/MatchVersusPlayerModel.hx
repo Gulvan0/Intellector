@@ -1,5 +1,6 @@
 package gfx.game.models;
 
+import gfx.game.interfaces.IReadWriteGameRelatedModel;
 import net.shared.board.Hex;
 import net.shared.board.HexCoords;
 import net.shared.board.Rules;
@@ -20,7 +21,7 @@ import gfx.game.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
 import net.shared.dataobj.OfferDirection;
 
-class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
+class MatchVersusPlayerModel implements IReadWriteGameRelatedModel implements IReadOnlyMatchVersusPlayerModel
 {
     public var gameID:Int;
     public var timeControl:TimeControl;
@@ -188,10 +189,10 @@ class MatchVersusPlayerModel implements IReadOnlyMatchVersusPlayerModel
         return getHistory().getStartingSituation();
     }
 
-	public function getMostRecentSituation():Situation 
+    public function getMostRecentSituation():Situation 
     {
-		return getHistory().getMostRecentSituation();
-	}
+        return getHistory().getMostRecentSituation();
+    }
 
     public function deriveInteractivityModeFromOtherParams()
     {

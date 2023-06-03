@@ -1,5 +1,6 @@
 package dict.utils;
 
+import net.shared.utils.PlayerRef;
 import utils.StringUtils;
 import net.shared.EloValue;
 import net.shared.PieceColor;
@@ -74,15 +75,15 @@ class OutcomePhrases
         }
     }
 
-    public static function getSpectatorGameOverDialogMessage(outcome:Outcome, whitePlayer:String, blackPlayer:String)
+    public static function getSpectatorGameOverDialogMessage(outcome:Outcome, playerRefs:Map<PieceColor, PlayerRef>)
     {
         var translations:Array<String>;
         
         switch outcome 
         {
             case Decisive(type, winnerColor):
-                var winner:String = winnerColor == White? whitePlayer : blackPlayer;
-                var loser:String = winnerColor == Black? whitePlayer : blackPlayer;
+                var winner:String = Utils.playerRef(playerRefs.get(winnerColor));
+                var loser:String = Utils.playerRef(playerRefs.get(opposite(winnerColor)));
 
                 translations = getDecisiveSpectatorGameOverDialogMessageTL(type, winner, loser);
             case Drawish(type):

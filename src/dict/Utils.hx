@@ -76,9 +76,9 @@ class Utils
         return TimePhrases.getTimePassedString(secsPassed);
     }
 
-    public static function getSpectatorGameOverDialogMessage(outcome:Outcome, whiteRef:String, blackRef:String)
+    public static function getSpectatorGameOverDialogMessage(outcome:Outcome, playerRefs:Map<PieceColor, PlayerRef>)
     {
-        return OutcomePhrases.getSpectatorGameOverDialogMessage(outcome, playerRef(whiteRef), playerRef(blackRef));
+        return OutcomePhrases.getSpectatorGameOverDialogMessage(outcome, playerRefs);
     }
 
     public static function getPlayerGameOverDialogMessage(outcome:Outcome, playerColor:PieceColor, newPersonalElo:Null<EloValue>)

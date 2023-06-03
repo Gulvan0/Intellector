@@ -19,7 +19,7 @@ class CommonModelExtractors
             case MatchVersusPlayer(model): model;
             case MatchVersusBot(model): model;
             case Spectation(model): model;
-            case AnalysisBoard(model): null;
+            case AnalysisBoard(_): null;
         }
     }
 
@@ -113,5 +113,10 @@ class CommonModelExtractors
             return {secs: secsLeftAtTimestamp, calculatedAt: nowTimestamp};
         else
             return {secs: Math.max(secsLeftAtTimestamp - actualTimeData.timestamp.getIntervalSecsTo(nowTimestamp), 0), calculatedAt: nowTimestamp};
+    }
+
+    public static function isPlayerParticipant(genericModel:IReadOnlyGameRelatedModel):Bool
+    {
+        return getColorByRef(genericModel, LoginManager.getRef()) != null;
     }
 }
