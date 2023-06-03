@@ -565,7 +565,7 @@ class Dictionary
             case CHALLENGE_PARAMS_TYPE_OPEN:
                 return ["Open", "Открытый"];
             case CHALLENGE_PARAMS_TYPE_BOT:
-                return ["Against Bot", "Против компьютера"];
+                return ["Versus Bot", "Против компьютера"];
             case CHALLENGE_PARAMS_DIRECT_USERNAME_OPTION_NAME:
                 return ["Username", "Ник"];
             case CHALLENGE_PARAMS_OPEN_VISIBILITY:
