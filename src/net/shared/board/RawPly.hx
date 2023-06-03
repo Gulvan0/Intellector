@@ -9,12 +9,21 @@ class RawPly
     public var to:HexCoords;
     public var morphInto:Null<PieceType>;
 
-    public static function construct(from:HexCoords, to:HexCoords, ?morphInto:PieceType) 
+    public static function construct(from:HexCoords, to:HexCoords, ?morphInto:PieceType):RawPly
     {
         var ply:RawPly = new RawPly();
         ply.from = from;
         ply.to = to;
         ply.morphInto = morphInto;
+        return ply;
+    }
+
+    public static function chameleon(from:HexCoords, to:HexCoords, situation:Situation):RawPly
+    {
+        var ply:RawPly = new RawPly();
+        ply.from = from;
+        ply.to = to;
+        ply.morphInto = situation.get(to).type();
         return ply;
     }
 
