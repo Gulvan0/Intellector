@@ -60,7 +60,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         Url.setPath(currentScreen.getURLPath(), titleStr);
     }
 
-	public function refreshLanguage() 
+    public function refreshLanguage() 
     {
         menubar.refreshLanguage();
     }

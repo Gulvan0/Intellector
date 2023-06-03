@@ -11,7 +11,7 @@ using Lambda;
 class SelectedState implements IState
 {
     private var boardInstance:GameBoard;
-	public var cursorLocation(default, null):Null<HexCoords>;
+    public var cursorLocation(default, null):Null<HexCoords>;
 
     private var selectedLocation:HexCoords;
     private var isDestinationAllowed:HexCoords->Bool;
@@ -24,14 +24,14 @@ class SelectedState implements IState
             boardInstance.hideLayerForEveryHex(Hover);
     }
 
-	public function exit() 
+    public function exit() 
     {
         boardInstance.getHex(selectedLocation).hideLayer(SelectedForMove);
         boardInstance.hideLayerForEveryHex(Hover);
         boardInstance.removeAllMarkers();
     }
 
-	public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         exit();
 
@@ -68,7 +68,7 @@ class SelectedState implements IState
         }
     }
 
-	public function onMouseMoved(newCursorLocation:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onMouseMoved(newCursorLocation:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         if (equal(cursorLocation, newCursorLocation))
             return;
@@ -81,7 +81,7 @@ class SelectedState implements IState
         cursorLocation = newCursorLocation;
     }
 
-	public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         //* Do nothing
     }

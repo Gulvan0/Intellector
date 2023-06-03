@@ -39,7 +39,7 @@ enum ServerEvent
     Move(ply:RawPly, timeData:Null<TimeReservesData>); //A move has been played. Sent both to opponent and to all of the spectators. timeData is only null in correspondence games
     Rollback(plysToUndo:Int, timeData:Null<TimeReservesData>); //Signal to undo a number of plys in a current game. Sent to both spectators and players. timeData is only null in correspondence games
     TimeAdded(receiver:PieceColor, timeData:TimeReservesData); //A player has added some time to their opponent. timeData can't be null since this event isn't dispatched in correspondence games
-    GameEnded(outcome:Outcome, timeData:TimeReservesData, rematchPossible:Bool, newPersonalElo:Null<EloValue>); //Game over. Sent both to players and to all of the spectators
+    GameEnded(outcome:Outcome, timeData:Null<TimeReservesData>, newPersonalElo:Null<EloValue>); //Game over. Sent both to players and to all of the spectators
 
     PlayerDisconnected(color:PieceColor); //Sent to the players and the spectators when one of the players disconnects
     PlayerReconnected(color:PieceColor); //Sent to the players and the spectators when one of the players reconnects

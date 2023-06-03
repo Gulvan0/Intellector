@@ -65,7 +65,7 @@ class StudiesTab extends VBox
 
     private function onEditStudyRequested(id:Int)
     {
-		Dialogs.getQueue().add(new StudyParamsDialog(Edit(id, loadedStudies.get(id), onStudyEdited.bind(id)), x -> {}));
+        Dialogs.getQueue().add(new StudyParamsDialog(Edit(id, loadedStudies.get(id), onStudyEdited.bind(id)), x -> {}));
     }
 
     private function onStudyEdited(id:Int, newParams:StudyInfo)

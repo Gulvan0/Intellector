@@ -8,7 +8,7 @@ import net.shared.board.HexCoords;
 class DraggingState implements IState
 {
     private var boardInstance:GameBoard;
-	public var cursorLocation(default, null):Null<HexCoords>;
+    public var cursorLocation(default, null):Null<HexCoords>;
 
     private var dragStartLocation:HexCoords;
     private var dragStartScreenCoords:Point;
@@ -26,7 +26,7 @@ class DraggingState implements IState
             boardInstance.hideLayerForEveryHex(Hover);
     }
 
-	public function exit() 
+    public function exit() 
     {
         dragBlocked = true;
         draggedPiece.setCenterAt(boardInstance.hexCoords(dragStartLocation));
@@ -36,12 +36,12 @@ class DraggingState implements IState
         boardInstance.removeAllMarkers();
     }
 
-	public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         //* Do nothing
     }
 
-	public function onMouseMoved(newCursorLocation:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onMouseMoved(newCursorLocation:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         if (equal(cursorLocation, newCursorLocation))
             return;
@@ -61,7 +61,7 @@ class DraggingState implements IState
         cursorLocation = newCursorLocation;
     }
 
-	public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         if (location != null && location.equals(dragStartLocation))
         {

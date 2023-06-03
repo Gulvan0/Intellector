@@ -30,102 +30,102 @@ import tests.UITest;
 using StringTools;
 
 /**
-	This class contains the entry point of a program followed
-	by all the necessary initialization.
+    This class contains the entry point of a program followed
+    by all the necessary initialization.
 
-	The file is structured in a waterfall manner: as you go
-	through all of the initialization steps, you descend lower
-	and lower.
+    The file is structured in a waterfall manner: as you go
+    through all of the initialization steps, you descend lower
+    and lower.
 **/
 class Main
 {
-	public static var app:HaxeUIApp;
+    public static var app:HaxeUIApp;
 
-	public static function main() 
+    public static function main() 
     {
         app = new HaxeUIApp();
         app.preloaderClass = DefaultPreloader;
-		app.icon = NormalFavicon;
+        app.icon = NormalFavicon;
         app.ready(onAppReady);
     }
 
-	private static function onAppReady()
-	{
-		init(start);
-	}
+    private static function onAppReady()
+    {
+        init(start);
+    }
 
-	/**
-		Some purely technical aspects for the app to work correctly
-	**/
-	private static function init(onInitFinished:Void->Void) 
-	{
-		Browser.window.onpopstate = ScreenNavigator.navigate;
-		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
-		Browser.document.addEventListener('wheel', event -> {
-			if (event.ctrlKey)
-				event.preventDefault();
-		}, true);
-		Browser.document.body.style.overflow = "auto";
+    /**
+        Some purely technical aspects for the app to work correctly
+    **/
+    private static function init(onInitFinished:Void->Void) 
+    {
+        Browser.window.onpopstate = ScreenNavigator.navigate;
+        Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
+        Browser.document.addEventListener('wheel', event -> {
+            if (event.ctrlKey)
+                event.preventDefault();
+        }, true);
+        Browser.document.body.style.overflow = "auto";
 
-		#if debug
-		Interceptor.init();
-		#end
+        #if debug
+        Interceptor.init();
+        #end
 
-		Blinker.init();
-		//TODO: OpeningDatabase.generate(_);
-		Changelog.init();
-		Config.init(onInitFinished);
-	}
+        Blinker.init();
+        //TODO: OpeningDatabase.generate(_);
+        Changelog.init();
+        Config.init(onInitFinished);
+    }
 
-	/**
-		Executed right after the initialization finishes completely
-	**/
-	private static function start()
-	{
-		var scene = SceneManager.launch();
-		app.addComponent(scene);
-		app.start();
+    /**
+        Executed right after the initialization finishes completely
+    **/
+    private static function start()
+    {
+        var scene = SceneManager.launch();
+        app.addComponent(scene);
+        app.start();
 
-		deriveLanguage();
-	}
+        deriveLanguage();
+    }
 
-	/**
-		Attempt to load user's language preference from their cookies.
-		If no exist (usually when it's their first visit), ask user to choose
-	**/
-	private static function deriveLanguage() 
-	{
-		var langInitializedFromCookie:Bool = Preferences.language.load();
+    /**
+        Attempt to load user's language preference from their cookies.
+        If no exist (usually when it's their first visit), ask user to choose
+    **/
+    private static function deriveLanguage() 
+    {
+        var langInitializedFromCookie:Bool = Preferences.language.load();
 
-		if (langInitializedFromCookie)
-			onLanguageReady();
-		else
-			SceneManager.getScene().toScreen(LanguageSelectIntro(onLanguageReady));
-	}
+        if (langInitializedFromCookie)
+            onLanguageReady();
+        else
+            SceneManager.getScene().toScreen(LanguageSelectIntro(onLanguageReady));
+    }
 
-	/**
-		Set locale and finally attempt to connect
-	**/
-	private static function onLanguageReady() 
-	{
-		if (Preferences.language.get() == RU)
-			LocaleManager.instance.language = "ru";
-		else
-			LocaleManager.instance.language = "en";
+    /**
+        Set locale and finally attempt to connect
+    **/
+    private static function onLanguageReady() 
+    {
+        if (Preferences.language.get() == RU)
+            LocaleManager.instance.language = "ru";
+        else
+            LocaleManager.instance.language = "en";
 
-		SceneManager.getScene().refreshLanguage();
+        SceneManager.getScene().refreshLanguage();
 
-		Networker.launch();
-		//test();
-	}
+        Networker.launch();
+        //test();
+    }
 
-	/**
-		Method called instead of Networker.launch() during testing
-	**/
-	private static function test()
-	{
-		Networker.ignoreEmitCalls = true;
-		LoginManager.imitateLoggedState("gulvan");
-		//Your testing code here (refer to `tests` package)
-	}
+    /**
+        Method called instead of Networker.launch() during testing
+    **/
+    private static function test()
+    {
+        Networker.ignoreEmitCalls = true;
+        LoginManager.imitateLoggedState("gulvan");
+        //Your testing code here (refer to `tests` package)
+    }
 }

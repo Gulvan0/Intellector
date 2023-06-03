@@ -11,8 +11,8 @@ using Lambda;
 
 class NeutralState implements IState 
 {
-	private var boardInstance:GameBoard;
-	public var cursorLocation(default, null):Null<HexCoords>;
+    private var boardInstance:GameBoard;
+    public var cursorLocation(default, null):Null<HexCoords>;
 
     public function onEntered() 
     {
@@ -22,12 +22,12 @@ class NeutralState implements IState
             boardInstance.hideLayerForEveryHex(Hover);
     }
 
-	public function exit() 
+    public function exit() 
     {
         //* Do nothing
     }
 
-	public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         boardInstance.eventHandler(LMBPressed(location));
         boardInstance.removeAllArrows(Colors.arrow);
@@ -67,7 +67,7 @@ class NeutralState implements IState
         }
     }
 
-	public function onMouseMoved(newCursorLocation:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onMouseMoved(newCursorLocation:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         if (equal(cursorLocation, newCursorLocation))
             return;
@@ -80,7 +80,7 @@ class NeutralState implements IState
         cursorLocation = newCursorLocation;
     }
 
-	public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         //* Do nothing
     }

@@ -59,7 +59,7 @@ class SituationSerializer
 
     public static function serialize(situation:Situation):String
     {
-		var playerPiecesStr:Map<PieceColor, String> = [White => '', Black => ''];
+        var playerPiecesStr:Map<PieceColor, String> = [White => '', Black => ''];
         
         for (hexData in situation.collectPiecesStable()) 
         {
@@ -69,5 +69,5 @@ class SituationSerializer
         }
 
         return colorLetter(situation.turnColor) + playerPiecesStr[White] + "!" + playerPiecesStr[Black];
-	}    
+    }    
 }

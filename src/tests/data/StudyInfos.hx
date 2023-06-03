@@ -19,12 +19,12 @@ class StudyInfos
     {
         var info:StudyInfo = new StudyInfo();
 
-		info.excludeNonParameters();
-		info.name = "Some clever name";
-		info.description = "This study is about bla-bla-bla and bla-bla-bla, moreover, bla-bla-bla. Some more bla-bla-bla and bla-bla-bla and bla-bla-bla";
-		info.publicity = Public;
-		info.tags = tagList1();
-		info.assignVariation(Variations.variation1());
+        info.excludeNonParameters();
+        info.name = "Some clever name";
+        info.description = "This study is about bla-bla-bla and bla-bla-bla, moreover, bla-bla-bla. Some more bla-bla-bla and bla-bla-bla and bla-bla-bla";
+        info.publicity = Public;
+        info.tags = tagList1();
+        info.assignVariation(Variations.variation1());
         info.keyPositionSIP = "w\\rerlrvn!DnZr";
 
         return info;
@@ -34,12 +34,12 @@ class StudyInfos
     {
         var info:StudyInfo = new StudyInfo();
 
-		info.excludeNonParameters();
-		info.name = "Yet another clever name";
-		info.description = "This study has dumb and not very long description, yet containing a looooooooooooooooooooooooong word";
-		info.publicity = DirectOnly;
-		info.tags = [];
-		info.assignVariation(Variations.variation1());
+        info.excludeNonParameters();
+        info.name = "Yet another clever name";
+        info.description = "This study has dumb and not very long description, yet containing a looooooooooooooooooooooooong word";
+        info.publicity = DirectOnly;
+        info.tags = [];
+        info.assignVariation(Variations.variation1());
         info.keyPositionSIP = "b\\rerlrvn!Dn";
 
         return info;
@@ -49,12 +49,12 @@ class StudyInfos
     {
         var info:StudyInfo = new StudyInfo();
 
-		info.excludeNonParameters();
-		info.name = "Private";
-		info.description = "This is a private study";
-		info.publicity = Private;
-		info.tags = [tag(2)];
-		info.assignVariation(Variations.variation1());
+        info.excludeNonParameters();
+        info.name = "Private";
+        info.description = "This is a private study";
+        info.publicity = Private;
+        info.tags = [tag(2)];
+        info.assignVariation(Variations.variation1());
         info.keyPositionSIP = "b\\rervn!Dn";
 
         return info;

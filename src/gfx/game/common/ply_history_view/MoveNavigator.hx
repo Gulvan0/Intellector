@@ -154,10 +154,10 @@ class MoveNavigator extends PlyHistoryView
         scrollTo(relPos);
     } 
 
-	public function asComponent():Component 
+    public function asComponent():Component 
     {
-		return this;
-	}
+        return this;
+    }
     
     public function new()
     {

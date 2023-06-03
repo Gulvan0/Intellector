@@ -255,11 +255,11 @@ class Networker
         Requests.greet(Reconnect(reconnectionToken, incomingBuffer.lastProcessedEventID), onGreetingAnswered.bind(_, true));
     }
 
-	private static function onGreetingAnswered(data:GreetingResponseData, ?dontLeave:Bool = false)
-	{
-		switch data 
-		{
-			case ConnectedAsGuest(sessionID, token, invalidCredentials, isShuttingDown):
+    private static function onGreetingAnswered(data:GreetingResponseData, ?dontLeave:Bool = false)
+    {
+        switch data 
+        {
+            case ConnectedAsGuest(sessionID, token, invalidCredentials, isShuttingDown):
                 GlobalBroadcaster.broadcast(Connected);
                 reconnectionToken = token;
                 sid = sessionID;
@@ -269,7 +269,7 @@ class Networker
                     ScreenNavigator.navigate();
                 if (isShuttingDown)
                     Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE);
-			case Logged(sessionID, token, incomingChallenges, ongoingFiniteGame, isShuttingDown):
+            case Logged(sessionID, token, incomingChallenges, ongoingFiniteGame, isShuttingDown):
                 GlobalBroadcaster.broadcast(Connected);
                 reconnectionToken = token;
                 sid = sessionID;
@@ -288,7 +288,7 @@ class Networker
                     if (isShuttingDown)
                         Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE); 
                 }
-			case Reconnected(missedEvents):
+            case Reconnected(missedEvents):
                 Dialogs.getQueue().closeGroup(ReconnectionPopUp);
                 GlobalBroadcaster.broadcast(Connected);
                 incomingBuffer.pushMissed(missedEvents);
@@ -304,7 +304,7 @@ class Networker
                     Dialogs.alert(OUTDATED_SERVER_ERROR_TEXT, OUTDATED_SERVER_ERROR_TITLE);
             case NotReconnected:
                 Browser.location.reload(false);
-		}
+        }
 
         if (data.match(ConnectedAsGuest(_, _, _, _) | Logged(_, _, _, _, _) | Reconnected(_)))
         {

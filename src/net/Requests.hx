@@ -110,7 +110,7 @@ class Requests
             case GameRetrieved(data):
                 //TODO: Rewrite
                         /*var parsedData:GameLogParserOutput = GameLogParser.parse(log);
-		        SceneManager.toScreen(LiveGame(id, Past(parsedData, null)));*/
+                SceneManager.toScreen(LiveGame(id, Past(parsedData, null)));*/
                         /*var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
                 SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, timeData, null)));*/
             case GameNotFound:

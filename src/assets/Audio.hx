@@ -26,7 +26,7 @@ class Audio
         var options:HowlOptions = {};
         options.src = [Paths.sound(soundName)];
 
-		var snd:Howl = new Howl(options);
+        var snd:Howl = new Howl(options);
         snd.play();
     }
 

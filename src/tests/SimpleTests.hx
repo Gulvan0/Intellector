@@ -46,330 +46,330 @@ import gfx.basic_components.AutosizingLabel;
 
 class SimpleTests 
 {
-	private static var box:Box;
+    private static var box:Box;
 
-	private static var traceArg:Dynamic->Void = arg -> {trace(arg);};
+    private static var traceArg:Dynamic->Void = arg -> {trace(arg);};
 
-	private static function add(comp:Component, ?wrapperWidth:DimValue, ?wrapperHeight:DimValue)
-	{
-		comp.horizontalAlign = 'center';
-		comp.verticalAlign = 'center';
+    private static function add(comp:Component, ?wrapperWidth:DimValue, ?wrapperHeight:DimValue)
+    {
+        comp.horizontalAlign = 'center';
+        comp.verticalAlign = 'center';
 
-		box = new Box();
-		box.percentWidth = 100;
-		box.percentHeight = 100;
+        box = new Box();
+        box.percentWidth = 100;
+        box.percentHeight = 100;
 
-		if (wrapperWidth != null || wrapperHeight != null)
-		{
-			var wrapperBox:Box = new Box();
-			wrapperBox.horizontalAlign = 'center';
-			wrapperBox.verticalAlign = 'center';
+        if (wrapperWidth != null || wrapperHeight != null)
+        {
+            var wrapperBox:Box = new Box();
+            wrapperBox.horizontalAlign = 'center';
+            wrapperBox.verticalAlign = 'center';
 
-			if (wrapperWidth != null)
-				assignWidth(wrapperBox, wrapperWidth);
+            if (wrapperWidth != null)
+                assignWidth(wrapperBox, wrapperWidth);
 
-			if (wrapperHeight != null)
-				assignHeight(wrapperBox, wrapperHeight);
+            if (wrapperHeight != null)
+                assignHeight(wrapperBox, wrapperHeight);
 
-			wrapperBox.addComponent(comp);
-			box.addComponent(wrapperBox);
-		}
-		else
-			box.addComponent(comp);
+            wrapperBox.addComponent(comp);
+            box.addComponent(wrapperBox);
+        }
+        else
+            box.addComponent(comp);
 
-		Screen.instance.addComponent(box);
-	}
+        Screen.instance.addComponent(box);
+    }
 
-	public static function square()
-	{
-		var bgColors:Array<Int> = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff];
-		var squares:Array<Square> = [];
+    public static function square()
+    {
+        var bgColors:Array<Int> = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff];
+        var squares:Array<Square> = [];
 
-		for (i in 0...4)
-		{
-			var sq:Square = new Square();
-			sq.customStyle = {backgroundColor: bgColors[i], backgroundOpacity: 0.5, verticalAlign: 'center'};
-			squares.push(sq);
-		}
+        for (i in 0...4)
+        {
+            var sq:Square = new Square();
+            sq.customStyle = {backgroundColor: bgColors[i], backgroundOpacity: 0.5, verticalAlign: 'center'};
+            squares.push(sq);
+        }
 
-		squares[0].height = 100;
-		squares[1].percentHeight = 100;
-		squares[2].width = 100;
-		squares[3].percentWidth = 100;
+        squares[0].height = 100;
+        squares[1].percentHeight = 100;
+        squares[2].width = 100;
+        squares[3].percentWidth = 100;
 
-		var contents1:HBox = new HBox();
-		contents1.percentWidth = 100;
-		contents1.height = 150;
-		contents1.customStyle = {borderSize: 2, borderColor: 0x666666};
-		for (i in 0...2)
-			contents1.addComponent(squares[i]);
+        var contents1:HBox = new HBox();
+        contents1.percentWidth = 100;
+        contents1.height = 150;
+        contents1.customStyle = {borderSize: 2, borderColor: 0x666666};
+        for (i in 0...2)
+            contents1.addComponent(squares[i]);
 
-		var contents2:VBox = new VBox();
-		contents2.percentHeight = 100;
-		contents2.width = 150;
-		contents2.customStyle = {borderSize: 2};
-		for (i in 2...4)
-			contents2.addComponent(squares[i]);
+        var contents2:VBox = new VBox();
+        contents2.percentHeight = 100;
+        contents2.width = 150;
+        contents2.customStyle = {borderSize: 2};
+        for (i in 2...4)
+            contents2.addComponent(squares[i]);
 
-		var vbox:VBox = new VBox();
-		vbox.percentWidth = 75;
-		vbox.percentHeight = 75;
-		vbox.addComponent(contents1);
-		vbox.addComponent(contents2);
-		
-		add(vbox);
-	}
+        var vbox:VBox = new VBox();
+        vbox.percentWidth = 75;
+        vbox.percentHeight = 75;
+        vbox.addComponent(contents1);
+        vbox.addComponent(contents2);
+        
+        add(vbox);
+    }
 
     public static function autosizingLabel()
     {
-		var v = new AutosizingLabel();
-		v.customStyle = {backgroundColor: 0xff0000, backgroundOpacity: 0.5};
-		v.percentWidth = 100;
-		v.text = "Lorem ipsum dolor sit amet";
-		add(v);
-	}
-	
-	public static function annotatedImage()
-	{
-		var vbox:VBox = new VBox();
-		vbox.percentWidth = 100;
+        var v = new AutosizingLabel();
+        v.customStyle = {backgroundColor: 0xff0000, backgroundOpacity: 0.5};
+        v.percentWidth = 100;
+        v.text = "Lorem ipsum dolor sit amet";
+        add(v);
+    }
+    
+    public static function annotatedImage()
+    {
+        var vbox:VBox = new VBox();
+        vbox.percentWidth = 100;
 
-		var images:Array<AnnotatedImage> = [
-			new AnnotatedImage(Exact(500), Exact(100), Paths.timeControl(Blitz), "3+2", "Blitz"),
-			new AnnotatedImage(Auto, Exact(100), Paths.timeControl(Rapid), "10+15", "Rapid"),
-			new AnnotatedImage(Percent(50), Exact(100), Paths.timeControl(Correspondence), "Correspondence")
-		];
+        var images:Array<AnnotatedImage> = [
+            new AnnotatedImage(Exact(500), Exact(100), Paths.timeControl(Blitz), "3+2", "Blitz"),
+            new AnnotatedImage(Auto, Exact(100), Paths.timeControl(Rapid), "10+15", "Rapid"),
+            new AnnotatedImage(Percent(50), Exact(100), Paths.timeControl(Correspondence), "Correspondence")
+        ];
 
-		for (image in images)
-		{
-			image.customStyle = {horizontalAlign: 'center', backgroundColor: 0xff0000, backgroundOpacity: 0.5};
+        for (image in images)
+        {
+            image.customStyle = {horizontalAlign: 'center', backgroundColor: 0xff0000, backgroundOpacity: 0.5};
 
-			var newStyle:Style = image.img.customStyle.clone();
-			newStyle.backgroundColor = 0xffff00;
-			newStyle.backgroundOpacity = 0.5;
-			image.img.customStyle = newStyle;
-	
-			var newStyle:Style = image.lbl.customStyle.clone();
-			newStyle.backgroundColor = 0xffff00;
-			newStyle.backgroundOpacity = 0.5;
-			image.lbl.customStyle = newStyle;
+            var newStyle:Style = image.img.customStyle.clone();
+            newStyle.backgroundColor = 0xffff00;
+            newStyle.backgroundOpacity = 0.5;
+            image.img.customStyle = newStyle;
+    
+            var newStyle:Style = image.lbl.customStyle.clone();
+            newStyle.backgroundColor = 0xffff00;
+            newStyle.backgroundOpacity = 0.5;
+            image.lbl.customStyle = newStyle;
 
-			vbox.addComponent(image);
-		}
+            vbox.addComponent(image);
+        }
 
-		add(vbox);
-	}
+        add(vbox);
+    }
 
-	public static function friendList()
-	{
-		var comp:FriendList = new FriendList(Percent(50), 50);
-		comp.fill(ProfileInfos.friendList1());
-		add(comp);
-	}
+    public static function friendList()
+    {
+        var comp:FriendList = new FriendList(Percent(50), 50);
+        comp.fill(ProfileInfos.friendList1());
+        add(comp);
+    }
 
-	public static function miniProfile()
-	{
-		Dialogs.getQueue().add(new MiniProfile("gulvan", ProfileInfos.miniData1()));
-	}
+    public static function miniProfile()
+    {
+        Dialogs.getQueue().add(new MiniProfile("gulvan", ProfileInfos.miniData1()));
+    }
 
-	public function playerLabel()
-	{
-		var comp:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", Normal(2300), true);
-		add(comp);
-	}
+    public function playerLabel()
+    {
+        var comp:PlayerLabel = new PlayerLabel(Exact(50), "gulvan", Normal(2300), true);
+        add(comp);
+    }
 
-	public static function profileHeader()
-	{
-		var comp:ProfileHeader = new ProfileHeader("kazvixx", ProfileInfos.data1());
-		add(comp);
-	}
+    public static function profileHeader()
+    {
+        var comp:ProfileHeader = new ProfileHeader("kazvixx", ProfileInfos.data1());
+        add(comp);
+    }
 
-	public static function studyTagFilterRect()
-	{
-		var comp:StudyFilterRect = null;
-		comp = new StudyFilterRect(Exact(30), StudyInfos.tag(1), () -> {box.removeComponent(comp);}, PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP);
-		add(comp);
-	}
+    public static function studyTagFilterRect()
+    {
+        var comp:StudyFilterRect = null;
+        comp = new StudyFilterRect(Exact(30), StudyInfos.tag(1), () -> {box.removeComponent(comp);}, PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP);
+        add(comp);
+    }
 
-	public static function studyFilterList()
-	{
-		var tags:Array<String> = [];
+    public static function studyFilterList()
+    {
+        var tags:Array<String> = [];
 
-		function onAdded(tag:String)
-		{
-			tags.push(tag);
-			trace(tags);
-		}
+        function onAdded(tag:String)
+        {
+            tags.push(tag);
+            trace(tags);
+        }
 
-		function onRemoved(tag:String)
-		{
-			tags.remove(tag);
-			trace(tags);
-		}
+        function onRemoved(tag:String)
+        {
+            tags.remove(tag);
+            trace(tags);
+        }
 
-		function onCleared()
-		{
-			tags = [];
-			trace(tags);
-		}
+        function onCleared()
+        {
+            tags = [];
+            trace(tags);
+        }
 
-		var comp:StudyFilterList = new StudyFilterList(Percent(50), 36, onAdded, onRemoved, onCleared, PROFILE_TAG_FILTERS_PREPENDER, PROFILE_TAG_NO_FILTERS_PLACEHOLDER_TEXT, PROFILE_ADD_TAG_FILTER_BTN_TEXT, PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP, PROFILE_CLEAR_TAG_FILTERS_BTN_TEXT, PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT);
-		add(comp);
-	}
+        var comp:StudyFilterList = new StudyFilterList(Percent(50), 36, onAdded, onRemoved, onCleared, PROFILE_TAG_FILTERS_PREPENDER, PROFILE_TAG_NO_FILTERS_PLACEHOLDER_TEXT, PROFILE_ADD_TAG_FILTER_BTN_TEXT, PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP, PROFILE_CLEAR_TAG_FILTERS_BTN_TEXT, PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT);
+        add(comp);
+    }
 
-	public static function studyTagLabel()
-	{
-		var comp:StudyTagLabel = new StudyTagLabel(Exact(30), StudyInfos.tag(1), () -> {trace(1);});
-		add(comp);
-	}
+    public static function studyTagLabel()
+    {
+        var comp:StudyTagLabel = new StudyTagLabel(Exact(30), StudyInfos.tag(1), () -> {trace(1);});
+        add(comp);
+    }
 
-	public static function studyTagList()
-	{
-		var comp:StudyTagList = new StudyTagList(Percent(50), 36, StudyInfos.tagList1(), s -> {trace(s);});
-		add(comp);
-	}
+    public static function studyTagList()
+    {
+        var comp:StudyTagList = new StudyTagList(Percent(50), 36, StudyInfos.tagList1(), s -> {trace(s);});
+        add(comp);
+    }
 
-	public static function studyWidget()
-	{
-		var data:StudyWidgetData = {
-			info: StudyInfos.info1(),
-			onStudyClicked: () -> {trace('Clicked');},
-			onTagSelected: tag -> {trace('Tag: $tag');},
-			onEditPressed: () -> {trace('Edit requested');},
-			onDeletePressed: () -> {trace('Delete requested');}
-		};
+    public static function studyWidget()
+    {
+        var data:StudyWidgetData = {
+            info: StudyInfos.info1(),
+            onStudyClicked: () -> {trace('Clicked');},
+            onTagSelected: tag -> {trace('Tag: $tag');},
+            onEditPressed: () -> {trace('Edit requested');},
+            onDeletePressed: () -> {trace('Delete requested');}
+        };
 
-		var comp:StudyWidget = new StudyWidget(data);
-		add(comp, Percent(50), Exact(200));
-	}
+        var comp:StudyWidget = new StudyWidget(data);
+        add(comp, Percent(50), Exact(200));
+    }
 
-	public static function gameWidget()
-	{
-		var info:GameInfo = new GameInfo();
-		info.id = 228;
-		info.log = GameLogs.log1();
+    public static function gameWidget()
+    {
+        var info:GameInfo = new GameInfo();
+        info.id = 228;
+        info.log = GameLogs.log1();
 
-		var data:GameWidgetData = {
-			info: info,
-			watchedLogin: "gulvan",
-			onClicked: () -> {trace('Clicked');}
-		};
+        var data:GameWidgetData = {
+            info: info,
+            watchedLogin: "gulvan",
+            onClicked: () -> {trace('Clicked');}
+        };
 
-		var comp:GameWidget = new GameWidget(data);
-		add(comp, Percent(50), Exact(200));
-	}
+        var comp:GameWidget = new GameWidget(data);
+        add(comp, Percent(50), Exact(200));
+    }
 
-	public static function tcFilterDropdown()
-	{
-		var sampleProfileData:ProfileData = ProfileInfos.data1();
-		var comp:TimeControlFilterDropdown = new TimeControlFilterDropdown(sampleProfileData.elo, sampleProfileData.gamesCntByTimeControl, sampleProfileData.totalPastGames, traceArg);
-		add(comp);
-	}
+    public static function tcFilterDropdown()
+    {
+        var sampleProfileData:ProfileData = ProfileInfos.data1();
+        var comp:TimeControlFilterDropdown = new TimeControlFilterDropdown(sampleProfileData.elo, sampleProfileData.gamesCntByTimeControl, sampleProfileData.totalPastGames, traceArg);
+        add(comp);
+    }
 
-	public static function studyTab()
-	{
-		var comp:StudiesTab = new StudiesTab("gulvan", [
-			StudyInfos.info1(),
-			StudyInfos.info2(),
-			StudyInfos.info3()
-		], 5);
-		add(comp, Percent(50), Percent(90));
-	}
+    public static function studyTab()
+    {
+        var comp:StudiesTab = new StudiesTab("gulvan", [
+            StudyInfos.info1(),
+            StudyInfos.info2(),
+            StudyInfos.info3()
+        ], 5);
+        add(comp, Percent(50), Percent(90));
+    }
 
-	public static function newStudyDialog()
-	{
-		var mode:StudyParamsDialogMode = Create(Variations.variation1());
-		Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
-	}
+    public static function newStudyDialog()
+    {
+        var mode:StudyParamsDialogMode = Create(Variations.variation1());
+        Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
+    }
 
-	public static function overwriteStudyDialog()
-	{
-		var mode:StudyParamsDialogMode = CreateOrOverwrite(Variations.variation1(), StudyInfos.info1());
-		Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
-	}
+    public static function overwriteStudyDialog()
+    {
+        var mode:StudyParamsDialogMode = CreateOrOverwrite(Variations.variation1(), StudyInfos.info1());
+        Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
+    }
 
-	public static function editStudyDialog()
-	{
-		var mode:StudyParamsDialogMode = Edit(111, StudyInfos.info1(), traceArg);
-		Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
-	}
+    public static function editStudyDialog()
+    {
+        var mode:StudyParamsDialogMode = Edit(111, StudyInfos.info1(), traceArg);
+        Dialogs.getQueue().add(new StudyParamsDialog(mode, info -> {trace(info);}));
+    }
 
-	public static function incomingChallengeDialog(i:Int)
-	{
-		var challengeParams:ChallengeParams = switch i
-		{
-			case 0: ChallengeParameters.incomingDirectBlitzCustomized();
-			case 1: ChallengeParameters.incomingDirectRapidRated();
-			case 2: ChallengeParameters.incomingDirectCorrespondenceUnrated();
-			default: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
-		}
+    public static function incomingChallengeDialog(i:Int)
+    {
+        var challengeParams:ChallengeParams = switch i
+        {
+            case 0: ChallengeParameters.incomingDirectBlitzCustomized();
+            case 1: ChallengeParameters.incomingDirectRapidRated();
+            case 2: ChallengeParameters.incomingDirectCorrespondenceUnrated();
+            default: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
+        }
 
-		var challengeData:ChallengeData = new ChallengeData();
-		challengeData.id = 42;
-		challengeData.params = challengeParams;
-		challengeData.ownerLogin = "kaz";
-		challengeData.ownerELO = Normal(1345);
+        var challengeData:ChallengeData = new ChallengeData();
+        challengeData.id = 42;
+        challengeData.params = challengeParams;
+        challengeData.ownerLogin = "kaz";
+        challengeData.ownerELO = Normal(1345);
 
-		Dialogs.getQueue().add(new IncomingChallengeDialog(challengeData, ()->{}));
-	}
+        Dialogs.getQueue().add(new IncomingChallengeDialog(challengeData, ()->{}));
+    }
 
-	public static function challengeEntryRenderer(i:Int) 
-	{
-		var contentBox:Grid = new Grid();
-		contentBox.columns = 2;
-		for (i in 0...7)
-		{
-			var challengeParams:ChallengeParams = switch i
-			{
-				case 0: ChallengeParameters.incomingDirectBlitzCustomized();
-				case 1: ChallengeParameters.outgoingDirect();
-				case 2: ChallengeParameters.incomingDirectRapidRated();
-				case 3: ChallengeParameters.outgoingPublic();
-				case 4: ChallengeParameters.incomingDirectCorrespondenceUnrated();
-				case 5: ChallengeParameters.outgoingByLink();
-				default: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
-			};
+    public static function challengeEntryRenderer(i:Int) 
+    {
+        var contentBox:Grid = new Grid();
+        contentBox.columns = 2;
+        for (i in 0...7)
+        {
+            var challengeParams:ChallengeParams = switch i
+            {
+                case 0: ChallengeParameters.incomingDirectBlitzCustomized();
+                case 1: ChallengeParameters.outgoingDirect();
+                case 2: ChallengeParameters.incomingDirectRapidRated();
+                case 3: ChallengeParameters.outgoingPublic();
+                case 4: ChallengeParameters.incomingDirectCorrespondenceUnrated();
+                case 5: ChallengeParameters.outgoingByLink();
+                default: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
+            };
 
-			var challengeData:ChallengeData = new ChallengeData();
-			challengeData.id = 12;
-			challengeData.params = challengeParams;
-			challengeData.ownerLogin = i % 2 == 0? "kaz" : "gulvan";
-			challengeData.ownerELO = Provisional(1250);
+            var challengeData:ChallengeData = new ChallengeData();
+            challengeData.id = 12;
+            challengeData.params = challengeParams;
+            challengeData.ownerLogin = i % 2 == 0? "kaz" : "gulvan";
+            challengeData.ownerELO = Provisional(1250);
 
-			var innerBox:Box = new Box();
-			assignWidth(innerBox, Exact(325));
+            var innerBox:Box = new Box();
+            assignWidth(innerBox, Exact(325));
 
-			var comp = new ChallengeEntryRenderer();
-			comp.data = challengeData;
+            var comp = new ChallengeEntryRenderer();
+            comp.data = challengeData;
 
-			innerBox.addComponent(comp);
-			contentBox.addComponent(innerBox);
-		}
-		
-		add(contentBox);
-	}
+            innerBox.addComponent(comp);
+            contentBox.addComponent(innerBox);
+        }
+        
+        add(contentBox);
+    }
 
-	@:access(gfx.scene.SceneManager.scene)
-	@:access(gfx.scene.Scene.menubar)
-	public static function challengeMenuEvent(i:Int) 
-	{
-		var challengeParams:ChallengeParams = switch i
-		{
-			case 0: ChallengeParameters.incomingDirectBlitzCustomized();
-			case 1: ChallengeParameters.incomingDirectRapidRated();
-			case 2: ChallengeParameters.incomingDirectCorrespondenceUnrated();
-			case 3: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
-			case 4: ChallengeParameters.outgoingDirect();
-			case 5: ChallengeParameters.outgoingPublic();
-			default: ChallengeParameters.outgoingByLink();
-		}
+    @:access(gfx.scene.SceneManager.scene)
+    @:access(gfx.scene.Scene.menubar)
+    public static function challengeMenuEvent(i:Int) 
+    {
+        var challengeParams:ChallengeParams = switch i
+        {
+            case 0: ChallengeParameters.incomingDirectBlitzCustomized();
+            case 1: ChallengeParameters.incomingDirectRapidRated();
+            case 2: ChallengeParameters.incomingDirectCorrespondenceUnrated();
+            case 3: ChallengeParameters.incomingDirectHyperbulletWhiteAcceptor();
+            case 4: ChallengeParameters.outgoingDirect();
+            case 5: ChallengeParameters.outgoingPublic();
+            default: ChallengeParameters.outgoingByLink();
+        }
 
-		var challengeData:ChallengeData = new ChallengeData();
-		challengeData.id = 12;
-		challengeData.params = challengeParams;
-		challengeData.ownerLogin = i < 4? "kaz" : "gulvan";
-		challengeData.ownerELO = Provisional(1250);
+        var challengeData:ChallengeData = new ChallengeData();
+        challengeData.id = 12;
+        challengeData.params = challengeParams;
+        challengeData.ownerLogin = i < 4? "kaz" : "gulvan";
+        challengeData.ownerELO = Provisional(1250);
 
-		SceneManager.scene.menubar.challengesMenu.appendEntry(challengeData);
-	}
+        SceneManager.scene.menubar.challengesMenu.appendEntry(challengeData);
+    }
 }

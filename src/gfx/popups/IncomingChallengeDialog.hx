@@ -54,7 +54,7 @@ class IncomingChallengeDialog extends BaseDialog
         this.challengeID = data.id;
         this.additionalCloseCallback = additionalCloseCallback;
         
-		challengeByLabel.text = Dictionary.getPhrase(INCOMING_CHALLENGE_CHALLENGE_BY_LABEL_TEXT, [data.ownerLogin]);
+        challengeByLabel.text = Dictionary.getPhrase(INCOMING_CHALLENGE_CHALLENGE_BY_LABEL_TEXT, [data.ownerLogin]);
         challengeByLabel.setFontBold(true);
         
         var timeControlType:TimeControlType = data.params.timeControl.getType();
@@ -65,15 +65,15 @@ class IncomingChallengeDialog extends BaseDialog
         var timeControlRow:AnnotatedImage = new AnnotatedImage(Auto, Percent(100), Paths.timeControl(timeControlType), timeControlString, null, 0.08);
         timeControlRowBox.addComponent(timeControlRow);
 
-		bracketLabel.text = Dictionary.getPhrase(data.params.rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
+        bracketLabel.text = Dictionary.getPhrase(data.params.rated? OPENJOIN_RATED : OPENJOIN_UNRATED);
 
-		colorIcon.resource = Paths.challengeColor(data.params.acceptorColor);
+        colorIcon.resource = Paths.challengeColor(data.params.acceptorColor);
         colorIcon.tooltip = switch data.params.acceptorColor 
         {
-			case White: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [data.ownerLogin]);
-			case Black: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [data.ownerLogin]);
-			case null: Dictionary.getPhrase(OPENJOIN_COLOR_RANDOM);
-		};
+            case White: Dictionary.getPhrase(OPENJOIN_COLOR_BLACK_OWNER, [data.ownerLogin]);
+            case Black: Dictionary.getPhrase(OPENJOIN_COLOR_WHITE_OWNER, [data.ownerLogin]);
+            case null: Dictionary.getPhrase(OPENJOIN_COLOR_RANDOM);
+        };
 
         if (data.params.customStartingSituation != null)
         {

@@ -29,7 +29,7 @@ class CredentialCookies
     {
         var duration:Null<Int> = expirable? 60 * 60 * 6 : 60 * 60 * 24 * 365 * 5;
         Cookie.set(LOGIN_COOKIE, login ?? LoginManager.getLogin(), duration, "/");
-		Cookie.set(PASSWORD_COOKIE, password ?? LoginManager.getPassword(), duration, "/");
+        Cookie.set(PASSWORD_COOKIE, password ?? LoginManager.getPassword(), duration, "/");
     }
 
     public static function removeLoginDetails() 
