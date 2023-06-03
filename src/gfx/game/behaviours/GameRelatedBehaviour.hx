@@ -1,5 +1,6 @@
 package gfx.game.behaviours;
 
+import net.shared.utils.UnixTimestamp;
 import assets.Audio;
 import dict.Dictionary;
 import dict.Utils;
@@ -73,7 +74,7 @@ abstract class GameRelatedBehaviour implements IBehaviour
 		model.activeTimerColor = newMoveCount < 2? null : newMoveCount % 2 == 0? White : Black;
 	}
 
-	private function rollback(plysToUndo:Int, updatedTimeData:Null<TimeReservesData>)
+	private function rollback(plysToUndo:Int, ?updatedTimestamp:Null<UnixTimestamp>)
 	{
 		var newMoveCount:Int = model.getLineLength() - plysToUndo;
 
@@ -88,11 +89,8 @@ abstract class GameRelatedBehaviour implements IBehaviour
 
 		if (model.perMoveTimeRemaindersData != null)
 		{
-			model.perMoveTimeRemaindersData.rollback(newMoveCount);
+			model.perMoveTimeRemaindersData.rollback(newMoveCount, updatedTimestamp);
 
-			if (updatedTimeData != null)
-				model.perMoveTimeRemaindersData.modifyLast(updatedTimeData);
-			
 			deriveActiveTimerColor(newMoveCount);
 
 			modelUpdateHandler(TimeDataUpdated);
@@ -164,8 +162,8 @@ abstract class GameRelatedBehaviour implements IBehaviour
                 }
 
                 updateBehaviourDueToTurnColorUpdate();
-            case Rollback(plysToUndo, timeData):
-                rollback(plysToUndo, timeData);
+            case Rollback(plysToUndo, updatedTimestamp):
+                rollback(plysToUndo, updatedTimestamp);
             case TimeAdded(receiver, timeData):
                 addTime(timeData, receiver);
             case GameEnded(outcome, timeData, newPersonalElo):

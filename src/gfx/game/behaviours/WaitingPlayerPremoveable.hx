@@ -5,11 +5,6 @@ import gfx.game.events.GameboardEvent;
 
 class WaitingPlayerPremoveable extends WaitingPlayerBehaviour
 {
-    public function handleGameboardEvent(event:GameboardEvent)
-    {
-        //TODO: Fill
-    }
-
     private function updateBehaviourDueToPremovePreferenceUpdate()
     {
         if (!Preferences.premoveEnabled.get()) 
@@ -18,6 +13,6 @@ class WaitingPlayerPremoveable extends WaitingPlayerBehaviour
 
     public function new(versusPlayerModel:MatchVersusPlayerModel)
     {
-        super(versusPlayerModel);
+        super(versusPlayerModel, Premove);
     }
 }

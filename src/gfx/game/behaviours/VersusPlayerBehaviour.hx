@@ -1,5 +1,7 @@
 package gfx.game.behaviours;
 
+import gfx.game.behaviours.util.GameboardEventHandler;
+import net.shared.board.RawPly;
 import net.shared.dataobj.OfferDirection;
 import net.shared.dataobj.OfferAction;
 import net.shared.dataobj.OfferKind;
@@ -9,26 +11,19 @@ import GlobalBroadcaster.GlobalEvent;
 import gfx.game.events.GameboardEvent;
 import gfx.game.models.MatchVersusPlayerModel;
 
-abstract class VersusPlayerBehaviour extends GameRelatedBehaviour
+abstract class VersusPlayerBehaviour extends OwnGameBehaviour
 {
     private var versusPlayerModel:MatchVersusPlayerModel;
 
-    public abstract function handleGameboardEvent(event:GameboardEvent):Void;
-    public abstract function handleGlobalEvent(event:GlobalEvent):Void;
     private abstract function onInvalidMove():Void;
     private abstract function onMoveAccepted(timeData:Null<TimeReservesData>):Void;
-    private abstract function customOnEntered():Void;
     private abstract function updateBehaviourDueToTurnColorUpdate():Void;
+    private abstract function updateBehaviourDueToPremovePreferenceUpdate():Void;
 
     private function setPlayerOnlineStatus(playerColor:PieceColor, online:Bool)
     {
         if (playerColor != versusPlayerModel.getPlayerColor())
             versusPlayerModel.opponentOnline = online;
-    }
-
-    private function isAutoscrollEnabled():Bool
-    {
-        return Preferences.autoScrollOnMove.get().match(Always | OwnGameOnly);
     }
 
     private function updateOfferStateDueToAction(offerSentBy:PieceColor, offer:OfferKind, action:OfferAction)
@@ -55,9 +50,24 @@ abstract class VersusPlayerBehaviour extends GameRelatedBehaviour
         writeChatEntry(Log(OFFER_ACTION_MESSAGE(kind, offerSentBy, action)));
     }
 
-    public function new(versusPlayerModel:MatchVersusPlayerModel)
+    private function getPlannedPremoves():Array<RawPly>
     {
-        super(versusPlayerModel);
+        return versusPlayerModel.plannedPremoves;
+    }
+
+    private function setPlannedPremoves(v:Array<RawPly>)
+    {
+        versusPlayerModel.plannedPremoves = v;
+    }
+
+    private function onCustomInitEnded():Void
+    {
+        //* Do nothing
+    }
+
+    public function new(versusPlayerModel:MatchVersusPlayerModel, performPremoveOnEntered:Bool, gameboardEventHandler:GameboardEventHandler)
+    {
+        super(versusPlayerModel, performPremoveOnEntered, gameboardEventHandler);
         this.versusPlayerModel = versusPlayerModel;
     }
 }

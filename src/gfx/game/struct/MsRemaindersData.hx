@@ -46,9 +46,11 @@ class MsRemaindersData implements IReadOnlyMsRemainders
         reservesAfterMove[reservesAfterMove.length - 1] = timeData.copy();
     }
 
-    public function rollback(newPlayedMovesCnt:Int) 
+    public function rollback(newPlayedMovesCnt:Int, ?updatedTimestamp:Null<UnixTimestamp>) 
     {
         reservesAfterMove = reservesAfterMove.slice(0, newPlayedMovesCnt);
+        if (updatedTimestamp != null)
+            reservesAfterMove[newPlayedMovesCnt - 1].timestamp = updatedTimestamp;
     }
 
     public function recordTimeOnGameEnded(timeData:TimeReservesData)

@@ -1,5 +1,6 @@
 package gfx.game.models;
 
+import engine.BotTimeData;
 import gfx.game.interfaces.IReadWriteGameRelatedModel;
 import net.shared.board.HexCoords;
 import net.shared.board.Hex;
@@ -137,6 +138,18 @@ class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IRead
     public function getSpectators():Array<PlayerRef>
     {
         return spectatorRefs.copy();
+    }
+
+    public function getBotTimeData():Null<BotTimeData>
+    {
+        if (timeControl.isCorrespondence())
+            return null;
+
+        var botColor:PieceColor = opposite(getPlayerColor());
+        var botMovesFirst:Bool = botColor == history.getStartingSituation().turnColor;
+        var actualReservesData = CommonModelExtractors.getActualSecsLeft(this, botColor);
+
+        return new BotTimeData(actualReservesData.secs, timeControl.incrementSecs, getLineLength(), botMovesFirst);
     }
 
     //Additional methods to unify with IReadOnlyGameRelatedModel

@@ -1,5 +1,6 @@
 package net.shared;
 
+import net.shared.utils.UnixTimestamp;
 import net.shared.dataobj.*;
 import net.shared.board.RawPly;
 
@@ -19,6 +20,8 @@ enum ClientEvent
     Resign; 
     PerformOfferAction(kind:OfferKind, action:OfferAction);
     AddTime; 
+    BotGameRollback(plysReverted:Int, updatedTimestamp:Null<UnixTimestamp>);
+    BotMessage(text:String);
     GetOpenChallenge(id:Int); 
     FollowPlayer(login:String);
     StopFollowing;
