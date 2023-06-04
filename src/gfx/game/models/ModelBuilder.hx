@@ -51,10 +51,21 @@ class ModelBuilder
             model.playerOnline = data.playerOnline;
             model.spectatorRefs = data.activeSpectators;
 
+            var hasTimeRemaindersData:Bool = false;
+            if (!model.timeControl.isCorrespondence())
+                for (item in data.eventLog)
+                    switch item.entry
+                    {
+                        case Ply(_, whiteMsAfter, blackMsAfter):
+                            hasTimeRemaindersData = whiteMsAfter != null && blackMsAfter != null;
+                            break;
+                        default:
+                    }
+
             model.outcome = null;
             model.history = new History(data.startingSituation, []);
             model.outgoingOfferActive = [for (color in PieceColor.createAll()) color => [for (kind in OfferKind.createAll()) kind => false]];
-            model.perMoveTimeRemaindersData = model.timeControl.isCorrespondence()? null : new MsRemaindersData(model.timeControl, model.startTimestamp);
+            model.perMoveTimeRemaindersData = hasTimeRemaindersData? null : new MsRemaindersData(model.timeControl, model.startTimestamp);
             model.chatHistory = [];
 
             processEventLog(data.eventLog, model.history, model.outgoingOfferActive, model.perMoveTimeRemaindersData, model.chatHistory, x -> {model.outcome = x;}, model.playerRefs);

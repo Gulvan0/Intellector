@@ -22,6 +22,8 @@ class UCMABox extends GameComponentLayout
     private var moveNavigator:MoveNavigator;
     private var actionBar:LiveActionBar;
 
+    private var clocksHidden:Bool = false;
+
     public function new() 
     {
         super();
@@ -46,8 +48,6 @@ class UCMABox extends GameComponentLayout
 
         center.addComponent(moveNavigator);
         center.addComponent(actionBar);
-
-        setOrientation(model.asGenericModel().getOrientation());
     }
 
     private function getChildGameComponents():Array<IGameComponent>
@@ -57,10 +57,16 @@ class UCMABox extends GameComponentLayout
         for (label in usernameLabels)
             a.push(label);
 
-        for (clock in clocks)
-            a.push(clock);
+        if (!clocksHidden)
+            for (clock in clocks)
+                a.push(clock);
 
         return a;
+    }
+
+    private override function beforeChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    {
+        clocksHidden = model.asGameModel().getMsRemainders() == null;
     }
 
     private override function afterChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
@@ -81,31 +87,36 @@ class UCMABox extends GameComponentLayout
     private function setOrientation(orientation:PieceColor)
     {
         headerContainer.removeAllComponents(false);
-        footerContatiner.removeAllComponents(false);
+        footerContainer.removeAllComponents(false);
 
         if (orientation == White)
         {
-            headerContainer.addComponent(clocks.get(Black));
+            if (!clocksHidden)
+                headerContainer.addComponent(clocks.get(Black));
             headerContainer.addComponent(usernameLabels.get(Black));
-            footerContatiner.addComponent(usernameLabels.get(White));
-            footerContatiner.addComponent(clocks.get(White));
+            footerContainer.addComponent(usernameLabels.get(White));
+            if (!clocksHidden)
+                footerContainer.addComponent(clocks.get(White));
         }
         else
         {
-            headerContainer.addComponent(clocks.get(White));
+            if (!clocksHidden)
+                headerContainer.addComponent(clocks.get(White));
             headerContainer.addComponent(usernameLabels.get(White));
-            footerContatiner.addComponent(usernameLabels.get(Black));
-            footerContatiner.addComponent(clocks.get(Black));
+            footerContainer.addComponent(usernameLabels.get(Black));
+            if (!clocksHidden)
+                footerContainer.addComponent(clocks.get(Black));
         }
     }
 
     @:bind(this, UIEvent.RESIZE)
-    private function onResized(e) 
+    private function onResize(e) 
     {
         for (color in PieceColor.createAll())
         {
             usernameLabels.get(color).height = 0.08 * this.height;
-            clocks.get(color).height = 0.055 * this.height;
+            if (!clocksHidden)
+                clocks.get(color).height = 0.055 * this.height;
         }
     }
 }

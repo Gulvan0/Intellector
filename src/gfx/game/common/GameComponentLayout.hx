@@ -38,12 +38,12 @@ abstract class GameComponentLayout extends Box implements IGameComponent
 
     public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
     {
-        beforeChildrenInitialized(model, behaviour);
+        beforeChildrenInitialized(model, getBehaviour);
 
         for (component in getChildGameComponents())
-            component.init(model, behaviour);
+            component.init(model, getBehaviour);
         
-        afterChildrenInitialized(model, behaviour);
+        afterChildrenInitialized(model, getBehaviour);
     }
 
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent):Void

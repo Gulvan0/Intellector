@@ -9,7 +9,7 @@ import net.shared.utils.PlayerRef;
 
 enum GameEventLogEntry
 {
-    Ply(ply:RawPly, whiteMsAfter:Int, blackMsAfter:Int);
+    Ply(ply:RawPly, whiteMsAfter:Null<Int>, blackMsAfter:Null<Int>);
     OfferActionPerformed(kind:OfferKind, sentBy:PieceColor, action:OfferAction);
     Message(sentBy:PlayerRef, text:String);
     TimeAdded(receiver:PieceColor);
