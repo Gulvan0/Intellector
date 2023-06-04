@@ -1,0 +1,4 @@
+<vbox width="100%">
+    <vbox id="studiesList" width="100%" />
+    <button id="loadMoreBtn" text="${Dictionary.getPhrase(PROFILE_LOAD_MORE_BTN_TEXT)}" horizontalAlign="center"/>
+</vbox>

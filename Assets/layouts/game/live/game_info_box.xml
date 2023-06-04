@@ -1,0 +1,16 @@
+<card width="100%" layoutName="vertical" style="spacing:5px">
+    <hbox width="100%">
+        <label id="matchParameters" horizontalAlign="left" style="font-size:16px;text-align:left" />
+        <spacer width="100%" />
+        <label id="datetime" horizontalAlign="right" style="font-size:12px;margin-top:0px" />
+    </hbox>
+    <label id="resolution" style="font-size:14px;font-style:bold;text-align:left" />
+    <hbox width="100%" horizontalAlign="center" style="margin-top:5px">
+        <box id="imagebox" width="70px" height="70px" style="padding:0 0 0 0" verticalAlign="center">
+            <image id="timeControlIcon" verticalAlign="center" horizontalAlign="center" />
+        </box>
+        <vbox id="opponentsBox" width="100%" style="spacing:0px;margin-left:5px" verticalAlign="center" />
+    </hbox>
+    <label id="watchingLabel" hidden="true" tooltip="${Dictionary.getPhrase(LIVE_WATCHING_LABEL_TOOLTIP)}" width="100%" style="font-size:16px;margin-top:10px;margin-bottom:10px;text-align:center;pointer-events:true" />
+    <label id="openingLabel" width="100%" horizontalAlign="center" style="font-size:14px;margin-top:10px;font-style:italic;text-align:left" />
+</card>

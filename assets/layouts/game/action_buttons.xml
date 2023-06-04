@@ -1,8 +1,0 @@
-<button-bar width="100%" toggle="false">
-    <style>
-        .action-button .icon {
-            width: 30px;
-            height: 30px;
-        }
-    </style>
-</button-bar>

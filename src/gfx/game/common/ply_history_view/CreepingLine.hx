@@ -13,7 +13,7 @@ import gfx.utils.PlyScrollType;
 import haxe.ui.containers.VBox;
 using utils.CallbackTools;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/creeping_line.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/common/ply_history_view/creeping_line.xml"))
 class CreepingLine extends PlyHistoryView
 {
     private var plyCards:Array<CreepingLinePly> = [];

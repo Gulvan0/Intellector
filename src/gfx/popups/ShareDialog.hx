@@ -26,7 +26,7 @@ import gfx.game.board.util.BoardSize;
 import gfx.game.board.Board;
 import gfx.game.board.GameBoard;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/share_dialog.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/popups/share_dialog.xml"))
 class ShareDialog extends Dialog 
 {   
     private var situation:Situation;

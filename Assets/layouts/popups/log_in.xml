@@ -1,0 +1,27 @@
+<dialog width="400" title="${Dictionary.getPhrase(LOGIN_DIALOG_TITLE)}">
+    <tabview id="tabview" width="100%">
+        <vbox text="${Dictionary.getPhrase(LOGIN_LOG_IN_MODE_TITLE)}" width="100%">
+            <grid width="100%">
+                <label text="${Dictionary.getPhrase(LOGIN_LOGIN_FIELD_NAME)}" verticalAlign="center" />
+                <textfield id="signInUsernameField" restrictChars="A-Za-z0-9" width="100%" />
+                
+                <label text="${Dictionary.getPhrase(LOGIN_PASSWORD_FIELD_NAME)}" verticalAlign="center" />
+                <textfield id="signInPasswordField" restrictChars="A-Za-z0-9" password="true" width="100%" />
+            </grid>
+            <checkbox id="signInRememberMeCheckbox" text="${Dictionary.getPhrase(LOGIN_REMEMBER_ME)}" selected="false" horizontalAlign='center'/>
+        </vbox>
+        <vbox text="${Dictionary.getPhrase(LOGIN_REGISTER_MODE_TITLE)}" width="100%">
+            <grid width="100%">
+                <label text="${Dictionary.getPhrase(LOGIN_LOGIN_FIELD_NAME)}" verticalAlign="center" />
+                <textfield id="signUpUsernameField" restrictChars="A-Za-z0-9" width="100%" />
+                
+                <label text="${Dictionary.getPhrase(LOGIN_PASSWORD_FIELD_NAME)}" verticalAlign="center" />
+                <textfield id="signUpPasswordField" restrictChars="A-Za-z0-9" password="true" width="100%" />
+
+                <label text="${Dictionary.getPhrase(LOGIN_REPEAT_PASSWORD_FIELD_NAME)}" verticalAlign="center" />
+                <textfield id="signUpRepeatPasswordField" restrictChars="A-Za-z0-9" password="true" width="100%" />
+            </grid>
+            <checkbox id="signUpStayLoggedCheckbox" text="${Dictionary.getPhrase(LOGIN_REMAIN_LOGGED)}" selected="false" horizontalAlign='center'/>
+        </vbox>
+    </tabview>
+</dialog>

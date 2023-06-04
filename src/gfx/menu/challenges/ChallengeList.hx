@@ -16,7 +16,7 @@ import haxe.ui.containers.ListView;
 import net.shared.dataobj.ChallengeData;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/menu/challenge_list.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/menu/challenges/challenge_list.xml'))
 class ChallengeList extends Menu implements IGlobalEventObserver implements INetObserver
 {
     public var flagIcon:ChallengeMenuIcon;

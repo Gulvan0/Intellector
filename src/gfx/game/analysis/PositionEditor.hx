@@ -20,7 +20,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/position_editor.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/analysis/position_editor.xml"))
 class PositionEditor extends VBox implements IGameComponent
 {
     private var eventHandler:PositionEditorEvent->Void;

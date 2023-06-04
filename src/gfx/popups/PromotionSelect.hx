@@ -1,6 +1,6 @@
 package gfx.popups;
 
-import gfx.game.board.components.Piece;
+import gfx.game.board.subcomponents.Piece;
 import dict.Dictionary;
 import haxe.ui.containers.dialogs.Dialog.DialogButton;
 import haxe.ui.events.UIEvent;

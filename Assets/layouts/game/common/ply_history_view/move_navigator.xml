@@ -1,0 +1,23 @@
+<vbox width="100%" height="100%" style="border-top: 0; border-left: 1; border-right: 1; border-bottom: 1;border-color: #dddddd;padding: 1 1 1 1;spacing:0px">
+    <style>
+        .navigator-scroll-btn .icon {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+    <button-bar id="scrollBtnBar" toggle="false" width="100%">
+        <button id="homeBtn" icon="assets/symbols/common/home.svg" width="25%" height="34px" styleName="navigator-scroll-btn" />
+        <button id="prevBtn" icon="assets/symbols/common/prev.svg" width="25%" height="34px" styleName="navigator-scroll-btn" />
+        <button id="nextBtn" icon="assets/symbols/common/next.svg" width="25%" height="34px" styleName="navigator-scroll-btn" />
+        <button id="endBtn" icon="assets/symbols/common/end.svg" width="25%" height="34px" styleName="navigator-scroll-btn" />
+    </button-bar>
+    <tableview id="movetable" width="100%" height="100%" contentWidth="100%">
+        <header width="100%" height="0px">
+            <column width="13%" id="num" />
+            <column width="43.5%" id="whiteMove" />
+            <column width="43.5%" id="blackMove" />
+        </header>
+        <move-cell-renderer id="whiteMove" />
+        <move-cell-renderer id="blackMove" />
+    </tableview>  
+</vbox>

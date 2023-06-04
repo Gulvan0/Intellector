@@ -19,7 +19,7 @@ import haxe.ui.core.Screen as HaxeUIScreen;
 
 using utils.StringUtils;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/menu/menubar.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/menu/menu_bar.xml'))
 class MenuBar extends HaxeUIMenuBar implements IGlobalEventObserver
 {
     private var sidemenu:SideMenu;

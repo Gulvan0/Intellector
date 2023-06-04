@@ -1,0 +1,4 @@
+<stack width="100%" height="100%">
+    <tabview id="tabview" width="100%" height="100%" />
+    <box id="singlepage" width="100%" height="100%" />
+</stack>

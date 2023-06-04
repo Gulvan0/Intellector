@@ -14,7 +14,7 @@ import haxe.ui.components.Button;
 import haxe.ui.containers.ListView;
 import haxe.ui.containers.ScrollView;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/profile/studies_tab.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/profile/complex_components/studies_tab.xml'))
 class StudiesTab extends VBox
 {
     private static inline final STUDIES_PAGE_SIZE:Int = 10;

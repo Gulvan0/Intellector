@@ -7,7 +7,7 @@ import gfx.game.events.ActionBarEvent;
 import haxe.ui.containers.VBox;
 import net.shared.dataobj.OfferKind;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/action_bar.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/common/action_bar/action_bar.xml"))
 class ActionBar extends VBox
 {
     private var buttonBars:Array<ActionButtons> = [];

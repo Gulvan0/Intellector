@@ -15,7 +15,7 @@ private enum PanelDisplayMode
     Hidden;
 }
 
-@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/panel.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/panel.xml"))
 class Panel extends Stack
 {
     private var pages:Array<ComponentPageName> = [];

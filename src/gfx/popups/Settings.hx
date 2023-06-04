@@ -14,7 +14,7 @@ import haxe.ui.containers.dialogs.Dialog;
 import Preferences.BranchingTabType;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/settings_popup.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/settings.xml'))
 class Settings extends BaseDialog
 {
     private var oldLanguage:Language;

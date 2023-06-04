@@ -27,7 +27,7 @@ import gfx.ResponsiveToolbox.ResponsiveProperty;
 import net.shared.dataobj.ViewedScreen;
 import dict.Phrase;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/generic_game_screen.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/screens/generic_game_screen.xml"))
 abstract class GenericGameScreen extends Screen implements IGameScreen
 {
     private var panels:Map<PanelName, Panel> = [];

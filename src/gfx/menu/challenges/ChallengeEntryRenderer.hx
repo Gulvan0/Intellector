@@ -18,7 +18,7 @@ import haxe.ui.core.ItemRenderer;
 import dict.Dictionary;
 import net.shared.dataobj.ChallengeParams;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/menu/challenge_entry.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/menu/challenges/challenge_entry_renderer.xml"))
 class ChallengeEntryRenderer extends ItemRenderer
 {
     private var challengeID:Int;

@@ -15,7 +15,7 @@ import GlobalBroadcaster.GlobalEvent;
 import gfx.game.interfaces.IGameComponent;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/branching_box.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/analysis/branching_box.xml"))
 class BranchingBox extends VBox implements IGameComponent implements IGlobalEventObserver
 {
     private var variationView:IVariationView;

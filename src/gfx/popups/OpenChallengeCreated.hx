@@ -7,7 +7,7 @@ import utils.Changelog;
 import dict.Dictionary;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/open_challenge_created_popup.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/open_challenge_created.xml'))
 class OpenChallengeCreated extends BaseDialog
 {
     private function resize()

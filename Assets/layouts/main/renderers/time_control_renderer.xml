@@ -1,0 +1,6 @@
+<item-renderer width="100%" height="100%">
+    <hbox height="100%" horizontalAlign="center">
+        <arpimage id="tcIcon" height="100%" verticalAlign="center" />
+        <label id="tcLabel" verticalAlign="center" style="font-size:14px" />
+    </hbox>
+</item-renderer>

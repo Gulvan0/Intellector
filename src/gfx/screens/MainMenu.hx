@@ -23,7 +23,7 @@ import dict.Dictionary;
 import utils.Changelog;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main_menu/main_menu.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/screens/main_menu.xml"))
 class MainMenu extends Screen implements INetObserver
 {
     private function onEnter()

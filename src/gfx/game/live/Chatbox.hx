@@ -32,7 +32,7 @@ import haxe.ui.core.Screen as HaxeUIScreen;
 using StringTools;
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/live/chatbox.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/game/live/chat_box.xml'))
 class Chatbox extends VBox implements IGameComponent
 {
     private var eventHandler:ChatboxEvent->Void;

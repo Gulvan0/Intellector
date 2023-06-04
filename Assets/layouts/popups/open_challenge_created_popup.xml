@@ -1,7 +1,0 @@
-<dialog title="${Dictionary.getPhrase(SEND_OPEN_CHALLENGE_SUCCESS_DIALOG_TITLE)}" width="600px">
-    <vbox width="100%" style="padding:8px">
-        <label width="100%" text="${Dictionary.getPhrase(SEND_OPEN_CHALLENGE_SUCCESS_DIALOG_TEXT)}" style="text-align:center;font-size:16px" />
-        <spacer height="15px" />
-        <copyable-text id="linkText" width="100%" height="30px" />
-    </vbox>
-</dialog>

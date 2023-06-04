@@ -1,7 +1,0 @@
-<vbox width="100%" height="100%" style="padding: 4px">
-    <hbox width="100%" style="padding-left: 10px;padding-right: 10px;">
-        <image id="backBtn" width="36px" height="36px" resource="assets/symbols/live/subscreen_back_btn.svg" />
-        <label id="subscreenNameLabel" style="font-size: 36px" />
-    </hbox>
-    <box id="contentBox" width="100%" height="100%" />
-</vbox>

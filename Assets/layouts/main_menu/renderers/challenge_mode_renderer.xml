@@ -1,6 +1,0 @@
-<item-renderer width="100%" height="100%">
-    <hbox height="100%" horizontalAlign="center">
-        <arpimage id="colorIcon" height="100%" />
-        <arpimage id="customStartPosIcon" height="100%" style="background-color:yellow;background-opacity:0;pointer-events:true" resource="assets/symbols/main_menu/challenge_modes/custom.svg" />
-    </hbox>
-</item-renderer>

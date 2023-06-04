@@ -5,7 +5,7 @@ import net.shared.dataobj.GameInfo;
 import haxe.ui.containers.VBox;
 import dict.*;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main_menu/past_games_list.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main/past_games_list.xml"))
 class PastGamesList extends VBox
 {
     public var ownerLogin:Null<String>;

@@ -14,7 +14,7 @@ using gfx.game.models.CommonModelExtractors;
 /**
     Short for "Usernames, Clocks, Moves, Actions". A panel to the right of a gameboard, present in any ongoing/past game screen
 **/
-@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/ucma_box.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/live/ucma_box.xml"))
 class UCMABox extends GameComponentLayout 
 {
     private var usernameLabels:Map<PieceColor, UsernameLabel> = [];

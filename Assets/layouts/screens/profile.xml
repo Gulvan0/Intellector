@@ -1,0 +1,5 @@
+<component width="100%">
+    <vbox id="contentsBox" width="800px" horizontalAlign="center">
+        <tabview id="tabView" width="100%" style="font-size:22px;" styleName="full-width-buttons" />
+    </vbox>
+</component>

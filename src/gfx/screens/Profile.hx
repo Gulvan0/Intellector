@@ -16,7 +16,7 @@ import gfx.profile.complex_components.FriendList;
 import gfx.profile.complex_components.ProfileHeader;
 import net.shared.dataobj.ProfileData;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/profile/profile.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/screens/profile.xml"))
 class Profile extends Screen
 {
     private var profileOwnerLogin:String;

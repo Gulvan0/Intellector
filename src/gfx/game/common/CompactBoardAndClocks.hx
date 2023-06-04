@@ -20,7 +20,7 @@ import haxe.ui.core.Component;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/compact_board_and_clocks.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/compact_board_and_clocks.xml"))
 class CompactBoardAndClocks extends GameComponentLayout
 {
     private var board:GameBoardWrapper;

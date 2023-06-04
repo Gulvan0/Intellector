@@ -1,0 +1,47 @@
+<dialog title="${Dictionary.getPhrase(SHARE_DIALOG_TITLE)}">
+    <style>
+        .tool-button .icon {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+    <tabview id="tabView" width="100%" height="100%" styleName="full-width-buttons">
+        <box width="100%" height="100%" text="${Dictionary.getPhrase(SHARE_POSITION_TAB_NAME)}">
+            <vbox width="100%" height="100%">
+                <section-header  width="100%" text="${Dictionary.getPhrase(SHARE_SIP_HEADER)}" />
+                <copyable-text id="sipText" width="100%" height="30px" />
+                <section-header width="100%" text="${Dictionary.getPhrase(SHARE_IMAGE_HEADER)}" />
+                <hbox width="100%" height="100%">
+                    <box id="boardContainer" width="50%" height="100%" />
+                    <vbox id="pngExportParamsBox" width="50%" verticalAlign="center">
+                        <checkbox id="preserveAspectRatioCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_KEEP_RATIO_CHECKBOX_TEXT)}" selected="false" horizontalAlign="center" />
+                        <hbox horizontalAlign="center" height="30px">
+                            <label text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_DIMENSIONS_LABEL_TEXT)}" verticalAlign="center" style="font-size: 16px" />
+                            <textfield id="pngWidthTF" width="54px" restrictChars="0-9" verticalAlign="center" />
+                            <label text="x" verticalAlign="center" style="font-size: 16px" />
+                            <textfield id="pngHeightTF" width="54px" restrictChars="0-9" verticalAlign="center" />
+                        </hbox>
+                        <spacer height="10px" />
+                        <checkbox id="transparentBackgroundCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_TRANSPARENT_BG_CHECKBOX_TEXT)}" selected="true" horizontalAlign="center" />
+                        <hbox id="bgColorBox" horizontalAlign="center" disabled="true" height="30px">
+                            <label text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_BGCOLOR_LABEL_TEXT)}" verticalAlign="center" style="font-size: 16px" />
+                            <color-picker-popup id="colorPicker" selectedItem="#ffffff" verticalAlign="center" />
+                        </hbox>
+                        <spacer height="10px" />
+                        <checkbox id="addMarkingCheckbox" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_MARKUP_CHECKBOX_TEXT)}" selected="false" horizontalAlign="center" />
+                    </vbox>
+                </hbox>
+                <button id="downloadPNGBtn" text="${Dictionary.getPhrase(SHARE_DOWNLOAD_PNG_BTN_TEXT)}" horizontalAlign="center"/>
+            </vbox>
+        </box>
+        <sharegametab id="shareGameTab" />
+        <box id="shareExportTab" width="100%" height="100%" text="${Dictionary.getPhrase(SHARE_EXPORT_TAB_NAME)}">
+            <vbox width="100%" height="100%">
+                <section-header  width="100%" text="${Dictionary.getPhrase(SHARE_EXPORT_AS_STUDY_HEADER)}" />
+                <button id="exportStudyBtn" text="${Dictionary.getPhrase(SHARE_EXPORT_AS_STUDY_BTN_TEXT)}" horizontalAlign="center" />
+                <section-header  width="100%" text="${Dictionary.getPhrase(SHARE_EXPORT_AS_QUESTION_MARKS_TEASER)}" />
+                <label text="${Dictionary.getPhrase(SHARE_COMING_SOON)}" horizontalAlign="center" style="font-size:22px" />
+            </vbox>
+        </box>
+    </tabview>
+</dialog>

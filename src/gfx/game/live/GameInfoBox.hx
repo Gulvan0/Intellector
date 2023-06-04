@@ -34,7 +34,7 @@ import net.shared.Outcome;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/live/gameinfobox.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/game/live/game_info_box.xml'))
 class GameInfoBox extends Card implements IGameComponent implements IGlobalEventObserver
 {
     private var whitePlayerLabel:PlayerLabel;

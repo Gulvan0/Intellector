@@ -1,0 +1,18 @@
+<component width="100%" height="100%">
+    <stack id="layoutStack" width="100%" height="100%">
+        <hbox id="largeLayout" width="100%" height="100%" style="spacing:15px">
+            <box id="largeLeftBox" style="spacing:10px" width="350px" height="100%" />
+            <vbox id="largeCenterContainer" width="100%" height="100%">
+                <box id="largeBoardBox" width="100%" height="100%" />
+                <box id="largeExtrasBox" width="100%" height="120px" />
+            </vbox>
+            <box id="largeRightBox" style="spacing:10px" width="350px" height="100%" />
+        </hbox>
+        <vbox id="compactLayout" width="100%" verticalAlign="center">
+            <box id="compactTopBox" width="100%" />
+            <box id="compactBoardBox" width="100%" />
+            <box id="compactExtrasBox" width="100%" height="120px" />
+            <box id="compactBottomBox" width="100%" />
+        </vbox>
+    </stack>
+</component>

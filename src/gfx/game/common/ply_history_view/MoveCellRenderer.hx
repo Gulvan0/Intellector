@@ -4,7 +4,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.styles.Style;
 import haxe.ui.core.ItemRenderer;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/move_cell_renderer.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/common/ply_history_view/move_cell_renderer.xml"))
 class MoveCellRenderer extends ItemRenderer
 {
     private var onMoveSelected:Null<Void->Void>;

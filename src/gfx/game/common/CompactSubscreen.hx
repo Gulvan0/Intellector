@@ -6,7 +6,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.VBox;
 
-@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/compact_subscreen.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/compact_subscreen.xml"))
 class CompactSubscreen extends VBox
 {
     public var inactive(default, null):Bool = false;

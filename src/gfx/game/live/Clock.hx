@@ -24,7 +24,7 @@ import haxe.ui.macros.ComponentMacros;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/clock.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/live/clock.xml"))
 class Clock extends Box implements IGameComponent
 {
     private var playSoundOnOneMinuteLeft:Bool;

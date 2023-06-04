@@ -1,5 +1,0 @@
-<vbox width="600px">
-    <hbox id="tableTitleBox" width="100%" height="40px">
-        <label id="title" text="${Dictionary.getPhrase(PAST_GAMES_TABLE_HEADER)}" style="font-size: 30px;font-name: 'assets/fonts/FuturaItalic.ttf'" verticalAlign="bottom" />
-    </hbox>
-</vbox>

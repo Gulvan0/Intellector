@@ -1,0 +1,3 @@
+<item-renderer>
+    <label id="label" style="pointer-events:true;background-color:yellow;background-opacity:0" />
+</item-renderer>

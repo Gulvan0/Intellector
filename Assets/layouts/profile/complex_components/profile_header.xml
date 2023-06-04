@@ -1,0 +1,36 @@
+<vbox width="800px" style="background-color: #faf9f7; padding: 10 10 10 10">
+    <style>
+        #rolesLabel {
+            font-size: 22px;
+            font-italic: true;
+        }
+        #statusLabel {
+            font-size: 18px;
+        }
+        .status-action-btn {
+            width: 24px;
+            height: 24px;
+            background-color: yellow;
+            background-opacity: 0;
+            pointer-events: true;
+        }
+        .quick-action-btn {
+            width: 30px;
+            height: 30px;
+            background-color: yellow;
+            background-opacity: 0;
+            pointer-events: true;
+        }
+    </style>
+    <hbox id="upperHBox" width="100%">
+        <spacer width="100%" />
+        <image id="addFriendBtn" verticalAlign="center" resource="assets/symbols/common/add_friend.svg" styleName="quick-action-btn" tooltip="${Dictionary.getPhrase(PROFILE_ACTION_ADD_FRIEND_TOOLTIP)}"  />
+        <image id="removeFriendBtn" verticalAlign="center" resource="assets/symbols/common/remove_friend.svg" styleName="quick-action-btn" tooltip="${Dictionary.getPhrase(PROFILE_ACTION_REMOVE_FRIEND_TOOLTIP)}" />
+    </hbox>
+    <label id="rolesLabel" />
+    <hbox>
+        <label id="statusLabel" verticalAlign="center" />
+        <image resource="assets/symbols/common/send.svg" verticalAlign="center" id="sendChallengeBtn" styleName="status-action-btn" tooltip="${Dictionary.getPhrase(PROFILE_QUICK_ACTION_SEND_CHALLENGE_TOOLTIP)}" />
+        <image resource="assets/symbols/common/follow.svg" verticalAlign="center" id="followBtn" styleName="status-action-btn" tooltip="${Dictionary.getPhrase(PROFILE_QUICK_ACTION_FOLLOW_TOOLTIP)}" />
+    </hbox>
+</vbox>

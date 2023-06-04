@@ -13,7 +13,7 @@ import haxe.ui.events.UIEvent;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/username_label.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/live/username_label.xml"))
 class UsernameLabel extends Box implements IGameComponent
 {
     private var ownerColor:PieceColor;

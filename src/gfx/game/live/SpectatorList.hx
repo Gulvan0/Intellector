@@ -9,7 +9,7 @@ import dict.Dictionary;
 import gfx.game.interfaces.IGameComponent;
 import haxe.ui.containers.Card;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/spectator_list.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/live/spectator_list.xml"))
 class SpectatorList extends Card implements IGameComponent
 {
     private static inline final MAX_DISPLAYED_LOGINS_COUNT:Int = 8;

@@ -4,7 +4,7 @@ import gfx.basic_components.BaseDialog;
 import net.Requests;
 import haxe.ui.components.Link;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/full_spectator_list_popup.xml'))
+@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/full_spectator_list_dialog.xml'))
 class FullSpectatorListDialog extends BaseDialog
 {
     private function resize()

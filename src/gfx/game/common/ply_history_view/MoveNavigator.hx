@@ -19,7 +19,7 @@ import net.shared.utils.MathUtils;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/plynavigator.xml"))
+@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/common/ply_history_view/move_navigator.xml"))
 class MoveNavigator extends PlyHistoryView
 {
     private var lastMovetableEntry:Dynamic;
