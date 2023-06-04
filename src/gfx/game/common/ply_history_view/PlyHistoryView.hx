@@ -91,20 +91,20 @@ abstract class PlyHistoryView extends VBox implements IGameComponent
     {
         switch event 
         {
-            case ViewedMoveNumUpdated:
+            case ViewedMoveNumUpdated, SelectedVariationNodeUpdated, VariationUpdated:
                 onShownMoveUpdated();
                 refreshElements();
             case MoveAddedToHistory:
                 onPlyAppended();
             case HistoryRollback, HistoryRewritten:
                 onHistoryRewritten();
-            case EditorActivenessUpdated:
+            case EditorModeUpdated:
                 switch model 
                 {
                     case AnalysisBoard(model):
                         onEditorToggled(model.isEditorActive());
                     default:
-                        throw "EditorActivenessUpdated can only be emitted by AnalysisBoard";
+                        throw "EditorModeUpdated can only be emitted by AnalysisBoard";
                 }
             default:
         }

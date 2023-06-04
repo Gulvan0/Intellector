@@ -71,7 +71,9 @@ class PositionEditor extends VBox implements IGameComponent
         switch event 
         {
             case EditorSituationUpdated:
-                turnColorStepper.selectedIndex = analysisModel.getEditorSituation().turnColor == White? 0 : 1;
+                var editorSituation:Null<Situation> = analysisModel.getEditorSituation();
+                if (editorSituation != null)
+                    turnColorStepper.selectedIndex = editorSituation.turnColor == White? 0 : 1;
             case EditorModeUpdated:
                 editModeBtns.get(analysisModel.getEditorMode()).selected = true;
             default:

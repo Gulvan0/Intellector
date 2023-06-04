@@ -15,7 +15,6 @@ enum ModelUpdateEvent
     MoveAddedToHistory;
     HistoryRollback;
     HistoryRewritten;
-    EditorActivenessUpdated;
     VariationUpdated;
     SelectedVariationNodeUpdated;
     EditorSituationUpdated;

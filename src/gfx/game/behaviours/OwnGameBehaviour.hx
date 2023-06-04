@@ -71,44 +71,6 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
         setPlannedPremoves(premoves);
         modelUpdateHandler(PlannedPremovesUpdated);
     }
-
-    private function onMoveAttempted(from:HexCoords, to:HexCoords, options:MoveIntentOptions, premove:Bool)
-    {
-        var onMoveConstructed:RawPly->Void = premove? appendPremove : performPly;
-
-        var situation:Situation = premove? model.getShownSituation() : model.getMostRecentSituation();
-        if (!premove && Rules.isChameleonAvailable(from, to, situation))
-        {
-            var chameleonPly:RawPly = RawPly.chameleon(from, to, situation);
-            var normalPly:RawPly = RawPly.construct(from, to);
-
-            switch options.fastChameleon 
-            {
-                case AutoAccept:
-                    onMoveConstructed(chameleonPly);
-                case AutoDecline:
-                    onMoveConstructed(normalPly);
-                case Ask:
-                    Dialogs.confirm(CHAMELEON_DIALOG_QUESTION, CHAMELEON_DIALOG_TITLE, onMoveConstructed.bind(chameleonPly), onMoveConstructed.bind(normalPly));
-            }
-        }
-        else if (Rules.isPromotionAvailable(from, to, situation))
-        {
-            switch options.fastPromotion 
-            {
-                case AutoPromoteToDominator:
-                    onMoveConstructed(RawPly.construct(from, to, Dominator));
-                case Ask:
-                    var onPieceSelected:PieceType->Void = type -> {
-                        onMoveConstructed(RawPly.construct(from, to, type));
-                    }
-                    var dialog:PromotionSelect = new PromotionSelect(model.getPlayerColor(), onPieceSelected);
-                    Dialogs.getQueue().add(dialog);
-            }
-        }
-        else
-            onMoveConstructed(RawPly.construct(from, to));
-    }
     
     public function handleGameboardEvent(event:GameboardEvent)
     {
@@ -118,9 +80,9 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
                 switch gameboardEventHandler 
                 {
                     case Move:
-                        onMoveAttempted(from, to, options, false);
+                        constructMove(from, to, options, false, performPly);
                     case Premove:
-                        onMoveAttempted(from, to, options, true);
+                        constructMove(from, to, options, true, appendPremove);
                     case None:
                         return;
                 }

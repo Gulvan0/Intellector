@@ -1,5 +1,9 @@
 package gfx.game.behaviours;
 
+import gfx.scene.SceneManager;
+import gfx.game.behaviours.BaseBehaviour;
+import gfx.popups.ChallengeParamsDialog;
+import net.shared.dataobj.ChallengeParams;
 import net.shared.utils.UnixTimestamp;
 import assets.Audio;
 import dict.Dictionary;
@@ -29,11 +33,9 @@ import gfx.game.interfaces.IBehaviour;
 
 using gfx.game.models.CommonModelExtractors;
 
-abstract class GameRelatedBehaviour implements IBehaviour
+abstract class GameRelatedBehaviour extends BaseBehaviour
 {
     private var model:IReadWriteGameRelatedModel;
-    private var modelUpdateHandler:ModelUpdateEvent->Void;
-    private var screenRef:IGameScreen;
 
     public abstract function handleGlobalEvent(event:GlobalEvent):Void;
     public abstract function handleGameboardEvent(event:GameboardEvent):Void;
@@ -98,37 +100,6 @@ abstract class GameRelatedBehaviour implements IBehaviour
 
 		updateBehaviourDueToTurnColorUpdate();
 	}
-
-    private function applyScroll(type:PlyScrollType)
-    {
-        switch type 
-        {
-            case Home:
-                if (model.shownMovePointer == 0)
-                    return;
-                model.shownMovePointer = 0;
-            case Prev:
-                if (model.shownMovePointer == 0)
-                    return;
-                model.shownMovePointer--;
-            case Next:
-                var moveCount:Int = model.getLineLength();
-                if (model.shownMovePointer == moveCount)
-                    return;
-                model.shownMovePointer++;
-            case End:
-                var moveCount:Int = model.getLineLength();
-                if (model.shownMovePointer == moveCount)
-                    return;
-                model.shownMovePointer = moveCount;
-            case Precise(plyNum):
-                if (model.shownMovePointer == plyNum)
-                    return;
-                model.shownMovePointer = plyNum;
-        }
-
-        modelUpdateHandler(ViewedMoveNumUpdated);
-    }
 
     public function handleNetEvent(event:ServerEvent)
     {
@@ -199,17 +170,6 @@ abstract class GameRelatedBehaviour implements IBehaviour
         }
     }
 
-    public function onEntered(modelUpdateHandler:ModelUpdateEvent->Void, screenRef:IGameScreen)
-    {
-        this.modelUpdateHandler = modelUpdateHandler;
-        this.screenRef = screenRef;
-
-        customOnEntered();
-
-        model.deriveInteractivityModeFromOtherParams();
-        modelUpdateHandler(InteractivityModeUpdated);
-    }
-
     public function handleChatboxEvent(event:ChatboxEvent)
     {
         switch event 
@@ -221,85 +181,55 @@ abstract class GameRelatedBehaviour implements IBehaviour
         }
     }
 
-    public function handleActionBarEvent(event:ActionBarEvent)
+    private function onSharePressed()
     {
-        switch event 
-        {
-            case ActionButtonPressed(btn):
-                onActionButtonPressed(btn);
-            case IncomingOfferAccepted(kind):
-                onOfferActionRequested(kind, Accept);
-            case IncomingOfferDeclined(kind):
-                onOfferActionRequested(kind, Decline);
-        }
+        var gameLink:String = Url.getGameLink(model.gameID);
+        var playedMoves:Array<RawPly> = model.getLine().map(x -> x.ply);
+        var pin:String = PortableIntellectorNotation.serialize(model.getStartingSituation(), playedMoves, model.getPlayerRef(White), model.getPlayerRef(Black), model.getTimeControl(), model.getStartTimestamp(), model.getOutcome());
+
+        var shareDialog:ShareDialog = new ShareDialog();
+        shareDialog.initInGame(model.getShownSituation(), model.getOrientation(), gameLink, pin, model.getStartingSituation(), playedMoves);
+        shareDialog.showShareDialog();
     }
 
-    private function onActionButtonPressed(btn:ActionButton)
+    private function onResignPressed()
     {
-        switch btn.unwrap() 
-        {
-            case Resign | Abort:
-                Networker.emitEvent(Resign);
-            case ChangeOrientation:
-                model.orientation = opposite(model.orientation);
-                modelUpdateHandler(OrientationUpdated);
-            case OfferDraw:
-                onOfferActionRequested(Draw, Create);
-            case CancelDraw:
-                onOfferActionRequested(Draw, Cancel);
-            case OfferTakeback:
-                onOfferActionRequested(Takeback, Create);
-            case CancelTakeback:
-                onOfferActionRequested(Takeback, Cancel);
-            case AddTime:
-                Networker.emitEvent(AddTime);
-            case Rematch:
-                Networker.emitEvent(SimpleRematch);
-            case Share:
-                var gameLink:String = Url.getGameLink(model.gameID);
-                var playedMoves:Array<RawPly> = model.getLine().map(x -> x.ply);
-                var pin:String = PortableIntellectorNotation.serialize(model.getStartingSituation(), playedMoves, model.getPlayerRef(White), model.getPlayerRef(Black), model.getTimeControl(), model.getStartTimestamp(), model.getOutcome());
-
-                var shareDialog:ShareDialog = new ShareDialog();
-                shareDialog.initInGame(model.getShownSituation(), model.getOrientation(), gameLink, pin, model.getStartingSituation(), playedMoves);
-                shareDialog.showShareDialog();
-            case PrevMove:
-                applyScroll(Prev);
-            case NextMove:
-                applyScroll(Next);
-            case OpenChat:
-                screenRef.displaySubscreen(Chat);
-            case OpenBranching:
-                screenRef.displaySubscreen(Branching);
-            case OpenSpecialControlSettings:
-                screenRef.displaySubscreen(SpecialControlSettings);
-            case OpenGameInfo:
-                screenRef.displaySubscreen(GameInfoSubscreen);
-            default:
-        }
+        Networker.emitEvent(Resign);
     }
-
-    public function handlePlyHistoryViewEvent(event:PlyHistoryViewEvent)
+    
+    private function onAbortPressed()
     {
-        switch event 
-        {
-            case ScrollRequested(type):
-                applyScroll(type);
-        }
+        Networker.emitEvent(Resign);
+    }
+    
+    private function onAddTimePressed()
+    {
+        Networker.emitEvent(AddTime);
+    }
+    
+    private function onRematchPressed()
+    {
+        Networker.emitEvent(SimpleRematch);
+    }
+    
+    private function onAnalyzePressed()
+    {
+        SceneManager.getScene().toScreen(AnalysisForLine(model.getStartingSituation(), model.getLine().map(x -> x.ply), model.getShownMovePointer()));
     }
 
     public function handleVariationViewEvent(event:VariationViewEvent)
     {
-        //* Do nothing (this component doesn't occur in real game)
+        throw 'VariationViewEvent occured in game related behaviour: $event';
     }
 
     public function handlePositionEditorEvent(event:PositionEditorEvent)
     {
-        //* Do nothing (this component doesn't occur in real game)
+        throw 'PositionEditorEvent occured in game related behaviour: $event';
     }
 
     public function new(model:IReadWriteGameRelatedModel)
     {
+        super(model);
         this.model = model;
     }
 }

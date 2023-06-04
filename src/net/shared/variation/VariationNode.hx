@@ -3,6 +3,8 @@ package net.shared.variation;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
 
+using Lambda;
+
 class VariationNode
 {
     public var path(default, null):VariationPath;
@@ -61,6 +63,11 @@ class VariationNode
     public function hasChild(childNum:Int):Bool
     {
         return childNum < childCount();
+    }
+
+    public function getChildNumByPly(ply:RawPly):Null<Int>
+    {
+        return children.find(node -> node.incomingPly.equals(ply))?.childNum;
     }
 
     public function leftSibling():Null<VariationNode>

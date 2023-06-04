@@ -50,6 +50,14 @@ class AnalysisBoardModel implements IReadWriteGenericModel implements IReadOnlyA
 
     public function getShownSituation():Situation
     {
+        if (editorSituation != null)
+            return editorSituation.copy();
+        else
+            return getSelectedNodeSituation();
+    }
+
+    public function getSelectedNodeSituation():Situation
+    {
         return variation.getNode(getSelectedNodePath()).situation.copy();
     }
 
