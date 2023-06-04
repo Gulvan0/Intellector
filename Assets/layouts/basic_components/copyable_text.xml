@@ -1,5 +1,5 @@
 <hbox width="100%" height="30px">
     <textfield id="tf" width="100%" height="100%" verticalAlign="center" />
-    <arp-image id="copyBtn" height="100%" style="pointer-events:true;background-color:#ffffff" tooltip="${Dictionary.getPhrase(COPY_BTN_TOOLTIP)}" verticalAlign="center" resource="assets/symbols/common/copy.svg" />
-    <arp-image id="tickBtn" height="100%" style="pointer-events:true;background-color:#ffffff" tooltip="${Dictionary.getPhrase(COPY_BTN_SUCCESS_TOOLTIP)}" verticalAlign="center" resource="assets/symbols/common/tick.svg" />
+    <arp-image id="copyBtn" height="100%" style="pointer-events:true;background-color:#ffffff" tooltip="${Dictionary.getPhrase(COPY_BTN_TOOLTIP)}" verticalAlign="center" resource="assets/images/common/copy.svg" />
+    <arp-image id="tickBtn" height="100%" style="pointer-events:true;background-color:#ffffff" tooltip="${Dictionary.getPhrase(COPY_BTN_SUCCESS_TOOLTIP)}" verticalAlign="center" resource="assets/images/common/tick.svg" />
 </hbox>

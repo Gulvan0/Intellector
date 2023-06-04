@@ -42,7 +42,7 @@
                 <arp-image id="tcIcon" height="100%" verticalAlign="center" />
                 <label id="tcLabel" height="100%" verticalAlign="center" />
                 <spacer width="100%" />
-                <arp-image id="editTCBtn" height="100%" style="background-color:yellow;background-opacity:0;pointer-events:true" resource="assets/symbols/common/edit.svg" />
+                <arp-image id="editTCBtn" height="100%" style="background-color:yellow;background-opacity:0;pointer-events:true" resource="assets/images/common/edit.svg" />
             </hbox>
         </hbox>
         <vbox id="tcParamsBox" width="100%" hidden="true" style="border: 1px solid $normal-border-color;padding: 3px;background-color:#fdfdfd">

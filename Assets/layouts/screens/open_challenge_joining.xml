@@ -12,7 +12,7 @@
                     <hbox id="paramsBox">
                         <label id="paramsLabel" style="font-style:italic" text="${Dictionary.getPhrase(OPENJOIN_ESSENTIAL_PARAMS_LABEL_TEXT)}" verticalAlign="center" />
                         <image id="colorIcon" style="background-color:yellow;background-opacity:0" verticalAlign="center" />
-                        <image id="customStartPosIcon" style="background-color:yellow;background-opacity:0" verticalAlign="center" resource="assets/symbols/main_menu/challenge_modes/custom.svg" />
+                        <image id="customStartPosIcon" style="background-color:yellow;background-opacity:0" verticalAlign="center" resource="assets/images/common/challenge_modes/custom.svg" />
                     </hbox>
                 </vbox>
             </hbox>

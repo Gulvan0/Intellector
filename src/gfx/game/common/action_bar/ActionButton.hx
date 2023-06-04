@@ -42,26 +42,26 @@ abstract ActionButton(ActionButtonInternal) from ActionButtonInternal to ActionB
     {
         return switch this 
         {
-            case Resign: "assets/symbols/live/resign.svg";
-            case Abort: "assets/symbols/live/abort_game.svg";
-            case ChangeOrientation: "assets/symbols/analysis/flip.svg";
-            case OfferDraw: "assets/symbols/live/offer_draw.svg";
-            case CancelDraw: "assets/symbols/live/cancel_offer.svg";
-            case OfferTakeback: "assets/symbols/live/takeback.svg";
-            case CancelTakeback: "assets/symbols/live/cancel_offer.svg";
-            case AddTime: "assets/symbols/live/add_time.svg";
-            case Rematch: "assets/symbols/live/rematch.svg";
-            case Share: "assets/symbols/common/share.svg";
-            case PlayFromHere: "assets/symbols/common/play_from_pos.svg";
-            case Analyze: "assets/symbols/live/analyze.svg";
-            case PrevMove: "assets/symbols/common/prev.svg";
-            case NextMove: "assets/symbols/common/next.svg";
-            case EditPosition: "assets/symbols/common/edit.svg";
-            case ViewReport: "assets/symbols/common/report.svg";
-            case OpenChat: "assets/symbols/common/chat.svg";
-            case OpenBranching: "assets/symbols/common/branching.svg";
-            case OpenSpecialControlSettings: "assets/symbols/common/special_settings.svg";
-            case OpenGameInfo: "assets/symbols/common/gameinfo.svg";
+            case Resign: "assets/images/game/common/action_bar/resign.svg";
+            case Abort: "assets/images/game/common/action_bar/abort_game.svg";
+            case ChangeOrientation: "assets/images/game/common/flip.svg";
+            case OfferDraw: "assets/images/game/common/action_bar/offer_draw.svg";
+            case CancelDraw: "assets/images/game/common/action_bar/cancel_offer.svg";
+            case OfferTakeback: "assets/images/game/common/action_bar/takeback.svg";
+            case CancelTakeback: "assets/images/game/common/action_bar/cancel_offer.svg";
+            case AddTime: "assets/images/game/common/action_bar/add_time.svg";
+            case Rematch: "assets/images/game/common/action_bar/rematch.svg";
+            case Share: "assets/images/game/common/action_bar/share.svg";
+            case PlayFromHere: "assets/images/game/common/action_bar/play_from_pos.svg";
+            case Analyze: "assets/images/game/common/action_bar/analyze.svg";
+            case PrevMove: "assets/images/game/common/prev.svg";
+            case NextMove: "assets/images/game/common/next.svg";
+            case EditPosition: "assets/images/common/edit.svg";
+            case ViewReport: "assets/images/game/common/action_bar/report.svg";
+            case OpenChat: "assets/images/game/common/action_bar/chat.svg";
+            case OpenBranching: "assets/images/game/common/action_bar/branching.svg";
+            case OpenSpecialControlSettings: "assets/images/game/common/action_bar/special_settings.svg";
+            case OpenGameInfo: "assets/images/game/common/action_bar/gameinfo.svg";
         }
     }
 

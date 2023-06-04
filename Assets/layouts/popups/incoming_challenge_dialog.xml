@@ -14,7 +14,7 @@
         <hbox id="paramsBox" height="24px" horizontalAlign="center">
             <autosizing-label id="paramsLabel" height="100%" text="${Dictionary.getPhrase(OPENJOIN_ESSENTIAL_PARAMS_LABEL_TEXT)}" />
             <arp-image id="colorIcon" height="100%" styleName="params-icon" />
-            <arp-image id="customStartPosIcon" height="100%" styleName="params-icon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" />
+            <arp-image id="customStartPosIcon" height="100%" styleName="params-icon" resource="assets/images/common/challenge_modes/custom.svg" />
         </hbox>
         <spacer height="10px" />
         <hbox horizontalAlign="center">

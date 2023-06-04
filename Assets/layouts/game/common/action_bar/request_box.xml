@@ -23,7 +23,7 @@
             padding: 0 0 0 1;
         }
     </style>
-    <button id="declineBtn" width="13.5%" height="100%" icon="assets/symbols/live/decline_offer.svg" styleName="accept-decline-button" horizontalAlign="left"/>
+    <button id="declineBtn" width="13.5%" height="100%" icon="assets/images/game/common/action_bar/decline_offer.svg" styleName="accept-decline-button" horizontalAlign="left"/>
     <label id="questionLabel" width="73%" styleName="accept-decline-question" horizontalAlign="center" verticalAlign="center"/>
-    <button id="acceptBtn" width="13.5%" height="100%" icon="assets/symbols/live/accept_offer.svg" styleName="accept-decline-button" horizontalAlign="right"/>
+    <button id="acceptBtn" width="13.5%" height="100%" icon="assets/images/game/common/action_bar/accept_offer.svg" styleName="accept-decline-button" horizontalAlign="right"/>
 </hbox>  

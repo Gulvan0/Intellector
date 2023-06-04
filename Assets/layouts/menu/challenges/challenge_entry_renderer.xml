@@ -75,7 +75,7 @@
                 <label id="paramsLabel" verticalAlign="center" />
                 <arp-image id="colorIcon" height="100%" styleName="params-row-icon" />
                 <spacer id="modeIconsSpacer" width="3px" />
-                <arp-image id="customStartPosIcon" resource="assets/symbols/main_menu/challenge_modes/custom.svg" height="100%" styleName="params-row-icon" />
+                <arp-image id="customStartPosIcon" resource="assets/images/common/challenge_modes/custom.svg" height="100%" styleName="params-row-icon" />
             </hbox>
             <spacer height="100%" />
             <hbox height="30px" horizontalAlign="center">

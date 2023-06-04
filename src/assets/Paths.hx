@@ -12,7 +12,7 @@ class Paths
 {
     public static inline function status(status:UserStatus):String
     {
-        return "assets/symbols/profile/user_status_indicators/" + status.getName().toLowerCase() + ".svg";
+        return "assets/images/profile/simple_components/user_status_indicators/" + status.getName().toLowerCase() + ".svg";
     }
 
     public static inline function piece(type:PieceType, color:PieceColor):String
@@ -23,8 +23,8 @@ class Paths
     public static inline function editModeIcon(mode:PosEditMode):String
     {
         return switch mode {
-            case Move: "assets/symbols/analysis/move.svg";
-            case Delete: "assets/symbols/analysis/delete.svg";
+            case Move: "assets/images/game/analysis/move.svg";
+            case Delete: "assets/images/common/delete.svg";
             case Set(type, color): piece(type, color);
         }
     }
@@ -53,7 +53,7 @@ class Paths
             case null: 'random';
         };
 
-        return 'assets/symbols/main_menu/challenge_modes/$filename.svg';
+        return 'assets/images/common/challenge_modes/$filename.svg';
     }
 
     public static inline function challengesMenuIcon(mode:ChallengesIconMode):String
@@ -65,13 +65,13 @@ class Paths
             case HasOutgoing: 'out';
             case HasBoth: 'both';
         }
-        return 'assets/symbols/upper_menu/challenges/button_icon/$filename.svg';
+        return 'assets/images/menu/challenges/button_icon/$filename.svg';
     }
 
     public static inline function challengesMenuItemArrow(isIncoming:Bool):String
     {
         var filename:String = isIncoming? "incoming" : "outgoing";
-        return 'assets/symbols/upper_menu/challenges/item_arrow_img/$filename.svg';
+        return 'assets/images/menu/challenges/item_arrow_img/$filename.svg';
     }
 
     public static inline function sound(soundName:String)
@@ -95,6 +95,6 @@ class Paths
             case VKChat: 'vk';
         }
 
-        return 'assets/symbols/upper_menu/menu_items/' + fileName + '.svg';
+        return 'assets/images/menu/menu_items/' + fileName + '.svg';
     }
 }

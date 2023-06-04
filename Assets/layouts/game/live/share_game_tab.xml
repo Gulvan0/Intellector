@@ -11,8 +11,8 @@
         <section-header  width="100%" text="${Dictionary.getPhrase(SHARE_PIN_HEADER)}" />
         <hbox width="100%" height="100%">
             <textarea id="pinTextArea" width="100%" height="100%" />
-            <button id="copyPINBtn" width="30px" height="30px" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_TOOLTIP)}" icon="assets/symbols/common/copy.svg" styleName="tool-button" />
-            <button id="copyPINBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_SUCCESS_TOOLTIP)}" icon="assets/symbols/common/tick.svg" styleName="tool-button" />
+            <button id="copyPINBtn" width="30px" height="30px" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_TOOLTIP)}" icon="assets/images/common/copy.svg" styleName="tool-button" />
+            <button id="copyPINBtnTick" width="30px" height="30px" hidden="true" verticalAlign="center" tooltip="${Dictionary.getPhrase(COPY_BTN_SUCCESS_TOOLTIP)}" icon="assets/images/common/tick.svg" styleName="tool-button" />
         </hbox>
         <section-header width="100%" text="${Dictionary.getPhrase(SHARE_ANIMATED_GIF_HEADER)}" />
         <vbox id="gifExportParamsBox" width="100%" verticalAlign="center" style="spacing: 5px">

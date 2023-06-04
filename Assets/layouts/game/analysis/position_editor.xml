@@ -1,13 +1,13 @@
 <vbox width="100%" style="spacing:5px;padding-top:10px;padding-bottom:10px">
     <grid id="editModesGrid" columns="7" horizontalAlign="center">
-        <button id="moveModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/move.svg"  group="editModes" toggle="true" selected="true" />
+        <button id="moveModeBtn" width="50px" height="50px" icon="assets/images/game/analysis/move.svg"  group="editModes" toggle="true" selected="true" />
         <button id="setProgWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_White.svg"  group="editModes" toggle="true" />
         <button id="setAgrWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Aggressor_White.svg"  group="editModes" toggle="true" />
         <button id="setDefWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Defensor_White.svg"  group="editModes" toggle="true" />
         <button id="setLibWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Liberator_White.svg"  group="editModes" toggle="true" />
         <button id="setDomWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Dominator_White.svg"  group="editModes" toggle="true" />
         <button id="setIntWhiteModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_White.svg"  group="editModes" toggle="true" />
-        <button id="deleteModeBtn" width="50px" height="50px" icon="assets/symbols/analysis/delete.svg"  group="editModes" toggle="true" />
+        <button id="deleteModeBtn" width="50px" height="50px" icon="assets/images/common/delete.svg"  group="editModes" toggle="true" />
         <button id="setProgBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Progressor_Black.svg"  group="editModes" toggle="true" />
         <button id="setAgrBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Aggressor_Black.svg"  group="editModes" toggle="true" />
         <button id="setDefBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Defensor_Black.svg"  group="editModes" toggle="true" />
@@ -16,7 +16,7 @@
         <button id="setIntBlackModeBtn" width="50px" height="50px" icon="assets/pieces/Intellector_Black.svg"  group="editModes" toggle="true" />
     </grid>
     <hbox id="otherOptionsHBox" horizontalAlign="center" width="500px">
-        <button id="orientationBtn" icon="assets/symbols/analysis/flip.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="orientationBtn" icon="assets/images/game/common/flip.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_FLIP_BOARD_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
         <spacer width="5px" />
         <box width="100%" verticalAlign="center">
             <dropdown id="turnColorStepper" width="100%">
@@ -27,10 +27,10 @@
             </dropdown>
         </box>
         <spacer width="5px" />
-        <button id="importBtn" icon="assets/symbols/analysis/import.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_IMPORT_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
-        <button id="clearBtn" icon="assets/symbols/analysis/flush.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_CLEAR_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
-        <button id="resetBtn" icon="assets/symbols/analysis/reset.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_RESET_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
-        <button id="startBtn" icon="assets/symbols/analysis/initial.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_TO_STARTPOS_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="importBtn" icon="assets/images/game/analysis/import.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_IMPORT_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="clearBtn" icon="assets/images/game/analysis/flush.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_CLEAR_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="resetBtn" icon="assets/images/game/analysis/reset.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_RESET_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
+        <button id="startBtn" icon="assets/images/game/analysis/initial.svg" verticalAlign="center" tooltip="${Dictionary.getPhrase(ANALYSIS_TO_STARTPOS_BTN_TOOLTIP)}" width="40px" height="40px" styleName="tool-button" />
     </hbox>
     <hbox horizontalAlign="center">
         <button id="applyChangesBtn" text="${Dictionary.getPhrase(ANALYSIS_APPLY_CHANGES_BTN_TEXT)}" verticalAlign="center" />

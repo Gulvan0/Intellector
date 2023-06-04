@@ -44,10 +44,10 @@
         <hbox id="upperRow" width="100%" height="30px">
             <box id="tagListContainer" width="100%" height="24px" />
             <box id="editBtn" styleName="action-btn" width="24px" height="24px" tooltip="${Dictionary.getPhrase(PROFILE_STUDY_EDIT_BTN_TOOLTIP)}">
-                <image width="19.2px" height="19.2px" resource="assets/symbols/common/edit.svg" verticalAlign="center" horizontalAlign="center" />
+                <image width="19.2px" height="19.2px" resource="assets/images/common/edit.svg" verticalAlign="center" horizontalAlign="center" />
             </box>
             <box id="deleteBtn" styleName="action-btn" width="24px" height="24px" tooltip="${Dictionary.getPhrase(PROFILE_STUDY_REMOVE_BTN_TOOLTIP)}">
-                <image width="19.2px" height="19.2px" resource="assets/symbols/analysis/delete.svg" verticalAlign="center" horizontalAlign="center" />
+                <image width="19.2px" height="19.2px" resource="assets/images/common/delete.svg" verticalAlign="center" horizontalAlign="center" />
             </box>
         </hbox>
         <hbox id="contentBox" width="100%" height="100%">

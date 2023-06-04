@@ -44,7 +44,7 @@
         }
     </style>
 
-    <image id="mobileMenuButton" verticalAlign="center" resource="assets/symbols/upper_menu/open_sidebar_btn.svg" />
+    <image id="mobileMenuButton" verticalAlign="center" resource="assets/images/menu/open_sidebar_btn.svg" />
 
     <label id="siteName" text="Intellector.info" verticalAlign="center" />
 
@@ -53,9 +53,9 @@
     <challenge-list id="challengesMenu" />
 
     <menu id="accountMenu">
-        <menuitem id="logInBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGIN_ITEM)}" icon="assets/symbols/upper_menu/account/log_in.svg" />
-        <menuitem id="myProfileBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_MY_PROFILE_ITEM)}" icon="assets/symbols/upper_menu/account/my_profile.svg" />
-        <menuitem id="settingsBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_SETTINGS_ITEM)}" icon="assets/symbols/upper_menu/account/settings.svg" />
-        <menuitem id="logOutBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGOUT_ITEM)}" icon="assets/symbols/upper_menu/account/log_out.svg" />
+        <menuitem id="logInBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGIN_ITEM)}" icon="assets/images/menu/account/log_in.svg" />
+        <menuitem id="myProfileBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_MY_PROFILE_ITEM)}" icon="assets/images/menu/account/my_profile.svg" />
+        <menuitem id="settingsBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_SETTINGS_ITEM)}" icon="assets/images/menu/account/settings.svg" />
+        <menuitem id="logOutBtn" text="${Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGOUT_ITEM)}" icon="assets/images/menu/account/log_out.svg" />
     </menu>
 </menubar>

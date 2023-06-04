@@ -16,12 +16,12 @@
         <label id="statusLabel" />
         <hbox id="elosBox" continuous="true" width="100%" />
         <hbox id="btnBar" horizontalAlign="right">
-            <button id="followBtn" width="40px" icon="assets/symbols/common/mini_profile/follow.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_FOLLOW_BTN_TOOLTIP)}" styleName="mini-profile-button" />
-            <button id="unfollowBtn" width="40px" icon="assets/symbols/common/mini_profile/unfollow.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_UNFOLLOW_BTN_TOOLTIP)}" styleName="mini-profile-button" />
-            <button id="friendBtn" width="40px" icon="assets/symbols/common/mini_profile/friend.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_FRIEND_BTN_TOOLTIP)}" styleName="mini-profile-button" />
-            <button id="unfriendBtn" width="40px" icon="assets/symbols/common/mini_profile/unfriend.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_UNFRIEND_BTN_TOOLTIP)}" styleName="mini-profile-button" />
-            <button id="challengeBtn" width="40px" icon="assets/symbols/common/mini_profile/challenge.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_CHALLENGE_BTN_TOOLTIP)}" styleName="mini-profile-button" />
-            <button id="toProfileBtn" width="40px" icon="assets/symbols/common/mini_profile/to_profile.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_TO_PROFILE_BTN_TOOLTIP)}" styleName="mini-profile-button" />
+            <button id="followBtn" width="40px" icon="assets/images/profile/complex_components/follow.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_FOLLOW_BTN_TOOLTIP)}" styleName="mini-profile-button" />
+            <button id="unfollowBtn" width="40px" icon="assets/images/profile/complex_components/unfollow.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_UNFOLLOW_BTN_TOOLTIP)}" styleName="mini-profile-button" />
+            <button id="friendBtn" width="40px" icon="assets/images/profile/complex_components/friend.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_FRIEND_BTN_TOOLTIP)}" styleName="mini-profile-button" />
+            <button id="unfriendBtn" width="40px" icon="assets/images/profile/complex_components/unfriend.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_UNFRIEND_BTN_TOOLTIP)}" styleName="mini-profile-button" />
+            <button id="challengeBtn" width="40px" icon="assets/images/profile/complex_components/challenge.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_CHALLENGE_BTN_TOOLTIP)}" styleName="mini-profile-button" />
+            <button id="toProfileBtn" width="40px" icon="assets/images/profile/complex_components/to_profile.svg" tooltip="${Dictionary.getPhrase(MINIPROFILE_TO_PROFILE_BTN_TOOLTIP)}" styleName="mini-profile-button" />
         </hbox>
     </vbox>
 </dialog>

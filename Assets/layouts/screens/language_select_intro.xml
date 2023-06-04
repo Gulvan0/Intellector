@@ -2,8 +2,8 @@
     <vbox horizontalAlign="center">
         <label id="headerLabel" text="Language/Язык:" horizontalAlign="center" />
         <hbox id="btnBox" horizontalAlign="center">
-            <image id="enBtn" style="pointer-events: true" resource="assets/symbols/flags/en.svg" />
-            <image id="ruBtn" style="pointer-events: true" resource="assets/symbols/flags/ru.svg" />
+            <image id="enBtn" style="pointer-events: true" resource="assets/images/language_select_intro/en.svg" />
+            <image id="ruBtn" style="pointer-events: true" resource="assets/images/language_select_intro/ru.svg" />
         </hbox>
     </vbox>
 </component>

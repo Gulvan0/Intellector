@@ -37,7 +37,7 @@
     </style>
     <vbox id="contentBox" style="spacing: 5px">
         <hbox>
-            <image id="mobileMenuButton" verticalAlign="center" resource="assets/symbols/upper_menu/open_sidebar_btn.svg" />
+            <image id="mobileMenuButton" verticalAlign="center" resource="assets/images/menu/open_sidebar_btn.svg" />
             <label id="siteName" text="Intellector.info" verticalAlign="center" />
         </hbox>
         <spacer id="mainSpacer" />

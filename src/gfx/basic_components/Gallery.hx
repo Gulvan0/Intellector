@@ -15,9 +15,9 @@ import haxe.ui.containers.HBox;
                 background-opacity: 0.5;
             }
         </style>
-        <image id="leftBtn" resource="assets/symbols/live/gallery_left.svg" verticalAlign="center" width="10%" height="80%" styleName="galleryBtn" />
+        <image id="leftBtn" resource="assets/images/basic_components/gallery_left.svg" verticalAlign="center" width="10%" height="80%" styleName="galleryBtn" />
         <stack id="contentStack" width="80%" height="100%" />
-        <image id="rightBtn" resource="assets/symbols/live/gallery_right.svg" verticalAlign="center" width="10%" height="80%" styleName="galleryBtn" />
+        <image id="rightBtn" resource="assets/images/basic_components/gallery_right.svg" verticalAlign="center" width="10%" height="80%" styleName="galleryBtn" />
     </hbox>
 ')
 class Gallery extends HBox

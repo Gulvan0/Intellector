@@ -8,7 +8,7 @@
     <hbox id="tableTitleBox" width="100%" height="40px">
         <label id="title" text="${Dictionary.getPhrase(CURRENT_GAMES_TABLE_HEADER)}" style="font-size: 30px;font-name: 'assets/fonts/FuturaItalic.ttf'" verticalAlign="bottom" />
         <spacer width="100%" />
-        <button id="reloadBtn" icon="assets/symbols/main_menu/reload.svg" iconPosition="left" text="${Dictionary.getPhrase(TABLEVIEW_RELOAD_BTN_TEXT)}" height="100%" style="font-size: 20px" verticalAlign="bottom"/>
+        <button id="reloadBtn" icon="assets/images/main/reload.svg" iconPosition="left" text="${Dictionary.getPhrase(TABLEVIEW_RELOAD_BTN_TEXT)}" height="100%" style="font-size: 20px" verticalAlign="bottom"/>
     </hbox>
     <tableview id="table" width="100%" height="100%" itemHeight="30px">
         <header id="tableHeader" width="100%">
