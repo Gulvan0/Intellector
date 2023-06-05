@@ -49,9 +49,13 @@ abstract class BaseBehaviour implements IBehaviour
     private abstract function onAnalyzePressed():Void;
     private abstract function onEditPositionPressed():Void;
     private abstract function onViewReportPressed():Void;
+    private abstract function onScrolledToPastMove():Void;
 
     private function applyScroll(type:PlyScrollType)
     {
+        var moveCount:Int = genericModel.getLineLength();
+        var wasAtEnd:Bool = genericModel.shownMovePointer == moveCount;
+
         switch type 
         {
             case Home:
@@ -63,13 +67,11 @@ abstract class BaseBehaviour implements IBehaviour
                     return;
                 genericModel.shownMovePointer--;
             case Next:
-                var moveCount:Int = genericModel.getLineLength();
-                if (genericModel.shownMovePointer == moveCount)
+                if (wasAtEnd)
                     return;
                 genericModel.shownMovePointer++;
             case End:
-                var moveCount:Int = genericModel.getLineLength();
-                if (genericModel.shownMovePointer == moveCount)
+                if (wasAtEnd)
                     return;
                 genericModel.shownMovePointer = moveCount;
             case Precise(plyNum):
@@ -77,6 +79,9 @@ abstract class BaseBehaviour implements IBehaviour
                     return;
                 genericModel.shownMovePointer = plyNum;
         }
+
+        if (wasAtEnd && genericModel.shownMovePointer < moveCount)
+            onScrolledToPastMove();
 
         modelUpdateHandler(ViewedMoveNumUpdated);
     }

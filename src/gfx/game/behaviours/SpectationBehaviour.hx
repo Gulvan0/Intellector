@@ -12,6 +12,11 @@ class SpectationBehaviour extends GameRelatedBehaviour
 {
     private var spectationModel:SpectationModel;
 
+    private function onScrolledToPastMove()
+    {
+        //* Do nothing
+    }
+
     private function setPlayerOnlineStatus(playerColor:PieceColor, online:Bool)
     {
         spectationModel.playerOnline.set(playerColor, online);

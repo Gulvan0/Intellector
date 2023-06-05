@@ -33,6 +33,12 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
     private abstract function updateBehaviourDueToPremovePreferenceUpdate():Void;
     private abstract function onCustomInitEnded():Void;
 
+    private function onScrolledToPastMove()
+    {
+        setPlannedPremoves([]);
+        modelUpdateHandler(PlannedPremovesUpdated);
+    }
+
     private function performPly(ply:RawPly)
     {
         Networker.emitEvent(Move(ply));
@@ -88,6 +94,12 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
                 }
             case LMBPressed(hexUnderCursor):
                 applyScroll(End);
+
+                if (model.getShownSituation().get(hexUnderCursor).color() != model.getPlayerColor())
+                {
+                    setPlannedPremoves([]);
+                    modelUpdateHandler(PlannedPremovesUpdated);
+                }
             default:
         }
     }

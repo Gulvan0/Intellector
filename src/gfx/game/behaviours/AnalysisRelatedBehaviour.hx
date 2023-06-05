@@ -31,6 +31,11 @@ abstract class AnalysisRelatedBehaviour extends BaseBehaviour
         this.model = model;
     }
 
+    private function onScrolledToPastMove()
+    {
+        //* Do nothing
+    }
+
 	public function handleNetEvent(event:ServerEvent) 
     {
         //* Do nothing

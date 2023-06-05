@@ -1,7 +1,6 @@
 package gfx.game.behaviours;
 
 import gfx.scene.SceneManager;
-import gfx.game.behaviours.BaseBehaviour;
 import gfx.popups.ChallengeParamsDialog;
 import net.shared.dataobj.ChallengeParams;
 import net.shared.utils.UnixTimestamp;
@@ -47,6 +46,7 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
     private abstract function onOfferActionRequested(kind:OfferKind, action:OfferAction):Void;
     private abstract function updateBehaviourDueToTurnColorUpdate():Void;
     private abstract function isAutoscrollEnabled():Bool;
+    private abstract function onScrolledToPastMove():Void;
 
     private function writeChatEntry(entry:ChatEntry) 
     {
@@ -81,10 +81,7 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
 		var newMoveCount:Int = model.getLineLength() - plysToUndo;
 
 		if (model.shownMovePointer > newMoveCount || isAutoscrollEnabled())
-		{
-			model.shownMovePointer = newMoveCount;
-			modelUpdateHandler(ViewedMoveNumUpdated);
-		}
+            applyScroll(Precise(newMoveCount));
 
 		model.history.dropLast(plysToUndo);
 		modelUpdateHandler(HistoryRollback);
@@ -225,6 +222,16 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
     public function handlePositionEditorEvent(event:PositionEditorEvent)
     {
         throw 'PositionEditorEvent occured in game related behaviour: $event';
+    }
+
+	private function onEditPositionPressed() 
+    {
+        throw 'EditPosition pressed in game related behaviour';
+    }
+
+	private function onViewReportPressed() 
+    {
+        throw 'ViewReport pressed in game related behaviour';
     }
 
     public function new(model:IReadWriteGameRelatedModel)
