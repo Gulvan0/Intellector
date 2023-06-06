@@ -6,7 +6,10 @@ import gfx.game.board.util.HexagonLayer;
 class Colors
 {
     public static var border:Color = 0x664126;
-    public static var arrow:Color = 0xFF0000;
+    public static var playerDrawnArrowNormal:Color = 0xFF0000;
+    public static var playerDrawnArrowGreen:Color = 0x00FF00;
+    public static var playerDrawnArrowBlue:Color = 0x0000FF;
+    public static var playerDrawnArrowBlack:Color = 0x000000;
 
     public static var variationTreeBackground:Color = 0xEEEEEE;
     public static var variationTreeUnselectedArrow:Color = 0x333333;

@@ -30,7 +30,6 @@ class NeutralState implements IState
     public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
     {
         boardInstance.eventHandler(LMBPressed(location));
-        boardInstance.removeAllArrows(Colors.arrow);
 
         if (location == null)
             return;

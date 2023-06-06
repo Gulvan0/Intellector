@@ -102,7 +102,7 @@ class ActionPromptDialog extends Dialog
                     if (inputBoards.exists(promptKey))
                     {
                         var ply:RawPly = cast(arg.value, RawPly);
-                        inputBoards.get(promptKey).toggleArrow(new ArrowParams(Colors.arrow, ply.from, ply.to));
+                        inputBoards.get(promptKey).toggleArrow(new ArrowParams(Colors.playerDrawnArrowNormal, ply.from, ply.to));
                     }
                     else
                         throw 'inputBoards has no mapping for prompt $promptKey';
@@ -161,7 +161,7 @@ class ActionPromptDialog extends Dialog
         vbox.percentWidth = 100;
         vbox.percentHeight = 100 / totalPlyInputs;
         
-        var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, [Colors.arrow => EnsureSingle], [], White, None);
+        var inputBoard:SelectableBoard = new SelectableBoard(currentSituation, [Colors.playerDrawnArrowNormal => EnsureSingle], [], White, None);
         inputBoard.percentWidth = 100;
         inputBoard.percentHeight = 100;
 

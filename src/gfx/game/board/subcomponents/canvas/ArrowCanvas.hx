@@ -75,7 +75,7 @@ class ArrowCanvas extends Canvas
         var builder = getBuilder();
         var path = builder.path(capTopVertex.x - topLeft.x, capTopVertex.y - topLeft.y);
 
-        path.fill({color: Colors.arrow.toHex(), opacity: 0.75});
+        path.fill({color: Colors.playerDrawnArrowNormal.toHex(), opacity: 0.75});
 
         for (vertex in interimVertexSequence)
             path.lineTo(vertex.x - topLeft.x, vertex.y - topLeft.y);

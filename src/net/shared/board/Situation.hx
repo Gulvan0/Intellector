@@ -290,6 +290,11 @@ class Situation
         return new Situation(pieces.copy(), newTurnColor ?? turnColor, intellectorPos.copy());
     }
 
+    public function equals(otherSituation:Situation):Bool
+    {
+        return getHash() == otherSituation.getHash();
+    }
+
     public function toString():String
     {
         return 'Situation';  

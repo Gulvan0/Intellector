@@ -133,7 +133,9 @@ class Board extends Absolute
         for (piece in pieces)
             pieceLayer.removeComponent(piece);
         pieces = [];
+
         shownSituation = newShownSituation;
+
         producePieces();
     }
 

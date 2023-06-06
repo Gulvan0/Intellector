@@ -38,6 +38,8 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
     public var lastMouseMoveEvent(default, null):MouseEvent;
     private var rmbPressLocation:Null<HexCoords>;
 
+    private var playerDrawnArrowColors:Array<Color>;
+
     private function set_state(newState:IState):IState
     {
         this.state = newState;
@@ -61,6 +63,9 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
         if (e.screenX >= screenLeft && e.screenX <= screenLeft + width && e.screenY >= screenTop && e.screenY <= screenTop + height)
         {
+            for (arrowColor in playerDrawnArrowColors)
+                removeAllArrows(arrowColor);
+
             var pressCoords:Null<HexCoords> = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
             state.onLMBPressed(pressCoords, e);
         }
@@ -106,7 +111,19 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
             if (equal(rmbPressLocation, rmbReleaseLocation))
                 toggleHexLayer(rmbPressLocation, HighlightedByPlayer);
             else
-                toggleArrow(new ArrowParams(Colors.arrow, rmbPressLocation, rmbReleaseLocation));
+            {
+                var arrowColor:Color;
+                if (e.shiftKey && e.ctrlKey)
+                    arrowColor = Colors.playerDrawnArrowBlack;
+                else if (e.ctrlKey)
+                    arrowColor = Colors.playerDrawnArrowBlue;
+                else if (e.shiftKey)
+                    arrowColor = Colors.playerDrawnArrowGreen;
+                else
+                    arrowColor = Colors.playerDrawnArrowNormal;
+
+                toggleArrow(new ArrowParams(arrowColor, rmbPressLocation, rmbReleaseLocation));
+            }
         }
         
         rmbPressLocation = null;
@@ -135,7 +152,13 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
             case OrientationUpdated:
                 setOrientation(model.asGenericModel().getOrientation());
             case ShownSituationUpdated:
-                setShownSituation(model.asGenericModel().getShownSituation());
+                var newSituation:Situation = model.asGenericModel().getShownSituation();
+
+                if (newSituation.equals(shownSituation))
+                    return;
+
+                removeAllArrows();
+                setShownSituation(newSituation);
             case InteractivityModeUpdated:
                 mode = model.asGenericModel().getBoardInteractivityMode();
             case PlannedPremovesUpdated:
@@ -163,7 +186,9 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         var orientation:PieceColor = model.asGenericModel().getOrientation();
         var mode:InteractivityMode = model.asGenericModel().getBoardInteractivityMode();
 
-        var arrowMode:Map<Color, ArrowSelectionMode> = [Colors.arrow => FreeConstSize]; //TODO: In the future, account for diminishing arrows & alt arrow colors
+        var playerDrawnArrowColors:Array<Color> = [Colors.playerDrawnArrowNormal, Colors.playerDrawnArrowGreen, Colors.playerDrawnArrowBlue, Colors.playerDrawnArrowBlack];
+
+        var arrowMode:Map<Color, ArrowSelectionMode> = [for (arrowColor in playerDrawnArrowColors) arrowColor => FreeConstSize];
         var hexMode:Map<HexagonLayer, HexSelectionMode> = [
             HighlightedByPlayer => Free,
             LastMove => Free,
@@ -178,5 +203,7 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         this.state = new NeutralState(this, null);
         this.mode = mode;
         this.eventHandler = getBehaviour().handleGameboardEvent;
+
+        this.playerDrawnArrowColors = playerDrawnArrowColors;
     }
 }
