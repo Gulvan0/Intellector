@@ -80,10 +80,13 @@ abstract class BaseBehaviour implements IBehaviour
                 genericModel.shownMovePointer = plyNum;
         }
 
+        modelUpdateHandler(ViewedMoveNumUpdated);
+
         if (wasAtEnd && genericModel.shownMovePointer < moveCount)
             onScrolledToPastMove();
 
-        modelUpdateHandler(ViewedMoveNumUpdated);
+        genericModel.deriveShownSituationFromOtherParams();
+        modelUpdateHandler(ShownSituationUpdated);
     }
 
     private function constructMove(from:HexCoords, to:HexCoords, options:MoveIntentOptions, premove:Bool, onMoveConstructed:RawPly->Void)

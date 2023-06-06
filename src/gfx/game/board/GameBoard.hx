@@ -134,13 +134,11 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         {
             case OrientationUpdated:
                 setOrientation(model.asGenericModel().getOrientation());
-            case ViewedMoveNumUpdated, EditorSituationUpdated, SelectedVariationNodeUpdated, VariationUpdated:
+            case ShownSituationUpdated:
                 setShownSituation(model.asGenericModel().getShownSituation());
             case InteractivityModeUpdated:
                 mode = model.asGenericModel().getBoardInteractivityMode();
             case PlannedPremovesUpdated:
-                setShownSituation(model.asGenericModel().getShownSituation());
-                
                 hideLayerForEveryHex(Premove);
                 for (premove in model.getPlannedPremoves())
                     for (hexCoords in premove.modifiedHexes())

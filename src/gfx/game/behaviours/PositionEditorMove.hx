@@ -13,6 +13,8 @@ class PositionEditorMove extends AnalysisRelatedBehaviour
                 model.editorSituation.set(to, model.editorSituation.get(from));
                 model.editorSituation.set(from, Empty);
                 modelUpdateHandler(EditorSituationUpdated);
+                model.deriveShownSituationFromOtherParams();
+                modelUpdateHandler(ShownSituationUpdated);
             default:
         }
     }

@@ -29,6 +29,9 @@ class PositionEditorSet extends AnalysisRelatedBehaviour
             model.shownMovePointer = childPath.length;
             modelUpdateHandler(SelectedVariationNodeUpdated);
         }
+                
+        model.deriveShownSituationFromOtherParams();
+        modelUpdateHandler(ShownSituationUpdated);
             
         model.deriveInteractivityModeFromOtherParams();
         modelUpdateHandler(InteractivityModeUpdated);

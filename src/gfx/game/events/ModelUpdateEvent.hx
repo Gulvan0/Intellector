@@ -23,4 +23,5 @@ enum ModelUpdateEvent
     PlannedPremovesUpdated;
     PlayerOnlineStatusUpdated;
     SpectatorListUpdated;
+    ShownSituationUpdated;
 }

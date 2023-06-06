@@ -34,7 +34,9 @@ class SpectationModel implements IReadWriteGameRelatedModel implements IReadOnly
 
     public var chatHistory:Array<ChatEntry>;
     public var playerOnline:Map<PieceColor, Bool>;
-    public var spectatorRefs:Array<PlayerRef>;   
+    public var spectatorRefs:Array<PlayerRef>; 
+
+    private var shownSituation:Situation;  
 
     public function getGameID():Int
     {
@@ -83,7 +85,7 @@ class SpectationModel implements IReadWriteGameRelatedModel implements IReadOnly
 
     public function getShownSituation():Situation
     {
-        return history.getShownSituationByPointer(shownMovePointer);
+        return shownSituation;
     }
 
     public function getHistory():IReadOnlyHistory
@@ -163,6 +165,11 @@ class SpectationModel implements IReadWriteGameRelatedModel implements IReadOnly
     public function deriveInteractivityModeFromOtherParams()
     {
         boardInteractivityMode = NotInteractive;
+    }
+
+    public function deriveShownSituationFromOtherParams()
+    {
+        shownSituation = history.getShownSituationByPointer(shownMovePointer);
     }
 
     public function new()

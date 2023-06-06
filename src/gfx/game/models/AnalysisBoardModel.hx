@@ -28,6 +28,8 @@ class AnalysisBoardModel implements IReadWriteGenericModel implements IReadOnlyA
 
     public var exploredStudyInfo:Null<StudyInfo>;
 
+    private var shownSituation:Situation;
+
     public function getVariation():ReadOnlyVariation
     {
         return variation;
@@ -50,10 +52,7 @@ class AnalysisBoardModel implements IReadWriteGenericModel implements IReadOnlyA
 
     public function getShownSituation():Situation
     {
-        if (editorSituation != null)
-            return editorSituation.copy();
-        else
-            return getSelectedNodeSituation();
+        return shownSituation;
     }
 
     public function getSelectedNodeSituation():Situation
@@ -148,6 +147,14 @@ class AnalysisBoardModel implements IReadWriteGenericModel implements IReadOnlyA
             case Set(type, color):
                 boardInteractivityMode = HexSelection(x -> true);
         }
+    }
+
+    public function deriveShownSituationFromOtherParams()
+    {
+        if (editorSituation != null)
+            shownSituation = editorSituation.copy();
+        else
+            shownSituation = getSelectedNodeSituation();
     }
 
     public function new()

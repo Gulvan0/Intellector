@@ -104,6 +104,8 @@ abstract class AnalysisRelatedBehaviour extends BaseBehaviour
         modelUpdateHandler(EditorModeUpdated);
         model.editorSituation = null;
         modelUpdateHandler(EditorSituationUpdated);
+        model.deriveShownSituationFromOtherParams();
+        modelUpdateHandler(ShownSituationUpdated);
         model.deriveInteractivityModeFromOtherParams();
         modelUpdateHandler(InteractivityModeUpdated);
     }
@@ -114,6 +116,8 @@ abstract class AnalysisRelatedBehaviour extends BaseBehaviour
         modelUpdateHandler(EditorSituationUpdated);
         model.editorMode = Move;
         modelUpdateHandler(EditorModeUpdated);
+        model.deriveShownSituationFromOtherParams();
+        modelUpdateHandler(ShownSituationUpdated);
         model.deriveInteractivityModeFromOtherParams();
         modelUpdateHandler(InteractivityModeUpdated);
     }
@@ -136,6 +140,9 @@ abstract class AnalysisRelatedBehaviour extends BaseBehaviour
 
                 model.shownMovePointer = path.length;
                 modelUpdateHandler(SelectedVariationNodeUpdated);
+                
+                model.deriveShownSituationFromOtherParams();
+                modelUpdateHandler(ShownSituationUpdated);
 
                 model.deriveInteractivityModeFromOtherParams();
                 modelUpdateHandler(InteractivityModeUpdated);
@@ -150,6 +157,9 @@ abstract class AnalysisRelatedBehaviour extends BaseBehaviour
                     var parentPath:VariationPath = path.parentPath();
                     model.selectedBranch = parentPath;
                     model.shownMovePointer = parentPath.length;
+                
+                    model.deriveShownSituationFromOtherParams();
+                    modelUpdateHandler(ShownSituationUpdated);
                 }
                 else
                 {
@@ -177,18 +187,28 @@ abstract class AnalysisRelatedBehaviour extends BaseBehaviour
             case TurnColorChangeRequested(color):
                 model.editorSituation = model.editorSituation.copy(color);
                 modelUpdateHandler(EditorSituationUpdated);
+                model.deriveShownSituationFromOtherParams();
+                modelUpdateHandler(ShownSituationUpdated);
             case SituationImported(situation):
                 model.editorSituation = situation;
                 modelUpdateHandler(EditorSituationUpdated);
+                model.deriveShownSituationFromOtherParams();
+                modelUpdateHandler(ShownSituationUpdated);
             case ClearRequested:
                 model.editorSituation = Situation.empty();
                 modelUpdateHandler(EditorSituationUpdated);
+                model.deriveShownSituationFromOtherParams();
+                modelUpdateHandler(ShownSituationUpdated);
             case ResetRequested:
                 model.editorSituation = model.getSelectedNodeSituation();
                 modelUpdateHandler(EditorSituationUpdated);
+                model.deriveShownSituationFromOtherParams();
+                modelUpdateHandler(ShownSituationUpdated);
             case StartPosRequested:
                 model.editorSituation = Situation.defaultStarting();
                 modelUpdateHandler(EditorSituationUpdated);
+                model.deriveShownSituationFromOtherParams();
+                modelUpdateHandler(ShownSituationUpdated);
             case OrientationChangeRequested:
                 model.orientation = opposite(model.orientation);
                 modelUpdateHandler(OrientationUpdated);

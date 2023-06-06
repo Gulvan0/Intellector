@@ -43,6 +43,8 @@ class MatchVersusPlayerModel implements IReadWriteGameRelatedModel implements IR
     public var opponentOnline:Bool;
     public var spectatorRefs:Array<PlayerRef>;
 
+    private var shownSituation:Situation;
+
     public function getGameID():Int
     {
         return gameID;
@@ -90,10 +92,7 @@ class MatchVersusPlayerModel implements IReadWriteGameRelatedModel implements IR
 
     public function getShownSituation():Situation
     {
-        var actualShownSituation:Situation = history.getShownSituationByPointer(shownMovePointer);
-        for (premovePly in plannedPremoves)
-            actualShownSituation.performRawPly(premovePly);
-        return actualShownSituation;
+        return shownSituation;
     }
 
     public function getHistory():IReadOnlyHistory
@@ -211,6 +210,13 @@ class MatchVersusPlayerModel implements IReadWriteGameRelatedModel implements IR
         }
         else
             boardInteractivityMode = NotInteractive;
+    }
+
+    public function deriveShownSituationFromOtherParams()
+    {
+        shownSituation = history.getShownSituationByPointer(shownMovePointer);
+        for (premovePly in plannedPremoves)
+            shownSituation.performRawPly(premovePly);
     }
 
     public function new()

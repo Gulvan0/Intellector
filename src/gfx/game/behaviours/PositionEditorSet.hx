@@ -15,6 +15,8 @@ class PositionEditorSet extends AnalysisRelatedBehaviour
             case HexSelected(coords):
                 model.editorSituation.set(coords, hex);
                 modelUpdateHandler(EditorSituationUpdated);
+                model.deriveShownSituationFromOtherParams();
+                modelUpdateHandler(ShownSituationUpdated);
             default:
         }
     }

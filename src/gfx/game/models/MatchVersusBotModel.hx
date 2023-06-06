@@ -42,6 +42,8 @@ class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IRead
     public var chatHistory:Array<ChatEntry>;
     public var spectatorRefs:Array<PlayerRef>;
 
+    private var shownSituation:Situation;
+
     public function getGameID():Int
     {
         return gameID;
@@ -94,10 +96,7 @@ class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IRead
 
     public function getShownSituation():Situation
     {
-        var actualShownSituation:Situation = history.getShownSituationByPointer(shownMovePointer);
-        for (premovePly in plannedPremoves)
-            actualShownSituation.performRawPly(premovePly);
-        return actualShownSituation;
+        return shownSituation;
     }
 
     public function getHistory():IReadOnlyHistory
@@ -211,6 +210,13 @@ class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IRead
         }
         else
             boardInteractivityMode = NotInteractive;
+    }
+
+    public function deriveShownSituationFromOtherParams()
+    {
+        shownSituation = history.getShownSituationByPointer(shownMovePointer);
+        for (premovePly in plannedPremoves)
+            shownSituation.performRawPly(premovePly);
     }
 
     public function new()

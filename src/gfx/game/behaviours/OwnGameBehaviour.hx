@@ -37,6 +37,9 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
     {
         setPlannedPremoves([]);
         modelUpdateHandler(PlannedPremovesUpdated);
+
+        model.deriveShownSituationFromOtherParams();
+        modelUpdateHandler(ShownSituationUpdated);
     }
 
     private function performPly(ply:RawPly)
@@ -76,6 +79,9 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
         premoves.push(ply);
         setPlannedPremoves(premoves);
         modelUpdateHandler(PlannedPremovesUpdated);
+
+        model.deriveShownSituationFromOtherParams();
+        modelUpdateHandler(ShownSituationUpdated);
     }
     
     public function handleGameboardEvent(event:GameboardEvent)
@@ -99,6 +105,9 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
                 {
                     setPlannedPremoves([]);
                     modelUpdateHandler(PlannedPremovesUpdated);
+
+                    model.deriveShownSituationFromOtherParams();
+                    modelUpdateHandler(ShownSituationUpdated);
                 }
             default:
         }
@@ -126,6 +135,9 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
         }
         
         onCustomInitEnded();
+        
+        model.deriveShownSituationFromOtherParams();
+        modelUpdateHandler(ShownSituationUpdated);
     }
 
     public function handleGlobalEvent(event:GlobalEvent)
