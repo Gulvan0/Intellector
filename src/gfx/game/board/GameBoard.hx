@@ -1,5 +1,7 @@
 package gfx.game.board;
 
+import gfx.game.interfaces.IGameScreenGetters;
+import gfx.utils.SpecialControlSettings;
 import gfx.game.events.ModelUpdateEvent;
 import GlobalBroadcaster.GlobalEvent;
 import GlobalBroadcaster.IGlobalEventObserver;
@@ -40,6 +42,8 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
     private var playerDrawnArrowColors:Array<Color>;
 
+    private var getSpecialControlSettings:Void->SpecialControlSettings;
+
     private function set_state(newState:IState):IState
     {
         this.state = newState;
@@ -63,11 +67,19 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
         if (e.screenX >= screenLeft && e.screenX <= screenLeft + width && e.screenY >= screenTop && e.screenY <= screenTop + height)
         {
-            for (arrowColor in playerDrawnArrowColors)
-                removeAllArrows(arrowColor);
+            var specialControlSettings:SpecialControlSettings = getSpecialControlSettings();
 
-            var pressCoords:Null<HexCoords> = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
-            state.onLMBPressed(pressCoords, e);
+            switch specialControlSettings.lmbArrowDrawingMode 
+            {
+                case Disabled:
+                    for (arrowColor in playerDrawnArrowColors)
+                        removeAllArrows(arrowColor);
+        
+                    var pressCoords:Null<HexCoords> = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
+                    state.onLMBPressed(pressCoords, e, specialControlSettings);
+                default:
+                    handlePressAsPlayerHighlighting(e);
+            }
         }
     }
 
@@ -78,7 +90,8 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         if (Dialogs.getQueue().hasActiveDialog())
             return;
 
-        state.onMouseMoved(posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop)), e);
+        var moveCoords:Null<HexCoords> = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
+        state.onMouseMoved(moveCoords, e);
     }
 
     private function onLMBReleased(e:MouseEvent)
@@ -86,7 +99,22 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         if (Dialogs.getQueue().hasActiveDialog())
             return;
 
-        state.onLMBReleased(posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop)), e);
+        var specialControlSettings:SpecialControlSettings = getSpecialControlSettings();
+
+        switch specialControlSettings.lmbArrowDrawingMode 
+        {
+            case Disabled:
+                var releaseCoords:Null<HexCoords> = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
+                state.onLMBReleased(releaseCoords, e, specialControlSettings);
+            case Red:
+                handleReleaseAsPlayerHighlighting(e, Colors.playerDrawnArrowNormal);
+            case Green:
+                handleReleaseAsPlayerHighlighting(e, Colors.playerDrawnArrowGreen);
+            case Blue:
+                handleReleaseAsPlayerHighlighting(e, Colors.playerDrawnArrowBlue);
+            case Black:
+                handleReleaseAsPlayerHighlighting(e, Colors.playerDrawnArrowBlack);
+        }
     }
 
     @:bind(this, MouseEvent.RIGHT_MOUSE_DOWN)
@@ -95,7 +123,7 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         if (Dialogs.getQueue().hasActiveDialog())
             return;
 
-        rmbPressLocation = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
+        handlePressAsPlayerHighlighting(e);
     }
 
     @:bind(this, MouseEvent.RIGHT_MOUSE_UP)
@@ -104,6 +132,16 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         if (Dialogs.getQueue().hasActiveDialog())
             return;
 
+        handleReleaseAsPlayerHighlighting(e);
+    }
+
+    private function handlePressAsPlayerHighlighting(e:MouseEvent) 
+    {
+        rmbPressLocation = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
+    }
+
+    private function handleReleaseAsPlayerHighlighting(e:MouseEvent, ?forcedArrowColor:Color) 
+    {
         var rmbReleaseLocation = posToIndexes(new Point(e.screenX - screenLeft, e.screenY - screenTop));
 
         if (rmbPressLocation != null && rmbReleaseLocation != null)
@@ -113,7 +151,9 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
             else
             {
                 var arrowColor:Color;
-                if (e.shiftKey && e.ctrlKey)
+                if (forcedArrowColor != null)
+                    arrowColor = forcedArrowColor;
+                else if (e.shiftKey && e.ctrlKey)
                     arrowColor = Colors.playerDrawnArrowBlack;
                 else if (e.ctrlKey)
                     arrowColor = Colors.playerDrawnArrowBlue;
@@ -180,7 +220,7 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
         }
     }
 
-    public function new(model:ReadOnlyModel, getBehaviour:Void->IBehaviour) 
+    public function new(model:ReadOnlyModel, getters:IGameScreenGetters) 
     {
         var shownSituation:Situation = model.asGenericModel().getShownSituation();
         var orientation:PieceColor = model.asGenericModel().getOrientation();
@@ -202,7 +242,8 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
         this.state = new NeutralState(this, null);
         this.mode = mode;
-        this.eventHandler = getBehaviour().handleGameboardEvent;
+        this.eventHandler = getters.getBehaviour().handleGameboardEvent;
+        this.getSpecialControlSettings = getters.getSpecialControlSettings;
 
         this.playerDrawnArrowColors = playerDrawnArrowColors;
     }

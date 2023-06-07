@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
 import gfx.game.events.ModelUpdateEvent;
@@ -37,9 +38,9 @@ class Chatbox extends VBox implements IGameComponent
 {
     private var eventHandler:ChatboxEvent->Void;
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
-        this.eventHandler = getBehaviour().handleChatboxEvent;
+        this.eventHandler = getters.getBehaviour().handleChatboxEvent;
 
         var history:Array<ChatEntry> = model.asGameModel().getChatHistory();
 

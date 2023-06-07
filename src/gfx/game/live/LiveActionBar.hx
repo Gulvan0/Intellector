@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import net.shared.PieceColor.opposite;
 import gfx.game.common.action_bar.ActionButton;
 import GlobalBroadcaster.IGlobalEventObserver;
@@ -19,7 +20,7 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
 
     private final compact:Bool;
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour):Void
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters):Void
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 
@@ -179,7 +180,7 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
         if (gameModel.getTimeControl().isCorrespondence())
             setBtnDisabled(AddTime, true);
 
-        eventHandler = getBehaviour().handleActionBarEvent;
+        eventHandler = getters.getBehaviour().handleActionBarEvent;
         GlobalBroadcaster.addObserver(this);
     }
 

@@ -43,7 +43,7 @@ class GameInfoBox extends Card implements IGameComponent implements IGlobalEvent
 
     private var renderedForWidth:Float = 0;
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 

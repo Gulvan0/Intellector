@@ -68,7 +68,7 @@ class CompactBoardAndClocks extends GameComponentLayout
         return a;
     }
 
-    private override function afterChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    private override function afterChildrenInitialized(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
         setOrientation(model.asGenericModel().getOrientation());
         GlobalBroadcaster.addObserver(this);

@@ -1,6 +1,6 @@
 package gfx.game.events.util;
 
-@:structInit class MoveIntentOptions 
+class MoveIntentOptions 
 {
     public final fastPromotion:FastPromotionOption;
     public final fastChameleon:FastChameleonOption;

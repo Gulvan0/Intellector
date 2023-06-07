@@ -1,5 +1,6 @@
 package gfx.game.board.states;
 
+import gfx.utils.SpecialControlSettings;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.geom.Point;
 import net.shared.board.HexCoords;
@@ -13,9 +14,9 @@ interface IState
 
     public function exit():Void;
 
-    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent):Void;
+    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings):Void;
 
     public function onMouseMoved(newCursorLocation:Null<HexCoords>, originalEvent:MouseEvent):Void;
 
-    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent):Void;
+    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings):Void;
 }

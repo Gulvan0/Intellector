@@ -1,5 +1,9 @@
 package gfx.game.board.states;
 
+import gfx.game.events.util.MoveIntentOptions;
+import gfx.game.events.util.FastChameleonOption;
+import gfx.game.events.util.FastPromotionOption;
+import gfx.utils.SpecialControlSettings;
 import haxe.ui.events.MouseEvent;
 import gfx.game.board.subcomponents.Piece;
 import haxe.ui.geom.Point;
@@ -36,7 +40,7 @@ class DraggingState implements IState
         boardInstance.removeAllMarkers();
     }
 
-    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings) 
     {
         //* Do nothing
     }
@@ -61,7 +65,7 @@ class DraggingState implements IState
         cursorLocation = newCursorLocation;
     }
 
-    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings) 
     {
         if (location != null && location.equals(dragStartLocation))
         {
@@ -76,10 +80,12 @@ class DraggingState implements IState
 
             if (location != null && isDestinationAllowed(location))
                 if (boardInstance.mode.match(PlySelection(_)))
-                    boardInstance.eventHandler(MoveAttempted(dragStartLocation, location, {
-                        fastPromotion: originalEvent.shiftKey? AutoPromoteToDominator : Ask,
-                        fastChameleon: originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask
-                    }));
+                {
+                    var fastPromotion:FastPromotionOption = specialControlSettings.fastPromotion || originalEvent.shiftKey? AutoPromoteToDominator : Ask;
+                    var fastChameleon:FastChameleonOption = originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask;
+                    var moveIntentOptions:MoveIntentOptions = new MoveIntentOptions(fastPromotion, fastChameleon);
+                    boardInstance.eventHandler(MoveAttempted(dragStartLocation, location, moveIntentOptions));
+                }
                 else
                     boardInstance.eventHandler(FreeMovePerformed(dragStartLocation, location));
         }

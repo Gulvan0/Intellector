@@ -1,5 +1,9 @@
 package gfx.game.board.states;
 
+import gfx.game.events.util.MoveIntentOptions;
+import gfx.game.events.util.FastChameleonOption;
+import gfx.game.events.util.FastPromotionOption;
+import gfx.utils.SpecialControlSettings;
 import gfx.game.events.GameboardEvent;
 import haxe.ui.geom.Point;
 import net.shared.board.HexCoords;
@@ -31,7 +35,7 @@ class SelectedState implements IState
         boardInstance.removeAllMarkers();
     }
 
-    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings) 
     {
         exit();
 
@@ -41,10 +45,12 @@ class SelectedState implements IState
         {
             boardInstance.state = new NeutralState(boardInstance, cursorLocation);
             if (boardInstance.mode.match(PlySelection(_)))
-                boardInstance.eventHandler(MoveAttempted(selectedLocation, location, {
-                    fastPromotion: originalEvent.shiftKey? AutoPromoteToDominator : Ask,
-                    fastChameleon: originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask
-                }));
+            {
+                var fastPromotion:FastPromotionOption = specialControlSettings.fastPromotion || originalEvent.shiftKey? AutoPromoteToDominator : Ask;
+                var fastChameleon:FastChameleonOption = originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask;
+                var moveIntentOptions:MoveIntentOptions = new MoveIntentOptions(fastPromotion, fastChameleon);
+                boardInstance.eventHandler(MoveAttempted(selectedLocation, location, moveIntentOptions));
+            }
             else
                 boardInstance.eventHandler(FreeMovePerformed(selectedLocation, location));
         }
@@ -81,7 +87,7 @@ class SelectedState implements IState
         cursorLocation = newCursorLocation;
     }
 
-    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings) 
     {
         //* Do nothing
     }

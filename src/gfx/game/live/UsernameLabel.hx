@@ -18,7 +18,7 @@ class UsernameLabel extends Box implements IGameComponent
 {
     private var ownerColor:PieceColor;
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 

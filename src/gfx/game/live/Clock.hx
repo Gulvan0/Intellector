@@ -43,7 +43,7 @@ class Clock extends Box implements IGameComponent
 
     private var timer:Timer;
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
         var gameModel:IReadOnlyGameRelatedModel = model.asGameModel();
 

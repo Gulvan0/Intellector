@@ -64,12 +64,12 @@ class UCMABox extends GameComponentLayout
         return a;
     }
 
-    private override function beforeChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    private override function beforeChildrenInitialized(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
         clocksHidden = model.asGameModel().getMsRemainders() == null;
     }
 
-    private override function afterChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    private override function afterChildrenInitialized(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
         setOrientation(model.asGenericModel().getOrientation());
     }

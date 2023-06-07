@@ -1,5 +1,6 @@
 package gfx.game.analysis;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import gfx.game.board.subcomponents.Piece;
 import gfx.game.analysis.util.PosEditMode;
 import gfx.game.interfaces.IReadOnlyAnalysisBoardModel;
@@ -28,9 +29,9 @@ class PositionEditor extends VBox implements IGameComponent
     private var editModeBtns:Map<PosEditMode, Button>;
     private var toolBtns:Array<Button>;
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour):Void
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters):Void
     {
-        this.eventHandler = getBehaviour().handlePositionEditorEvent;
+        this.eventHandler = getters.getBehaviour().handlePositionEditorEvent;
 
         editModeBtns = [
             Move => moveModeBtn,

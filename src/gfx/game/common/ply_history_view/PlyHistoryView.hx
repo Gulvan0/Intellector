@@ -1,5 +1,6 @@
 package gfx.game.common.ply_history_view;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import gfx.game.interfaces.IReadOnlyGenericModel;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.interfaces.IBehaviour;
@@ -77,10 +78,10 @@ abstract class PlyHistoryView extends VBox implements IGameComponent
         refreshElements();
     }
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour):Void
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters):Void
     {
         genericModel = model.asGenericModel();
-        eventHandler = getBehaviour().handlePlyHistoryViewEvent;
+        eventHandler = getters.getBehaviour().handlePlyHistoryViewEvent;
 
         onHistoryRewritten();
 

@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import gfx.utils.SpecialControlSettings as SpControlSettings;
 import gfx.game.interfaces.IGameScreen;
 import net.shared.ServerEvent;
 import gfx.game.interfaces.IBehaviour;
@@ -35,6 +36,8 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
     private var gameComponents:Array<IGameComponent> = [];
 
     private var behaviour(default, set):IBehaviour;
+    
+    private var compactSpecialControlSettings:SpControlSettings = SpControlSettings.normal();
 
     public abstract function getTitle():Null<Phrase>;
     public abstract function getURLPath():Null<String>;
@@ -50,6 +53,19 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
     private function getResponsiveComponents():Map<Component, Map<ResponsiveProperty, ResponsivenessRule>>
     {
         return [];
+    }
+
+    public function getBehaviour():IBehaviour
+    {
+        return behaviour;
+    }
+
+    public function getSpecialControlSettings():SpControlSettings
+    {
+        if (layoutStack.selectedId == "compactLayout")
+            return compactSpecialControlSettings;
+        else
+            return SpControlSettings.normal();
     }
 
     private function onEnter()
@@ -160,10 +176,9 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
         }
 
         var model:ReadOnlyModel = getModel();
-        var behaviourGetter:Void->IBehaviour = () -> this.behaviour;
 
         for (gameComponent in gameComponents)
-            gameComponent.init(model, behaviourGetter);
+            gameComponent.init(model, this);
 
         this.behaviour = initialBehaviour;
     }

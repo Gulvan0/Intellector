@@ -1,5 +1,6 @@
 package gfx.game.analysis;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import GlobalBroadcaster.IGlobalEventObserver;
 import gfx.game.interfaces.IReadOnlyAnalysisBoardModel;
 import haxe.ui.containers.VBox;
@@ -25,13 +26,13 @@ class BranchingBox extends VBox implements IGameComponent implements IGlobalEven
 
     private var activeWheelHandler:Null<MouseEvent->Void>;
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour):Void
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters):Void
     {
         switch model 
         {
             case AnalysisBoard(model):
                 analysisModel = model;
-                eventHandler = getBehaviour().handleVariationViewEvent;
+                eventHandler = getters.getBehaviour().handleVariationViewEvent;
             default:
                 throw "BranchingBox can only be used with AnalysisBoardModel";
         }

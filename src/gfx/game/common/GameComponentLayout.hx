@@ -1,5 +1,6 @@
 package gfx.game.common;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import haxe.ui.core.Component;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.interfaces.IBehaviour;
@@ -21,12 +22,12 @@ abstract class GameComponentLayout extends Box implements IGameComponent
         //* Do nothing (override if needed)
     }
 
-    private function beforeChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    private function beforeChildrenInitialized(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
         //* Do nothing (override if needed)
     }
     
-    private function afterChildrenInitialized(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    private function afterChildrenInitialized(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
         //* Do nothing (override if needed)
     }
@@ -36,14 +37,14 @@ abstract class GameComponentLayout extends Box implements IGameComponent
         //* Do nothing (override if needed)
     }
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
-        beforeChildrenInitialized(model, getBehaviour);
+        beforeChildrenInitialized(model, getters);
 
         for (component in getChildGameComponents())
-            component.init(model, getBehaviour);
+            component.init(model, getters);
         
-        afterChildrenInitialized(model, getBehaviour);
+        afterChildrenInitialized(model, getters);
     }
 
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent):Void

@@ -1,5 +1,6 @@
 package gfx.game.board.states;
 
+import gfx.utils.SpecialControlSettings;
 import gfx.utils.Colors;
 import haxe.ui.geom.Point;
 import net.shared.board.Hex;
@@ -27,7 +28,7 @@ class NeutralState implements IState
         //* Do nothing
     }
 
-    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings) 
     {
         boardInstance.eventHandler(LMBPressed(location));
 
@@ -79,7 +80,7 @@ class NeutralState implements IState
         cursorLocation = newCursorLocation;
     }
 
-    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent) 
+    public function onLMBReleased(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings) 
     {
         //* Do nothing
     }

@@ -1,5 +1,6 @@
 package gfx.game.common;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.interfaces.IBehaviour;
 import gfx.game.models.ReadOnlyModel;
@@ -12,9 +13,9 @@ class GameBoardWrapper extends Box implements IGameComponent
 {
     private var gameboard:GameBoard;
 
-    public function init(model:ReadOnlyModel, getBehaviour:Void->IBehaviour)
+    public function init(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
-        gameboard = new GameBoard(model, behaviour);
+        gameboard = new GameBoard(model, getters);
         gameboard.percentWidth = 100;
         gameboard.percentHeight = 100;
         addComponent(gameboard);
