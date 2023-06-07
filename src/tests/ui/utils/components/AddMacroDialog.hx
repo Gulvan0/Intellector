@@ -5,7 +5,7 @@ import tests.ui.utils.data.Macro;
 import tests.ui.utils.data.MacroStep;
 import haxe.ui.containers.dialogs.Dialog;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/testenv/addmacrodialog.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/testenv/addmacrodialog.xml"))
 class AddMacroDialog extends Dialog
 {
     private var entryIDs:Array<Int>;

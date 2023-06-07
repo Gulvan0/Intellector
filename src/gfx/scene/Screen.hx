@@ -1,5 +1,6 @@
 package gfx.scene;
 
+import haxe.ui.containers.Box;
 import net.shared.dataobj.ViewedScreen;
 import dict.Phrase;
 import haxe.Timer;
@@ -10,7 +11,7 @@ import haxe.ui.styles.Style;
 import gfx.screens.*;
 using Lambda;
 
-abstract class Screen extends Component
+abstract class Screen extends Box
 {
     public final menuHidden:Bool;
 

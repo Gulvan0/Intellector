@@ -1,5 +1,6 @@
 package dict;
 
+import gfx.utils.LMBArrowDrawingMode;
 import net.shared.dataobj.OfferAction;
 import gfx.menu.MenuItemName;
 import gfx.menu.MenuSection;
@@ -264,6 +265,10 @@ enum Phrase
 
     SPECTATOR_COUNT_HEADER(cnt:Int);
     FULL_SPECTATOR_LIST_DIALOG_TITLE;
+
+    SPECIAL_CONTROL_SETTINGS_FAST_PROMOTION_SETTING_NAME;
+    SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_NAME;
+    SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_ITEM_TEXT(value:LMBArrowDrawingMode);
 
     //Dialogs
 

@@ -24,7 +24,7 @@ typedef GameWidgetData =
     var onClicked:Void->Void;
 } 
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/game_widget.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/game_widget.xml"))
 class GameWidget extends Box
 {
     private var typedData:GameWidgetData;

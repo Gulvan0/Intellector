@@ -3,7 +3,7 @@ package tests.ui.utils.components;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.HBox;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/testenv/macrolistentry.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/testenv/macrolistentry.xml"))
 class MacroListEntry extends HBox
 {
     private var includeCallback:Void->Void;

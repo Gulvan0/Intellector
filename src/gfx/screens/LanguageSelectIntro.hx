@@ -10,7 +10,7 @@ import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
 import haxe.ui.containers.HBox;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/screens/language_select_intro.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/screens/language_select_intro.xml"))
 class LanguageSelectIntro extends Screen
 {
     private var onLangSelected:Void->Void;

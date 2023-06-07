@@ -35,7 +35,7 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 {
     public var state(default, set):IState;
     public var mode:InteractivityMode;
-    public var eventHandler:GameboardEvent->Void;
+    public var getBehaviour:Void->IBehaviour;
 
     public var lastMouseMoveEvent(default, null):MouseEvent;
     private var rmbPressLocation:Null<HexCoords>;
@@ -242,7 +242,7 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
         this.state = new NeutralState(this, null);
         this.mode = mode;
-        this.eventHandler = getters.getBehaviour().handleGameboardEvent;
+        this.getBehaviour = getters.getBehaviour;
         this.getSpecialControlSettings = getters.getSpecialControlSettings;
 
         this.playerDrawnArrowColors = playerDrawnArrowColors;

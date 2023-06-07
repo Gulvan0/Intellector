@@ -1,5 +1,7 @@
 package gfx.game.common;
 
+import GlobalBroadcaster.IGlobalEventObserver;
+import gfx.game.interfaces.IGameScreenGetters;
 import gfx.basic_components.Spacers;
 import haxe.ui.containers.HBox;
 import gfx.game.live.UsernameLabel;
@@ -21,7 +23,7 @@ import haxe.ui.core.Component;
 using gfx.game.models.CommonModelExtractors;
 
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/compact_board_and_clocks.xml"))
-class CompactBoardAndClocks extends GameComponentLayout
+class CompactBoardAndClocks extends GameComponentLayout implements IGlobalEventObserver
 {
     private var board:GameBoardWrapper;
     private var usernameLabels:Map<PieceColor, UsernameLabel> = [];
@@ -92,21 +94,21 @@ class CompactBoardAndClocks extends GameComponentLayout
     private function setOrientation(orientation:PieceColor)
     {
         headerContainer.removeAllComponents(false);
-        footerContatiner.removeAllComponents(false);
+        footerContainer.removeAllComponents(false);
 
         if (orientation == White)
         {
             headerContainer.addComponent(blackDetailsBox);
-            footerContatiner.addComponent(whiteDetailsBox);
+            footerContainer.addComponent(whiteDetailsBox);
         }
         else
         {
             headerContainer.addComponent(whiteDetailsBox);
-            footerContatiner.addComponent(blackDetailsBox);
+            footerContainer.addComponent(blackDetailsBox);
         }
     }
 
-    private function handleGlobalEvent(event:GlobalEvent)
+    public function handleGlobalEvent(event:GlobalEvent)
     {
         switch event 
         {
@@ -118,7 +120,7 @@ class CompactBoardAndClocks extends GameComponentLayout
     }
 
     @:bind(this, UIEvent.RESIZE)
-    private function onResized(e) 
+    private function onResize(e) 
     {
         doLayout();
     }

@@ -1,5 +1,6 @@
 package gfx.game.common.action_bar;
 
+import gfx.game.interfaces.IBehaviour;
 import haxe.ui.core.Component;
 import gfx.basic_components.Gallery;
 import dict.Phrase;
@@ -7,14 +8,14 @@ import gfx.game.events.ActionBarEvent;
 import haxe.ui.containers.VBox;
 import net.shared.dataobj.OfferKind;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/common/action_bar/action_bar.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/action_bar/action_bar.xml"))
 class ActionBar extends VBox
 {
     private var buttonBars:Array<ActionButtons> = [];
     private var requestBoxes:Map<OfferKind, RequestBox> = [];
 
     private var requestActive:Map<OfferKind, Bool> = [Draw => false, Takeback => false];
-    private var eventHandler:ActionBarEvent->Void;
+    private var getBehaviour:Void->IBehaviour;
 
     private function displayRequestBox(request:OfferKind)
     {
@@ -45,18 +46,18 @@ class ActionBar extends VBox
     private function onRequestAccepted(request:OfferKind)
     {
         hideRequestBox(request);
-        eventHandler(IncomingOfferAccepted(request));
+        getBehaviour().handleActionBarEvent(IncomingOfferAccepted(request));
     }
 
     private function onRequestDeclined(request:OfferKind)
     {
         hideRequestBox(request);
-        eventHandler(IncomingOfferDeclined(request));
+        getBehaviour().handleActionBarEvent(IncomingOfferDeclined(request));
     }
 
     private function onButtonPressed(button:ActionButton)
     {
-        eventHandler(ActionButtonPressed(button));
+        getBehaviour().handleActionBarEvent(ActionButtonPressed(button));
     }
 
     private function questionByOfferKind(offerKind:OfferKind):Phrase
@@ -115,12 +116,12 @@ class ActionBar extends VBox
         }
     }
 
-    public function new(?eventHandler:ActionBarEvent->Void, ?buttonSets:Array<Array<ActionButton>>)
+    public function new(?getBehaviour:Void->IBehaviour, ?buttonSets:Array<Array<ActionButton>>)
     {
         super();
 
-        if (eventHandler != null)
-            this.eventHandler = eventHandler;
+        if (getBehaviour != null)
+            this.getBehaviour = getBehaviour;
 
         if (buttonSets != null)
             updateButtonSets(buttonSets);

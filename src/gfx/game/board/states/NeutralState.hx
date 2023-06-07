@@ -30,7 +30,7 @@ class NeutralState implements IState
 
     public function onLMBPressed(location:Null<HexCoords>, originalEvent:MouseEvent, specialControlSettings:SpecialControlSettings) 
     {
-        boardInstance.eventHandler(LMBPressed(location));
+        boardInstance.getBehaviour().handleGameboardEvent(LMBPressed(location));
 
         if (location == null)
             return;
@@ -52,7 +52,7 @@ class NeutralState implements IState
                 }
             case HexSelection(isSelectable):
                 if (isSelectable(location))
-                    boardInstance.eventHandler(HexSelected(location));
+                    boardInstance.getBehaviour().handleGameboardEvent(HexSelected(location));
             case FreeMove(canBeMoved):
                 if (canBeMoved(location))
                 {

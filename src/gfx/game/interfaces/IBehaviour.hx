@@ -1,5 +1,6 @@
 package gfx.game.interfaces;
 
+import gfx.game.events.SpecialControlSettingsEvent;
 import GlobalBroadcaster.IGlobalEventObserver;
 import net.INetObserver;
 import gfx.game.events.ModelUpdateEvent;
@@ -19,4 +20,5 @@ interface IBehaviour extends INetObserver extends IGlobalEventObserver
     public function handlePlyHistoryViewEvent(event:PlyHistoryViewEvent):Void;
     public function handleVariationViewEvent(event:VariationViewEvent):Void;
     public function handlePositionEditorEvent(event:PositionEditorEvent):Void;
+    public function handleSpecialControlSettingsEvent(event:SpecialControlSettingsEvent):Void;
 }

@@ -3,7 +3,7 @@ package gfx.popups;
 import dict.Dictionary;
 import gfx.basic_components.BaseDialog;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/reconnection_dialog.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/popups/reconnection_dialog.xml'))
 class ReconnectionDialog extends BaseDialog
 {
     private function resize()

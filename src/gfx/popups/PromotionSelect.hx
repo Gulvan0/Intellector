@@ -13,7 +13,7 @@ import gfx.basic_components.BaseDialog;
 import haxe.ui.core.Screen as HaxeUIScreen;
 import assets.Paths;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/promotion_select.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/popups/promotion_select.xml'))
 class PromotionSelect extends BaseDialog
 {
     private var pieceButtons:Map<PieceType, Button> = [];

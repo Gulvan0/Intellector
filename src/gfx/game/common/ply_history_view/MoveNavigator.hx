@@ -19,7 +19,7 @@ import net.shared.utils.MathUtils;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/common/ply_history_view/move_navigator.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/ply_history_view/move_navigator.xml"))
 class MoveNavigator extends PlyHistoryView
 {
     private var lastMovetableEntry:Dynamic;
@@ -152,11 +152,6 @@ class MoveNavigator extends PlyHistoryView
         var neededRowCenterY:Float = neededRowIndex * rowHeight + rowHeight / 2;
         var relPos:Float = MathUtils.clamp((neededRowCenterY - windowHeight / 2) / (totalHeight - windowHeight), 0, 1);
         scrollTo(relPos);
-    } 
-
-    public function asComponent():Component 
-    {
-        return this;
     }
     
     public function new()

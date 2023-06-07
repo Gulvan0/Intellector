@@ -5,7 +5,7 @@ import haxe.ui.events.MouseEvent;
 import tests.ui.utils.data.Macro;
 import haxe.ui.containers.dialogs.Dialog;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/testenv/proposemacrosdialog.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/testenv/proposemacrosdialog.xml"))
 class ProposeMacrosDialog extends Dialog 
 {
     private var excludedMacros:Array<String>;

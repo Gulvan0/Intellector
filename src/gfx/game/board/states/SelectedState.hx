@@ -49,10 +49,10 @@ class SelectedState implements IState
                 var fastPromotion:FastPromotionOption = specialControlSettings.fastPromotion || originalEvent.shiftKey? AutoPromoteToDominator : Ask;
                 var fastChameleon:FastChameleonOption = originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask;
                 var moveIntentOptions:MoveIntentOptions = new MoveIntentOptions(fastPromotion, fastChameleon);
-                boardInstance.eventHandler(MoveAttempted(selectedLocation, location, moveIntentOptions));
+                boardInstance.getBehaviour().handleGameboardEvent(MoveAttempted(selectedLocation, location, moveIntentOptions));
             }
             else
-                boardInstance.eventHandler(FreeMovePerformed(selectedLocation, location));
+                boardInstance.getBehaviour().handleGameboardEvent(FreeMovePerformed(selectedLocation, location));
         }
         else                                                                                                //Not allowed, but on board => if draggable, start dragging, otherwise deselect
         {

@@ -2,7 +2,7 @@ package gfx.game.common.ply_history_view;
 
 import haxe.ui.containers.Card;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/common/ply_history_view/creeping_line_ply.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/ply_history_view/creeping_line_ply.xml"))
 class CreepingLinePly extends Card 
 {
     private final pointerPos:Int;

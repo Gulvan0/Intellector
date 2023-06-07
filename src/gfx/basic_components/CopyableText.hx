@@ -8,7 +8,7 @@ import js.Browser;
 import gfx.Dialogs;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/basic_components/copyable_text.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/basic_components/copyable_text.xml"))
 class CopyableText extends HBox
 {
     public var copiedText(get, set):String;

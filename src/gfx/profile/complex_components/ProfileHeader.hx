@@ -11,7 +11,7 @@ import net.shared.dataobj.ProfileData;
 import gfx.profile.simple_components.PlayerLabel;
 import haxe.ui.containers.Box;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/profile/complex_components/profile_header.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/profile/complex_components/profile_header.xml"))
 class ProfileHeader extends VBox
 {
     private var username:String;

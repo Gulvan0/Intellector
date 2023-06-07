@@ -459,6 +459,21 @@ class Dictionary
             case FULL_SPECTATOR_LIST_DIALOG_TITLE:
                 return ["All spectators", "Все наблюдатели"];
 
+            case SPECIAL_CONTROL_SETTINGS_FAST_PROMOTION_SETTING_NAME:
+                return ["Promote to dominator", "Превращаться в доминатора"];
+            case SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_NAME:
+                return ["Touch/LMB hex highlighting and arrow drawing", "Выделение гексов и стрелки по нажатию/ЛКМ"];
+            case SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_ITEM_TEXT(Disabled):
+                return ["Disabled", "Отключено"];
+            case SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_ITEM_TEXT(Red):
+                return ["Enabled; Red arrows", "Включено; красные стрелки"];
+            case SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_ITEM_TEXT(Green):
+                return ["Enabled; Green arrows", "Включено; зеленые стрелки"];
+            case SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_ITEM_TEXT(Blue):
+                return ["Enabled; Blue arrows", "Включено; синие стрелки"];
+            case SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_ITEM_TEXT(Black):
+                return ["Enabled; Black arrows", "Включено; черные стрелки"];
+
             case INPUT_PLAYER_LOGIN:
                 return ["Input player's username", "Введите ник игрока"];
 

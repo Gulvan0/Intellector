@@ -11,7 +11,7 @@ import haxe.Timer;
 import net.Requests;
 import net.shared.PieceColor;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main/current_games_table.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/main/current_games_table.xml"))
 class CurrentGamesTable extends VBox
 {
     private var gameIDs:Array<Int> = [];

@@ -25,7 +25,7 @@ import net.shared.board.Situation;
 
 using StringTools;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/challenge_params_dialog.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/popups/challenge_params_dialog.xml'))
 class ChallengeParamsDialog extends BaseDialog
 {
     private static inline final MAX_START_SECS_ALLOWED:Int = 60 * 60 * 6;

@@ -9,7 +9,7 @@ import net.shared.TimeControl;
 import haxe.ui.core.ItemRenderer;
 import net.shared.board.Situation;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main/renderers/challenge_mode_renderer.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/main/renderers/challenge_mode_renderer.xml"))
 class ChallengeModeRenderer extends ItemRenderer
 {
     private override function onDataChanged(data:Dynamic) 

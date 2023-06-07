@@ -165,7 +165,7 @@
 
 //! Analysis.hx, whole
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/analysis/analysis_layout.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/analysis/analysis_layout.xml'))
 class Analysis extends Screen implements IGameBoardObserver implements IGlobalEventObserver
 {
     private var variant:Variant;
@@ -317,7 +317,7 @@ class Analysis extends Screen implements IGameBoardObserver implements IGlobalEv
 
 //! LiveGame.hx, whole
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/live_layout.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/live/live_layout.xml"))
 class LiveGame extends Screen implements INetObserver implements IGameBoardObserver implements IGlobalEventObserver
 {
     private var board:GameBoard;

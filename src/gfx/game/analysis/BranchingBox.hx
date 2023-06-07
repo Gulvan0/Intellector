@@ -16,13 +16,13 @@ import GlobalBroadcaster.GlobalEvent;
 import gfx.game.interfaces.IGameComponent;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/analysis/branching_box.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/analysis/branching_box.xml"))
 class BranchingBox extends VBox implements IGameComponent implements IGlobalEventObserver
 {
     private var variationView:IVariationView;
 
     private var analysisModel:IReadOnlyAnalysisBoardModel;
-    private var eventHandler:VariationViewEvent->Void;
+    private var getBehaviour:Void->IBehaviour;
 
     private var activeWheelHandler:Null<MouseEvent->Void>;
 
@@ -32,7 +32,7 @@ class BranchingBox extends VBox implements IGameComponent implements IGlobalEven
         {
             case AnalysisBoard(model):
                 analysisModel = model;
-                eventHandler = getters.getBehaviour().handleVariationViewEvent;
+                getBehaviour = getters.getBehaviour;
             default:
                 throw "BranchingBox can only be used with AnalysisBoardModel";
         }
@@ -84,6 +84,11 @@ class BranchingBox extends VBox implements IGameComponent implements IGlobalEven
             else if (e.delta < 0 && tree.scale > 0.125)
                 tree.setScale(tree.scale / 2);
         } 
+    }
+
+    private function eventHandler(event:VariationViewEvent)
+    {
+        getBehaviour().handleVariationViewEvent(event);
     }
 
     private function refreshVariationView()

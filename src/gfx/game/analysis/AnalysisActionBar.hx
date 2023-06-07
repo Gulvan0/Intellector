@@ -24,7 +24,7 @@ class AnalysisActionBar extends ActionBar implements IGameComponent implements I
         if (!LoginManager.isLogged())
             setBtnDisabled(PlayFromHere, true);
 
-        eventHandler = getters.getBehaviour().handleActionBarEvent;
+        getBehaviour = getters.getBehaviour;
         GlobalBroadcaster.addObserver(this);
     }
 

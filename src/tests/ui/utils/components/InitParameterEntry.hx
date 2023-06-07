@@ -4,7 +4,7 @@ import haxe.ui.data.ArrayDataSource;
 import utils.StringUtils;
 import haxe.ui.containers.HBox;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/testenv/initparam.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/testenv/initparam.xml"))
 class InitParameterEntry extends HBox
 {
     public function getSelected():Int

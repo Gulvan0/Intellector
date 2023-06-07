@@ -28,7 +28,7 @@ import tests.ui.utils.data.MacroStep;
 import haxe.ui.containers.HBox;
 import net.shared.board.Situation;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/testenv/main.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/testenv/main.xml"))
 class MainView extends HBox
 {
     private var component:TestedComponent;

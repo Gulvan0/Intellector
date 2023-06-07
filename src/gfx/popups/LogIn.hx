@@ -8,7 +8,7 @@ import gfx.Dialogs;
 import dict.Dictionary;
 import haxe.ui.containers.dialogs.Dialog;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/popups/log_in.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/popups/log_in.xml"))
 class LogIn extends BaseDialog 
 {
     private var onLoggedIn:Void->Void;

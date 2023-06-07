@@ -11,7 +11,7 @@ enum Dimension
     Height;
 }
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/testenv/adjustablecontentbox.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/testenv/adjustablecontentbox.xml"))
 class AdjustableContentBox extends VBox
 {
     private function setDimension(dim:Dimension, value:Null<Float>)

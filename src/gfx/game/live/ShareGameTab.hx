@@ -14,7 +14,7 @@ import dict.Dictionary;
 import net.shared.board.Situation;
 import net.shared.utils.MathUtils;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/live/share_game_tab.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/live/share_game_tab.xml"))
 class ShareGameTab extends Box
 {
     private var plySequence:Array<RawPly>;

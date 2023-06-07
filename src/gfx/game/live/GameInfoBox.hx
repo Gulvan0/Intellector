@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import net.shared.utils.UnixTimestamp;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
 import net.shared.openings.OpeningDatabase;
@@ -34,7 +35,7 @@ import net.shared.Outcome;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/game/live/game_info_box.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/game/live/game_info_box.xml'))
 class GameInfoBox extends Card implements IGameComponent implements IGlobalEventObserver
 {
     private var whitePlayerLabel:PlayerLabel;

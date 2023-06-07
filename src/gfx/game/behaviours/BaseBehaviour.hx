@@ -1,5 +1,6 @@
 package gfx.game.behaviours;
 
+import gfx.game.events.SpecialControlSettingsEvent;
 import gfx.popups.PromotionSelect;
 import net.shared.PieceType;
 import net.shared.board.RawPly;
@@ -204,6 +205,15 @@ abstract class BaseBehaviour implements IBehaviour
         {
             case ScrollRequested(type):
                 applyScroll(type);
+        }
+    }
+
+    public function handleSpecialControlSettingsEvent(event:SpecialControlSettingsEvent)
+    {
+        switch event 
+        {
+            case SettingsUpdated(newSettings):
+                screenRef.setCompactSpecialControlSettings(newSettings);
         }
     }
 

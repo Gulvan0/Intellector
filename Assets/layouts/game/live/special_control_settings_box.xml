@@ -1,0 +1,9 @@
+<vbox width="100%">
+    <section-header text="${Dictionary.getPhrase(SPECIAL_CONTROL_SETTINGS_FAST_PROMOTION_SETTING_NAME)}" />
+    <hbox horizontalAlign="center">
+        <switch id="fastPromotionSwitch" styleName="pill-switch" />
+        <label id="fastPromotionLabel" style="pill-label" />
+    </hbox>
+    <section-header text="${Dictionary.getPhrase(SPECIAL_CONTROL_SETTINGS_LMB_ARROW_MODE_SETTING_NAME)}" />
+    <dropdown id="lmbArrowModeDropdown" horizontalAlign="center" />
+</vbox>

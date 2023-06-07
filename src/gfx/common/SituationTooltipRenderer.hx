@@ -7,7 +7,7 @@ import gfx.game.board.Board;
 import haxe.ui.core.ItemRenderer;
 import net.shared.board.Situation;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/situation_tooltip_renderer.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/situation_tooltip_renderer.xml"))
 class SituationTooltipRenderer extends ItemRenderer
 {
     private var board:Board;

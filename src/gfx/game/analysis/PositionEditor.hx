@@ -21,17 +21,17 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
 import dict.Dictionary;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/analysis/position_editor.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/analysis/position_editor.xml"))
 class PositionEditor extends VBox implements IGameComponent
 {
-    private var eventHandler:PositionEditorEvent->Void;
+    private var getBehaviour:Void->IBehaviour;
 
     private var editModeBtns:Map<PosEditMode, Button>;
     private var toolBtns:Array<Button>;
 
     public function init(model:ReadOnlyModel, getters:IGameScreenGetters):Void
     {
-        this.eventHandler = getters.getBehaviour().handlePositionEditorEvent;
+        this.getBehaviour = getters.getBehaviour;
 
         editModeBtns = [
             Move => moveModeBtn,
@@ -54,7 +54,7 @@ class PositionEditor extends VBox implements IGameComponent
 
 
         for (mode => btn in editModeBtns)
-            btn.onClick = e -> {eventHandler(EditModeChangeRequested(mode));};
+            btn.onClick = e -> {getBehaviour().handlePositionEditorEvent(EditModeChangeRequested(mode));};
     }
 
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent):Void
@@ -150,7 +150,7 @@ class PositionEditor extends VBox implements IGameComponent
             deserializedSituation = Situation.deserialize(response);
         
         if (deserializedSituation != null)
-            eventHandler(SituationImported(deserializedSituation));
+            getBehaviour().handlePositionEditorEvent(SituationImported(deserializedSituation));
         else
             Dialogs.alert(ANALYSIS_INVALID_SIP_WARNING_TEXT, ANALYSIS_INVALID_SIP_WARNING_TITLE);
     }
@@ -159,43 +159,43 @@ class PositionEditor extends VBox implements IGameComponent
     private function onTurnColorChanged(e)
     {
         var turnColor:PieceColor = turnColorStepper.selectedIndex == 0? White : Black;
-        eventHandler(TurnColorChangeRequested(turnColor));
+        getBehaviour().handlePositionEditorEvent(TurnColorChangeRequested(turnColor));
     }
 
     @:bind(applyChangesBtn, MouseEvent.CLICK)
     private function onApplyChangesPressed(e)
     {
-        eventHandler(ApplyChangesRequested);
+        getBehaviour().handlePositionEditorEvent(ApplyChangesRequested);
     }
 
     @:bind(discardChangesBtn, MouseEvent.CLICK)
     private function onDiscardChangesPressed(e)
     {
-        eventHandler(DiscardChangesRequested);
+        getBehaviour().handlePositionEditorEvent(DiscardChangesRequested);
     }
 
     @:bind(clearBtn, MouseEvent.CLICK)
     private function onClearPressed(e)
     {
-        eventHandler(ClearRequested);
+        getBehaviour().handlePositionEditorEvent(ClearRequested);
     }
 
     @:bind(resetBtn, MouseEvent.CLICK)
     private function onResetPressed(e)
     {
-        eventHandler(ResetRequested);
+        getBehaviour().handlePositionEditorEvent(ResetRequested);
     }
 
     @:bind(startBtn, MouseEvent.CLICK)
     private function onStartPosPressed(e)
     {
-        eventHandler(StartPosRequested);
+        getBehaviour().handlePositionEditorEvent(StartPosRequested);
     }
 
     @:bind(orientationBtn, MouseEvent.CLICK)
     private function onChangeOrientationPressed(e)
     {
-        eventHandler(OrientationChangeRequested);
+        getBehaviour().handlePositionEditorEvent(OrientationChangeRequested);
     }
 
     public function new()

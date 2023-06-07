@@ -7,7 +7,7 @@ import js.Browser;
 import dict.Phrase;
 import haxe.ui.components.Button;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/common/action_bar/action_buttons.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/action_bar/action_buttons.xml"))
 class ActionButtons extends ButtonBar
 {
     private static inline final BUTTON_HEIGHT:Float = 36;

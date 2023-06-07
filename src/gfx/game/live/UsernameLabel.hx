@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import haxe.ui.styles.Style;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
@@ -13,7 +14,7 @@ import haxe.ui.events.UIEvent;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/live/username_label.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/live/username_label.xml"))
 class UsernameLabel extends Box implements IGameComponent
 {
     private var ownerColor:PieceColor;

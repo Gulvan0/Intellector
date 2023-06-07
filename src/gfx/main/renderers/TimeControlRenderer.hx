@@ -7,7 +7,7 @@ import net.shared.TimeControl;
 import haxe.ui.core.ItemRenderer;
 import net.shared.TimeControlType;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main/renderers/time_control_renderer.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/main/renderers/time_control_renderer.xml"))
 class TimeControlRenderer extends ItemRenderer
 {
     private override function onDataChanged(data:Dynamic) 

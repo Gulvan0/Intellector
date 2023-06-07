@@ -84,10 +84,10 @@ class DraggingState implements IState
                     var fastPromotion:FastPromotionOption = specialControlSettings.fastPromotion || originalEvent.shiftKey? AutoPromoteToDominator : Ask;
                     var fastChameleon:FastChameleonOption = originalEvent.shiftKey? AutoAccept : originalEvent.ctrlKey? AutoDecline : Ask;
                     var moveIntentOptions:MoveIntentOptions = new MoveIntentOptions(fastPromotion, fastChameleon);
-                    boardInstance.eventHandler(MoveAttempted(dragStartLocation, location, moveIntentOptions));
+                    boardInstance.getBehaviour().handleGameboardEvent(MoveAttempted(dragStartLocation, location, moveIntentOptions));
                 }
                 else
-                    boardInstance.eventHandler(FreeMovePerformed(dragStartLocation, location));
+                    boardInstance.getBehaviour().handleGameboardEvent(FreeMovePerformed(dragStartLocation, location));
         }
     }
 

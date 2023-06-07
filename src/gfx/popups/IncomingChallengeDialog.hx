@@ -16,7 +16,7 @@ import net.shared.dataobj.ChallengeParams;
 import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/incoming_challenge_dialog.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/popups/incoming_challenge_dialog.xml'))
 class IncomingChallengeDialog extends BaseDialog
 {
     private var challengeID:Int;

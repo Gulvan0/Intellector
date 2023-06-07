@@ -1,4 +1,4 @@
-<component width="100%">
+<box width="100%">
     <style>
         #changelogLabel {
             font-size:26px;
@@ -20,4 +20,4 @@
             <past-games-list id="pastGamesList" ownerLogin="${null}" width="50%" />
         </hbox>
     </vbox>
-</component>
+</box>

@@ -35,7 +35,7 @@ import haxe.ui.core.Screen as HaxeUIScreen;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/scene/scene.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/scene/scene.xml'))
 class Scene extends VBox implements INetObserver implements IGlobalEventObserver implements IPublicScene
 {
     private var currentScreen:Null<Screen> = null;

@@ -17,7 +17,7 @@ typedef StudyWidgetData =
     var onStudyClicked:Void->Void;
 }
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/profile/simple_components/study_widget.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/profile/simple_components/study_widget.xml"))
 class StudyWidget extends Box
 {
     private var typedData:StudyWidgetData;

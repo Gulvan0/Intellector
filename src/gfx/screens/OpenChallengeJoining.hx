@@ -25,7 +25,7 @@ import dict.Dictionary;
 import js.Browser;
 import dict.Utils;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/screens/open_challenge_joining.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/screens/open_challenge_joining.xml'))
 class OpenChallengeJoining extends Screen implements IGlobalEventObserver
 {
     private final challengeID:Int;

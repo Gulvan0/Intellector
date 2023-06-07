@@ -7,7 +7,7 @@ import haxe.ui.events.UIEvent;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.VBox;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/testenv/sequencewidget.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/testenv/sequencewidget.xml"))
 class SequenceWidget extends VBox
 {
     private var currentStep:Int;

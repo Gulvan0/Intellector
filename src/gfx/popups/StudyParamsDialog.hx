@@ -23,7 +23,7 @@ enum StudyParamsDialogMode
     Edit(studyID:Int, currentParams:StudyInfo, onNewParamsSent:StudyInfo->Void);
 }
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/popups/study_params_dialog.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/popups/study_params_dialog.xml'))
 class StudyParamsDialog extends BaseDialog
 {
     private static inline final MAX_TAG_COUNT:Int = 10;

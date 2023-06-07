@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import haxe.ui.core.Component;
 import gfx.game.interfaces.IGameScreenGetters;
 import net.shared.PieceColor.opposite;
 import gfx.game.common.action_bar.ActionButton;
@@ -180,7 +181,7 @@ class LiveActionBar extends ActionBar implements IGameComponent implements IGlob
         if (gameModel.getTimeControl().isCorrespondence())
             setBtnDisabled(AddTime, true);
 
-        eventHandler = getters.getBehaviour().handleActionBarEvent;
+        getBehaviour = getters.getBehaviour;
         GlobalBroadcaster.addObserver(this);
     }
 

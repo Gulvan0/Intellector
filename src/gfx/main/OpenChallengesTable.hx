@@ -10,7 +10,7 @@ import dict.Dictionary;
 import haxe.Timer;
 import net.Requests;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/main/open_challenges_table.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/main/open_challenges_table.xml"))
 class OpenChallengesTable extends VBox
 {
     private var challengeData:Array<ChallengeData> = [];

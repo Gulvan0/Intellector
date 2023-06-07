@@ -4,7 +4,7 @@ import dict.Dictionary;
 import dict.Phrase;
 import haxe.ui.containers.HBox;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/request_box.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/action_bar/request_box.xml"))
 class RequestBox extends HBox
 {
     public function new(question:Phrase, onAccept:Void->Void, onDecline:Void->Void)

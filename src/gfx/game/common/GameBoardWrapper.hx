@@ -38,6 +38,11 @@ class GameBoardWrapper extends Box implements IGameComponent
         return this;
     }
 
+    public function inverseAspectRatio():Float
+    {
+        return gameboard.inverseAspectRatio();
+    }
+
     public function new()
     {
         super();

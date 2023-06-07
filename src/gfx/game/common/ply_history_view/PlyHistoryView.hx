@@ -1,5 +1,6 @@
 package gfx.game.common.ply_history_view;
 
+import haxe.ui.core.Component;
 import gfx.game.interfaces.IGameScreenGetters;
 import gfx.game.interfaces.IReadOnlyGenericModel;
 import gfx.game.events.ModelUpdateEvent;
@@ -21,7 +22,7 @@ using gfx.game.models.CommonModelExtractors;
 
 abstract class PlyHistoryView extends VBox implements IGameComponent
 {
-    private var eventHandler:PlyHistoryViewEvent->Void;
+    private var getBehaviour:Void->IBehaviour;
     private var genericModel:IReadOnlyGenericModel;
 
     private abstract function postInit():Void;
@@ -40,7 +41,7 @@ abstract class PlyHistoryView extends VBox implements IGameComponent
 
     private function onScrollRequested(scrollType:PlyScrollType)
     {
-        eventHandler(ScrollRequested(scrollType));
+        getBehaviour().handlePlyHistoryViewEvent(ScrollRequested(scrollType));
     }
 
     private function onPlySelectedManually(num:Int)
@@ -81,7 +82,7 @@ abstract class PlyHistoryView extends VBox implements IGameComponent
     public function init(model:ReadOnlyModel, getters:IGameScreenGetters):Void
     {
         genericModel = model.asGenericModel();
-        eventHandler = getters.getBehaviour().handlePlyHistoryViewEvent;
+        getBehaviour = getters.getBehaviour;
 
         onHistoryRewritten();
 
@@ -114,6 +115,11 @@ abstract class PlyHistoryView extends VBox implements IGameComponent
     public function destroy():Void
     {
         //* Do nothing
+    }
+
+    public function asComponent():Component
+    {
+        return this;
     }
     
     public function new()

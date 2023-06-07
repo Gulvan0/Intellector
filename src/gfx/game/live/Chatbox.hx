@@ -33,14 +33,14 @@ import haxe.ui.core.Screen as HaxeUIScreen;
 using StringTools;
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/game/live/chat_box.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/game/live/chat_box.xml'))
 class Chatbox extends VBox implements IGameComponent
 {
-    private var eventHandler:ChatboxEvent->Void;
+    private var getBehaviour:Void->IBehaviour;
 
     public function init(model:ReadOnlyModel, getters:IGameScreenGetters)
     {
-        this.eventHandler = getters.getBehaviour().handleChatboxEvent;
+        this.getBehaviour = getters.getBehaviour;
 
         var history:Array<ChatEntry> = model.asGameModel().getChatHistory();
 
@@ -175,7 +175,7 @@ class Chatbox extends VBox implements IGameComponent
         messageInput.text = "";
 
         if (text != "")
-            eventHandler(MessageSent(text));
+            getBehaviour().handleChatboxEvent(MessageSent(text));
     }
 
     public function new() 

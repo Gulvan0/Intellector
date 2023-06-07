@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import gfx.utils.SpecialControlSettings as SpControlSettings;
 import gfx.game.interfaces.IGameScreen;
 import net.shared.ServerEvent;
@@ -28,8 +29,8 @@ import gfx.ResponsiveToolbox.ResponsiveProperty;
 import net.shared.dataobj.ViewedScreen;
 import dict.Phrase;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/screens/generic_game_screen.xml"))
-abstract class GenericGameScreen extends Screen implements IGameScreen
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/screens/generic_game_screen.xml"))
+abstract class GenericGameScreen extends Screen implements IGameScreen implements IGameScreenGetters
 {
     private var panels:Map<PanelName, Panel> = [];
     private var subscreens:Map<ComponentPageName, CompactSubscreen> = [];
@@ -66,6 +67,11 @@ abstract class GenericGameScreen extends Screen implements IGameScreen
             return compactSpecialControlSettings;
         else
             return SpControlSettings.normal();
+    }
+
+    public function setCompactSpecialControlSettings(settings:SpControlSettings)
+    {
+        this.compactSpecialControlSettings = settings;
     }
 
     private function onEnter()

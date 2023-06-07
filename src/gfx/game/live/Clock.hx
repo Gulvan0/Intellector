@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import haxe.ui.events.UIEvent;
 import net.shared.utils.UnixTimestamp;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
@@ -24,7 +25,7 @@ import haxe.ui.macros.ComponentMacros;
 
 using gfx.game.models.CommonModelExtractors;
 
-@:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/game/live/clock.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/live/clock.xml"))
 class Clock extends Box implements IGameComponent
 {
     private var playSoundOnOneMinuteLeft:Bool;

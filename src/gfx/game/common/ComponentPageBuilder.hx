@@ -1,5 +1,6 @@
 package gfx.game.common;
 
+import gfx.game.live.SpecialControlSettingsBox;
 import dict.Dictionary;
 import dict.Phrase;
 import haxe.ui.containers.VBox;
@@ -97,7 +98,7 @@ class ComponentPageBuilder
                 components = [wrap(new CompactBoardAndClocks(), 100, 100)];
             case SpecialControlSettings:
                 autoHeight = true;
-                components = []; //TODO: Add corresponding component
+                components = [wrap(new SpecialControlSettingsBox(), 100, null)];
 
         }
     }

@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import gfx.game.interfaces.IGameScreenGetters;
 import gfx.game.interfaces.IBehaviour;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.models.ReadOnlyModel;

@@ -7,7 +7,7 @@ import dict.Dictionary;
 import haxe.ui.components.Label;
 import haxe.ui.containers.SideBar;
 
-@:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/menu/side_menu.xml'))
+@:build(haxe.ui.ComponentBuilder.build('assets/layouts/menu/side_menu.xml'))
 class SideMenu extends SideBar 
 {
     private var sectionHeaders:Map<MenuSection, Label> = [];
