@@ -17,7 +17,7 @@ class MatchVersusPlayer extends GenericGameScreen
 {
     private var model:MatchVersusPlayerModel;
 
-	public function getTitle():Null<Phrase> 
+	public function getTitle():Null<Phrase>
     {
 		return OWN_MATCH_SCREEN_TITLE(model.getOpponentRef());
 	}
@@ -34,6 +34,7 @@ class MatchVersusPlayer extends GenericGameScreen
 
 	private function customOnEnter() 
     {
+        GlobalBroadcaster.broadcast(LockedInGame);
         Audio.playSound("notify");
     }
 
@@ -49,7 +50,12 @@ class MatchVersusPlayer extends GenericGameScreen
 
 	private function processModelUpdateAtTopLevel(update:ModelUpdateEvent) 
     {
-        //* Do nothing
+        switch update 
+        {
+            case GameEnded:
+                GlobalBroadcaster.broadcast(NotLockedInGame);
+            default:
+        }
     }
 
     public function new(model:MatchVersusPlayerModel)

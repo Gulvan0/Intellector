@@ -65,18 +65,18 @@ class MenuBar extends HaxeUIMenuBar implements IGlobalEventObserver
         sidemenu.resize();
     }
 
-    private function setIngameStatus(ingame:Bool)
+    private function setLockedInGame(locked:Bool)
     {
-        mobileMenuButton.disabled = ingame;
-        siteName.disabled = ingame;
+        mobileMenuButton.disabled = locked;
+        siteName.disabled = locked;
 
         for (menu in sectionMenus)
-            menu.disabled = ingame;
+            menu.disabled = locked;
         
-        challengesMenu.disabled = ingame;
-        logInBtn.disabled = ingame;
-        myProfileBtn.disabled = ingame;
-        logOutBtn.disabled = ingame;
+        challengesMenu.disabled = locked;
+        logInBtn.disabled = locked;
+        myProfileBtn.disabled = locked;
+        logOutBtn.disabled = locked;
     }
 
     private function refreshAccountElements()
@@ -119,10 +119,10 @@ class MenuBar extends HaxeUIMenuBar implements IGlobalEventObserver
         {
             case LoggedIn, LoggedOut:
                 refreshAccountElements();
-            case InGame:
-                setIngameStatus(true);
-            case NotInGame:
-                setIngameStatus(false);
+            case LockedInGame:
+                setLockedInGame(true);
+            case NotLockedInGame:
+                setLockedInGame(false);
             case Disconnected:
                 disabled = true;
             case Connected:

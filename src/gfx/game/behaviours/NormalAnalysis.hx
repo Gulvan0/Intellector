@@ -6,7 +6,7 @@ import net.shared.board.RawPly;
 import gfx.game.events.GameboardEvent;
 import gfx.game.models.AnalysisBoardModel;
 
-class PositionEditorSet extends AnalysisRelatedBehaviour 
+class NormalAnalysis extends AnalysisRelatedBehaviour 
 {
     private function performPly(ply:RawPly) 
     {

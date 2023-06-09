@@ -7,8 +7,8 @@ enum GlobalEvent
 {
     LoggedIn;
     LoggedOut;
-    InGame;
-    NotInGame;
+    LockedInGame;
+    NotLockedInGame;
     Disconnected;
     Connected;
     ModalDialogShown;

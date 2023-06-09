@@ -70,6 +70,9 @@ class BranchingBox extends VBox implements IGameComponent implements IGlobalEven
         {
             case PreferenceUpdated(BranchingType):
                 refreshVariationView();
+            case PreferenceUpdated(BranchingShowTurnColor):
+                if (Preferences.branchingTabType.get().match(Tree))
+                    refreshVariationView();
             default:
         }
     }

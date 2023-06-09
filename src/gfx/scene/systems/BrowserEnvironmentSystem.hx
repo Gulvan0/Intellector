@@ -10,9 +10,9 @@ class BrowserEnvironmentSystem implements IGlobalEventObserver
     {
         switch event 
         {
-            case InGame:
+            case LockedInGame:
                 Browser.window.onpopstate = SceneManager.getScene().refreshTitleAndUrl;
-            case NotInGame:
+            case NotLockedInGame:
                 Browser.window.onpopstate = ScreenNavigator.navigate;
             default:
         }

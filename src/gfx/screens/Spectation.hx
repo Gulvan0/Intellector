@@ -17,7 +17,10 @@ class Spectation extends GenericGameScreen
 
 	public function getTitle():Null<Phrase> 
     {
-		return SPECTATING_SCREEN_TITLE(model.getPlayerRef(White), model.getPlayerRef(Black));
+        if (model.hasEnded())
+		    return PAST_GAME_SCREEN_TITLE(model.gameID, model.getPlayerRef(White), model.getPlayerRef(Black));
+        else
+            return SPECTATING_SCREEN_TITLE(model.getPlayerRef(White), model.getPlayerRef(Black));
 	}
 
 	public function getURLPath():Null<String> 
@@ -32,12 +35,13 @@ class Spectation extends GenericGameScreen
 
 	private function customOnEnter() 
     {
-        Audio.playSound("notify");
+        //* Do nothing
     }
 
 	private function customOnClose() 
     {
-        //* Do nothing
+        if (FollowManager.followedGameID == model.gameID)
+            FollowManager.stopFollowing();
     }
 
 	private function getModel():ReadOnlyModel 

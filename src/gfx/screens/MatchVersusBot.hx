@@ -34,6 +34,7 @@ class MatchVersusBot extends GenericGameScreen
 
 	private function customOnEnter() 
     {
+        GlobalBroadcaster.broadcast(LockedInGame);
         Audio.playSound("notify");
     }
 
@@ -49,7 +50,12 @@ class MatchVersusBot extends GenericGameScreen
 
 	private function processModelUpdateAtTopLevel(update:ModelUpdateEvent) 
     {
-        //* Do nothing
+        switch update 
+        {
+            case GameEnded:
+                GlobalBroadcaster.broadcast(NotLockedInGame);
+            default:
+        }
     }
 
     public function new(model:MatchVersusBotModel)
