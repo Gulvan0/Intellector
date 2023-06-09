@@ -1,5 +1,7 @@
 package gfx.scene;
 
+import net.shared.utils.PlayerRef;
+import net.shared.PieceColor;
 import gfx.menu.MenuItem;
 import gfx.menu.MenuSection;
 import gfx.menu.MenuBar;
@@ -88,31 +90,25 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         switch event
         {
             case GoToGame(data):
-                //TODO: Rewrite, add spectation case?
-                /*var parsedData:GameLogParserOutput = GameLogParser.parse(logPreamble);
+                var playerColor:Null<PieceColor> = null;
+                for (color in PieceColor.createAll())
+                    if (LoginManager.isPlayer(data.playerRefs.get(color)))
+                        playerColor = color;
 
-                if (parsedData.isPlayerParticipant())
-                {
-                    Dialogs.getQueue().closeGroup(RemovedOnGameStarted);
-                    Blinker.blink(GameStarted);
-                    if (parsedData.timeControl.getType() != Correspondence)
-                        setIngameStatus(true);
+                var orientationParticipant:Null<PlayerRef>;
 
-                    var opponentLogin:String = parsedData.getPlayerOpponentRef();
-                    challengesMenu.removeOwnEntries();
-                    challengesMenu.removeEntriesByPlayer(opponentLogin);
-                }*/
-                /*if (parsedData.isPlayerParticipant())
+                if (playerColor != null)
                 {
-                    FollowManager.stopFollowing();
-                    constructor = New(parsedData.whiteRef, parsedData.blackRef, parsedData.elo, parsedData.timeControl, parsedData.startingSituation, parsedData.datetime);
+                    var opponentLogin:String = data.playerRefs.get(opposite(playerColor));
+                    menubar.challengesMenu.removeOwnEntries();
+                    menubar.challengesMenu.removeEntriesByPlayer(opponentLogin);
+
+                    orientationParticipant = LoginManager.getRef();
                 }
                 else
-                {
-                    FollowManager.followedGameID = gameID;
-                    constructor = Ongoing(parsedData, null, FollowManager.getFollowedPlayerLogin());
-                }
-                toScreen(LiveGame(gameID, constructor));*/
+                    orientationParticipant = FollowManager.getFollowedPlayerLogin();
+
+                toScreen(GameFromModelData(data, orientationParticipant));
             default:
         }
     }

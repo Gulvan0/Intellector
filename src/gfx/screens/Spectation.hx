@@ -35,7 +35,7 @@ class Spectation extends GenericGameScreen
 
 	private function customOnEnter() 
     {
-        //* Do nothing
+        FollowManager.followedGameID = model.gameID;
     }
 
 	private function customOnClose() 

@@ -1,8 +1,11 @@
 package gfx.common;
 
+import net.shared.openings.OpeningDatabase;
+import net.shared.Outcome;
+import net.shared.TimeControl;
+import net.shared.dataobj.GameModelData;
 import gfx.game.board.Board;
 import haxe.ui.containers.Box;
-import net.shared.dataobj.GameInfo;
 import net.shared.board.Situation;
 import haxe.CallStack;
 import utils.StringUtils.eloToStr;
@@ -19,7 +22,7 @@ import dict.Utils;
 
 typedef GameWidgetData = 
 {
-    var info:GameInfo;
+    var data:GameModelData;
     var watchedLogin:Null<String>;
     var onClicked:Void->Void;
 } 
@@ -91,39 +94,54 @@ class GameWidget extends Box
         super();
         this.typedData = data;
 
-        //TODO: Rewrite
-        /*var parsedData:GameLogParserOutput = GameLogParser.parse(typedData.info.log);
-
         var watchedColor:Null<PieceColor> = null;
         if (typedData.watchedLogin != null)
-            watchedColor = parsedData.getParticipantColor(typedData.watchedLogin);
+            for (color in PieceColor.createAll())
+                if (typedData.data.playerRefs[color].equals(typedData.watchedLogin))
+                    watchedColor = color;
 
-        loadBoard(parsedData.currentSituation, watchedColor);
+        var currentSituation:Situation = typedData.data.startingSituation;
+        var outcome:Null<Outcome> = null;
+        var hasAtLeastOneMove:Bool = false;
+        for (item in typedData.data.eventLog)
+            switch item.entry 
+            {
+                case Ply(ply, _, _):
+                    currentSituation.performRawPly(ply);
+                    hasAtLeastOneMove = true;
+                case GameEnded(ot):
+                    outcome = ot;
+                    break;
+                default:
+            }
+        loadBoard(currentSituation, watchedColor);
 
-        var whitePlayerStr:String = Utils.playerRef(parsedData.whiteRef);
-        var blackPlayerStr:String = Utils.playerRef(parsedData.blackRef);
+        var whitePlayerStr:String = Utils.playerRef(typedData.data.playerRefs[White]);
+        var blackPlayerStr:String = Utils.playerRef(typedData.data.playerRefs[Black]);
 
-        if (parsedData.elo != null)
+        if (typedData.data.elo != null)
         {
-            whitePlayerStr += ' (${eloToStr(parsedData.elo[White])})';
-            blackPlayerStr += ' (${eloToStr(parsedData.elo[Black])})';
+            whitePlayerStr += ' (${eloToStr(typedData.data.elo[White])})';
+            blackPlayerStr += ' (${eloToStr(typedData.data.elo[Black])})';
         }
 
         opponentsLabelLongText = '$whitePlayerStr vs $blackPlayerStr';
         opponentsLabelTallText = '$whitePlayerStr\nvs\n$blackPlayerStr';
 
-        if (parsedData.datetime != null)
-            datetimeLabel.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
+        if (typedData.data.startTimestamp != null)
+            datetimeLabel.text = typedData.data.startTimestamp.format(DotDelimitedDayWithSeparateTime);
         else
             datetimeLabel.hidden = true;
 
-        timeControlLabel.text = parsedData.timeControl.toString();
+        timeControlLabel.text = new TimeControl(typedData.data.timeControl.startSecs, typedData.data.timeControl.incrementSecs).toString();
         opponentsLabel.text = opponentsLabelLongText;
-        resultLabel.text = Utils.getResolution(parsedData.outcome);
+        resultLabel.text = Utils.getResolution(outcome);
 
-        if (parsedData.startingSituation.isDefaultStarting())
-            openingLabel.text = OpeningTree.getOpening(parsedData.movesPlayed);
+        if (typedData.data.startingSituation.isDefaultStarting())
+            openingLabel.text = OpeningDatabase.get(currentSituation.serialize()).renderName(false);
+        else if (hasAtLeastOneMove)
+            openingLabel.text = Dictionary.getPhrase(OPENING_UNORTHODOX_LINE);
         else
-            openingLabel.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);*/
+            openingLabel.text = Dictionary.getPhrase(OPENING_UNORTHODOX_STARTING_POSITION);
     }
 }

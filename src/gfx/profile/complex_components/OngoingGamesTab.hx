@@ -1,6 +1,6 @@
 package gfx.profile.complex_components;
 
-import net.shared.dataobj.GameInfo;
+import net.shared.dataobj.GameModelData;
 import net.Requests;
 import dict.Dictionary;
 import haxe.ui.components.Button;
@@ -13,12 +13,12 @@ class OngoingGamesTab extends VBox
 
     private var profileOwnerLogin:String;
 
-    private function onGameClicked(info:GameInfo)
+    private function onGameClicked(data:GameModelData)
     {
-        Requests.getGame(info.id);
+        Requests.getGame(data.gameID, profileOwnerLogin);
     }
 
-    private function onGamesLoaded(games:Array<GameInfo>, hasNext:Bool)
+    private function onGamesLoaded(games:Array<GameModelData>, hasNext:Bool)
     {
         reloadBtn.disabled = false;
         list.clear();
@@ -31,7 +31,7 @@ class OngoingGamesTab extends VBox
         Requests.getPlayerOngoingGames(profileOwnerLogin, onGamesLoaded);
     }
 
-    public function new(profileOwnerLogin:String, gamesInProgress:Array<GameInfo>)
+    public function new(profileOwnerLogin:String, gamesInProgress:Array<GameModelData>)
     {
         super();
         this.percentWidth = 100;

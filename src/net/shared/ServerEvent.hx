@@ -54,7 +54,7 @@ enum ServerEvent
     StudyCreated(info:StudyInfo); //Answer to CreateStudy
     MiniProfile(data:MiniProfileData); //Answer to GetPlayerProfile
     PlayerProfile(data:ProfileData); //Answer to GetPlayerProfile
-    Games(games:Array<GameInfo>, hasNext:Bool); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
+    Games(games:Array<GameModelData>, hasNext:Bool); //Answer to GetGamesByLogin, GetOngoingGamesByLogin
     Studies(studies:Array<StudyInfo>, hasNext:Bool); //Answer to GetStudiesByLogin
 
     FollowAlreadySpectating(id:Int); //Answer to FollowPlayer: added to follower list, but the game is already viewed by client
@@ -63,13 +63,13 @@ enum ServerEvent
     PlayerNotFound; //Answer to FollowPlayer, GetPlayerProfile, GetGamesByLogin, GetOngoingGamesByLogin and GetStudiesByLogin: no such player exists
 
     OpenChallenges(data:Array<ChallengeData>); //Answer to GetOpenChallenges
-    CurrentGames(data:Array<GameInfo>); //Answer to GetCurrentGames
-    RecentGames(data:Array<GameInfo>); //Answer to GetRecentGames
-    MainMenuData(openChallenges:Array<ChallengeData>, currentGames:Array<GameInfo>, recentGames:Array<GameInfo>); //Answer to PageUpdated(MainMenu). Contains the data of all three events above
+    CurrentGames(data:Array<GameModelData>); //Answer to GetCurrentGames
+    RecentGames(data:Array<GameModelData>); //Answer to GetRecentGames
+    MainMenuData(openChallenges:Array<ChallengeData>, currentGames:Array<GameModelData>, recentGames:Array<GameModelData>); //Answer to PageUpdated(MainMenu). Contains the data of all three events above
     MainMenuNewOpenChallenge(data:ChallengeData);
     MainMenuOpenChallengeRemoved(id:Int);
-    MainMenuNewGame(data:GameInfo);
-    MainMenuGameEnded(data:GameInfo);
+    MainMenuNewGame(data:GameModelData);
+    MainMenuGameEnded(data:GameModelData);
 
     DontReconnect; //Signal preventing the other sessions' attempts to reconnect after a new session was created
     ServerError(message:String); //An error occured while processing the event on the server-side

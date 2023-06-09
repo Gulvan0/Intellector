@@ -20,7 +20,6 @@ import tests.data.GameLogs;
 import gfx.profile.simple_components.TimeControlFilterDropdown;
 import gfx.common.GameWidget;
 import gfx.common.GameWidget.GameWidgetData;
-import net.shared.dataobj.GameInfo;
 import net.shared.dataobj.StudyInfo;
 import gfx.profile.simple_components.StudyWidget;
 import gfx.profile.complex_components.StudyTagList;
@@ -240,22 +239,6 @@ class SimpleTests
         };
 
         var comp:StudyWidget = new StudyWidget(data);
-        add(comp, Percent(50), Exact(200));
-    }
-
-    public static function gameWidget()
-    {
-        var info:GameInfo = new GameInfo();
-        info.id = 228;
-        info.log = GameLogs.log1();
-
-        var data:GameWidgetData = {
-            info: info,
-            watchedLogin: "gulvan",
-            onClicked: () -> {trace('Clicked');}
-        };
-
-        var comp:GameWidget = new GameWidget(data);
         add(comp, Percent(50), Exact(200));
     }
 

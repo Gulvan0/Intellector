@@ -1,12 +1,13 @@
 package net;
 
+import net.shared.utils.PlayerRef;
+import net.shared.dataobj.GameModelData;
 import gfx.profile.complex_components.MiniProfile;
 import net.shared.utils.Build;
 import net.shared.dataobj.GreetingResponseData;
 import net.shared.dataobj.Greeting;
 import net.shared.dataobj.ChallengeData;
 import net.shared.TimeControlType;
-import net.shared.dataobj.GameInfo;
 import net.shared.dataobj.StudyInfo;
 import net.shared.dataobj.ProfileData;
 import net.shared.dataobj.ChallengeParams;
@@ -18,7 +19,7 @@ import net.shared.TimeControl;
 import net.shared.ClientEvent;
 import net.shared.ServerEvent;
 
-typedef GetGamesCallback = (games:Array<GameInfo>, hasNext:Bool) -> Void;
+typedef GetGamesCallback = (games:Array<GameModelData>, hasNext:Bool) -> Void;
 typedef GetStudiesCallback = (studyMap:Array<StudyInfo>, hasNext:Bool) -> Void;
 
 class Requests
@@ -58,12 +59,10 @@ class Requests
                         LoginManager.assignCredentials(login, password, remember? LongTerm : ShortTerm);
                         GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
                         onSuccess();
-                    case ReconnectionNeeded(incomingChallenges, gameInfo):
+                    case ReconnectionNeeded(incomingChallenges, data):
                         LoginManager.assignCredentials(login, password, remember? LongTerm : ShortTerm);
                         GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
-                        //TODO: Rewrite
-                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(gameInfo.currentLog);
-                        SceneManager.toScreen(LiveGame(gameInfo.id, Ongoing(parsedData, gameInfo.timeData, null)));*/
+                        SceneManager.getScene().toScreen(GameFromModelData(data, LoginManager.getRef()));
                     case Fail:
                         onFail();
                 }
@@ -97,22 +96,18 @@ class Requests
         }
     }
 
-    public static function getGame(id:Int)
+    public static function getGame(id:Int, ?orientationParticipant:PlayerRef)
     {
-        Networker.addHandler(getGame_handler.bind(id));
+        Networker.addHandler(getGame_handler.bind(id, orientationParticipant));
         Networker.emitEvent(GetGame(id));
     }
 
-    private static function getGame_handler(id:Int, event:ServerEvent):Bool
+    private static function getGame_handler(id:Int, orientationParticipant:Null<PlayerRef>, event:ServerEvent):Bool
     {
         switch event
         {
             case GameRetrieved(data):
-                //TODO: Rewrite
-                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(log);
-                SceneManager.toScreen(LiveGame(id, Past(parsedData, null)));*/
-                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(currentLog);
-                SceneManager.toScreen(LiveGame(id, Ongoing(parsedData, timeData, null)));*/
+                SceneManager.getScene().toScreen(GameFromModelData(data, orientationParticipant));
             case GameNotFound:
                 SceneManager.getScene().toScreen(MainMenu);
             default:
@@ -134,11 +129,7 @@ class Requests
             case OpenChallengeInfo(data):
                 SceneManager.getScene().toScreen(ChallengeJoining(data));
             case OpenChallengeAlreadyAccepted(data):
-                //TODO: Rewrite
-                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
-                SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, null)));*/
-                        /*var parsedData:GameLogParserOutput = GameLogParser.parse(log);
-                SceneManager.toScreen(LiveGame(gameID, Past(parsedData, null)));*/
+                SceneManager.getScene().toScreen(GameFromModelData(data));
             case OpenChallengeNotFound:
                 SceneManager.getScene().toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_CHALLENGE_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
@@ -244,17 +235,16 @@ class Requests
 
     private static function getStudy_handler(id:Int, event:ServerEvent) 
     {
-        //TODO: Rewrite
-        /*switch event
+        switch event
         {
             case SingleStudy(info):
-                SceneManager.toScreen(Analysis(info.variantStr, 0, new StudyData(id, ownerLogin, info)));
+                SceneManager.getScene().toScreen(Study(info));
             case StudyNotFound:
-                SceneManager.toScreen(MainMenu);
+                SceneManager.getScene().toScreen(MainMenu);
                 Dialogs.alert(REQUESTS_ERROR_STUDY_NOT_FOUND, REQUESTS_ERROR_DIALOG_TITLE);
             default:
                 return false;
-        }*/
+        }
         return true;
     }
 
@@ -301,13 +291,13 @@ class Requests
         return true;
     }
 
-    public static function getCurrentGames(callback:Array<GameInfo>->Void)
+    public static function getCurrentGames(callback:Array<GameModelData>->Void)
     {
         Networker.addHandler(getCurrentGames_handler.bind(callback));
         Networker.emitEvent(GetCurrentGames);
     }
 
-    private static function getCurrentGames_handler(callback:Array<GameInfo>->Void, event:ServerEvent)
+    private static function getCurrentGames_handler(callback:Array<GameModelData>->Void, event:ServerEvent)
     {
         switch event
         {
@@ -337,13 +327,13 @@ class Requests
         }
     }
 
-    public static function getRecentGames(callback:Array<GameInfo>->Void)
+    public static function getRecentGames(callback:Array<GameModelData>->Void)
     {
         Networker.addHandler(getRecentGames_handler.bind(callback));
         Networker.emitEvent(GetRecentGames);
     }
 
-    private static function getRecentGames_handler(callback:Array<GameInfo>->Void, event:ServerEvent)
+    private static function getRecentGames_handler(callback:Array<GameModelData>->Void, event:ServerEvent)
     {
         switch event
         {

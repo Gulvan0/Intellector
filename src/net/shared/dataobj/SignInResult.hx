@@ -6,6 +6,6 @@ import net.shared.dataobj.ChallengeData;
 enum SignInResult
 {
     Success(incomingChallenges:Array<ChallengeData>);
-    ReconnectionNeeded(incomingChallenges:Array<ChallengeData>, gameInfo:GameModelData);
+    ReconnectionNeeded(incomingChallenges:Array<ChallengeData>, data:GameModelData);
     Fail;
 }

@@ -276,11 +276,7 @@ class Networker
                 LoginManager.assignCredentials(CredentialCookies.getLogin(), CredentialCookies.getPassword(), None);
                 GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
                 if (ongoingFiniteGame != null)
-                {
-                    //TODO: Rewrite
-                    /*var parsedData:GameLogParserOutput = GameLogParser.parse(ongoingFiniteGame.currentLog);
-                    SceneManager.getScene().toScreen(LiveGame(ongoingFiniteGame.id, Ongoing(parsedData, ongoingFiniteGame.timeData, null)));*/
-                }
+                    SceneManager.getScene().toScreen(GameFromModelData(ongoingFiniteGame, LoginManager.getRef()));
                 else
                 {
                     if (!dontLeave)

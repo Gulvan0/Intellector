@@ -1,7 +1,8 @@
 package gfx.main;
 
+import net.shared.TimeControl;
+import net.shared.dataobj.GameModelData;
 import dict.Utils;
-import net.shared.dataobj.GameInfo;
 import utils.StringUtils.eloToStr;
 import haxe.ui.containers.VBox;
 import haxe.ui.events.MouseEvent;
@@ -16,26 +17,24 @@ class CurrentGamesTable extends VBox
 {
     private var gameIDs:Array<Int> = [];
 
-    public function appendGames(data:Array<GameInfo>)
+    public function appendGames(data:Array<GameModelData>)
     {
         for (gameData in data)
         {
-            if (Lambda.has(gameIDs, gameData.id))
+            if (Lambda.has(gameIDs, gameData.gameID))
                 continue;
 
-            //TODO: Rewrite
-            /*var parsedData:GameLogParserOutput = GameLogParser.parse(gameData.log);
-
-            var whiteLabel:String = Utils.playerRef(parsedData.whiteRef);
-            var blackLabel:String = Utils.playerRef(parsedData.blackRef);
-            if (parsedData.elo != null)
+            var whiteLabel:String = Utils.playerRef(gameData.playerRefs[White]);
+            var blackLabel:String = Utils.playerRef(gameData.playerRefs[Black]);
+            var rated:Bool = gameData.elo != null;
+            if (rated)
             {
-                whiteLabel += ' (${eloToStr(parsedData.elo[White])})';
-                blackLabel += ' (${eloToStr(parsedData.elo[Black])})';
+                whiteLabel += ' (${eloToStr(gameData.elo[White])})';
+                blackLabel += ' (${eloToStr(gameData.elo[Black])})';
             }
 
-            table.dataSource.add({timeControl: parsedData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(false))});*/
-            gameIDs.push(gameData.id);
+            table.dataSource.add({timeControl: new TimeControl(gameData.timeControl.startSecs, gameData.timeControl.incrementSecs), players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(rated))});
+            gameIDs.push(gameData.gameID);
         }
     }
 

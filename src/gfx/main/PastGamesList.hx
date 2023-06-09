@@ -1,7 +1,8 @@
 package gfx.main;
 
+import gfx.scene.SceneManager;
+import net.shared.dataobj.GameModelData;
 import gfx.profile.complex_components.GamesList;
-import net.shared.dataobj.GameInfo;
 import haxe.ui.containers.VBox;
 import dict.*;
 
@@ -11,19 +12,17 @@ class PastGamesList extends VBox
     public var ownerLogin:Null<String>;
     private var list:GamesList;
 
-    private function onGameClicked(info:GameInfo)
+    private function onGameClicked(data:GameModelData)
     {
-        //TODO: Rewrite
-        /*var parsedData:GameLogParserOutput = GameLogParser.parse(info.log);
-        SceneManager.toScreen(LiveGame(info.id, Past(parsedData, ownerLogin)));*/
+        SceneManager.getScene().toScreen(GameFromModelData(data, ownerLogin));
     }
 
-    public function insertAtBeginning(info:GameInfo)
+    public function insertAtBeginning(data:GameModelData)
     {
-        list.insertAtBeginning(info);
+        list.insertAtBeginning(data);
     }
 
-    public function appendGames(data:Array<GameInfo>)
+    public function appendGames(data:Array<GameModelData>)
     {
         list.appendGames(data);
     }

@@ -1,5 +1,6 @@
 package gfx.screens;
 
+import browser.Blinker;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.models.ReadOnlyModel;
 import assets.Audio;
@@ -34,7 +35,11 @@ class MatchVersusBot extends GenericGameScreen
 
 	private function customOnEnter() 
     {
-        GlobalBroadcaster.broadcast(LockedInGame);
+        FollowManager.stopFollowing();
+        Dialogs.getQueue().closeGroup(RemovedOnGameStarted);
+        Blinker.blink(GameStarted);
+        if (!model.timeControl.isCorrespondence())
+            GlobalBroadcaster.broadcast(LockedInGame);
         Audio.playSound("notify");
     }
 
@@ -53,7 +58,8 @@ class MatchVersusBot extends GenericGameScreen
         switch update 
         {
             case GameEnded:
-                GlobalBroadcaster.broadcast(NotLockedInGame);
+                if (!model.timeControl.isCorrespondence())
+                    GlobalBroadcaster.broadcast(NotLockedInGame);
             default:
         }
     }

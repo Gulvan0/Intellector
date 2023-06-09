@@ -53,12 +53,21 @@ class Analysis extends GenericGameScreen
 		return AnalysisBoard(model);
 	}
 
+    private function onEditorModeUpdated()
+    {
+        setPageHidden(PositionEditor, model.editorMode == null);
+        setPageHidden(CompactAnalysisActionBar, model.editorMode != null);
+        setPageDisabled(AnalysisOverview, model.editorMode != null);
+        setPageDisabled(Branching, model.editorMode != null);
+        setPageDisabled(CreepingLine, model.editorMode != null);
+    }
+
 	private function processModelUpdateAtTopLevel(update:ModelUpdateEvent) 
     {
         switch update 
         {
             case EditorModeUpdated:
-                setPageHidden(PositionEditor, model.editorMode == null);
+                onEditorModeUpdated();
             default:
         }
     }
@@ -84,6 +93,6 @@ class Analysis extends GenericGameScreen
         var subscreenNames:Array<ComponentPageName> = [Branching];
 
         init(initialBehaviour, panelMap, subscreenNames);
-        setPageHidden(PositionEditor, model.editorMode == null);
+        onEditorModeUpdated();
     }
 }

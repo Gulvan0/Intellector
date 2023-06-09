@@ -12,7 +12,6 @@ import gfx.popups.ChallengeParamsDialog;
 import gfx.popups.ChangelogDialog;
 import net.shared.ServerEvent;
 import net.INetObserver;
-import net.shared.dataobj.GameInfo;
 import net.shared.dataobj.ChallengeData;
 import net.Requests;
 import haxe.ui.styles.Style;
@@ -70,7 +69,7 @@ class MainMenu extends Screen implements INetObserver
             case MainMenuNewGame(data):
                 currentGamesTable.appendGames([data]);
             case MainMenuGameEnded(data):
-                currentGamesTable.removeGame(data.id);
+                currentGamesTable.removeGame(data.gameID);
                 pastGamesList.insertAtBeginning(data);
             case MainMenuOpenChallengeRemoved(id):
                 openChallengesTable.removeChallenge(id);

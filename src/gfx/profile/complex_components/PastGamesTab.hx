@@ -1,11 +1,12 @@
 package gfx.profile.complex_components;
 
+import gfx.scene.SceneManager;
+import net.shared.dataobj.GameModelData;
 import haxe.ui.events.UIEvent;
 import js.Browser;
 import haxe.Timer;
 import dict.Dictionary;
 import net.shared.EloValue;
-import net.shared.dataobj.GameInfo;
 import net.shared.TimeControlType;
 import net.Requests;
 import haxe.ui.containers.VBox;
@@ -23,11 +24,9 @@ class PastGamesTab extends VBox
     private var hasNext:Bool;
     private var canLoad:Bool = true;
 
-    private function onGameClicked(info:GameInfo)
+    private function onGameClicked(data:GameModelData)
     {
-        //TODO: Rewrite
-        /*var parsedData:GameLogParserOutput = GameLogParser.parse(info.log);
-        SceneManager.toScreen(LiveGame(info.id, Past(parsedData, profileOwnerLogin)));*/
+        SceneManager.getScene().toScreen(GameFromModelData(data, profileOwnerLogin));
     }
 
     private function onTimeControlFilterChanged(newValue:Null<TimeControlType>)
@@ -37,7 +36,7 @@ class PastGamesTab extends VBox
         Requests.getPlayerPastGames(profileOwnerLogin, 0, GAMES_PAGE_SIZE, activeTimeControlFilter, onGamesLoaded);
     }
 
-    private function onGamesLoaded(games:Array<GameInfo>, hasNext:Bool)
+    private function onGamesLoaded(games:Array<GameModelData>, hasNext:Bool)
     {
         list.appendGames(games);
         this.hasNext = hasNext;
@@ -69,7 +68,7 @@ class PastGamesTab extends VBox
         Browser.document.removeEventListener('scroll', onScrolled);
     }
 
-    public function new(profileOwnerLogin:String, preloadedGames:Array<GameInfo>, elo:Map<TimeControlType, EloValue>, gamesCntByTimeControl:Map<TimeControlType, Int>, totalPastGames:Int)
+    public function new(profileOwnerLogin:String, preloadedGames:Array<GameModelData>, elo:Map<TimeControlType, EloValue>, gamesCntByTimeControl:Map<TimeControlType, Int>, totalPastGames:Int)
     {
         super();
         this.percentWidth = 100;

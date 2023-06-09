@@ -1,20 +1,20 @@
 package gfx.profile.complex_components;
 
+import net.shared.dataobj.GameModelData;
 import haxe.ui.events.UIEvent;
 import haxe.Timer;
 import haxe.ui.containers.VBox;
-import net.shared.dataobj.GameInfo;
 import gfx.profile.simple_components.TimeControlFilterDropdown;
 import gfx.common.GameWidget;
 import haxe.ui.containers.ListView;
 
 class GamesList extends VBox
 {
-    private var loadedGames:Map<Int, GameInfo> = [];
+    private var loadedGames:Map<Int, GameModelData> = [];
     private var profileOwnerLogin:String;
-    private var onGameSelected:(info:GameInfo)->Void;
+    private var onGameSelected:(info:GameModelData)->Void;
 
-    private var queuedGames:Array<GameInfo> = [];
+    private var queuedGames:Array<GameModelData> = [];
     private var loadingTimer:Null<Timer> = null;
 
     public var loadedGamesCount(get, never):Int;
@@ -40,19 +40,19 @@ class GamesList extends VBox
         loadedGames = [];
     }
 
-    public function insertAtBeginning(info:GameInfo)
+    public function insertAtBeginning(data:GameModelData)
     {
         var gameWidgetData:GameWidgetData = {
-            info: info,
-            onClicked: onGameClicked.bind(info.id),
+            data: data,
+            onClicked: onGameClicked.bind(data.gameID),
             watchedLogin: profileOwnerLogin
         };
 
         addComponentAt(new GameWidget(gameWidgetData), 0);
-        loadedGames.set(info.id, info);
+        loadedGames.set(data.gameID, data);
     }
 
-    public function appendGames(games:Array<GameInfo>)
+    public function appendGames(games:Array<GameModelData>)
     {
         queuedGames = queuedGames.concat(games);
 
@@ -68,16 +68,16 @@ class GamesList extends VBox
             return;
         }
 
-        var info = queuedGames.shift();
+        var data = queuedGames.shift();
 
         var gameWidgetData:GameWidgetData = {
-            info: info,
-            onClicked: onGameClicked.bind(info.id),
+            data: data,
+            onClicked: onGameClicked.bind(data.gameID),
             watchedLogin: profileOwnerLogin
         };
 
         addComponent(new GameWidget(gameWidgetData));
-        loadedGames.set(info.id, info);
+        loadedGames.set(data.gameID, data);
 
         loadingTimer = Timer.delay(appendQueuedGame, 30);
     }
@@ -90,7 +90,7 @@ class GamesList extends VBox
         loadingTimer = null;
     }
 
-    public function new(profileOwnerLogin:String, preloadedGames:Array<GameInfo>, onGameSelected:(info:GameInfo)->Void)
+    public function new(profileOwnerLogin:String, preloadedGames:Array<GameModelData>, onGameSelected:(info:GameModelData)->Void)
     {
         super();
         this.profileOwnerLogin = profileOwnerLogin;

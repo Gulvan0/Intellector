@@ -1,7 +1,6 @@
 package net.shared.dataobj;
 
 import net.shared.utils.UnixTimestamp;
-import net.shared.board.RawPly;
 import net.shared.board.Situation;
 import net.shared.utils.PlayerRef;
 
