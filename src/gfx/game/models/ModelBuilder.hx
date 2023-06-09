@@ -1,5 +1,6 @@
 package gfx.game.models;
 
+import net.shared.board.RawPly;
 import engine.Bot;
 import net.shared.dataobj.ChallengeParams;
 import net.shared.board.Rules;
@@ -26,8 +27,14 @@ using Lambda;
 
 class ModelBuilder
 {
-    public static function fromGameModelData(data:GameModelData, ?orientation:Null<PieceColor>):Model
+    public static function fromGameModelData(data:GameModelData, ?orientationPariticipant:Null<PlayerRef>):Model
     {
+        var orientation:PieceColor;
+        if (orientationPariticipant != null && data.playerRefs[Black].equals(orientationPariticipant))
+            orientation = Black;
+        else
+            orientation = White;
+
         var gameEnded:Bool = data.eventLog.exists(item -> item.entry.match(GameEnded(_)));
         var playerColor:Null<PieceColor> = LoginManager.isPlayer(data.playerRefs[White])? White : LoginManager.isPlayer(data.playerRefs[Black])? Black : null;
 
@@ -47,7 +54,7 @@ class ModelBuilder
             model.playerRefs = data.playerRefs;
             model.elo = data.elo;
             model.startTimestamp = data.startTimestamp;
-            model.orientation = orientation ?? White;
+            model.orientation = orientation;
             model.playerOnline = data.playerOnline;
             model.spectatorRefs = data.activeSpectators;
 
@@ -214,10 +221,11 @@ class ModelBuilder
         return model;
     }
 
-    public static function fromExploredLine(history:IReadOnlyHistory, shownMovePointer:Int):AnalysisBoardModel
+    public static function fromExploredLine(startingSituation:Situation, plys:Array<RawPly>, shownMovePointer:Int):AnalysisBoardModel
     {
         var model:AnalysisBoardModel = new AnalysisBoardModel();
 
+        var history:History = new History(startingSituation, plys);
         model.variation = history.asVariation();
         model.selectedBranch = model.variation.getFullMainlinePath();
         model.shownMovePointer = shownMovePointer;

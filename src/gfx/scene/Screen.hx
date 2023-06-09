@@ -1,5 +1,7 @@
 package gfx.scene;
 
+import gfx.game.models.Model;
+import gfx.game.models.ModelBuilder;
 import haxe.ui.containers.Box;
 import net.shared.dataobj.ViewedScreen;
 import dict.Phrase;
@@ -55,24 +57,35 @@ abstract class Screen extends Box
     
     public static function build(initializer:ScreenInitializer):Screen
     {
-        return switch initializer 
+        switch initializer 
         {
             case LanguageSelectIntro(languageReadyCallback):
-                new LanguageSelectIntro(languageReadyCallback);
+                return new LanguageSelectIntro(languageReadyCallback);
             case MainMenu:
-                new MainMenu();
+                return new MainMenu();
             case GameFromModelData(data, orientationPariticipant):
-                new MainMenu();//TODO: Change
+                var model:Model = ModelBuilder.fromGameModelData(data, orientationPariticipant);
+                switch model 
+                {
+                    case MatchVersusPlayer(model):
+                        return new MatchVersusPlayer(model);
+                    case MatchVersusBot(model):
+                        return new MatchVersusBot(model);
+                    case Spectation(model):
+                        return new Spectation(model);
+                    case AnalysisBoard(model):
+                        throw "Expected game model returned by ModelBuilder.fromGameModelData(), but got AnalysisBoard instead";
+                }
             case NewAnalysisBoard:
-                new MainMenu();//TODO: Change
+                return new Analysis(ModelBuilder.cleanAnalysis());
             case Study(info):
-                new MainMenu();//TODO: Change
+                return new Analysis(ModelBuilder.fromStudyInfo(info));
             case AnalysisForLine(startingSituation, plys, viewedMovePointer):
-                new MainMenu();//TODO: Change
+                return new Analysis(ModelBuilder.fromExploredLine(startingSituation, plys, viewedMovePointer));
             case PlayerProfile(ownerLogin, data):
-                new Profile(ownerLogin, data);
+                return new Profile(ownerLogin, data);
             case ChallengeJoining(data):
-                new OpenChallengeJoining(data);
+                return new OpenChallengeJoining(data);
         }
     }
     
