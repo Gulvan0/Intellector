@@ -58,6 +58,7 @@ class ShareGameTab extends Box
         var bgColor:Color = 0xFF000000 | cast(colorPicker.selectedItem, Color);
         var addLetters:Bool = addMarkingCheckbox.selected;
 
+        var tsParam:Float = Math.round(Date.now().getTime());
         var aParam:String = "gif";
         var wParam:String = Std.string(gifWidth);
         var hParam:String = Std.string(gifHeight);
@@ -67,7 +68,7 @@ class ShareGameTab extends Box
         var sParam:String = StringTools.urlEncode(startingSituation.serialize());
         var pParam:String = StringTools.urlEncode(plySequence.map(x -> x.serialize()).join(";"));
 
-        var url:String = 'https://intellector.info/tools/gen/?a=$aParam&w=$wParam&h=$hParam&i=$iParam&b=$bParam&o=$oParam&s=$sParam&p=$pParam';
+        var url:String = 'https://intellector.info/tools/gen/?ts=$tsParam&a=$aParam&w=$wParam&h=$hParam&i=$iParam&b=$bParam&o=$oParam&s=$sParam&p=$pParam';
 
         if (addLetters)
             url += "&l=t";

@@ -48,6 +48,7 @@ class ShareDialog extends Dialog
         else
             boardHeight = Math.floor(boardWidth * BoardSize.inverseAspectRatio(addLetters));
 
+        var tsParam:Float = Math.round(Date.now().getTime());
         var aParam:String = "png";
         var wParam:String = Std.string(pngWidth);
         var hParam:String = Std.string(pngHeight);
@@ -55,7 +56,7 @@ class ShareDialog extends Dialog
         var oParam:String = orientation == White? "w" : "b";
         var sParam:String = StringTools.urlEncode(situation.serialize());
 
-        var url:String = 'https://intellector.info/tools/gen/?a=$aParam&w=$wParam&h=$hParam&b=$bParam&o=$oParam&s=$sParam';
+        var url:String = 'https://intellector.info/tools/gen/?ts=$tsParam&a=$aParam&w=$wParam&h=$hParam&b=$bParam&o=$oParam&s=$sParam';
 
         if (addLetters)
             url += "&l=t";
