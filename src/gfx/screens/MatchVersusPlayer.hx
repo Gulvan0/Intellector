@@ -60,9 +60,9 @@ class MatchVersusPlayer extends GenericGameScreen
         var isPlayerMove:Bool = model.getMostRecentSituation().turnColor == model.getPlayerColor();
         var initialBehaviour:IBehaviour;
         if (isPlayerMove)
-            initialBehaviour = new MoveSelectVsPlayer(model)
+            initialBehaviour = new MoveSelectVsPlayer(model);
         else if (Preferences.premoveEnabled.get())
-            initialBehaviour = new WaitingPlayerPremoveable(model)
+            initialBehaviour = new WaitingPlayerPremoveable(model);
         else
             initialBehaviour = new WaitingPlayerNoPremoves(model);
 

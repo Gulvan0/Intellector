@@ -151,6 +151,11 @@ class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IRead
         return new BotTimeData(actualReservesData.secs, timeControl.incrementSecs, getLineLength(), botMovesFirst);
     }
 
+    public function getOpponentRef():PlayerRef
+    {
+        return LoginManager.isPlayer(getPlayerRef(White))? getPlayerRef(Black) : getPlayerRef(White);
+    }
+
     //Additional methods to unify with IReadOnlyGameRelatedModel
     
     public function getPlayerColor():Null<PieceColor>
