@@ -61,9 +61,7 @@ abstract class Screen extends Box
                 new LanguageSelectIntro(languageReadyCallback);
             case MainMenu:
                 new MainMenu();
-            case GameFromModelData(data, orientationPariticipantLogin):
-                new MainMenu();//TODO: Change
-            case StartedGameVersusBot(params):
+            case GameFromModelData(data, orientationPariticipant):
                 new MainMenu();//TODO: Change
             case NewAnalysisBoard:
                 new MainMenu();//TODO: Change
