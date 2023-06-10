@@ -52,6 +52,11 @@ class RawPly
         return [from.copy(), to.copy()];
     }
 
+    public function symmetrical():RawPly
+    {
+        return RawPly.construct(from.horizontalReflection(), to.horizontalReflection(), morphInto);
+    }
+
     public function copy():RawPly
     {
         var ply:RawPly = new RawPly();

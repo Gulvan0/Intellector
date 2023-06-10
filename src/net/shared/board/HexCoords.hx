@@ -44,6 +44,11 @@ class HexCoords
         return new HexCoords(8 - i, 6 - j - i % 2);
     }
 
+    public function horizontalReflection():HexCoords 
+    {
+        return new HexCoords(8 - i, j);
+    }
+
     public function copy():HexCoords
     {
         return new HexCoords(i, j);

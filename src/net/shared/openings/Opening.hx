@@ -2,32 +2,33 @@ package net.shared.openings;
 
 class Opening
 {
-    public final code:OpeningCode;
     public final shownToPlayersName:String;
-    public final hiddenName:String;
-    public final reminiscence:Bool;
+    public final realName:String;
+    public final isContinuation:Bool;
 
     public function renderName(hideRealName:Bool):String
     {
-        var codeStr:String = renderCode();
-        var namePrefix:String = reminiscence? "RM " : "";
-        var name:String = hideRealName? shownToPlayersName : hiddenName;
-        var fullName:String = namePrefix + name;
-
-        return '$codeStr. $fullName';
+        return hideRealName? shownToPlayersName : realName;
     }
 
-    private function renderCode():String
+    public function withContinuation(plyStr:String, plyNum:Int):Opening
     {
-        //TODO: Fill
-        return "";
+        var newHiddenName:String = realName + " ";
+
+        if (!isContinuation)
+            newHiddenName += "...";
+
+        newHiddenName += '$plyNum. $plyStr';
+
+        var newShownToPlayersName:String = realName == shownToPlayersName? newHiddenName : shownToPlayersName;
+
+        return new Opening(newShownToPlayersName, newHiddenName, true);
     }
 
-    public function new(code:OpeningCode, shownToPlayersName:String, hiddenName:String, reminiscence:Bool) 
+    public function new(shownToPlayersName:String, realName:String, ?isContinuation:Bool = false) 
     {
-        this.code = code;
         this.shownToPlayersName = shownToPlayersName;
-        this.hiddenName = hiddenName;
-        this.reminiscence = reminiscence;
+        this.realName = realName;
+        this.isContinuation = isContinuation;
     }
 }

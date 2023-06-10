@@ -25,7 +25,7 @@ class Notation
         return plyStrSeq;
     }
 
-    public static function plyFromNotation(plyStr:String, context:Situation):RawPly
+    public static function plyFromNotation(plyStr:String, context:Situation):Null<RawPly>
     {
         var ply:RawPly = new RawPly();
 

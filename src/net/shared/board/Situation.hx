@@ -71,6 +71,16 @@ class Situation
         return SituationSerializer.serialize(this);
     }
 
+    public function symmetrical():Situation
+    {
+        var sit:Situation = Situation.empty();
+
+        for (coords in HexCoords.enumerate())
+            sit.set(coords.horizontalReflection(), get(coords));
+
+        return sit;
+    }
+
     public function isValidStarting():Bool
     {
         var whiteIntPos = intellectorPos.get(White);
