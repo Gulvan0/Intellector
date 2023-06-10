@@ -1,5 +1,6 @@
 package gfx.game.board;
 
+import gfx.game.interfaces.IReadOnlyGenericModel;
 import gfx.game.interfaces.IGameScreenGetters;
 import gfx.utils.SpecialControlSettings;
 import gfx.game.events.ModelUpdateEvent;
@@ -187,12 +188,13 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
 
     public function handleModelUpdate(model:ReadOnlyModel, event:ModelUpdateEvent)
     {
+        var genericModel:IReadOnlyGenericModel = model.asGenericModel();
         switch event 
         {
             case OrientationUpdated:
-                setOrientation(model.asGenericModel().getOrientation());
+                setOrientation(genericModel.getOrientation());
             case ShownSituationUpdated:
-                var newSituation:Situation = model.asGenericModel().getShownSituation();
+                var newSituation:Situation = genericModel.getShownSituation();
 
                 if (newSituation.equals(shownSituation))
                     return;
@@ -200,12 +202,19 @@ class GameBoard extends SelectableBoard implements IGlobalEventObserver
                 removeAllArrows();
                 setShownSituation(newSituation);
             case InteractivityModeUpdated:
-                mode = model.asGenericModel().getBoardInteractivityMode();
+                mode = genericModel.getBoardInteractivityMode();
             case PlannedPremovesUpdated:
                 hideLayerForEveryHex(Premove);
                 for (premove in model.getPlannedPremoves())
                     for (hexCoords in premove.modifiedHexes())
                         showHexLayer(hexCoords, Premove);
+            case ViewedMoveNumUpdated, VariationUpdated, SelectedVariationNodeUpdated:
+                hideLayerForEveryHex(LastMove);
+
+                var pointer:Int = genericModel.getShownMovePointer();
+                if (pointer > 0)
+                    for (coords in genericModel.getLine()[pointer - 1].ply.modifiedHexes())
+                        showHexLayer(coords, LastMove);
             default:
         }
     }

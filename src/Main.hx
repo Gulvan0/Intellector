@@ -1,5 +1,6 @@
 package;
 
+import net.shared.openings.OpeningDatabase;
 import gfx.game.common.ComponentPageName;
 import gfx.game.common.ComponentPageBuilder;
 import gfx.popups.ChangelogDialog;
@@ -80,7 +81,7 @@ class Main
         #end
 
         Blinker.init();
-        //TODO: OpeningDatabase.generate(_);
+        OpeningDatabase.generate();
         Changelog.init();
         Config.init(onInitFinished);
     }
