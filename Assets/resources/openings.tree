@@ -1,16 +1,16 @@
 wmrnrorprqrriseteuivowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr
--- e3 // Intellector's Progressor Opening // A1-X
----- e5 // Double Intellector's Progressor Opening // A1-A1
------- Ie2 // [r] Bongcloud // A2-A1
--------- Ie6 // Double Bongcloud // A2-A2
+-- e3 // Intellector's Progressor Opening
+---- e5 // Double Intellector's Progressor Opening
+------ Ie2 // [r] Bongcloud
+-------- Ie6 // Double Bongcloud
 ---------- Ag1~e1 // [h] Double Bongcloud: Triangle Fork
 ------------ Ac7~e7 // [h] Double Bongcloud: Double Triangle Fork (Circular Symmetry)
 ------------ Ag7~e7 // [h] Double Bongcloud: Double Triangle Fork (Axial Symmetry)
--------------- a2~b2
----------------- AXi1=D
+-------------- a2~b2 // Double Triangle Fork: Axial, Kraken Varitation
+---------------- AXi1=D // _
 ------------------ AXi1=D // Double Bongcloud with one Aggressor: Axial, Closed Canal
 -------------------- Ae7
----------------------- i2~h2 // Double Bongcloud with one Aggressor: Central vs Flank, One-sided Closed Venice
+---------------------- i2~h2 // Double Bongcloud with one Aggressor: Central vs Flank, One-Sided Closed Venice
 ------------------------ a6~b5 // Double Bongcloud with one Aggressor: Central vs Flank, Mixed Venice A
 ------------------------ i6~h5 // Double Bongcloud with one Aggressor: Central vs Flank, Mixed Venice B
 ---------------------- Ae1 // Double Bongcloud with one Aggressor: Central vs Central, Closed Canal
@@ -19,8 +19,9 @@ wmrnrorprqrriseteuivowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr
 -------------------- a6~b5 // Double Bongcloud with one Aggressor: Axial, Open Canal
 ---------------------- DXa7
 ------------------------ AXa7 // Double Bongcloud with one Aggressor: Axial, Dominator Exchange
--------------------- i6~h5 // Double Bongcloud with one Aggressor: Axial, Two-sided Closed Venice
+-------------------- i6~h5 // Double Bongcloud with one Aggressor: Axial, Two-Sided Closed Venice
 ---------------------- Ae1
+------------------ AXi7 // _
 ---------------- a6~b5
 ------------------ DXa7
 -------------------- AXa7 // Double Bongcloud with two Aggressors: Dominator Exchange
@@ -46,27 +47,68 @@ wmrnrorprqrriseteuivowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr
 -------------------- AXi1=D // _
 ---------------------- DXb6 // _
 ------------------------ DXh1 // _
--------------------------- Da1Xa6 // The Great Pandemonium: Black Intellector Hunt
----------------------------- Di5 // The Great Pandemonium with 14. Di5
+-------------------------- Da1Xa6 // Hunting Ground: Black Intellector Hunt
+---------------------------- Di5 // Hunting Ground with 14. Di5
 ------------------------------ Df3
----------------------------- Di4 // The Great Pandemonium with 14. Di4
+---------------------------- Di4 // Hunting Ground with 14. Di4
 ------------------------------ f2 // _
--------------------------------- DXf2 // The Great Pandemonium: White Intellector Hunt, Dominator Sacrifice Line
----------------------------- E6:F6 // The Great Pandemonium: Verto Defense
+-------------------------------- DXf2 // Hunting Ground: White Intellector Hunt, Dominator Sacrifice Line
+---------------------------- E6:F6 // Hunting Ground: Verto Defense
 -- a3 // Corner Pushthrough Opening
+---- a5 // Corner Pushthrough: Axial Counteraction
+------ i3 // Corner Pushthrough: Axial Counteraction, Second Pushthrough
+-------- i5 // Corner Pushthrough: Double Axial Counteraction 
+---- i5 // Corner Pushthrough: Circular Counteraction
 -- a2~b2 // Canal Opening
+---- a6~b5 // Canal Opening: Open
+------ DXa7 // Canal Opening: Dominator Exchange
+-------- AXa7
+---------- i2~h2 // Venice System with Dominator Exchange
+------------ i6~h5 // Open Venice
+-------------- DXi7 // Open Venice: Dominatorless Game
+---------------- AXi7
 -- c2~b2 // Flank Pair Opening
 -- c3 // Jumping Progressor Opening
--- c2~d2 // Inwards Intermission Opening
--- e2~d2 // Outwards Intermission Opening
--- Lb3 // Liberator Dash Opening
+-- c2~d2 // Inwards Interference Opening
+-- e2~d2 // Outwards Interference Opening
+-- Lb3 // Liberator Jump Opening
 -- Lb2 // Short Liberator Opening
--- Ld2 // Liberator Intermission Opening
+-- Ld2 // Liberator Interference Opening
 -- Ab2 // Flank Attack
+---- Ad5 // _
+---- Fd5 // _
+---- Ld5 // _
+------ Ac4 // Flank Attack: Wandering Aggressor Trap
+-------- Ab5 // _
+-------- Ah5 // _
 -- Ad2 // Central Attack
+---- a6~b5 // Central Attack: Canal Defense
+------ Ad2~f2 // Central Attack: Canal, Aggressor Battery Trap
+-------- Ad5 // _
+-------- Ah5 // _
 -- Aa4 // Flank Sacrifice
--- Ae4 // Central Sacrifice
+---- AXa4
+-- Ac1~e4 // Central Sacrifice
+---- Ac7Xe4 // _
+------ Ag1Xe4 // _
+-------- Ag7Xe4 // Full Central Sacrifice
+---- Ag7Xe4 // _
+------ Ag1Xe4 // _
 -- Af5 // Infiltration Sacrifice
--- Axg7 // Aggressor Exchange Opening
--- Fd2 // Defensor Intermission Opening
+---- AXf5 // _
+---- FXf5 // _
+---- FXf5=A // _
+---- LXf5 // _
+---- g6Xf5 // _
+---- e6Xf5 // _
+-- AXg7 // Aggressor Exchange Opening
+---- FXg7 // _
+------ AXc7 // Double Aggressor Exchange (Defensor Line)
+-------- FXc7 // Double Aggressor Exchange: Deflected Defensors Varitation
+-------- FXc7=A // Double Aggressor Exchange: Single Aggressor Varitation
+---- FXg7=A // _
+------ AXc7 // Double Aggressor Exchange (Aggressor Line)
+-------- FXc7=A // Double Aggressor Exchange: Aggressor-Defensor Confrontation
+-- Fd2 // Defensor Interference Opening
 -- E1:D1 // Verto Opening
+---- AXc1 // Verto Opening Refuted
