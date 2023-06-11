@@ -22,6 +22,13 @@ class Panel extends Stack
     private var pageComponents:Map<ComponentPageName, Box> = [];
     private var currentMode:PanelDisplayMode;
 
+    private override function set_hidden(value:Bool):Bool 
+    {
+        if (parentComponent != null)
+            parentComponent.hidden = value;
+        return super.set_hidden(value);
+    }
+
     private function modeByPagesCount(cnt:Int):PanelDisplayMode
     {
         if (cnt == 0)

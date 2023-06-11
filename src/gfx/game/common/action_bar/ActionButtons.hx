@@ -1,6 +1,6 @@
 package gfx.game.common.action_bar;
 
-import haxe.ui.containers.ButtonBar;
+import haxe.ui.containers.HorizontalButtonBar;
 import gfx.game.common.action_bar.ActionButton.ActionButtonInternal;
 import dict.Dictionary;
 import js.Browser;
@@ -8,7 +8,7 @@ import dict.Phrase;
 import haxe.ui.components.Button;
 
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/game/common/action_bar/action_buttons.xml"))
-class ActionButtons extends ButtonBar
+class ActionButtons extends HorizontalButtonBar
 {
     private static inline final BUTTON_HEIGHT:Float = 36;
 

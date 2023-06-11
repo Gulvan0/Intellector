@@ -48,6 +48,11 @@
 
     <label id="siteName" text="Intellector.info" verticalAlign="center" />
 
+    <menu id="menu0" />
+    <menu id="menu1" />
+    <menu id="menu2" />
+    <menu id="menu3" />
+
     <spacer width="100%" />
 
     <challenge-list id="challengesMenu" />

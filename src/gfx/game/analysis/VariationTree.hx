@@ -101,16 +101,21 @@ class VariationTree extends Absolute implements IVariationView
 
         for (path in fullSelectedBranch.ancestorPathsIterator(true))
         {
-            var arrow:Arrow = arrows.get(path);
             var node:Node = nodes.get(path);
+
+            node.moveComponentToFront();
+
+            if (path.isRoot())
+                continue;
+
+            var arrow:Arrow = arrows.get(path);
 
             if (path.length > selectedNodePath.length)
                 arrow.highlight(false);
-            else if (path.length > 0)
+            else
                 arrow.highlight(true);
 
             arrow.moveComponentToFront();
-            node.moveComponentToFront();
         }
     }
     

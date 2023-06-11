@@ -213,7 +213,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         var items:Map<MenuSection, Array<MenuItem>> = [for (k => v in itemNames) k => v.map(name -> new MenuItem(name))];
 
         menubar = new MenuBar(sections, items, onMenuItemSelected, onSiteNamePressed);
-
+        menubar.percentWidth = 100;
         mainScene.addComponentAt(menubar, 0);
     }
 

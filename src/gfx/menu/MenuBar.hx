@@ -137,13 +137,14 @@ class MenuBar extends HaxeUIMenuBar implements IGlobalEventObserver
         sidemenu = new SideMenu(sections, items, clickHandler, onSiteNamePressed);
         disabled = !Networker.isConnectedToServer();
 
-        for (section in sections)
+        var menus:Array<Menu> = [menu0, menu1, menu2, menu3]; //Ugly hacks because HaxeUI doesn't allow to procedurally add menus
+
+        for (sectionIndex => section in sections.keyValueIterator())
         {
-            var sectionMenu:Menu = new Menu();
+            var sectionMenu:Menu = menus[sectionIndex];
             sectionMenu.text = Dictionary.getPhrase(MENU_SECTION_TITLE(section));
 
             sectionMenus.set(section, sectionMenu);
-            addComponent(sectionMenu);
 
             for (item in items.get(section))
             {
