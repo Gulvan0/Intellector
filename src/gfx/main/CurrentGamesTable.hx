@@ -33,7 +33,7 @@ class CurrentGamesTable extends VBox
                 blackLabel += ' (${eloToStr(gameData.elo[Black])})';
             }
 
-            table.dataSource.add({timeControl: new TimeControl(gameData.timeControl.startSecs, gameData.timeControl.incrementSecs), players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(rated))});
+            table.dataSource.add({timeControl: gameData.timeControl, players: '$whiteLabel vs $blackLabel', bracket: Dictionary.getPhrase(TABLEVIEW_BRACKET_RANKED(rated))});
             gameIDs.push(gameData.gameID);
         }
     }

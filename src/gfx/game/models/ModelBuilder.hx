@@ -1,5 +1,7 @@
 package gfx.game.models;
 
+import gfx.game.models.util.ChatEntry;
+import gfx.game.models.util.History;
 import net.shared.board.RawPly;
 import engine.Bot;
 import net.shared.dataobj.ChallengeParams;
@@ -18,7 +20,7 @@ import net.shared.utils.UnixTimestamp;
 import net.shared.dataobj.GameEventLogEntry;
 import net.shared.dataobj.OfferKind;
 import net.shared.dataobj.TimeReservesData;
-import gfx.game.struct.MsRemaindersData;
+import gfx.game.models.util.MsRemaindersData;
 import net.shared.PieceColor;
 import net.shared.TimeControl;
 import net.shared.dataobj.GameModelData;
@@ -50,7 +52,7 @@ class ModelBuilder
             var model:SpectationModel = new SpectationModel();
 
             model.gameID = data.gameID;
-            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.incrementSecs);
+            model.timeControl = data.timeControl;
             model.playerRefs = data.playerRefs;
             model.elo = data.elo;
             model.startTimestamp = data.startTimestamp;
@@ -58,31 +60,17 @@ class ModelBuilder
             model.playerOnline = data.playerOnline;
             model.spectatorRefs = data.activeSpectators;
 
-            var hasTimeRemaindersData:Bool = false;
-            if (!model.timeControl.isCorrespondence())
-                for (item in data.eventLog)
-                    switch item.entry
-                    {
-                        case Ply(_, whiteMsAfter, blackMsAfter):
-                            hasTimeRemaindersData = whiteMsAfter != null && blackMsAfter != null;
-                            break;
-                        default:
-                    }
+            var constructRemainders:Bool = !data.legacyFlags.contains(FakeEventTimestamps) && !model.timeControl.isCorrespondence();
 
             model.outcome = null;
             model.history = new History(data.startingSituation, []);
             model.outgoingOfferActive = [for (color in PieceColor.createAll()) color => [for (kind in OfferKind.createAll()) kind => false]];
-            model.perMoveTimeRemaindersData = hasTimeRemaindersData? null : new MsRemaindersData(model.timeControl, model.startTimestamp);
+            model.perMoveTimeRemaindersData = constructRemainders? new MsRemaindersData(model.timeControl, model.startTimestamp, data.startingSituation.turnColor) : null;
             model.chatHistory = [];
 
             processEventLog(data.eventLog, model.history, model.outgoingOfferActive, model.perMoveTimeRemaindersData, model.chatHistory, x -> {model.outcome = x;}, model.playerRefs);
 
-            var totalMoves:Int = model.getLineLength();
-            model.shownMovePointer = totalMoves;
-            if (gameEnded || model.timeControl.isCorrespondence() || totalMoves < 2)
-                model.activeTimerColor = null;
-            else
-                model.activeTimerColor = totalMoves % 2 == 0? White : Black;
+            model.shownMovePointer = model.getLineLength();
             
             model.deriveInteractivityModeFromOtherParams();
 
@@ -93,7 +81,7 @@ class ModelBuilder
             var model:MatchVersusBotModel = new MatchVersusBotModel();
 
             model.gameID = data.gameID;
-            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.incrementSecs);
+            model.timeControl = data.timeControl;
             model.playerRefs = data.playerRefs;
             model.startTimestamp = data.startTimestamp;
             model.orientation = orientation ?? playerColor;
@@ -103,17 +91,12 @@ class ModelBuilder
 
             model.outcome = null;
             model.history = new History(data.startingSituation, []);
-            model.perMoveTimeRemaindersData = model.timeControl.isCorrespondence()? null : new MsRemaindersData(model.timeControl, model.startTimestamp);
+            model.perMoveTimeRemaindersData = model.timeControl.isCorrespondence()? null : new MsRemaindersData(model.timeControl, model.startTimestamp, data.startingSituation.turnColor);
             model.chatHistory = [];
 
             processEventLog(data.eventLog, model.history, null, model.perMoveTimeRemaindersData, model.chatHistory, x -> {model.outcome = x;}, data.playerRefs);
 
-            var totalMoves:Int = model.getLineLength();
-            model.shownMovePointer = totalMoves;
-            if (gameEnded || model.timeControl.isCorrespondence() || totalMoves < 2)
-                model.activeTimerColor = null;
-            else
-                model.activeTimerColor = totalMoves % 2 == 0? White : Black;
+            model.shownMovePointer = model.getLineLength();
 
             model.deriveInteractivityModeFromOtherParams();
 
@@ -124,7 +107,7 @@ class ModelBuilder
             var model:MatchVersusPlayerModel = new MatchVersusPlayerModel();
 
             model.gameID = data.gameID;
-            model.timeControl = new TimeControl(data.timeControl.startSecs, data.timeControl.incrementSecs);
+            model.timeControl = data.timeControl;
             model.playerRefs = data.playerRefs;
             model.elo = data.elo;
             model.startTimestamp = data.startTimestamp;
@@ -135,7 +118,7 @@ class ModelBuilder
 
             model.outcome = null;
             model.history = new History(data.startingSituation, []);
-            model.perMoveTimeRemaindersData = model.timeControl.isCorrespondence()? null : new MsRemaindersData(model.timeControl, model.startTimestamp);
+            model.perMoveTimeRemaindersData = model.timeControl.isCorrespondence()? null : new MsRemaindersData(model.timeControl, model.startTimestamp, data.startingSituation.turnColor);
             model.chatHistory = [];
 
             var outgoingOfferActive = [for (color in PieceColor.createAll()) color => [for (kind in OfferKind.createAll()) kind => false]];
@@ -144,12 +127,7 @@ class ModelBuilder
 
             model.offerActive = [for (kind in OfferKind.createAll()) kind => [Incoming => outgoingOfferActive[opposite(playerColor)][kind], Outgoing => outgoingOfferActive[playerColor][kind]]];
 
-            var totalMoves:Int = model.getLineLength();
-            model.shownMovePointer = totalMoves;
-            if (gameEnded || model.timeControl.isCorrespondence() || totalMoves < 2)
-                model.activeTimerColor = null;
-            else
-                model.activeTimerColor = totalMoves % 2 == 0? White : Black;
+            model.shownMovePointer = model.getLineLength();
 
             model.deriveInteractivityModeFromOtherParams();
 
@@ -163,10 +141,10 @@ class ModelBuilder
         {
             switch item.entry 
             {
-                case Ply(ply, whiteMsAfter, blackMsAfter):
+                case Ply(ply):
                     history.append(ply);
                     if (perMoveTimeRemaindersData != null)
-                        perMoveTimeRemaindersData.append(new TimeReservesData(whiteMsAfter / 1000, blackMsAfter / 1000, item.ts));
+                        perMoveTimeRemaindersData.onMoveMade(item.ts);
                 case OfferActionPerformed(kind, sentBy, action):
                     if (outgoingOfferActive != null)
                         outgoingOfferActive[sentBy][kind] = action.match(Create);
@@ -177,12 +155,16 @@ class ModelBuilder
                     else
                         chatHistory.push(SpectatorMessage(sentBy, text));
                 case TimeAdded(receiver):
-                    perMoveTimeRemaindersData.addTime(receiver, Constants.msAddedByOpponent / 1000);
+                    if (perMoveTimeRemaindersData != null)
+                        perMoveTimeRemaindersData.onTimeAdded(receiver);
                     chatHistory.push(Log(TIME_ADDED_MESSAGE(receiver)));
                 case GameEnded(outcome):
                     outcomeSetter(outcome);
                     chatHistory.push(Log(CHATBOX_GAME_OVER_MESSAGE(outcome)));
-                default:
+                case Rollback(cancelledMovesCount):
+                    history.dropLast(cancelledMovesCount);
+                    if (perMoveTimeRemaindersData != null)
+                        perMoveTimeRemaindersData.onRollback(cancelledMovesCount, item.ts);
             }
         }
     }

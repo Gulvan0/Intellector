@@ -204,4 +204,9 @@ class Rules
 
         return plys;
     }
+
+    public static function getActiveTimerColorAt(pointer:Int, firstColorToMove:PieceColor):Null<PieceColor>
+    {
+        return pointer < 2? null : pointer % 2 == 0? firstColorToMove : opposite(firstColorToMove);
+    }
 }

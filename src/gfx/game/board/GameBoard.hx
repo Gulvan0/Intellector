@@ -1,5 +1,6 @@
 package gfx.game.board;
 
+import gfx.game.models.util.InteractivityMode;
 import gfx.game.interfaces.IReadOnlyGenericModel;
 import gfx.game.interfaces.IGameScreenGetters;
 import gfx.utils.SpecialControlSettings;

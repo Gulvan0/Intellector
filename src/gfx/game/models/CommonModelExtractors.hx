@@ -1,5 +1,7 @@
 package gfx.game.models;
 
+import gfx.game.models.util.ChatEntry;
+import net.shared.board.Rules;
 import net.shared.utils.UnixTimestamp;
 import net.shared.dataobj.TimeReservesData;
 import gfx.game.interfaces.IReadOnlyMsRemainders;
@@ -93,26 +95,19 @@ class CommonModelExtractors
             return null;
     }
 
-    public static function getActualSecsLeft(genericModel:IReadOnlyGameRelatedModel, side:PieceColor):Null<{secs:Float, calculatedAt:UnixTimestamp}>
+    public static function getActualTimeReserves(genericModel:IReadOnlyGameRelatedModel):Null<TimeReservesData>
     {
         var remainders:Null<IReadOnlyMsRemainders> = genericModel.getMsRemainders();
 
         if (remainders == null)
             return null;
-
-        var nowTimestamp:UnixTimestamp = UnixTimestamp.now();
-
-        if (genericModel.hasEnded())
-            return {secs: remainders.getTimeLeftWhenEnded().getSecsLeftAtTimestamp(side), calculatedAt: nowTimestamp};
-
-        var actualTimeData:TimeReservesData = remainders.getTimeLeftAfterMove(genericModel.getLineLength());
-        var secsLeftAtTimestamp:Float = actualTimeData.getSecsLeftAtTimestamp(side);
-
-
-        if (genericModel.getActiveTimerColor() != side)
-            return {secs: secsLeftAtTimestamp, calculatedAt: nowTimestamp};
         else
-            return {secs: Math.max(secsLeftAtTimestamp - actualTimeData.timestamp.getIntervalSecsTo(nowTimestamp), 0), calculatedAt: nowTimestamp};
+            return remainders.getActualReserves(UnixTimestamp.now());
+    }
+
+    public static function getActiveTimerColor(genericModel:IReadOnlyGameRelatedModel):Null<PieceColor>
+    {
+        return Rules.getActiveTimerColorAt(genericModel.getLineLength(), genericModel.getStartingSituation().turnColor);
     }
 
     public static function isPlayerParticipant(genericModel:IReadOnlyGameRelatedModel):Bool

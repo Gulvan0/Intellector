@@ -1,5 +1,6 @@
 package gfx.game.behaviours;
 
+import net.shared.utils.UnixTimestamp;
 import net.shared.dataobj.OfferAction;
 import net.shared.dataobj.OfferKind;
 import net.shared.PieceColor;
@@ -53,7 +54,7 @@ class SpectationBehaviour extends GameRelatedBehaviour
         trace("Unexpected InvalidMove for SpectatorBehaviour");
     }
 
-    private function onMoveAccepted(timeData:Null<TimeReservesData>)
+    private function onMoveAccepted(timestamp:UnixTimestamp)
     {
         trace("Unexpected MoveAccepted for SpectatorBehaviour");
     }

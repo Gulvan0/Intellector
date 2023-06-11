@@ -66,8 +66,8 @@ class Clock extends Box implements IGameComponent
             alertsEnabled = gameModel.getPlayerColor() == ownerColor;
 
             onActiveTimerColorUpdated(gameModel.getActiveTimerColor());
-            var secsLeftData = gameModel.getActualSecsLeft(ownerColor);
-            correctTime(secsLeftData.secs, secsLeftData.calculatedAt);
+            var timeReserves:TimeReservesData = gameModel.getActualTimeReserves();
+            correctTime(timeReserves.getSecsLeftAtTimestamp(ownerColor), timeReserves.timestamp);
         }
     }
 
@@ -86,12 +86,11 @@ class Clock extends Box implements IGameComponent
                     if (shownMovePointer == gameModel.getLineLength())
                         setTimeToAmountLeftWhenEnded(gameModel.getMsRemainders());
                     else
-                        label.text = TimeControl.secsToString(gameModel.getMsRemainders().getTimeLeftAfterMove(shownMovePointer).getSecsLeftAtTimestamp(ownerColor));
+                        label.text = TimeControl.secsToString(gameModel.getMsRemainders().getTimeLeftAt(shownMovePointer).getSecsLeftAtTimestamp(ownerColor));
                 }
             case TimeDataUpdated:
-                var secsLeftData = gameModel.getActualSecsLeft(ownerColor);
-                correctTime(secsLeftData.secs, secsLeftData.calculatedAt);
-            case ActiveTimerColorUpdated:
+                var timeReserves:TimeReservesData = gameModel.getActualTimeReserves();
+                correctTime(timeReserves.getSecsLeftAtTimestamp(ownerColor), timeReserves.timestamp);
                 onActiveTimerColorUpdated(gameModel.getActiveTimerColor());
             default:
         }

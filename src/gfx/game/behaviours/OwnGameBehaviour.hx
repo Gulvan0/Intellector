@@ -23,7 +23,7 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
     private var gameboardEventHandler:GameboardEventHandler;
 
     private abstract function onInvalidMove():Void;
-    private abstract function onMoveAccepted(timeData:Null<TimeReservesData>):Void;
+    private abstract function onMoveAccepted(timestamp:UnixTimestamp):Void;
     private abstract function setPlayerOnlineStatus(playerColor:PieceColor, online:Bool):Void;
     private abstract function updateOfferStateDueToAction(offerSentBy:PieceColor, offer:OfferKind, action:OfferAction):Void;
     private abstract function onOfferActionRequested(kind:OfferKind, action:OfferAction):Void;
@@ -56,17 +56,8 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
 
         if (!model.timeControl.isCorrespondence())
         {
-            var timeData:TimeReservesData = model.perMoveTimeRemaindersData.getTimeLeftAfterMove(newMoveCount - 1);
             var nowTimestamp:UnixTimestamp = UnixTimestamp.now();
-            if (model.activeTimerColor != null)
-            {
-                var pastSeconds:Float = timeData.getSecsLeftAtTimestamp(model.activeTimerColor);
-                var secondsPassed:Float = nowTimestamp.getIntervalSecsFrom(timeData.timestamp);
-                var actualSeconds:Float = pastSeconds - secondsPassed;
-                timeData.setSecsLeftAtTimestamp(model.activeTimerColor, actualSeconds);
-            }
-            model.perMoveTimeRemaindersData.append(timeData);
-            deriveActiveTimerColor(newMoveCount);
+            model.perMoveTimeRemaindersData.onMoveMade(nowTimestamp);
             modelUpdateHandler(TimeDataUpdated);
         }
 

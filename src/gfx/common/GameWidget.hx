@@ -106,7 +106,7 @@ class GameWidget extends Box
         for (item in typedData.data.eventLog)
             switch item.entry 
             {
-                case Ply(ply, _, _):
+                case Ply(ply):
                     currentSituation.performRawPly(ply);
                     hasAtLeastOneMove = true;
                 case GameEnded(ot):
@@ -133,7 +133,7 @@ class GameWidget extends Box
         else
             datetimeLabel.hidden = true;
 
-        timeControlLabel.text = new TimeControl(typedData.data.timeControl.startSecs, typedData.data.timeControl.incrementSecs).toString();
+        timeControlLabel.text = typedData.data.timeControl.toString();
         opponentsLabel.text = opponentsLabelLongText;
         resultLabel.text = Utils.getResolution(outcome);
 

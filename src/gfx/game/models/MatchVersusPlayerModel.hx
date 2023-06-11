@@ -1,5 +1,8 @@
 package gfx.game.models;
 
+import gfx.game.models.util.ChatEntry;
+import gfx.game.models.util.InteractivityMode;
+import gfx.game.models.util.History;
 import gfx.game.interfaces.IReadWriteGameRelatedModel;
 import net.shared.board.Hex;
 import net.shared.board.HexCoords;
@@ -15,7 +18,7 @@ import net.shared.PieceColor;
 import net.shared.TimeControl;
 import net.shared.utils.PlayerRef;
 import gfx.game.interfaces.IReadOnlyMsRemainders;
-import gfx.game.struct.MsRemaindersData;
+import gfx.game.models.util.MsRemaindersData;
 import net.shared.board.RawPly;
 import gfx.game.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
@@ -36,7 +39,6 @@ class MatchVersusPlayerModel implements IReadWriteGameRelatedModel implements IR
     public var plannedPremoves:Array<RawPly>;
     public var offerActive:Map<OfferKind, Map<OfferDirection, Bool>>;
     public var perMoveTimeRemaindersData:Null<MsRemaindersData>;
-    public var activeTimerColor:Null<PieceColor>;
     public var boardInteractivityMode:InteractivityMode;
 
     public var chatHistory:Array<ChatEntry>;
@@ -118,11 +120,6 @@ class MatchVersusPlayerModel implements IReadWriteGameRelatedModel implements IR
     public function getMsRemainders():Null<IReadOnlyMsRemainders>
     {
         return perMoveTimeRemaindersData;
-    }
-
-    public function getActiveTimerColor():Null<PieceColor>
-    {
-        return activeTimerColor;
     }
 
     public function getBoardInteractivityMode():InteractivityMode

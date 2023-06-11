@@ -32,9 +32,9 @@ abstract class VersusBotBehaviour extends OwnGameBehaviour
         versusBotModel.opponentBot.interrupt();
 
         var plysToUndo:Int = versusBotModel.getPlayerColor() == versusBotModel.getMostRecentSituation().turnColor? 2 : 1;
-        var updatedTimestamp:Null<UnixTimestamp> = versusBotModel.timeControl.isCorrespondence()? null : UnixTimestamp.now();
-        rollback(plysToUndo, updatedTimestamp);
-        Networker.emitEvent(BotGameRollback(plysToUndo, updatedTimestamp));
+        var timestamp:UnixTimestamp = UnixTimestamp.now();
+        rollback(plysToUndo, timestamp);
+        Networker.emitEvent(BotGameRollback(plysToUndo, timestamp));
     }
 
     private function updateOfferStateDueToAction(offerSentBy:PieceColor, offer:OfferKind, action:OfferAction)
@@ -47,7 +47,7 @@ abstract class VersusBotBehaviour extends OwnGameBehaviour
         //* Do nothing
     }
 
-    private function onMoveAccepted(timeData:Null<TimeReservesData>)
+    private function onMoveAccepted(timestamp:UnixTimestamp)
     {
         //* Do nothing
     }

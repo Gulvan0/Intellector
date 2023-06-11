@@ -1,5 +1,6 @@
 package gfx.game.interfaces;
 
+import gfx.game.models.util.ChatEntry;
 import net.shared.utils.UnixTimestamp;
 import gfx.game.interfaces.IReadOnlySpectationModel;
 import net.shared.board.Situation;
@@ -9,7 +10,7 @@ import net.shared.PieceColor;
 import net.shared.TimeControl;
 import net.shared.utils.PlayerRef;
 import gfx.game.interfaces.IReadOnlyMsRemainders;
-import gfx.game.struct.MsRemaindersData;
+import gfx.game.models.util.MsRemaindersData;
 import net.shared.dataobj.TimeReservesData;
 import net.shared.board.RawPly;
 import gfx.game.interfaces.IReadOnlyHistory;
@@ -28,7 +29,6 @@ interface IReadOnlyGameRelatedModel extends IReadOnlyGenericModel
     public function getHistory():IReadOnlyHistory;
     public function isOutgoingOfferActive(color:PieceColor, kind:OfferKind):Bool;
     public function getMsRemainders():Null<IReadOnlyMsRemainders>;
-    public function getActiveTimerColor():PieceColor;
     public function getChatHistory():Array<ChatEntry>;
     public function isPlayerOnline(color:PieceColor):Bool;
     public function getSpectators():Array<PlayerRef>;

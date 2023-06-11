@@ -1,5 +1,6 @@
 package gfx.game.models;
 
+import gfx.game.models.util.InteractivityMode;
 import gfx.game.interfaces.IReadWriteGenericModel;
 import net.shared.board.Rules;
 import net.shared.board.Hex;

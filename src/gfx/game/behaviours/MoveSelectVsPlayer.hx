@@ -1,5 +1,6 @@
 package gfx.game.behaviours;
 
+import net.shared.utils.UnixTimestamp;
 import net.shared.PieceColor;
 import gfx.game.models.MatchVersusPlayerModel;
 import net.shared.dataobj.TimeReservesData;
@@ -11,7 +12,7 @@ class MoveSelectVsPlayer extends VersusPlayerBehaviour
         Dialogs.alert(INVALID_MOVE_DIALOG_MESSAGE, INVALID_MOVE_DIALOG_TITLE);
     }
 
-    private function onMoveAccepted(timeData:Null<TimeReservesData>)
+    private function onMoveAccepted(timestamp:UnixTimestamp)
     {
         throw "Unexpected onMoveAccepted call: should have happened in WaitingPlayerBehaviour";
     }

@@ -1,5 +1,6 @@
 package gfx.game.behaviours;
 
+import net.shared.utils.UnixTimestamp;
 import gfx.game.behaviours.util.GameboardEventHandler;
 import net.shared.board.RawPly;
 import net.shared.dataobj.OfferDirection;
@@ -16,7 +17,7 @@ abstract class VersusPlayerBehaviour extends OwnGameBehaviour
     private var versusPlayerModel:MatchVersusPlayerModel;
 
     private abstract function onInvalidMove():Void;
-    private abstract function onMoveAccepted(timeData:Null<TimeReservesData>):Void;
+    private abstract function onMoveAccepted(timestamp:UnixTimestamp):Void;
     private abstract function updateBehaviourDueToTurnColorUpdate():Void;
     private abstract function updateBehaviourDueToPremovePreferenceUpdate():Void;
 

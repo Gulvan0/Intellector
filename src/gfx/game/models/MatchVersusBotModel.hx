@@ -1,5 +1,9 @@
 package gfx.game.models;
 
+import gfx.game.models.util.ChatEntry;
+import gfx.game.models.util.InteractivityMode;
+import gfx.game.models.util.History;
+import net.shared.dataobj.TimeReservesData;
 import engine.BotTimeData;
 import gfx.game.interfaces.IReadWriteGameRelatedModel;
 import net.shared.board.HexCoords;
@@ -17,10 +21,12 @@ import net.shared.PieceColor;
 import net.shared.TimeControl;
 import net.shared.utils.PlayerRef;
 import gfx.game.interfaces.IReadOnlyMsRemainders;
-import gfx.game.struct.MsRemaindersData;
+import gfx.game.models.util.MsRemaindersData;
 import net.shared.board.RawPly;
 import gfx.game.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
+
+using gfx.game.models.CommonModelExtractors;
 
 class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IReadOnlyMatchVersusBotModel
 {
@@ -36,7 +42,6 @@ class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IRead
     public var shownMovePointer:Int;
     public var plannedPremoves:Array<RawPly>;
     public var perMoveTimeRemaindersData:Null<MsRemaindersData>;
-    public var activeTimerColor:Null<PieceColor>;
     public var boardInteractivityMode:InteractivityMode;
 
     public var chatHistory:Array<ChatEntry>;
@@ -119,11 +124,6 @@ class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IRead
         return perMoveTimeRemaindersData;
     }
 
-    public function getActiveTimerColor():Null<PieceColor>
-    {
-        return activeTimerColor;
-    }
-
     public function getBoardInteractivityMode():InteractivityMode
     {
         return boardInteractivityMode;
@@ -146,9 +146,9 @@ class MatchVersusBotModel implements IReadWriteGameRelatedModel implements IRead
 
         var botColor:PieceColor = opposite(getPlayerColor());
         var botMovesFirst:Bool = botColor == history.getStartingSituation().turnColor;
-        var actualReservesData = CommonModelExtractors.getActualSecsLeft(this, botColor);
+        var actualReservesData:TimeReservesData = this.getActualTimeReserves();
 
-        return new BotTimeData(actualReservesData.secs, timeControl.incrementSecs, getLineLength(), botMovesFirst);
+        return new BotTimeData(actualReservesData.getSecsLeftAtTimestamp(botColor), timeControl.incrementSecs, getLineLength(), botMovesFirst);
     }
 
     public function getOpponentRef():PlayerRef

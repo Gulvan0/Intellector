@@ -1,7 +1,9 @@
 package gfx.game.interfaces;
 
+import gfx.game.models.util.ChatEntry;
+import gfx.game.models.util.History;
 import net.shared.Outcome;
-import gfx.game.struct.MsRemaindersData;
+import gfx.game.models.util.MsRemaindersData;
 import net.shared.PieceColor;
 import net.shared.utils.PlayerRef;
 import net.shared.utils.UnixTimestamp;
@@ -17,7 +19,6 @@ interface IReadWriteGameRelatedModel extends IReadOnlyGameRelatedModel extends I
     
     public var history:History;
     public var perMoveTimeRemaindersData:Null<MsRemaindersData>;
-    public var activeTimerColor:Null<PieceColor>;
 
     public var chatHistory:Array<ChatEntry>;
     public var spectatorRefs:Array<PlayerRef>;   

@@ -9,9 +9,10 @@ import net.shared.utils.PlayerRef;
 
 enum GameEventLogEntry
 {
-    Ply(ply:RawPly, whiteMsAfter:Null<Int>, blackMsAfter:Null<Int>);
+    Ply(ply:RawPly);
     OfferActionPerformed(kind:OfferKind, sentBy:PieceColor, action:OfferAction);
     Message(sentBy:PlayerRef, text:String);
     TimeAdded(receiver:PieceColor);
     GameEnded(outcome:Outcome);
+    Rollback(cancelledMovesCount:Int);
 }

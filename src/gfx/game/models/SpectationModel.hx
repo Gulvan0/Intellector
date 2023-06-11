@@ -1,5 +1,8 @@
 package gfx.game.models;
 
+import gfx.game.models.util.ChatEntry;
+import gfx.game.models.util.InteractivityMode;
+import gfx.game.models.util.History;
 import gfx.game.interfaces.IReadWriteGameRelatedModel;
 import net.shared.utils.UnixTimestamp;
 import gfx.game.interfaces.IReadOnlySpectationModel;
@@ -10,7 +13,7 @@ import net.shared.PieceColor;
 import net.shared.TimeControl;
 import net.shared.utils.PlayerRef;
 import gfx.game.interfaces.IReadOnlyMsRemainders;
-import gfx.game.struct.MsRemaindersData;
+import gfx.game.models.util.MsRemaindersData;
 import net.shared.board.RawPly;
 import gfx.game.interfaces.IReadOnlyHistory;
 import net.shared.dataobj.OfferKind;
@@ -29,7 +32,6 @@ class SpectationModel implements IReadWriteGameRelatedModel implements IReadOnly
     public var shownMovePointer:Int;
     public var outgoingOfferActive:Map<PieceColor, Map<OfferKind, Bool>>;
     public var perMoveTimeRemaindersData:Null<MsRemaindersData>;
-    public var activeTimerColor:Null<PieceColor>;
     public var boardInteractivityMode:InteractivityMode;
 
     public var chatHistory:Array<ChatEntry>;
@@ -106,11 +108,6 @@ class SpectationModel implements IReadWriteGameRelatedModel implements IReadOnly
     public function getMsRemainders():Null<IReadOnlyMsRemainders>
     {
         return perMoveTimeRemaindersData;
-    }
-
-    public function getActiveTimerColor():Null<PieceColor>
-    {
-        return activeTimerColor;
     }
 
     public function getBoardInteractivityMode():InteractivityMode

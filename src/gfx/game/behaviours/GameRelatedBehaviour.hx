@@ -1,5 +1,6 @@
 package gfx.game.behaviours;
 
+import net.shared.board.Rules;
 import gfx.scene.SceneManager;
 import gfx.popups.ChallengeParamsDialog;
 import net.shared.dataobj.ChallengeParams;
@@ -29,6 +30,7 @@ import gfx.game.interfaces.IGameScreen;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.interfaces.IReadWriteGameRelatedModel;
 import gfx.game.interfaces.IBehaviour;
+import gfx.game.models.util.ChatEntry;
 
 using gfx.game.models.CommonModelExtractors;
 
@@ -39,7 +41,7 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
     public abstract function handleGlobalEvent(event:GlobalEvent):Void;
     public abstract function handleGameboardEvent(event:GameboardEvent):Void;
     private abstract function onInvalidMove():Void;
-    private abstract function onMoveAccepted(timeData:Null<TimeReservesData>):Void;
+    private abstract function onMoveAccepted(timestamp:UnixTimestamp):Void;
     private abstract function setPlayerOnlineStatus(playerColor:PieceColor, online:Bool):Void;
     private abstract function updateOfferStateDueToAction(offerSentBy:PieceColor, offer:OfferKind, action:OfferAction):Void;
     private abstract function customOnEntered():Void;
@@ -54,29 +56,10 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
         modelUpdateHandler(EntryAddedToChatHistory);
     }
 
-    private function updateLastTimeData(timeData:Null<TimeReservesData>)
-    {
-        if (timeData != null)
-        {
-            model.perMoveTimeRemaindersData.modifyLast(timeData);
-            modelUpdateHandler(TimeDataUpdated);
-        }
-    }
-
-    private function addTime(timeData:TimeReservesData, receiver:PieceColor)
-    {
-        updateLastTimeData(timeData);
-        writeChatEntry(Log(TIME_ADDED_MESSAGE(receiver)));
-    }
-
-	private function deriveActiveTimerColor(?newMoveCount:Int)
-	{
-		if (newMoveCount == null)
-			newMoveCount = model.getLineLength();
-		model.activeTimerColor = newMoveCount < 2? null : newMoveCount % 2 == 0? White : Black;
-	}
-
-	private function rollback(plysToUndo:Int, ?updatedTimestamp:Null<UnixTimestamp>)
+    /**
+        timestampForTimeReset is null only for client-side rollbacks (such as when the move wasn't accepted by the server)
+    **/
+	private function rollback(plysToUndo:Int, timestampForTimeReset:Null<UnixTimestamp>)
 	{
 		var newMoveCount:Int = model.getLineLength() - plysToUndo;
 
@@ -88,10 +71,7 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
 
 		if (model.perMoveTimeRemaindersData != null)
 		{
-			model.perMoveTimeRemaindersData.rollback(newMoveCount, updatedTimestamp);
-
-			deriveActiveTimerColor(newMoveCount);
-
+			model.perMoveTimeRemaindersData.onRollback(plysToUndo, timestampForTimeReset);
 			modelUpdateHandler(TimeDataUpdated);
 		}
 
@@ -108,9 +88,9 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
                 writeChatEntry(PlayerMessage(authorRef, message));
             case SpectatorMessage(authorRef, message):
                 writeChatEntry(SpectatorMessage(authorRef, message));
-            case MoveAccepted(timeData):
-                onMoveAccepted(timeData);
-            case Move(ply, timeData):
+            case MoveAccepted(timestamp):
+                onMoveAccepted(timestamp);
+            case Move(ply, timestamp):
                 model.history.append(ply);
                 modelUpdateHandler(MoveAddedToHistory);
 
@@ -122,22 +102,23 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
                     modelUpdateHandler(ViewedMoveNumUpdated);
                 }
                 
-                if (timeData != null)
+                if (model.perMoveTimeRemaindersData != null)
                 {
-                    model.perMoveTimeRemaindersData.append(timeData);
-                    deriveActiveTimerColor(newMoveCount);
+                    model.perMoveTimeRemaindersData.onMoveMade(timestamp);
                     modelUpdateHandler(TimeDataUpdated);
                 }
 
                 updateBehaviourDueToTurnColorUpdate();
-            case Rollback(plysToUndo, updatedTimestamp):
-                rollback(plysToUndo, updatedTimestamp);
-            case TimeAdded(receiver, timeData):
-                addTime(timeData, receiver);
-            case GameEnded(outcome, timeData, newPersonalElo):
+            case Rollback(plysToUndo, timestamp):
+                rollback(plysToUndo, timestamp);
+            case TimeAdded(receiver):
+                model.perMoveTimeRemaindersData.onTimeAdded(receiver);
+                modelUpdateHandler(TimeDataUpdated);
+                writeChatEntry(Log(TIME_ADDED_MESSAGE(receiver)));
+            case GameEnded(outcome, timestamp, newPersonalElo):
                 model.outcome = outcome;
-                if (timeData != null)
-                    model.perMoveTimeRemaindersData.recordTimeOnGameEnded(timeData);
+                if (model.perMoveTimeRemaindersData != null)
+                    model.perMoveTimeRemaindersData.recordTimeOnGameEnded(timestamp);
                 modelUpdateHandler(GameEnded);
 
                 var message:String;

@@ -1,5 +1,6 @@
 package gfx.game.behaviours;
 
+import net.shared.utils.UnixTimestamp;
 import gfx.game.behaviours.util.GameboardEventHandler;
 import gfx.game.models.MatchVersusPlayerModel;
 import net.shared.dataobj.TimeReservesData;
@@ -16,11 +17,11 @@ abstract class WaitingPlayerBehaviour extends VersusPlayerBehaviour
         rollback(1, null);
     }
 
-    private function onMoveAccepted(timeData:Null<TimeReservesData>)
+    private function onMoveAccepted(timestamp:UnixTimestamp)
     {
-        if (timeData != null)
+        if (versusPlayerModel.perMoveTimeRemaindersData != null)
         {
-            versusPlayerModel.perMoveTimeRemaindersData.modifyLast(timeData);
+            versusPlayerModel.perMoveTimeRemaindersData.correctLastMoveTimestamp(timestamp);
             modelUpdateHandler(TimeDataUpdated);
         }
     }

@@ -10,7 +10,6 @@ enum ModelUpdateEvent
     GameEnded;
     ViewedMoveNumUpdated;
     TimeDataUpdated;
-    ActiveTimerColorUpdated;
     OfferStateUpdated(kind:OfferKind, direction:OfferDirection, active:Bool);
     MoveAddedToHistory;
     HistoryRollback;

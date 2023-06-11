@@ -1,5 +1,6 @@
 package gfx.game.interfaces;
 
+import gfx.game.models.util.InteractivityMode;
 import net.shared.board.RawPly;
 import net.shared.board.Situation;
 import net.shared.PieceColor;

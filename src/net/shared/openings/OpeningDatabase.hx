@@ -94,7 +94,7 @@ class OpeningDatabase
                     openings.set(symNextSIP, symOpening);
                 }
             }
-            else if (name.length == 0)
+            else if (name == null)
             {
                 if (level == 1)
                     throw 'Empty opening at level 1 ($plyStr in openings.tree, line $lineIndex)';

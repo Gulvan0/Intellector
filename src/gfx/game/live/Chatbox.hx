@@ -1,5 +1,6 @@
 package gfx.game.live;
 
+import gfx.game.models.util.ChatEntry;
 import gfx.game.interfaces.IGameScreenGetters;
 import gfx.game.interfaces.IReadOnlyGameRelatedModel;
 import haxe.ui.core.Component;
