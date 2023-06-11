@@ -50,12 +50,6 @@ class Main
         app.preloaderClass = DefaultPreloader;
         app.icon = NormalFavicon;
         app.ready(onAppReady);
-
-        var builders:Array<ComponentPageBuilder> = [];
-        for (a in ComponentPageName.createAll())
-            builders.push(new ComponentPageBuilder(a));
-        for (b in builders)
-            trace(b);
     }
 
     private static function onAppReady()

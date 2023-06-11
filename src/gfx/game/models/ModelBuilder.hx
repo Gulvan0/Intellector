@@ -72,6 +72,7 @@ class ModelBuilder
 
             model.shownMovePointer = model.getLineLength();
             
+            model.deriveShownSituationFromOtherParams();
             model.deriveInteractivityModeFromOtherParams();
 
             return Spectation(model);
@@ -98,6 +99,7 @@ class ModelBuilder
 
             model.shownMovePointer = model.getLineLength();
 
+            model.deriveShownSituationFromOtherParams();
             model.deriveInteractivityModeFromOtherParams();
 
             return MatchVersusBot(model);
@@ -129,6 +131,7 @@ class ModelBuilder
 
             model.shownMovePointer = model.getLineLength();
 
+            model.deriveShownSituationFromOtherParams();
             model.deriveInteractivityModeFromOtherParams();
 
             return MatchVersusPlayer(model);
@@ -181,6 +184,7 @@ class ModelBuilder
         model.editorMode = null;
         model.exploredStudyInfo = null;
 
+        model.deriveShownSituationFromOtherParams();
         model.deriveInteractivityModeFromOtherParams();
 
         return model;
@@ -198,6 +202,7 @@ class ModelBuilder
         model.editorMode = null;
         model.exploredStudyInfo = null;
 
+        model.deriveShownSituationFromOtherParams();
         model.deriveInteractivityModeFromOtherParams();
 
         return model;
@@ -216,6 +221,7 @@ class ModelBuilder
         model.editorMode = null;
         model.exploredStudyInfo = null;
 
+        model.deriveShownSituationFromOtherParams();
         model.deriveInteractivityModeFromOtherParams();
 
         return model;

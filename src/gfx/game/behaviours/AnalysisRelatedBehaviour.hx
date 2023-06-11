@@ -215,6 +215,7 @@ abstract class AnalysisRelatedBehaviour extends BaseBehaviour
             case ApplyChangesRequested:
                 model.variation = new Variation(model.editorSituation);
                 modelUpdateHandler(VariationUpdated);
+                // Shown situation remains the same, so its derivation and model update event emission aren't needed
                 closeEditor();
             case DiscardChangesRequested:
                 closeEditor();

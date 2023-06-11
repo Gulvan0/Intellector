@@ -15,6 +15,6 @@
 --resource ./assets/resources/openings.tree@openings
 #--resource ./src/tests/ui/test_case_infos.json@test_case_infos
 
--js build/html5/1686502421.js
+-js build/html5/1686506099.js
 
 -D rapid_text_metrics

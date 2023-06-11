@@ -22,11 +22,16 @@ class Url
 
     public static function setPath(path:String, ?title:String)
     {
-        if (StringTools.startsWith(path, "/"))
-            path = path.substr(1);
         var fullTitle:String = title != null? title + " - Intellector" : "Intellector";
-        if (new URLSearchParams(Browser.location.search).get("p") != path)
-            Browser.window.history.pushState({}, fullTitle, ingameToUrlPath(path));
+
+        if (path != null)
+        {
+            if (StringTools.startsWith(path, "/"))
+                path = path.substr(1);
+            if (new URLSearchParams(Browser.location.search).get("p") != path)
+                Browser.window.history.pushState({}, fullTitle, ingameToUrlPath(path));
+        }
+
         Browser.document.title = fullTitle;
         Url.currentTitle = fullTitle;
     }

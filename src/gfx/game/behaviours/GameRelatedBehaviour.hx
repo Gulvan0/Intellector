@@ -100,6 +100,9 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
                 {
                     model.shownMovePointer = newMoveCount;
                     modelUpdateHandler(ViewedMoveNumUpdated);
+
+                    model.deriveShownSituationFromOtherParams();
+                    modelUpdateHandler(ShownSituationUpdated);
                 }
                 
                 if (model.perMoveTimeRemaindersData != null)

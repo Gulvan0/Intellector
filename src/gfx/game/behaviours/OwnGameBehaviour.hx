@@ -54,6 +54,9 @@ abstract class OwnGameBehaviour extends GameRelatedBehaviour
         model.shownMovePointer = newMoveCount;
         modelUpdateHandler(ViewedMoveNumUpdated);
 
+        model.deriveShownSituationFromOtherParams();
+        modelUpdateHandler(ShownSituationUpdated);
+
         if (!model.timeControl.isCorrespondence())
         {
             var nowTimestamp:UnixTimestamp = UnixTimestamp.now();
