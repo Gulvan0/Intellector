@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import browser.ChallengeParamsCookies;
 import gfx.scene.SceneManager;
 import gfx.popups.ChallengeParamsDialog;
 import gfx.basic_components.BaseDialog;
@@ -73,7 +74,7 @@ class MiniProfile extends BaseDialog
     private function onChallengePressed(e)
     {
         hideDialog(null);
-        Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.directChallengeParams(username)));
+        Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.directChallengeParams(ChallengeParamsCookies.load(), username)));
     }
 
     @:bind(toProfileBtn, MouseEvent.CLICK)

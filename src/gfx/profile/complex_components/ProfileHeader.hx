@@ -1,5 +1,6 @@
 package gfx.profile.complex_components;
 
+import browser.ChallengeParamsCookies;
 import gfx.popups.ChallengeParamsDialog;
 import haxe.Timer;
 import haxe.ui.containers.VBox;
@@ -23,7 +24,7 @@ class ProfileHeader extends VBox
     @:bind(sendChallengeBtn, MouseEvent.CLICK)
     private function onSendChallengePressed(e)
     {
-        Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.directChallengeParams(username)));
+        Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.directChallengeParams(ChallengeParamsCookies.load(), username)));
     }
 
     @:bind(followBtn, MouseEvent.CLICK)

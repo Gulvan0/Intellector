@@ -1,7 +1,6 @@
 package net.shared.dataobj;
 
 import net.shared.utils.MathUtils;
-import browser.ChallengeParamsCookies;
 import net.shared.board.Situation;
 
 class ChallengeParams
@@ -26,16 +25,16 @@ class ChallengeParams
         return rated = value;
     }
 
-    public static function directChallengeParams(calleeRef:String):ChallengeParams
+    public static function directChallengeParams(paramsFromCookies:ChallengeParams, calleeRef:String):ChallengeParams
     {
-        var params:ChallengeParams = ChallengeParamsCookies.load();
+        var params:ChallengeParams = paramsFromCookies;
         params.type = Direct(calleeRef);
         return params;
     }
 
-    public static function anacondaChallengeParams():ChallengeParams
+    public static function anacondaChallengeParams(paramsFromCookies:ChallengeParams):ChallengeParams
     {
-        var params:ChallengeParams = ChallengeParamsCookies.load();
+        var params:ChallengeParams = paramsFromCookies;
         params.type = Direct("+stconda"); 
         return params;
     }

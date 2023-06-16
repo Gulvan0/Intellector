@@ -1,5 +1,6 @@
 package gfx.scene;
 
+import browser.ChallengeParamsCookies;
 import net.shared.utils.PlayerRef;
 import net.shared.PieceColor;
 import gfx.menu.MenuItem;
@@ -175,7 +176,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
                 toScreen(MainMenu);
             case PlayVersusBot:
                 var displayChallengeParamsDialog:Void->Void = () -> {
-                    Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.anacondaChallengeParams()));
+                    Dialogs.getQueue().add(new ChallengeParamsDialog(ChallengeParams.anacondaChallengeParams(ChallengeParamsCookies.load())));
                 };
 
                 if (!LoginManager.isLogged())
