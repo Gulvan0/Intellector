@@ -119,6 +119,11 @@ abstract class GameRelatedBehaviour extends BaseBehaviour
                 modelUpdateHandler(TimeDataUpdated);
                 writeChatEntry(Log(TIME_ADDED_MESSAGE(receiver)));
             case GameEnded(outcome, timestamp, newPersonalElo):
+                for (offerKind in OfferKind.createAll())
+                    for (offerSender in PieceColor.createAll())
+                        if (model.isOutgoingOfferActive(offerSender, offerKind))
+                            updateOfferStateDueToAction(offerSender, offerKind, Cancel);
+                
                 model.outcome = outcome;
                 if (model.perMoveTimeRemaindersData != null)
                     model.perMoveTimeRemaindersData.recordTimeOnGameEnded(timestamp);
