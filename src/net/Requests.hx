@@ -1,5 +1,8 @@
 package net;
 
+import haxe.ds.BalancedTree;
+import net.shared.message.ClientRequest;
+import net.shared.message.ServerRequestResponse;
 import net.shared.utils.PlayerRef;
 import net.shared.dataobj.GameModelData;
 import gfx.profile.complex_components.MiniProfile;
@@ -16,31 +19,52 @@ import gfx.Dialogs;
 import gfx.scene.SceneManager;
 import net.shared.PieceColor;
 import net.shared.TimeControl;
-import net.shared.ClientEvent;
-import net.shared.ServerEvent;
-
-typedef GetGamesCallback = (games:Array<GameModelData>, hasNext:Bool) -> Void;
-typedef GetStudiesCallback = (studyMap:Array<StudyInfo>, hasNext:Bool) -> Void;
 
 class Requests
 {
-    public static function greet(greeting:Greeting, callback:GreetingResponseData->Void)
+    private static var pendingRequestHandlers:BalancedTree<Int, ServerRequestResponse->Void> = new BalancedTree();
+    private static var sentRequests:Map<Int, ClientRequest> = [];
+    private static var lastRequestID:Int = 0;
+
+    private static var requestSender:(id:Int, req:ClientRequest)->Void;
+
+    public static function init(requestSender:(id:Int, req:ClientRequest)->Void)
     {
-        Networker.addHandler(greet_handler.bind(callback));
-        Networker.emitEvent(Greet(greeting, Build.buildTime(), Config.dict.getInt("min-server-build")));
+        Requests.requestSender = requestSender;
     }
 
-    private static function greet_handler(callback:GreetingResponseData->Void, event:ServerEvent):Bool
+    public static function request(request:ClientRequest, handler:ServerRequestResponse->Void)
     {
-        switch event 
+        lastRequestID++;
+
+        pendingRequestHandlers.set(lastRequestID, handler);
+        sentRequests.set(lastRequestID, request);
+
+        requestSender(lastRequestID, request);
+    }
+
+    public static function processResponse(requestID:Int, response:ServerRequestResponse)
+    {
+        if (pendingRequestHandlers.exists(requestID))
+            pendingRequestHandlers[requestID](response);
+
+        pendingRequestHandlers.remove(requestID);
+    }
+
+    public static function repeatUnansweredRequests()
+    {
+        var handlers:BalancedTree<Int, ServerRequestResponse->Void> = pendingRequestHandlers.copy();
+
+        pendingRequestHandlers.clear();
+
+        for (requestID => handler in handlers.keyValueIterator())
         {
-            case GreetingResponse(data):
-                callback(data);
-                return true;
-            default:
-                return false;
+            var request:ClientRequest = sentRequests[requestID];
+            sendRequest(request, handler);
         }
     }
+
+    /*
 
     public static function signin(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void) 
     {
@@ -343,5 +367,5 @@ class Requests
             default:
                 return false;
         }
-    }
+    }*/
 }

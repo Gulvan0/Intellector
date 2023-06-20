@@ -1,6 +1,6 @@
 package net;
 
-import net.shared.ServerEvent;
+import net.shared.message.ServerEvent;
 
 class EventProcessingQueue
 {

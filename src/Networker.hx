@@ -1,11 +1,11 @@
 package;
 
+import net.shared.dataobj.Greeting;
+import net.shared.message.ClientMessage;
+import net.shared.message.ClientRequest;
 import net.INetObserver;
 import lzstring.LZString;
 import js.lib.Uint8Array;
-import net.shared.ServerMessage;
-import net.shared.ClientMessage;
-import net.IncomingEventBuffer;
 import utils.StringUtils;
 import gfx.popups.ReconnectionDialog;
 import browser.Url;
@@ -20,8 +20,6 @@ import hx.ws.Types.MessageType;
 import haxe.Unserializer;
 import haxe.Serializer;
 import js.html.Event;
-import net.shared.ClientEvent;
-import net.shared.ServerEvent;
 import net.shared.dataobj.SessionRestorationResult;
 import net.EventProcessingQueue;
 import gfx.Dialogs;
@@ -39,22 +37,18 @@ class Networker
     private static var address:String;
 
     private static var eventQueue:EventProcessingQueue = new EventProcessingQueue();
-    private static var incomingBuffer:IncomingEventBuffer;
     private static var sentEvents:Map<Int, ClientEvent>;
-    private static var lastSentMessageID:Int;
+    private static var lastSentEventID:Int;
+    private static var lastProcessedEventID:Int;
 
     private static var suppressAlert:Bool;
     private static var backoffDelay:Float;
-    private static var doNotReconnect:Bool = false;
     private static var reconnectionToken:String = "not_set";
     private static var sid:Int = -1;
     private static var isConnected:Bool = false;
-    public static var ignoreEmitCalls:Bool = false; 
 
-    private static var serverHeartbeatTimeoutTimer:Timer;
-    private static var clientHeartbeatTimer:Timer;
-    private static var clientHeartbeatIntervalMs:Int;
-    private static var serverHeartbeatTimeoutMs:Int;
+    public static var ignoreEmitCalls:Bool = false;
+    private static var stayOnPageOnGreetingResponse:Bool = false;
 
     public static function getSessionID():Int
     {
@@ -75,6 +69,13 @@ class Networker
     {
         Serializer.USE_ENUM_INDEX = true;
 
+        sentEvents = [];
+        lastSentEventID = 0;
+        lastProcessedEventID = 0;
+
+        Requests.init(sendRequest);
+        MessageProcessor.init(eventQueue, _);
+
         if (Config.dict.getBool("secure"))
             address = "wss://";
         else
@@ -82,26 +83,14 @@ class Networker
 
         address += Config.dict.getString("host") + ":" + Config.dict.getString("port");
 
-        clientHeartbeatIntervalMs = Config.dict.getInt("keep-alive-beat-interval-ms");
-
-        if (clientHeartbeatIntervalMs == null || clientHeartbeatIntervalMs <= 0)
-            clientHeartbeatIntervalMs = 5000;
-
-        serverHeartbeatTimeoutMs = Config.dict.getInt("keep-alive-timeout-ms");
-
-        if (serverHeartbeatTimeoutMs == null || serverHeartbeatTimeoutMs <= 0)
-            serverHeartbeatTimeoutMs = 10000;
-
-        incomingBuffer = new IncomingEventBuffer(eventQueue.processEvent, requestResend);
-        sentEvents = [];
-        lastSentMessageID = 0;
-
         createWS();
         
         _ws.onopen = onConnectionOpen.bind(true);
         _ws.onerror = onErrorBeforeOpen;
 
         _ws.open();
+
+        //TODO: Client heartbeat
     }
 
     private static function onErrorBeforeOpen(e)
@@ -125,6 +114,14 @@ class Networker
         }
     }
 
+    private static function initialGreeting(stayOnPage:Bool)
+    {
+        if (CredentialCookies.hasLoginDetails())
+            greet(Login(CredentialCookies.getLogin(), CredentialCookies.getPassword()), stayOnPage);
+        else
+            greet(Simple, stayOnPage);
+    }
+
     @:access(hx.ws.WebSocket._ws)
     private static function onConnectionOpen(?navigateByURL:Bool = true)
     {
@@ -139,102 +136,22 @@ class Networker
         _ws.onerror = onConnectionError;
 
         if (_ws._ws.readyState == 1)
-            if (CredentialCookies.hasLoginDetails())
-                Requests.greet(Login(CredentialCookies.getLogin(), CredentialCookies.getPassword()), onGreetingAnswered.bind(_, !navigateByURL));
-            else
-                Requests.greet(Simple, onGreetingAnswered.bind(_, !navigateByURL));
+            initialGreeting(!navigateByURL);
         else
-            Timer.delay(() -> {
-                if (CredentialCookies.hasLoginDetails())
-                    Requests.greet(Login(CredentialCookies.getLogin(), CredentialCookies.getPassword()), onGreetingAnswered.bind(_, !navigateByURL));
-                else
-                    Requests.greet(Simple, onGreetingAnswered.bind(_, !navigateByURL));
-            }, 100);
+            Timer.delay(initialGreeting.bind(!navigateByURL), 100);
     }
 
     private static function onMessageRecieved(msg:MessageType)
     {
-        var message:ServerMessage;
-
-        switch msg 
-        {
-            case BytesMessage(content):
-                var lz = new LZString();
-                var base64:String = content.readAllAvailableBytes().toString();
-                var s:String = lz.decompressFromBase64(base64);
-                onMessageRecieved(StrMessage(s));
-                return;
-            case StrMessage(content):
-                try
-                {
-                    message = Unserializer.run(content);
-                }
-                catch (e)
-                {
-                    trace("Failed to deserialize message: " + content);
-                    trace(e);
-                    return;
-                }
-        }
-
-        switch message.event
-        {
-            case DontReconnect:
-                doNotReconnect = true;
-                suppressAlert = true;
-                Dialogs.alert(SESSION_CLOSED_ALERT_TEXT, SESSION_CLOSED_ALERT_TITLE);
-            case KeepAliveBeat:
-                if (serverHeartbeatTimeoutTimer != null)
-                    serverHeartbeatTimeoutTimer.stop();
-                serverHeartbeatTimeoutTimer = Timer.delay(dropConnection, serverHeartbeatTimeoutMs);
-            case ServerError(message):
-                Dialogs.alert(SERVER_ERROR_DIALOG_TITLE, SERVER_ERROR_DIALOG_TEXT(StringUtils.shorten(message, 500)));
-            case ResendRequest(from, to):
-                var map:Map<Int, ClientEvent> = [];
-                for (i in from...(to+1))
-                    if (sentEvents.exists(i))
-                        map.set(i, sentEvents.get(i));
-                emitEvent(MissedEvents(map));
-            case MissedEvents(map):
-                incomingBuffer.pushMissed(map);
-                if (!incomingBuffer.isWaiting())
-                    Dialogs.getQueue().closeGroup(ReconnectionPopUp);
-            default:
-                incomingBuffer.push(message);
-        }
+        MessageProcessor.onMessageRecieved(msg);
     }
 
     private static function onConnectionClosed()
     {
         isConnected = false;
-
-        if (serverHeartbeatTimeoutTimer != null)
-            serverHeartbeatTimeoutTimer.stop();
-        serverHeartbeatTimeoutTimer = null;
-
-        if (clientHeartbeatTimer != null)
-            clientHeartbeatTimer.stop();
-        clientHeartbeatTimer = null;
-
-        if (doNotReconnect)
-        {
-            SceneManager.getScene().toScreen(null);
-
-            if (!suppressAlert)
-            {
-                Dialogs.alert(CONNECTION_LOST_ERROR, CONNECTION_ERROR_DIALOG_TITLE);
-                suppressAlert = true;
-            }
-            else
-                trace("Connection closed");
-        }
-        else
-        {
-            GlobalBroadcaster.broadcast(Disconnected);
-            if (!Dialogs.getQueue().hasActiveDialog(ReconnectionPopUp))
-                Dialogs.getQueue().add(new ReconnectionDialog());
-            startReconnectionAttempts(onConnectionReopened);
-        }
+        
+        GlobalBroadcaster.broadcast(Disconnected);
+        startReconnectionAttempts(onConnectionReopened);
     }
 
     private static function onConnectionError(err:Event)
@@ -252,10 +169,16 @@ class Networker
         _ws.onerror = onConnectionError;
 
         suppressAlert = false;
-        Requests.greet(Reconnect(reconnectionToken, incomingBuffer.lastProcessedEventID), onGreetingAnswered.bind(_, true));
+        greet(Reconnect(reconnectionToken, lastProcessedEventID), true);
     }
 
-    private static function onGreetingAnswered(data:GreetingResponseData, ?dontLeave:Bool = false)
+    private static function greet(greeting:Greeting, stayOnPage:Bool)
+    {
+        stayOnPageOnGreetingResponse = stayOnPage;
+        sendMessage(Greet(greeting, Build.buildTime(), Config.dict.getInt("min-server-build")));
+    }
+
+    private static function onGreetingAnswered(data:GreetingResponseData)
     {
         switch data 
         {
@@ -265,29 +188,43 @@ class Networker
                 sid = sessionID;
                 if (invalidCredentials)
                     CredentialCookies.removeLoginDetails();
-                if (!dontLeave)
+                if (!stayOnPageOnGreetingResponse)
                     ScreenNavigator.navigate();
                 if (isShuttingDown)
                     Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE);
-            case Logged(sessionID, token, incomingChallenges, ongoingFiniteGame, isShuttingDown):
+            case Logged(sessionID, token, incomingChallenges, isShuttingDown):
                 GlobalBroadcaster.broadcast(Connected);
                 reconnectionToken = token;
                 sid = sessionID;
                 LoginManager.assignCredentials(CredentialCookies.getLogin(), CredentialCookies.getPassword(), None);
                 GlobalBroadcaster.broadcast(IncomingChallengesBatch(incomingChallenges));
-                if (ongoingFiniteGame != null)
-                    SceneManager.getScene().toScreen(GameFromModelData(ongoingFiniteGame, LoginManager.getRef()));
-                else
-                {
-                    if (!dontLeave)
-                        ScreenNavigator.navigate();
-                    if (isShuttingDown)
-                        Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE); 
-                }
-            case Reconnected(missedEvents):
-                Dialogs.getQueue().closeGroup(ReconnectionPopUp);
+                if (!stayOnPageOnGreetingResponse)
+                    ScreenNavigator.navigate();
+                if (isShuttingDown)
+                    Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE);
+            case Reconnected(missedEvents, missedRequestResponses, lastReceivedClientEventID):
                 GlobalBroadcaster.broadcast(Connected);
-                incomingBuffer.pushMissed(missedEvents);
+                
+                var eventTree:BalancedTree<Int, ServerEvent> = new BalancedTree();
+                for (id => event in missedEvents.keyValueIterator())
+                    eventTree.set(id, event);
+
+                for (id => event in eventTree.keyValueIterator())
+                    eventQueue.processEvent(id, event);
+
+                for (id => response in missedRequestResponses.keyValueIterator())
+                    Requests.processResponse(id, response);
+
+                //TODO: Undo events if needed
+                var lastSentIDBeforeReconnection:Int = lastSentEventID;
+                var missedClientEventID:Int = lastReceivedClientEventID + 1;
+                while (missedClientEventID <= lastSentIDBeforeReconnection)
+                {
+                    emitEvent(sentEvents.get(missedClientEventID));
+                    missedClientEventID++;
+                }
+
+                Requests.repeatUnansweredRequests();
             case OutdatedClient:
                 if (Url.isFallback())
                     Browser.window.location.replace(Url.toActual());
@@ -300,18 +237,6 @@ class Networker
                     Dialogs.alert(OUTDATED_SERVER_ERROR_TEXT, OUTDATED_SERVER_ERROR_TITLE);
             case NotReconnected:
                 Browser.location.reload(false);
-        }
-
-        if (data.match(ConnectedAsGuest(_, _, _, _) | Logged(_, _, _, _, _) | Reconnected(_)))
-        {
-            if (serverHeartbeatTimeoutTimer != null)
-                serverHeartbeatTimeoutTimer.stop();
-            serverHeartbeatTimeoutTimer = Timer.delay(dropConnection, serverHeartbeatTimeoutMs);
-
-            if (clientHeartbeatTimer != null)
-                clientHeartbeatTimer.stop();
-            clientHeartbeatTimer = new Timer(clientHeartbeatIntervalMs);
-            clientHeartbeatTimer.run = emitEvent.bind(KeepAliveBeat);
         }
     }
     
@@ -328,7 +253,7 @@ class Networker
 
         Timer.delay(_ws.open, Math.round(backoffDelay));
 
-        if (backoffDelay < 16000)
+        if (backoffDelay < 8000)
             backoffDelay += backoffDelay * (Math.random() - 0.5);
         else
             backoffDelay += 1000 * (Math.random() - 0.5);
@@ -370,29 +295,20 @@ class Networker
             trace(event.getName(), event.getParameters());
         else if (_ws != null)
         {
-            var messageID:Int = -1;
+            lastSentEventID++;
+            sentEvents.set(lastSentEventID, event);
 
-            switch event 
-            {
-                case Greet(_, _, _), KeepAliveBeat, ResendRequest(_, _), MissedEvents(_):
-                default:
-                    messageID = lastSentMessageID + 1;
-                    lastSentMessageID = messageID;
-                    sentEvents.set(messageID, event);
-            }
-
-            _ws.send(Serializer.run(new ClientMessage(messageID, event)));
+            sendMessage(ClientMessage.Event(lastSentEventID, event));
         }
     }
 
-    private static function requestResend(from:Int, to:Int) 
+    private static function sendRequest(id:Int, req:ClientRequest)
     {
-        if (from > to)
-            return;
+        sendMessage(ClientMessage.Request(id, req));
+    }
 
-        if (!Dialogs.getQueue().hasActiveDialog(ReconnectionPopUp))
-            Dialogs.getQueue().add(new ReconnectionDialog());
-
-        emitEvent(ResendRequest(from, to));
+    private static function sendMessage(message:ClientMessage)
+    {
+        _ws.send(Serializer.run(message));
     }
 }
