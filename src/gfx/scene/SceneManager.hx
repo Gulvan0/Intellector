@@ -6,7 +6,8 @@ import haxe.ui.core.Component;
 import net.shared.utils.UnixTimestamp;
 import haxe.ui.events.UIEvent;
 import haxe.Timer;
-import net.shared.ServerEvent;
+import net.Networker;
+import net.shared.message.ServerEvent;
 import haxe.ui.core.Screen as HaxeUIScreen;
 
 using StringTools;

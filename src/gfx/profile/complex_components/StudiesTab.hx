@@ -4,6 +4,7 @@ import gfx.scene.SceneManager;
 import haxe.ui.containers.VBox;
 import gfx.popups.StudyParamsDialog;
 import tests.SimpleTests;
+import net.Networker;
 import haxe.ds.BalancedTree;
 import dict.Dictionary;
 import gfx.profile.simple_components.StudyWidget;

@@ -16,6 +16,7 @@ import js.html.Blob;
 import haxe.Timer;
 import gfx.Dialogs;
 import js.Browser;
+import net.Networker;
 import net.shared.PieceColor;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.dialogs.Dialog;

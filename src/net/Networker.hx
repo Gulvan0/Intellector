@@ -1,9 +1,8 @@
-package;
+package net;
 
 import net.shared.dataobj.Greeting;
 import net.shared.message.ClientMessage;
 import net.shared.message.ClientRequest;
-import net.INetObserver;
 import lzstring.LZString;
 import js.lib.Uint8Array;
 import utils.StringUtils;
@@ -15,13 +14,11 @@ import js.Browser;
 import gfx.scene.ScreenNavigator;
 import browser.CredentialCookies;
 import net.shared.dataobj.GreetingResponseData;
-import net.Requests;
 import hx.ws.Types.MessageType;
 import haxe.Unserializer;
 import haxe.Serializer;
 import js.html.Event;
 import net.shared.dataobj.SessionRestorationResult;
-import net.EventProcessingQueue;
 import gfx.Dialogs;
 import gfx.scene.SceneManager;
 import hx.ws.WebSocket;

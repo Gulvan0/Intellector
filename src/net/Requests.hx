@@ -64,7 +64,7 @@ class Requests
         }
     }
 
-    /*
+    /* //TODO: Move
 
     public static function signin(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void) 
     {

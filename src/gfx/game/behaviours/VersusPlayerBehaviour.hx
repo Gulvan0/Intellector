@@ -11,6 +11,7 @@ import net.shared.dataobj.TimeReservesData;
 import GlobalBroadcaster.GlobalEvent;
 import gfx.game.events.GameboardEvent;
 import gfx.game.models.MatchVersusPlayerModel;
+import net.Networker;
 
 abstract class VersusPlayerBehaviour extends OwnGameBehaviour
 {

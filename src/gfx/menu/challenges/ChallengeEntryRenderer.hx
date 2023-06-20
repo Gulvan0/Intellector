@@ -17,6 +17,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.core.ItemRenderer;
 import dict.Dictionary;
 import net.shared.dataobj.ChallengeParams;
+import net.Networker;
 
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/menu/challenges/challenge_entry_renderer.xml"))
 class ChallengeEntryRenderer extends ItemRenderer

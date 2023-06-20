@@ -7,6 +7,7 @@ import gfx.basic_components.BaseDialog;
 import gfx.ResponsiveToolbox.Dimension;
 import gfx.profile.complex_components.StudyFilterList;
 import net.Requests;
+import net.Networker;
 import haxe.ui.events.MouseEvent;
 import dict.Dictionary;
 import net.shared.dataobj.StudyInfo;

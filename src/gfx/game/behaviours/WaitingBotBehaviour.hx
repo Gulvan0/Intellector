@@ -6,6 +6,7 @@ import dict.Phrase;
 import gfx.game.behaviours.util.GameboardEventHandler;
 import gfx.game.models.MatchVersusBotModel;
 import net.shared.PieceColor;
+import net.Networker;
 
 abstract class WaitingBotBehaviour extends VersusBotBehaviour 
 {

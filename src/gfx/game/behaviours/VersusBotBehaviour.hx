@@ -10,6 +10,7 @@ import net.shared.utils.UnixTimestamp;
 import gfx.game.models.MatchVersusBotModel;
 import net.shared.dataobj.OfferAction;
 import net.shared.dataobj.OfferKind;
+import net.Networker;
 
 abstract class VersusBotBehaviour extends OwnGameBehaviour
 {

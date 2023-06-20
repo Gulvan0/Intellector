@@ -29,6 +29,7 @@ import gfx.screens.LanguageSelectIntro;
 import haxe.ui.Toolkit;
 import js.Browser;
 import tests.UITest;
+import net.Networker;
 
 using StringTools;
 

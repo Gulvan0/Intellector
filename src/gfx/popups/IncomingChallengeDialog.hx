@@ -9,6 +9,7 @@ import net.shared.TimeControlType;
 import haxe.ui.tooltips.ToolTipManager;
 import gfx.common.SituationTooltipRenderer;
 import assets.Paths;
+import net.Networker;
 import dict.Dictionary;
 import net.shared.TimeControl;
 import haxe.ui.events.MouseEvent;

@@ -15,6 +15,7 @@ import net.shared.dataobj.OfferKind;
 import net.shared.PieceColor;
 import net.shared.dataobj.TimeReservesData;
 import gfx.game.events.GameboardEvent;
+import net.Networker;
 import GlobalBroadcaster.GlobalEvent;
 
 abstract class OwnGameBehaviour extends GameRelatedBehaviour

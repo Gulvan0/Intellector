@@ -7,6 +7,7 @@ import gfx.basic_components.BaseDialog;
 import utils.StringUtils;
 import net.shared.dataobj.ChallengeParams;
 import net.Requests;
+import net.Networker;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.components.Button;
 import gfx.profile.simple_components.TCEloEntry;

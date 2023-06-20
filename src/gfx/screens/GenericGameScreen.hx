@@ -3,7 +3,7 @@ package gfx.screens;
 import gfx.game.interfaces.IGameScreenGetters;
 import gfx.utils.SpecialControlSettings as SpControlSettings;
 import gfx.game.interfaces.IGameScreen;
-import net.shared.ServerEvent;
+import net.shared.message.ServerEvent;
 import gfx.game.interfaces.IBehaviour;
 import gfx.game.events.ModelUpdateEvent;
 import gfx.game.events.PositionEditorEvent;
@@ -26,7 +26,7 @@ import gfx.scene.Screen;
 import haxe.ui.core.Component;
 import gfx.ResponsiveToolbox.ResponsivenessRule;
 import gfx.ResponsiveToolbox.ResponsiveProperty;
-import net.shared.dataobj.ViewedScreen;
+import net.Networker;
 import dict.Phrase;
 
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/screens/generic_game_screen.xml"))

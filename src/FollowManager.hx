@@ -1,6 +1,7 @@
 package;
 
 import net.Requests;
+import net.Networker;
 
 class FollowManager 
 {

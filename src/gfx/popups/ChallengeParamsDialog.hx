@@ -10,6 +10,7 @@ import net.shared.TimeControlType;
 import haxe.ui.locale.LocaleManager;
 import haxe.ui.components.Image;
 import haxe.Timer;
+import net.Networker;
 import haxe.ui.components.Button;
 import gfx.game.board.Board;
 import haxe.ui.events.UIEvent;

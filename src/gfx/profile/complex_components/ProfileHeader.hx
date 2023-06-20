@@ -3,6 +3,7 @@ package gfx.profile.complex_components;
 import browser.ChallengeParamsCookies;
 import gfx.popups.ChallengeParamsDialog;
 import haxe.Timer;
+import net.Networker;
 import haxe.ui.containers.VBox;
 import net.Requests;
 import net.shared.dataobj.ChallengeParams;
