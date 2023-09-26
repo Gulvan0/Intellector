@@ -17,7 +17,7 @@ import haxe.ui.components.DropDown;
             <label id="games" style="font-size: 16px;color: #888888;" />
             <label id="elo" style="font-size: 16px;color: #888888;" />
         </vbox>
-    </item-renderer>16
+    </item-renderer>
 ')
 private class TimeControlFilterRenderer extends ItemRenderer {}
 

@@ -1,7 +1,6 @@
 package gfx.basic_components;
 
 import browser.Clipboard;
-import haxe.ui.util.ImageLoader;
 import haxe.Timer;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.containers.HBox;
