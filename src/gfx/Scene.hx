@@ -131,6 +131,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         playerProfileBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM);
         vkBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_VK_ITEM);
         discordBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_DISCORD_ITEM);
+        iterationBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_ITERATION_ITEM);
         logInBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_LOGIN_ITEM);
         myProfileBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_MY_PROFILE_ITEM);
         settingsBtn.text = Dictionary.getPhrase(MENUBAR_ACCOUNT_MENU_SETTINGS_ITEM);
@@ -144,6 +145,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         sidemenu.playerProfileBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM);
         sidemenu.vkBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_VK_ITEM);
         sidemenu.discordBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_DISCORD_ITEM);
+        sidemenu.iterationBtn.text = Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_ITERATION_ITEM);
     }
 
     private function onSendChallengeResultReceived(result:SendChallengeResult)
@@ -328,6 +330,11 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         Browser.window.open("https://discord.gg/f8chehcnV5", "_blank");
     }
 
+    private function onIterationBtnPressed(e)
+    {
+        Browser.window.open("https://t.me/iteracia_club", "_blank");
+    }
+
     private function navigateToProfile(requestedLogin:String)
     {
         Requests.getPlayerProfile(requestedLogin);
@@ -380,6 +387,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         playerProfileBtn.onClick = onPlayerProfilePressed;
         vkBtn.onClick = onVKBtnPressed;
         discordBtn.onClick = onDiscordBtnPressed;
+        iterationBtn.onClick = onIterationBtnPressed;
 
         sidemenu.siteName.onClick = e -> {sidemenu.hide(); onSiteNamePressed(e);};
         sidemenu.createChallengeBtn.onClick = e -> {sidemenu.hide(); onCreateChallengePressed(e);};
@@ -391,6 +399,7 @@ class Scene extends VBox implements INetObserver implements IGlobalEventObserver
         sidemenu.playerProfileBtn.onClick = e -> {sidemenu.hide(); onPlayerProfilePressed(e);};
         sidemenu.vkBtn.onClick = e -> {sidemenu.hide(); onVKBtnPressed(e);};
         sidemenu.discordBtn.onClick = e -> {sidemenu.hide(); onDiscordBtnPressed(e);};
+        sidemenu.iterationBtn.onClick = e -> {sidemenu.hide(); onIterationBtnPressed(e);};
 
         logInBtn.onClick = onLogInPressed;
         myProfileBtn.onClick = onMyProfilePressed;

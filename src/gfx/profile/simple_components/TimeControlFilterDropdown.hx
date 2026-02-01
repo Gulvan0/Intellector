@@ -10,7 +10,7 @@ import net.shared.TimeControlType;
 import haxe.ui.components.DropDown;
 
 @:xml('
-    <item-renderer layoutName="horizontal" width="100%" height="71px">
+    <item-renderer layout="horizontal" width="100%" height="71px">
         <image width="71px" height="71px" id="img" />
         <vbox verticalAlign="center" style="spacing:0px">
             <label id="tc" style="font-size: 20px;" />

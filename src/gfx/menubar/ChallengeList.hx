@@ -1,8 +1,8 @@
 package gfx.menubar;
 
+import haxe.ui.events.MenuEvent;
 import haxe.ui.events.UIEvent;
 import haxe.ui.containers.menus.Menu;
-import haxe.ui.containers.menus.Menu.MenuEvent;
 import haxe.ui.containers.Stack;
 import struct.ChallengeParams;
 import haxe.ui.containers.ListView;

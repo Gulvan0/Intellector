@@ -159,6 +159,8 @@ class Dictionary
                 return ["VK Group", "Группа VK"];
             case MENUBAR_SOCIAL_MENU_DISCORD_ITEM:
                 return ["Discord Server", "Сервер Discord"];
+            case MENUBAR_SOCIAL_MENU_ITERATION_ITEM:
+                return ["Iteration Club", "Клуб \"Итерация\""];
             case MENUBAR_CHALLENGES_NO_CHALLENGES_PLACEHOLDER:
                 return ["No challenges", "Нет вызовов"];
             case MENUBAR_CHALLENGES_HEADER_INCOMING_CHALLENGE:

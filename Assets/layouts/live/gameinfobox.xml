@@ -1,4 +1,4 @@
-<card width="100%" layoutName="vertical">
+<card width="100%" layout="vertical">
     <vbox width="100%" style="spacing:5px">
         <hbox width="100%">
             <label id="matchParameters" horizontalAlign="left" style="font-size:16px;text-align:left" />

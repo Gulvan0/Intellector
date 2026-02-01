@@ -67,6 +67,7 @@
             <menuitem id="playerProfileBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_PLAYER_PROFILE_ITEM)}" icon="assets/symbols/upper_menu/menu_items/player_profile.svg" />
             <menuitem id="vkBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_VK_ITEM)}" icon="assets/symbols/upper_menu/menu_items/vk.svg" />
             <menuitem id="discordBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_DISCORD_ITEM)}" icon="assets/symbols/upper_menu/menu_items/discord.svg" />
+            <menuitem id="iterationBtn" text="${Dictionary.getPhrase(MENUBAR_SOCIAL_MENU_ITERATION_ITEM)}" icon="assets/symbols/upper_menu/menu_items/iteration.svg" />
         </menu>
 
         <spacer width="100%" />

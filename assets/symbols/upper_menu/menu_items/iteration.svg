@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<svg width="120" height="120" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" version="1.1" xml:space="preserve">
+ <desc>Sdelano: LOGOZA.RU</desc>
+ <defs>
+  <style type="text/css">@import url(http://fonts.googleapis.com/css?family=Open+Sans:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i)</style>
+  <style type="text/css">@import url(http://fonts.googleapis.com/css?family=Open+Sans:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i)</style>
+ </defs>
+ <g class="layer">
+  <title>Layer 1</title>
+  <g id="svg_6" transform="matrix(0.21 0 0 0.21 202.31 220)">
+   <filter height="140%" id="SVGID_343" width="140%" x="-20%" y="-20%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+    <feOffset dx="0" dy="0" result="oBlur"/>
+    <feFlood flood-color="rgb(153,153,153)" flood-opacity="1"/>
+    <feComposite in2="oBlur" operator="in"/>
+    <feMerge>
+     <feMergeNode/>
+     <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+   </filter>
+   <g filter="url(#SVGID_343)" id="svg_7">
+    <g id="Layer_1" transform="matrix(1 0 0 1 -117.95 73.7)">
+     <polygon fill="rgb(24,68,115)" fill-rule="nonzero" id="svg_8" points="-715.7880249023438,-908.1094942092896 -753.18798828125,-929.8095064163208 -753.2880249023438,-929.8095064163208 -788.2880249023438,-950.1094942092896 -788.2880249023438,-706.9094820022583 -577.9879760742188,-585.509518623352 -577.9879760742188,-675.009518623352 -715.7880249023438,-754.6094942092896 " stroke-dashoffset="0" stroke-miterlimit="4"/>
+    </g>
+    <g id="svg_1" transform="matrix(1 0 0 1 0.8 -174.7)">
+     <polygon fill="rgb(3,182,240)" fill-rule="nonzero" id="svg_9" points="-544.6380004882812,-686.509518623352 -506.2380676269531,-708.8095064163208 -473.2380676269531,-727.9094820022583 -683.0380249023438,-849.1094942092896 -893.0379638671875,-727.8095064163208 -837.5379638671875,-695.6094942092896 -835.0379638671875,-694.3095064163208 -822.43798828125,-687.009518623352 -683.93798828125,-766.9094820022583 " stroke-dashoffset="0" stroke-miterlimit="4"/>
+    </g>
+    <g id="svg_2" transform="matrix(1 0 0 1 117.95 73.7)">
+     <polygon fill="rgb(5,130,210)" fill-rule="nonzero" id="svg_10" points="-613.0880126953125,-929.8095064163208 -613.0880126953125,-929.8095064163208 -650.4879760742188,-908.1094942092896 -650.4879760742188,-754.6094942092896 -788.2880249023438,-675.009518623352 -788.2880249023438,-585.509518623352 -577.9879760742188,-706.9094820022583 -577.9879760742188,-950.1094942092896 " stroke-dashoffset="0" stroke-miterlimit="4"/>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>
