@@ -9,6 +9,8 @@
 -lib format
 -lib haxe-strings
 -lib lzstring
+-lib http
+-lib json2object
 #-lib utest
 
 --resource ./assets/resources/changelog.json@changelog
