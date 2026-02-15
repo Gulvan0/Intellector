@@ -7,7 +7,7 @@ import gfx.ScreenType;
 import js.Browser;
 using hx.strings.Strings;
 
-class Url 
+class Url
 {
     private static var currentTitle:String;
 
@@ -16,7 +16,7 @@ class Url
         return currentTitle;
     }
 
-    public static function clear() 
+    public static function clear()
     {
         setPath("");
     }
@@ -51,40 +51,31 @@ class Url
 
     public static function isFallback():Bool
     {
-        var actualVerPathPrefix:Null<String> = Config.dict.getString("actual-path-prefix");
-        var prevVerPathPrefix:Null<String> = Config.dict.getString("prev-path-prefix");
-
-        if (actualVerPathPrefix != null && prevVerPathPrefix != null)
-            return Browser.window.location.pathname.startsWith(prevVerPathPrefix);
+        if (Config.actualPathPrefix != null && Config.prevPathPrefix != null)
+            return Browser.window.location.pathname.startsWith(Config.prevPathPrefix);
         else
             return false;
     }
 
     public static function toFallback():String
     {
-        var actualVerPathPrefix:Null<String> = Config.dict.getString("actual-path-prefix");
-        var prevVerPathPrefix:Null<String> = Config.dict.getString("prev-path-prefix");
-
-        if (actualVerPathPrefix != null && prevVerPathPrefix != null)
-            return Browser.window.location.href.replaceFirstIgnoreCase(actualVerPathPrefix, prevVerPathPrefix);
+        if (Config.actualPathPrefix != null && Config.prevPathPrefix != null)
+            return Browser.window.location.href.replaceFirstIgnoreCase(Config.actualPathPrefix, Config.prevPathPrefix);
         else
             return Browser.window.location.href;
     }
 
     public static function toActual():String
     {
-        var actualVerPathPrefix:Null<String> = Config.dict.getString("actual-path-prefix");
-        var prevVerPathPrefix:Null<String> = Config.dict.getString("prev-path-prefix");
-
-        if (actualVerPathPrefix != null && prevVerPathPrefix != null)
-            return Browser.window.location.href.replaceFirstIgnoreCase(prevVerPathPrefix, actualVerPathPrefix);
+        if (Config.actualPathPrefix != null && Config.prevPathPrefix != null)
+            return Browser.window.location.href.replaceFirstIgnoreCase(Config.prevPathPrefix, Config.actualPathPrefix);
         else
             return Browser.window.location.href;
     }
 
     private static function getURLPath(type:ScreenType):Null<String>
     {
-        return switch type 
+        return switch type
         {
             case MainMenu: "home";
             case Analysis(_, _, exploredStudyData): exploredStudyData == null? "analysis" : 'study/${exploredStudyData.id}';

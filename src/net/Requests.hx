@@ -29,12 +29,12 @@ class Requests
     public static function greet(greeting:Greeting, callback:GreetingResponseData->Void)
     {
         Networker.addHandler(greet_handler.bind(callback));
-        Networker.emitEvent(Greet(greeting, Build.buildTime(), Config.dict.getInt("min-server-build")));
+        Networker.emitEvent(Greet(greeting, Build.buildTime(), 0/* Config.dict.getInt("min-server-build") */));
     }
 
     private static function greet_handler(callback:GreetingResponseData->Void, event:ServerEvent):Bool
     {
-        switch event 
+        switch event
         {
             case GreetingResponse(data):
                 callback(data);
@@ -44,18 +44,18 @@ class Requests
         }
     }
 
-    public static function signin(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void) 
+    public static function signin(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void)
     {
         Networker.addHandler(signin_handler.bind(login, password, remember, onSuccess, onFail));
         Networker.emitEvent(Login(login, password));
     }
 
-    private static function signin_handler(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void, event:ServerEvent) 
+    private static function signin_handler(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void, event:ServerEvent)
     {
         switch event
         {
             case LoginResult(result):
-                switch result 
+                switch result
                 {
                     case Success(incomingChallenges):
                         LoginManager.assignCredentials(login, password, remember? LongTerm : ShortTerm);
@@ -75,13 +75,13 @@ class Requests
         }
     }
 
-    public static function register(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void) 
+    public static function register(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void)
     {
         Networker.addHandler(register_handler.bind(login, password, remember, onSuccess, onFail));
         Networker.emitEvent(Register(login, password));
     }
 
-    private static function register_handler(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void, event:ServerEvent) 
+    private static function register_handler(login:String, password:String, remember:Bool, onSuccess:Void->Void, onFail:Void->Void, event:ServerEvent)
     {
         switch event
         {
@@ -123,7 +123,7 @@ class Requests
         return true;
     }
 
-    public static function getOpenChallenge(id:Int) 
+    public static function getOpenChallenge(id:Int)
     {
         Networker.addHandler(getOpenChallenge_handler);
         Networker.emitEvent(GetOpenChallenge(id));
@@ -150,13 +150,13 @@ class Requests
         return true;
     }
 
-    public static function getMiniProfile(login:String) 
+    public static function getMiniProfile(login:String)
     {
         Networker.addHandler(getMiniProfile_handler.bind(login));
         Networker.emitEvent(GetMiniProfile(login));
     }
 
-    private static function getMiniProfile_handler(login:String, event:ServerEvent) 
+    private static function getMiniProfile_handler(login:String, event:ServerEvent)
     {
         switch event
         {
@@ -170,13 +170,13 @@ class Requests
         return true;
     }
 
-    public static function getPlayerProfile(login:String, ?returnToMainOnFailed:Bool = false) 
+    public static function getPlayerProfile(login:String, ?returnToMainOnFailed:Bool = false)
     {
         Networker.addHandler(getPlayerProfile_handler.bind(login, returnToMainOnFailed));
         Networker.emitEvent(GetPlayerProfile(login));
     }
 
-    private static function getPlayerProfile_handler(login:String, returnToMainOnFailed:Bool, event:ServerEvent) 
+    private static function getPlayerProfile_handler(login:String, returnToMainOnFailed:Bool, event:ServerEvent)
     {
         switch event
         {
@@ -204,7 +204,7 @@ class Requests
         Networker.emitEvent(GetOngoingGamesByLogin(login));
     }
 
-    private static function getPlayerGames_handler(callback:GetGamesCallback, event:ServerEvent) 
+    private static function getPlayerGames_handler(callback:GetGamesCallback, event:ServerEvent)
     {
         switch event
         {
@@ -224,7 +224,7 @@ class Requests
         Networker.emitEvent(GetStudiesByLogin(login, after, pageSize, filterByTags));
     }
 
-    private static function getPlayerStudies_handler(callback:GetStudiesCallback, event:ServerEvent) 
+    private static function getPlayerStudies_handler(callback:GetStudiesCallback, event:ServerEvent)
     {
         switch event
         {
@@ -238,13 +238,13 @@ class Requests
         return true;
     }
 
-    public static function getStudy(id:Int) 
+    public static function getStudy(id:Int)
     {
         Networker.addHandler(getStudy_handler.bind(id));
         Networker.emitEvent(GetStudy(id));
     }
 
-    private static function getStudy_handler(id:Int, event:ServerEvent) 
+    private static function getStudy_handler(id:Int, event:ServerEvent)
     {
         switch event
         {
@@ -259,13 +259,13 @@ class Requests
         return true;
     }
 
-    public static function createStudy(params:StudyInfo) 
+    public static function createStudy(params:StudyInfo)
     {
         Networker.addHandler(createStudy_handler);
         Networker.emitEvent(CreateStudy(params));
     }
 
-    private static function createStudy_handler(event:ServerEvent) 
+    private static function createStudy_handler(event:ServerEvent)
     {
         switch event
         {
@@ -287,7 +287,7 @@ class Requests
     {
         switch event
         {
-            case SpectationData(data): 
+            case SpectationData(data):
 		        var parsedData:GameLogParserOutput = GameLogParser.parse(data.currentLog);
                 onStartedFollowing(login, data.id);
                 SceneManager.toScreen(LiveGame(data.id, Ongoing(parsedData, data.timeData, login)));

@@ -45,13 +45,13 @@ class Main
 {
 	public static var app:HaxeUIApp;
 
-	public static function main() 
-    {
-        app = new HaxeUIApp();
-        app.preloaderClass = DefaultPreloader;
+	public static function main()
+	{
+		app = new HaxeUIApp();
+		app.preloaderClass = DefaultPreloader;
 		app.icon = NormalFavicon;
-        app.ready(onAppReady);
-    }
+		app.ready(onAppReady);
+	}
 
 	private static function onAppReady()
 	{
@@ -61,11 +61,12 @@ class Main
 	/**
 		Some purely technical aspects for the app to work correctly
 	**/
-	private static function init(onInitFinished:Void->Void) 
+	private static function init(onInitFinished:Void->Void)
 	{
 		Browser.window.onpopstate = ScreenNavigator.navigate;
 		Browser.document.addEventListener('contextmenu', event -> event.preventDefault());
-		Browser.document.addEventListener('wheel', event -> {
+		Browser.document.addEventListener('wheel', event ->
+		{
 			if (event.ctrlKey)
 				event.preventDefault();
 		}, true);
@@ -78,7 +79,8 @@ class Main
 		Blinker.init();
 		OpeningTree.init();
 		Changelog.init();
-		Config.init(onInitFinished);
+
+		onInitFinished();
 	}
 
 	/**
@@ -97,7 +99,7 @@ class Main
 		Attempt to load user's language preference from their cookies.
 		If no exist (usually when it's their first visit), ask user to choose
 	**/
-	private static function deriveLanguage() 
+	private static function deriveLanguage()
 	{
 		var langInitializedFromCookie:Bool = Preferences.language.load();
 
@@ -110,7 +112,7 @@ class Main
 	/**
 		Set locale and finally attempt to connect
 	**/
-	private static function onLanguageReady() 
+	private static function onLanguageReady()
 	{
 		if (Preferences.language.get() == RU)
 			LocaleManager.instance.language = "ru";
@@ -120,7 +122,7 @@ class Main
 		SceneManager.updateLanguage();
 
 		Networker.launch();
-		//test();
+		// test();
 	}
 
 	/**
@@ -130,6 +132,6 @@ class Main
 	{
 		Networker.ignoreEmitCalls = true;
 		LoginManager.imitateLoggedState("gulvan");
-		//Your testing code here (refer to `tests` package)
+		// Your testing code here (refer to `tests` package)
 	}
 }

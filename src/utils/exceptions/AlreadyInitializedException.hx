@@ -4,10 +4,10 @@ import haxe.PosInfos;
 import haxe.Exception;
 import haxe.exceptions.PosException;
 
-class AlreadyInitializedException extends PosException 
+class AlreadyInitializedException extends PosException
 {
-    public function new(message:String = 'Already initialized', ?previous:Exception, ?pos:PosInfos):Void 
+    public function new(message:String = 'Already initialized', ?previous:Exception, ?pos:PosInfos):Void
     {
-		super(message, previous, pos);
-	}
+		  super(message, previous, pos);
+	  }
 }

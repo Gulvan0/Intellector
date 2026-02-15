@@ -3,7 +3,7 @@ package tests.ui.utils.data;
 import js.Cookie;
 import tests.ui.utils.data.CheckModule.constructCheckModule;
 
-class TestCaseDescriptor 
+class TestCaseDescriptor
 {
     public var checks:Map<String, CheckModule> = [];
     private var macros:Array<Macro> = [];
@@ -13,14 +13,14 @@ class TestCaseDescriptor
     private static function constructCheckModuleMap(json:Dynamic, testCaseName:String):Map<String, CheckModule>
     {
         var map:Map<String, CheckModule> = [];
-    
+
         for (checkModuleName in Reflect.fields(json))
         {
             var moduleJson = Reflect.field(json, checkModuleName);
             var module:CheckModule = constructCheckModule(moduleJson, testCaseName, checkModuleName);
             map.set(checkModuleName, module);
         }
-    
+
         return map;
     }
 
@@ -72,7 +72,7 @@ class TestCaseDescriptor
             untrackedMacros.remove(m.name);
             updateUntrackedMacrosCookie();
         }
-        else 
+        else
             throw 'Attempting to remove published macro ${m.name}';
     }
 
@@ -114,7 +114,7 @@ class TestCaseDescriptor
         Cookie.set("_" + UITest.getCurrentTestCase(), s, 60 * 60 * 24 * 2);
     }
 
-    public function proposeMacros(exclude:Array<String>) 
+    public function proposeMacros(exclude:Array<String>)
     {
         for (m in untrackedMacros)
         {
@@ -122,12 +122,12 @@ class TestCaseDescriptor
                 continue;
 
             var message:String = 'A new macro was proposed:\n```\n' + m.serialize() + '\n```';
-            Telegram.notifyAdmin(message);
+            trace(message);
         }
     }
 
-    private function new() 
+    private function new()
     {
-        
+
     }
 }

@@ -49,7 +49,7 @@ class Networker
     private static var reconnectionToken:String = "not_set";
     private static var sid:Int = -1;
     private static var isConnected:Bool = false;
-    public static var ignoreEmitCalls:Bool = false; 
+    public static var ignoreEmitCalls:Bool = false;
 
     private static var serverHeartbeatTimeoutTimer:Timer;
     private static var clientHeartbeatTimer:Timer;
@@ -71,23 +71,23 @@ class Networker
         _ws = new WebSocket(address, false);
     }
 
-    public static function launch() 
+    public static function launch()
     {
         Serializer.USE_ENUM_INDEX = true;
 
-        if (Config.dict.getBool("secure"))
+        if (true /*Config.dict.getBool("secure")*/)
             address = "wss://";
         else
             address = "ws://";
 
-        address += Config.dict.getString("host") + ":" + Config.dict.getString("port");
+        address += /* Config.dict.getString("host") +  */":"/*  + Config.dict.getString("port") */;
 
-        clientHeartbeatIntervalMs = Config.dict.getInt("keep-alive-beat-interval-ms");
+        clientHeartbeatIntervalMs = null/* Config.dict.getInt("keep-alive-beat-interval-ms") */;
 
         if (clientHeartbeatIntervalMs == null || clientHeartbeatIntervalMs <= 0)
             clientHeartbeatIntervalMs = 5000;
 
-        serverHeartbeatTimeoutMs = Config.dict.getInt("keep-alive-timeout-ms");
+        serverHeartbeatTimeoutMs = null/* Config.dict.getInt("keep-alive-timeout-ms") */;
 
         if (serverHeartbeatTimeoutMs == null || serverHeartbeatTimeoutMs <= 0)
             serverHeartbeatTimeoutMs = 10000;
@@ -97,7 +97,7 @@ class Networker
         lastSentMessageID = 0;
 
         createWS();
-        
+
         _ws.onopen = onConnectionOpen.bind(true);
         _ws.onerror = onErrorBeforeOpen;
 
@@ -110,8 +110,8 @@ class Networker
         Dialogs.info(SERVER_UNAVAILABLE_DIALOG_TEXT, SERVER_UNAVAILABLE_DIALOG_TITLE);
         startReconnectionAttempts(onConnectionOpen.bind(false));
     }
-    
-    public static function dropConnection() 
+
+    public static function dropConnection()
     {
         if (_ws != null)
         {
@@ -156,7 +156,7 @@ class Networker
     {
         var message:ServerMessage;
 
-        switch msg 
+        switch msg
         {
             case BytesMessage(content):
                 var lz = new LZString();
@@ -257,7 +257,7 @@ class Networker
 
 	private static function onGreetingAnswered(data:GreetingResponseData, ?dontLeave:Bool = false)
 	{
-		switch data 
+		switch data
 		{
 			case ConnectedAsGuest(sessionID, token, invalidCredentials, isShuttingDown):
                 SceneManager.onConnected();
@@ -285,7 +285,7 @@ class Networker
                     if (!dontLeave)
                         ScreenNavigator.navigate();
                     if (isShuttingDown)
-                        Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE); 
+                        Dialogs.alert(SERVER_IS_SHUTTING_DOWN_WARNING_TEXT, SERVER_IS_SHUTTING_DOWN_WARNING_TITLE);
                 }
 			case Reconnected(missedEvents):
                 Dialogs.getQueue().closeGroup(ReconnectionPopUp);
@@ -295,7 +295,7 @@ class Networker
                 if (Url.isFallback())
                     Browser.window.location.replace(Url.toActual());
                 else
-                    Dialogs.alert(OUTDATED_CLIENT_ERROR_TEXT, OUTDATED_CLIENT_ERROR_TITLE); 
+                    Dialogs.alert(OUTDATED_CLIENT_ERROR_TEXT, OUTDATED_CLIENT_ERROR_TITLE);
             case OutdatedServer:
                 if (!Url.isFallback())
                     Browser.window.location.replace(Url.toFallback());
@@ -317,7 +317,7 @@ class Networker
             clientHeartbeatTimer.run = emitEvent.bind(KeepAliveBeat);
         }
     }
-    
+
     private static function retryConnecting(onOpen:Void->Void)
     {
         if (_ws != null)
@@ -375,7 +375,7 @@ class Networker
         {
             var messageID:Int = -1;
 
-            switch event 
+            switch event
             {
                 case Greet(_, _, _), KeepAliveBeat, ResendRequest(_, _), MissedEvents(_):
                 default:
@@ -388,7 +388,7 @@ class Networker
         }
     }
 
-    private static function requestResend(from:Int, to:Int) 
+    private static function requestResend(from:Int, to:Int)
     {
         if (from > to)
             return;
