@@ -1,9 +1,18 @@
 {
+    "workbench.colorTheme": "Bearded Theme Black & Gold Soft",
+    "editor.fontFamily": "'Monaspace Argon', monospace",
+    "editor.codeLensFontFamily": "'Monaspace Argon', monospace",
+    "haxe.executable": "haxe",
     "haxe.enableServerView": true,
     "haxe.displayServer": {
         "arguments": ["-v"],
         "print": {
             "reusing": true
         }
-    }
+    },
+	"haxe.configurations": [
+		["html5.hxml"]
+	],
+    "editor.formatOnSave": true,
+    "[haxe]": { "editor.defaultFormatter": "nadako.vshaxe" }
 }
