@@ -9,9 +9,13 @@ class UnserializableArray<T:JsonUnserializable>
 {
     public final parsed:Array<T>;
 
-	public function new(json:String)
+	public function new(input:UnserializerInput)
 	{
-		var jsonValue:JsonValue = Parser.parse(json, "<internal>").value;
+		var jsonValue:JsonValue = switch input {
+			case Str(json): Parser.parse(json, "<internal>").value;
+			case Ast(json): json.value;
+		}
+
 		switch jsonValue
 		{
 			case JArray(values):
