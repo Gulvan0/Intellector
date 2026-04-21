@@ -8,8 +8,8 @@ import http.HttpMethod;
 import http.HttpResponse;
 import http.HttpClient;
 
-using lib.extensions.MapExtension;
-using lib.extensions.StringExtension;
+using lib.std.extensions.MapExtension;
+using lib.std.extensions.StringExtension;
 
 class RestClient
 {
@@ -41,9 +41,10 @@ class RestClient
 			response -> {
 				try
 				{
-					var parsedResponse:ResponsePayloadType = new ResponsePayloadType(response.bodyAsString);
+					var parsedResponse:ResponsePayloadType = response.bodyAsString == "null"? null : new ResponsePayloadType(Str(response.bodyAsString));
 					onResponse(parsedResponse);
-				} catch (exception:UnserializationException)
+				}
+				catch (exception:UnserializationException)
 				{
 					if (onHttpError != null)
 						onHttpError(response);

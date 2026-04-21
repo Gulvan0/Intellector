@@ -6,4 +6,5 @@ enum UnserializerInput
 {
     Str(json:String);
     Ast(json:Json);
+    RawJson(json:Dynamic);
 }

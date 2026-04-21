@@ -1,39 +1,175 @@
 package net.ws;
 
+import lib.std.Json as JsonUtils;
+import lib.std.SetMap;
+import net.ws.Subscription;
+import net.ws.channel.IChannel;
+import lib.std.BackoffDelayTimer;
+import hx.ws.Types.MessageType;
+import js.html.Event;
+import lib.std.DateTime;
+import lib.std.RefreshableTimer;
 import haxe.Json;
 import hx.ws.WebSocket;
 
-class PubSubEngine
+class PubSubEngine implements IPubSubEngine
 {
-    private static var websocket:WebSocket = new WebSocket(Config.getWebsocketUrl(), false);
+	private var websocket:WebSocket;
+	private var pingTimer:RefreshableTimer;
+	private var reconnectTimer:BackoffDelayTimer;
 
-    private static var activeSubscriptions:Array<EventChannel> = [];
+	private var lastServerMessageUnixSecs:Int;
 
-    public static var token:Null<String> = null;
+	public var activeSubscriptions:SetMap<String, Subscription<IChannel>> = new SetMap();
+	public var connected(default, null):Bool = false;
+	public var hasEverBeenConnected(default, null):Bool = false;
 
-    public static function connect()
-    {
-        // TODO: While open, support heartbeat
-        // TODO: Upon disconnect, try to reconnect
-        // TODO: Process incoming message accordingly
-        websocket.open();
-    }
+	private var tokenRetriever:Null<Void->Null<String>> = null;
+	private var lastActivityUnixSecsRetriever:Null<Void->Null<Int>> = null;
+	private var onInitialConnectionFailed:Null<Void->Void> = null;
 
-    private static function sendEvent(eventSlug:String, body:Null<{}> = null)
-    {
-        var message:{} = {event: eventSlug};
-        if (token != null)
-            Reflect.setField(message, "token", token);
-        if (body != null)
-            Reflect.setField(message, "body", body);
-        websocket.send(Json.stringify(message));
-    }
+	private var token(get, never):Null<String>;
+	private var lastActivityUnixSecs(get, never):Null<Int>;
 
-    public static function sub(channel:EventChannel)
-    {
-        if (channel.match(EveryoneEventChannel))
-            throw "Cannot sub to everyone channel";
+	public function new(url:String, ?onInitialConnectionFailed:Null<Void->Void> = null, ?tokenRetriever:Null<Void->Null<String>> = null,
+			?lastActivityUnixSecsRetriever:Null<Void->Null<Int>> = null)
+	{
+		this.websocket = new WebSocket(url, false);
+		this.pingTimer = new RefreshableTimer(30_000, heartbeatTick);
+		this.reconnectTimer = new BackoffDelayTimer(1000, 1.5, 2, 16_000, -1000, 1000, connect.bind(null));
 
-        sendEvent("sub", {channel: channel.serialize()});
-    }
+		this.onInitialConnectionFailed = onInitialConnectionFailed;
+		this.tokenRetriever = tokenRetriever;
+		this.lastActivityUnixSecsRetriever = lastActivityUnixSecsRetriever;
+	}
+
+	public function connect(?onInitialConnectionFailed:Null<Void->Void> = null)
+	{
+		if (onInitialConnectionFailed != null)
+			this.onInitialConnectionFailed = onInitialConnectionFailed;
+
+		websocket.onclose = onClose;
+		websocket.onerror = onError;
+		websocket.onmessage = onMessage;
+		websocket.onopen = onOpen;
+
+		lastServerMessageUnixSecs = DateTime.nowUnixSecs();
+
+		websocket.open();
+	}
+
+	public function sendEvent(eventSlug:String, body:Null<{}> = null)
+	{
+		var message:{} = {event: eventSlug};
+		if (token != null)
+			Reflect.setField(message, "token", token);
+		if (body != null)
+			Reflect.setField(message, "body", body);
+		websocket.send(Json.stringify(message));
+	}
+
+	public function sendSerializedEvent(eventSlug:String, serializedBody:String)
+	{
+		var message:String = '{"event":"$eventSlug","body":$serializedBody';
+		if (token != null)
+			message += ',"token":"$token"';
+		message += "}";
+		websocket.send(message);
+	}
+
+	private function sendSubOrUnsubEvent(channel:IChannel, sub:Bool)
+	{
+		var eventKind:String = sub ? "sub" : "unsub";
+		sendEvent(eventKind, {channel: channel.toJson()});
+	}
+
+	public function sub<T:IChannel>(channel:T):Subscription<T>
+	{
+		var subscription:Subscription<T> = new Subscription(this, channel);
+		activeSubscriptions.add(channel.hash(), cast subscription);
+		sendSubOrUnsubEvent(channel, true);
+		return subscription;
+	}
+
+	public function unsub<T:IChannel>(subscription:Subscription<T>)
+	{
+		var channelHash:String = subscription.channel.hash();
+		activeSubscriptions.remove(channelHash, cast subscription);
+		if (!activeSubscriptions.hasValues(channelHash))
+			sendSubOrUnsubEvent(subscription.channel, false);
+	}
+
+	private function heartbeatTick()
+	{
+		sendEvent("ping", {last_activity: lastActivityUnixSecs});
+
+		if (DateTime.nowUnixSecs() - lastServerMessageUnixSecs > 60)
+			websocket.close();
+	}
+
+	private function onOpen()
+	{
+		connected = true;
+		hasEverBeenConnected = true;
+
+		reconnectTimer.reset();
+		pingTimer.start();
+
+		for (canonicalChannelJson in activeSubscriptions.keys())
+			sendSerializedEvent("sub", canonicalChannelJson);
+	}
+
+	private function onMessage(msg:MessageType)
+	{
+		var strContent:String = switch msg
+		{
+			case BytesMessage(content):
+				content.readAllAvailableBytes().toString();
+			case StrMessage(content):
+				content;
+		};
+
+		lastServerMessageUnixSecs = DateTime.nowUnixSecs();
+
+		try
+		{
+			final rawData:Dynamic = Json.parse(strContent);
+			final eventKind:String = Reflect.field(rawData, "event");
+			final rawPayload:Dynamic = Reflect.field(rawData, "body");
+			final channelJson:Dynamic = Reflect.field(rawData, "channel");
+			final channelHash:String = JsonUtils.canonize(channelJson);
+			for (subscription in activeSubscriptions.get(channelHash))
+				subscription.dispatch(eventKind, rawPayload);
+		}
+		catch (e)
+		{
+			return;
+		}
+	}
+
+	private function onClose()
+	{
+		connected = false;
+
+		pingTimer.stop();
+		reconnectTimer.startDelay();
+
+		if (!hasEverBeenConnected && onInitialConnectionFailed != null)
+			onInitialConnectionFailed();
+	}
+
+	private function onError(error:Event)
+	{
+		trace("Connection error: " + error.type);
+	}
+
+	private function get_token():Null<String>
+	{
+		return tokenRetriever != null ? tokenRetriever() : null;
+	}
+
+	private function get_lastActivityUnixSecs():Null<Int>
+	{
+		return lastActivityUnixSecsRetriever != null ? lastActivityUnixSecsRetriever() : null;
+	}
 }

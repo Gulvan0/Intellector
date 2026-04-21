@@ -1,6 +1,6 @@
 package lib.json;
 
-import lib.stdtypes.DateTime;
+import lib.std.DateTime;
 import hxjsonast.Json;
 
 class StdParsers
