@@ -9,9 +9,9 @@ class PubSub
     private static var _engine:PubSubEngine;
 
     public static function start(
-        ?onInitialConnectionFailed:Null<Void->Void> = null,
-        ?tokenRetriever:Null<Void->Null<String>> = null,
-        ?lastActivityUnixSecsRetriever:Null<Void->Null<Int>> = null
+        tokenRetriever:()->Null<String>,
+        lastActivityUnixSecsRetriever:()->Null<Int>,
+        ?onInitialConnectionFailed:Null<()->Void> = null
     )
     {
         _engine = new PubSubEngine(Config.getWebsocketUrl(), onInitialConnectionFailed, tokenRetriever, lastActivityUnixSecsRetriever);

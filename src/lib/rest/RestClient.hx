@@ -13,10 +13,19 @@ using lib.std.extensions.StringExtension;
 
 class RestClient
 {
-	public var baseUrl:String;
+	private var baseUrl:String;
+	private var httpClient:HttpClient = new HttpClient();
+	private var commonHeaderRetrievers:Array<()->Map<String, String>> = [];
 
-	public var httpClient:HttpClient = new HttpClient();
-	public var defaultHeaders:Map<String, String> = [];
+	private function getHeaders(explicitHeaders:Null<Map<String, String>> = null):Map<String, String>
+	{
+		var headers:Map<String, String> = [];
+		for (retriever in commonHeaderRetrievers)
+			headers.mergeWith(retriever());
+		if (explicitHeaders != null)
+			headers.mergeWith(explicitHeaders);
+		return headers;
+	}
 
 	@:generic
 	public function execute<RequestPayloadType:JsonSerializable, ResponsePayloadType:JsonUnserializable>(
@@ -35,9 +44,8 @@ class RestClient
 
 		var url:String = baseUrl + operation.path.pythonicFormat(pathParams ?? []);
 		var serializedRequestPayload:String = body != null ? body.serialize() : null;
-		var finalizedHeaders:Map<String, String> = defaultHeaders.mergeWith(headers ?? []);
 
-		httpClient.makeRequest(url, serializedRequestPayload, queryParams, finalizedHeaders).then(
+		httpClient.makeRequest(url, serializedRequestPayload, queryParams, getHeaders(headers)).then(
 			response -> {
 				try
 				{
@@ -55,6 +63,16 @@ class RestClient
 					onRequestPromiseRejected(rejection);
 			}
 		);
+	}
+
+	public function addCommonHeaderRetriever(retriever:()->Map<String, String>)
+	{
+		commonHeaderRetrievers.push(retriever);
+	}
+
+	public function removeCommonHeaderRetriever(retriever:()->Map<String, String>)
+	{
+		commonHeaderRetrievers.remove(retriever);
 	}
 
 	public function new(baseUrl:String)
