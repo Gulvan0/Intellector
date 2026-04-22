@@ -1,19 +1,20 @@
 package net.ws;
 
-import net.ws.channel.IChannel;
+import lib.pubsub.Subscription;
+import lib.pubsub.IChannel;
+import lib.pubsub.PubSubEngine;
 
 class PubSub
 {
     private static var _engine:PubSubEngine;
 
     public static function start(
-        url:String,
         ?onInitialConnectionFailed:Null<Void->Void> = null,
         ?tokenRetriever:Null<Void->Null<String>> = null,
         ?lastActivityUnixSecsRetriever:Null<Void->Null<Int>> = null
     )
     {
-        _engine = new PubSubEngine(url, onInitialConnectionFailed, tokenRetriever, lastActivityUnixSecsRetriever);
+        _engine = new PubSubEngine(Config.getWebsocketUrl(), onInitialConnectionFailed, tokenRetriever, lastActivityUnixSecsRetriever);
         _engine.connect();
     }
 
@@ -22,8 +23,8 @@ class PubSub
         return _engine.connected;
     }
 
-    public static function sub(channel:IChannel)
+    public static function sub<T:IChannel>(channel:T):Subscription<T>
     {
-        return _engine.sub(channel);  //TODO: Return Subscription<T>
+        return _engine.sub(channel);
     }
 }
