@@ -1,7 +1,7 @@
 package lib.pubsub;
 
 import lib.std.Never;
-import lib.std.SetMap;
+import lib.std.StringSetMap;
 import lib.json.JsonUnserializable;
 
 using lib.std.extensions.StringExtension;
@@ -12,7 +12,7 @@ class Subscription<TChannel:IChannel>
 
 	public final channel:TChannel;
 
-	private final handlers:SetMap<String, Dynamic->Void> = new SetMap();
+	private final handlers:StringSetMap<Dynamic->Void> = new StringSetMap();
 
 	public function new(engine:IPubSubEngine, channel:TChannel)
 	{

@@ -3,19 +3,19 @@ package lib.std;
 import js.lib.Set;
 
 @:forward(keys, clear)
-abstract SetMap<K, V>(Map<K, Set<V>>) from Map<K, Set<V>> to Map<K, Set<V>>
+abstract StringSetMap<V>(Map<String, Set<V>>)
 {
     public function new()
     {
         this = [];
     }
 
-    public function hasValues(key: K):Bool
+    public function hasValues(key: String):Bool
     {
         return this.exists(key) && this[key].size > 0;
     }
 
-    public function add(key:K, value:V)
+    public function add(key:String, value:V)
     {
         if (this.exists(key))
             this[key].add(value);
@@ -23,7 +23,7 @@ abstract SetMap<K, V>(Map<K, Set<V>>) from Map<K, Set<V>> to Map<K, Set<V>>
             this[key] = new Set([value]);
     }
 
-    public function remove(key:K, value:V)
+    public function remove(key:String, value:V)
     {
         if (!this.exists(key))
             return;
@@ -33,14 +33,14 @@ abstract SetMap<K, V>(Map<K, Set<V>>) from Map<K, Set<V>> to Map<K, Set<V>>
             this.remove(key);
     }
 
-    public function get(key:K):Iterator<V>
+    public function get(key:String):Iterator<V>
     {
         if (!this.exists(key))
             return [].iterator();
         return this[key].iterator();
     }
 
-    public function removeAll(key:K)
+    public function removeAll(key:String)
     {
         this.remove(key);
     }

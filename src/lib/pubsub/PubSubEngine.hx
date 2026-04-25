@@ -1,7 +1,7 @@
 package lib.pubsub;
 
 import lib.std.Json as JsonUtils;
-import lib.std.SetMap;
+import lib.std.StringSetMap;
 import lib.std.BackoffDelayTimer;
 import hx.ws.Types.MessageType;
 import js.html.Event;
@@ -18,7 +18,7 @@ class PubSubEngine implements IPubSubEngine
 
 	private var lastServerMessageUnixSecs:Int;
 
-	public var activeSubscriptions:SetMap<String, Subscription<IChannel>> = new SetMap();
+	public var activeSubscriptions:StringSetMap<Subscription<IChannel>> = new StringSetMap();
 	public var connected(default, null):Bool = false;
 	public var hasEverBeenConnected(default, null):Bool = false;
 
