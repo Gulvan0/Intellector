@@ -21,6 +21,6 @@ class GamePublic implements IJsonUnserializableMacro
 	public var black_player:UserRefWithNickname;
 	@:default(null) public var fischer_time_control:Null<TimeControl>;
 	@:default(null) public var outcome:Null<GameOutcomePublic>;
-	@:jcustomparse(net.rest.models.game.SpecialParsers.parseGenericEventList) public var events:Array<GameEvent>;
+	@:jcustomparse(net.models.game.SpecialParsers.parseGenericEventList) public var events:Array<GameEvent>;
 	@:default(null) public var latest_time_update:Null<GameTimeUpdatePublic>;
 }

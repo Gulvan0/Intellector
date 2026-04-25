@@ -19,6 +19,7 @@ import net.models.game.external.ExternalGameEndPayload;
 import net.models.game.external.ExternalGameRollbackPayload;
 import net.models.game.GameAddTimePayload;
 import net.models.game.GameSendChatMessagePayload;
+import net.models.game.GameFilter;
 import net.models.game.internal.InternalGameAppendPlyPayload;
 import net.models.game.internal.InternalGamePerformOfferActionPayload;
 import net.models.game.external.ExternalGameAppendPlyResponse;
