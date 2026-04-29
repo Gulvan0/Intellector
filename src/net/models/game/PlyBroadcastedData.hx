@@ -14,7 +14,6 @@ class PlyBroadcastedData implements IJsonUnserializableMacro
 	public var to_i:Int;
 	public var to_j:Int;
 	@:default(null) public var morph_into:Null<PieceKind>;
-	public var game_id:Int;
 	public var sip_after:String;
 	@:default(null) public var time_update:Null<GameTimeUpdatePublic>;
 }

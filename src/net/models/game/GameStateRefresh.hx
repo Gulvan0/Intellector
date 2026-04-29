@@ -8,7 +8,6 @@ import net.models.game.GameStateRefreshReason;
 
 class GameStateRefresh implements IJsonUnserializableMacro
 {
-	public var game_id:Int;
 	public var refresh_reason:GameStateRefreshReason;
 	@:default(null) public var outcome:Null<GameOutcomePublic>;
 	@:jcustomparse(net.models.game.SpecialParsers.parseGenericEventList) public var events:Array<GameEvent>;

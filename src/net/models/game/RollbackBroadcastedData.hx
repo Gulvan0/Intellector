@@ -11,7 +11,6 @@ class RollbackBroadcastedData implements IJsonUnserializableMacro
 	public var ply_cnt_before:Int;
 	public var ply_cnt_after:Int;
 	public var requested_by:PieceColor;
-	public var game_id:Int;
 	@:default(null) public var time_update:Null<GameTimeUpdatePublic>;
 	public var updated_sip:String;
 }

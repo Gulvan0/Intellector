@@ -12,5 +12,4 @@ class OfferActionBroadcastedData implements IJsonUnserializableMacro
 	public var action:OfferAction;
 	public var offer_kind:OfferKind;
 	public var offer_author:PieceColor;
-	public var game_id:Int;
 }

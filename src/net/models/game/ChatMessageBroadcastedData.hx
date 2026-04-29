@@ -10,5 +10,4 @@ class ChatMessageBroadcastedData implements IJsonUnserializableMacro
 	public var text:String;
 	public var spectator:Bool;
 	public var author:UserRefWithNickname;
-	public var game_id:Int;
 }
