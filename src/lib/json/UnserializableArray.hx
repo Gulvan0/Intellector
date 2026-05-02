@@ -1,5 +1,6 @@
 package lib.json;
 
+import haxe.Json;
 import hxjsonast.Json.JsonValue;
 import hxjsonast.Parser;
 import lib.json.JsonUnserializable;
@@ -14,6 +15,7 @@ class UnserializableArray<T:JsonUnserializable>
 		var jsonValue:JsonValue = switch input {
 			case Str(json): Parser.parse(json, "<internal>").value;
 			case Ast(json): json.value;
+			case RawJson(json): Parser.parse(Json.stringify(json), "<internal>").value;
 		}
 
 		switch jsonValue

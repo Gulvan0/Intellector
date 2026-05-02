@@ -1,15 +1,13 @@
 package net.models.game;
 
-import net.models.game.GameEvent;
 import net.models.game.GameOutcomePublic;
 import net.models.common.TimeControlKind;
 import net.models.common.UserRefWithNickname;
 import net.models.common.TimeControl;
-import net.models.game.GameTimeUpdatePublic;
 import lib.std.DateTime;
 import lib.json.IJsonUnserializableMacro;
 
-class GamePublic implements IJsonUnserializableMacro
+class GameSummaryPublic implements IJsonUnserializableMacro
 {
 	@:jcustomparse(lib.json.StdParsers.parseDate) public var started_at:DateTime;
 	public var time_control_kind:TimeControlKind;
@@ -22,6 +20,4 @@ class GamePublic implements IJsonUnserializableMacro
 	public var opening:String;
 	@:default(null) public var fischer_time_control:Null<TimeControl>;
 	@:default(null) public var outcome:Null<GameOutcomePublic>;
-	@:jcustomparse(net.models.game.SpecialParsers.parseGenericEventList) public var events:Array<GameEvent>;
-	@:default(null) public var latest_time_update:Null<GameTimeUpdatePublic>;
 }

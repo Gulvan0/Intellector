@@ -1,5 +1,6 @@
 package net.rest;
 
+import lib.json.UnserializableBool;
 import lib.rest.NoResponse;
 import lib.json.UnserializableArray;
 import haxe.http.HttpMethod;
@@ -24,15 +25,18 @@ import net.models.game.internal.InternalGameAppendPlyPayload;
 import net.models.game.internal.InternalGamePerformOfferActionPayload;
 import net.models.game.external.ExternalGameAppendPlyResponse;
 import net.models.game.GamePublic;
+import net.models.game.GameSummaryPublic;
 import net.models.game.internal.InternalGameAppendPlyResponse;
 import net.models.other.CompatibilityCheckPayload;
 import net.models.other.CompatibilityResponse;
 import net.models.player.PlayerUpdate;
 import net.models.player.PlayerPublic;
+import net.models.player.PlayerGameStats;
 import net.models.study.ListStudiesPayload;
 import net.models.study.StudyCreate;
 import net.models.study.StudyUpdate;
 import net.models.study.StudyPublic;
+import net.models.study.StudySummaryPublic;
 
 class RestOperation
 {
@@ -49,13 +53,13 @@ class RestOperation
 	public static final ACCEPT_CHALLENGE = new GenericRestOperation<NoPayload, GamePublic>("/challenge/{challenge_id}/accept", Post);
 	public static final DECLINE_CHALLENGE = new GenericRestOperation<NoPayload, NoResponse>("/challenge/{challenge_id}/decline", Post);
 
-	public static final GET_CURRENT_GAMES = new GenericRestOperation<GameFilter, UnserializableArray<GamePublic>>("/game/current", Post);
-	public static final GET_RECENT_GAMES = new GenericRestOperation<GameFilter, UnserializableArray<GamePublic>>("/game/recent", Post);
+	public static final GET_CURRENT_GAMES = new GenericRestOperation<GameFilter, UnserializableArray<GameSummaryPublic>>("/game/current", Post);
+	public static final GET_RECENT_GAMES = new GenericRestOperation<GameFilter, UnserializableArray<GameSummaryPublic>>("/game/recent", Post);
 	public static final GET_GAME = new GetOperaton<GamePublic>("/game/{game_id}");
 	public static final CHECK_TIMEOUT = new GetOperaton<NoPayload>("/game/{game_id}/check_timeout");
 	public static final GAME_SEND_CHAT_MESSAGE = new GenericRestOperation<GameSendChatMessagePayload, NoResponse>("/game/chat/send_message", Post);
 	public static final GAME_ADD_TIME = new GenericRestOperation<GameAddTimePayload, NoResponse>("/game/add_time", Post);
-	public static final CREATE_EXTERNAL_GAME = new GenericRestOperation<ExternalGameCreatePayload, GamePublic>("/game/external/create", Post);
+	public static final CREATE_EXTERNAL_GAME = new GenericRestOperation<ExternalGameCreatePayload, GameSummaryPublic>("/game/external/create", Post);
 	public static final APPEND_PLY_TO_EXTERNAL_GAME = new GenericRestOperation<ExternalGameAppendPlyPayload,
 		ExternalGameAppendPlyResponse>("/game/external/append_ply", Post);
 	public static final END_EXTERNAL_GAME = new GenericRestOperation<ExternalGameEndPayload, NoResponse>("/game/external/end", Post);
@@ -69,14 +73,16 @@ class RestOperation
 
 	public static final GET_PLAYER_FOLLOWERS = new GetOperaton<UnserializableArray<UserRefWithNickname>>("/player/{login}/followers");
 	public static final GET_FOLLOWED_PLAYERS = new GetOperaton<UnserializableArray<UserRefWithNickname>>("/player/{login}/followed");
+	public static final IS_FOLLOWED_BY_ME = new GetOperaton<UnserializableBool>("/player/{login}/is_followed_by_me");
 	public static final GET_PLAYER = new GetOperaton<PlayerPublic>("/player/{login}");
 	public static final UPDATE_PLAYER = new GenericRestOperation<PlayerUpdate, NoResponse>("/player/{login}", Patch);
 	public static final FOLLOW_PLAYER = new GenericRestOperation<NoPayload, NoResponse>("/player/{login}/follow", Post);
 	public static final UNFOLLOW_PLAYER = new GenericRestOperation<NoPayload, NoResponse>("/player/{login}/unfollow", Post);
+	public static final GET_GAME_STATS = new GetOperaton<PlayerGameStats>("/player/{login}/game_stats");
 
-	public static final CREATE_STUDY = new GenericRestOperation<StudyCreate, StudyPublic>("/study/create", Post);
-	public static final LIST_STUDIES = new GenericRestOperation<ListStudiesPayload, UnserializableArray<StudyPublic>>("/study/list", Post);
+	public static final CREATE_STUDY = new GenericRestOperation<StudyCreate, StudySummaryPublic>("/study/create", Post);
+	public static final LIST_STUDIES = new GenericRestOperation<ListStudiesPayload, UnserializableArray<StudySummaryPublic>>("/study/list", Post);
 	public static final GET_STUDY = new GetOperaton<StudyPublic>("/study/{study_id}");
 	public static final UPDATE_STUDY = new GenericRestOperation<StudyUpdate, StudyPublic>("/study/{study_id}", Patch);
-	public static final DELETE_STUDY = new GenericRestOperation<NoPayload, StudyPublic>("/study/{study_id}", Delete);
+	public static final DELETE_STUDY = new GenericRestOperation<NoPayload, NoResponse>("/study/{study_id}", Delete);
 }
