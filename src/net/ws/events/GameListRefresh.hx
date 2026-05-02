@@ -1,9 +1,9 @@
 package net.ws.events;
 
-import net.models.game.GameListChannelsStateRefresh;
-import net.ws.channels.GameList;
+import net.models.game.CurrentGameListStateRefresh;
+import net.ws.channels.CurrentGameList;
 import lib.pubsub.IEvent;
 
-class GameListRefresh implements IEvent<GameListChannelsStateRefresh, GameList>
+class CurrentGameListRefresh implements IEvent<CurrentGameListStateRefresh, CurrentGameList>
 {
 }
