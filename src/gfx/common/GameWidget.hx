@@ -1,5 +1,7 @@
 package gfx.common;
 
+import openings.OpeningEntry;
+import dict.Language;
 import haxe.ui.containers.Box;
 import net.shared.dataobj.GameInfo;
 import net.shared.board.Situation;
@@ -20,12 +22,12 @@ import dict.Utils;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
 
-typedef GameWidgetData = 
+typedef GameWidgetData =
 {
     var info:GameInfo;
     var watchedLogin:Null<String>;
     var onClicked:Void->Void;
-} 
+}
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/game_widget.xml"))
 class GameWidget extends Box
@@ -74,7 +76,7 @@ class GameWidget extends Box
             opponentsLabel.text = opponentsLabelLongText;
     }
 
-    private function loadBoard(shownSituation:Situation, watchedColor:Null<PieceColor>) 
+    private function loadBoard(shownSituation:Situation, watchedColor:Null<PieceColor>)
     {
         var orientationColor:PieceColor = watchedColor == null? shownSituation.turnColor : watchedColor;
         var board:Board = new Board(shownSituation, orientationColor, None, 150, 150, true);
@@ -89,7 +91,7 @@ class GameWidget extends Box
         typedData.onClicked();
     }
 
-    public function new(data:GameWidgetData) 
+    public function new(data:GameWidgetData)
     {
         super();
         this.typedData = data;
@@ -124,7 +126,10 @@ class GameWidget extends Box
         resultLabel.text = Utils.getResolution(parsedData.outcome);
 
         if (parsedData.startingSituation.isDefaultStarting())
-            openingLabel.text = OpeningTree.getOpening(parsedData.movesPlayed);
+        {
+            var entry:OpeningEntry = OpeningTree.openings.get(parsedData.currentSituation.serialize());  // TODO: Use opening_sip instead
+            openingLabel.text = Preferences.language.get() == Language.EN? entry.name_en : entry.name_ru;
+        }
         else
             openingLabel.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);
     }

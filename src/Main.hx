@@ -28,7 +28,6 @@ import gfx.screens.Analysis;
 import gfx.screens.LanguageSelectIntro;
 import haxe.ui.Toolkit;
 import js.Browser;
-import openings.OpeningTree;
 import tests.UITest;
 
 using StringTools;
@@ -77,7 +76,6 @@ class Main
 		#end
 
 		Blinker.init();
-		OpeningTree.init();
 		Changelog.init();
 
 		onInitFinished();

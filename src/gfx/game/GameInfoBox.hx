@@ -18,7 +18,6 @@ import net.shared.ServerEvent;
 import utils.TimeControl;
 import haxe.ui.containers.Card;
 import haxe.ui.containers.VBox;
-import openings.OpeningTree;
 import dict.Dictionary;
 import net.shared.PieceType;
 import net.shared.PieceColor;
@@ -30,9 +29,6 @@ import net.shared.Outcome;
 @:build(haxe.ui.macros.ComponentMacros.build('assets/layouts/live/gameinfobox.xml'))
 class GameInfoBox extends Card implements IGameBoardObserver implements INetObserver
 {
-    private var openingTree:Null<OpeningTree> = null;
-    private var movesAfterTerminalOpeningNode:Int = 0;
-
     private var whitePlayerLabel:PlayerLabel;
     private var crossSign:Label;
     private var blackPlayerLabel:PlayerLabel;
@@ -41,7 +37,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     public function handleNetEvent(event:ServerEvent)
     {
-        switch event 
+        switch event
         {
             case Move(ply, _):
                 accountMove(ply);
@@ -55,7 +51,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     public function handleGameBoardEvent(event:GameBoardEvent)
     {
-        switch event 
+        switch event
         {
             case ContinuationMove(ply, plyStr, performedBy):
                 accountMove(ply);
@@ -65,7 +61,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     public function handleGlobalEvent(event:GlobalEvent)
     {
-        switch event 
+        switch event
         {
             case FollowedPlayerUpdated(followedLogin):
                 if (followedLogin == null)
@@ -82,34 +78,15 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     private function accountMove(ply:RawPly)
     {
-        if (openingTree == null)
-            return;
-
-        if (!openingTree.currentNode.terminal)
-        {
-            openingTree.makeMove(ply.from.i, ply.from.j, ply.to.i, ply.to.j, ply.morphInto);
-            opening.text = openingTree.currentNode.name;
-        }
-        else
-            movesAfterTerminalOpeningNode++;
+        // TODO: opening.text = ...
     }
 
-    private function revertPlys(cnt:Int) 
+    private function revertPlys(cnt:Int)
     {
-        if (openingTree == null)
-            return;
-
-        if (movesAfterTerminalOpeningNode < cnt)
-        {
-            openingTree.revertMoves(cnt - movesAfterTerminalOpeningNode);
-            opening.text = openingTree.currentNode.name;
-            movesAfterTerminalOpeningNode = 0;
-        }
-        else
-            movesAfterTerminalOpeningNode -= cnt;
+        // TODO: opening.text = ...
     }
 
-    private override function validateComponentLayout():Bool 
+    private override function validateComponentLayout():Bool
     {
         var b = super.validateComponentLayout();
 
@@ -198,10 +175,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         timeControlIcon.resource = Paths.timeControl(tcType);
 
         if (startingSituation.isDefaultStarting())
-        {
-            this.openingTree = new OpeningTree();
             opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
-        }
         else
             opening.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);
     }
@@ -224,10 +198,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
             datetime.text = DateTools.format(parsedData.datetime, "%d.%m.%Y %H:%M:%S");
 
         if (parsedData.startingSituation.isDefaultStarting())
-        {
-            this.openingTree = new OpeningTree();
             opening.text = Dictionary.getPhrase(OPENING_STARTING_POSITION);
-        }
         else
             opening.text = Dictionary.getPhrase(CUSTOM_STARTING_POSITION);
 
@@ -237,7 +208,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     private function markFollowedPlayer(color:Null<PieceColor>)
     {
-        switch color 
+        switch color
         {
             case null:
                 watchingLabel.hidden = true;
@@ -252,7 +223,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
 
     public function init(constructor:LiveGameConstructor)
     {
-        switch constructor 
+        switch constructor
         {
             case New(whiteRef, blackRef, playerElos, timeControl, startingSituation, startDatetime):
                 initNewGame(whiteRef, blackRef, playerElos, timeControl, startingSituation, startDatetime);
@@ -265,7 +236,7 @@ class GameInfoBox extends Card implements IGameBoardObserver implements INetObse
         }
     }
 
-    public function new() 
+    public function new()
     {
         super();
     }
