@@ -18,6 +18,7 @@ class GameSummaryPublic implements IJsonUnserializableMacro
 	public var white_player:UserRefWithNickname;
 	public var black_player:UserRefWithNickname;
 	public var opening:String;
+	public var latest_position_sip:String;
 	@:default(null) public var fischer_time_control:Null<TimeControl>;
 	@:default(null) public var outcome:Null<GameOutcomePublic>;
 }
