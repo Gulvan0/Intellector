@@ -1,6 +1,5 @@
 package lib.rest;
 
-import lib.json.JsonUnserializable;
 import lib.json.JsonSerializable;
 import lib.json.exceptions.UnserializationException;
 import lib.rest.exceptions.GetPayloadProvidedException;
@@ -10,6 +9,12 @@ import http.HttpClient;
 
 using lib.std.extensions.MapExtension;
 using lib.std.extensions.StringExtension;
+
+private typedef RestOpInterface<Resp> = {
+	var path(default, null):String;
+	var method(default, null):HttpMethod;
+	function deserializeResponse(bodyStr:String):Resp;
+}
 
 class RestClient
 {
@@ -21,18 +26,16 @@ class RestClient
 	{
 		var headers:Map<String, String> = [];
 		for (retriever in commonHeaderRetrievers)
-			headers.mergeWith(retriever());
+			headers = headers.mergeWith(retriever());
 		if (explicitHeaders != null)
-			headers.mergeWith(explicitHeaders);
+			headers = headers.mergeWith(explicitHeaders);
 		return headers;
 	}
 
-	@:generic
-	public function execute<RequestPayloadType:JsonSerializable, ResponsePayloadType:JsonUnserializable>(
-		operation:GenericRestOperation<RequestPayloadType, ResponsePayloadType>,
+	public function execute<RequestPayloadType:JsonSerializable, ResponsePayloadType>(
+		operation:RestOpInterface<ResponsePayloadType>,
 		onResponse:ResponsePayloadType->Void,
 		onHttpError:HttpResponse<Dynamic>->Void = null,
-		onRequestPromiseRejected:Dynamic->Void = null,
 		pathParams:Map<String, String> = null,
 		queryParams:Map<String, Any> = null,
 		body:RequestPayloadType = null,
@@ -49,18 +52,18 @@ class RestClient
 			response -> {
 				try
 				{
-					var parsedResponse:ResponsePayloadType = response.bodyAsString == "null"? null : new ResponsePayloadType(Str(response.bodyAsString));
+					var parsedResponse:ResponsePayloadType = operation.deserializeResponse(response.bodyAsString);
 					onResponse(parsedResponse);
 				}
 				catch (exception:UnserializationException)
 				{
+					trace(exception);
 					if (onHttpError != null)
 						onHttpError(response);
 				}
 			},
-			rejection -> {
-				if (onRequestPromiseRejected != null)
-					onRequestPromiseRejected(rejection);
+			error -> {
+				onHttpError(error);
 			}
 		);
 	}

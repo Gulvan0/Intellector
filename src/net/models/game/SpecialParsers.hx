@@ -101,39 +101,62 @@ class SpecialParsers
 	public static function parsePlyEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
 		var rawTimeUpdate:Null<JsonValue> = fields.get("time_update");
-		return Ply(DateTime.fromIso(getString("ply", eventIndex, fields, "occured_at")), getInt("ply", eventIndex, fields, "ply_index"),
+		return Ply(
+			DateTime.fromIso(getString("ply", eventIndex, fields, "occurred_at")),
+			getInt("ply", eventIndex, fields, "event_index"),
+			getInt("ply", eventIndex, fields, "ply_index"),
 			new HexCoords(getInt("ply", eventIndex, fields, "from_i"), getInt("ply", eventIndex, fields, "from_j")),
 			new HexCoords(getInt("ply", eventIndex, fields, "to_i"), getInt("ply", eventIndex, fields, "to_j")),
-			getString("ply", eventIndex, fields, "morph_into", false), rawTimeUpdate != null ? timeUpdateParser.loadJson(toJson(rawTimeUpdate)) : null,
-			getBool("ply", eventIndex, fields, "is_cancelled"));
+			getString("ply", eventIndex, fields, "morph_into", false),
+			rawTimeUpdate != null ? timeUpdateParser.loadJson(toJson(rawTimeUpdate)) : null,
+			getBool("ply", eventIndex, fields, "is_cancelled")
+		);
 	}
 
 	public static function parseChatMessageEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
-		return ChatMessage(DateTime.fromIso(getString("chat_message", eventIndex, fields, "occured_at")),
-			getString("chat_message", eventIndex, fields, "text"), getBool("chat_message", eventIndex, fields, "spectator"),
-			userRefWithNicknameParser.loadJson(toJson(fields.get("author"))));
+		return ChatMessage(
+			DateTime.fromIso(getString("chat_message", eventIndex, fields, "occurred_at")),
+			getInt("chat_message", eventIndex, fields, "event_index"),
+			getString("chat_message", eventIndex, fields, "text"),
+			getBool("chat_message", eventIndex, fields, "spectator"),
+			userRefWithNicknameParser.loadJson(toJson(fields.get("author")))
+		);
 	}
 
 	public static function parseOfferEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
-		return Offer(DateTime.fromIso(getString("offer", eventIndex, fields, "occured_at")), getString("offer", eventIndex, fields, "action"),
-			getString("offer", eventIndex, fields, "offer_kind"), getString("offer", eventIndex, fields, "offer_author"));
+		return Offer(
+			DateTime.fromIso(getString("offer", eventIndex, fields, "occurred_at")),
+			getInt("offer", eventIndex, fields, "event_index"),
+			getString("offer", eventIndex, fields, "action"),
+			getString("offer", eventIndex, fields, "offer_kind"),
+			getString("offer", eventIndex, fields, "offer_author")
+		);
 	}
 
 	public static function parseTimeAddedEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
-		return TimeAdded(DateTime.fromIso(getString("time_added", eventIndex, fields, "occured_at")),
-			getInt("time_added", eventIndex, fields, "amount_seconds"), getString("time_added", eventIndex, fields, "receiver"),
-			timeUpdateParser.loadJson(toJson(fields.get("time_update"))));
+		return TimeAdded(
+			DateTime.fromIso(getString("time_added", eventIndex, fields, "occurred_at")),
+			getInt("time_added", eventIndex, fields, "event_index"),
+			getInt("time_added", eventIndex, fields, "amount_seconds"),
+			getString("time_added", eventIndex, fields, "receiver"),
+			timeUpdateParser.loadJson(toJson(fields.get("time_update")))
+		);
 	}
 
 	public static function parseRollbackEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
 		var rawTimeUpdate:Null<JsonValue> = fields.get("time_update");
-		return Rollback(DateTime.fromIso(getString("rollback", eventIndex, fields, "occured_at")), getInt("rollback", eventIndex, fields, "ply_cnt_before"),
-			getInt("rollback", eventIndex, fields, "ply_cnt_after"), getString("rollback", eventIndex, fields, "requested_by"),
-			rawTimeUpdate != null ? timeUpdateParser.loadJson(toJson(rawTimeUpdate)) : null);
+		return Rollback(
+			DateTime.fromIso(getString("rollback", eventIndex, fields, "occurred_at")),
+			getInt("rollback", eventIndex, fields, "event_index"),
+			getInt("rollback", eventIndex, fields, "ply_cnt_before"),
+			getInt("rollback", eventIndex, fields, "ply_cnt_after"),
+			getString("rollback", eventIndex, fields, "requested_by"),
+			rawTimeUpdate != null ? timeUpdateParser.loadJson(toJson(rawTimeUpdate)) : null
+		);
 	}
 
 	public static function parseGenericEvent(index:Int, item:Json):GameEvent
@@ -162,7 +185,6 @@ class SpecialParsers
 					for (field in fields)
 						if (field.name != "event_kind") field.name => field.value.value
 				];
-
 				var parserFunc:Map<String, JsonValue>->Int->GameEvent = switch eventKind
 				{
 					case PLY: parsePlyEvent;

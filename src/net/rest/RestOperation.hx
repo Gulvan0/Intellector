@@ -1,6 +1,7 @@
 package net.rest;
 
 import lib.json.UnserializableBool;
+import lib.rest.NoPayload;
 import lib.rest.NoResponse;
 import lib.json.UnserializableArray;
 import haxe.http.HttpMethod;
@@ -56,7 +57,7 @@ class RestOperation
 	public static final GET_CURRENT_GAMES = new GenericRestOperation<GameFilter, UnserializableArray<GameSummaryPublic>>("/game/current", Post);
 	public static final GET_RECENT_GAMES = new GenericRestOperation<GameFilter, UnserializableArray<GameSummaryPublic>>("/game/recent", Post);
 	public static final GET_GAME = new GetOperaton<GamePublic>("/game/{game_id}");
-	public static final CHECK_TIMEOUT = new GetOperaton<NoPayload>("/game/{game_id}/check_timeout");
+	public static final CHECK_TIMEOUT = new GetOperaton<NoResponse>("/game/{game_id}/check_timeout");
 	public static final GAME_SEND_CHAT_MESSAGE = new GenericRestOperation<GameSendChatMessagePayload, NoResponse>("/game/chat/send_message", Post);
 	public static final GAME_ADD_TIME = new GenericRestOperation<GameAddTimePayload, NoResponse>("/game/add_time", Post);
 	public static final CREATE_EXTERNAL_GAME = new GenericRestOperation<ExternalGameCreatePayload, GameSummaryPublic>("/game/external/create", Post);

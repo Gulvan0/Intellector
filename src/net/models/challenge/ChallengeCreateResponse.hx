@@ -3,9 +3,9 @@ package net.models.challenge;
 import net.models.challenge.ChallengeCreateResult;
 import net.models.game.GameSummaryPublic;
 import net.models.challenge.ChallengePublic;
-import lib.json.IJsonSerializableMacro;
+import lib.json.IJsonUnserializableMacro;
 
-class ChallengeCreateResponse implements IJsonSerializableMacro
+class ChallengeCreateResponse implements IJsonUnserializableMacro
 {
 	public var result:ChallengeCreateResult;
 	@:default(null) public var challenge:Null<ChallengePublic>;

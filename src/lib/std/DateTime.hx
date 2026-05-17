@@ -26,7 +26,7 @@ class DateTime
 
 		var dateParts:Array<String> = date.split("-");
 		var year:Int = Std.parseInt(dateParts[0]);
-		var month:Int = Std.parseInt(dateParts[1]);
+		var month:Int = Std.parseInt(dateParts[1]) - 1;  // As it is zero-based
 		var day:Int = Std.parseInt(dateParts[2]);
 
 		var timeParts:Array<String> = time.split(":");

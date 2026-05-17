@@ -80,7 +80,7 @@ class ChannelMacro
 		{
 			final fieldName:String = channelParameter.name;
 			final key:String = fieldName.toSnakeCase();
-			final isChannel:Bool = false; // typeImplementsIChannel(channelParameter);
+			final isChannel:Bool = isFieldIChannel(channelParameter);
 
 			var value:Expr = macro this.$fieldName;
 			if (isChannel)

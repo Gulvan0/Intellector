@@ -49,7 +49,7 @@ class UnserializationMacros
 								case lib.json.UnserializerInput.Ast(json): parser.loadJson(json);
 								case lib.json.UnserializerInput.RawJson(json): parser.fromJson(haxe.Json.stringify(json));
 							}
-							if (!Lambda.empty(parser.errors))
+							if (parser.errors != null && !Lambda.empty(parser.errors))
 								throw new lib.json.exceptions.UnserializationException(parser.errors);
 							$b{varNames.map(name -> macro this.$name = builtObject.$name)}
 						}

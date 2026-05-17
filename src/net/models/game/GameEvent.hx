@@ -11,9 +11,9 @@ import lib.std.DateTime;
 
 enum GameEvent
 {
-	Ply(occuredAt:DateTime, plyIndex:Int, from:HexCoords, to:HexCoords, morphInto:Null<PieceKind>, timeUpdate:Null<GameTimeUpdatePublic>, isCancelled:Bool);
-	ChatMessage(occuredAt:DateTime, text:String, spectator:Bool, author:UserRefWithNickname);
-	Offer(occuredAt:DateTime, action:OfferAction, kind:OfferKind, author:PieceColor);
-	TimeAdded(occuredAt:DateTime, amountSeconds:Int, receiver:PieceColor, timeUpdate:GameTimeUpdatePublic);
-	Rollback(occuredAt:DateTime, plyCntBefore:Int, plyCntAfter:Int, requestedBy:PieceColor, timeUpdate:Null<GameTimeUpdatePublic>);
+	Ply(occuredAt:DateTime, event_index:Int, plyIndex:Int, from:HexCoords, to:HexCoords, morphInto:Null<PieceKind>, timeUpdate:Null<GameTimeUpdatePublic>, isCancelled:Bool);
+	ChatMessage(occuredAt:DateTime, event_index:Int, text:String, spectator:Bool, author:UserRefWithNickname);
+	Offer(occuredAt:DateTime, event_index:Int, action:OfferAction, kind:OfferKind, author:PieceColor);
+	TimeAdded(occuredAt:DateTime, event_index:Int, amountSeconds:Int, receiver:PieceColor, timeUpdate:GameTimeUpdatePublic);
+	Rollback(occuredAt:DateTime, event_index:Int, plyCntBefore:Int, plyCntAfter:Int, requestedBy:PieceColor, timeUpdate:Null<GameTimeUpdatePublic>);
 }

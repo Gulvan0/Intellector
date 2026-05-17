@@ -13,6 +13,7 @@ class Subscription<TChannel:IChannel>
 	public final channel:TChannel;
 
 	private final handlers:StringSetMap<Dynamic->Void> = new StringSetMap();
+	private final anyEventHandlers:Array<String->Dynamic->Void> = [];
 
 	public function new(engine:IPubSubEngine, channel:TChannel)
 	{
@@ -75,12 +76,20 @@ class Subscription<TChannel:IChannel>
 		return this;
 	}
 
+	public function onAnyEvent(handler:String->Dynamic->Void):Subscription<TChannel>
+	{
+		anyEventHandlers.push(handler);
+		return this;
+	}
+
 	public function dropAllHandlers<T>(kind:Null<Class<IEvent<T, TChannel>>> = null)
 	{
-		if (kind == null)
+		if (kind == null) {
 			handlers.clear();
-		else
+			anyEventHandlers.resize(0);
+		} else {
 			handlers.removeAll(getEventKind(kind));
+		}
 	}
 
 	@:allow(lib.pubsub.PubSubEngine)
@@ -88,6 +97,8 @@ class Subscription<TChannel:IChannel>
 	{
 		for (handler in handlers.get(eventKind))
 			handler(rawPayload);
+		for (handler in anyEventHandlers)
+			handler(eventKind, rawPayload);
 	}
 
 	public function branch():Subscription<TChannel>

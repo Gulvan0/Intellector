@@ -13,9 +13,9 @@ class UnserializableArray<T:JsonUnserializable>
 	public function new(input:UnserializerInput)
 	{
 		var jsonValue:JsonValue = switch input {
-			case Str(json): Parser.parse(json, "<internal>").value;
+			case Str(json): Parser.parse(json, "").value;
 			case Ast(json): json.value;
-			case RawJson(json): Parser.parse(Json.stringify(json), "<internal>").value;
+			case RawJson(json): Parser.parse(Json.stringify(json), "").value;
 		}
 
 		switch jsonValue
