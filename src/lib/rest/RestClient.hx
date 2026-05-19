@@ -1,5 +1,6 @@
 package lib.rest;
 
+import http.HttpRequest;
 import lib.json.JsonSerializable;
 import lib.json.exceptions.UnserializationException;
 import lib.rest.exceptions.GetPayloadProvidedException;
@@ -48,7 +49,10 @@ class RestClient
 		var url:String = baseUrl + operation.path.pythonicFormat(pathParams ?? []);
 		var serializedRequestPayload:String = body != null ? body.serialize() : null;
 
-		httpClient.makeRequest(url, serializedRequestPayload, queryParams, getHeaders(headers)).then(
+		var request:HttpRequest = new HttpRequest(url);
+		request.method = operation.method;
+
+		httpClient.makeRequest(request, serializedRequestPayload, queryParams, getHeaders(headers)).then(
 			response -> {
 				try
 				{
