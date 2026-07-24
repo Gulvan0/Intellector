@@ -1,0 +1,303 @@
+{
+    "2!wtrurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "",
+        "sip": "2!wtrurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!wtrurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Starting Position",
+        "name_ru": "Начальная расстановка"
+    },
+    "2!btrurvrwrxryizn0e1i2o3g4e5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "U0",
+        "sip": "2!btrurvrwrxryizn0e1i2o3g4e5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!btrurvrwrxryize0n1i2o3g4e5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Verto Opening",
+        "name_ru": "Дебют верто"
+    },
+    "2!btrurvrwrxryize0n1i2o3g4e5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "U0",
+        "sip": "2!btrurvrwrxryizn0e1i2o3g4e5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!btrurvrwrxryize0n1i2o3g4e5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Verto Opening",
+        "name_ru": "Дебют верто"
+    },
+    "2!bqetrurvrwrxryi0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "D0",
+        "sip": "2!bqetrurvrwrxryi0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bretrurvrwrxryize1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Defensor Opening",
+        "name_ru": "Дебют дефенсора"
+    },
+    "2!bretrurvrwrxryize1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "D0",
+        "sip": "2!bqetrurvrwrxryi0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bretrurvrwrxryize1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Defensor Opening",
+        "name_ru": "Дебют дефенсора"
+    },
+    "2!bjitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "L1",
+        "sip": "2!bjitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bgitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Jump Opening",
+        "name_ru": "Прыжковый дебют"
+    },
+    "2!bgitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "L1",
+        "sip": "2!bjitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bgitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Jump Opening",
+        "name_ru": "Прыжковый дебют"
+    },
+    "2!wjitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrWr": {
+        "code": "L1",
+        "sip": "2!wjitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrWr",
+        "other_sip": "2!wgitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiKrLrMrNrSr",
+        "name_en": "Spike Defense",
+        "name_ru": "Защита шипа"
+    },
+    "2!wgitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiKrLrMrNrSr": {
+        "code": "L1",
+        "sip": "2!wjitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrWr",
+        "other_sip": "2!wgitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiKrLrMrNrSr",
+        "name_en": "Spike Defense",
+        "name_ru": "Защита шипа"
+    },
+    "2!bsitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "L2",
+        "sip": "2!bsitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bpitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Passive Liberator Opening",
+        "name_ru": "Дебют пассивного либератора"
+    },
+    "2!bpitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "L2",
+        "sip": "2!bsitrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bpitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Passive Liberator Opening",
+        "name_ru": "Дебют пассивного либератора"
+    },
+    "2!britrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "L3",
+        "sip": "2!britrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bqitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Central Liberator Opening",
+        "name_ru": "Дебют центрального либератора"
+    },
+    "2!bqitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "L3",
+        "sip": "2!britrurvrwrxryize0e2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bqitrurvrwrxrze0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Central Liberator Opening",
+        "name_ru": "Дебют центрального либератора"
+    },
+    "2!bmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P1",
+        "sip": "2!bmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Central Advancement",
+        "name_ru": "Центральное продвижение"
+    },
+    "2!wmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr": {
+        "code": "P1",
+        "sip": "2!wmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr",
+        "other_sip": "2!wmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr",
+        "name_en": "Symmetric Central Advancement",
+        "name_ru": "Двойное центральное продвижение"
+    },
+    "2!bmrtrurvnwrxryize0e1i2o3g5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr": {
+        "code": "P1",
+        "sip": "2!bmrtrurvnwrxryize0e1i2o3g5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr",
+        "other_sip": "2!bmrtrurvnwrxryize0e1i2o3g5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr",
+        "name_en": "Central Opening",
+        "name_ru": "Центральный дебют"
+    },
+    "2!wmrtrurvnwrxryize0e1i2o3g5g6o!AoBgDgEoFiGeHeIiJrKrLnMrNrUr": {
+        "code": "P1",
+        "sip": "2!wmrtrurvnwrxryize0e1i2o3g5g6o!AoBgDgEoFiGeHeIiJrKrLnMrNrUr",
+        "other_sip": "2!wmrtrurvnwrxryize0e1i2o3g5g6o!AoBgDgEoFiGeHeIiJrKrLnMrNrUr",
+        "name_en": "Symmetric Central Opening",
+        "name_ru": "Двойной центральный дебют"
+    },
+    "2!bqrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P2",
+        "sip": "2!bqrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!brrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Open Intellector Opening",
+        "name_ru": "Дебют вскрытого интеллектора"
+    },
+    "2!brrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P2",
+        "sip": "2!bqrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!brrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Open Intellector Opening",
+        "name_ru": "Дебют вскрытого интеллектора"
+    },
+    "2!bqrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P3",
+        "sip": "2!bqrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!brrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Inward Progressor Opening",
+        "name_ru": "Центростремительный дебют прогрессора"
+    },
+    "2!brrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P3",
+        "sip": "2!bqrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!brrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Inward Progressor Opening",
+        "name_ru": "Центростремительный дебют прогрессора"
+    },
+    "2!bprtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P4",
+        "sip": "2!bprtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bsrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Outward Progressor Opening",
+        "name_ru": "Центробежный дебют прогрессора"
+    },
+    "2!bsrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P4",
+        "sip": "2!bprtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bsrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Outward Progressor Opening",
+        "name_ru": "Центробежный дебют прогрессора"
+    },
+    "2!blrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P5",
+        "sip": "2!blrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bnrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Forward Progressor Opening",
+        "name_ru": "Прямой дебют прогрессора"
+    },
+    "2!bnrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P5",
+        "sip": "2!blrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bnrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Forward Progressor Opening",
+        "name_ru": "Прямой дебют прогрессора"
+    },
+    "2!bprurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P6",
+        "sip": "2!bprurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bsrtrurvrwryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Channel Opening",
+        "name_ru": "Дебют канала"
+    },
+    "2!bsrtrurvrwryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "P6",
+        "sip": "2!bprurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bsrtrurvrwryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Channel Opening",
+        "name_ru": "Дебют канала"
+    },
+    "2!bpgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "A1",
+        "sip": "2!bpgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bsgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Pulsum Opening",
+        "name_ru": "Дебют пульсума"
+    },
+    "2!bsgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "A1",
+        "sip": "2!bpgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bsgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Pulsum Opening",
+        "name_ru": "Дебют пульсума"
+    },
+    "2!bbgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "U1",
+        "sip": "2!bbgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bfgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "a4/i4 Sac",
+        "name_ru": "Жертва на a4/i4"
+    },
+    "2!bfgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "U1",
+        "sip": "2!bbgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bfgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "a4/i4 Sac",
+        "name_ru": "Жертва на a4/i4"
+    },
+    "2!bqgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "A2",
+        "sip": "2!bqgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!brgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Central Aggressor Opening",
+        "name_ru": "Дебют центрального агрессора"
+    },
+    "2!brgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "A2",
+        "sip": "2!bqgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!brgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Central Aggressor Opening",
+        "name_ru": "Дебют центрального агрессора"
+    },
+    "2!bdgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "U2",
+        "sip": "2!bdgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bdgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Central Aggressor Opening",
+        "name_ru": "Дебют центрального агрессора"
+    },
+    "2!bdgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "U2",
+        "sip": "2!bdgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bdgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Central Aggressor Opening",
+        "name_ru": "Дебют центрального агрессора"
+    },
+    "2!bQgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "U3",
+        "sip": "2!bQgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bPgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "e4 Sac",
+        "name_ru": "Жертва на e4"
+    },
+    "2!bPgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "U3",
+        "sip": "2!bQgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bPgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "e4 Sac",
+        "name_ru": "Жертва на e4"
+    },
+    "2!bDgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnEoFiGeHeIiJrKrLrMrNr": {
+        "code": "A3",
+        "sip": "2!bDgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bBgtrurvrwrxryize0e1i2o3g4n6o!AoCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Exchange Opening",
+        "name_ru": "Разменный дебют"
+    },
+    "2!bBgtrurvrwrxryize0e1i2o3g4n6o!AoCnDgEoFiGeHeIiJrKrLrMrNr": {
+        "code": "A3",
+        "sip": "2!bDgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnEoFiGeHeIiJrKrLrMrNr",
+        "other_sip": "2!bBgtrurvrwrxryize0e1i2o3g4n6o!AoCnDgEoFiGeHeIiJrKrLrMrNr",
+        "name_en": "Exchange Opening",
+        "name_ru": "Разменный дебют"
+    },
+    "2!wtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDeEoFiGeIiJrKrLrMrNr": {
+        "code": "A31",
+        "sip": "2!wtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDeEoFiGeIiJrKrLrMrNr",
+        "other_sip": "2!wtrurvrwrxryize0e1i2o3g4n6o!AoBeCnDgEoFiHeIiJrKrLrMrNr",
+        "name_en": "Exchange Opening: Capture Variant",
+        "name_ru": "Разменный дебют: Вариант без превращения"
+    },
+    "2!wtrurvrwrxryize0e1i2o3g4n6o!AoBeCnDgEoFiHeIiJrKrLrMrNr": {
+        "code": "A31",
+        "sip": "2!wtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDeEoFiGeIiJrKrLrMrNr",
+        "other_sip": "2!wtrurvrwrxryize0e1i2o3g4n6o!AoBeCnDgEoFiHeIiJrKrLrMrNr",
+        "name_en": "Exchange Opening: Capture Variant",
+        "name_ru": "Разменный дебют: Вариант без превращения"
+    },
+    "2!wtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeIiJrKrLrMrNr": {
+        "code": "A32",
+        "sip": "2!wtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeIiJrKrLrMrNr",
+        "other_sip": "2!wtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiHeIiJrKrLrMrNr",
+        "name_en": "Exchange Opening: Morph Variant",
+        "name_ru": "Разменный дебют: Вариант с превращением"
+    },
+    "2!wtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiHeIiJrKrLrMrNr": {
+        "code": "A32",
+        "sip": "2!wtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeIiJrKrLrMrNr",
+        "other_sip": "2!wtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiHeIiJrKrLrMrNr",
+        "name_en": "Exchange Opening: Morph Variant",
+        "name_ru": "Разменный дебют: Вариант с превращением"
+    }
+}
