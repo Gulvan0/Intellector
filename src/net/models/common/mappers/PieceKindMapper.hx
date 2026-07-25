@@ -2,7 +2,7 @@ package net.models.common.mappers;
 
 class PieceKindMapper
 {
-    public static function datatypeToDto(datatype:lib.intellectorboard.primitives.piece.PieceKind):net.models.common.PieceKind
+    public static function datatypeToDto(datatype:intellectorboard.primitives.piece.PieceKind):net.models.common.PieceKind
     {
         return switch datatype {
             case Progressor: PROGRESSOR;
@@ -14,7 +14,7 @@ class PieceKindMapper
         }
     }
 
-    public static function dtoToDatatype(dto:net.models.common.PieceKind):lib.intellectorboard.primitives.piece.PieceKind
+    public static function dtoToDatatype(dto:net.models.common.PieceKind):intellectorboard.primitives.piece.PieceKind
     {
         return switch dto {
             case PROGRESSOR: Progressor;

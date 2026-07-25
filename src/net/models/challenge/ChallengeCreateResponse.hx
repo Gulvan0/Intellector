@@ -3,7 +3,7 @@ package net.models.challenge;
 import net.models.challenge.ChallengeCreateResult;
 import net.models.game.GameSummaryPublic;
 import net.models.challenge.ChallengePublic;
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 
 class ChallengeCreateResponse implements IJsonUnserializableMacro
 {

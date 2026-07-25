@@ -1,6 +1,6 @@
 package net.models.study;
 
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class ListStudiesPayload implements IJsonSerializableMacro

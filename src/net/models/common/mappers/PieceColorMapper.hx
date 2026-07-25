@@ -2,7 +2,7 @@ package net.models.common.mappers;
 
 class PieceColorMapper
 {
-    public static function datatypeToDto(datatype:lib.intellectorboard.primitives.piece.PieceColor):net.models.common.PieceColor
+    public static function datatypeToDto(datatype:intellectorboard.primitives.piece.PieceColor):net.models.common.PieceColor
     {
         return switch datatype {
             case White: WHITE
@@ -10,7 +10,7 @@ class PieceColorMapper
         }
     }
 
-    public static function dtoToDatatype(dto:net.models.common.PieceColor):lib.intellectorboard.primitives.piece.PieceColor
+    public static function dtoToDatatype(dto:net.models.common.PieceColor):intellectorboard.primitives.piece.PieceColor
     {
         return switch dto {
             case WHITE: White

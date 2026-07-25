@@ -1,12 +1,12 @@
 package net.models.study.mappers;
 
-import lib.intellectorboard.primitives.hex.HexCoords;
-import lib.intellectorboard.primitives.ply.RawPly;
-import lib.intellectorboard.plytree.PlyTreeNodeBase;
-import lib.intellectorboard.plytree.path.PlyTreePath;
-import lib.intellectorboard.position.Position;
-import lib.intellectorboard.plytree.PlyTreePlyNode;
-import lib.intellectorboard.plytree.PlyTree;
+import intellectorboard.primitives.hex.HexCoords;
+import intellectorboard.primitives.ply.RawPly;
+import intellectorboard.plytree.PlyTreeNodeBase;
+import intellectorboard.plytree.path.PlyTreePath;
+import intellectorboard.position.Position;
+import intellectorboard.plytree.PlyTreePlyNode;
+import intellectorboard.plytree.PlyTree;
 
 class StudyPlyTreeMapper
 {

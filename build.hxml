@@ -3,6 +3,11 @@
 
 -lib haxeui-core
 -lib haxeui-html5
+-lib morestd
 -lib haxefolio
+-lib jsonmodel
+-lib easyrest
+-lib easypubsub
+-lib intellectorboard
 
 -js bin/app.js

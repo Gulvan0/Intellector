@@ -1,7 +1,7 @@
 package net.models.game.external;
 
 import net.models.game.SimpleOutcome;
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 
 class ExternalGameAppendPlyResponse implements IJsonUnserializableMacro
 {

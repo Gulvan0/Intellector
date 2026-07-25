@@ -1,7 +1,7 @@
 package net.models.game;
 
 import net.models.common.TimeControlKind;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 class GameFilter implements IJsonSerializableMacro
 {

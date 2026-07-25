@@ -1,6 +1,6 @@
 package net.models.common;
 
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 
 class IdList implements IJsonUnserializableMacro
 {

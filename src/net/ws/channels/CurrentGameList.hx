@@ -1,6 +1,6 @@
 package net.ws.channels;
 
-import lib.pubsub.IChannel;
+import easypubsub.IChannel;
 
 class CurrentGameList implements IChannel
 {

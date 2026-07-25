@@ -1,7 +1,7 @@
 package net.models.study.mappers;
 
 import net.models.common.mappers.PieceKindMapper;
-import lib.intellectorboard.primitives.ply.RawPly;
+import intellectorboard.primitives.ply.RawPly;
 import net.models.common.mappers.HexCoordsMapper;
 
 class ApiPlyMapper

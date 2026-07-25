@@ -1,6 +1,6 @@
 package net.models.auth;
 
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class AuthCredentials implements IJsonSerializableMacro

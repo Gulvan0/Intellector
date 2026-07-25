@@ -1,14 +1,14 @@
 package net.models.game;
 
-import lib.std.DateTime;
-import lib.json.IJsonUnserializableMacro;
+import morestd.DateTime;
+import jsonmodel.IJsonUnserializableMacro;
 import net.models.common.UserRefWithNickname;
 import net.models.common.TimeControl;
 import net.models.common.TimeControlKind;
 
 class GameStartedBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(lib.json.StdParsers.parseDate) public var started_at:DateTime;
+	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var started_at:DateTime;
 	public var time_control_kind:TimeControlKind;
 	public var rated:Bool;
 	@:default(null) public var custom_starting_sip:Null<String>;

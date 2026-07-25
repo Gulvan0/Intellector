@@ -1,6 +1,6 @@
 package net.models.game.external;
 
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 import net.models.common.TimeControl;
 
 class ExternalGameCreatePayload implements IJsonSerializableMacro

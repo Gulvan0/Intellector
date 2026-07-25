@@ -2,7 +2,7 @@ package net.models.game.external;
 
 import net.models.common.PieceKind;
 import net.models.game.TimeRemainders;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 class ExternalGameAppendPlyPayload implements IJsonSerializableMacro
 {

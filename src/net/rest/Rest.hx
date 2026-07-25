@@ -1,6 +1,6 @@
 package net.rest;
 
-import lib.rest.RestClient;
+import easyrest.RestClient;
 
 class Rest
 {

@@ -1,6 +1,6 @@
 package net.models.auth;
 
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 
 class TokenResponse implements IJsonUnserializableMacro
 {

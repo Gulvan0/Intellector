@@ -1,7 +1,7 @@
 package net.models.player;
 
 import net.models.player.UserRole;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class PlayerUpdate implements IJsonSerializableMacro

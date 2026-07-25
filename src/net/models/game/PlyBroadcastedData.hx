@@ -1,13 +1,13 @@
 package net.models.game;
 
-import lib.std.DateTime;
-import lib.json.IJsonUnserializableMacro;
+import morestd.DateTime;
+import jsonmodel.IJsonUnserializableMacro;
 import net.models.game.GameTimeUpdatePublic;
 import net.models.common.PieceKind;
 
 class PlyBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(lib.json.StdParsers.parseDate) public var occurred_at:DateTime;
+	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var occurred_at:DateTime;
 	public var event_index:Int;
 	public var ply_index:Int;
 	public var from_i:Int;

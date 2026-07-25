@@ -1,6 +1,6 @@
 package client.datatypes;
 
-import lib.intellectorboard.primitives.piece.PieceColor;
+import intellectorboard.primitives.piece.PieceColor;
 
 enum DecisiveOutcomeKind
 {

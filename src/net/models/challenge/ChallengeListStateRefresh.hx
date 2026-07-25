@@ -1,6 +1,6 @@
 package net.models.challenge;
 
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 import net.models.challenge.ChallengePublic;
 
 class ChallengeListStateRefresh implements IJsonUnserializableMacro

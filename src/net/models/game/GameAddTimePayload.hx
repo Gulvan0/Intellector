@@ -1,7 +1,7 @@
 package net.models.game;
 
 import net.models.common.PieceColor;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class GameAddTimePayload implements IJsonSerializableMacro

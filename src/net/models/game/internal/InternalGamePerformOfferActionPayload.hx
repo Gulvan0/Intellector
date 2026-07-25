@@ -2,7 +2,7 @@ package net.models.game.internal;
 
 import net.models.game.OfferKind;
 import net.models.game.OfferAction;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class InternalGamePerformOfferActionPayload implements IJsonSerializableMacro

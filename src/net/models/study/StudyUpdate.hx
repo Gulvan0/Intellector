@@ -1,7 +1,7 @@
 package net.models.study;
 
 import net.models.study.StudyPublicity;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class StudyUpdate implements IJsonSerializableMacro

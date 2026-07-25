@@ -2,7 +2,7 @@ package net.models.game.external;
 
 import net.models.common.PieceColor;
 import net.models.game.OutcomeKind;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 class ExternalGameEndPayload implements IJsonSerializableMacro
 {

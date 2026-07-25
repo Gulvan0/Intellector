@@ -1,6 +1,6 @@
 package net.models.game;
 
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class GameSendChatMessagePayload implements IJsonSerializableMacro

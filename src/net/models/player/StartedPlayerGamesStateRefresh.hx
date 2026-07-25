@@ -1,6 +1,6 @@
 package net.models.player;
 
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 import net.models.game.GamePublic;
 
 class StartedPlayerGamesStateRefresh implements IJsonUnserializableMacro

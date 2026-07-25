@@ -1,7 +1,7 @@
 package net.models.other;
 
 import net.models.other.CompatibilityResolution;
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 
 class CompatibilityResponse implements IJsonUnserializableMacro
 {

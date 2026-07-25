@@ -1,6 +1,6 @@
 package net.models.player;
 
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 import net.models.common.TimeControlKind;
 
 class PlayerGameStats implements IJsonUnserializableMacro

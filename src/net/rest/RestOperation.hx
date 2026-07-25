@@ -1,12 +1,12 @@
 package net.rest;
 
-import lib.json.UnserializableBool;
-import lib.rest.NoPayload;
-import lib.rest.NoResponse;
-import lib.json.UnserializableArray;
+import jsonmodel.UnserializableBool;
+import easyrest.NoPayload;
+import easyrest.NoResponse;
+import jsonmodel.UnserializableArray;
 import haxe.http.HttpMethod;
-import lib.rest.GetOperaton;
-import lib.rest.GenericRestOperation;
+import easyrest.GetOperaton;
+import easyrest.GenericRestOperation;
 import net.models.common.UserRefWithNickname;
 import net.models.auth.AuthCredentials;
 import net.models.auth.GuestTokenResponse;

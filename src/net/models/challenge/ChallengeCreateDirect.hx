@@ -1,7 +1,7 @@
 package net.models.challenge;
 
 import net.models.common.TimeControl;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class ChallengeCreateDirect implements IJsonSerializableMacro

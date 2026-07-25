@@ -7,7 +7,7 @@ import net.models.common.UserRefWithNickname;
 import net.models.game.GameTimeUpdatePublic;
 import net.models.common.PieceKind;
 import net.models.common.HexCoords;
-import lib.std.DateTime;
+import morestd.DateTime;
 
 enum GameEvent
 {

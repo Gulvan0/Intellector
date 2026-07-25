@@ -1,6 +1,6 @@
 package net.models.other;
 
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class CompatibilityCheckPayload implements IJsonSerializableMacro

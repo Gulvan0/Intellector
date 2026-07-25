@@ -1,8 +1,8 @@
 package net.ws.events;
 
-import lib.std.Never;
+import morestd.Never;
 import net.ws.channels.Everyone;
-import lib.pubsub.IEvent;
+import easypubsub.IEvent;
 
 class ServerShutdown implements IEvent<Never, Everyone>
 {

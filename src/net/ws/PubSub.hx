@@ -1,8 +1,8 @@
 package net.ws;
 
-import lib.pubsub.Subscription;
-import lib.pubsub.IChannel;
-import lib.pubsub.PubSubEngine;
+import easypubsub.Subscription;
+import easypubsub.IChannel;
+import easypubsub.PubSubEngine;
 
 class PubSub
 {

@@ -1,7 +1,7 @@
 package net.models.game.internal;
 
 import net.models.common.PieceKind;
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 @:structInit
 class InternalGameAppendPlyPayload implements IJsonSerializableMacro

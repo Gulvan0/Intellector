@@ -2,7 +2,7 @@ package net.models.game.internal;
 
 import net.models.game.SimpleOutcome;
 import net.models.game.GameTimeUpdatePublic;
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 
 class InternalGameAppendPlyResponse implements IJsonUnserializableMacro
 {

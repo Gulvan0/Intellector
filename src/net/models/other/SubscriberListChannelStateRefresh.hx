@@ -1,6 +1,6 @@
 package net.models.other;
 
-import lib.json.IJsonUnserializableMacro;
+import jsonmodel.IJsonUnserializableMacro;
 import net.models.common.UserRefWithNickname;
 
 class SubscriberListChannelStateRefresh implements IJsonUnserializableMacro

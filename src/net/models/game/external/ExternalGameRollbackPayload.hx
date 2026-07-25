@@ -1,6 +1,6 @@
 package net.models.game.external;
 
-import lib.json.IJsonSerializableMacro;
+import jsonmodel.IJsonSerializableMacro;
 
 class ExternalGameRollbackPayload implements IJsonSerializableMacro
 {
