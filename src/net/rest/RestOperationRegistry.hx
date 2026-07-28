@@ -39,7 +39,7 @@ import net.models.study.StudyUpdate;
 import net.models.study.StudyPublic;
 import net.models.study.StudySummaryPublic;
 
-class RestOperation
+class RestOperationRegistry
 {
 	public static final AUTH_AS_GUEST = new GetOperaton<GuestTokenResponse>("/auth/guest");
 	public static final SIGN_IN = new GenericRestOperation<AuthCredentials, TokenResponse>("/auth/signin", Post);
