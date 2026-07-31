@@ -3,7 +3,7 @@ package net.models.game;
 import morestd.DateTime;
 import jsonmodel.IJsonUnserializableMacro;
 import net.models.common.UserRefWithNickname;
-import net.models.common.TimeControl;
+import net.models.common.FischerTimeControl;
 import net.models.common.TimeControlKind;
 
 class GameStartedBroadcastedData implements IJsonUnserializableMacro
@@ -16,5 +16,5 @@ class GameStartedBroadcastedData implements IJsonUnserializableMacro
 	public var id:Int;
 	public var white_player:UserRefWithNickname;
 	public var black_player:UserRefWithNickname;
-	@:default(null) public var fischer_time_control:Null<TimeControl>;
+	@:default(null) public var fischer_time_control:Null<FischerTimeControl>;
 }

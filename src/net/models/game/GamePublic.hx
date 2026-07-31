@@ -4,7 +4,7 @@ import net.models.game.GameEvent;
 import net.models.game.GameOutcomePublic;
 import net.models.common.TimeControlKind;
 import net.models.common.UserRefWithNickname;
-import net.models.common.TimeControl;
+import net.models.common.FischerTimeControl;
 import net.models.game.GameTimeUpdatePublic;
 import morestd.DateTime;
 import jsonmodel.IJsonUnserializableMacro;
@@ -21,7 +21,7 @@ class GamePublic implements IJsonUnserializableMacro
 	public var black_player:UserRefWithNickname;
 	public var opening_sip:String;
 	public var latest_sip:String;
-	@:default(null) public var fischer_time_control:Null<TimeControl>;
+	@:default(null) public var fischer_time_control:Null<FischerTimeControl>;
 	@:default(null) public var outcome:Null<GameOutcomePublic>;
 	@:jcustomparse(net.models.game.SpecialParsers.parseGenericEventList) public var events:Array<GameEvent>;
 	@:default(null) public var latest_time_update:Null<GameTimeUpdatePublic>;
