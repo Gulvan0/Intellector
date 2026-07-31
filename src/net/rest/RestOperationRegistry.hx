@@ -11,6 +11,7 @@ import net.models.common.UserRefWithNickname;
 import net.models.auth.AuthCredentials;
 import net.models.auth.GuestTokenResponse;
 import net.models.auth.TokenResponse;
+import net.models.auth.WhoamiResponse;
 import net.models.challenge.ChallengeCreateDirect;
 import net.models.challenge.ChallengeCreateOpen;
 import net.models.challenge.ChallengeCreateResponse;
@@ -42,6 +43,7 @@ import net.models.study.StudySummaryPublic;
 class RestOperationRegistry
 {
 	public static final AUTH_AS_GUEST = new GetOperaton<GuestTokenResponse>("/auth/guest");
+	public static final WHOAMI = new GetOperaton<WhoamiResponse>("/auth/whoami");
 	public static final SIGN_IN = new GenericRestOperation<AuthCredentials, TokenResponse>("/auth/signin", Post);
 	public static final REGISTER = new GenericRestOperation<AuthCredentials, TokenResponse>("/auth/register", Post);
 
