@@ -11,19 +11,7 @@ renderers, and three prerequisite bug fixes in `net.models`/`net.ws` (`TimeContr
 
 Everything below is still open.
 
-## 1. Login / authentication system
-
-**Why deferred:** no equivalent of the old `LoginManager`/`gfx.popups.LogIn` exists yet in V3.
-The REST endpoints already exist (`RestOperationRegistry.AUTH_AS_GUEST`/`SIGN_IN`/`REGISTER`), but
-there's no UI, no token storage, and no session/preference wiring.
-
-**How to apply:** build as its own page or overlay. The Create Game button's stub click handler
-(`HomePage.onCreateGameClicked`) should call into it once it exists.
-
-**Related:** `Main.hx` currently bootstraps `Rest.init(() -> null)` /
-`PubSub.start(() -> null, () -> null)` — an explicit no-auth guest bootstrap, not a placeholder to
-silently leave in place. Once login exists, swap the `tokenRetriever` implementation (e.g. reading
-a stored-token preference) without needing to touch any REST/WS call site.
+## 1. < Removed >
 
 ## 2. Challenge-creation dialog
 
@@ -83,12 +71,7 @@ pass's bug fix) but only to *remove* the game from Current Games — the same ev
 live-update source a Recent Games list would need. `RestOperationRegistry.GET_RECENT_GAMES` exists
 and is unused so far.
 
-## 7. Menu bar / navigation chrome
-
-**Why deferred:** Home is the only page that exists; there's nothing to navigate to yet, so no
-`addLeftMenubarItem`/`addNormalMenuItem` wiring was added to `Main.hx`.
-
-**How to apply:** add once a second page exists.
+## 7. < Removed >
 
 ## 8. Live locale rebinding for table-row text
 
@@ -128,11 +111,3 @@ refresh/update event against the actual server contract at that point, too — t
 unrelated `TimeControl`/`FischerTimeControl` naming bug fixed this pass) both suggest the
 `net.models`/`net.ws` package was generated/copied with some systematic mismatches, not just
 isolated typos, so more may be lurking in channels no page has exercised yet.
-
-## Reload-button cooldown — dropped, not deferred
-
-The old tables disabled their Reload button for 5 seconds after each click. This was dropped
-outright (not carried forward as a TODO) because it only ever existed to rate-limit REST as the
-*sole* refresh mechanism; now that WS push keeps both tables live, a manual reload is just an
-occasional force-resync and doesn't need throttling. Noted here so it isn't mistaken for an
-oversight later.
