@@ -2,6 +2,8 @@ This project is named `Intellector Frontend v3.0` and it is a sandbox for the fu
 
 ANY AMBIGUITY OR DESIGN DOC GAP SURFACING DURING THE IMPLEMENTATION SHOULD NOT BE RESOLVED SILENTLY. Instead, explicitly ask the question.
 
+If told to take a dubious or possibly suboptimal approach (whether from the UI/UX or technical standpoint), also ask a question, providing details on why you're uncertain about this and what are the better practices or better ways to solve the problem.
+
 `haxe build.hxml --debug` builds the project.
 
 # Tech stack
@@ -56,7 +58,25 @@ The previous iteration is located in `C:/Users/mitmi/Documents/GitHub/Intellecto
 
 The original version can be used as a declarative reference (answering how the result is expected to look like, minus the ill-designed aspects), but the concrete approaches and decisions chosen may and should be subject to being questioned.
 
-What used to be "screens" became HaxeFolio pages.
+## Original version VS v3.0
+
+What used to be "screens" became HaxeFolio pages. Being navigated to a screen used to look like this: send the request, wait until the response, then build a screen using the response data.
+
+Now being navigated to a page should instead be: go to a page - those components that need data from the server will display the "loading" state, send requests as part of the initialization, then, when a response arrives, updates the components depending on it. If the response doesn't arrive in time, the components that were in a "loading" state should display the error and give the option to retry. Same should happen when the request results in an error.
+
+Generally, if the components are interested in different, non-intersecting things, a separate request per each such component is emitted and the responses get processed as they arrive. For example, on the home page there is an open challenges table and a current games table, the requests getting open challenges and current games are separate and each of their callbacks updates only one, respective, table.
+
+All networking-related stuff must be replaced with the usage of rest operation objects defined in @src/net/rest/RestOperationRegistry.hx (use @src/net/rest/Rest: `Rest.client().execute(...)`) and `PubSub.sub()` method (followed by `on*Event*` method calls: one per each handler that needs to be attached).
+
+Some of the old approaches related to retrieving the data and interacting with the server have been reworked. If unsure, consult the server repo located at `C:/Users/mitmi/Documents/GitHub/IntellectorServerV2` (though the contents of @src/net/ws package should usually be more than enough).
+
+Reject the old responsive design approaches, including `ResponsiveToolbox/ResponsivenessRule`. Font size should be constant. Widths/heights should be either exact or percentage-based.
+
+Dialogs should be replaced with the overlays by making use of HaxeFolio's `HaxeFolioApp.showOverlay()`.
+
+The old frontend dealt solely with the logins. Now the server API always returns login-nickname bundles. In every visual context, a nickname should be used. The login, on the other hand, should be used to unambiguously refer to the player programmatically, for example, in REST and WS networking.
+
+If the source code of the previous iteration does not match the style guide, reformat it freely. If it violates some principles stated in this file, ask how to fix it in V3.0.
 
 Brief original project structure overview:
 
@@ -71,16 +91,6 @@ Brief original project structure overview:
     - `gfx.preloader` - preloader animation wrapper
     - `gfx.menubar` - what needs to become HaxeFolio MenuBar widgets
     - `gfx.utils` - utilities
-
-All networking-related stuff must be replaced with the usage of rest operation objects defined in @src/net/rest/RestOperationRegistry.hx (use @src/net/rest/Rest: `Rest.client().execute(...)`) and `PubSub.sub()` method (followed by `on*Event*` method calls: one per each handler that needs to be attached).
-
-Some of the old approaches related to retrieving the data and interacting with the server have been reworked. If unsure, consult the server repo located at `C:/Users/mitmi/Documents/GitHub/IntellectorServerV2` (though the contents of @src/net/ws package should usually be more than enough).
-
-Reject the old responsive design approaches, including `ResponsiveToolbox/ResponsivenessRule`. Font size should be constant. Widths/heights should be either exact or percentage-based.
-
-Dialogs should be replaced with the overlays by making use of HaxeFolio's `HaxeFolioApp.showOverlay()`.
-
-If the source code of the previous iteration does not match the style guide, reformat it freely. If it violates some principles stated in this file, ask how to fix it in V3.0.
 
 # Code style conventions
 
