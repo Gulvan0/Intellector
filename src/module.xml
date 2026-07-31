@@ -2,14 +2,21 @@
 <module id="haxefolio-example">
     <resources>
         <resource path="assets/locale" prefix="" />
+        <resource path="assets/styles" prefix="" />
     </resources>
 
     <locales>
         <locale id="en">
             <resource path="en.properties" />
         </locale>
-        <locale id="de">
-            <resource path="de.properties" />
+        <locale id="ru">
+            <resource path="ru.properties" />
         </locale>
     </locales>
+
+    <themes>
+        <default>
+            <style resource="main.css" priority="10" />
+        </default>
+    </themes>
 </module>
