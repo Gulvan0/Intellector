@@ -73,6 +73,22 @@ The only functions are allowed to have a single-line declaration are:
 
 The bodies of all other functions, even one-liners, should always be placed on a separate line.
 
+When a function call's arguments don't fit on one line, put every argument on its own indented line, with newlines after `(` and before `)`:
+
+```
+someFunc(
+    arg1,
+    arg2,
+    arg3
+)
+```
+
+Never mix the two styles in a single call. Specifically:
+- Don't put the first argument on the same line as `(` while wrapping the rest.
+- Don't put multiple arguments on one line if any other argument is on its own line.
+
+If any argument is broken onto its own line, all arguments must be.
+
 5. Explicit types
 
 All variables should be annotated with proper types explicitly. Don't use Dynamic unless absolutely have to.

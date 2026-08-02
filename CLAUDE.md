@@ -66,6 +66,8 @@ Now being navigated to a page should instead be: go to a page - those components
 
 Generally, if the components are interested in different, non-intersecting things, a separate request per each such component is emitted and the responses get processed as they arrive. For example, on the home page there is an open challenges table and a current games table, the requests getting open challenges and current games are separate and each of their callbacks updates only one, respective, table.
 
+The old `Scene.setIngameStatus` disabled almost every menu bar control (all four `NormalMenu`s, the site name, log in/out/profile buttons) while the player was in a live game, re-enabling on `GameEnded`/reconnect. This should NOT be replicated in v3.0. The user will now be able to leave an active game whenever they like it.
+
 All networking-related stuff must be replaced with the usage of rest operation objects defined in @src/net/rest/RestOperationRegistry.hx (use @src/net/rest/Rest: `Rest.client().execute(...)`) and `PubSub.sub()` method (followed by `on*Event*` method calls: one per each handler that needs to be attached).
 
 Some of the old approaches related to retrieving the data and interacting with the server have been reworked. If unsure, consult the server repo located at `C:/Users/mitmi/Documents/GitHub/IntellectorServerV2` (though the contents of @src/net/ws package should usually be more than enough).
