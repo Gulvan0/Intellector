@@ -17,7 +17,7 @@ class HomePage extends PageBase
         setTitle(titleKey);
 
         var label:Label = new Label();
-        label.text = LocaleUtils.resolveText(titleKey);
+        label.text = titleKey;
         addComponent(label);
     }
 }

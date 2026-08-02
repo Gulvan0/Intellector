@@ -47,28 +47,3 @@ needs to be reachable on mobile too, unlike every `NormalMenu` here which mirror
 Sits between the last left-side `NormalMenu` and the Account menu on the right, per the old
 layout (`scene_template.xml`: `<challenge-list id="challengesMenu" />` right before
 `<menu id="accountMenu">`).
-
-## 4. In-game menu disabling
-
-**Why deferred:** the old `Scene.setIngameStatus` disabled almost every menu bar
-control (all four `NormalMenu`s, the site name, log in/out/profile buttons) while the player was
-in a live game, re-enabling on `GameEnded`/reconnect. No live-game-state tracking exists anywhere
-in this project yet (that's the entire point of `[[home_page_deferred]]`'s still-unbuilt
-`LiveGamePage`).
-
-**How to apply:** revisit once `LiveGamePage` and a real WS-driven "am I currently in a game"
-signal exist. `haxefolio` has no built-in "disable menu bar" facility — would need either a new
-`MenuFacade` method or direct `.disabled` toggling via `findComponent` on `MenuFacade.menuBar`/
-`sideBar`, mirroring the old code's `siteName.disabled = ingame` etc. approach but through
-whatever public surface `MenuFacade` ends up exposing.
-
-## 5. < Removed >
-
-## 6. `log_out.svg` icon not ported
-
-**Why deferred:** the `log_in_out` Account item never reaches its "logged in" visual state this
-pass (see item 1), so there's nothing to show the icon on.
-
-**How to apply:** copy `Intellector/assets/symbols/upper_menu/account/log_out.svg` to
-`assets/images/menubar/account/log_out.svg` alongside `log_in.svg` when building the real
-shapeshifting behavior.

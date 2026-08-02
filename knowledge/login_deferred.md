@@ -23,28 +23,3 @@ logout endpoint — logging out is purely a client-side decision to stop present
 Also open at that point: whether `log_in_out` becomes a real three-way toggle (Log In / My
 Profile / Log Out, like the old iteration) or a genuine single shapeshifting item — not decided
 here.
-
-## 2. No cross-tab `storage`-event sync
-
-**Why deferred:** out of scope for the init-chain this pass covers; `StorageBackend`
-(`haxefolio/src/haxefolio/preferences/StorageBackend.hx`) has no `storage`-event listener at all,
-confirmed by reading the whole class.
-
-**How to apply:** two tabs each independently resolve `Session` state from shared `localStorage`
-at their own boot time, but won't react live to a login/logout happening in another already-open
-tab. If this needs fixing later, it'd mean either `StorageBackend` itself growing a
-`window.addEventListener("storage", ...)` hook (a generic, library-appropriate addition, not
-Intellector-specific) or an app-level listener that re-runs `Session`'s resolution on the relevant
-storage keys changing.
-
-## 3. No retry/backoff or 401-vs-transient-error distinction in `bootstrapSession`
-
-**Why deferred (an accepted simplification, not an oversight):** every failure branch in the
-three-step init chain (`whoami` → `signin` → guest) is treated identically, whether it's a genuine
-401 or a transient network/server error. Worst case on a blip is a redundant guest-token fetch —
-harmless, self-corrects on the next reload/reconnect.
-
-**How to apply:** if this turns out to matter in practice (e.g. users on flaky connections getting
-silently downgraded to guest during a brief outage), a future pass could branch on HTTP status —
-only treat 401 as "definitely invalid, move to the next fallback," and retry with backoff on
-5xx/network errors instead.
