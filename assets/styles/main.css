@@ -1,0 +1,12 @@
+.intellector-login-form-field-label {
+    margin-top: 6px;
+}
+
+.intellector-login-field-error-label {
+    color: $error-border-color;
+    font-size: 11px;
+}
+
+.intellector-login-form-error-label {
+    color: $error-border-color;
+}

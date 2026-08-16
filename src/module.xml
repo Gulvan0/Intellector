@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <module id="haxefolio-example">
     <resources>
-        <resource path="assets/locale" prefix="" />
-        <resource path="assets/styles" prefix="" />
+        <resource path="assets/locale" prefix="locale" />
+        <resource path="assets/styles" prefix="styles" />
+        <resource path="assets/layouts" prefix="layouts" />
     </resources>
 
     <locales>
         <locale id="en">
-            <resource path="en.properties" />
+            <resource path="locale/en.properties" />
         </locale>
         <locale id="ru">
-            <resource path="ru.properties" />
+            <resource path="locale/ru.properties" />
         </locale>
     </locales>
 
     <themes>
         <default>
-            <style resource="main.css" priority="10" />
+            <style resource="styles/main.css" priority="10" />
         </default>
     </themes>
 </module>

@@ -1,0 +1,4 @@
+<vbox>
+    <textfield id="inputTextfield" />
+    <label id="errorLabel" hidden="true" horizontalAlign="right" styleName="intellector-login-field-error-label" />
+</vbox>

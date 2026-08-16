@@ -73,6 +73,8 @@ The only functions are allowed to have a single-line declaration are:
 
 The bodies of all other functions, even one-liners, should always be placed on a separate line.
 
+Curly braces enclosing function bodies should NEVER be omitted.
+
 When a function call's arguments don't fit on one line, put every argument on its own indented line, with newlines after `(` and before `)`:
 
 ```

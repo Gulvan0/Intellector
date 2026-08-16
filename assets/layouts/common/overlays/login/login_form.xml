@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<vbox width="100%">
+    <grid id="rowsContainer" columns="2" width="100%" />
+    <checkbox id="rememberCheckbox" text="{{intellector.overlay.login.remember_me}}" />
+    <label id="errorLabel" hidden="true" styleName="intellector-login-form-error-label" />
+    <button id="submitButton" />
+</vbox>
