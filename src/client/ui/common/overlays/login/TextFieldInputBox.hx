@@ -12,19 +12,25 @@ class TextFieldInputBox extends VBox
 {
     private final validationErrorRetrievers:Array<String->Null<String>>;
 
+    private var everHadContent:Bool = false;  // Only showsg
+
     public function new(ownValidators:Array<IValidator>, externalValidators:Array<String->Null<String>>, restrictChars:String, maxChars:Int, isPassword:Bool = false)
     {
         super();
         this.validationErrorRetrievers = externalValidators.concat([
             for (validator in ownValidators)
-            _ -> validator.validate(inputTextfield)? validator.invalidMessage : null
+            _ -> validator.validate(inputTextfield) == false? validator.invalidMessage : null
         ]);
 
         inputTextfield.restrictChars = restrictChars;
         inputTextfield.maxChars = maxChars;
         inputTextfield.password = isPassword;
         inputTextfield.validators = ownValidators;
-        inputTextfield.registerEvent(UIEvent.CHANGE, _ -> revalidate(false));
+        inputTextfield.registerEvent(UIEvent.CHANGE, _ -> {
+            if (inputTextfield.text.length > 0)
+                everHadContent = true;
+            revalidate(false);
+        });
 
         revalidate(false);
     }
@@ -36,6 +42,9 @@ class TextFieldInputBox extends VBox
 
     public function revalidate(withFeedback:Bool):Bool
     {
+        if (withFeedback)
+            everHadContent = true;
+
         var errorMessage:Null<String> = null;
 
         for (retriever in validationErrorRetrievers)
@@ -45,15 +54,13 @@ class TextFieldInputBox extends VBox
                 break;
         }
 
-        if (errorMessage == null)
+        if (errorMessage == null || !everHadContent)
         {
-            errorLabel.text = "";  // Just in case, to prevent stale text
-            errorLabel.hidden = true;
-            return true;
+            errorLabel.text = "";
+            return errorMessage == null;
         }
 
         errorLabel.text = errorMessage;
-        errorLabel.hidden = false;
 
         if (withFeedback)
             inputTextfield.shake().flash();

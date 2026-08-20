@@ -85,7 +85,7 @@ class LoginForm extends VBox
 
         var areFieldsValid:Bool = true;
         for (box in inputBoxes)
-            areFieldsValid = areFieldsValid && box.revalidate(true);  // No short-cicruiting since we need to display all errors, not just the first one
+            areFieldsValid = box.revalidate(true) && areFieldsValid;  // revalidate() first so it's never short-circuited away; every invalid box gets its error shown, not just the first one
 
         if (!areFieldsValid)
             return;

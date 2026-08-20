@@ -1,6 +1,5 @@
 package client.ui.common.overlays.login;
 
-import haxefolio.HaxeFolioApp;
 import haxefolio.overlay.OverlayContent;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/common/overlays/login/login_overlay.xml"))

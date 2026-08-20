@@ -1,4 +1,11 @@
+#haxefolio-overlay-login-modal {
+    width: 450px;
+    height: 340px;
+}
+
 .intellector-login-form-field-label {
+    width: 100%;
+    text-align: center;
     margin-top: 6px;
 }
 
@@ -9,4 +16,8 @@
 
 .intellector-login-form-error-label {
     color: $error-border-color;
+}
+
+.intellector-login-form-remember-checkbox {
+    margin-bottom: 12px;
 }

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <vbox width="100%" height="100%">
-    <label text="{{intellector.overlay.login.title}}" />
     <tabview width="100%" height="100%">
-        <vbox id="signInTab" text="{{intellector.overlay.login.tab.sign_in}}" width="100%" height="100%" />
-        <vbox id="registerTab" text="{{intellector.overlay.login.tab.register}}" width="100%" height="100%" />
+        <box id="signInTab" text="{{intellector.overlay.login.tab.sign_in}}" width="100%" height="100%" />
+        <box id="registerTab" text="{{intellector.overlay.login.tab.register}}" width="100%" height="100%" />
     </tabview>
 </vbox>
