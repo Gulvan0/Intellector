@@ -4,7 +4,7 @@ ANY AMBIGUITY OR DESIGN DOC GAP SURFACING DURING THE IMPLEMENTATION SHOULD NOT B
 
 If told to take a dubious or possibly suboptimal approach (whether from the UI/UX or technical standpoint), also ask a question, providing details on why you're uncertain about this and what are the better practices or better ways to solve the problem.
 
-`haxe build.hxml --debug` builds the project.
+`haxe build.hxml --debug` builds the project. To test in a browser, first try `127.0.0.1:5500` instead of running your own webserver - most of the times the live server serving `index.html` has already been open.
 
 # Tech stack
 
