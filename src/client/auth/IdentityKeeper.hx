@@ -16,7 +16,7 @@ class IdentityKeeper
 
     private static function updateKeeperIdentity(identity:Identity):Void
     {
-        if (currentIdentity == identity)
+        if (Type.enumEq(currentIdentity, identity))
             return;
 
         currentIdentity = identity;
