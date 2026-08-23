@@ -4,6 +4,7 @@ import client.formatters.IdentityFormatters;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
 import client.LocalStorageKey;
+import client.PreferenceMigration;
 import client.ui.common.overlays.login.LoginOverlay;
 import haxefolio.browser.ActivityTracker;
 import haxefolio.HaxeFolioApp;
@@ -57,6 +58,7 @@ class Main
             .buildConfig();
 
         HaxeFolioApp.init(config);
+        PreferenceMigration.run();
         ActivityTracker.activate();
 
         var tokenRetriever:Void->Null<String> = HaxeFolioApp.valueStorage.read.bind(LocalStorageKey.TOKEN);
