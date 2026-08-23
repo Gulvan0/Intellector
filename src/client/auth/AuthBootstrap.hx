@@ -32,6 +32,17 @@ class AuthBootstrap
         attemptWhoami(0);
     }
 
+    /*
+        Drops the current session and re-enters the chain at the guest step, skipping remembered
+        credentials (erased here) so the user isn't immediately signed back in.
+    */
+    public static function logOut():Void
+    {
+        HaxeFolioApp.valueStorage.remove(LocalStorageKey.TOKEN);
+        SavedCredentials.eraseEverything();
+        authAsGuest(0);
+    }
+
     private static function attemptWhoami(retryCount:Int):Void
     {
         Rest.client().execute(
