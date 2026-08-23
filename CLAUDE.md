@@ -94,6 +94,14 @@ Brief original project structure overview:
     - `gfx.menubar` - what needs to become HaxeFolio MenuBar widgets
     - `gfx.utils` - utilities
 
+## Vocabulary changes
+
+Some terminology from the original version is being deliberately replaced, since the old naming was either ambiguous or overloaded. Apply these renames consistently wherever the underlying concept shows up while porting the rest of the app, not just at the specific spots they were first fixed:
+
+- **"Marking" → "board coordinates".** The old `gameboard.util.Marking` enum (`None`/`Side`/`Over`) named itself after an internal implementation detail rather than what it controls - whether/how board coordinate labels (file letters) are displayed. Its own old locale label was already "Coordinates" ("Координаты"), not "Marking" - the type name never actually reached users. Use `boardCoordinates`/`board_coordinates`, with values `all`/`files_only`/`none` instead of `over`/`side`/`none`.
+- **"Scroll" → "navigate" for changing the shown ply/move.** The old code overloaded "scroll" for two unrelated things: literal viewport/scrollbar movement (`CreepingLine`, `Chatbox`'s `VerticalScroll`), and changing which ply/move is currently displayed (`PlyScrollType`, `performScroll`, `applyScrolling`, `ScrollBtnPressed`) - even though a class doing the exact same job as the latter was already (correctly) named `MoveNavigator`. In v3.0, use `navigate` (e.g. `navigateToPly`, `PlyNavigationType`) for changing the shown ply/move (prev/next/jump to start/end/a specific move); reserve `scroll` strictly for actual viewport/scrollbar motion.
+- **"Auto-scroll on move" → "follow latest move".** The old `autoScrollOnMove` preference ("Return to the updated current position") controls whether the view snaps back to the live position when a new move arrives - that's following the live position, not a scrolling action. Renamed to `followLatestMove`/`follow_latest_move`.
+
 # Code style conventions
 
 See `code_style.md`.
