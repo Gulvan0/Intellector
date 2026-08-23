@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<module id="haxefolio-example">
+<module id="intellector">
     <resources>
-        <resource path="assets/locale" prefix="locale" />
-        <resource path="assets/styles" prefix="styles" />
-        <resource path="assets/layouts" prefix="layouts" />
+        <resource path="assets/locale" prefix="intellector/locale" />
+        <resource path="assets/styles" prefix="intellector/styles" />
+        <resource path="assets/layouts" prefix="intellector/layouts" />
     </resources>
 
     <locales>
         <locale id="en">
-            <resource path="locale/en.properties" />
+            <resource path="intellector/locale/en.properties" />
         </locale>
         <locale id="ru">
-            <resource path="locale/ru.properties" />
+            <resource path="intellector/locale/ru.properties" />
         </locale>
     </locales>
 
     <themes>
         <default>
-            <style resource="styles/main.css" priority="10" />
+            <style resource="intellector/styles/main.css" priority="10" />
         </default>
     </themes>
 </module>
