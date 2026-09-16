@@ -1,0 +1,28 @@
+<!--
+    Bug: a CSS rule with a compound/chained pseudo-class selector (two pseudo-classes on one
+    selector, e.g. `:down:disabled`) corrupts matching for an EARLIER, unrelated `:down`-only
+    rule in the same stylesheet - not just failing to match itself.
+
+    Expected: the button is selected (toggle=true, selected=true) and not disabled, so
+    `.repro-button:down` should apply - red background.
+
+    Actual: the button renders with its default (unstyled) background - neither red nor green -
+    because the presence of the `.repro-button:down:disabled` rule below breaks the `:down`-only
+    rule above it, even though the button never matches `:down:disabled` (it isn't disabled).
+
+    Removing the `.repro-button:down:disabled` block (or replacing it with two separate,
+    non-chained rules) makes `.repro-button:down` apply correctly.
+-->
+<vbox>
+    <style>
+        .repro-button:down {
+            background-color: #ff0000;
+        }
+
+        .repro-button:down:disabled {
+            background-color: #00ff00;
+        }
+    </style>
+
+    <button id="btn" text="Selected (should be RED)" toggle="true" selected="true" styleName="repro-button" />
+</vbox>
