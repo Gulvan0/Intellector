@@ -8,6 +8,11 @@ Light mode. Styling is constrained to what HaxeUI's style engine supports — in
 particular **no `letter-spacing` and no `text-overflow: ellipsis`** anywhere in this
 spec; see §7 for how labels are kept from overflowing instead.
 
+Because this presentation ships **upstream and is used by several sites**, the palette
+below is the framework default — hue-neutral graphite — and every colour is a token a
+host theme may override (§6.3). Intellector, for instance, replaces the neutrals with a
+warm set derived from its board and the accent with brass; nothing here assumes it.
+
 ## 0. Coexistence with the existing (bare) presentation
 
 This is a second **presentation** an overlay can be shown with, not a replacement for
@@ -57,10 +62,10 @@ children.
 | Height         | 720 px, fixed                   | 100% of viewport minus a top inset             |
 | Top inset      | — (vertically centred, see §2.1) | ~124 px of scrim visible above                 |
 | Corner radius  | 9 px all corners                | 12 px top-left + top-right, 0 bottom           |
-| Background     | `#fbf9f5`                       | same                                           |
-| Border         | 1 px `#d6cfc2`                  | 1 px `#d6cfc2`, top/left/right (bottom is off-screen) |
-| Elevation      | drop shadow, `0 8px 28px rgba(36,31,26,0.16)` | `0 −4px 20px rgba(36,31,26,0.18)` |
-| Scrim          | **none**                        | `rgba(36,31,26,0.35)`                          |
+| Background     | `#fafafa`                       | same                                           |
+| Border         | 1 px `#d4d4d6`                  | 1 px `#d4d4d6`, top/left/right (bottom is off-screen) |
+| Elevation      | drop shadow, `0 8px 28px rgba(24,26,31,0.16)` | `0 −4px 20px rgba(24,26,31,0.18)` |
+| Scrim          | **none**                        | `rgba(24,26,31,0.35)`                          |
 | Entry          | fade, no movement               | slide up from `y = 100%` to rest               |
 
 ### 2.1 Desktop: non-blocking
@@ -105,15 +110,15 @@ side margins.
 
 - Height **60 px**, fixed. Never scrolls, never changes height.
 - Horizontal padding **22 px** both sides.
-- Bottom border: 1 px `#e4ded2`.
-- Background: same as container (`#fbf9f5`) — no separate fill.
+- Bottom border: 1 px `#e4e4e6`.
+- Background: same as container (`#fafafa`) — no separate fill.
 - Layout: title left, close button right, both vertically centred.
 
-**Title**: 17 px, weight 600, colour `#241f1a`, single line, no wrapping.
+**Title**: 17 px, weight 600, colour `#1f2126`, single line, no wrapping.
 
-**Close button**: 26 × 26 px, corner radius 4 px, 1 px border `#d6cfc2`, transparent
-background, glyph `✕` at 14 px in `#6b6357`, centred. Hover: border `#b9b0a0`, glyph
-`#241f1a`. Pressed: background `#f1ede5`. It is the only interactive element in the
+**Close button**: 26 × 26 px, corner radius 4 px, 1 px border `#d4d4d6`, transparent
+background, glyph `✕` at 14 px in `#5f6168`, centred. Hover: border `#b3b3b6`, glyph
+`#1f2126`. Pressed: background `#f0f0f1`. It is the only interactive element in the
 header.
 
 ## 4. Body — the scrollview shell
@@ -137,9 +142,9 @@ permanently-gutter'd track so that content never reflows when it appears.
 | --------------------- | ------------------------------------------------------ |
 | Lane width            | 10 px, always reserved                                  |
 | Track background      | transparent — the container fill shows through          |
-| Thumb background      | `#cdc5b6`                                               |
-| Thumb hover           | `#b9b0a0`                                               |
-| Thumb active/drag     | `#9a9082`                                               |
+| Thumb background      | `#cccdd1`                                               |
+| Thumb hover           | `#b3b3b6`                                               |
+| Thumb active/drag     | `#90929a`                                               |
 | Thumb corner radius   | 4 px                                                    |
 | Thumb inset           | 2 px each side, giving a 6 px visible thumb in the 10 px lane |
 | Thumb minimum length  | 32 px                                                   |
@@ -163,8 +168,8 @@ the thumb may auto-hide; the gutter stays reserved regardless.
 
 - Height **68 px**, fixed.
 - Horizontal padding **22 px** both sides.
-- Top border: 1 px `#e4ded2`.
-- Background `#fbf9f5`, explicitly painted — it must be opaque so scrolled body content
+- Top border: 1 px `#e4e4e6`.
+- Background `#fafafa`, explicitly painted — it must be opaque so scrolled body content
   passes behind it, not through it.
 - Buttons in a single row, vertically centred, **gap 10 px** between adjacent buttons.
 
@@ -174,13 +179,18 @@ The programmer supplies an ordered list; each entry is:
 
 ```haxe
 {
-  label:      String,        // display text
-  widthPct:   Float,         // percent of the available row width
-  emphasized: Bool,          // theme-coloured fill + bold text
-  enabled:    Bool,          // optional, default true
-  onClick:    Void -> Void
+  label:String, // display text
+  widthPct:Float, // percent of the available row width
+  emphasized:Bool, // marks the primary action; treatment per §5.4
+  enabled:Bool, // optional, default true
+  onClick:Void->Void
 }
 ```
+
+`emphasized` states *that* a button is the primary action, not *how* it looks — the
+treatment is chosen once by `emphasisStyle` (§5.4). More than one emphasized button is
+permitted but discouraged; two primary actions usually means the dialog is asking two
+questions.
 
 ### 5.2 Width resolution
 
@@ -190,52 +200,143 @@ available = containerW − 44           // footer padding
 buttonW_i = widthPct_i / 100 × available
 ```
 
+
 Percentages are expected to sum to 100. If they sum to less, the row is left-aligned
 with trailing slack; if more, widths are scaled down proportionally so the row never
 overflows. The reference design's footer is Cancel at 25% and Create at 75%.
 
-### 5.3 Button styling
+### 5.3 Base button styling
 
-Identical geometry for both variants: vertical padding 11 px (≈37 px tall), corner
-radius 5 px, font size 13 px, single line, centred, no wrapping.
+Common to every variant: vertical padding 11 px (≈37 px tall), corner radius 5 px, font
+size 13 px, single line, centred, no wrapping.
 
-**Normal** — transparent background, 1 px border `#d6cfc2`, text `#6b6357`, weight 500.
-Hover: border `#b9b0a0`, text `#241f1a`.
+**Normal** — transparent background, 1 px `border`, text `inkMuted`, weight 500.
+Hover: border `borderHover`, text `ink`.
 
-**Emphasized** — background = theme accent (`#2f6bbf` in the reference design), border
-1 px the same accent, text `#ffffff`, weight **600**. Hover: accent darkened ~8%
-(`#2a5fa9`).
+**Disabled** (any variant) — background `surfaceSunken`, 1 px `divider`, text
+`inkFaint`, cursor `not-allowed`, no hover response. **A disabled emphasized button
+loses its emphasis treatment entirely** and renders as the disabled style above; this is
+how the overlay signals "not submittable" without a modal error.
 
-**Disabled** (either variant) — background `#f1ede5`, border 1 px `#e4ded2`, text
-`#a39a8c`, cursor `not-allowed`, no hover response. A disabled emphasized button drops
-its accent fill entirely; this is how the overlay signals "not submittable" without a
-modal error.
+### 5.4 Emphasis treatment — `emphasisStyle`
+
+The emphasized button has two treatments. Both are first-class; the framework user
+picks one. `EmphasisStyle` (`Filled`/`Outlined`) is not declared here — it is a
+general form-component model type (see `form-components.md` §5), reused by this footer
+button rather than owned by it, so a form's own controls and the overlay presenting it
+agree on what "active" looks like.
+
+Settable at two levels: a theme-wide default, and a per-host override — for this footer
+button, that override sits alongside the title and button spec that `Modern` already
+requires (§0). Default is `Filled`, so a call site that says nothing gets the stronger
+treatment.
+
+**`Filled`** — background `accent`, 1 px `accent`, text `accentInk`, weight 600.
+Hover: background `accentHover`. The strongest available emphasis; reads unambiguously
+as the action to take.
+
+**`Outlined`** — background `accentTint`, 1 px `accentMuted`, text `accent`, weight
+600. Hover: border `accent`. Quieter, and it keeps the footer in the same visual
+register as the rest of the dialog.
+
+The outlined border is `accentMuted`, deliberately **weaker** than the accent itself.
+The tint and the label weight already mark the state; a full-strength border makes three
+signals for one condition, which reads as shouting. If an outlined button needs
+strengthening, deepen `accentTint` — do not promote the border to `accent`.
+
+#### Which to choose
+
+`Filled` is the default and correct in most themes.
+
+`Outlined` exists for one specific situation: **when the theme's accent shares a hue
+family with the site's own content imagery.** Intellector is the motivating case — its
+accent is brass and its boards are tan and orange, so a filled brass button sitting near
+a board reads as a piece of board that came loose. An outlined button avoids the
+collision by treatment rather than by hue. The rule:
+
+- Accent hue-distant from content imagery → `Filled`.
+- Accent inside the content's hue family → `Outlined`.
+
+**This choice must agree with how the host draws selected states inside the body.** A
+dialog with filled selection chips and an outlined primary button, or the reverse, gives
+the user two competing definitions of "active". The framework cannot enforce this —
+the body is the framework user's `OverlayContent` — so it stands as a contract:
+whichever `emphasisStyle` an overlay uses, its content should use the matching
+selection treatment.
 
 ## 6. Colour tokens (light)
 
 | Token             | Value     | Used for                                        |
 | ----------------- | --------- | ----------------------------------------------- |
-| `surface`         | `#fbf9f5` | container, header, footer fill                   |
-| `surfaceSunken`   | `#f1ede5` | disabled fills, inset boxes in the body          |
+| `surface`         | `#fafafa` | container, header, footer fill                   |
+| `surfaceSunken`   | `#f0f0f1` | disabled fills, inset boxes in the body          |
 | `surfaceDeep`     | `#ffffff` | input fills in the body                          |
-| `border`          | `#d6cfc2` | container and control borders                    |
-| `borderHover`     | `#b9b0a0` | hover borders                                    |
-| `divider`         | `#e4ded2` | header/footer hairlines, disabled borders        |
-| `ink`             | `#241f1a` | primary text                                     |
-| `inkMuted`        | `#6b6357` | secondary text, labels, normal button text       |
-| `inkFaint`        | `#a39a8c` | disabled text                                    |
-| `accent`          | `#2f6bbf` | emphasized button, active selections             |
-| `accentHover`     | `#2a5fa9` | emphasized button hover                          |
-| `accentInk`       | `#ffffff` | text on accent                                   |
-| `danger`          | `#b23a22` | validation text                                  |
-| `dangerBorder`    | `#c4634f` | invalid field borders                            |
-| `scrollThumb`     | `#cdc5b6` | scrollbar thumb                                  |
-| `scrollThumbHover`| `#b9b0a0` | scrollbar thumb hover                            |
-| `scrollThumbDrag` | `#9a9082` | scrollbar thumb while dragging                   |
-| `scrim`           | `rgba(36,31,26,0.35)` | mobile sheet scrim only                |
+| `border`          | `#d4d4d6` | container and control borders                    |
+| `borderHover`     | `#b3b3b6` | hover borders                                    |
+| `divider`         | `#e4e4e6` | header/footer hairlines, disabled borders        |
+| `ink`             | `#1f2126` | primary text                                     |
+| `inkMuted`        | `#5f6168` | secondary text, labels, normal button text       |
+| `inkFaint`        | `#9a9ca2` | disabled text                                    |
+| `accent`          | `#2f3540` | emphasis fill (`Filled`), emphasis label (`Outlined`) |
+| `accentHover`     | `#232832` | emphasis hover (`Filled`)                        |
+| `accentMuted`     | `#8d939e` | emphasis border (`Outlined`)                     |
+| `accentTint`      | `#e7e9ee` | emphasis fill (`Outlined`)                       |
+| `accentInk`       | `#ffffff` | text on a solid accent fill                      |
+| `danger`          | `#b3261e` | validation text                                  |
+| `dangerBorder`    | `#c4392f` | invalid field borders                            |
+| `scrollThumb`     | `#cccdd1` | scrollbar thumb                                  |
+| `scrollThumbHover`| `#b3b3b6` | scrollbar thumb hover                            |
+| `scrollThumbDrag` | `#90929a` | scrollbar thumb while dragging                   |
+| `scrim`           | `rgba(24,26,31,0.35)` | mobile sheet scrim only                |
 
-Contrast: `ink` on `surface` is ~14:1, `inkMuted` on `surface` ~5.4:1, `accentInk` on
-`accent` ~5.1:1 — all comfortably above 4.5:1 for body text.
+Measured contrast: `ink` on `surface` ~15:1 · `inkMuted` on `surface` ~6.2:1 ·
+`inkMuted` on `surfaceSunken` ~5.9:1 · `accentInk` on `accent` ~11.6:1 · `accent` on
+`accentTint` ~9.9:1 · `danger` on `surface` ~6.4:1. All above 4.5:1, which leaves a
+host theme room to shift hue without falling below the floor.
+
+### 6.1 Why graphite is the default accent
+
+A framework default accent must satisfy a condition no site-specific accent does: it
+has to be **wrong for nobody**. Graphite is the only thing that qualifies.
+
+- It carries no semantics. Green means success or victory somewhere, red means error or
+  loss, blue means links or trust, and any of those may already be spoken for by a host
+  product. Graphite claims nothing.
+- It cannot collide with a host's content imagery by hue, because it has effectively no
+  hue — so `Filled` works out of the box, and a host needs `Outlined` only if its own
+  override creates the collision described in §5.4.
+- Its darkness carries `accentInk` at ~11.6:1, so an overriding theme can move to almost
+  any hue and still clear 4.5:1 without redesigning the button.
+- Emphasis by *value* rather than by *hue* reads as restraint rather than as branding,
+  which is the right posture for a presentation the host is expected to re-skin.
+
+Stated plainly, the trade-off: graphite is not memorable, and a dark grey primary button
+looks slightly severe beside colourful content. That is the intended default — the
+framework should be unopinionated and let the host add the opinion.
+
+### 6.2 The neutrals are neutral for the same reason
+
+The greys above are hue-neutral rather than warm or cool. A framework default cannot
+inherit one product's palette, and a hueless accent on tinted surfaces reads muddy — the
+two decisions go together. A host theme that tints its surfaces should tint its accent
+to match, and vice versa.
+
+### 6.3 Overriding for a host theme
+
+A host may override any token. Three rules constrain that:
+
+1. **Keep the contrast floor.** Every pair listed above must stay above 4.5:1. The
+   framework's ratios are generous precisely so a hue shift does not break them.
+2. **Keep the elevation direction.** `surfaceDeep` ≥ `surface` > `surfaceSunken`, and
+   the host's page background below `surface` — with no scrim on desktop (§2.1),
+   lightness is the only cue that the dialog floats. A page lighter than `surface` makes
+   it read as inset.
+3. **Re-evaluate `emphasisStyle` after changing `accent`.** A hue change can create the
+   content collision of §5.4 where the default had none. This is the one override with a
+   structural knock-on.
+
+Geometry — heights, paddings, radii, the scrollbar lane — is **not** themeable. The
+invariants in §8 depend on it.
 
 ## 7. Typography and label fitting
 
@@ -263,6 +364,12 @@ Two HaxeUI constraints shape this:
     contraction («Случ.»).
   - Any row of ≥3 equal-width buttons whose labels are locale-dependent should stack
     vertically on mobile rather than shrink, so each label gets full sheet width.
+    "Mobile" here means the framework's single existing breakpoint —
+    `ResponsivityController.isCollapsed` (driven by `HaxeFolioConfig.menuCollapseWidth`,
+    the same flag `HaxeFolioApp.showOverlay` already uses to pick this presentation's
+    Modal vs. SideBar chrome) — not a new, component-local pixel threshold. Reintroducing
+    a bespoke breakpoint per component is exactly the `ResponsiveToolbox`/
+    `ResponsivenessRule` pattern CLAUDE.md rejects.
 
 ## 8. Invariants
 
@@ -278,3 +385,5 @@ Two HaxeUI constraints shape this:
    dismissal.
 7. **No label is ever truncated** — it is budgeted to fit, because the platform cannot
    ellipsise it.
+8. **Colour is themeable; geometry is not.** Hosts override tokens, never heights,
+   paddings or radii.
