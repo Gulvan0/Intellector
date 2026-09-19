@@ -222,7 +222,7 @@ how the overlay signals "not submittable" without a modal error.
 
 The emphasized button has two treatments. Both are first-class; the framework user
 picks one. `EmphasisStyle` (`Filled`/`Outlined`) is not declared here — it is a
-general form-component model type (see `form-components.md` §5), reused by this footer
+general form-component model type (see `form-components.md` §6), reused by this footer
 button rather than owned by it, so a form's own controls and the overlay presenting it
 agree on what "active" looks like.
 
@@ -340,7 +340,7 @@ invariants in §8 depend on it.
 
 ## 7. Typography and label fitting
 
-Archivo (400/500/600/700) for all UI text; IBM Plex Mono (400/500/600) for numeric
+Onest (400/500/600) for all UI text; IBM Plex Mono (400/500/600) for numeric
 values and the small uppercase field labels (10 px). No other faces.
 
 Two HaxeUI constraints shape this:
