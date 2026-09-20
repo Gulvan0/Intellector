@@ -694,7 +694,8 @@ not cluttered enough to split yet.
 6. The `Tabs` region with both roles: `TabStrip` (the label row) plus the `SwapSlot` of page
    `ScrollView`s. Needs the error-marker contract (§4.3) to exist first, and is a build rather
    than a skin (§3.6).
-7. Rebuild `showPreferences` on `present` (§9): header, tabs, footer. Needs steps 4–6.
+7. Rebuild `showPreferences` on `present` (§9): header, tabs, footer — and restyle the window
+   and everything inside it to the theme, retiring its bespoke CSS (§9.1). Needs steps 4–6.
 8. `SearchBar`, `Toolbar`, `StepIndicator` — only when a real case demands them.
 
 Step 8 is the discipline: a region that nothing yet needs is a region specified from
@@ -744,3 +745,99 @@ bare `TabView` plus an ad-hoc footer `HBox`. The reset button moves into the `Ac
 the autosave notice is dropped. `preferenceTabIcons` keeps working as the tab labels' icons. The
 window is `Navigate` per §3: one shared footer, state that persists across tabs; each preference
 applies immediately (§4.4), so the footer hosts Reset rather than a Save.
+
+### 9.1 The preference window: transition and styling
+
+The preference window is the first real consumer of everything above, and the one built-in
+composition — so it is both the proof that the region model carries a real case and the place
+where any leftover of the old system would show. It moves over **in full**: not "a `present`
+call wrapping the old body", but a window whose structure, controls and styling all come from
+the new system. Nothing of it may keep depending on `TabView`, the old overlay classes or the
+`.haxefolio-preference-*` stylesheet rules after step 7.
+
+**Transition — what has to change.**
+
+- **`showPreferences` is a `present` call** with slug `"preference"`. `PreferenceWindowBuilder`
+  stops returning an `OverlayContent` and returns the composition of §1 — `{title, regions,
+  ?onDismissed}` — so it must be reworked, not merely re-typed. Every `Preference.onChange`
+  `Detachable` the rows register moves onto the composition's teardown hook, which replaces
+  `OverlayContent.addDetachable`; none may leak past dismissal.
+- **Structure.** `Header(title)`, then `Tabs` in the `Navigate` role (§3), then `Actions`. Each
+  tab page is a `ScrollView` inside the shared `SwapSlot`, so the window keeps a fixed frame
+  and per-tab scroll offsets. The `TabView` and the ad-hoc footer `HBox` go away.
+  `HaxeFolioConfig.preferenceTabIcons` keeps working, now as the icons on the `TabStrip`
+  labels.
+- **Footer.** Reset only. The preferences are *all* autosaved, which is what makes the footer
+  legal at all: §3.5 forbids autosaving fields under a Save button, and the window has no Save
+  — every control applies on change (§4.4). Nothing may be added that would reintroduce a
+  mixed state, such as a "Save & Close". The autosave notice stays dropped (§9, Deleted).
+- **Modal, sized by the presentation.** The window is now a modal dialog with a scrim on
+  expanded and a sheet on collapsed (§2) — no longer a non-blocking box beside a live menu bar.
+  This is an accepted behaviour change and must be called out in the README. Its size comes
+  from the presentation's geometry (§2.1, §3 of the theme), so the `480x360` / `520x400`
+  defaults of `#haxefolio-overlay-preference-modal` are deleted rather than ported.
+- **Cross-tab reactions still work.** A preference changed from another browser tab fires the
+  same `onChange` handlers as before, so the rows must keep rendering from `Preference.get()`
+  and updating on the handler — the composition must not snapshot values at build time.
+- **Contracts apply to it like to any other composition.** In particular §4.1: switching
+  tabs, pressing Reset, or a locale change re-wrapping a label never moves the frame or another
+  region; §4.6: every label and value-button caption fits its slot **in every shipped locale**
+  (the sample ships `en` and `ru`; a Russian caption is the usual first overflow), against the
+  character budgets of `haxefolio-typography.md` §4, since there is no ellipsis to fall back on.
+- **Locale keys.** `Header` needs a localized title, so a new key joins the `Locale keys`
+  table and every shipped locale file. Keys whose element is dropped or replaced
+  (`haxefolio.preference.autosave_notice`, and any per-control key a rebuilt row no longer
+  reads) are removed from the table in the same change.
+- **Documentation.** The README's `Overlays`, `Preference window` and `CSS classes and elements`
+  sections describe the old system and are rewritten together with the code (project rule:
+  the README is never left outdated). The preference window's supported customization points
+  are listed there explicitly — see the open question below.
+
+**Styling — what it must end up as.** The window is styled by the theme
+(@knowledge/plans/haxefolio/haxefolio-theme.md), and by nothing of its own: no colour, font
+size, weight, radius or spacing that the theme already defines may be re-declared for it.
+
+- **Chrome from the region chrome.** The header, its close control, the footer hairline and
+  opaque fill, and the scrollbar are the theme's region chrome (theme §4, §4.1) exactly as
+  every other overlay gets them, with no preference-specific override. The title is the
+  17 px / 600 `ink` dialog title of the type scale.
+- **Tabs from `TabStrip`.** Tab labels are the `ChoiceButton`-style labels of §3.6, in the
+  `Navigate` (underlined, flush) treatment; the icons from `preferenceTabIcons` sit inside them
+  at the size the strip defines. The old `#haxefolio-preference-tabview .icon` rule has no
+  successor unless the strip needs one.
+- **Controls from the form layer.** Rows are composed from `haxefolio.form` (`FieldHeader`,
+  `ChoiceRow`, `FormSection`, and so on) instead of the bespoke row `HBox` with a fixed-width
+  name label and a hand-styled `Button` per option. That gives them the field-label scale
+  (12 px / 500 `inkMuted`), the `EmphasisStyle`-driven selected state (§6.0) and the
+  disabled-in-place behaviour (§4.5) for free, and removes the preference window's own private
+  idea of what a selected option looks like. Where a preference is genuinely a boolean, the
+  control follows the ToggleButton-versus-checkbox guidance in the README (a mode versus an
+  attribute), rather than the current slider by default.
+- **Reset is a plain button.** With no primary action in the footer, Reset is not emphasized —
+  it is an ordinary HaxeUI `Button` given the opt-in `haxefolio-button` class (unselected
+  `ChoiceButton` treatment; plain buttons are not restyled automatically); it must not be given
+  `EmphasisStyle.Filled`, which would present a destructive secondary action as *the* action to
+  take.
+- **Selectors.** The `.haxefolio-preference-*` rules in `main.css` (`-tab`, `-row`,
+  `-name-label`, `-option-*`, `-toggle`, `-footer`, `-reset-button`, `-autosave-notice`) and
+  `#haxefolio-overlay-preference-modal` are deleted, except any that survives the test of §3.6 —
+  it names a contract the theme cannot express. What remains is the per-overlay ids/classes
+  every overlay gets from §6.0 (`#haxefolio-overlay-preference-frame`, `-header`, `-tabs`,
+  `-scroll`, `-actions`, `-close`), which are how a host restyles this window by colour or type.
+- **Colour, type and geometry follow the two mechanisms of §6.0.** A host recolours the window
+  through the cascade; changing its structural values goes through `AppearanceOverrides`, and
+  the height arithmetic re-sums automatically.
+
+**Open questions — to decide when step 7 is designed, not assumed here.**
+
+1. **Preference kind → component.** The mapping for `toggle`, `option` and `locale` is not
+   fixed by this plan (see the toggle guidance above; `option`/`locale` look like `ChoiceRow`,
+   but a preference with many values — a long locale list — would need `ChoiceGrid` instead,
+   and the choice should be made from the value count, not per call site).
+2. **Per-window appearance override.** `present` takes `?appearance` (§2), but `showPreferences`
+   currently takes no arguments. Either it gains an `AppearanceOverrides` parameter (or a
+   `HaxeFolioConfig` field) so a host can change the window's geometry or emphasis, or the
+   window is themable only theme-wide plus the cascade. Both are defensible; the second is
+   simpler, the first is consistent with every other overlay.
+3. **Title text and any per-tab title.** `Navigate` fixes the frame title (§3), so a single
+   localized key is enough — confirm no per-tab heading is wanted before adding keys.
