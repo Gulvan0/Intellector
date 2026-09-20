@@ -701,6 +701,13 @@ not cluttered enough to split yet.
 Step 8 is the discipline: a region that nothing yet needs is a region specified from
 imagination. Build it when the second host asks.
 
+**Not scheduled, but owed:** the menu bar and the side bar still carry their original styling
+(the `.haxefolio-menubar`, `.haxefolio-site-name-label`, `.haxefolio-sidebar-*` rules and the
+hard-coded colours/fonts in `main.css`) and have not been brought onto the theme. They must be
+revised later according to @knowledge/plans/haxefolio/haxefolio-theme.md — colour tokens,
+typography scale, and geometry — the same way the overlay chrome and form components already
+follow it. Until then they visibly disagree with the overlay frame that now sits over them.
+
 ---
 
 ## 9. Replacing the old overlay system
