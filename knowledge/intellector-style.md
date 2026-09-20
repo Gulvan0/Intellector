@@ -136,7 +136,8 @@ sheets only.
 
 ### 3.1 Faces
 
-**Archivo** (400/500/600/700) for all UI text. **IBM Plex Mono** (400/500/600) for
+**Onest** (400/500/600) for all UI text - HaxeFolio's own default face, no Intellector
+override. **IBM Plex Mono** (400/500/600) for
 **numeric values only** — clock readouts, time-control labels like `3+2`, SIP and other
 notation strings, ratings. No other faces.
 
@@ -155,7 +156,7 @@ read digit by digit". Using it for anything else dilutes that.
 
 ### 3.3 Field labels are sentence case, not mono caps
 
-Field labels are sentence-case Archivo at 12 px — **not** 10 px mono uppercase. Three
+Field labels are sentence-case Onest at 12 px — **not** 10 px mono uppercase. Three
 reasons, in order of weight:
 
 1. Small mono caps are the visual signature of administrative software. On a game site
@@ -172,7 +173,7 @@ looks broken. Therefore:
 
 - Any control whose width is known must have a **character budget** stated in its
   component spec, and translators must be given those budgets. As a reference point,
-  Archivo at 13 px averages ~6.8 px per Latin character and ~7.4 px per Cyrillic one.
+  Onest at 13 px averages ~6.2 px per Latin character and ~7.1 px per Cyrillic one.
 - Where a translation will not fit, **shorten the term rather than abbreviating with a
   trailing dot.** A full short word always reads better than a contraction — Russian
   «Любые» over «Случ.».

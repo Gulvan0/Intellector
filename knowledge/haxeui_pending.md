@@ -1,32 +1,19 @@
+This file stores HaxeUI's unmerged PR's and unaddressed issues. Every item mentioned there affects the Intellector website negatively.
+
+Changes proposed in the PR's are temporarily applied in the local fork of the HaxeUI. Issues are either circumvented by a workaround or, once again, by changes in the local branch.
+
+As the PR's will get merged and issues resolved, the local branch should be rebased onto more recent versions of a master. The diff between local and master branches should get smaller while the workarounds should get reverted.
+
 # PRs
 
 https://github.com/haxeui/haxeui-core/pull/701
 https://github.com/haxeui/haxeui-core/pull/703
+https://github.com/haxeui/haxeui-core/pull/713
 
 # Issues
 
 https://github.com/haxeui/haxeui-core/issues/702
+Workaround: fixed in the local haxeui-core fork (commit `ebc756a2`, branch `fix/vbox-hbox-trailing-margin`, fork PR #706): the layout cursor now adds child margins. haxefolio's form components rely on it (`verticalSpacing = 0` + header `margin-bottom`).
+
 https://github.com/haxeui/haxeui-core/issues/704
-
-- A CSS rule with a **compound/chained pseudo-class selector** (two pseudo-classes on one
-  selector, e.g. `.button:down:disabled`) corrupts an earlier, unrelated `:down`-only rule in the
-  same stylesheet - not just failing to match itself. Found while building `haxefolio.form`'s
-  `ChoiceButton` (a toggle `Button`): a `.haxefolio-choice-button:disabled` rule combined with
-  `.haxefolio-choice-button:down:disabled` (added so a selected-but-disabled button unambiguously
-  fell back to the disabled look) made the separate, preceding `.haxefolio-choice-button:down`
-  rule stop applying entirely for every selected-and-enabled button too, even though those buttons
-  never match `:disabled`. Removing the compound selector - relying on plain CSS source-order
-  precedence instead, since `:disabled` already comes after `:down` in the file - fixed it with no
-  other change. Not yet reported upstream or fixed in the fork; the workaround (avoid chained
-  pseudo-classes, order same-specificity rules so the one that should win comes last) is enough for
-  now. Minimal repro: [haxeui_compound_pseudo_selector_repro.xml](haxeui_compound_pseudo_selector_repro.xml).
-
-# Fixed in the fork, PR'd upstream
-
-- `FocusManager.enabled` not respected in the focus setter (click-driven
-  `:active` styling bypasses it) - see
-  [haxeui_focusmanager_enabled_repro.md](haxeui_focusmanager_enabled_repro.md).
-  Fixed in the fork (`Gulvan0/haxeui-core`), commit `145c418b`, merged into
-  the fork's `master` via PR
-  https://github.com/Gulvan0/haxeui-core/pull/2. Submitted upstream as
-  https://github.com/haxeui/haxeui-core/pull/709.
+Workaround: haxefolio's `MenuFacade.updateMenuLabelText` also sets `text` on `MenuBar`'s private proxy Button, found via `Reflect` on `menuBar._compositeBuilder._menus/_buttons`. Breaks if `MenuBar` internals change.
