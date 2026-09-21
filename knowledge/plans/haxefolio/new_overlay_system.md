@@ -64,11 +64,17 @@ region and, below it, the scrolling area. A composition therefore has at most on
 it. A plain `Scroll` region is a single `ScrollView`.
 
 typedef OverlayContent = {
-  title:        String,
   regions:      Array<Region>,
   ?onDismissed: Void->Void
 }
 ```
+
+There is deliberately no overlay-level `title`: the title is the `Header` region's (its `title`
+argument), so a composition without a `Header` has none, and nothing exists to fall out of sync
+with the header's copy. A title that changes at runtime — `Choose` tabs, where the frame title
+follows the tab (§3) — is a `Header` concern too: `Region.Header` takes a plain string today, so
+the `Tabs` step has to give the header a way to be retitled (the `HeaderBar` already has a
+settable `title`).
 
 `onDismissed` is the content's own teardown hook: whatever the content registered while it
 was built — a `Preference.onChange` handle, a `ChoiceGrid` breakpoint binding — is released
@@ -718,7 +724,7 @@ What the new system takes over, what it keeps, and what it deletes.
 - `HaxeFolioApp.showOverlay` → `HaxeFolioApp.present` (§2). `showPreferences` becomes a
   `present` call.
 - `OverlayContent` (a `VBox` subclass with `addDetachable`/`dispose`) → the
-  `{title, regions, ?onDismissed}` typedef of §1; the teardown hook takes over the detachable
+  `{regions, ?onDismissed}` typedef of §1; the teardown hook takes over the detachable
   lifecycle.
 - `ModalOverlay` and `SideBarOverlay` → the private `Dialog` and `Sheet` presentations.
 
@@ -765,7 +771,7 @@ the new system. Nothing of it may keep depending on `TabView`, the old overlay c
 **Transition — what has to change.**
 
 - **`showPreferences` is a `present` call** with slug `"preference"`. `PreferenceWindowBuilder`
-  stops returning an `OverlayContent` and returns the composition of §1 — `{title, regions,
+  stops returning an `OverlayContent` and returns the composition of §1 — `{regions,
   ?onDismissed}` — so it must be reworked, not merely re-typed. Every `Preference.onChange`
   `Detachable` the rows register moves onto the composition's teardown hook, which replaces
   `OverlayContent.addDetachable`; none may leak past dismissal.
