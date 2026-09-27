@@ -13,3 +13,7 @@ Dragging the sheet downward closes it, the same as tapping the scrim.
 ## Accent color choice in preferences
 
 The user is able to choose the accent colour from the selected presets, plus freely (the latter - maybe only with paid subscription).
+
+## Dependent preferences
+
+Haxefolio implementation + Turn color only active for Tree mode + Rename labels more fittingly

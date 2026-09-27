@@ -9,6 +9,7 @@ As the PR's will get merged and issues resolved, the local branch should be reba
 https://github.com/haxeui/haxeui-core/pull/701
 https://github.com/haxeui/haxeui-core/pull/703
 https://github.com/haxeui/haxeui-core/pull/713
+https://github.com/haxeui/haxeui-core/pull/715
 
 # Issues
 
