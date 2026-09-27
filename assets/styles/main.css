@@ -572,26 +572,18 @@
     color: #a79b8a;
 }
 
-#haxefolio-overlay-login-modal {
-    width: 450px;
-    height: 340px;
+/*
+    Intellector-specific components (not framework-provided haxefolio-* classes).
+*/
+
+.intellector-login-status {
+    height: 18px;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6d6152;
 }
 
-.intellector-login-form-field-label {
-    width: 100%;
-    text-align: center;
-    margin-top: 6px;
-}
-
-.intellector-login-field-error-label {
-    color: $error-border-color;
-    font-size: 11px;
-}
-
-.intellector-login-form-error-label {
-    color: $error-border-color;
-}
-
-.intellector-login-form-remember-checkbox {
-    margin-bottom: 12px;
+.intellector-login-status-error {
+    color: #9e2f1c;
 }

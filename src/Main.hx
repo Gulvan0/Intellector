@@ -54,7 +54,7 @@ class Main
             .addRightMenubarItem(NormalMenu("account", []))
             .addNormalMenuItem("account", "my_profile", NavigateTo(getMyProfilePath), Assets.menuItemIcon("my_profile"), null, true)
             .addNormalMenuItem("account", "preferences", Execute(HaxeFolioApp.showPreferences), Assets.menuItemIcon("settings"))
-            .addNormalMenuItem("account", "log_in", Execute(() -> HaxeFolioApp.showOverlay("login", dismiss -> new LoginOverlay(dismiss))), Assets.menuItemIcon("log_in"))
+            .addNormalMenuItem("account", "log_in", Execute(LoginOverlay.present), Assets.menuItemIcon("log_in"))
             .addNormalMenuItem("account", "log_out", Execute(AuthBootstrap.logOut), Assets.menuItemIcon("log_out"), null, true)
             .setLanguagePreference(Preferences.language)
             .buildConfig();
