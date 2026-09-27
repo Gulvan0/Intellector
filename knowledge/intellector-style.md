@@ -256,10 +256,42 @@ hover response. A disabled primary drops its accent fill entirely.
 `surfaceDeep` fill, 1 px `border`, radius 4 px, `ink` text. Focus: border `accentMuted`.
 Invalid: border `dangerBorder`. Disabled: `surfaceSunken` fill, `inkFaint` text.
 
+**Password reveal toggle.** A password field that can show its text carries the toggle at its
+right edge, inside the input. The toggle is a square lane as tall as the input (37 px, 44 on a
+sheet), so it meets the touch minimum where the input does. The input's right padding equals
+the lane, so text never runs under the glyph. The glyph is a 16 px line icon at stroke 1.4,
+centred in the lane: an eye while the text is hidden (the action is "show"), a struck-through
+eye while it is shown.
+
+| | Glyph |
+| --- | --- |
+| Normal | `inkMuted` |
+| Hover | `ink` |
+| Disabled | `inkFaint`, cursor `not-allowed` |
+
+It has no fill or border of its own, and no pressed state. The glyph changing is the feedback.
+Pressing it keeps focus and the caret in the input, and it stays out of the tab order, so a
+form's tab sequence is the same with or without it. Its accessible name is "Show password" /
+"Hide password".
+
 ### 5.4 Touch targets
 
 Minimum 44 px on mobile. Desktop controls may be 37 px tall, but anything that also
 appears on a sheet must reach 44 px there.
+
+### 5.5 Checkbox
+
+A boolean attribute (not a mode, which is a toggle button). Selection is outlined per §5.1:
+
+| | Box fill | Box border | Mark | Label |
+| --- | --- | --- | --- | --- |
+| Off | `surfaceDeep` | `border` | none | `inkMuted` 13 / 500 |
+| On | `accentTint` | `accentMuted` | ✓ `accent`, 11 / 700 | `inkMuted` 13 / 500 |
+| Disabled | `surfaceSunken` | `divider` | as state | `inkFaint` |
+
+The box is 16 px with radius 4, and the gap to the label is 8. The whole row (37 px tall,
+44 on a sheet) is the hit target. Hover changes the border to `borderHover`. The row is
+keyboard-reachable and toggles on Space or Enter.
 
 ---
 
@@ -312,6 +344,10 @@ Sparing. Two transitions only:
 
 No motion on layout: nothing grows, collapses, or reflows as a transition, because
 nothing in this theme is permitted to change size in the first place (§7).
+
+## 9. Other
+
+- Site name uses Montserrat Alternates 500 as a font.
 
 # Colour tokens (light) for invididual components
 

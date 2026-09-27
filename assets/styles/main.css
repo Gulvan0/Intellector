@@ -1,15 +1,580 @@
+/*
+    Intellector's override of HaxeFolio's default theme (see knowledge/intellector-style.md for the
+    full token/type/shape rationale; knowledge/plans/haxefolio/haxefolio-theme.md for what this
+    replaces). Registered at priority 10 in module.xml, above the framework's own priority-0
+    stylesheet, so every rule here only needs to restate the properties that actually change -
+    sizing, spacing and structural properties left out keep the framework's own values.
+
+    Token -> hex, for readers matching a value back to its name:
+
+    pageBg #e9e3d9 · barBg #f2eee6 · barBorder #ded5c6 · surface #faf7f2 ·
+    surfaceSunken #f0ebe2 · surfaceDeep #fffefb · border #d8cfc0 · borderHover #bdb2a0 ·
+    divider #e6dfd3 · ink #2a211a · inkMuted #6d6152 · inkFaint #a79b8a · accent #8a5a1f ·
+    accentHover #70491a · accentMuted #c79a56 · accentTint #f6e6c6 · accentInk #fffefb ·
+    danger #9e2f1c · dangerBorder #b8462c · scrim rgba(42,33,26,0.35) (= ink at 35%)
+
+    The elevation ladder (theme §2.1) splits what the framework calls one flat `surface` into
+    three rungs - pageBg (lowest) < barBg < surface (highest, floats without a scrim) - so the bar
+    reads as a fixture and a dialog reads as genuinely lifted above it. Menu bar, its hamburger
+    button, its site name and the sidebar's header (which repeats the bar row) take barBg; the
+    sidebar's own panel, dropdowns, and every overlay/dialog surface take surface.
+
+    Corner radii are snapped to Intellector's closed set (theme §4.1: 9/12 dialog+sheet, 5
+    button/chip/row, 4 input/stepper/small icon button, 50% circular) wherever the framework
+    default falls outside it (the hamburger button and sidebar row were 6px).
+
+    Two known gaps, tracked separately rather than worked around here: the scrollbar thumb's
+    colour and radius, and the switch marker `.switch-button-sub`/native HaxeUI `Switch`, are
+    painted from hardcoded values the host stylesheet cannot reach (see ScrollArea's injected
+    `::-webkit-scrollbar` rules) - not restyled by this file.
+*/
+
+/*
+    Page container. The framework leaves this unpainted (transparent over whatever the page's own
+    background is); Intellector's page background is a theme rung of its own.
+*/
+
+.haxefolio-page-container {
+    background-color: #e9e3d9;
+}
+
+/*
+    Menu bar, site name, hamburger, menu triggers and their dropdown.
+*/
+
+.haxefolio-menubar {
+    background-color: #f2eee6;
+    border-bottom: 1px solid #ded5c6;
+}
+
+.haxefolio-hamburger-button {
+    border-radius: 5px;
+    color: #6d6152;
+}
+
+.haxefolio-hamburger-button:down {
+    background-color: #f0ebe2;
+}
+
+.haxefolio-site-name-label {
+    color: #2a211a;
+}
+
+.haxefolio-site-name-label:disabled {
+    color: #a79b8a;
+}
+
+.haxefolio-menubar > .menubar-button,
+.haxefolio-menubar > .menubar-button-no-children {
+    color: #6d6152;
+}
+
+.haxefolio-menubar > .menubar-button:hover,
+.haxefolio-menubar > .menubar-button-no-children:hover {
+    background-color: #f0ebe2;
+    color: #2a211a;
+}
+
+.haxefolio-menubar > .menubar-button:down {
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-bottom-width: 0px;
+    border-bottom-size: 0px;
+    color: #2a211a;
+}
+
+.haxefolio-menubar > .menubar-button:disabled,
+.haxefolio-menubar > .menubar-button-no-children:disabled {
+    color: #a79b8a;
+}
+
+.haxefolio-normal-menu {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-top-width: 0px;
+    border-top-size: 0px;
+}
+
+.haxefolio-normal-menu .menu-filler {
+    background-color: #d8cfc0;
+}
+
 .haxefolio-normal-menu-item {
-    font-size: 12px;
+    color: #2a211a;
+}
+
+.haxefolio-normal-menu-item:hover {
+    background-color: #f0ebe2;
+}
+
+.haxefolio-normal-menu-item .label:hover {
+    color: #2a211a;
+}
+
+/*
+    Side bar: panel and scrim at the `surface` rung, header repeating the bar's `barBg` row.
+*/
+
+.haxefolio-sidebar {
+    background-color: #faf7f2;
+    border-right: 1px solid #d8cfc0;
+}
+
+.haxefolio-sidebar-scrim {
+    background-color: #2a211a;
+    background-opacity: 0.35;
+}
+
+.haxefolio-sidebar-header {
+    background-color: #f2eee6;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.haxefolio-sidebar-group-header {
+    color: #6d6152;
+}
+
+.haxefolio-sidebar-group-item {
+    border-radius: 5px;
+    color: #2a211a;
+}
+
+.haxefolio-sidebar-group-item:down {
+    background-color: #f0ebe2;
+}
+
+/*
+    Overlay chrome: scrim, frame, and the header/actions/tabs regions.
+*/
+
+.haxefolio-overlay-scrim {
+    background-color: #2a211a;
+    background-opacity: 0.35;
+}
+
+.haxefolio-overlay-frame {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+}
+
+.haxefolio-region-header {
+    background-color: #faf7f2;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.haxefolio-header-title {
+    color: #2a211a;
+}
+
+.haxefolio-close-button {
+    border: 1px solid #d8cfc0;
+    color: #6d6152;
+}
+
+.haxefolio-close-button:hover {
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+.haxefolio-close-button:down {
+    background-color: #f0ebe2;
+}
+
+.haxefolio-region-actions {
+    background-color: #faf7f2;
+    border-top: 1px solid #e6dfd3;
+}
+
+/*
+    ActionButton. Its non-primary state is "a screen's single primary action" territory's
+    counterpart - an ordinary secondary action, not a chip - so it takes the theme's "Normal"
+    button treatment (§5.2: transparent fill) rather than the unselected-ChoiceButton look the
+    framework defaults to; ChoiceButton itself (an actual chip among peers) keeps that look below.
+*/
+
+.haxefolio-action-button {
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    color: #6d6152;
+}
+
+.haxefolio-action-button:hover {
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+.haxefolio-action-button-primary {
+    background-color: #8a5a1f;
+    border: 1px solid #8a5a1f;
+    color: #fffefb;
+}
+
+.haxefolio-action-button-primary:hover {
+    background-color: #70491a;
+    border-color: #70491a;
+}
+
+.haxefolio-action-button-outlined {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    color: #8a5a1f;
+}
+
+.haxefolio-action-button-outlined:hover {
+    border-color: #8a5a1f;
+}
+
+.haxefolio-action-button:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+/*
+    Tabs region.
+*/
+
+.haxefolio-region-tabs {
+    background-color: #faf7f2;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.haxefolio-tab-label {
+    color: #6d6152;
+}
+
+.haxefolio-tab-marker-active {
+    background-color: #b8462c;
+}
+
+.haxefolio-tab-navigate:hover > .haxefolio-tab-content > .haxefolio-tab-label {
+    color: #2a211a;
+}
+
+.haxefolio-tab-navigate-selected {
+    border-bottom: 2px solid #8a5a1f;
+}
+
+.haxefolio-tab-track {
+    background-color: #f0ebe2;
+}
+
+.haxefolio-tab-choose-selected {
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+}
+
+.haxefolio-tab-label-selected {
+    color: #2a211a;
+}
+
+.haxefolio-tab-strip-locked .haxefolio-tab-label {
+    color: #a79b8a;
+}
+
+/*
+    haxefolio.form
+*/
+
+.haxefolio-field-header-label {
+    color: #6d6152;
+}
+
+.haxefolio-field-header-label-locked {
+    color: #a79b8a;
+}
+
+.haxefolio-field-header-hint {
+    color: #6d6152;
+}
+
+.haxefolio-field-header-hint-error {
+    color: #9e2f1c;
+}
+
+.haxefolio-hint-line {
+    color: #6d6152;
+}
+
+.haxefolio-hint-line-error {
+    color: #9e2f1c;
+}
+
+/*
+    ChoiceButton (and ToggleButton, which extends it). Selection is outlined, not filled (theme
+    §5.1) - brass shares the board's hue family, so a filled brass chip reads as board material.
+    `Main.hx` sets `selectionEmphasis: Outlined`, so `-outlined:down` (not the plain `:down`
+    Filled rule, kept below for completeness/future per-overlay overrides) is what actually shows.
+*/
+
+.haxefolio-choice-button {
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    color: #6d6152;
+}
+
+.haxefolio-choice-button:hover {
+    border-color: #bdb2a0;
+}
+
+.haxefolio-choice-button:down {
+    background-color: #8a5a1f;
+    border: 1px solid #8a5a1f;
+    color: #fffefb;
+}
+
+.haxefolio-choice-button-outlined:down {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    color: #8a5a1f;
+}
+
+.haxefolio-choice-button:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+/*
+    Locked-but-selected (`:down:disabled`): still tinted like the selected state, so a locked row
+    keeps showing the value actually in effect, but at disabled strength (no accentMuted border,
+    inkFaint label) rather than the active border/label weight.
+*/
+.haxefolio-choice-button:down:disabled {
+    background-color: #f6e6c6;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+/*
+    Stepper.
+*/
+
+.haxefolio-stepper-button {
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+    color: #6d6152;
+}
+
+.haxefolio-stepper-button:hover {
+    border-color: #bdb2a0;
+}
+
+.haxefolio-stepper-button:disabled {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    color: #a79b8a;
+}
+
+.haxefolio-stepper-input {
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+    color: #2a211a;
+}
+
+.haxefolio-stepper-input-invalid {
+    border-color: #b8462c;
+}
+
+.haxefolio-stepper-input:disabled {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    color: #a79b8a;
+}
+
+.haxefolio-field-group {
+    background-color: #f0ebe2;
+    border-radius: 5px;
+}
+
+/*
+    CommitTextField. Its commit button is a single call-to-action, not a chip, so it reads
+    `actionEmphasis` (default Filled, unchanged by Main.hx) - solid accent, same as a primary
+    ActionButton.
+*/
+
+.haxefolio-commit-input {
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+    color: #2a211a;
+}
+
+.haxefolio-commit-input-invalid {
+    border-color: #b8462c;
+}
+
+.haxefolio-commit-input:disabled {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    color: #a79b8a;
+}
+
+/*
+    TextInputField (theme §5.3).
+*/
+
+.haxefolio-text-input {
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+    color: #2a211a;
+}
+
+.haxefolio-text-input-focused {
+    border-color: #c79a56;
+}
+
+.haxefolio-text-input-invalid {
+    border-color: #b8462c;
+}
+
+.haxefolio-text-input:disabled {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    color: #a79b8a;
+}
+
+/* its reveal toggle (theme §5.3): inkMuted glyph, ink on hover, inkFaint while disabled */
+.haxefolio-password-reveal {
+    color: #6d6152;
+}
+
+.haxefolio-password-reveal:hover {
+    color: #2a211a;
+}
+
+.haxefolio-password-reveal:disabled {
+    color: #a79b8a;
+}
+
+/*
+    CheckBoxRow. Checked is outlined like every other selection (theme §5.1): the row carries
+    -outlined because Main.hx sets selectionEmphasis: Outlined.
+*/
+
+.haxefolio-check-box {
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+}
+
+.haxefolio-check-box-row:hover .haxefolio-check-box {
+    border-color: #bdb2a0;
+}
+
+.haxefolio-check-box-row-checked .haxefolio-check-box {
+    background-color: #8a5a1f;
+    border-color: #8a5a1f;
+}
+
+.haxefolio-check-box-row-outlined.haxefolio-check-box-row-checked .haxefolio-check-box {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.haxefolio-check-box-mark {
+    color: #fffefb;
+}
+
+.haxefolio-check-box-row-outlined .haxefolio-check-box-mark {
+    color: #8a5a1f;
+}
+
+.haxefolio-check-box-label {
+    color: #6d6152;
+}
+
+.haxefolio-check-box-row:disabled .haxefolio-check-box {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+}
+
+.haxefolio-check-box-row:disabled .haxefolio-check-box-label {
+    color: #a79b8a;
+}
+
+.haxefolio-commit-button {
+    background-color: #8a5a1f;
+    border: 1px solid #8a5a1f;
+    color: #fffefb;
+}
+
+.haxefolio-commit-button:hover {
+    background-color: #70491a;
+}
+
+.haxefolio-commit-button-outlined {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    color: #8a5a1f;
+}
+
+.haxefolio-commit-button:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+.haxefolio-commit-button-outlined:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+.haxefolio-preview-pane-caption {
+    color: #6d6152;
+}
+
+.haxefolio-preview-pane-area {
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+}
+
+/*
+    Opt-in look for a plain HaxeUI Button/Label (see haxefolio README, "Styling plain HaxeUI
+    components the HaxeFolio way"). Unlike ChoiceButton's unselected state, a freestanding button
+    is not a chip among peers, so its rest state is the theme's "Normal" button (§5.2): transparent
+    fill, not surfaceSunken.
+*/
+
+.haxefolio-button {
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    color: #6d6152;
+}
+
+.haxefolio-button:hover {
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+.haxefolio-button:down {
+    background-color: #8a5a1f;
+    border: 1px solid #8a5a1f;
+    color: #fffefb;
+}
+
+.haxefolio-button:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+.haxefolio-button:down:disabled {
+    background-color: #f6e6c6;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+.haxefolio-label {
+    color: #2a211a;
+}
+
+.haxefolio-label:disabled {
+    color: #a79b8a;
 }
 
 #haxefolio-overlay-login-modal {
     width: 450px;
     height: 340px;
-}
-
-#haxefolio-overlay-preference-modal {
-    width: 640px;
-    height: 445px;
 }
 
 .intellector-login-form-field-label {

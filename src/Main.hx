@@ -27,6 +27,7 @@ class Main
             .setAppIcon("assets/favicons/normal.png")
             .setSiteName("Intellector")
             .setDebounceMs(100)
+            .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}}) // outlined: brass shares the board's hue family (knowledge/intellector-style.md §5.1); field heights: §5.2/§5.4
             .addLocale("en", "English")
             .addLocale("ru", "Русский")
             .addPage("home", params -> new HomePage(), true)
@@ -35,6 +36,7 @@ class Main
             .addPage("live/{gameID}", params -> new LiveGamePage(Std.parseInt(params.get("gameID"))))
             .addPage("player/{login}", params -> new ProfilePage(params.get("login")))
             .addPage("join/{id}", params -> new ChallengeJoiningPage(Std.parseInt(params.get("id"))))
+            .setMenubarChevronsShown(false)
             .addLeftMenubarItem(NormalMenu("play", []))
             .addNormalMenuItem("play", "create_game", Execute(onCreateGamePressed), Assets.menuItemIcon("new_game"))
             .addNormalMenuItem("play", "open_challenges", NavigateTo(() -> "home"), Assets.menuItemIcon("open_challenges"))
