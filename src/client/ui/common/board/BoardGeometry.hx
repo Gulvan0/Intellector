@@ -74,12 +74,10 @@ class BoardGeometry
     }
 
     /**
-        The hex whose center is closest to `(pointX, pointY)` (board-center-relative, like
-        `hexCenter`'s own output), provided that center is within one `SIDE_LENGTH` - `null`
-        otherwise (the point isn't really over any hex, e.g. it's in a far corner of the
-        bounding box). Nearest-center search over all 59 hexes, ported unchanged from the old
-        `Board.posToIndexes` - cheap enough at this hex count, and correct enough for pointer
-        interaction without a true point-in-hexagon test.
+        The hex whose center is closest to `(pointX, pointY)` (board-center-relative), or `null`
+        if that center is farther than one `SIDE_LENGTH` away. Nearest-center search over all 59
+        hexes - cheap at this count, and close enough for pointer interaction without a true
+        point-in-hexagon test.
     **/
     public static function hexAt(pointX:Float, pointY:Float, orientation:PieceColor):Null<HexCoords>
     {

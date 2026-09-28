@@ -5,16 +5,12 @@ import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceData;
 
 /**
-    Rules queries `MoveInteractionController` needs, injected at construction rather than
-    imported - the controller itself has no compile-time dependency on `intellectorboard`'s rules
-    engine (see knowledge/plans/board_plan.md). `MoveRulesAdapter.DEFAULT` is the real
-    implementation, delegating to `intellectorboard`.
-
-    Takes `PieceArrangement` rather than `Position` throughout, and `PieceData` rather than a
-    departure `HexCoords` to look a piece up again - none of these three queries care about whose
-    turn it is (the controller's own `config.allowedToMove` already gates that), and the
-    controller always already has the moving/captured `PieceData` in hand by the time it calls
-    any of these, so there's nothing left to null-check at the call site.
+    Rules queries `MoveInteractionController` needs, injected rather than imported - the
+    controller has no compile-time dependency on `intellectorboard`'s rules engine (see
+    knowledge/plans/board_plan.md); `MoveRulesAdapter.DEFAULT` is the real implementation. Takes
+    `PieceArrangement`/`PieceData` directly rather than `Position`/a departure `HexCoords` - none
+    of these care whose turn it is, and the controller already has the pieces in hand by the time
+    it calls any of these.
 **/
 typedef MoveRules =
 {

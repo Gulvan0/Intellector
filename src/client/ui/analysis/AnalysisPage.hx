@@ -9,9 +9,8 @@ import intellectorboard.plyapplication.PlyPerformer;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.ply.RawPly;
+import client.datatypes.BoardCoordinatesMode;
 import client.ui.common.board.BoardSurface;
-import client.ui.common.board.BoardCoordinatesMode;
-import client.ui.common.board.BoardCoordinatesMode.BoardCoordinatesModeExtension;
 import client.ui.common.board.MoveInteractionController;
 import client.ui.common.board.MoveRulesAdapter;
 
@@ -42,15 +41,11 @@ class AnalysisPage extends PageBase
         content.addComponent(label);
 
         /*
-            Interim: exercises BoardSurface (knowledge/plans/board_plan.md) at a large size and
-            several small (list-row-sized) previews, across orientations and all 3
-            boardCoordinates modes, until PositionEditorController (board_deferred.md item 3)
-            replaces this with a real position editor driving a single board. The main board is
-            also wired to a live MoveInteractionController (board_deferred.md item 1, core click/
-            drag pass only - no premove yet) for local hot-seat play, both colors moved from the
-            same board with no session/network layer behind it.
+            Interim smoke test for BoardSurface/MoveInteractionController (local hot-seat play,
+            no session/network layer) until PositionEditorController (board_deferred.md item 3)
+            replaces this with a real position editor.
         */
-        var mode:BoardCoordinatesMode = BoardCoordinatesModeExtension.fromPreferenceValue(Preferences.boardCoordinates.get());
+        var mode:BoardCoordinatesMode = Preferences.boardCoordinates.get();
         var currentPosition:Position = Position.defaultStarting();
 
         var mainBoard:BoardSurface = new BoardSurface(currentPosition, White, mode);
@@ -73,7 +68,7 @@ class AnalysisPage extends PageBase
         previewRow.percentWidth = 100;
         content.addComponent(previewRow);
 
-        var previewModes:Array<BoardCoordinatesMode> = [None, FilesOnly, All];
+        var previewModes:Array<BoardCoordinatesMode> = [NONE, FILES_ONLY, ALL];
         var previewOrientations:Array<PieceColor> = [White, Black, White];
 
         for (i in 0...previewModes.length)
@@ -81,8 +76,7 @@ class AnalysisPage extends PageBase
             var previewWrapper:VBox = new VBox();
             previewWrapper.width = 150;
 
-            // A separate Position instance: the previews always show the starting position,
-            // independent of whatever mainBoard's interactive game does to currentPosition.
+            // Separate Position - previews stay at the starting position regardless of mainBoard's game.
             var preview:BoardSurface = new BoardSurface(Position.defaultStarting(), previewOrientations[i], previewModes[i]);
             previewWrapper.addComponent(preview);
             previewRow.addComponent(previewWrapper);

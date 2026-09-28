@@ -1,6 +1,7 @@
 package client.ui.common.board;
 
 import client.Assets;
+import client.datatypes.BoardCoordinatesMode;
 import haxefolio.graphics.SvgSurface;
 import haxe.ui.backend.html5.svg.SVGPathBuilder;
 import haxe.ui.backend.html5.svg.SVGImageBuilder;
@@ -27,9 +28,14 @@ private typedef PieceHandle =
 **/
 class BoardSurface extends SvgSurface
 {
-    private static inline final LABEL_FONT_SIZE:Float = BoardGeometry.SIDE_LENGTH * 0.35;
-    private static inline final LABEL_GAP:Float = BoardGeometry.SIDE_LENGTH * 0.15;
-    private static inline final LABEL_ROW_HEIGHT:Float = LABEL_FONT_SIZE * 1.3;
+    // Constrained by hex size - must fit inside a single hex alongside a piece.
+    private static inline final ROW_NUMBER_FONT_SIZE:Float = BoardGeometry.SIDE_LENGTH * 0.35;
+
+    // Unconstrained by hex size - sits in its own dedicated strip below the grid, sized to fit it.
+    private static inline final FILE_LABEL_FONT_SIZE:Float = BoardGeometry.SIDE_LENGTH * 0.7;
+
+    private static inline final LABEL_GAP:Float = BoardGeometry.SIDE_LENGTH * 0.04;
+    private static inline final LABEL_ROW_HEIGHT:Float = FILE_LABEL_FONT_SIZE * 1.3;
 
     private static inline final HEX_FILL_LIGHT:String = "#ffcf9f";
     private static inline final HEX_FILL_DARK:String = "#d18b47";
@@ -51,20 +57,18 @@ class BoardSurface extends SvgSurface
 
     private final boardOriginX:Float;
     private final boardOriginY:Float;
-    private final fileLetterY:Float;
 
     public function new(position:Position, orientation:PieceColor, coordinatesMode:BoardCoordinatesMode)
     {
         var gridWidth:Float = 2 * BoardGeometry.GRID_HALF_WIDTH + BoardGeometry.BORDER_THICKNESS;
         var gridHeight:Float = 2 * BoardGeometry.GRID_HALF_HEIGHT + BoardGeometry.BORDER_THICKNESS;
-        var labelsShown:Bool = coordinatesMode != None;
+        var labelsShown:Bool = coordinatesMode != NONE;
         var viewBoxHeight:Float = gridHeight + (labelsShown ? LABEL_GAP + LABEL_ROW_HEIGHT : 0);
 
         super(gridWidth, viewBoxHeight);
 
         this.boardOriginX = gridWidth / 2;
         this.boardOriginY = gridHeight / 2;
-        this.fileLetterY = gridHeight + LABEL_GAP + LABEL_ROW_HEIGHT / 2;
 
         this.position = position;
         this.orientation = orientation;
@@ -100,7 +104,7 @@ class BoardSurface extends SvgSurface
         for (coords in new HexCoordsIterator())
             drawHex(coords);
 
-        if (coordinatesMode != None)
+        if (coordinatesMode != NONE)
             drawFileLetters();
 
         for (occupiedHex in new OccupiedHexesIterator(position))
@@ -123,7 +127,7 @@ class BoardSurface extends SvgSurface
         hexPath.stroke({color: HEX_BORDER, thickness: BoardGeometry.BORDER_THICKNESS});
         hexPaths.set(coords.toScalarCoord(), hexPath);
 
-        if (coordinatesMode == All)
+        if (coordinatesMode == ALL)
             drawRowNumber(coords, x, y, dark);
     }
 
@@ -132,7 +136,7 @@ class BoardSurface extends SvgSurface
         var rowNumber:Int = 7 - coords.j - coords.i % 2;
         var label = svgText('$rowNumber', hexX - 0.85 * BoardGeometry.SIDE_LENGTH, hexY);
         label.fill({color: dark ? ROW_NUMBER_ON_DARK : ROW_NUMBER_ON_LIGHT});
-        label.font({size: Std.int(LABEL_FONT_SIZE), anchor: "start"});
+        label.font({size: Std.int(ROW_NUMBER_FONT_SIZE), anchor: "start"});
         label.element.setAttribute("dominant-baseline", "central");
         label.element.setAttribute("font-weight", "bold");
     }
@@ -146,9 +150,14 @@ class BoardSurface extends SvgSurface
             var center = BoardGeometry.hexCenter(bottomHex, orientation);
             var x:Float = boardOriginX + center.x;
 
-            var label = svgText(String.fromCharCode('a'.code + i), x, fileLetterY);
+            // Each file's own bottom border, not one shared row - adjoining files' bottom hexes
+            // sit at different heights (the staggered-column grid).
+            var bottomBorderY:Float = boardOriginY + center.y + BoardGeometry.HEX_HEIGHT / 2;
+            var y:Float = bottomBorderY + LABEL_GAP + LABEL_ROW_HEIGHT / 2;
+
+            var label = svgText(String.fromCharCode('a'.code + i), x, y);
             label.fill({color: HEX_BORDER});
-            label.font({size: Std.int(LABEL_FONT_SIZE), anchor: "middle"});
+            label.font({size: Std.int(FILE_LABEL_FONT_SIZE), anchor: "middle"});
             label.element.setAttribute("dominant-baseline", "central");
             label.element.setAttribute("font-weight", "bold");
         }
@@ -238,10 +247,9 @@ class BoardSurface extends SvgSurface
     }
 
     /**
-        Draws a move-destination glyph at `coords` - a filled dot if that hex is currently empty,
-        a hollow ring if it's occupied (a capture), matching the old board's marker look. Returns
-        a live handle; remove it later with `handle.element.remove()` (`BoardSurface` keeps no
-        ownership of glyphs it hands out - see board_plan.md's "self-tracked glyphs" rule).
+        Draws a move-destination glyph at `coords` - a filled dot if empty, a hollow ring if
+        occupied (a capture). Returns a live handle; remove it later with `handle.element.remove()`
+        (`BoardSurface` keeps no ownership of glyphs it hands out).
     **/
     public function addMoveMarker(coords:HexCoords):SVGCircleBuilder
     {
@@ -263,11 +271,9 @@ class BoardSurface extends SvgSurface
     }
 
     /**
-        Repositions the piece currently drawn at `fromCoords` so it's centered at the
-        board-center-relative point `(boardX, boardY)` (the same space `screenPointToBoardPoint`
-        returns) - a plain `x`/`y` attribute write, no redraw. `fromCoords` keeps indexing the
-        dragged piece for the whole gesture: `position` (and this surface's glyphs) only change on
-        the next `setPosition` call, never mid-drag.
+        Repositions the piece drawn at `fromCoords` to the board-center-relative point
+        `(boardX, boardY)` (the same space `screenPointToBoardPoint` returns) - a plain `x`/`y`
+        attribute write, no redraw.
     **/
     public function movePieceTo(fromCoords:HexCoords, boardX:Float, boardY:Float):Void
     {
