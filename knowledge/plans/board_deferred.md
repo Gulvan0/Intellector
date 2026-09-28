@@ -14,7 +14,11 @@ Source: `C:/Users/mitmi/Documents/GitHub/Intellector/src/gameboard` (old rendere
 mini-state (not a subclass), taking legal-destination/promotion-eligibility/chameleon-eligibility
 lookups via the `MoveRules` typedef, with `MoveRulesAdapter.DEFAULT` (same package) as the real
 `intellectorboard`-backed implementation - the controller itself imports no `intellectorboard`
-rules code, per `[[board_plan]]`. `BoardSurface` gained the glyph/tint/hit-testing API this needed
+rules code, per `[[board_plan]]`. `isPromotionPossible`/`isChameleonPossible` are thin wrappers
+around `CoreRules.isPromotionEligible`/`isChameleonEligible` (new, extracted from `PlyRules.
+possiblePlys`'s own inline conditions - one definition shared by the move generator and this
+adapter, not two independently re-derived ones; a correction after first writing this adapter with
+its own hand-rolled version). `BoardSurface` gained the glyph/tint/hit-testing API this needed
 (`setHexFill`/`resetHexFill`, `addMoveMarker`, `movePieceTo`/`resetPiecePosition`,
 `bringPieceToFront`, `hexAtScreenPoint`/`screenPointToBoardPoint`), and `haxefolio.graphics.SvgSurface`
 gained `svgCircle` and `screenPointToViewBox` (generic, not board-specific). Promotion/chameleon
