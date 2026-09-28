@@ -18,3 +18,11 @@ Workaround: fixed in the local haxeui-core fork (commit `ebc756a2`, branch `fix/
 
 https://github.com/haxeui/haxeui-core/issues/704
 Workaround: haxefolio's `MenuFacade.updateMenuLabelText` also sets `text` on `MenuBar`'s private proxy Button, found via `Reflect` on `menuBar._compositeBuilder._menus/_buttons`. Breaks if `MenuBar` internals change.
+
+Not yet filed upstream: haxeui-html5's `ComponentImpl.handleSize` only applies a size when both
+`width` and `height` are non-null (`if (width == null || height == null || width <= 0 || height
+<= 0) return;`). A component sized purely via `percentWidth`, with no paired `percentHeight` or
+explicit `height`, never gets even its width applied - it collapses to the browser's replaced-
+element default size instead. Workaround: `haxefolio.graphics.SvgSurface` overrides `handleSize`
+to derive `height` from the resolved `width` (via its fixed aspect ratio) whenever `height` comes
+in null, before delegating to `super.handleSize`.

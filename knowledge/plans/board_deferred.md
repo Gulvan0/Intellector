@@ -46,8 +46,9 @@ instead of `SVGBuilder` directly.
 
 ## 3. `PositionEditorController` (free move / place / clear modes, analysis page)
 
-**Why deferred:** `AnalysisPage` is still a title-only stub; no position editor UI exists to drive
-it.
+**Why deferred:** `AnalysisPage` only mounts a `BoardSurface` smoke test (a static preview at
+several sizes/orientations/`boardCoordinates` modes, interim until this lands); no position editor
+UI exists yet to drive an actual editable board.
 
 **How to apply:** old reference for the three edit modes (Move/Delete/Set) is
 `C:/Users/mitmi/Documents/GitHub/Intellector/src/gameboard/behaviors/{EditorBehavior,EditorFreeMoveBehavior,EditorDeleteBehavior,EditorSetBehavior}.hx`
@@ -73,25 +74,27 @@ page, not in the board — not designed at all this pass.
 
 ## 5. Piece asset migration
 
-**Why deferred:** not needed until `BoardSurface` actually renders pieces; flagging now since it's
-a straightforward, separable prep task and the mismatch below needs a human decision.
+**Done for the 6 kinds `intellectorboard.PieceKind` currently has** (`Progressor`, `Aggressor`,
+`Dominator`, `Liberator`, `Defensor`, `Intellector` × White/Black = 12 files), copied unchanged
+from `C:/Users/mitmi/Documents/GitHub/Intellector/assets/pieces/{Kind}_{Color}.svg` to
+`assets/images/common/board/pieces/` (mirroring the existing `assets/images/menubar/`
+subfolder-per-owning-area convention — `board` isn't a "page" so it doesn't fit the per-page
+image-folder convention directly; `common` is the closest existing analogue to how
+`client.ui.common.board` is placed in the source tree). Read via `client.Assets.pieceImage`.
 
-**How to apply:** old assets at
-`C:/Users/mitmi/Documents/GitHub/Intellector/assets/pieces/{Kind}_{Color}.svg` — 7 kinds × 2 colors
-= 14 files, naming pattern `${PieceType}_${PieceColor}.svg` (e.g. `Progressor_White.svg`). Current
-`intellectorboard.primitives.piece.PieceKind` only has **6** values (`Progressor`, `Aggressor`,
-`Dominator`, `Liberator`, `Defensor`, `Intellector`) — the old asset set also has a `Yapper_*.svg`
-pair with no corresponding `PieceKind` case. Needs a decision before copying: is `Yapper` a
-deprecated/renamed piece (skip it), or does `intellectorboard.PieceKind` need a 7th case that just
-hasn't been ported yet (out of scope for `intellectorboard` changes without separate approval, per
-CLAUDE.md's third-party/library-change rules — though `intellectorboard` is one of the project's own
-freely-editable libraries, not third-party, so this is a smaller ask than it might look, just not
-one to make silently inside a board-rendering pass).
+**Resolved:** the old asset set also has a `Yapper_White.svg`/`Yapper_Black.svg` pair with no
+corresponding `PieceKind` case (only 6 of the old repo's 7 piece kinds exist in
+`intellectorboard.PieceKind`) - confirmed with the user: `Yapper` is an asset for a piece planned
+for a future ruleset addition, not yet part of the game. Not copied, and `PieceKind` gets no 7th
+case until that piece actually ships in the v3.0 rewrite - revisit then, not as part of any board
+rendering/interaction pass.
 
-Proposed target location (not yet created): `assets/images/common/board/pieces/`, mirroring the
-existing `assets/images/menubar/` subfolder-per-owning-area convention — `board` isn't a "page" so
-it doesn't fit the per-page image-folder convention directly; `common` is the closest existing
-analogue to how `client.ui.common.board` is placed in the source tree.
+Each kind's own SVG has a fixed, slightly-different-per-color-variant aspect ratio (its own
+viewBox's width/height); `BoardSurface.pieceAspectRatio` hardcodes one constant per kind (from the
+White variant) rather than measuring at runtime, since the couple-percent difference between color
+variants isn't visually distinguishable and the old runtime-image-load-then-measure approach
+(`Piece.hx`'s `onImageLoaded`) is unneeded complexity for static SVG assets whose dimensions are
+already known.
 
 ## 6. Non-interactive arrows/hex-highlights
 
