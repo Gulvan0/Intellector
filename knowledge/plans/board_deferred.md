@@ -1,8 +1,12 @@
 # Deferred entries from the board component pass
 
+Historical record of the `BoardSurface`/`MoveInteractionController` core-click-drag passes -
+what shipped, and the bugs found and fixed along the way. **For what's left and the build order,
+see `[[board_plan]]`**, which now owns forward planning for the rest of the board component; this
+file isn't kept in sync with it going forward.
+
 Source: `C:/Users/mitmi/Documents/GitHub/Intellector/src/gameboard` (old renderer/interaction) and
-`C:/Users/mitmi/Documents/GitHub/Libraries/intellectorboard` (rules/geometry primitives). See
-`[[board_plan]]` for the architecture actually agreed and for what `BoardSurface` itself covers.
+`C:/Users/mitmi/Documents/GitHub/Libraries/intellectorboard` (rules/geometry primitives).
 
 `BoardSurface` (static rendering) and the core click/drag pass of `MoveInteractionController` (item
 1 below) are done. Everything else below is still open.
@@ -99,31 +103,7 @@ current navigation pointer; on each navigation step, hands `BoardSurface` a fres
 referenced in `PlayerMoveBehavior.hx:80`/`EnemyMoveBehavior.hx:43`) belongs at this level or in the
 page, not in the board — not designed at all this pass.
 
-## 5. Piece asset migration
-
-**Done for the 6 kinds `intellectorboard.PieceKind` currently has** (`Progressor`, `Aggressor`,
-`Dominator`, `Liberator`, `Defensor`, `Intellector` × White/Black = 12 files), copied unchanged
-from `C:/Users/mitmi/Documents/GitHub/Intellector/assets/pieces/{Kind}_{Color}.svg` to
-`assets/images/common/board/pieces/` (mirroring the existing `assets/images/menubar/`
-subfolder-per-owning-area convention — `board` isn't a "page" so it doesn't fit the per-page
-image-folder convention directly; `common` is the closest existing analogue to how
-`client.ui.common.board` is placed in the source tree). Read via `client.Assets.pieceImage`.
-
-**Resolved:** the old asset set also has a `Yapper_White.svg`/`Yapper_Black.svg` pair with no
-corresponding `PieceKind` case (only 6 of the old repo's 7 piece kinds exist in
-`intellectorboard.PieceKind`) - confirmed with the user: `Yapper` is an asset for a piece planned
-for a future ruleset addition, not yet part of the game. Not copied, and `PieceKind` gets no 7th
-case until that piece actually ships in the v3.0 rewrite - revisit then, not as part of any board
-rendering/interaction pass.
-
-Each kind's own SVG has a fixed, slightly-different-per-color-variant aspect ratio (its own
-viewBox's width/height); `BoardSurface.pieceAspectRatio` hardcodes one constant per kind (from the
-White variant) rather than measuring at runtime, since the couple-percent difference between color
-variants isn't visually distinguishable and the old runtime-image-load-then-measure approach
-(`Piece.hx`'s `onImageLoaded`) is unneeded complexity for static SVG assets whose dimensions are
-already known.
-
-## 6. Non-interactive arrows/hex-highlights
+## 5. Non-interactive arrows/hex-highlights
 
 **Why deferred:** explicitly deprioritized by the user ("highly compelling but I can live without
 it") in favor of scoping this pass to plain `BoardSurface`.

@@ -1,189 +1,235 @@
 # Board component plan
 
-Discussed and scoped with the user before any code was written — this doc captures the agreed
-architecture for the whole board component family, even though only the first slice
-(`BoardSurface`) is being built now. See `[[board_deferred]]` for everything explicitly not part of
-this pass.
+What's left to fully implement the board component family, and a provisional order to build it
+in. Supersedes this file's previous content (the original architecture pitch and the
+`BoardSurface`-only scoping) - see git history for that discussion if the *why* behind a decision
+below needs re-deriving. `[[board_deferred]]` still holds the detailed record of what shipped in
+the `BoardSurface`/`MoveInteractionController` core-click-drag passes and the bugs found along the
+way; this doc doesn't repeat that.
 
-## Why not a straight port of the old `Board`/`SelectableBoard`/`GameBoard` hierarchy
+## 0. Where things stand
 
-The old repo (`C:/Users/mitmi/Documents/GitHub/Intellector/src/gameboard`) uses a 3-level
-inheritance chain (`Board` → `SelectableBoard` → `GameBoard`), crossed with a second, separate
-`State` × `Behavior` hierarchy (5 states × ~8 behaviors) for interaction handling. Rejected for
-this port, per the user's explicit reasoning:
+Done: `BoardSurface` (static rendering + the glyph/tint/hit-testing API
+`MoveInteractionController` needs), `MoveInteractionController`'s core click/drag/click-to-select
+pass (no premove), the promotion/chameleon `MoveRules` split with `intellectorboard`,
+`MovePromptOverlay` (functional but visually generic - see §2.2), piece assets, and
+`BoardCoordinatesMode` as an `enum abstract` in `client.datatypes`. Also fixed along the way, in
+`intellectorboard`: the hex-stepping geometry, several dead-code-since-nothing-called-it bugs in
+the movement/ply-application packages, and (in `haxefolio`) two `SvgSurface` sizing/coordinate
+bugs (pinned height on resize; screen-coordinate mismatch under `Toolkit.scale`).
 
-1. Inheritance doesn't compose — combining features (e.g. "selectable but not a full game board")
-   only works because it happens to sit on the one inheritance path that was built; anything off
-   that path can't be assembled. The State × Behavior cross-product is the same problem twice over
-   (25–40 meaningful combinations, most unused, each pair having to know about the other).
-2. Class sizes (`Board.hx` 547 lines, `GameBoard.hx` 403 lines) are themselves evidence of
-   over-accumulated responsibility, and a direct symptom of (1) — there was nowhere smaller to put
-   the logic once inheritance was the only decomposition tool.
-3. `GameBoard` owns ply history (`plyHistory:PlyHistory`, `GameBoard.hx:54`) and drives navigation
-   (`prev`/`next`/`home`/`end`, `GameBoard.hx:214-240`) itself — game/session state that shouldn't
-   live inside a rendering+interaction component.
-4. `GameBoard`/`IBehavior` import `net.shared.board.Rules`, `Preferences`, `Dialogs`, `Audio`,
-   `net.shared.ServerEvent`, `LoginManager` directly (`PlayerMoveBehavior.hx`,
-   `EnemyMoveBehavior.hx`). Same class of problem `[[feedback_service_module_coupling]]` already
-   flags for service modules — a UI component must not import `net.*`/`Preferences`/`Dialogs`
-   itself; it receives pure state and emits pure events.
-5. Mid-gesture interruption (opponent's move arrives while the player is mid-drag, a rollback
-   arrives, editor mode changes) was handled ad hoc, scattered across every `ServerEvent` case in
-   every behavior (e.g. `EnemyMoveBehavior.hx:91-99` calling `state.exitToNeutral()` inline). Needs
-   to be a single, guaranteed contract instead.
+Not done, and the subject of this doc: everything in §2 below, in the order given in §3.
 
-## Revised architecture: composition, not inheritance
+## 1. Architecture, condensed
 
-**`BoardSurface`** (this pass) is the only thing that always exists. It owns geometry and rendering
-for a given `Position` — nothing else. A non-interactive preview (challenge overlay, incoming
-challenge widget, game/study list rows) *is* a bare `BoardSurface`; there is no separate
-"non-interactive board" class to keep in sync with it.
+(Full rationale for rejecting the old `Board`/`SelectableBoard`/`GameBoard` inheritance chain and
+`State`×`Behavior` cross-product lives in git history for this file - the short version: it didn't
+compose, the resulting classes were 400-500+ lines, and it let networking/preferences/dialog
+concerns leak into rendering code. Not being re-litigated.)
 
-Everything interactive is a **controller** (deferred, not built this pass) — a small standalone
-class holding a reference to `BoardSurface` plus its own config, attached only where needed:
+- **`BoardSurface`** is the only thing that always exists - geometry, rendering, and (now) the
+  glyph/tint/hit-testing primitives. A non-interactive preview is a bare `BoardSurface`.
+- **Controllers** are small standalone classes attached to a `BoardSurface`, never subclasses of
+  it: `MoveInteractionController` (done, core pass), `HexAnnotationController` (RMB marks, §2.5),
+  `PositionEditorController` (§2.6). Config values (allowed-to-move color, premove on/off, etc.)
+  select behavior - not separate classes.
+- **Non-overlapping ownership, not runtime arbitration:** left-button gestures belong to
+  move/editor interaction, right-button to `HexAnnotationController`; only one "state" controller
+  (`MoveInteractionController` XOR `PositionEditorController`) is ever attached; `BoardSurface`'s
+  glyph API hands back raw handles and keeps no ownership map, so each controller tracks only what
+  it created.
+- **Mandatory interruption contract:** a new `Position` or a new controller config must cleanly
+  abort any gesture in flight. Implemented for `MoveInteractionController`
+  (`notifyPositionChanged`/`notifyConfigChanged`); not yet covered by an automated test (§2.7).
+- **Game-rules queries are injected, not imported** - `MoveInteractionController` has no
+  compile-time dependency on `intellectorboard`; `MoveRulesAdapter` (same package as
+  `BoardSurface`, which already depends on `intellectorboard`) is the real implementation.
+- **Ply history/navigation lives outside the board entirely** (§2.4), in a session-level datatype
+  the page owns.
 
-- `MoveInteractionController` — click/drag-to-move, premove marking, promotion/chameleon
-  disambiguation. One private internal mini-state (idle/selected/dragging), not a swappable
-  polymorphic `IBehavior`; the differences between "it's my turn" / "premoving" / "spectating" /
-  "history-browsing" collapse to a handful of config values (allowed-to-move color, premove
-  enabled, markers enabled, hover enabled) that the page sets — not separate classes.
-- `HexAnnotationController` — RMB rings/arrows (the old `SelectableBoard` slice).
-- `PositionEditorController` — free move / place / clear modes for the analysis position editor.
-
-Ply history and move navigation move **out of the board entirely**, into a session-level datatype
-(`client.datatypes`, name TBD — `GameSession`/`AnalysisSession` or similar) owned by the page. Each
-navigation step hands `BoardSurface` a `Position` + "previous move's from/to hexes" to display; the
-board never remembers a history of its own.
-
-Game-rules queries (`intellectorboard`'s `MoveDestinations.getPossibleDestinations`,
-`PremoveDestinations.getPossiblePremoveDestinations`, `CoreRules`) are **injected into
-`MoveInteractionController` at construction**, not imported by it — a small typedef bundling
-legal-destination lookup, premove-destination lookup, and promotion/chameleon-eligibility
-predicates. Real call sites pass a thin adapter delegating to `intellectorboard`; the controller
-itself has no compile-time dependency on that library.
-
-### Why controllers won't fight each other
-
-Not runtime arbitration — non-overlapping ownership by construction:
-
-1. **Input-channel partitioning.** Move/editor interaction owns left-button gestures;
-   `HexAnnotationController` owns right-button gestures. `BoardSurface` refuses to attach two
-   controllers claiming the same channel.
-2. **Single writer for hex fill.** Only one "state" controller is ever attached at a time —
-   `MoveInteractionController` XOR `PositionEditorController`, never both (editor mode *replaces*
-   move interaction). `HexAnnotationController` never touches fill, only its own ring/arrow glyphs.
-3. **Self-tracked glyphs.** `BoardSurface`'s glyph API creates/removes primitives and hands back a
-   raw handle; it holds no shared per-hex ownership map. Each controller tracks only the handles it
-   created.
-4. **Mandatory interruption contract.** Feeding `BoardSurface` a new `Position` or feeding a
-   controller a new config must cleanly abort any gesture in flight (piece snaps back, selection
-   clears) — a documented, tested guarantee, not a per-`ServerEvent`-case afterthought like the old
-   code.
-
-## Rendering: one SVG surface, not one component tree per hex
-
-Traced why the old renderer is heavy (see `[[board_deferred]]` item 1 for the full old-vs-new DOM
-count comparison): each `Hexagon` pre-creates 7 full hex shapes (one `haxe.ui.components.Canvas`/
-inline-`<svg>` per selection state, `Hexagon.hx:105-141`) plus a label/dot/circle canvas — 10
-DOM subtrees per hex, always present, toggled via `.hidden` — and `Hexagon.resize()` tears down and
-rebuilds all of them, for all 59 hexes, on every resize (`Hexagon.hx:68-79`).
-
-This is fixable structurally rather than by micro-optimizing the old shape:
-
-- `haxe.ui.backend.html5.svg.SVGPathBuilder.fill()`/`.stroke()` (confirmed in
-  `C:/HaxeToolkit/haxe/lib/haxeui-html5/git/haxe/ui/backend/html5/svg/SVGPathBuilder.hx:105-123`)
-  are plain `element.setAttribute(...)` calls on a real `PathElement` — restylable after the fact,
-  if the caller keeps the element handle. One hex needs **one path, drawn once**, restyled via
-  attribute writes for every later state change — not 7 duplicate pre-drawn shapes.
-- A fixed internal `viewBox` scales for free via CSS (`width:100%;height:100%` on the SVG root,
-  `aspect-ratio` on its container) — no JS resize listener, no debounce timer, no path
-  recomputation on resize at all. This replaces `Board.hx`'s `ResizeData`/`Timer.delay` machinery
-  entirely.
-- Per the user's explicit choice, this is **not** built on `haxe.ui.components.Canvas` (which would
-  need `@:access` hacks to reach per-shape restyling, same as the old `ArrowCanvas.getBuilder()`
-  pattern) but on a **new generic primitive in HaxeFolio**: `haxefolio.graphics.SvgSurface` (new
-  `haxefolio.graphics` package — no prior art in the library; closest sibling is
-  `haxefolio.structure`). A HaxeUI-tree-compatible component wrapping a raw `<svg>` element with a
-  fixed `viewBox`, exposing typed child-element builders (path/image/text) that return live handles
-  for later attribute updates. Reusable by any future page needing custom vector graphics, not
-  Intellector-specific. The exact low-level mounting mechanism (how a HaxeUI component's native
-  element becomes an `<svg>` rather than a `<div>` under the HTML5 backend) is implementation work
-  for when this is actually built — flag back to the user if it turns out not to be straightforward.
-- Pieces and coordinate labels also live **inside** the same SVG (`<image href="...svg">` / `<text>`
-  elements), not as separate HaxeUI `Image`/`Label` components layered on top — so they scale with
-  the board for free too, and dragging a piece (later, in `MoveInteractionController`) is just an
-  `x`/`y` attribute write.
-- Hex border overlap is preserved unchanged: each hex still draws its own full centered stroke: at
-  a shared edge, both neighboring hexes' strokes land on the exact same coordinates and coincide
-  (not double up); at the outer edge, the lone hex's stroke is the same thickness. Not "optimized"
-  into single-drawn shared edges — that would thin outer edges relative to internal ones.
-
-### Geometry
-
-Hex-center-pixel math (`Board.hx:378-400`'s `absHexCoords`) is pure, DOM-free math and ports
-directly into a small geometry helper (exact placement TBD — likely
-`client.ui.common.board.BoardGeometry`, colocated with `BoardSurface` since nothing outside the
-board package needs it yet). Since sizing is now viewBox-driven, this helper only needs to compute
-hex-center-in-viewBox-units and (for future pointer interaction) viewBox-units → screen-pixels via
-`getBoundingClientRect()` read on demand — no cached "current size" state to keep in sync,
-unlike the old `Board.dimensions`/`resize()` pair.
-
-## Hex tint palette (locked in for when `MoveInteractionController` is built — not used by
-`BoardSurface` itself)
-
-Chosen to stay clearly distinguishable by hue (several can be visible at once) and to avoid
-colliding with nearby UI semantics — accent brass (`#8a5a1f`, intentionally board-echoing per
-`[[intellector-style]]`) and the product-wide green=win/red=loss convention:
+### Locked-in hex tint palette
 
 | Signal | Light hex | Dark hex | Note |
 | --- | --- | --- | --- |
-| Hover (transient) | `#83ACD4` | `#6F8EAC` | Cool blue — the only cool hue on the board, so pointer feedback can't be mistaken for a committed state. |
-| Selected / drag departure | `#E56A00` | `#E56A00` | Kept from the old palette, uniform across dark/light (a "you're holding this" state). |
-| Premove | `#869E60` | `#648039` | Unchanged from the old palette. |
-| Last move | `#FDD340` | `#BE9C26` | Unchanged from the old palette. |
-| RMB mark, legacy fill mode (preference-gated) | `#FF6955` | `#BE3726` | Unchanged from the old palette — "how it works now," opt-in via preference. |
-| RMB mark, new default | ring, stroke `#FF0000` | ring, stroke `#FF0000` | Matches the arrow color (`Colors.arrow = 0xFF0000` in the old repo) rather than the legacy pinkish fill — outline, not a fill, so it never competes for the fill-priority slot below. |
+| Hover (transient) | `#83ACD4` | `#6F8EAC` | Implemented. |
+| Selected / drag departure | `#E56A00` | `#E56A00` | Implemented. |
+| Premove | `#869E60` | `#648039` | Not yet used - §2.4. |
+| Last move | `#FDD340` | `#BE9C26` | Not yet used - needs §2.3's session datatype to know what the last move was. |
+| RMB mark, legacy fill (preference-gated) | `#FF6955` | `#BE3726` | Not yet used - §2.5. |
+| RMB mark, new default | ring, stroke `#FF0000` | ring, stroke `#FF0000` | Not yet used - §2.5. |
 
-Resolved priority for the fill slot (highest wins; only `MoveInteractionController` XOR
-`PositionEditorController` ever writes it): **hover → selected/drag departure → premove → RMB
-legacy-fill (only if that preference is on) → last move → base.** Destination dot/circle markers
-and both RMB ring modes are drawn as separate shapes, outside this list, so they can coexist with
-any resolved fill state.
+Fill priority (highest wins; only one state controller ever writes it): **hover → selected/drag
+departure → premove → RMB legacy-fill (if that preference is on) → last move → base.** Markers and
+RMB rings are separate shapes outside this list.
 
-## This pass: `BoardSurface` only
+## 2. Remaining work
 
-Scope, matching what `[[todo]]` already lists as next (challenge-creation overlay preview,
-incoming-challenge notification widget) and what game/study list rows need — none of which require
-interaction:
+### 2.1 Marking auto-updates on preference change
 
-- Package: `client.ui.common.board` (shared across pages, per CLAUDE.md's `client.ui.common`
-  convention — not page-specific).
-- Inputs: `Position` (from `intellectorboard`), orientation (`PieceColor`), coordinate-marking mode
-  (reading `Preferences.boardCoordinates` — `all`/`files_only`/`none`, already renamed per
-  CLAUDE.md's vocabulary section).
-- Renders: hex fills/borders (base dark/light only — no tint API yet, nothing calls it), coordinate
-  labels per marking mode, piece images, at whatever size its container gives it (percentage-sized,
-  aspect-ratio preserved via CSS, per `[[intellector-style]]` §7's "size children in percentages"
-  rule).
-- No tint-setting API, no pointer handling, no resize-triggered redraw logic (view-box scaling
-  makes that unnecessary) — deliberately not building unused API surface ahead of the controller
-  that would call it, per `[[feedback_service_module_coupling]]`'s "don't build unused scaffolding"
-  lesson.
-- Depends on the new `haxefolio.graphics.SvgSurface` primitive (built alongside `BoardSurface`,
-  since nothing else needs it yet — but written and reviewed as HaxeFolio-owned, generic code, not
-  tailored to the board).
+Currently a page reads `Preferences.boardCoordinates.get()` once, at construction, and passes the
+resolved mode into `BoardSurface`'s constructor - changing the preference elsewhere (the
+preferences window) does nothing to an already-open board.
 
-## Verification
+`BoardSurface` must not import `Preferences` itself (architecture rule in §1 - it receives pure
+state). So each page hosting an interactive/live board subscribes itself:
 
-1. `haxe build.hxml --debug` — zero errors.
-2. A throwaway test page (or a temporary mount inside an existing stub page) rendering
-   `BoardSurface` with the default starting `Position`, both orientations, and all three
-   `boardCoordinates` modes — visual check against the old board's look (`Colors.hx`'s base fill
-   values are unchanged: light `#ffcf9f`, dark `#d18b47`, border `#664126`).
-3. Resize the browser window / the board's container — confirm the whole board scales smoothly with
-   no flash/redraw artifact, at both a small (~150px, list-row-sized) and large (fills available
-   space) rendered size.
-4. Confirm adjoining hex borders read as a single, uniform-thickness line matching the outer board
-   edge — the overlap behavior described above, carried over unchanged.
-5. Confirm piece images and coordinate labels scale in lockstep with the hex grid (same SVG
-   viewBox), not independently.
+```haxe
+private var coordinatesModeHandle:Detachable;
+...
+coordinatesModeHandle = Preferences.boardCoordinates.onChange(mainBoard.setCoordinatesMode);
+```
+
+and detaches in `onClose` - the pattern `Preference.onChange`'s own doc comment already names as
+canonical, just not yet used anywhere in this codebase (first real call site).
+
+Only the *live* board a page is actually showing should subscribe. `AnalysisPage`'s current
+preview row deliberately shows all three modes side by side at once - those three boards must
+stay fixed at `NONE`/`FILES_ONLY`/`ALL` regardless of the live preference, or the demo loses its
+point.
+
+Wire this into `AnalysisPage` now; repeat at each future call site (challenge preview, live game
+page, list rows that end up interactive) as they're built. Don't extract a shared helper until a
+second real call site actually needs the identical wiring - one call site doesn't justify the
+abstraction yet.
+
+### 2.2 `MovePromptOverlay`: theme conformance
+
+`MovePromptOverlay` (promotion picker, chameleon yes/no) is functional but was built without
+attention to `[[intellector-style]]`. Two different levels of work here:
+
+- **Probably already free:** `assets/styles/main.css` themes HaxeFolio's own overlay chrome
+  classes (`.haxefolio-overlay-frame`, header, action bar, `ActionButton`) globally - the same
+  mechanism `LoginOverlay` already benefits from without any per-overlay styling. `MovePromptOverlay`
+  already uses `Header`/`Actions`/`ActionButton`, so the frame, title, and the chameleon prompt's
+  yes/no buttons likely already inherit theme colors correctly - **verify this by rendering it**,
+  don't assume.
+- **Needs actual work:** the promotion picker's 4 piece-choice buttons are plain
+  `haxe.ui.components.Button`s with no theme-aware styling (no selection/hover treatment matching
+  §5.1's "selection is outlined" rule, no confirmed `accent`/`surfaceSunken` treatment). These need
+  a small component-level style pass - likely a dedicated CSS class (e.g.
+  `move-prompt-piece-choice`) giving each button the outlined-chip look on hover/focus, sized/
+  spaced per §4.2's token scale, not ad hoc pixel values.
+
+### 2.3 `MovePromptOverlay`: must not become a mobile sheet — design not yet decided
+
+**Requirement:** on mobile/collapsed viewports, the promotion/chameleon prompt must not cover the
+whole screen the way `OverlayController.present`'s default `SheetPresentation` does - the player
+needs to keep seeing the board (or most of it) while choosing.
+
+**This is explicitly not resolved by this doc** - stated here as a to-do, not a decision, per
+instruction while this plan was being written. What's known so far, as leads for whoever picks
+this up (research done, not committed to):
+
+- `OverlayController.present` picks `SheetPresentation` (covers the full viewport, fully modal,
+  `ResponsivityController.isCollapsed`-driven) vs `DialogPresentation` (centered, scrim at 35%
+  opacity so the background stays visible-but-dimmed, `applySize()` already shrinks the frame to
+  fit a narrow viewport down to a floor) purely off `isCollapsed`, with **no existing per-overlay
+  override** to force one or the other.
+- `AppearanceOverrides` already has exactly one field documented as "only meaningful for a
+  per-overlay override, ignored theme-wide" (`styleClass`) - a hypothetical new field forcing
+  dialog-style presentation would follow that precedent, but this needs a real design pass (does
+  it belong on `AppearanceOverrides`, as a separate `present()` parameter, or somewhere else
+  entirely?), not just bolting on a boolean.
+- Open questions still to work out, not just the mechanism above: does the *content* also need a
+  mobile-specific layout (the promotion picker's 4 buttons in a row may not fit a narrow dialog
+  width - `MovePromptOverlay` doesn't currently supply a `mobileContentFactory`), and is a
+  modified `DialogPresentation` actually the right answer at all, versus something else entirely
+  (e.g. a non-modal anchored popover near the moved piece)? Come up with the actual design - a
+  mock, not just a mechanism - before implementing.
+
+This item touches `haxefolio` (a shared library), not just app code, if the `AppearanceOverrides`
+route is the one chosen - same review bar as any other framework-level change.
+
+### 2.4 Premove
+
+`MoveInteractionController` config needs a premove-enabled flag; `MoveRules` needs a
+premove-destination query parallel to `getLegalDestinations`, backed by
+`intellectorboard.movement.rules.PremoveDestinations` - **which currently has its own
+never-compiled-because-never-called bug**, same class as the ones already fixed elsewhere this
+pass: `getPossiblePremoveDestinations` references an undeclared `piece` (should be `movingPiece`)
+and is missing a semicolon. Fix this as part of starting this item, not before - no point fixing
+dead code ahead of its first real caller.
+
+Needs its own queue/state (a premove is provisional until the real move happens or is invalidated)
+and the `#869E60`/`#648039` tint from the locked palette. Interacts with the interruption
+contract: an opponent's move arriving while a premove is queued either fires the premove (if still
+legal) or clears it - this is new behavior the contract doesn't cover yet.
+
+### 2.5 `HexAnnotationController` (RMB rings/arrows)
+
+Owns right-button gestures only (input-channel partitioning, §1). Two RMB modes per the locked
+palette: new default is a red ring outline (`#FF0000`, matching the arrow color); a preference
+(name/location TBD, likely alongside `Preferences.boardCoordinates`) switches to the legacy
+pinkish fill, which then occupies the fill-priority slot between premove and last-move. Arrow
+geometry ports from the old repo's `ArrowCanvas.hx:25-82` (pure math) onto `SvgSurface`'s path
+builder.
+
+Independent of §2.4 (different input channel, no shared state) - the two could be built in either
+order or swapped in the build order below without consequence.
+
+### 2.6 `PositionEditorController` (analysis position editor)
+
+Free move / place / clear modes, replacing `MoveInteractionController` when attached (never both).
+Old reference: `EditorBehavior`/`EditorFreeMoveBehavior`/`EditorDeleteBehavior`/`EditorSetBehavior`
+- shape of the three modes only, not their dialog/event coupling. Worth deciding, once
+`MoveInteractionController` premove work (§2.4) is also done and both controllers' click/drag
+plumbing can be compared side by side, whether "free move" shares a base/helper with
+`MoveInteractionController` or duplicates it.
+
+Depends on §2.7 existing first: a real position editor is what finally turns `AnalysisPage` from a
+smoke test into the actual page, which needs somewhere to hold the position being edited.
+
+### 2.7 Session-level ply history / navigation datatype
+
+New `client.datatypes` type (name TBD - `GameSession`/`AnalysisSession` or similar), replacing the
+old `GameBoard.plyHistory`. Owns move history and the current navigation pointer; on each
+navigation step, hands `BoardSurface` a fresh `Position` plus the previous move's from/to hexes
+(for the last-move tint, still unused - see §1's palette table). Move sounds
+(old `Audio.playPlySound`) belong at this level or in the page, not in the board.
+
+This is the last piece needed before `LiveGamePage` can exist at all, and before `AnalysisPage`
+can hold more than one position.
+
+### 2.8 Automated interruption-contract tests
+
+The contract itself is implemented and manually verified, not covered by an automated test.
+Retrofit once there's something real to interrupt *with* - an opponent-move-mid-drag test needs
+§2.7 (a session feeding real position updates), a rollback test needs the same, and an
+editor-mode-switch test needs §2.6. Writing this test now, against only the core click/drag pass,
+would just re-verify what's already been checked by hand.
+
+### 2.9 Revisit `BoardSurface`'s size
+
+Flagged (by the user, in passing) as having grown large over the `MoveInteractionController` pass
+- currently ~300 lines covering static rendering, the glyph/tint API, and hit-testing together.
+Not addressed by this doc: revisit once §2.4-§2.6 have all landed and used the API for real, so
+any split (e.g. separating static rendering from the interactive glyph/hit-testing surface) is
+based on how the API is actually exercised, not a guess made before the remaining controllers
+exist.
+
+## 3. Provisional build order
+
+1. **§2.1 marking auto-update** - small, standalone, no dependencies on anything else in this
+   list. Quick to ship correctly.
+2. **§2.2 `MovePromptOverlay` theme conformance** - standalone visual work, makes the existing
+   promotion/chameleon flow production-quality before more gets built that depends on it.
+3. **§2.3 `MovePromptOverlay` mobile presentation** - do the actual design work here (explicitly
+   deferred by this doc, see above), then implement. Sequenced after §2.2 so the visual design
+   isn't done twice.
+4. **§2.4 premove** - extends the controller that already exists; fixes the
+   `PremoveDestinations` bug as part of the work.
+5. **§2.5 `HexAnnotationController`** - independent of §2.4; could trade places with it.
+6. **§2.7 session-level datatype** - needed before either real page (`LiveGamePage` or a
+   `AnalysisPage` beyond a smoke test) can exist; natural next step once single-board interaction
+   (§2.4-§2.5) is solid.
+7. **§2.6 `PositionEditorController`** - depends on §2.7 existing, and benefits from §2.4 being
+   done first (see the shared-plumbing question in §2.6).
+8. **§2.8 automated interruption-contract tests** - retrofit once §2.4/§2.6/§2.7 give it real
+   scenarios to test against.
+9. **§2.9 revisit `BoardSurface`'s size** - opportunistic, once its API's real shape is settled by
+   §2.4-§2.6 actually using it.
+
+Each numbered item, when its turn comes, likely deserves its own scoping pass (the way
+`BoardSurface` and `MoveInteractionController`'s core pass were each scoped down from the full
+architecture) rather than being built in one shot against this doc's necessarily-provisional
+description of it.
