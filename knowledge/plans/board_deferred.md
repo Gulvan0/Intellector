@@ -1,33 +1,51 @@
 # Deferred entries from the board component pass
 
 Source: `C:/Users/mitmi/Documents/GitHub/Intellector/src/gameboard` (old renderer/interaction) and
-`C:/Users/mitmi/Documents/GitHub/Libraries/intellectorboard` (rules/geometry primitives, read-only
-reference — not modified by this pass). See `[[board_plan]]` for the architecture actually agreed
-and for what `BoardSurface` itself covers.
+`C:/Users/mitmi/Documents/GitHub/Libraries/intellectorboard` (rules/geometry primitives). See
+`[[board_plan]]` for the architecture actually agreed and for what `BoardSurface` itself covers.
 
-Only `BoardSurface` (static rendering of a `Position`, no interaction) is being built now.
-Everything below is still open.
+`BoardSurface` (static rendering) and the core click/drag pass of `MoveInteractionController` (item
+1 below) are done. Everything else below is still open.
 
 ## 1. `MoveInteractionController` (click/drag-to-move, premove, promotion/chameleon disambiguation)
 
-**Why deferred:** needs `BoardSurface`'s glyph/tint API to exist first, and no page currently
-consuming it (`LiveGamePage`/`AnalysisPage` are still title-only stubs).
+**Done, core pass:** click/drag and click-to-select-then-click-to-move both work end to end -
+`src/client/ui/common/board/MoveInteractionController.hx`, its own idle/selected/dragging
+mini-state (not a subclass), taking legal-destination/promotion-eligibility/chameleon-eligibility
+lookups via the `MoveRules` typedef, with `MoveRulesAdapter.DEFAULT` (same package) as the real
+`intellectorboard`-backed implementation - the controller itself imports no `intellectorboard`
+rules code, per `[[board_plan]]`. `BoardSurface` gained the glyph/tint/hit-testing API this needed
+(`setHexFill`/`resetHexFill`, `addMoveMarker`, `movePieceTo`/`resetPiecePosition`,
+`bringPieceToFront`, `hexAtScreenPoint`/`screenPointToBoardPoint`), and `haxefolio.graphics.SvgSurface`
+gained `svgCircle` and `screenPointToViewBox` (generic, not board-specific). Promotion/chameleon
+disambiguation is `client/ui/common/overlays/move_prompt/MovePromptOverlay.hx`, built on
+`HaxeFolioApp.present`/`OverlayContent` per CLAUDE.md's dialog-replacement rule (not the old
+`Dialogs.getQueue().add(new PromotionSelect(...))`/`Dialogs.confirm(...)` calls) - deliberately
+minimal (no keyboard-modifier shortcuts to skip the prompt, unlike the old dialogs). Verified
+in-browser on `AnalysisPage`'s local hot-seat smoke test: hover/selection/marker tints, drag
+follow, click-to-select, and turn/color gating (wrong-color piece under cursor does nothing) all
+confirmed. The promotion/chameleon overlay path itself compiled and type-checks but wasn't
+exercised in-browser (reaching either state needs a longer, specific move sequence) - worth a
+dedicated check before this is called fully done.
 
-**How to apply:** per `[[board_plan]]`'s composition design — a standalone controller, not a
-subclass, holding its own idle/selected/dragging mini-state, taking legal-destination /
-premove-destination / promotion-eligibility / chameleon-eligibility lookups as injected callbacks
-(adapter delegating to `intellectorboard`'s `MoveDestinations`/`PremoveDestinations`/`CoreRules`) —
-not importing that library directly. Old reference for the click/drag mechanics themselves (the
-*shape* of the state machine, not its coupling) is
-`C:/Users/mitmi/Documents/GitHub/Intellector/src/gameboard/states/{NeutralState,SelectedState,DraggingState}.hx`.
-Promotion/chameleon disambiguation UI (old `BasePlayableState.askMoveDetails`,
-`gameboard/states/BasePlayableState.hx:12-42`) should become a `HaxeFolioApp.showOverlay()` overlay
-per CLAUDE.md's dialog-replacement rule, not the old `Dialogs.getQueue().add(new PromotionSelect(...))`/
-`Dialogs.confirm(...)` calls.
+**Still deferred:** premove (needs `PremoveDestinations` wired into a `MoveRules`-like typedef, a
+premove queue, and the `#869E60`/`#648039` tint from `[[board_plan]]`'s palette - none of that
+exists yet) and the mandatory interruption contract's *automated* test coverage (the contract
+itself is implemented - `notifyPositionChanged`/`notifyConfigChanged` both abort any gesture in
+flight unconditionally - but only manually verified so far, not covered by an opponent-move-mid-
+drag/rollback/editor-switch test).
 
-Must implement the mandatory interruption contract from `[[board_plan]]`: an external `Position` or
-config change always cleanly aborts an in-flight drag/selection, tested explicitly (opponent move
-arriving mid-drag, a rollback, editor-mode switch).
+**Unplanned but required:** building this exposed that `intellectorboard`'s
+`movement`/`plyapplication` packages (`HexCoordsNavigation`, `DirectionGroups`, `MoveDestinations`,
+`CoreRules`, `MaterializedPly`, `PlyPerformer`, `PlyRules`) had never actually compiled - nothing in
+the frontend called them before `MoveRulesAdapter`/`PlyPerformer` usage in this pass, so Haxe's dead
+code elimination let them sit broken indefinitely (instance methods called as static,
+`PieceColor`/`Hex` vs `HexCoords` mixups, bare `turnColor` where `position.turnColor` was meant, an
+`Array<RawPly>` vs `RawPly` mismatch in `performRandomPly`). Fixed in place, mechanically - a real
+compile-error repair, not a game-rules design change - with the user's explicit go-ahead given the
+scale. Also carried over: three pre-existing uncommitted `intellectorboard` fixes to `Position`/
+`PieceArrangement`/`OccupiedHexesIterator` from the earlier `BoardSurface` pass that were never
+committed at the time.
 
 ## 2. `HexAnnotationController` (RMB ring/arrow marks)
 

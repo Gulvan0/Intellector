@@ -1,6 +1,7 @@
 package client.ui.common.board;
 
 import intellectorboard.primitives.hex.HexCoords;
+import intellectorboard.primitives.hex.HexCoordsIterator;
 import intellectorboard.primitives.piece.PieceColor;
 
 /**
@@ -70,5 +71,35 @@ class BoardGeometry
             {x: centerX + s / 2, y: centerY + h / 2},
             {x: centerX - s / 2, y: centerY + h / 2}
         ];
+    }
+
+    /**
+        The hex whose center is closest to `(pointX, pointY)` (board-center-relative, like
+        `hexCenter`'s own output), provided that center is within one `SIDE_LENGTH` - `null`
+        otherwise (the point isn't really over any hex, e.g. it's in a far corner of the
+        bounding box). Nearest-center search over all 59 hexes, ported unchanged from the old
+        `Board.posToIndexes` - cheap enough at this hex count, and correct enough for pointer
+        interaction without a true point-in-hexagon test.
+    **/
+    public static function hexAt(pointX:Float, pointY:Float, orientation:PieceColor):Null<HexCoords>
+    {
+        var closest:Null<HexCoords> = null;
+        var closestDistSqr:Float = SIDE_LENGTH * SIDE_LENGTH;
+
+        for (coords in new HexCoordsIterator())
+        {
+            var center = hexCenter(coords, orientation);
+            var dx:Float = center.x - pointX;
+            var dy:Float = center.y - pointY;
+            var distSqr:Float = dx * dx + dy * dy;
+
+            if (distSqr < closestDistSqr)
+            {
+                closest = coords;
+                closestDistSqr = distSqr;
+            }
+        }
+
+        return closest;
     }
 }

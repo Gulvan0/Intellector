@@ -5,15 +5,20 @@ import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;
 import haxefolio.PageBase;
+import intellectorboard.plyapplication.PlyPerformer;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
+import intellectorboard.primitives.ply.RawPly;
 import client.ui.common.board.BoardSurface;
 import client.ui.common.board.BoardCoordinatesMode;
 import client.ui.common.board.BoardCoordinatesMode.BoardCoordinatesModeExtension;
+import client.ui.common.board.MoveInteractionController;
+import client.ui.common.board.MoveRulesAdapter;
 
 class AnalysisPage extends PageBase
 {
     private final studyId:Null<Int>;
+    private var moveInteraction:MoveInteractionController;
 
     public function new(?studyId:Null<Int>)
     {
@@ -40,13 +45,29 @@ class AnalysisPage extends PageBase
             Interim: exercises BoardSurface (knowledge/plans/board_plan.md) at a large size and
             several small (list-row-sized) previews, across orientations and all 3
             boardCoordinates modes, until PositionEditorController (board_deferred.md item 3)
-            replaces this with a real position editor driving a single board.
+            replaces this with a real position editor driving a single board. The main board is
+            also wired to a live MoveInteractionController (board_deferred.md item 1, core click/
+            drag pass only - no premove yet) for local hot-seat play, both colors moved from the
+            same board with no session/network layer behind it.
         */
-        var startingPosition:Position = Position.defaultStarting();
         var mode:BoardCoordinatesMode = BoardCoordinatesModeExtension.fromPreferenceValue(Preferences.boardCoordinates.get());
+        var currentPosition:Position = Position.defaultStarting();
 
-        var mainBoard:BoardSurface = new BoardSurface(startingPosition, White, mode);
+        var mainBoard:BoardSurface = new BoardSurface(currentPosition, White, mode);
         content.addComponent(mainBoard);
+
+        moveInteraction = new MoveInteractionController(
+            mainBoard,
+            currentPosition,
+            MoveRulesAdapter.DEFAULT,
+            {allowedToMove: currentPosition.turnColor},
+            (ply:RawPly) -> {
+                PlyPerformer.performRawPly(currentPosition, ply);
+                mainBoard.setPosition(currentPosition);
+                moveInteraction.notifyPositionChanged(currentPosition);
+                moveInteraction.notifyConfigChanged({allowedToMove: currentPosition.turnColor});
+            }
+        );
 
         var previewRow:HBox = new HBox();
         previewRow.percentWidth = 100;
@@ -60,9 +81,16 @@ class AnalysisPage extends PageBase
             var previewWrapper:VBox = new VBox();
             previewWrapper.width = 150;
 
-            var preview:BoardSurface = new BoardSurface(startingPosition, previewOrientations[i], previewModes[i]);
+            // A separate Position instance: the previews always show the starting position,
+            // independent of whatever mainBoard's interactive game does to currentPosition.
+            var preview:BoardSurface = new BoardSurface(Position.defaultStarting(), previewOrientations[i], previewModes[i]);
             previewWrapper.addComponent(preview);
             previewRow.addComponent(previewWrapper);
         }
+    }
+
+    private override function onClose():Void
+    {
+        moveInteraction.dispose();
     }
 }

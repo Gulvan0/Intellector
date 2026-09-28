@@ -2,12 +2,22 @@ package client.ui.common.board;
 
 import client.Assets;
 import haxefolio.graphics.SvgSurface;
+import haxe.ui.backend.html5.svg.SVGPathBuilder;
+import haxe.ui.backend.html5.svg.SVGImageBuilder;
+import haxe.ui.backend.html5.svg.SVGCircleBuilder;
 import intellectorboard.position.Position;
 import intellectorboard.position.OccupiedHexesIterator;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.hex.HexCoordsIterator;
 import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.piece.PieceKind;
+
+private typedef PieceHandle =
+{
+    image:SVGImageBuilder,
+    width:Float,
+    height:Float
+}
 
 /**
     Static rendering of a `Position` on the hex board - geometry and rendering only, no
@@ -27,9 +37,17 @@ class BoardSurface extends SvgSurface
     private static inline final ROW_NUMBER_ON_LIGHT:String = "#664126";
     private static inline final ROW_NUMBER_ON_DARK:String = "#FFD8B2";
 
+    private static inline final MARKER_COLOR:String = "#333333";
+    private static inline final MARKER_DOT_RADIUS:Float = BoardGeometry.SIDE_LENGTH * 0.2;
+    private static inline final MARKER_RING_RADIUS:Float = BoardGeometry.SIDE_LENGTH * 0.8;
+    private static inline final MARKER_RING_THICKNESS:Float = BoardGeometry.SIDE_LENGTH * 0.1;
+
     private var position:Position;
     private var orientation:PieceColor;
     private var coordinatesMode:BoardCoordinatesMode;
+
+    private var hexPaths:Map<Int, SVGPathBuilder> = [];
+    private var pieceHandles:Map<Int, PieceHandle> = [];
 
     private final boardOriginX:Float;
     private final boardOriginY:Float;
@@ -76,6 +94,8 @@ class BoardSurface extends SvgSurface
     private function redraw():Void
     {
         clear();
+        hexPaths = [];
+        pieceHandles = [];
 
         for (coords in new HexCoordsIterator())
             drawHex(coords);
@@ -101,6 +121,7 @@ class BoardSurface extends SvgSurface
         hexPath.close();
         hexPath.fill({color: dark ? HEX_FILL_DARK : HEX_FILL_LIGHT});
         hexPath.stroke({color: HEX_BORDER, thickness: BoardGeometry.BORDER_THICKNESS});
+        hexPaths.set(coords.toScalarCoord(), hexPath);
 
         if (coordinatesMode == All)
             drawRowNumber(coords, x, y, dark);
@@ -142,7 +163,8 @@ class BoardSurface extends SvgSurface
         var height:Float = BoardGeometry.HEX_HEIGHT * 0.85 * pieceRelativeScale(kind);
         var width:Float = height * pieceAspectRatio(kind);
 
-        svgImage(Assets.pieceImage(kind, color), x - width / 2, y - height / 2, width, height);
+        var image = svgImage(Assets.pieceImage(kind, color), x - width / 2, y - height / 2, width, height);
+        pieceHandles.set(coords.toScalarCoord(), {image: image, width: width, height: height});
     }
 
     private static function pieceRelativeScale(kind:PieceKind):Float
@@ -171,5 +193,108 @@ class BoardSurface extends SvgSurface
             case Defensor: 0.65379;
             case Intellector: 0.62913;
         }
+    }
+
+    /**
+        The hex under `(screenX, screenY)` (as reported by a `MouseEvent`'s `screenX`/`screenY`),
+        or `null` when the point isn't over the board at all.
+    **/
+    public function hexAtScreenPoint(screenX:Float, screenY:Float):Null<HexCoords>
+    {
+        var point = screenPointToViewBox(screenX, screenY);
+        return BoardGeometry.hexAt(point.x - boardOriginX, point.y - boardOriginY, orientation);
+    }
+
+    /**
+        The board-center-relative point of `(screenX, screenY)` (the same space `movePieceTo`
+        takes), for a controller that needs the raw point rather than a snapped hex - e.g. to keep
+        a dragged piece under the cursor.
+    **/
+    public function screenPointToBoardPoint(screenX:Float, screenY:Float):{x:Float, y:Float}
+    {
+        var point = screenPointToViewBox(screenX, screenY);
+        return {x: point.x - boardOriginX, y: point.y - boardOriginY};
+    }
+
+    /**
+        Overrides `coords`'s hex fill with `color` - a single writer's semantic tint (hover,
+        selection, etc; see knowledge/plans/board_plan.md's priority list), resolved by that
+        writer, not by `BoardSurface` itself. Invalidated by the next `setPosition`/
+        `setOrientation`/`setCoordinatesMode` call, like every other glyph.
+    **/
+    public function setHexFill(coords:HexCoords, color:String):Void
+    {
+        var path = hexPaths.get(coords.toScalarCoord());
+        if (path != null)
+            path.fill({color: color});
+    }
+
+    /**
+        Reverts `coords`'s hex fill back to its base dark/light color.
+    **/
+    public function resetHexFill(coords:HexCoords):Void
+    {
+        setHexFill(coords, coords.isDark() ? HEX_FILL_DARK : HEX_FILL_LIGHT);
+    }
+
+    /**
+        Draws a move-destination glyph at `coords` - a filled dot if that hex is currently empty,
+        a hollow ring if it's occupied (a capture), matching the old board's marker look. Returns
+        a live handle; remove it later with `handle.element.remove()` (`BoardSurface` keeps no
+        ownership of glyphs it hands out - see board_plan.md's "self-tracked glyphs" rule).
+    **/
+    public function addMoveMarker(coords:HexCoords):SVGCircleBuilder
+    {
+        var center = BoardGeometry.hexCenter(coords, orientation);
+        var x:Float = boardOriginX + center.x;
+        var y:Float = boardOriginY + center.y;
+
+        var marker = svgCircle(x, y, position.get(coords).isEmpty() ? MARKER_DOT_RADIUS : MARKER_RING_RADIUS);
+
+        if (position.get(coords).isEmpty())
+            marker.fill({color: MARKER_COLOR});
+        else
+        {
+            marker.fill({color: "transparent"});
+            marker.stroke({color: MARKER_COLOR, thickness: MARKER_RING_THICKNESS});
+        }
+
+        return marker;
+    }
+
+    /**
+        Repositions the piece currently drawn at `fromCoords` so it's centered at the
+        board-center-relative point `(boardX, boardY)` (the same space `screenPointToBoardPoint`
+        returns) - a plain `x`/`y` attribute write, no redraw. `fromCoords` keeps indexing the
+        dragged piece for the whole gesture: `position` (and this surface's glyphs) only change on
+        the next `setPosition` call, never mid-drag.
+    **/
+    public function movePieceTo(fromCoords:HexCoords, boardX:Float, boardY:Float):Void
+    {
+        var handle = pieceHandles.get(fromCoords.toScalarCoord());
+        if (handle != null)
+            handle.image.position(boardOriginX + boardX - handle.width / 2, boardOriginY + boardY - handle.height / 2);
+    }
+
+    /**
+        Snaps the piece at `coords` back to its resting position - undoes any `movePieceTo` calls
+        made while dragging it, e.g. when a gesture is aborted before a move is committed.
+    **/
+    public function resetPiecePosition(coords:HexCoords):Void
+    {
+        var center = BoardGeometry.hexCenter(coords, orientation);
+        movePieceTo(coords, center.x, center.y);
+    }
+
+    /**
+        Moves the piece at `coords` to the end of the SVG's paint order, so it draws on top of
+        every other hex/piece/glyph while dragged (SVG has no `z-index`; paint order is the only
+        stacking control).
+    **/
+    public function bringPieceToFront(coords:HexCoords):Void
+    {
+        var handle = pieceHandles.get(coords.toScalarCoord());
+        if (handle != null)
+            handle.image.element.parentNode.appendChild(handle.image.element);
     }
 }
