@@ -5,7 +5,6 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.backend.html5.svg.SVGCircleBuilder;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
-import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.piece.PieceData;
 import intellectorboard.primitives.ply.RawPly;
 import client.ui.common.overlays.move_prompt.MovePromptOverlay;
@@ -186,7 +185,7 @@ class MoveInteractionController
             return;
 
         state = Dragging(target);
-        legalDestinations = rules.getLegalDestinations(target, position);
+        legalDestinations = rules.getLegalDestinations(target, position.pieces);
 
         board.setHexFill(target, SELECTED_COLOR);
         for (destination in legalDestinations)
@@ -196,24 +195,24 @@ class MoveInteractionController
 
     private function attemptMove(from:HexCoords, to:HexCoords):Void
     {
-        var movingColor:PieceColor = position.getPiece(from).color;
+        var movingPiece:PieceData = position.getPiece(from);
+        var capturedPiece:Null<PieceData> = position.getPiece(to);
         abortGesture();
 
-        if (rules.isPromotionPossible(from, to, position))
+        if (rules.isPromotionPossible(movingPiece, to))
         {
             interactionSuspended = true;
-            MovePromptOverlay.presentPromotion(movingColor, kind -> {
+            MovePromptOverlay.presentPromotion(movingPiece.color, kind -> {
                 interactionSuspended = false;
                 onMoveChosen(RawPly.construct(from, to, kind));
             });
         }
-        else if (rules.isChameleonPossible(from, to, position))
+        else if (rules.isChameleonPossible(movingPiece, from, capturedPiece, position.pieces))
         {
             interactionSuspended = true;
-            var capturedKind = position.getPiece(to).type;
             MovePromptOverlay.presentChameleon(chameleon -> {
                 interactionSuspended = false;
-                onMoveChosen(RawPly.construct(from, to, chameleon ? capturedKind : null));
+                onMoveChosen(RawPly.construct(from, to, chameleon ? capturedPiece.type : null));
             });
         }
         else

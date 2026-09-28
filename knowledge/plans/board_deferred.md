@@ -14,11 +14,16 @@ Source: `C:/Users/mitmi/Documents/GitHub/Intellector/src/gameboard` (old rendere
 mini-state (not a subclass), taking legal-destination/promotion-eligibility/chameleon-eligibility
 lookups via the `MoveRules` typedef, with `MoveRulesAdapter.DEFAULT` (same package) as the real
 `intellectorboard`-backed implementation - the controller itself imports no `intellectorboard`
-rules code, per `[[board_plan]]`. `isPromotionPossible`/`isChameleonPossible` are thin wrappers
-around `CoreRules.isPromotionEligible`/`isChameleonEligible` (new, extracted from `PlyRules.
-possiblePlys`'s own inline conditions - one definition shared by the move generator and this
-adapter, not two independently re-derived ones; a correction after first writing this adapter with
-its own hand-rolled version). `BoardSurface` gained the glyph/tint/hit-testing API this needed
+rules code, per `[[board_plan]]`. `isPromotionPossible`/`isChameleonPossible` are direct references
+to `CoreRules.isPromotionEligible`/`isChameleonEligible` (extracted from `PlyRules.possiblePlys`'s
+own inline conditions - one definition shared by the move generator and this adapter, not two
+independently re-derived ones; a correction after first writing this adapter with its own
+hand-rolled version). `MoveRules` itself takes `PieceArrangement` rather than `Position` throughout
+(none of its three queries care whose turn it is - that's `config.allowedToMove`'s job) and
+`PieceData` rather than a departure `HexCoords` to re-look-up - the controller already has the
+moving/captured piece in hand by the time it calls any of these, so there's nothing left to
+null-check at the call site either in the controller or in `MoveRulesAdapter`. `BoardSurface` gained
+the glyph/tint/hit-testing API this needed
 (`setHexFill`/`resetHexFill`, `addMoveMarker`, `movePieceTo`/`resetPiecePosition`,
 `bringPieceToFront`, `hexAtScreenPoint`/`screenPointToBoardPoint`), and `haxefolio.graphics.SvgSurface`
 gained `svgCircle` and `screenPointToViewBox` (generic, not board-specific). Promotion/chameleon
