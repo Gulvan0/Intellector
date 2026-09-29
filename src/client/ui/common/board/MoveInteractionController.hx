@@ -1,13 +1,13 @@
 package client.ui.common.board;
 
-import haxe.ui.core.Screen;
-import haxe.ui.events.MouseEvent;
 import haxe.ui.backend.html5.svg.SVGCircleBuilder;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceData;
 import intellectorboard.primitives.ply.RawPly;
-import client.ui.common.overlays.move_prompt.MovePromptOverlay;
+import client.ui.common.board.move_prompt.MovePrompt;
+import js.Browser;
+import js.html.PointerEvent;
 
 using Lambda;
 
@@ -16,6 +16,8 @@ private enum InteractionState
     Idle;
     Selected(from:HexCoords);
     Dragging(from:HexCoords);
+    // The move's promotion/chameleon choice is pending in `prompt`; the moving piece is drawn on `to`.
+    AwaitingChoice(from:HexCoords, to:HexCoords, prompt:MovePrompt);
 }
 
 /**
@@ -31,9 +33,14 @@ private enum InteractionState
 **/
 class MoveInteractionController
 {
-    private static inline final SELECTED_COLOR:String = "#E56A00";
-    private static inline final HOVER_LIGHT:String = "#83ACD4";
-    private static inline final HOVER_DARK:String = "#6F8EAC";
+    // Orange: a hex that's a departure candidate (hovered) or the departure itself (selected).
+    private static inline final DEPARTURE_COLOR:String = "#E56A00";
+    // Destination hover: each hex's normal fill with HSL lightness raised by the same 0.08, so the
+    // pale/normal difference is uniform across light and dark hexes (BoardSurface.HEX_FILL_*).
+    private static inline final DESTINATION_HOVER_LIGHT:String = "#FFE4C8";
+    private static inline final DESTINATION_HOVER_DARK:String = "#D9A068";
+    // The hex a pending promotion/chameleon prompt is anchored to (theme token accentMuted).
+    private static inline final PROMPT_ANCHOR_COLOR:String = "#C79A56";
 
     private final board:BoardSurface;
     private final rules:MoveRules;
@@ -47,10 +54,6 @@ class MoveInteractionController
     private var markers:Array<SVGCircleBuilder> = [];
     private var hoveredHex:Null<HexCoords> = null;
 
-    // Set while a promotion/chameleon choice is pending, so a click the overlay doesn't itself
-    // consume can't also be read as a new board gesture underneath it.
-    private var interactionSuspended:Bool = false;
-
     public function new(board:BoardSurface, position:Position, rules:MoveRules, config:MoveInteractionConfig, onMoveChosen:RawPly->Void)
     {
         this.board = board;
@@ -59,9 +62,11 @@ class MoveInteractionController
         this.config = config;
         this.onMoveChosen = onMoveChosen;
 
-        Screen.instance.registerEvent(MouseEvent.MOUSE_DOWN, onMouseDown);
-        Screen.instance.registerEvent(MouseEvent.MOUSE_MOVE, onMouseMove);
-        Screen.instance.registerEvent(MouseEvent.MOUSE_UP, onMouseUp);
+        // Native window-level listeners: clientX/clientY are scroll- and transform-safe against
+        // BoardSurface's getBoundingClientRect(), unlike HaxeUI's MouseEvent.screenX/Y.
+        Browser.window.addEventListener("pointerdown", onMouseDown);
+        Browser.window.addEventListener("pointermove", onMouseMove);
+        Browser.window.addEventListener("pointerup", onMouseUp);
     }
 
     /**
@@ -72,9 +77,9 @@ class MoveInteractionController
     {
         abortGesture();
 
-        Screen.instance.unregisterEvent(MouseEvent.MOUSE_DOWN, onMouseDown);
-        Screen.instance.unregisterEvent(MouseEvent.MOUSE_MOVE, onMouseMove);
-        Screen.instance.unregisterEvent(MouseEvent.MOUSE_UP, onMouseUp);
+        Browser.window.removeEventListener("pointerdown", onMouseDown);
+        Browser.window.removeEventListener("pointermove", onMouseMove);
+        Browser.window.removeEventListener("pointerup", onMouseUp);
     }
 
     /**
@@ -97,12 +102,12 @@ class MoveInteractionController
         this.config = config;
     }
 
-    private function onMouseDown(e:MouseEvent):Void
+    private function onMouseDown(e:PointerEvent):Void
     {
-        if (interactionSuspended)
+        if (e.button != 0)
             return;
 
-        var target:Null<HexCoords> = board.hexAtScreenPoint(e.screenX, e.screenY);
+        var target:Null<HexCoords> = board.hexAtClientPoint(e.clientX, e.clientY);
 
         switch state
         {
@@ -122,15 +127,15 @@ class MoveInteractionController
 
             case Dragging(_):
                 // A second mouse-down can't happen before the first's mouse-up; ignore.
+
+            case AwaitingChoice(_, _, _):
+                // The board is inert until the popover's choice is made (or the gesture is interrupted).
         }
     }
 
-    private function onMouseMove(e:MouseEvent):Void
+    private function onMouseMove(e:PointerEvent):Void
     {
-        if (interactionSuspended)
-            return;
-
-        var target:Null<HexCoords> = board.hexAtScreenPoint(e.screenX, e.screenY);
+        var target:Null<HexCoords> = board.hexAtClientPoint(e.clientX, e.clientY);
 
         switch state
         {
@@ -138,27 +143,29 @@ class MoveInteractionController
                 updateHover(target, h -> {
                     var piece:Null<PieceData> = position.getPiece(h);
                     return piece != null && config.allowedToMove != null && piece.color == config.allowedToMove;
-                });
+                }, h -> DEPARTURE_COLOR);
 
             case Selected(_):
-                updateHover(target, h -> legalDestinations.exists(x -> x.equals(h)));
+                updateHover(target, isLegalDestination, destinationHoverColor);
 
             case Dragging(from):
-                updateHover(target, h -> legalDestinations.exists(x -> x.equals(h)));
-                var boardPoint = board.screenPointToBoardPoint(e.screenX, e.screenY);
+                updateHover(target, isLegalDestination, destinationHoverColor);
+                var boardPoint = board.clientPointToBoardPoint(e.clientX, e.clientY);
                 board.movePieceTo(from, boardPoint.x, boardPoint.y);
+
+            case AwaitingChoice(_, _, _):
         }
     }
 
-    private function onMouseUp(e:MouseEvent):Void
+    private function onMouseUp(e:PointerEvent):Void
     {
-        if (interactionSuspended)
+        if (e.button != 0)
             return;
 
         switch state
         {
             case Dragging(from):
-                var target:Null<HexCoords> = board.hexAtScreenPoint(e.screenX, e.screenY);
+                var target:Null<HexCoords> = board.hexAtClientPoint(e.clientX, e.clientY);
 
                 if (target != null && target.equals(from))
                 {
@@ -170,7 +177,7 @@ class MoveInteractionController
                 else
                     abortGesture();
 
-            case Idle, Selected(_):
+            case Idle, Selected(_), AwaitingChoice(_, _, _):
                 // Only a drag's release is meaningful; a plain click is handled on mouse-down.
         }
     }
@@ -187,7 +194,10 @@ class MoveInteractionController
         state = Dragging(target);
         legalDestinations = rules.getLegalDestinations(target, position.pieces);
 
-        board.setHexFill(target, SELECTED_COLOR);
+        // The departure keeps the orange it got as a hover candidate; it's now owned by the
+        // gesture (reset in abortGesture), not by hover tracking.
+        hoveredHex = null;
+        board.setHexFill(target, DEPARTURE_COLOR);
         for (destination in legalDestinations)
             markers.push(board.addMoveMarker(destination));
         board.bringPieceToFront(target);
@@ -201,25 +211,40 @@ class MoveInteractionController
 
         if (rules.isPromotionPossible(movingPiece, to))
         {
-            interactionSuspended = true;
-            MovePromptOverlay.presentPromotion(movingPiece.color, kind -> {
-                interactionSuspended = false;
+            awaitChoice(from, to, capturedPiece, MovePrompt.promotion(board, to, movingPiece.color, kind -> {
+                abortGesture();
                 onMoveChosen(RawPly.construct(from, to, kind));
-            });
+            }, abortGesture));
         }
         else if (rules.isChameleonPossible(movingPiece, from, capturedPiece, position.pieces))
         {
-            interactionSuspended = true;
-            MovePromptOverlay.presentChameleon(chameleon -> {
-                interactionSuspended = false;
+            awaitChoice(from, to, capturedPiece, MovePrompt.captureMorph(board, to, movingPiece.type, movingPiece.color, capturedPiece.type, chameleon -> {
+                abortGesture();
                 onMoveChosen(RawPly.construct(from, to, chameleon ? capturedPiece.type : null));
-            });
+            }, abortGesture));
         }
         else
             onMoveChosen(RawPly.construct(from, to));
     }
 
-    private function updateHover(target:Null<HexCoords>, isReactive:HexCoords->Bool):Void
+    // The board stays as it is, but shows the move as though made: the piece on the anchor hex, the captured one gone.
+    private function awaitChoice(from:HexCoords, to:HexCoords, capturedPiece:Null<PieceData>, prompt:MovePrompt):Void
+    {
+        board.movePieceToHex(from, to);
+        if (capturedPiece != null)
+            board.setPieceVisible(to, false);
+        board.setHexFill(to, PROMPT_ANCHOR_COLOR);
+
+        state = AwaitingChoice(from, to, prompt);
+    }
+
+    private function isLegalDestination(h:HexCoords):Bool
+        return legalDestinations.exists(x -> x.equals(h));
+
+    private function destinationHoverColor(h:HexCoords):String
+        return h.isDark() ? DESTINATION_HOVER_DARK : DESTINATION_HOVER_LIGHT;
+
+    private function updateHover(target:Null<HexCoords>, isReactive:HexCoords->Bool, colorOf:HexCoords->String):Void
     {
         if (HexCoords.areEqual(target, hoveredHex))
             return;
@@ -230,7 +255,7 @@ class MoveInteractionController
         hoveredHex = (target != null && isReactive(target)) ? target : null;
 
         if (hoveredHex != null)
-            board.setHexFill(hoveredHex, hoveredHex.isDark() ? HOVER_DARK : HOVER_LIGHT);
+            board.setHexFill(hoveredHex, colorOf(hoveredHex));
     }
 
     private function abortGesture():Void
@@ -241,6 +266,11 @@ class MoveInteractionController
                 board.resetHexFill(from);
             case Dragging(from):
                 board.resetHexFill(from);
+                board.resetPiecePosition(from);
+            case AwaitingChoice(from, to, prompt):
+                prompt.close();
+                board.resetHexFill(to);
+                board.setPieceVisible(to, true);
                 board.resetPiecePosition(from);
             case Idle:
         }

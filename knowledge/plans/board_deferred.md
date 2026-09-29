@@ -29,17 +29,19 @@ moving/captured piece in hand by the time it calls any of these, so there's noth
 null-check at the call site either in the controller or in `MoveRulesAdapter`. `BoardSurface` gained
 the glyph/tint/hit-testing API this needed
 (`setHexFill`/`resetHexFill`, `addMoveMarker`, `movePieceTo`/`resetPiecePosition`,
-`bringPieceToFront`, `hexAtScreenPoint`/`screenPointToBoardPoint`), and `haxefolio.graphics.SvgSurface`
-gained `svgCircle` and `screenPointToViewBox` (generic, not board-specific). Promotion/chameleon
-disambiguation is `client/ui/common/overlays/move_prompt/MovePromptOverlay.hx`, built on
-`HaxeFolioApp.present`/`OverlayContent` per CLAUDE.md's dialog-replacement rule (not the old
-`Dialogs.getQueue().add(new PromotionSelect(...))`/`Dialogs.confirm(...)` calls) - deliberately
-minimal (no keyboard-modifier shortcuts to skip the prompt, unlike the old dialogs). Verified
-in-browser on `AnalysisPage`'s local hot-seat smoke test: hover/selection/marker tints, drag
-follow, click-to-select, and turn/color gating (wrong-color piece under cursor does nothing) all
-confirmed. The promotion/chameleon overlay path itself compiled and type-checks but wasn't
-exercised in-browser (reaching either state needs a longer, specific move sequence) - worth a
-dedicated check before this is called fully done.
+`bringPieceToFront`, `hexAtClientPoint`/`clientPointToBoardPoint`), and `haxefolio.graphics.SvgSurface`
+gained `svgCircle` and `clientPointToViewBox`/`viewBoxPointToClient` (generic, not board-specific;
+the controller listens for native window `pointer*` events and works in `clientX`/`clientY`, not
+HaxeUI's `screenX`/`screenY`). Promotion/chameleon disambiguation is the board-anchored popovers in
+`client/ui/common/board/move_prompt/` (see `[[board_plan]]` 2.2/2.3), not an overlay and not the old
+`Dialogs` calls - no keyboard-modifier shortcuts to skip the prompt. Verified in-browser on
+`AnalysisPage`'s local hot-seat smoke test: hover/selection/marker tints, drag follow,
+click-to-select, and turn/color gating (wrong-color piece under cursor does nothing) all
+confirmed; the prompt paths were later verified too (click route, cancelling, resize - see
+`[[board_plan]]` 2.2/2.3 for what remains unchecked, notably the drag route into a prompt).
+
+**Since then:** the board coordinates preference subscription and the promotion/chameleon
+popovers landed - both tracked in `[[board_plan]]`, not here.
 
 **Still deferred:** premove (needs `PremoveDestinations` wired into a `MoveRules`-like typedef, a
 premove queue, and the `#869E60`/`#648039` tint from `[[board_plan]]`'s palette - none of that
@@ -112,3 +114,6 @@ it") in favor of scoping this pass to plain `BoardSurface`.
 to a `BoardSurface` used in a preview context — nothing in the composition design prevents it, it
 just isn't exercised by any current call site (challenge overlay preview, incoming-challenge
 widget, game/study list rows all show a single static position with no user-drawn marks).
+
+
+## 6. Extract a shared helper for BoardCoordinatesMode preference subscription

@@ -5,6 +5,7 @@ import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;
 import haxefolio.PageBase;
+import morestd.Detachable;
 import intellectorboard.plyapplication.PlyPerformer;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
@@ -18,6 +19,7 @@ class AnalysisPage extends PageBase
 {
     private final studyId:Null<Int>;
     private var moveInteraction:MoveInteractionController;
+    private var coordinatesModeHandle:Detachable;
 
     public function new(?studyId:Null<Int>)
     {
@@ -45,11 +47,12 @@ class AnalysisPage extends PageBase
             no session/network layer) until PositionEditorController (board_deferred.md item 3)
             replaces this with a real position editor.
         */
-        var mode:BoardCoordinatesMode = Preferences.boardCoordinates.get();
         var currentPosition:Position = Position.defaultStarting();
 
-        var mainBoard:BoardSurface = new BoardSurface(currentPosition, White, mode);
+        // Live board - not a fixed preview mode, so it tracks the preference for as long as it's shown.
+        var mainBoard:BoardSurface = new BoardSurface(currentPosition, White, Preferences.boardCoordinates.get());
         content.addComponent(mainBoard);
+        coordinatesModeHandle = Preferences.boardCoordinates.onChange(mainBoard.setCoordinatesMode);
 
         moveInteraction = new MoveInteractionController(
             mainBoard,
@@ -77,6 +80,7 @@ class AnalysisPage extends PageBase
             previewWrapper.width = 150;
 
             // Separate Position - previews stay at the starting position regardless of mainBoard's game.
+            // Fixed coordinates mode by design (demo of all three modes) - must not track the live preference.
             var preview:BoardSurface = new BoardSurface(Position.defaultStarting(), previewOrientations[i], previewModes[i]);
             previewWrapper.addComponent(preview);
             previewRow.addComponent(previewWrapper);
@@ -86,5 +90,6 @@ class AnalysisPage extends PageBase
     private override function onClose():Void
     {
         moveInteraction.dispose();
+        coordinatesModeHandle.detach();
     }
 }

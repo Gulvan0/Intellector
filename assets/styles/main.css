@@ -587,3 +587,90 @@
 .intellector-login-status-error {
     color: #9e2f1c;
 }
+
+/*
+    Move prompt popovers (promotion fan, capture morph): board-anchored, no scrim. Pointer states
+    only - hover (-active) and pressed, driven by PromptButton itself. The pressed rule stays after
+    the active one so it wins when both apply. Shadows are applied by ElementShadow, not here, and
+    the radii of circular parts are set in code (HaxeUI doesn't resolve a percentage radius).
+*/
+
+.intellector-prompt-popover {
+    background-color: #faf7f2;
+    background-opacity: 0.94;
+    border: 1px solid #d8cfc0;
+    border-radius: 14px;
+    padding: 15px;
+}
+
+.intellector-prompt-button {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+}
+
+.intellector-prompt-button-labelled {
+    border-radius: 8px;
+    padding: 0px 18px;
+}
+
+.intellector-prompt-button-neutral {
+    background-color: transparent;
+}
+
+.intellector-prompt-button-emphasised {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+}
+
+.intellector-prompt-button-active {
+    background-color: #fffefb;
+    border: 1px solid #c79a56;
+}
+
+.intellector-prompt-button-emphasised.intellector-prompt-button-active {
+    background-color: #f6e6c6;
+    border: 1px solid #8a5a1f;
+}
+
+.intellector-prompt-button-pressed {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+}
+
+/*
+    No border of its own: a rim lighter than the slot's fill reads as a halo, and a darker one is
+    a third outline on top of the button's own.
+*/
+.intellector-prompt-art-slot {
+    background-color: #f0ebe2;
+}
+
+.intellector-prompt-cross {
+    font-name: $ui-family-medium;
+    color: #6d6152;
+}
+
+.intellector-prompt-button-cancel.intellector-prompt-button-active .intellector-prompt-cross {
+    color: #2a211a;
+}
+
+.intellector-prompt-title {
+    font-name: $ui-family-semibold;
+    font-size: 26px;
+    font-weight: 600;
+    word-wrap: false;
+    color: #2a211a;
+}
+
+.intellector-prompt-button-label {
+    font-name: $ui-family-medium;
+    font-size: 22px;
+    font-weight: 500;
+    color: #6d6152;
+}
+
+.intellector-prompt-button-emphasised .intellector-prompt-button-label {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #8a5a1f;
+}

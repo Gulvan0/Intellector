@@ -191,7 +191,7 @@ class BoardSurface extends SvgSurface
         close enough between the white/black variants of the same kind to treat as one constant -
         the couple-percent difference between color variants isn't visually distinguishable.
     */
-    private static function pieceAspectRatio(kind:PieceKind):Float
+    public static function pieceAspectRatio(kind:PieceKind):Float
     {
         return switch kind
         {
@@ -205,23 +205,23 @@ class BoardSurface extends SvgSurface
     }
 
     /**
-        The hex under `(screenX, screenY)` (as reported by a `MouseEvent`'s `screenX`/`screenY`),
-        or `null` when the point isn't over the board at all.
+        The hex under `(clientX, clientY)` (a native DOM event's viewport coordinates), or `null`
+        when the point isn't over the board at all.
     **/
-    public function hexAtScreenPoint(screenX:Float, screenY:Float):Null<HexCoords>
+    public function hexAtClientPoint(clientX:Float, clientY:Float):Null<HexCoords>
     {
-        var point = screenPointToViewBox(screenX, screenY);
+        var point = clientPointToViewBox(clientX, clientY);
         return BoardGeometry.hexAt(point.x - boardOriginX, point.y - boardOriginY, orientation);
     }
 
     /**
-        The board-center-relative point of `(screenX, screenY)` (the same space `movePieceTo`
+        The board-center-relative point of `(clientX, clientY)` (the same space `movePieceTo`
         takes), for a controller that needs the raw point rather than a snapped hex - e.g. to keep
         a dragged piece under the cursor.
     **/
-    public function screenPointToBoardPoint(screenX:Float, screenY:Float):{x:Float, y:Float}
+    public function clientPointToBoardPoint(clientX:Float, clientY:Float):{x:Float, y:Float}
     {
-        var point = screenPointToViewBox(screenX, screenY);
+        var point = clientPointToViewBox(clientX, clientY);
         return {x: point.x - boardOriginX, y: point.y - boardOriginY};
     }
 
@@ -272,7 +272,7 @@ class BoardSurface extends SvgSurface
 
     /**
         Repositions the piece drawn at `fromCoords` to the board-center-relative point
-        `(boardX, boardY)` (the same space `screenPointToBoardPoint` returns) - a plain `x`/`y`
+        `(boardX, boardY)` (the same space `clientPointToBoardPoint` returns) - a plain `x`/`y`
         attribute write, no redraw.
     **/
     public function movePieceTo(fromCoords:HexCoords, boardX:Float, boardY:Float):Void
@@ -290,6 +290,63 @@ class BoardSurface extends SvgSurface
     {
         var center = BoardGeometry.hexCenter(coords, orientation);
         movePieceTo(coords, center.x, center.y);
+    }
+
+    /**
+        Draws the piece that stands on `fromCoords` on top of `toCoords`'s hex, as though it
+        already moved there - a purely visual stand-in while a move's details are still being
+        chosen. Undo with `resetPiecePosition(fromCoords)`.
+    **/
+    public function movePieceToHex(fromCoords:HexCoords, toCoords:HexCoords):Void
+    {
+        var center = BoardGeometry.hexCenter(toCoords, orientation);
+        movePieceTo(fromCoords, center.x, center.y);
+        bringPieceToFront(fromCoords);
+    }
+
+    /**
+        Shows or hides the piece drawn at `coords` (no effect on an empty hex). Like every other
+        glyph, reset by the next `setPosition`/`setOrientation`/`setCoordinatesMode` call.
+    **/
+    public function setPieceVisible(coords:HexCoords, visible:Bool):Void
+    {
+        var handle = pieceHandles.get(coords.toScalarCoord());
+        if (handle != null)
+            handle.image.element.style.visibility = visible ? "visible" : "hidden";
+    }
+
+    /**
+        The center of the hex at `coords`, in viewport (`clientX`/`clientY`) coordinates.
+    **/
+    public function hexClientCenter(coords:HexCoords):{x:Float, y:Float}
+    {
+        var center = BoardGeometry.hexCenter(coords, orientation);
+        return viewBoxPointToClient(boardOriginX + center.x, boardOriginY + center.y);
+    }
+
+    /**
+        The hex's current on-screen height, in pixels (the board scales with its container).
+    **/
+    public function hexClientHeight():Float
+    {
+        return BoardGeometry.HEX_HEIGHT * viewBoxUnitInPixels();
+    }
+
+    /**
+        How far left or right of the board's vertical midline the hex at `coords` is drawn: -1 for
+        the leftmost file, 1 for the rightmost, 0 for the middle one.
+    **/
+    public function horizontalPosition(coords:HexCoords):Float
+    {
+        return BoardGeometry.hexCenter(coords, orientation).x / (6 * BoardGeometry.SIDE_LENGTH);
+    }
+
+    /**
+        Whether the hex at `coords` is drawn below the board's horizontal midline.
+    **/
+    public function isInLowerHalf(coords:HexCoords):Bool
+    {
+        return BoardGeometry.hexCenter(coords, orientation).y > 0;
     }
 
     /**
