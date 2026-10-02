@@ -58,12 +58,12 @@ class AnalysisPage extends PageBase
             mainBoard,
             currentPosition,
             MoveRulesAdapter.DEFAULT,
-            {allowedToMove: currentPosition.turnColor},
+            {allowedToMove: currentPosition.turnColor, premovesEnabled: false},
             (ply:RawPly) -> {
                 PlyPerformer.performRawPly(currentPosition, ply);
                 mainBoard.setPosition(currentPosition);
-                moveInteraction.notifyPositionChanged(currentPosition);
-                moveInteraction.notifyConfigChanged({allowedToMove: currentPosition.turnColor});
+                moveInteraction.notifyMovePlayed(currentPosition);
+                moveInteraction.notifyConfigChanged({allowedToMove: currentPosition.turnColor, premovesEnabled: false});
             }
         );
 

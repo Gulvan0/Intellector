@@ -20,6 +20,12 @@ typedef MoveRules =
     getLegalDestinations:(from:HexCoords, pieces:PieceArrangement) -> Array<HexCoords>,
 
     /**
+        Every hex `from`'s piece could reach as a premove: its movement geometry alone, ignoring
+        whatever stands in the way (the position it will actually move in isn't known yet).
+    **/
+    getPremoveDestinations:(from:HexCoords, pieces:PieceArrangement) -> Array<HexCoords>,
+
+    /**
         Whether `movingPiece` reaching `destination` is a Progressor promotion, needing a
         promotion choice before the move can be completed.
     **/

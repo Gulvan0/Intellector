@@ -43,6 +43,15 @@ class BoardSurface extends SvgSurface
     private static inline final ROW_NUMBER_ON_LIGHT:String = "#664126";
     private static inline final ROW_NUMBER_ON_DARK:String = "#FFD8B2";
 
+    // Tint fills (HexTint), light-hex / dark-hex. Destination hover is each normal fill with HSL
+    // lightness raised by the same 0.08, so the pale/normal difference is uniform on both shades.
+    private static inline final TINT_DEPARTURE:String = "#E56A00";
+    private static inline final TINT_DESTINATION_HOVER_LIGHT:String = "#FFE4C8";
+    private static inline final TINT_DESTINATION_HOVER_DARK:String = "#D9A068";
+    private static inline final TINT_PROMPT_ANCHOR:String = "#C79A56";  // Theme token accentMuted
+    private static inline final TINT_PREMOVE_LIGHT:String = "#869E60";
+    private static inline final TINT_PREMOVE_DARK:String = "#648039";
+
     private static inline final MARKER_COLOR:String = "#333333";
     private static inline final MARKER_DOT_RADIUS:Float = BoardGeometry.SIDE_LENGTH * 0.2;
     private static inline final MARKER_RING_RADIUS:Float = BoardGeometry.SIDE_LENGTH * 0.8;
@@ -226,16 +235,26 @@ class BoardSurface extends SvgSurface
     }
 
     /**
-        Overrides `coords`'s hex fill with `color` - a single writer's semantic tint (hover,
+        Overrides `coords`'s hex fill with `tint` - a single writer's semantic highlight (hover,
         selection, etc; see knowledge/plans/board_plan.md's priority list), resolved by that
         writer, not by `BoardSurface` itself. Invalidated by the next `setPosition`/
         `setOrientation`/`setCoordinatesMode` call, like every other glyph.
     **/
-    public function setHexFill(coords:HexCoords, color:String):Void
+    public function setHexTint(coords:HexCoords, tint:HexTint):Void
     {
         var path = hexPaths.get(coords.toScalarCoord());
-        if (path != null)
-            path.fill({color: color});
+        if (path == null)
+            return;
+
+        var dark:Bool = coords.isDark();
+        var color:String = switch tint
+        {
+            case Departure: TINT_DEPARTURE;
+            case DestinationHover: dark ? TINT_DESTINATION_HOVER_DARK : TINT_DESTINATION_HOVER_LIGHT;
+            case PromptAnchor: TINT_PROMPT_ANCHOR;
+            case Premove: dark ? TINT_PREMOVE_DARK : TINT_PREMOVE_LIGHT;
+        }
+        path.fill({color: color});
     }
 
     /**
@@ -243,7 +262,9 @@ class BoardSurface extends SvgSurface
     **/
     public function resetHexFill(coords:HexCoords):Void
     {
-        setHexFill(coords, coords.isDark() ? HEX_FILL_DARK : HEX_FILL_LIGHT);
+        var path = hexPaths.get(coords.toScalarCoord());
+        if (path != null)
+            path.fill({color: coords.isDark() ? HEX_FILL_DARK : HEX_FILL_LIGHT});
     }
 
     /**

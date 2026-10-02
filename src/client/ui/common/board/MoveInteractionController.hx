@@ -2,7 +2,9 @@ package client.ui.common.board;
 
 import haxe.ui.backend.html5.svg.SVGCircleBuilder;
 import intellectorboard.position.Position;
+import intellectorboard.primitives.hex.Hex;
 import intellectorboard.primitives.hex.HexCoords;
+import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.piece.PieceData;
 import intellectorboard.primitives.ply.RawPly;
 import client.ui.common.board.move_prompt.MovePrompt;
@@ -22,35 +24,43 @@ private enum InteractionState
 
 /**
     Click/drag-to-move on a `BoardSurface`: its own idle/selected/dragging mini-state, not a
-    swappable polymorphic behavior (see knowledge/plans/board_plan.md). Premove and RMB
-    annotations are separate, not-yet-built controllers (knowledge/plans/board_deferred.md items
-    1-2); this one owns left-button gestures only.
+    swappable polymorphic behavior (see knowledge/plans/board_plan.md), plus the premove queue.
+    RMB annotations are a separate, not-yet-built controller; this one owns left-button gestures
+    only.
 
-    Mandatory interruption contract: `notifyPositionChanged`/`notifyConfigChanged` always cleanly
-    abort a gesture in flight - the page must call both whenever the position or the allowed-to-
-    move color changes for any reason (opponent's move arriving, a rollback, leaving the page),
-    not just in response to this controller's own `onMoveChosen`.
+    Premoves: while `config.premovesEnabled` and it isn't `config.allowedToMove`'s turn (read off
+    the position), the same gestures queue premoves (geometry-only destinations, no markers; a
+    promotion is chosen up front, a chameleon never is) instead of calling `onMoveChosen`. A queued premove is drawn as
+    though already played - the piece stands on its destination, from where it can be premoved
+    again (a bare transposition of pieces; nothing is checked). Nothing is validated until
+    the turn comes to `allowedToMove` (a `notifyMovePlayed` call) - then the queue's first premove
+    is played through `onMoveChosen` if it's still legal, and the whole queue is dropped if it
+    isn't. Clicking a hex that starts no gesture also drops the queue, as does any position change
+    that isn't a move being played (`notifyPositionReplaced`; `notifyMovePlayed` keeps it) and any
+    config change of `allowedToMove` or to `premovesEnabled = false`.
+
+    Mandatory interruption contract: `notifyMovePlayed`/`notifyPositionReplaced`/`notifyConfigChanged`
+    always cleanly abort a gesture in flight - the page must call one of the first two, then the
+    last, whenever the position or the config changes for any reason (a move by either side, a
+    rollback, leaving the page), not just in response to this controller's own `onMoveChosen`.
+    Call `board.setPosition` first, then the position notification: a queued premove is resolved
+    there, against the position it carries.
 **/
 class MoveInteractionController
 {
-    // Orange: a hex that's a departure candidate (hovered) or the departure itself (selected).
-    private static inline final DEPARTURE_COLOR:String = "#E56A00";
-    // Destination hover: each hex's normal fill with HSL lightness raised by the same 0.08, so the
-    // pale/normal difference is uniform across light and dark hexes (BoardSurface.HEX_FILL_*).
-    private static inline final DESTINATION_HOVER_LIGHT:String = "#FFE4C8";
-    private static inline final DESTINATION_HOVER_DARK:String = "#D9A068";
-    // The hex a pending promotion/chameleon prompt is anchored to (theme token accentMuted).
-    private static inline final PROMPT_ANCHOR_COLOR:String = "#C79A56";
-
     private final board:BoardSurface;
     private final rules:MoveRules;
     private final onMoveChosen:RawPly->Void;
 
+    // The real position, as last reported by the page.
     private var position:Position;
+    // `position` with the queued premoves transposed onto it - what's drawn and what gestures work on.
+    private var shownPosition:Position;
     private var config:MoveInteractionConfig;
 
     private var state:InteractionState = Idle;
     private var legalDestinations:Array<HexCoords> = [];
+    private var premoves:Array<RawPly> = [];
     private var markers:Array<SVGCircleBuilder> = [];
     private var hoveredHex:Null<HexCoords> = null;
 
@@ -58,6 +68,7 @@ class MoveInteractionController
     {
         this.board = board;
         this.position = position;
+        this.shownPosition = position;
         this.rules = rules;
         this.config = config;
         this.onMoveChosen = onMoveChosen;
@@ -83,23 +94,50 @@ class MoveInteractionController
     }
 
     /**
-        Must be called every time the page also calls `board.setPosition` - keeps this
-        controller's own view of the position in sync and aborts any gesture in flight.
+        Must be called every time the page also calls `board.setPosition` because a move was played,
+        by either side (including one this controller reported through `onMoveChosen`): keeps this
+        controller's own view of the position in sync and aborts any gesture in flight. Queued
+        premoves stay - a move is the one thing they're planned across - and if the turn has now
+        come to `allowedToMove`, the first of them is played (or the queue dropped, if it can't be).
     **/
-    public function notifyPositionChanged(position:Position):Void
+    public function notifyMovePlayed(position:Position):Void
     {
         abortGesture();
         this.position = position;
+        this.shownPosition = position;
+
+        if (isUsersTurn())
+            resolvePremoves();
+        else if (!premoves.empty())
+            refreshPremoveDisplay();
     }
 
     /**
-        Must be called whenever the allowed-to-move color changes for any reason (turn changed,
-        started/stopped spectating, started browsing history). Aborts any gesture in flight.
+        Same as `notifyMovePlayed`, for the position changing for any other reason - a rollback,
+        history navigation, a reset - and so also discards every queued premove: they were planned
+        against a position that's gone.
+    **/
+    public function notifyPositionReplaced(position:Position):Void
+    {
+        abortGesture();
+        this.position = position;
+        this.shownPosition = position;
+        premoves = [];
+    }
+
+    /**
+        Must be called whenever the config changes for any reason (started/stopped spectating,
+        started browsing history, the premove preference toggled). Aborts any gesture in flight.
     **/
     public function notifyConfigChanged(config:MoveInteractionConfig):Void
     {
         abortGesture();
+
+        var dropPremoves:Bool = config.allowedToMove != this.config.allowedToMove || !config.premovesEnabled;
         this.config = config;
+
+        if (dropPremoves)
+            setPremoves([]);
     }
 
     private function onMouseDown(e:PointerEvent):Void
@@ -112,7 +150,7 @@ class MoveInteractionController
         switch state
         {
             case Idle:
-                tryBeginDragging(target);
+                tryBeginDraggingOrDropPremoves(target);
 
             case Selected(from):
                 if (target != null && target.equals(from))
@@ -122,7 +160,7 @@ class MoveInteractionController
                 else
                 {
                     abortGesture();
-                    tryBeginDragging(target);
+                    tryBeginDraggingOrDropPremoves(target);
                 }
 
             case Dragging(_):
@@ -140,16 +178,13 @@ class MoveInteractionController
         switch state
         {
             case Idle:
-                updateHover(target, h -> {
-                    var piece:Null<PieceData> = position.getPiece(h);
-                    return piece != null && config.allowedToMove != null && piece.color == config.allowedToMove;
-                }, h -> DEPARTURE_COLOR);
+                updateHover(target, isDepartureCandidate, h -> Departure);
 
             case Selected(_):
-                updateHover(target, isLegalDestination, destinationHoverColor);
+                updateHover(target, isLegalDestination, h -> DestinationHover);
 
             case Dragging(from):
-                updateHover(target, isLegalDestination, destinationHoverColor);
+                updateHover(target, isLegalDestination, h -> DestinationHover);
                 var boardPoint = board.clientPointToBoardPoint(e.clientX, e.clientY);
                 board.movePieceTo(from, boardPoint.x, boardPoint.y);
 
@@ -182,41 +217,78 @@ class MoveInteractionController
         }
     }
 
+    private function isUsersTurn():Bool
+        return config.allowedToMove != null && position.turnColor == config.allowedToMove;
+
+    private function isPremoveMode():Bool
+        return config.premovesEnabled && config.allowedToMove != null && !isUsersTurn();
+
+    // The color whose pieces a gesture may pick up right now.
+    private function movableColor():Null<PieceColor>
+        return isUsersTurn() || isPremoveMode() ? config.allowedToMove : null;
+
+    private function isDepartureCandidate(h:HexCoords):Bool
+    {
+        var piece:Null<PieceData> = shownPosition.getPiece(h);
+        return piece != null && movableColor() != null && piece.color == movableColor();
+    }
+
+    private function tryBeginDraggingOrDropPremoves(target:Null<HexCoords>):Void
+    {
+        tryBeginDragging(target);
+
+        if (state.match(Idle) && target != null)
+            setPremoves([]);
+    }
+
     private function tryBeginDragging(target:Null<HexCoords>):Void
     {
-        if (target == null)
+        if (target == null || !isDepartureCandidate(target))
             return;
 
-        var piece:Null<PieceData> = position.getPiece(target);
-        if (piece == null || config.allowedToMove == null || piece.color != config.allowedToMove)
-            return;
+        var premoving:Bool = isPremoveMode();
 
         state = Dragging(target);
-        legalDestinations = rules.getLegalDestinations(target, position.pieces);
+        legalDestinations = premoving ? rules.getPremoveDestinations(target, shownPosition.pieces) : rules.getLegalDestinations(target, shownPosition.pieces);
 
         // The departure keeps the orange it got as a hover candidate; it's now owned by the
         // gesture (reset in abortGesture), not by hover tracking.
         hoveredHex = null;
-        board.setHexFill(target, DEPARTURE_COLOR);
-        for (destination in legalDestinations)
-            markers.push(board.addMoveMarker(destination));
+        board.setHexTint(target, Departure);
+        if (!premoving)
+            for (destination in legalDestinations)
+                markers.push(board.addMoveMarker(destination));
         board.bringPieceToFront(target);
     }
 
     private function attemptMove(from:HexCoords, to:HexCoords):Void
     {
-        var movingPiece:PieceData = position.getPiece(from);
-        var capturedPiece:Null<PieceData> = position.getPiece(to);
+        var movingPiece:PieceData = shownPosition.getPiece(from);
+        var capturedPiece:Null<PieceData> = shownPosition.getPiece(to);
+        var premoving:Bool = isPremoveMode();
         abortGesture();
 
-        if (rules.isPromotionPossible(movingPiece, to))
+        if (premoving)
+        {
+            // The chameleon choice depends on a capture that may never happen - never asked for a premove.
+            if (rules.isPromotionPossible(movingPiece, to))
+            {
+                awaitChoice(from, to, capturedPiece, MovePrompt.promotion(board, to, movingPiece.color, kind -> {
+                    abortGesture();
+                    setPremoves(premoves.concat([RawPly.construct(from, to, kind)]));
+                }, abortGesture));
+            }
+            else
+                setPremoves(premoves.concat([RawPly.construct(from, to)]));
+        }
+        else if (rules.isPromotionPossible(movingPiece, to))
         {
             awaitChoice(from, to, capturedPiece, MovePrompt.promotion(board, to, movingPiece.color, kind -> {
                 abortGesture();
                 onMoveChosen(RawPly.construct(from, to, kind));
             }, abortGesture));
         }
-        else if (rules.isChameleonPossible(movingPiece, from, capturedPiece, position.pieces))
+        else if (rules.isChameleonPossible(movingPiece, from, capturedPiece, shownPosition.pieces))
         {
             awaitChoice(from, to, capturedPiece, MovePrompt.captureMorph(board, to, movingPiece.type, movingPiece.color, capturedPiece.type, chameleon -> {
                 abortGesture();
@@ -233,7 +305,7 @@ class MoveInteractionController
         board.movePieceToHex(from, to);
         if (capturedPiece != null)
             board.setPieceVisible(to, false);
-        board.setHexFill(to, PROMPT_ANCHOR_COLOR);
+        board.setHexTint(to, PromptAnchor);
 
         state = AwaitingChoice(from, to, prompt);
     }
@@ -241,21 +313,97 @@ class MoveInteractionController
     private function isLegalDestination(h:HexCoords):Bool
         return legalDestinations.exists(x -> x.equals(h));
 
-    private function destinationHoverColor(h:HexCoords):String
-        return h.isDark() ? DESTINATION_HOVER_DARK : DESTINATION_HOVER_LIGHT;
+    private function isPremoveHex(h:HexCoords):Bool
+        return premoves.exists(p -> p.from.equals(h) || p.to.equals(h));
 
-    private function updateHover(target:Null<HexCoords>, isReactive:HexCoords->Bool, colorOf:HexCoords->String):Void
+    // Back to what the hex shows when no gesture is touching it: the premove tint, or the base fill.
+    private function restoreHexFill(h:HexCoords):Void
+    {
+        if (isPremoveHex(h))
+            board.setHexTint(h, Premove);
+        else
+            board.resetHexFill(h);
+    }
+
+    private function paintPremoves():Void
+    {
+        for (premove in premoves)
+            for (h in [premove.from, premove.to])
+                board.setHexTint(h, Premove);
+    }
+
+    // Only called with no gesture in flight, so there's no gesture-owned drawing for the redraw to wipe.
+    private function setPremoves(newPremoves:Array<RawPly>):Void
+    {
+        var changed:Bool = !premoves.empty() || !newPremoves.empty();
+        premoves = newPremoves;
+
+        if (changed)
+            refreshPremoveDisplay();
+    }
+
+    // Rebuilds `shownPosition` from the real position and the queue, then redraws the board from it.
+    private function refreshPremoveDisplay():Void
+    {
+        shownPosition = position;
+
+        if (!premoves.empty())
+        {
+            shownPosition = position.copy();
+            for (premove in premoves)
+            {
+                var piece:Null<PieceData> = shownPosition.getPiece(premove.from);
+                if (piece == null)  // The real position changed under it; it'll fail validation when its turn comes
+                    continue;
+
+                shownPosition.set(premove.from, Empty);
+                shownPosition.set(premove.to, Occupied(new PieceData(premove.morphInto != null ? premove.morphInto : piece.type, piece.color)));
+            }
+        }
+
+        board.setPosition(shownPosition);
+        paintPremoves();
+    }
+
+    private function resolvePremoves():Void
+    {
+        if (premoves.empty())
+            return;
+
+        var ply:Null<RawPly> = currentlyLegalForm(premoves[0]);
+        setPremoves(ply != null ? premoves.slice(1) : []);
+
+        if (ply != null)
+            onMoveChosen(ply);
+    }
+
+    // `premove` as it would be played in the current position, or `null` if it can't be.
+    private function currentlyLegalForm(premove:RawPly):Null<RawPly>
+    {
+        var piece:Null<PieceData> = position.getPiece(premove.from);
+        if (piece == null || piece.color != config.allowedToMove)
+            return null;
+        if (!rules.getLegalDestinations(premove.from, position.pieces).exists(h -> h.equals(premove.to)))
+            return null;
+
+        // The promotion was picked back when queued; whether it's needed is only known now.
+        if (rules.isPromotionPossible(piece, premove.to))
+            return premove.morphInto != null ? premove : null;
+        return RawPly.construct(premove.from, premove.to);
+    }
+
+    private function updateHover(target:Null<HexCoords>, isReactive:HexCoords->Bool, tintOf:HexCoords->HexTint):Void
     {
         if (HexCoords.areEqual(target, hoveredHex))
             return;
 
         if (hoveredHex != null)
-            board.resetHexFill(hoveredHex);
+            restoreHexFill(hoveredHex);
 
         hoveredHex = (target != null && isReactive(target)) ? target : null;
 
         if (hoveredHex != null)
-            board.setHexFill(hoveredHex, colorOf(hoveredHex));
+            board.setHexTint(hoveredHex, tintOf(hoveredHex));
     }
 
     private function abortGesture():Void
@@ -263,13 +411,13 @@ class MoveInteractionController
         switch state
         {
             case Selected(from):
-                board.resetHexFill(from);
+                restoreHexFill(from);
             case Dragging(from):
-                board.resetHexFill(from);
+                restoreHexFill(from);
                 board.resetPiecePosition(from);
             case AwaitingChoice(from, to, prompt):
                 prompt.close();
-                board.resetHexFill(to);
+                restoreHexFill(to);
                 board.setPieceVisible(to, true);
                 board.resetPiecePosition(from);
             case Idle:
@@ -281,7 +429,7 @@ class MoveInteractionController
         legalDestinations = [];
 
         if (hoveredHex != null)
-            board.resetHexFill(hoveredHex);
+            restoreHexFill(hoveredHex);
         hoveredHex = null;
 
         state = Idle;

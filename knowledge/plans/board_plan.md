@@ -11,7 +11,8 @@ way; this doc doesn't repeat that.
 
 Done: `BoardSurface` (static rendering + the glyph/tint/hit-testing API
 `MoveInteractionController` needs), `MoveInteractionController`'s core click/drag/click-to-select
-pass (no premove), the promotion/chameleon `MoveRules` split with `intellectorboard`, the
+pass, premove (§2.4: queue, tints, `notifyMovePlayed`/`notifyPositionReplaced` contract, `HexTint` palette
+in `BoardSurface`), the promotion/chameleon `MoveRules` split with `intellectorboard`, the
 board-anchored promotion fan and capture-morph popovers (`client.ui.common.board.move_prompt`, §2.2),
 the live board's `boardCoordinates` preference subscription on `AnalysisPage` (§2.1), piece assets,
 and `BoardCoordinatesMode` as an `enum abstract` in `client.datatypes`. Also fixed along the way, in
@@ -42,7 +43,7 @@ concerns leak into rendering code. Not being re-litigated.)
 - **Mandatory interruption contract:** a new `Position` or a new controller config must cleanly
   abort any gesture in flight - including a pending promotion/chameleon choice, whose popover is
   closed and whose visuals are reverted. Implemented for `MoveInteractionController`
-  (`notifyPositionChanged`/`notifyConfigChanged`/`dispose`); not yet covered by an automated test (§2.8).
+  (`notifyPositionReplaced`/`notifyConfigChanged`/`dispose`); not yet covered by an automated test (§2.8).
 - **Game-rules queries are injected, not imported** - `MoveInteractionController` has no
   compile-time dependency on `intellectorboard`; `MoveRulesAdapter` (same package as
   `BoardSurface`, which already depends on `intellectorboard`) is the real implementation.
@@ -58,7 +59,7 @@ concerns leak into rendering code. Not being re-litigated.)
 | Selected / drag departure | `#E56A00` | `#E56A00` | Implemented. Stays tinted from selection until the move happens or the gesture is cancelled (through dragging, and after a plain click on the departure). |
 | Hover over a legal destination (drag or click-selected) | `#FFE4C8` | `#D9A068` | Implemented. Normal fill with HSL lightness +0.08, uniform delta on light/dark. Non-destination hexes get no hover tint. |
 | Hover in position editor | `#E56A00` | `#E56A00` | Not yet used - orange like the departure hover; apply when the position editor's controller is built. |
-| Premove | `#869E60` | `#648039` | Not yet used - §2.4. |
+| Premove | `#869E60` | `#648039` | Implemented (`HexTint.Premove`). |
 | Last move | `#FDD340` | `#BE9C26` | Not yet used - needs §2.7's session datatype to know what the last move was. |
 | RMB mark, legacy fill (preference-gated) | `#FF6955` | `#BE3726` | Not yet used - §2.5. |
 | RMB mark, new default | ring, stroke `#FF0000` | ring, stroke `#FF0000` | Not yet used - §2.5. |
@@ -118,7 +119,7 @@ current. Summary of the state of things:
 - **Interaction:** while a choice is pending the moving piece is drawn on the anchor hex, any
   captured piece is hidden, and the anchor gets the `#C79A56` fill; everything reverts on choice,
   cancel or interruption. The pending choice is an `InteractionState` case (`AwaitingChoice`), so
-  `notifyPositionChanged`/`notifyConfigChanged`/`dispose` close the popover.
+  `notifyPositionReplaced`/`notifyConfigChanged`/`dispose` close the popover.
 - **Not built, by decision:** keyboard focus, arrow keys, focus rings (dropped project-wide).
 - **Supporting changes:** `haxefolio.ElementShadow` is public (returns a `Detachable`);
   `SvgSurface` gained `viewBoxPointToClient`/`viewBoxUnitInPixels`; `BoardSurface` gained
@@ -135,20 +136,37 @@ the position-changing-under-an-open-prompt interruption (only navigating away wa
 following page scroll, a phone-width (~390 px) viewport, and long Russian labels wrapping. The
 fan looks worst for a corner hex on a wide board (the a/i quarter circle is large).
 
-### 2.4 Premove
+### 2.4 Premove - DONE in `MoveInteractionController` (not yet wired into a real page)
 
-`MoveInteractionController` config needs a premove-enabled flag; `MoveRules` needs a
-premove-destination query parallel to `getLegalDestinations`, backed by
-`intellectorboard.movement.rules.PremoveDestinations` - **which currently has its own
-never-compiled-because-never-called bug**, same class as the ones already fixed elsewhere this
-pass: `getPossiblePremoveDestinations` references an undeclared `piece` (should be `movingPiece`)
-and is missing a semicolon. Fix this as part of starting this item, not before - no point fixing
-dead code ahead of its first real caller.
+Built: `MoveInteractionConfig` is `{allowedToMove: Null<PieceColor>, premovesEnabled: Bool}` -
+`allowedToMove` is the color the user plays (constant across the opponent's turn, `null` for
+spectating/history), and whose turn it is is read off the position, so premove mode is derived:
+`premovesEnabled` and not the user's turn. `MoveRules.getPremoveDestinations` (backed by
+`PremoveDestinations`, whose bugs - undeclared `piece`, missing semicolon, missing `using Lambda` -
+are fixed). A plain FIFO queue of `RawPly`; a queued premove is drawn as already played
+(`shownPosition` = real position with the queue transposed onto it, no validation) so the same piece
+can be premoved again from its destination, while firing validates only the head against the real
+position. Promotion is chosen at queue time; chameleon is never asked (plays as no-morph). No move
+markers in premove mode (as in the old version).
 
-Needs its own queue/state (a premove is provisional until the real move happens or is invalidated)
-and the `#869E60`/`#648039` tint from the locked palette. Interacts with the interruption
-contract: an opponent's move arriving while a premove is queued either fires the premove (if still
-legal) or clears it - this is new behavior the contract doesn't cover yet.
+Tints: the palette moved out of the controller into `BoardSurface.setHexTint(coords, HexTint)`
+(`Departure`, `DestinationHover`, `PromptAnchor`, `Premove`), which picks the light/dark shade itself;
+future writers (annotations, last move) add enum cases there. Fill priority stays the controller's
+job (`restoreHexFill` replaces `resetHexFill` for gesture reverts so premove tints survive hovering).
+
+Page contract: `board.setPosition`, then `notifyMovePlayed` (a move by either side, including the
+controller's own fired premove - queue kept, and if the turn has come to `allowedToMove` the head is
+validated and played via `onMoveChosen`, else the whole queue is dropped) or `notifyPositionReplaced`
+(anything else: rollback, history, reset - queue discarded). `notifyConfigChanged` only needs calling
+when the config actually changes; changing `allowedToMove` or setting `premovesEnabled` to false
+drops the queue. A click on a hex that starts no gesture also drops it.
+
+Verified in-browser with a temporary harness (random Black replies after 4 s, constant config): queue
++ tint on light and dark hexes, void-click clear, chaining the same piece (one premove fires per
+reply), invalid head dropped with everything behind it (confirmed as intended), `notifyPositionReplaced`
+discarding the queue, no dependence on the page re-sending its config (an earlier design lost the
+queue when the handover config omitted `premoveColor`), markers back on the user's own turn.
+**Not verified by me:** drag route, premove interrupted by the position changing mid-prompt.
 
 ### 2.5 `HexAnnotationController` (RMB rings/arrows)
 
@@ -187,7 +205,7 @@ can hold more than one position.
 
 ### 2.8 Automated interruption-contract tests
 
-The contract itself is implemented and manually verified, not covered by an automated test.
+The contract itself (including the premove queue's survive/discard rules) is implemented and manually verified, not covered by an automated test.
 Retrofit once there's something real to interrupt *with* - an opponent-move-mid-drag test needs
 §2.7 (a session feeding real position updates), a rollback test needs the same, and an
 editor-mode-switch test needs §2.6. Writing this test now, against only the core click/drag pass,
@@ -204,19 +222,17 @@ exist.
 
 ## 3. Provisional build order
 
-Done: §2.1 (coordinates auto-update), §2.2/§2.3 (promotion and morph popovers).
+Done: §2.1 (coordinates auto-update), §2.2/§2.3 (promotion and morph popovers), §2.4 (premove).
 
-1. **§2.4 premove** - extends the controller that already exists; fixes the
-   `PremoveDestinations` bug as part of the work.
-2. **§2.5 `HexAnnotationController`** - independent of §2.4; could trade places with it.
-3. **§2.7 session-level datatype** - needed before either real page (`LiveGamePage` or a
+1. **§2.5 `HexAnnotationController`** - independent of §2.4 (now done).
+2. **§2.7 session-level datatype** - needed before either real page (`LiveGamePage` or a
    `AnalysisPage` beyond a smoke test) can exist; natural next step once single-board interaction
    (§2.4-§2.5) is solid.
-4. **§2.6 `PositionEditorController`** - depends on §2.7 existing, and benefits from §2.4 being
+3. **§2.6 `PositionEditorController`** - depends on §2.7 existing, and benefits from §2.4 being
    done first (see the shared-plumbing question in §2.6).
-5. **§2.8 automated interruption-contract tests** - retrofit once §2.4/§2.6/§2.7 give it real
+4. **§2.8 automated interruption-contract tests** - retrofit once §2.4/§2.6/§2.7 give it real
    scenarios to test against.
-6. **§2.9 revisit `BoardSurface`'s size** - opportunistic, once its API's real shape is settled by
+5. **§2.9 revisit `BoardSurface`'s size** - opportunistic, once its API's real shape is settled by
    §2.4-§2.6 actually using it. (It has grown by the popover-support methods above.)
 
 Each numbered item, when its turn comes, likely deserves its own scoping pass (the way
