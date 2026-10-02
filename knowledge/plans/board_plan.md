@@ -143,7 +143,9 @@ Built: `MoveInteractionConfig` is `{allowedToMove: Null<PieceColor>, premovesEna
 spectating/history), and whose turn it is is read off the position, so premove mode is derived:
 `premovesEnabled` and not the user's turn. `MoveRules.getPremoveDestinations` (backed by
 `PremoveDestinations`, whose bugs - undeclared `piece`, missing semicolon, missing `using Lambda` -
-are fixed). A plain FIFO queue of `RawPly`; a queued premove is drawn as already played
+are fixed). The queue lives in `PremoveQueue` (pure: no board, no events - `add`, `applyTo(position)`,
+`takeNext(position, color, rules)`, so it can be unit-tested for §2.8); the controller only drives it and
+paints the tints. A plain FIFO queue of `RawPly`; a queued premove is drawn as already played
 (`shownPosition` = real position with the queue transposed onto it, no validation) so the same piece
 can be premoved again from its destination, while firing validates only the head against the real
 position. Promotion is chosen at queue time; chameleon is never asked (plays as no-morph). No move

@@ -43,8 +43,10 @@ class BoardSurface extends SvgSurface
     private static inline final ROW_NUMBER_ON_LIGHT:String = "#664126";
     private static inline final ROW_NUMBER_ON_DARK:String = "#FFD8B2";
 
-    // Tint fills (HexTint), light-hex / dark-hex. Destination hover is each normal fill with HSL
-    // lightness raised by the same 0.08, so the pale/normal difference is uniform on both shades.
+    /*
+        Tint fills (HexTint), light-hex / dark-hex. Destination hover is each normal fill with HSL
+        lightness raised by the same 0.08, so the pale/normal difference is uniform on both shades.
+    */
     private static inline final TINT_DEPARTURE:String = "#E56A00";
     private static inline final TINT_DESTINATION_HOVER_LIGHT:String = "#FFE4C8";
     private static inline final TINT_DESTINATION_HOVER_DARK:String = "#D9A068";
@@ -242,13 +244,12 @@ class BoardSurface extends SvgSurface
     **/
     public function setHexTint(coords:HexCoords, tint:HexTint):Void
     {
-        var path = hexPaths.get(coords.toScalarCoord());
+        var path:Null<SVGPathBuilder> = hexPaths.get(coords.toScalarCoord());
         if (path == null)
             return;
 
         var dark:Bool = coords.isDark();
-        var color:String = switch tint
-        {
+        var color:String = switch tint {
             case Departure: TINT_DEPARTURE;
             case DestinationHover: dark ? TINT_DESTINATION_HOVER_DARK : TINT_DESTINATION_HOVER_LIGHT;
             case PromptAnchor: TINT_PROMPT_ANCHOR;
@@ -262,7 +263,7 @@ class BoardSurface extends SvgSurface
     **/
     public function resetHexFill(coords:HexCoords):Void
     {
-        var path = hexPaths.get(coords.toScalarCoord());
+        var path:Null<SVGPathBuilder> = hexPaths.get(coords.toScalarCoord());
         if (path != null)
             path.fill({color: coords.isDark() ? HEX_FILL_DARK : HEX_FILL_LIGHT});
     }
