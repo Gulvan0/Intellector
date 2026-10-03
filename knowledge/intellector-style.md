@@ -120,8 +120,10 @@ green or red to mean anything else**. A confirm button is brass, not green.
 | `scrollThumbDrag` | `#9e9282` |
 | `scrim` | `rgba(42,33,26,0.35)` |
 
-Scrim is used only where a surface is genuinely modal — on current evidence, mobile
-sheets only.
+Scrim is used only where a surface is genuinely modal: mobile sheets, and the board's
+promotion/chameleon prompts. The prompts use the same ink color at a much lower opacity (about
+0.08-0.12, exact value settled in the browser, not yet built), because the board under them
+must stay readable.
 
 ### 2.6 Measured contrast
 
@@ -374,7 +376,7 @@ nothing in this theme is permitted to change size in the first place (§7).
 | `scrollThumb`     | `#d0c6b5`             | scrollbar thumb                              |
 | `scrollThumbHover`| `#bdb2a0`             | scrollbar thumb hover                        |
 | `scrollThumbDrag` | `#9e9282`             | scrollbar thumb while dragging               |
-| `scrim`           | `rgba(42,33,26,0.35)` | mobile sheet scrim only                      |
+| `scrim`           | `rgba(42,33,26,0.35)` | mobile sheet scrim; board prompts use the same ink at ~0.08-0.12 |
 
 Measured contrast: `ink` on `surface` ~13:1 · `inkMuted` on `surface` ~5.4:1 ·
 `inkMuted` on `surfaceSunken` ~12:1 · `accentInk` on `accent` ~7.2:1 · `accent` on
