@@ -22,7 +22,7 @@ class PromptButton extends Box
     private static inline final ART_SHARE:Float = 0.76;
     private static inline final CROSS_SHARE:Float = 0.4;
 
-    private final onSelect:Void->Void;
+    private final onSelect:Null<Void->Void>;
 
     private var slot:Null<Box> = null;
     private var art:Null<Image> = null;
@@ -30,9 +30,29 @@ class PromptButton extends Box
     private var cross:Null<Label> = null;
 
     /**
-        A round, art-only button (the promotion fan's). Its size is set by `setDiameter`.
+        A round, art-only button (a piece ring's). Its size is set by `setDiameter`. `stay`: styled
+        as the option of keeping the piece as it is, rather than as a piece to become.
     **/
-    public static function round(kind:PieceKind, color:PieceColor, onSelect:Void->Void):PromptButton
+    public static function round(kind:PieceKind, color:PieceColor, stay:Bool, onSelect:Void->Void):PromptButton
+    {
+        var button:PromptButton = roundArt(kind, color, onSelect);
+        if (stay)
+            button.addClass("intellector-prompt-button-stay");
+        return button;
+    }
+
+    /**
+        The disc at the centre of a piece ring, showing the moving piece: the size of a ring
+        button, but not a button. Its size is set by `setDiameter`.
+    **/
+    public static function hub(kind:PieceKind, color:PieceColor):PromptButton
+    {
+        var hub:PromptButton = roundArt(kind, color, null);
+        hub.addClass("intellector-prompt-hub");
+        return hub;
+    }
+
+    private static function roundArt(kind:PieceKind, color:PieceColor, onSelect:Null<Void->Void>):PromptButton
     {
         var button:PromptButton = new PromptButton(onSelect);
         button.addClass("intellector-prompt-button-round");
@@ -50,14 +70,14 @@ class PromptButton extends Box
 
         button.slot = slot;
         button.art = art;
-        button.artAspectRatio = BoardSurface.pieceAspectRatio(kind);
+        button.artAspectRatio = Assets.pieceAspectRatio(kind);
 
         return button;
     }
 
     /**
-        A round button with a cross in it, for cancelling (the promotion fan's last button). Its
-        size is set by `setDiameter`.
+        A round button with a cross in it, for cancelling (a piece ring's). Its size is set by
+        `setDiameter`.
     **/
     public static function cancelRound(onSelect:Void->Void):PromptButton
     {
@@ -106,7 +126,7 @@ class PromptButton extends Box
 
         button.slot = slot;
         button.art = art;
-        button.artAspectRatio = BoardSurface.pieceAspectRatio(kind);
+        button.artAspectRatio = Assets.pieceAspectRatio(kind);
         button.fitSlot(artSlotDiameter);
 
         var text:Label = new Label();
@@ -140,12 +160,17 @@ class PromptButton extends Box
         }
     }
 
-    private function new(onSelect:Void->Void)
+    // A null `onSelect` makes a static disc rather than a button.
+    private function new(onSelect:Null<Void->Void>)
     {
         super();
 
         this.onSelect = onSelect;
         addClass("intellector-prompt-button");
+
+        if (onSelect == null)
+            return;
+
         element.style.cursor = "pointer";
 
         registerEvent(MouseEvent.MOUSE_OVER, _ -> addClass("intellector-prompt-button-active"));

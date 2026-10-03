@@ -5,12 +5,11 @@ import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceData;
 
 /**
-    Rules queries `MoveInteractionController` needs, injected rather than imported - the
-    controller has no compile-time dependency on `intellectorboard`'s rules engine (see
+    Rules queries the board's move policies and `Premoves` need, injected rather than imported -
+    they have no compile-time dependency on `intellectorboard`'s rules engine (see
     knowledge/plans/board_plan.md); `MoveRulesAdapter.DEFAULT` is the real implementation. Takes
     `PieceArrangement`/`PieceData` directly rather than `Position`/a departure `HexCoords` - none
-    of these care whose turn it is, and the controller already has the pieces in hand by the time
-    it calls any of these.
+    of these care whose turn it is, and the callers already have the pieces in hand.
 **/
 typedef MoveRules =
 {
@@ -37,5 +36,11 @@ typedef MoveRules =
         choice before the move can be completed. `capturedPiece` is `null` for a non-capturing
         move, which is never chameleon-eligible.
     **/
-    isChameleonPossible:(movingPiece:PieceData, from:HexCoords, capturedPiece:Null<PieceData>, pieces:PieceArrangement) -> Bool
+    isChameleonPossible:(movingPiece:PieceData, from:HexCoords, capturedPiece:Null<PieceData>, pieces:PieceArrangement) -> Bool,
+
+    /**
+        Whether the piece on `coords` is within its own Intellector's aura (the precondition for
+        it to morph when capturing).
+    **/
+    isAuraActive:(coords:HexCoords, pieces:PieceArrangement) -> Bool
 }

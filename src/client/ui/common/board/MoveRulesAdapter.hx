@@ -10,6 +10,7 @@ class MoveRulesAdapter
         getLegalDestinations: (from, pieces) -> MoveDestinations.getPossibleDestinations(from, pieces),
         getPremoveDestinations: PremoveDestinations.getPossiblePremoveDestinations,
         isPromotionPossible: CoreRules.isPromotionEligible,
-        isChameleonPossible: CoreRules.isChameleonEligible
+        isChameleonPossible: CoreRules.isChameleonEligible,
+        isAuraActive: (coords, pieces) -> CoreRules.isHexAffectedByAura(pieces, coords)
     };
 }

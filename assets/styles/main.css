@@ -637,6 +637,18 @@
     border: 1px solid #c79a56;
 }
 
+/* The piece ring's centre: the moving piece, on the anchor hex. Not a button, so never highlighted. */
+.intellector-prompt-hub {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+}
+
+/* Keeping the piece as it is, among pieces to become: quieter than the others. */
+.intellector-prompt-button-stay {
+    background-color: #f0ebe2;
+    border: 1px solid #e3dccf;
+}
+
 /*
     No border of its own: a rim lighter than the slot's fill reads as a halo, and a darker one is
     a third outline on top of the button's own.
@@ -673,4 +685,45 @@
     font-name: $ui-family-semibold;
     font-weight: 600;
     color: #8a5a1f;
+}
+
+/*
+    Board control row (touch screens): annotation mode and promotion/chameleon toggles - chips,
+    selection outlined (style guide §5.1), on a surface panel so the sunken chips have something
+    to be recessed into (§2.1) rather than sitting on the page background.
+*/
+.intellector-board-controls {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+    padding: 6px;
+}
+
+.intellector-board-control {
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+}
+
+.intellector-board-control-selected {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+}
+
+.intellector-board-control-cross {
+    font-name: $ui-family-medium;
+    font-size: 18px;
+    color: #6d6152;
+}
+
+.intellector-board-control-question {
+    font-name: $ui-family-semibold;
+    font-size: 14px;
+    font-weight: 600;
+    color: #8a5a1f;
+}
+
+.intellector-board-controls-separator {
+    font-name: $ui-family-semibold;
+    font-size: 20px;
+    color: #b5a892;
 }

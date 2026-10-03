@@ -16,51 +16,46 @@ import js.Browser;
 import js.html.KeyboardEvent;
 import js.html.Node;
 import js.html.PointerEvent;
+import morestd.Detachable;
 
 using Lambda;
 
-/**
-    The two move-detail choices `MoveInteractionController` can't resolve on its own, presented as
-    popovers anchored to a board hex (knowledge/plans/promotion-and-morph-popovers.md): which piece
-    a Progressor promotes into (a fan of round buttons), and whether a capturing piece morphs into
-    the type it captured (two labelled buttons).
+private enum RingSlot
+{
+    Piece(kind:PieceKind);
+    Cancel;
+}
 
-    Both are non-modal - the board stays visible - and can be cancelled: by their own cancel
-    button (the fan's last button, the morph popover's close button), by a press anywhere outside
-    them, or by Esc. Cancelling only closes the popover and calls `onCancelled`; the owner also
+/**
+    The two move-detail choices `PieceMoveTool` can't resolve on its own, presented as
+    popovers anchored to a board hex (knowledge/plans/promotion-and-morph-popovers.md): which piece
+    a Progressor promotes into, or a premoved piece morphs into (a ring of round buttons around the
+    moving piece), and whether a capturing piece morphs into the type it captured (two labelled
+    buttons).
+
+    Both keep the board visible under a very light scrim, and can be cancelled: by their own cancel
+    button (the ring's cross, the morph popover's close button), by a press anywhere outside
+    them (which lands on the scrim, so nothing underneath reacts to it), or by Esc. Cancelling only closes the popover and calls `onCancelled`; the owner also
     closes it, via `close`, when the position changes underneath it. Follows the anchor hex while
-    the board rescales or the page scrolls.
+    the board rescales, flips or the page scrolls.
 **/
 class MovePrompt
 {
-    private static inline final PROMOTION_SHADOW:String = "0 4px 14px rgba(42, 33, 26, 0.18)";
+    private static inline final RING_SHADOW:String = "0 4px 14px rgba(42, 33, 26, 0.18)";
     private static inline final POPOVER_SHADOW:String = "0 8px 28px rgba(42, 33, 26, 0.16)";
 
     private static inline final VIEWPORT_MARGIN:Float = 8;
 
-    // Four promotion options plus the cancel button, on an arc centred on the anchor hex.
-    private static inline final FAN_SLOT_COUNT:Int = 5;
-    private static inline final FAN_GAP:Float = 6;
-    private static inline final FAN_MINIMUM_DIAMETER:Float = 44;
+    /*
+        A piece ring: six slots around the anchor hex, at its vertex angles (counterclockwise from
+        the right one), the same for every anchor and both ring prompts. The hub sits over the anchor.
+    */
+    private static final RING_SLOTS:Array<RingSlot> = [Piece(Aggressor), Piece(Liberator), Piece(Dominator), Cancel, Piece(Progressor), Piece(Defensor)];
+    private static inline final RING_GAP:Float = 6;
+    private static inline final RING_MINIMUM_DIAMETER:Float = 44;
 
     // A button's diameter as a share of the hex's on-screen height: its radius is close to the hex's inner radius.
-    private static inline final FAN_DIAMETER_SHARE:Float = 0.9;
-
-    /*
-        The angle between neighbouring buttons. Over an outer file (a, i) the arc is squeezed into a
-        quarter of a circle, running from straight below/above the hex to straight beside it, toward the
-        board's centre; over every other file it is wider, symmetric about the vertical through the hex.
-        Each arc's radius is whatever keeps its own neighbours apart, so the quarter circle is the larger one.
-    */
-    private static final FAN_STEP:Float = 40 * Math.PI / 180;
-    private static final FAN_EDGE_STEP:Float = 90 / (FAN_SLOT_COUNT - 1) * Math.PI / 180;
-    private static inline final FAN_EDGE_TILT_DEGREES:Float = 45;
-
-    // The most the axis may turn to make the fan fit the viewport, over the files that don't turn by default.
-    private static inline final FAN_MAXIMUM_TILT_DEGREES:Float = 60;
-
-    // Fixed left-to-right order, not whatever order the rules happen to list the options in.
-    private static final PROMOTION_OPTIONS:Array<PieceKind> = [Aggressor, Defensor, Liberator, Dominator];
+    private static inline final RING_DIAMETER_SHARE:Float = 0.9;
 
     private static inline final MORPH_POPOVER_WIDTH:Int = 390;
     private static inline final MORPH_POPOVER_SPACING:Int = 12;
@@ -79,28 +74,60 @@ class MovePrompt
     private final onCancelled:Void->Void;
 
     private var resizeObserver:Dynamic;
+    private var scrim:PromptScrim;
+    private var geometryChangeHandle:Detachable;
     private var closed:Bool = false;
 
     /**
-        A fan of the four promotion options, in `color`, and a cancel button, on an arc around the
-        hex `anchor` that opens toward the board's interior. `onChosen` is called after the fan is
-        closed; `onCancelled` after it is closed by cancelling.
+        A ring of the four promotion options, in `color`, and a cancel button around the hex
+        `anchor`, with the promoting Progressor in the middle. `onChosen` is called after the ring
+        is closed; `onCancelled` after it is closed by cancelling.
     **/
     public static function promotion(board:BoardSurface, anchor:HexCoords, color:PieceColor, onChosen:PieceKind->Void, onCancelled:Void->Void):MovePrompt
     {
+        return pieceRing(board, anchor, Progressor, color, [Aggressor, Liberator, Dominator, Defensor], onChosen, onCancelled);
+    }
+
+    /**
+        A ring of the five kinds a premoved `movingKind` (of `color`) could morph into on capture -
+        its own kind among them, styled as staying as is - and a cancel button, around the hex
+        `anchor`. `onChosen` is called after the ring is closed; `onCancelled` after it is closed
+        by cancelling.
+    **/
+    public static function premoveChameleon(board:BoardSurface, anchor:HexCoords, movingKind:PieceKind, color:PieceColor, onChosen:PieceKind->Void, onCancelled:Void->Void):MovePrompt
+    {
+        return pieceRing(board, anchor, movingKind, color, [Aggressor, Liberator, Dominator, Progressor, Defensor], onChosen, onCancelled);
+    }
+
+    private static function pieceRing(board:BoardSurface, anchor:HexCoords, movingKind:PieceKind, color:PieceColor, options:Array<PieceKind>, onChosen:PieceKind->Void, onCancelled:Void->Void):MovePrompt
+    {
         var prompt:Null<MovePrompt> = null;
-        var buttons:Array<PromptButton> = [];
 
-        for (kind in PROMOTION_OPTIONS)
-        {
-            buttons.push(PromptButton.round(kind, color, () -> {
-                prompt.close();
-                onChosen(kind);
-            }));
-        }
-        buttons.push(PromptButton.cancelRound(() -> prompt.cancel()));
+        // By slot; null for a slot left empty.
+        var buttons:Array<Null<PromptButton>> = [
+            for (slot in RING_SLOTS)
+            {
+                switch slot {
+                    case Cancel:
+                        PromptButton.cancelRound(() -> prompt.cancel());
+                    case Piece(kind) if (options.contains(kind)):
+                        PromptButton.round(kind, color, kind == movingKind, () -> {
+                            prompt.close();
+                            onChosen(kind);
+                        });
+                    case Piece(_):
+                        null;
+                }
+            }
+        ];
+        var hub:PromptButton = PromptButton.hub(movingKind, color);
 
-        prompt = new MovePrompt(board, [for (button in buttons) button], PROMOTION_SHADOW, () -> placeFan(board, anchor, buttons), onCancelled);
+        var roots:Array<Component> = [hub];
+        for (button in buttons)
+            if (button != null)
+                roots.push(button);
+
+        prompt = new MovePrompt(board, roots, RING_SHADOW, () -> placeRing(board, anchor, hub, buttons), onCancelled);
         return prompt;
     }
 
@@ -187,11 +214,13 @@ class MovePrompt
         closed = true;
 
         resizeObserver.disconnect();
+        geometryChangeHandle.detach();
         Browser.window.removeEventListener("scroll", onViewportChanged, true);
         Browser.window.removeEventListener("resize", onViewportChanged);
         Browser.window.removeEventListener("pointerdown", onPointerDown);
         Browser.document.removeEventListener("keydown", onKeyDown, true);
 
+        scrim.remove();
         for (root in roots)
             Screen.instance.removeComponent(root, true);
     }
@@ -207,6 +236,7 @@ class MovePrompt
             Screen.instance.addComponent(root);
             ElementShadow.apply(root.element, shadow);
         }
+        scrim = new PromptScrim(roots[0].element);
 
         place();
 
@@ -216,16 +246,24 @@ class MovePrompt
         for (root in roots)
             resizeObserver.observe(root.element);
 
+        // A flip or a coordinates mode change moves the anchor without resizing anything.
+        geometryChangeHandle = board.onGeometryChanged.subscribe(place);
+
         Browser.window.addEventListener("scroll", onViewportChanged, true);
         Browser.window.addEventListener("resize", onViewportChanged);
 
         /*
-            Bubbling phase, registered after the controller's own listener: the press that cancels is
-            first seen (and ignored) by the controller as one made while a choice is pending, so it
-            can't also start a new gesture on the board.
+            Only once the event that opened the prompt is over: a prompt opened by a press would
+            otherwise receive that same press in its bubble phase and cancel itself at once.
         */
-        Browser.window.addEventListener("pointerdown", onPointerDown);
+        Browser.window.setTimeout(listenForOutsidePresses, 0);
         Browser.document.addEventListener("keydown", onKeyDown, true);
+    }
+
+    private function listenForOutsidePresses():Void
+    {
+        if (!closed)
+            Browser.window.addEventListener("pointerdown", onPointerDown);
     }
 
     private function cancel():Void
@@ -260,96 +298,47 @@ class MovePrompt
         cancel();
     }
 
-    private static function placeFan(board:BoardSurface, anchor:HexCoords, buttons:Array<PromptButton>):Void
+    private static function placeRing(board:BoardSurface, anchor:HexCoords, hub:PromptButton, buttons:Array<Null<PromptButton>>):Void
     {
-        var center = board.hexClientCenter(anchor);
+        var center:{x:Float, y:Float} = board.hexClientCenter(anchor);
         var hexHeight:Float = board.hexClientHeight();
 
-        var diameter:Float = Math.max(FAN_MINIMUM_DIAMETER, Math.round(hexHeight * FAN_DIAMETER_SHARE));
-        for (button in buttons)
-            button.setDiameter(diameter);
-
-        var horizontalPosition:Float = board.horizontalPosition(anchor);
-        var isEdgeFile:Bool = Math.abs(horizontalPosition) > 0.99;
-        var step:Float = isEdgeFile ? FAN_EDGE_STEP : FAN_STEP;
-
-        // Far enough that neighbouring buttons clear each other by FAN_GAP, and that the ones
-        // around the side clear the hex itself (its corners, a side length from the centre).
-        var hexSideLength:Float = hexHeight / Math.sqrt(3);
-        var radius:Float = Math.max(
-            (diameter + FAN_GAP) / (2 * Math.sin(step / 2)),
-            hexSideLength + diameter / 2 + FAN_GAP
-        );
-
-        // Toward the board's interior: a hex in the lower half (Black's promotion rank, on a
-        // White-oriented board) mirrors the fan upward.
-        var direction:Float = board.isInLowerHalf(anchor) ? -1 : 1;
-
-        // The axis leans toward the board's centre: fixed for an outer file, only as far as needed to fit elsewhere.
-        var lean:Float = horizontalPosition < 0 ? 1 : (horizontalPosition > 0 ? -1 : (center.x < Browser.window.innerWidth / 2 ? 1 : -1));
-        var tiltDegrees:Float = isEdgeFile ? FAN_EDGE_TILT_DEGREES : 0;
-
+        var diameter:Float = Math.max(RING_MINIMUM_DIAMETER, Math.round(hexHeight * RING_DIAMETER_SHARE));
         var half:Float = diameter / 2;
-        var centers:Array<{x:Float, y:Float}> = fanCenters(center, radius, step, direction, lean * tiltDegrees);
-        while (!isEdgeFile && tiltDegrees < FAN_MAXIMUM_TILT_DEGREES && !fitsHorizontally(centers, half))
+
+        // Far enough that neighbouring buttons clear each other by RING_GAP, and clear the hex itself (its corners, a side length from the centre).
+        var hexSideLength:Float = hexHeight / Math.sqrt(3);
+        var radius:Float = Math.max(diameter + RING_GAP, hexSideLength + half + RING_GAP);
+
+        var items:Array<{button:PromptButton, x:Float, y:Float}> = [{button: hub, x: center.x, y: center.y}];
+        for (i in 0...buttons.length)
         {
-            tiltDegrees += 1;
-            centers = fanCenters(center, radius, step, direction, lean * tiltDegrees);
+            if (buttons[i] == null)
+                continue;
+
+            var angle:Float = i * Math.PI / 3;
+            items.push({button: buttons[i], x: center.x + radius * Math.cos(angle), y: center.y - radius * Math.sin(angle)});
         }
 
-        var minX:Float = Math.POSITIVE_INFINITY;
-        var maxX:Float = Math.NEGATIVE_INFINITY;
-        var minY:Float = Math.POSITIVE_INFINITY;
-        var maxY:Float = Math.NEGATIVE_INFINITY;
-        for (buttonCenter in centers)
-        {
-            minX = Math.min(minX, buttonCenter.x - half);
-            maxX = Math.max(maxX, buttonCenter.x + half);
-            minY = Math.min(minY, buttonCenter.y - half);
-            maxY = Math.max(maxY, buttonCenter.y + half);
-        }
+        var minX:Float = center.x - radius - half;
+        var maxX:Float = center.x + radius + half;
+        var minY:Float = center.y - radius - half;
+        var maxY:Float = center.y + radius + half;
 
-        // Whatever turning couldn't fix: one shift for the whole fan, so it slides as a unit.
+        // Near a viewport edge the whole ring, hub included, slides inward as a unit.
         var shiftX:Float = shiftIntoViewport(minX, maxX, Browser.window.innerWidth);
         var shiftY:Float = shiftIntoViewport(minY, maxY, Browser.window.innerHeight);
 
-        for (i in 0...buttons.length)
-            moveTo(buttons[i], centers[i].x - half + shiftX, centers[i].y - half + shiftY);
-    }
-
-    /*
-        The button centres, left to right, around `center` on a circle of `radius`, `step`
-        apart and symmetric about the fan's axis. The axis points down (or up, for direction -1),
-        turned `tiltDegrees` toward +x - the rotation is done by positioning, not by rotating the buttons.
-    */
-    private static function fanCenters(center:{x:Float, y:Float}, radius:Float, step:Float, direction:Float, tiltDegrees:Float):Array<{x:Float, y:Float}>
-    {
-        var tilt:Float = tiltDegrees * Math.PI / 180;
-        var axisX:Float = Math.sin(tilt);
-        var axisY:Float = direction * Math.cos(tilt);
-        var sideX:Float = Math.cos(tilt);
-        var sideY:Float = -direction * Math.sin(tilt);
-
-        return [
-            for (slot in 0...FAN_SLOT_COUNT)
-            {
-                var angle:Float = (slot - (FAN_SLOT_COUNT - 1) / 2) * step;
-                {
-                    x: center.x + radius * (Math.cos(angle) * axisX + Math.sin(angle) * sideX),
-                    y: center.y + radius * (Math.cos(angle) * axisY + Math.sin(angle) * sideY)
-                }
-            }
-        ];
-    }
-
-    private static function fitsHorizontally(centers:Array<{x:Float, y:Float}>, half:Float):Bool
-    {
-        return centers.foreach(buttonCenter -> buttonCenter.x - half >= VIEWPORT_MARGIN && buttonCenter.x + half <= Browser.window.innerWidth - VIEWPORT_MARGIN);
+        for (item in items)
+        {
+            item.button.setDiameter(diameter);
+            moveTo(item.button, item.x - half + shiftX, item.y - half + shiftY);
+        }
     }
 
     private static function placeMorphPopover(board:BoardSurface, anchor:HexCoords, popover:VBox):Void
     {
-        var center = board.hexClientCenter(anchor);
+        var center:{x:Float, y:Float} = board.hexClientCenter(anchor);
         var hexHeight:Float = board.hexClientHeight();
 
         var measuredHeight:Float = popover.element.getBoundingClientRect().height;

@@ -8,21 +8,14 @@ core-click-drag passes and the bugs found along the way.
 
 ## 0. Where things stand
 
-Built (the old structure, which §1 replaces):
+**§1 is implemented, steps 1–31 of §3** (2026-10-03), each checked in the browser on
+`AnalysisPage`. Step 32 (automated tests) was dropped from this plan by decision. Decisions and
+deviations taken during the build, which override §1 where they differ: §6. Not verified in the
+browser: §6.3.
 
-- `BoardSurface`: one SVG doing everything (hexes, labels, pieces, markers, tints, hit-testing,
-  prompt-placement geometry), every color a constant in it, a full `redraw()` on every
-  `setPosition`/`setOrientation`/`setCoordinatesMode`.
-- `MoveInteractionController`: click/drag/click-to-select, premove (`PremoveQueue`,
-  `notifyMovePlayed`/`notifyPositionReplaced`/`notifyConfigChanged`), the `HexTint` palette in
-  `BoardSurface.setHexTint`, fill priority by hand (`restoreHexFill`).
-- Board-anchored promotion fan and capture-morph popovers (`client.ui.common.board.move_prompt`).
-- The promotion/chameleon `MoveRules` split with `intellectorboard`; piece assets;
-  `BoardCoordinatesMode`; the `boardCoordinates` preference subscription on `AnalysisPage`.
-- Fixed along the way: `intellectorboard`'s hex-stepping geometry and several dead-code bugs;
-  two `SvgSurface` sizing/coordinate bugs in haxefolio.
-
-Details of what was built and verified: §2. Nothing in §1 is implemented yet. Build order: §3.
+`AnalysisPage` is still an interim smoke test: hot-seat play on an `InteractiveBoard` with a linear
+`PlyHistory`, plus temporary debug controls (flip button, history navigation buttons, editor mode
+buttons) that go away when the real analysis page is built. The replies harness of step 12 is gone.
 
 ## 1. Architecture
 
@@ -187,7 +180,7 @@ Default values:
 | `AnnotationFill(blue)` | `#83ACD4` | `#6F8EAC` | |
 | `AnnotationFill(green)` | `#9DD482` | `#83AC6F` | grass green |
 | `AnnotationFill(yellow)` | `#D4C482` | `#ACA06F` | calm yellow |
-| Annotation ring/arrow | red `#FF0000`, blue `#0000FF`, green `#00CC00`, yellow `#E6E600` | | vivid; every ring and arrow drawn at 75% opacity (as the old `ArrowCanvas.hx:75`); fills are opaque |
+| Annotation ring/arrow | red `#FF0000`, blue `#0000FF`, green `#00CC00`, yellow `#C8B400` | | vivid; every ring and arrow drawn at 75% opacity (as the old `ArrowCanvas.hx:75`); fills are opaque |
 
 ### 1.7 `BoardGestures`
 
@@ -767,3 +760,76 @@ Not scheduled: palette customization through preferences (path in §1.6).
 ## 5. Open questions
 
 None at the moment.
+
+## 6. Build record (decisions taken while implementing)
+
+### 6.1 Decided with the user
+
+- **`morestd.VoidSignal`** next to `Signal<T>` for payload-less events (`onGeometryChanged`).
+- **Only a dragged piece is above everything:** `PiecesLayer` draws into two groups, its own place
+  in the stack (below markers and annotations) and a "lifted" group `BoardSurface` adds last. Only
+  the dragged piece moves into the lifted group; the piece shown on a prompt anchor and every
+  resting piece stay below the annotations.
+- **A premove prompt survives a move while premoves remain** (amends §1.11's "a prompt is always
+  interrupted"): on a `Move`, an open prompt completing a premove stays open if premoves are still
+  queued afterwards (`PieceMovePolicy.keepsChoiceAcrossMove`, true in `LiveGameMovePolicy` while
+  `Premoves.hasQueued()`) and the premoved piece is still on its departure. Otherwise it closes and
+  its premove is dropped, as before.
+- **Annotation rings:** radius through the hex's vertices (= side length), thickness 0.24 × side.
+- **Outside press (§1.16) = layout background:** the target lies in `#haxefolio-page-container`,
+  outside `InteractiveBoard`'s own element, and its nearest HaxeUI component is a `Box` (VBox, HBox,
+  the page…) or the page's `ScrollArea` - `HaxeFolioApp.isPageBackground`, which searches the
+  component tree top-down (haxeui-html5's element→component map only holds components briefly).
+- **Preference defaults:** auto-promote `shift`; both annotation-clearing preferences on;
+  "select hexes by" `circle`; "show board controls" `auto`.
+- **Option preferences are `enum abstract`s** in `client.datatypes` (`AutoPromoteMode`,
+  `AnnotationHexStyle`, `BoardControlsVisibility`, `FollowLatestMoveMode`), passed straight through.
+- **Control row:** icon buttons only, no caption: three sections (annotation mode: the cross and the
+  four color discs · auto-promote · ask about chameleon) separated by dots; 40×36 chips styled
+  per the style guide §5.1 (`surfaceSunken` unselected, `accentTint`/`accentMuted` selected, 5 px
+  radius, 6 px apart) on a `surface` panel (9 px radius, 6 px padding) so they read as recessed
+  rather than blending into `pageBg`; toggles carry tooltips. Centered along the board's side: horizontally above it,
+  vertically beside it. Fits a 390 px phone.
+- **Session datatype:** a linear `client.datatypes.PlyHistory` for now (start/prev/next/end/after
+  ply n; `append(ply, followLatestMove)`; emits position + last move + cause). The analysis ply tree
+  comes with the real analysis page.
+- **Editor tools** (steps 30–31) checked with temporary buttons; the editor's real UI is designed
+  with the analysis page. **Tests** (step 32): not part of this plan.
+
+### 6.2 Decided while building (no question needed, or forced by a bug)
+
+- **Prompt outside-press listener is registered after the opening event** (`setTimeout 0`): with
+  `BoardGestures` listening for presses in the capture phase, a prompt opened by a press (the click
+  route) otherwise received that same press in its bubble phase and cancelled itself at once.
+- **Scrim** (`PromptScrim`): a plain fixed `div` inserted just under the prompt's elements, color
+  `rgba(42, 33, 26, 0.10)`; forwards the wheel by scrolling the nearest scrollable element beneath
+  (the page is a native scroller). Covers the menu bar.
+- **haxefolio menu Esc fix:** `MenuBarBuilder` marks Esc `preventDefault()` only when a dropdown was
+  open (tracked via `onMenuOpened`/`onMenuClosed`).
+- **`BoardGestures` hit-tests presses and hover by target:** a press or hover counts as on a hex
+  only if its target is inside the board, so clicking an overlay or popup covering the board (e.g.
+  the settings window) is not a board press; drag moves and releases follow coordinates.
+- **`BoardGestures`** takes the element its own controls live in (`ownArea`), so presses there are
+  never outside presses; handlers receive `HexPress`/`HexDrag` structures (no button argument,
+  since a subscription names its button). Releases are synthesized on `pointercancel` and window
+  `blur`. `touch-action: none` on the board.
+- **Ring prompt:** slots counterclockwise from the right vertex: Aggressor, Liberator, Dominator,
+  cancel, Progressor, Defensor; the hub is a non-interactive `PromptButton.hub`; the "stay" option
+  is a quieter style (HaxeUI has no dashed borders).
+- **`BoardInputOptions.controlsShown`:** the control row's toggles count only while it's shown;
+  hiding it in an annotation color returns to the normal mode.
+- **`InteractiveBoard.rebindTools`** decides the primary button: annotation color (control row) >
+  edit mode (`EditMode.Moving`/`Placing`/`Clearing`) > move tool; the secondary button annotates
+  otherwise. `HexEditTool` edits on press and paints while dragged.
+- **`InertMovePolicy`** (spectating, browsing history) and `EditorMovePolicy` (free move) next to
+  `AnalysisMovePolicy`/`LiveGameMovePolicy`.
+- `Assets.pieceAspectRatio` (moved from `BoardSurface`); `MoveRules.isAuraActive` added for the
+  premove chameleon eligibility.
+
+### 6.3 Not verified in the browser
+
+- A premove chameleon choice of the capturing piece's own kind firing as a plain move, and a
+  chosen morph that is possible when it fires (only the impossible-morph case was exercised).
+- Promotion chosen up front for a premove (shares the move path, which was checked).
+- Anchors on every file and both edge rows for the ring (top edge and a 390 px viewport checked).
+- Real touch hardware (only devtools emulation).

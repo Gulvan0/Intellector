@@ -17,3 +17,7 @@ The user is able to choose the accent colour from the selected presets, plus fre
 ## Dependent preferences
 
 Haxefolio implementation + Turn color only active for Tree mode + Rename labels more fittingly
+
+## Tests (board?)
+
+Deferred while implementing the board plan
