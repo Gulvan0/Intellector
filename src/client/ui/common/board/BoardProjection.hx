@@ -5,15 +5,12 @@ import intellectorboard.primitives.hex.HexCoordsIterator;
 import intellectorboard.primitives.piece.PieceColor;
 
 /**
-    Where each hex is drawn on a `BoardSurface`, given the board's orientation: the single source
-    of truth every layer and every hit-test goes through, so no layer keeps its own copy of the
-    orientation. Owned by `BoardSurface`; only it changes `orientation`.
+    Where each hex is drawn for the board's orientation; every layer and hit-test goes through it.
+    Only `BoardSurface` changes `orientation`.
 **/
 class BoardProjection
 {
-    /**
-        The color drawn at the bottom of the screen.
-    **/
+    /** The color drawn at the bottom of the screen **/
     public var orientation:PieceColor;
 
     // The board's own center.
@@ -25,20 +22,14 @@ class BoardProjection
         this.origin = origin;
     }
 
-    /**
-        The center of the hex at `coords`.
-    **/
+    /** The center of the hex at `coords` **/
     public function hexCenter(coords:HexCoords):BoardPoint
     {
         var relative:BoardPoint = relativeHexCenter(coords);
         return {x: origin.x + relative.x, y: origin.y + relative.y};
     }
 
-    /**
-        The hex whose center is closest to `point`, or `null` if that center is farther than one
-        `SIDE_LENGTH` away. Nearest-center search over all 59 hexes - cheap at this count, and
-        close enough for pointer interaction without a true point-in-hexagon test.
-    **/
+    /** The hex whose center is nearest to `point`, or `null` if it's over `SIDE_LENGTH` away **/
     public function hexAt(point:BoardPoint):Null<HexCoords>
     {
         var closest:Null<HexCoords> = null;
@@ -61,24 +52,19 @@ class BoardProjection
         return closest;
     }
 
-    /**
-        Whether the hex at `coords` is drawn below the board's horizontal midline.
-    **/
+    /** Whether the hex at `coords` is drawn below the board's horizontal midline **/
     public function isInLowerHalf(coords:HexCoords):Bool
     {
         return relativeHexCenter(coords).y > 0;
     }
 
-    /**
-        How far left or right of the board's vertical midline the hex at `coords` is drawn: -1 for
-        the leftmost file, 1 for the rightmost, 0 for the middle one.
-    **/
+    /** Where `coords` is drawn horizontally: -1 for the leftmost file, 0 the middle, 1 the rightmost **/
     public function horizontalPosition(coords:HexCoords):Float
     {
         return relativeHexCenter(coords).x / (6 * BoardGeometry.SIDE_LENGTH);
     }
 
-    // Relative to the board's own center; whichever color is `orientation` is drawn at the bottom.
+    // relative to the board's center
     private function relativeHexCenter(coords:HexCoords):BoardPoint
     {
         var i:Int = coords.i;

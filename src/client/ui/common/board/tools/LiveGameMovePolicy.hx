@@ -8,9 +8,8 @@ import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.piece.PieceData;
 
 /**
-    The user's own pieces in a live game: legal moves on their turn, premoves (if `premoves` is
-    given and enabled) on the opponent's. Whose turn it is comes from the real position, not the
-    shown one, which queued premoves may have advanced.
+    The user's own pieces in a live game: legal moves on their turn, premoves (if `premoves` is given
+    and enabled) on the opponent's. The turn is the real position's, not the premove-advanced one.
 **/
 class LiveGameMovePolicy implements PieceMovePolicy
 {
@@ -65,16 +64,13 @@ class LiveGameMovePolicy implements PieceMovePolicy
         return mode != Premove;
     }
 
-    // While other premoves are still queued, the position the choice was made for is still coming.
+    /** While premoves are queued, the position the choice was made for is still coming **/
     public function keepsChoiceAcrossMove(position:Position):Bool
     {
         return premoves != null && premoves.hasQueued();
     }
 
-    /*
-        Whether a premove might turn out to be a chameleon capture: not a Progressor or Intellector
-        move, not the Intellector-Defensor swap, and the aura active in the shown position.
-    */
+    // not a Progressor or Intellector move, not the Intellector-Defensor swap, and the aura active
     private function isPremoveChameleonEligible(position:Position, movingPiece:PieceData, from:HexCoords, to:HexCoords):Bool
     {
         if (movingPiece.type == Progressor || movingPiece.type == Intellector)

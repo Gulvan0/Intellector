@@ -16,35 +16,17 @@ import net.models.auth.TokenResponse;
 import net.rest.Rest;
 import net.rest.RestOperationRegistry;
 
+using client.ui.ComponentExtension;
+
 /*
-    One tab page of LoginOverlay (knowledge/plans/login-overlay.md §2-§4): the fields, then 18px
-    below the last one the checkbox and the always-reserved status line. Both tabs have the same two
-    fields (the password one revealable, which is why Register has no "repeat password"), so the
-    page takes its natural height and the two tabs match.
+    One tab of `LoginOverlay`. Calls `onStateChange` after anything that could change
+    `canSubmit`/`busy`, leaving the shared button and tabs to the overlay.
 
-    The password field's slot says "Caps Lock is on" while it is focused with Caps Lock on, over its
-    hint or error alike.
-
-    The form owns its validation state. It never touches the overlay's shared primary button or the
-    tab strip: it calls `onStateChange` after anything that could change `canSubmit`/`busy`, and the
-    overlay reads them back.
-
-    Error reveal: a field's error shows once the field has had content, or on every field once a
-    submit was attempted on this tab. The primary is disabled on any error, revealed or not, so Enter
-    on an invalid form is the one way to "attempt" - it reveals all errors and sends nothing.
+    A field's error shows once it has had content, or on every field after a submit attempt. The
+    button is disabled on any error, so Enter is the one way to attempt: it reveals all errors.
 */
 class LoginForm extends VBox
 {
-    private static inline final FIELD_SPACING:Int = 14;
-    private static inline final BOTTOM_SPACING:Int = 4;
-    private static inline final GAP_ABOVE_BOTTOM:Int = 18;
-
-    // 22 on the left; 12 on the right plus the scroll area's reserved 10px lane makes 22 visible too
-    private static inline final PADDING_TOP:Int = 18;
-    private static inline final PADDING_RIGHT:Int = 12;
-    private static inline final PADDING_BOTTOM:Int = 14;
-    private static inline final PADDING_LEFT:Int = 22;
-
     private final isSignUp:Bool;
     private final restOperation:GenericRestOperation<AuthCredentials, TokenResponse>;
     private final errorReducer:HttpError->String;
@@ -63,15 +45,10 @@ class LoginForm extends VBox
     // disabling the fields for the request drops focus, so a failure gives it back to this one
     private var focusedOnSubmit:Null<LoginFormField> = null;
 
-    /**
-        Whether a request is in flight. The overlay locks the tabs while it is.
-    **/
+    /** Whether a request is in flight; the overlay locks the tabs meanwhile **/
     public var busy(default, null):Bool = false;
 
-    /**
-        What the Login field holds. Assigning it (e.g. to carry it over from the other tab) does
-        not count as the user's edit, but a non-empty value counts as content for error reveal.
-    **/
+    /** Setting it isn't a user edit, but a non-empty value counts as content for error reveal **/
     public var login(get, set):String;
 
     public function new(isSignUp:Bool, dismiss:Void->Void, onStateChange:Void->Void)
@@ -87,21 +64,21 @@ class LoginForm extends VBox
 
         this.percentWidth = 100;
         this.verticalSpacing = 0;
-        this.paddingTop = PADDING_TOP;
-        this.paddingRight = PADDING_RIGHT;
-        this.paddingBottom = PADDING_BOTTOM;
-        this.paddingLeft = PADDING_LEFT;
-        this.addClass("intellector-login-page");
+        this.paddingTop = StyleVars.LOGIN_FORM_PADDING_TOP;
+        this.paddingRight = StyleVars.LOGIN_FORM_PADDING_RIGHT;
+        this.paddingBottom = StyleVars.LOGIN_FORM_PADDING_BOTTOM;
+        this.paddingLeft = StyleVars.LOGIN_FORM_PADDING_LEFT;
+        this.addClass(StyleClass.LOGIN_PAGE);
 
         var fieldBox:VBox = new VBox();
         fieldBox.percentWidth = 100;
-        fieldBox.verticalSpacing = FIELD_SPACING;
+        fieldBox.verticalSpacing = StyleVars.LOGIN_FORM_FIELD_SPACING;
         this.addComponent(fieldBox);
 
         for (field in fieldOrder)
         {
             var input:TextInputField = new TextInputField(
-                LocaleUtils.localeBinding('intellector.overlay.login.field.${field.slug()}'),
+                GroupedLocaleResolvers.loginOverlayField(field),
                 text -> onFieldEdited(field, text),
                 submit,
                 field.mode(),
@@ -116,8 +93,8 @@ class LoginForm extends VBox
 
         var bottomBox:VBox = new VBox();
         bottomBox.percentWidth = 100;
-        bottomBox.marginTop = GAP_ABOVE_BOTTOM;
-        bottomBox.verticalSpacing = BOTTOM_SPACING;
+        bottomBox.marginTop = StyleVars.LOGIN_FORM_GAP_ABOVE_BOTTOM;
+        bottomBox.verticalSpacing = StyleVars.LOGIN_FORM_BOTTOM_SPACING;
         this.addComponent(bottomBox);
 
         rememberRow = new CheckBoxRow(LocaleUtils.localeBinding("intellector.overlay.login.remember_me"), _ -> {}, true);
@@ -125,16 +102,13 @@ class LoginForm extends VBox
 
         statusLine = new Label();
         statusLine.percentWidth = 100;
-        statusLine.addClass("intellector-login-status");
+        statusLine.addClass(StyleClass.LOGIN_STATUS);
         bottomBox.addComponent(statusLine);
 
         refresh();
     }
 
-    /**
-        Whether the primary action may be pressed: nothing in flight and no field in error
-        (revealed or not).
-    **/
+    /** Whether nothing is in flight and no field is in error, revealed or not **/
     public function canSubmit():Bool
     {
         if (busy)
@@ -147,10 +121,7 @@ class LoginForm extends VBox
         return true;
     }
 
-    /**
-        Sends the request if the form is valid; otherwise reveals every error on this tab and
-        sends nothing. Called by the overlay's primary button and by Enter in any field.
-    **/
+    /** Sends the request if valid; otherwise reveals every error, sending nothing **/
     public function submit():Void
     {
         if (busy)
@@ -165,7 +136,9 @@ class LoginForm extends VBox
 
         focusedOnSubmit = Lambda.find(fieldOrder, field -> fields[field].focused);
         setBusy(true);
-        showStatus(LocaleUtils.localeBinding(isSignUp ? "intellector.overlay.login.in_flight.register" : "intellector.overlay.login.in_flight.sign_in"), false);
+
+        statusLine.text = GroupedLocaleResolvers.loginOverlayInFlight(isSignUp);
+        statusLine.removeClass(StyleClass.LOGIN_STATUS_ERROR);
 
         var payload:AuthCredentials = new AuthCredentials(login, fields[Password].currentText);
         Rest.client().execute(restOperation, onAuthSucceeded, onAuthFailed, null, null, payload);
@@ -173,7 +146,8 @@ class LoginForm extends VBox
 
     public function clearStatus():Void
     {
-        showStatus("", false);
+        statusLine.text = "";
+        statusLine.removeClass(StyleClass.LOGIN_STATUS_ERROR);
     }
 
     public function focusFirstEmpty():Void
@@ -233,7 +207,10 @@ class LoginForm extends VBox
             refresh();
         }
         else
-            showStatus(GroupedLocaleResolvers.loginOverlayError(slug), true);
+        {
+            statusLine.text = GroupedLocaleResolvers.loginOverlayError(slug);
+            statusLine.addClass(StyleClass.LOGIN_STATUS_ERROR);
+        }
 
         if (focusedOnSubmit != null)
             fields[focusedOnSubmit].focus();
@@ -248,16 +225,6 @@ class LoginForm extends VBox
 
         rememberRow.enabled = !value;
         onStateChange();
-    }
-
-    private function showStatus(text:String, isError:Bool):Void
-    {
-        statusLine.text = text;
-
-        if (isError)
-            statusLine.addClass("intellector-login-status-error");
-        else
-            statusLine.removeClass("intellector-login-status-error");
     }
 
     private function errorSlug(field:LoginFormField):Null<String>
@@ -276,7 +243,7 @@ class LoginForm extends VBox
 
             input.invalid = shownError != null;
 
-            // the likely cause of a password error while typing, so it takes the slot over the error; the red border stays
+            // the likely cause of a password error, so it replaces the error text; the red border stays
             if (input.capsLockOn)
             {
                 input.hint = LocaleUtils.localeBinding("intellector.overlay.login.hint.caps_lock");
@@ -297,16 +264,10 @@ class LoginForm extends VBox
         onStateChange();
     }
 
-    // What a field's slot says while it shows no error. Log In says nothing while fine.
+    // shown with no error; Log In shows none
     private function fineHint(field:LoginFormField):Null<String>
     {
-        if (!isSignUp)
-            return null;
-
-        return switch field {
-            case Login: LocaleUtils.localeBinding("intellector.overlay.login.hint.login");
-            case Password: LocaleUtils.localeBinding("intellector.overlay.login.hint.password");
-        }
+        return isSignUp ? GroupedLocaleResolvers.loginOverlayHint(field) : null;
     }
 
     private function get_login():String

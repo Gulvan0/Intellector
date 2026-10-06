@@ -14,15 +14,9 @@ private typedef MoveMarker =
     capture:Bool
 }
 
-/**
-    Move markers: a dot on an empty destination, a ring around an occupied one (a capture).
-**/
+/** Move markers: a dot on an empty destination, a ring around an occupied one (a capture) **/
 class GlyphLayer implements BoardLayer
 {
-    private static inline final DOT_RADIUS:Float = BoardGeometry.SIDE_LENGTH * 0.2;
-    private static inline final RING_RADIUS:Float = BoardGeometry.SIDE_LENGTH * 0.8;
-    private static inline final RING_THICKNESS:Float = BoardGeometry.SIDE_LENGTH * 0.1;
-
     private final layer:SvgLayer;
     private final projection:BoardProjection;
     private var palette:BoardPalette;
@@ -36,9 +30,7 @@ class GlyphLayer implements BoardLayer
         this.palette = palette;
     }
 
-    /**
-        Marks `coords` as a destination: a ring if `capture`, a dot otherwise.
-    **/
+    /** Marks `coords` as a destination: a ring if `capture`, a dot otherwise **/
     public function addMoveMarker(coords:HexCoords, capture:Bool):Void
     {
         var marker:MoveMarker = {coords: coords, capture: capture};
@@ -72,12 +64,12 @@ class GlyphLayer implements BoardLayer
     private function drawMarker(marker:MoveMarker):Void
     {
         var center:BoardPoint = projection.hexCenter(marker.coords);
-        var circle:SVGCircleBuilder = layer.svgCircle(center.x, center.y, marker.capture ? RING_RADIUS : DOT_RADIUS);
+        var circle:SVGCircleBuilder = layer.svgCircle(center.x, center.y, marker.capture ? StyleVars.BOARD_MARKER_RING_RADIUS : StyleVars.BOARD_MARKER_DOT_RADIUS);
 
         if (marker.capture)
         {
             circle.fill({color: "transparent"});
-            circle.stroke({color: palette.moveMarker, thickness: RING_THICKNESS});
+            circle.stroke({color: palette.moveMarker, thickness: StyleVars.BOARD_MARKER_RING_THICKNESS});
         }
         else
             circle.fill({color: palette.moveMarker});

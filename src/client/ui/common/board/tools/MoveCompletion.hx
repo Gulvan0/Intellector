@@ -5,14 +5,10 @@ import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceData;
 
-/**
-    The completion rules shared by policies.
-**/
+/** The completion rules shared by policies **/
 class MoveCompletion
 {
-    /**
-        What a legal move from `from` to `to` in `position` still needs chosen.
-    **/
+    /** What a legal move from `from` to `to` in `position` still needs chosen **/
     public static function ofMove(rules:MoveRules, position:Position, from:HexCoords, to:HexCoords):CompletionKind
     {
         var movingPiece:PieceData = position.getPiece(from);

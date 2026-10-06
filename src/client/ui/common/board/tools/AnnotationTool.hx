@@ -20,18 +20,13 @@ private typedef StartedAnnotation =
 }
 
 /**
-    Drawing annotations with the button it's bound to: press and release on one hex annotates the
-    hex, on two hexes draws an arrow between them (previewed while dragging). The color is taken
-    once, at the press. Reports `AnnotationIntent`s; applies nothing itself.
-
-    When bound to a button other than `Primary`, a `Primary` press anywhere on the board or on the
-    page background also reports `ClearAnnotations`, if `clearsOnPrimaryPress`.
+    Draws annotations with its button, only reporting `AnnotationIntent`s: press and release on one
+    hex annotates it, on two draws an arrow (previewed while dragging), in the color taken at the
+    press.
 **/
 class AnnotationTool
 {
-    /**
-        Whether a primary press clears the annotations (see the class description).
-    **/
+    /** Whether a `Primary` press anywhere clears the annotations, when bound to another button **/
     public var clearsOnPrimaryPress:Bool = true;
 
     private final board:BoardSurface;
@@ -50,8 +45,8 @@ class AnnotationTool
     }
 
     /**
-        Starts drawing with `drawButton` on `gestures`. Detaching the returned handle drops an
-        annotation being drawn. One binding at a time.
+        Starts drawing with `drawButton`; detaching the handle drops the annotation in progress. One
+        binding at a time.
     **/
     public function bind(gestures:BoardGestures, drawButton:PointerButton):Detachable
     {
@@ -85,7 +80,7 @@ class AnnotationTool
 
     private function onDrawPress(press:HexPress):Void
     {
-        // An outside press never starts (or clears) anything here.
+        // an outside press starts nothing
         if (press.hex == null)
             return;
 

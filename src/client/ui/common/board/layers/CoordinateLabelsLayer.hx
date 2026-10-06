@@ -10,21 +10,9 @@ import haxefolio.graphics.SvgLayer;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.hex.HexCoordsIterator;
 
-/**
-    File letters (in a strip below the grid) and row numbers (inside each hex), per the
-    coordinates mode.
-**/
+/** File letters (in a strip below the grid) and row numbers (inside each hex), per the coordinates mode **/
 class CoordinateLabelsLayer implements BoardLayer
 {
-    // Constrained by hex size - must fit inside a single hex alongside a piece.
-    private static inline final ROW_NUMBER_FONT_SIZE:Float = BoardGeometry.SIDE_LENGTH * 0.35;
-
-    // Unconstrained by hex size - sits in its own dedicated strip below the grid, sized to fit it.
-    private static inline final FILE_LETTER_FONT_SIZE:Float = BoardGeometry.SIDE_LENGTH * 0.7;
-
-    private static inline final FILE_LETTER_GAP:Float = BoardGeometry.SIDE_LENGTH * 0.04;
-    private static inline final FILE_LETTER_ROW_HEIGHT:Float = FILE_LETTER_FONT_SIZE * 1.3;
-
     private final layer:SvgLayer;
     private final projection:BoardProjection;
     private var palette:BoardPalette;
@@ -38,13 +26,10 @@ class CoordinateLabelsLayer implements BoardLayer
         this.mode = mode;
     }
 
-    /**
-        How far below the grid the labels reach in `mode`: the height of the file-letter strip, or
-        0 when there's none.
-    **/
+    /** The height of the file-letter strip below the grid in `mode`; 0 if there's none **/
     public static function stripHeight(mode:BoardCoordinatesMode):Float
     {
-        return mode == NONE ? 0 : FILE_LETTER_GAP + FILE_LETTER_ROW_HEIGHT;
+        return mode == NONE ? 0 : StyleVars.BOARD_FILE_LETTER_GAP + StyleVars.BOARD_FILE_LETTER_ROW_HEIGHT;
     }
 
     public function setMode(mode:BoardCoordinatesMode):Void
@@ -76,9 +61,9 @@ class CoordinateLabelsLayer implements BoardLayer
         var center:BoardPoint = projection.hexCenter(coords);
         var rowNumber:Int = 7 - coords.j - coords.i % 2;
 
-        var label:SVGTextBuilder = layer.svgText('$rowNumber', center.x - 0.85 * BoardGeometry.SIDE_LENGTH, center.y);
+        var label:SVGTextBuilder = layer.svgText('$rowNumber', center.x - StyleVars.BOARD_ROW_NUMBER_INSET, center.y);
         label.fill({color: coords.isDark() ? palette.rowNumber.dark : palette.rowNumber.light});
-        label.font({size: Std.int(ROW_NUMBER_FONT_SIZE), anchor: "start"});
+        label.font({size: Std.int(StyleVars.BOARD_ROW_NUMBER_FONT_SIZE), anchor: "start"});
         label.element.setAttribute("dominant-baseline", "central");
         label.element.setAttribute("font-weight", "bold");
     }
@@ -90,16 +75,13 @@ class CoordinateLabelsLayer implements BoardLayer
             var bottomRow:Int = projection.orientation == White ? 6 - i % 2 : 0;
             var center:BoardPoint = projection.hexCenter(new HexCoords(i, bottomRow));
 
-            /*
-                Each file's own bottom border, not one shared row - adjoining files' bottom hexes
-                sit at different heights (the staggered-column grid).
-            */
+            // per file: adjoining files' bottom hexes sit at different heights
             var bottomBorderY:Float = center.y + BoardGeometry.HEX_HEIGHT / 2;
-            var y:Float = bottomBorderY + FILE_LETTER_GAP + FILE_LETTER_ROW_HEIGHT / 2;
+            var y:Float = bottomBorderY + StyleVars.BOARD_FILE_LETTER_GAP + StyleVars.BOARD_FILE_LETTER_ROW_HEIGHT / 2;
 
             var label:SVGTextBuilder = layer.svgText(String.fromCharCode('a'.code + i), center.x, y);
             label.fill({color: palette.fileLetter});
-            label.font({size: Std.int(FILE_LETTER_FONT_SIZE), anchor: "middle"});
+            label.font({size: Std.int(StyleVars.BOARD_FILE_LETTER_FONT_SIZE), anchor: "middle"});
             label.element.setAttribute("dominant-baseline", "central");
             label.element.setAttribute("font-weight", "bold");
         }

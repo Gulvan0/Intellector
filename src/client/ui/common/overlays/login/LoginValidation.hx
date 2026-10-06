@@ -3,22 +3,17 @@ package client.ui.common.overlays.login;
 import client.ui.common.overlays.login.LoginFormField;
 
 /*
-    The login overlay's validation rules (knowledge/plans/login-overlay.md §3): for a field, the
-    slug of the first failing rule, or null. Log In is lenient (non-empty only); Register mirrors the
-    server's own checks. Upper length bounds are not rules: `maxChars` makes them unreachable.
+    For a field, the slug of the first failing rule, or null. Log In only checks for emptiness;
+    Register mirrors the server. Upper length bounds are left to `maxChars`.
 
-    The character check runs before "starts with a letter", so a Cyrillic login is told about the
-    alphabet rather than that it should start with a letter, which it does.
+    Characters are checked before the first letter, so a Cyrillic login is told about the alphabet.
 */
 class LoginValidation
 {
     private static inline final LOGIN_MIN_LENGTH:Int = 2;
     private static inline final PASSWORD_MIN_LENGTH:Int = 6;
 
-    /**
-        `loginTaken` is the server's verdict on the current login (Register only), cleared by the
-        caller as soon as the login changes.
-    **/
+    /** `loginTaken` is the server's verdict on the current login (Register only), reset when it changes **/
     public static function errorSlug(field:LoginFormField, login:String, password:String, strict:Bool, loginTaken:Bool):Null<String>
     {
         return switch field

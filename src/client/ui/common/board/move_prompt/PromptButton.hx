@@ -10,18 +10,12 @@ import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.piece.PieceKind;
 
 /**
-    A button of a move prompt popover: piece art in a circular slot, optionally followed by a
-    label - or a bare cross, for cancelling. Pointer states only (hover, pressed), driven here
-    rather than by `:hover`/`:down` selectors since the button is a composite whose children would
-    otherwise steal the events. Styled by the `intellector-prompt-*` classes in main.css.
+    A move prompt button: piece art in a circular slot, optionally labelled, or a bare cross for
+    cancelling. Hover and press states are driven here, as `:hover`/`:down` would lose the events to
+    the children.
 **/
 class PromptButton extends Box
 {
-    // Share of a round button's diameter taken by the art slot, and of the slot by the art itself.
-    private static inline final SLOT_SHARE:Float = 0.72;
-    private static inline final ART_SHARE:Float = 0.76;
-    private static inline final CROSS_SHARE:Float = 0.4;
-
     private final onSelect:Null<Void->Void>;
 
     private var slot:Null<Box> = null;
@@ -29,39 +23,33 @@ class PromptButton extends Box
     private var artAspectRatio:Float = 1;
     private var cross:Null<Label> = null;
 
-    /**
-        A round, art-only button (a piece ring's). Its size is set by `setDiameter`. `stay`: styled
-        as the option of keeping the piece as it is, rather than as a piece to become.
-    **/
+    /** A ring's art-only button, sized by `setDiameter`; `stay` styles it as keeping the piece **/
     public static function round(kind:PieceKind, color:PieceColor, stay:Bool, onSelect:Void->Void):PromptButton
     {
         var button:PromptButton = roundArt(kind, color, onSelect);
         if (stay)
-            button.addClass("intellector-prompt-button-stay");
+            button.addClass(StyleClass.PROMPT_BUTTON_STAY);
         return button;
     }
 
-    /**
-        The disc at the centre of a piece ring, showing the moving piece: the size of a ring
-        button, but not a button. Its size is set by `setDiameter`.
-    **/
+    /** The non-button disc at a ring's centre, showing the moving piece; sized by `setDiameter` **/
     public static function hub(kind:PieceKind, color:PieceColor):PromptButton
     {
         var hub:PromptButton = roundArt(kind, color, null);
-        hub.addClass("intellector-prompt-hub");
+        hub.addClass(StyleClass.PROMPT_HUB);
         return hub;
     }
 
     private static function roundArt(kind:PieceKind, color:PieceColor, onSelect:Null<Void->Void>):PromptButton
     {
         var button:PromptButton = new PromptButton(onSelect);
-        button.addClass("intellector-prompt-button-round");
+        button.addClass(StyleClass.PROMPT_BUTTON_ROUND);
 
         var slot:Box = new Box();
-        slot.addClass("intellector-prompt-art-slot");
+        slot.addClass(StyleClass.PROMPT_ART_SLOT);
         slot.horizontalAlign = "center";
         slot.verticalAlign = "center";
-        // Children are never the event target, so entering the art doesn't read as leaving the button.
+        // so entering the art doesn't read as leaving the button
         slot.element.style.pointerEvents = "none";
 
         var art:Image = createArt(kind, color);
@@ -75,19 +63,16 @@ class PromptButton extends Box
         return button;
     }
 
-    /**
-        A round button with a cross in it, for cancelling (a piece ring's). Its size is set by
-        `setDiameter`.
-    **/
+    /** A ring's cancel button, a cross; sized by `setDiameter` **/
     public static function cancelRound(onSelect:Void->Void):PromptButton
     {
         var button:PromptButton = new PromptButton(onSelect);
-        button.addClass("intellector-prompt-button-round");
-        button.addClass("intellector-prompt-button-cancel");
+        button.addClass(StyleClass.PROMPT_BUTTON_ROUND);
+        button.addClass(StyleClass.PROMPT_BUTTON_CANCEL);
 
         var cross:Label = new Label();
         cross.text = "✕";
-        cross.addClass("intellector-prompt-cross");
+        cross.addClass(StyleClass.PROMPT_CROSS);
         cross.horizontalAlign = "center";
         cross.verticalAlign = "center";
         cross.element.style.pointerEvents = "none";
@@ -98,27 +83,24 @@ class PromptButton extends Box
         return button;
     }
 
-    /**
-        A full-width button with the art on the left and `label` beside it, at least `minimumHeight`
-        px tall (it grows when the label wraps).
-    **/
+    /** A full-width button with art and `label`, at least `minimumHeight` px tall **/
     public static function labelled(kind:PieceKind, color:PieceColor, label:String, emphasised:Bool, minimumHeight:Int, artSlotDiameter:Int, onSelect:Void->Void):PromptButton
     {
         var button:PromptButton = new PromptButton(onSelect);
-        button.addClass("intellector-prompt-button-labelled");
-        button.addClass(emphasised ? "intellector-prompt-button-emphasised" : "intellector-prompt-button-neutral");
+        button.addClass(StyleClass.PROMPT_BUTTON_LABELLED);
+        button.addClass(emphasised ? StyleClass.PROMPT_BUTTON_EMPHASISED : StyleClass.PROMPT_BUTTON_NEUTRAL);
         button.percentWidth = 100;
         button.customStyle.minHeight = minimumHeight;
 
         var row:HBox = new HBox();
         row.percentWidth = 100;
         row.verticalAlign = "center";
-        row.horizontalSpacing = 18;
-        // Inherited by the whole subtree, so the button itself is always the event target.
+        row.horizontalSpacing = StyleVars.MOVE_PROMPT_LABELLED_BUTTON_SPACING;
+        // inherited by the subtree, so the button is always the event target
         row.element.style.pointerEvents = "none";
 
         var slot:Box = new Box();
-        slot.addClass("intellector-prompt-art-slot");
+        slot.addClass(StyleClass.PROMPT_ART_SLOT);
         slot.verticalAlign = "center";
         var art:Image = createArt(kind, color);
         slot.addComponent(art);
@@ -131,7 +113,7 @@ class PromptButton extends Box
 
         var text:Label = new Label();
         text.text = label;
-        text.addClass("intellector-prompt-button-label");
+        text.addClass(StyleClass.PROMPT_BUTTON_LABEL);
         text.percentWidth = 100;
         text.verticalAlign = "center";
         row.addComponent(text);
@@ -141,9 +123,7 @@ class PromptButton extends Box
         return button;
     }
 
-    /**
-        Resizes a round button (`round`/`cancelRound`) to `diameter` px, art and all.
-    **/
+    /** Resizes a round button (`round`/`cancelRound`) to `diameter` px, art and all **/
     public function setDiameter(diameter:Float):Void
     {
         width = diameter;
@@ -151,35 +131,35 @@ class PromptButton extends Box
         setRadius(this, diameter / 2);
 
         if (slot != null)
-            fitSlot(Math.round(diameter * SLOT_SHARE));
+            fitSlot(Math.round(diameter * StyleVars.MOVE_PROMPT_SLOT_SHARE));
 
         if (cross != null)
         {
-            cross.customStyle.fontSize = Math.round(diameter * CROSS_SHARE);
+            cross.customStyle.fontSize = Math.round(diameter * StyleVars.MOVE_PROMPT_CROSS_SHARE);
             cross.invalidateComponentStyle();
         }
     }
 
-    // A null `onSelect` makes a static disc rather than a button.
+    // a `null` `onSelect` makes a static disc rather than a button
     private function new(onSelect:Null<Void->Void>)
     {
         super();
 
         this.onSelect = onSelect;
-        addClass("intellector-prompt-button");
+        addClass(StyleClass.PROMPT_BUTTON);
 
         if (onSelect == null)
             return;
 
         element.style.cursor = "pointer";
 
-        registerEvent(MouseEvent.MOUSE_OVER, _ -> addClass("intellector-prompt-button-active"));
+        registerEvent(MouseEvent.MOUSE_OVER, _ -> addClass(StyleClass.PROMPT_BUTTON_ACTIVE));
         registerEvent(MouseEvent.MOUSE_OUT, _ -> {
-            removeClass("intellector-prompt-button-active");
-            removeClass("intellector-prompt-button-pressed");
+            removeClass(StyleClass.PROMPT_BUTTON_ACTIVE);
+            removeClass(StyleClass.PROMPT_BUTTON_PRESSED);
         });
-        registerEvent(MouseEvent.MOUSE_DOWN, _ -> addClass("intellector-prompt-button-pressed"));
-        registerEvent(MouseEvent.MOUSE_UP, _ -> removeClass("intellector-prompt-button-pressed"));
+        registerEvent(MouseEvent.MOUSE_DOWN, _ -> addClass(StyleClass.PROMPT_BUTTON_PRESSED));
+        registerEvent(MouseEvent.MOUSE_UP, _ -> removeClass(StyleClass.PROMPT_BUTTON_PRESSED));
         registerEvent(MouseEvent.CLICK, _ -> onSelect());
     }
 
@@ -189,13 +169,13 @@ class PromptButton extends Box
         slot.height = slotDiameter;
         setRadius(slot, slotDiameter / 2);
 
-        // The art fits a box a little smaller than the slot, so no piece touches its rim.
-        var artBox:Float = Math.round(slotDiameter * ART_SHARE);
+        // smaller than the slot, so no piece touches its rim
+        var artBox:Float = Math.round(slotDiameter * StyleVars.MOVE_PROMPT_ART_SHARE);
         art.width = artAspectRatio >= 1 ? artBox : artBox * artAspectRatio;
         art.height = artAspectRatio >= 1 ? artBox / artAspectRatio : artBox;
     }
 
-    // HaxeUI doesn't resolve a percentage border-radius, so a circle is always a pixel radius.
+    // HaxeUI doesn't resolve a percentage border-radius
     private static function setRadius(component:Box, radius:Float):Void
     {
         component.customStyle.borderRadius = radius;

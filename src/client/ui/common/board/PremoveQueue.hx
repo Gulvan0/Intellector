@@ -11,21 +11,15 @@ using Lambda;
 
 private typedef QueuedPremove =
 {
-    // Its `morphInto` is the promotion choice.
+    // `morphInto` is the promotion choice
     ply:RawPly,
-    // The chameleon choice: the kind to morph into on capture, the piece's own kind for "don't", `null` if never asked.
+    // the kind to morph into on capture; the piece's own kind for "don't", `null` if never asked
     chameleon:Null<PieceKind>
 }
 
 /**
-    The premoves a user has planned, in the order they'll be played. Pure data and rules - no
-    board, no events - so `Premoves` can drive it and a test can too.
-
-    Nothing is checked when a premove is `add`ed: it's only a plan. `applyTo` shows what the board
-    would look like if all of them had been played (a bare transposition of pieces, so the same
-    piece can be premoved again from its destination), and `takeNext` is where a premove is finally
-    validated - only the first one, against the position it would really be played in; if it
-    fails, the whole queue goes with it.
+    The user's planned premoves, in play order; data and rules only. A premove is unchecked until
+    `takeNext` validates it against the real position, dropping the whole queue if it fails.
 **/
 class PremoveQueue
 {
@@ -44,18 +38,15 @@ class PremoveQueue
     }
 
     /**
-        Queues `ply` (its `morphInto` being the promotion choice). `chameleon`: the kind to morph
-        into if it captures, the moving piece's own kind to never morph, `null` if never asked
-        (no morph either).
+        Queues `ply` (`morphInto` is the promotion choice). `chameleon` is the kind to morph into on
+        capture, the piece's own kind to never morph, `null` if never asked.
     **/
     public function add(ply:RawPly, chameleon:Null<PieceKind>):Void
     {
         premoves.push({ply: ply, chameleon: chameleon});
     }
 
-    /**
-        The departure and destination hexes of every queued premove, for highlighting.
-    **/
+    /** The departure and destination hexes of every queued premove, for highlighting **/
     public function hexes():Array<HexCoords>
     {
         var result:Array<HexCoords> = [];
@@ -68,8 +59,8 @@ class PremoveQueue
     }
 
     /**
-        `position` as it would be after every queued premove - `position` itself, untouched, when
-        the queue is empty; otherwise a copy. A chameleon choice shows as the morph.
+        `position` after every queued premove, as a bare transposition of pieces: a copy, or
+        `position` itself if the queue is empty.
     **/
     public function applyTo(position:Position):Position
     {
@@ -80,7 +71,8 @@ class PremoveQueue
         for (premove in premoves)
         {
             var piece:Null<PieceData> = result.getPiece(premove.ply.from);
-            if (piece == null)  // The real position changed under it; it'll fail validation when its turn comes
+            // the real position changed under it; it fails validation when its turn comes
+            if (piece == null)
                 continue;
 
             var kind:PieceKind = premove.ply.morphInto ?? premove.chameleon ?? piece.type;
@@ -91,9 +83,8 @@ class PremoveQueue
     }
 
     /**
-        Removes the first premove and returns it as it would be played in `position` by `color`,
-        or returns `null` - emptying the whole queue - if it can't be played there (or if the queue
-        was already empty).
+        Removes the first premove and returns it as played in `position` by `color`, or `null`,
+        emptying the queue, if it can't be played there.
     **/
     public function takeNext(position:Position, color:PieceColor, rules:MoveRules):Null<RawPly>
     {
@@ -119,11 +110,11 @@ class PremoveQueue
         if (!rules.getLegalDestinations(from, position.pieces).exists(h -> h.equals(to)))
             return null;
 
-        // The promotion was picked back when queued; whether it's needed is only known now.
+        // picked when queued; only now is it known whether it's needed
         if (rules.isPromotionPossible(piece, to))
             return premove.ply.morphInto != null ? premove.ply : null;
 
-        // Morphing into another kind was asked for: only that exact morph will do, nothing else.
+        // a morph was asked for: only that exact morph will do
         if (premove.chameleon != null && premove.chameleon != piece.type)
         {
             var captured:Null<PieceData> = position.getPiece(to);

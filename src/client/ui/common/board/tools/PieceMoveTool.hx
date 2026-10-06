@@ -29,7 +29,7 @@ private typedef PickedPiece =
     from:HexCoords,
     piece:PieceData,
     mode:PieceMoveMode,
-    // null: anywhere
+    // `null` for anywhere
     destinations:Null<Array<HexCoords>>
 }
 
@@ -38,7 +38,7 @@ private enum ToolState
     Idle;
     Selected(picked:PickedPiece);
     Dragging(picked:PickedPiece);
-    // A choice completing the move is pending in `prompt`; the moving piece is drawn on `to`.
+    /** A choice completing the move is pending in `prompt`; the moving piece is drawn on `to` **/
     AwaitingChoice(picked:PickedPiece, to:HexCoords, prompt:MovePrompt);
 }
 
@@ -49,21 +49,12 @@ private typedef HexTintPlacement =
 }
 
 /**
-    Picking up pieces and putting them down - by dragging, or by clicking the piece and then its
-    destination - on the button it's bound to. What may be picked up and where it may go is the
-    policy's; the result is reported as an intent (`playMove`, `PremoveIntent.Queue` or
-    `EditIntent.MovePiece`, by the mode the policy gives) and never applied by the tool itself.
+    Moving pieces by dragging, or by clicking the piece and then its destination, as the policy
+    allows. Only reports the result (`playMove`, `PremoveIntent` or `EditIntent`, by mode), showing
+    the gesture's tints, markers and completing prompt meanwhile.
 
-    Shows the feedback of a gesture in flight: hover, selection and prompt anchor tints, move
-    markers, the dragged piece, and the promotion/chameleon prompt that completes a move, during
-    which the board's gestures are suspended.
-
-    Reads the shown position off the board. On a `Move`, a selection or drag survives if the same
-    piece still stands on its departure and the policy still lets it be picked up; anything else
-    aborts it. An open prompt is closed (dropping that move), unless it completes a premove and
-    the policy keeps it open across the move (other premoves still queued) with the piece still
-    on its departure. Also reports
-    `PremoveIntent.CancelAll` for presses and Esc that mean it while nothing is picked up.
+    On a `Move`, a selection or drag survives if the same piece still stands on its departure and
+    can still be picked up; an open prompt survives only per `keepsChoiceAcrossMove`.
 **/
 class PieceMoveTool
 {
@@ -84,9 +75,9 @@ class PieceMoveTool
 
     private var state:ToolState = Idle;
 
-    // Under the mouse cursor (hover events).
+    // under the mouse cursor
     private var hoveredHex:Null<HexCoords> = null;
-    // Under the pointer dragging a piece, and where exactly.
+    // under the pointer dragging a piece
     private var dragHex:Null<HexCoords> = null;
     private var dragPoint:Null<BoardPoint> = null;
 
@@ -106,8 +97,8 @@ class PieceMoveTool
     }
 
     /**
-        Starts reacting to presses, drags and releases of `button` on `gestures`, plus hover and
-        Esc. Detaching the returned handle aborts any gesture in flight. One binding at a time.
+        Starts moving pieces with `button`; detaching the handle aborts the gesture in flight. One
+        binding at a time.
     **/
     public function bind(gestures:BoardGestures, button:PointerButton):Detachable
     {
@@ -125,9 +116,7 @@ class PieceMoveTool
         return new Detachable(unbind, false);
     }
 
-    /**
-        Aborts any gesture in flight, prompt included, and applies `policy` from then on.
-    **/
+    /** Aborts the gesture in flight and applies `policy` from then on **/
     public function setPolicy(policy:PieceMovePolicy):Void
     {
         abort();
@@ -181,7 +170,7 @@ class PieceMoveTool
                 }
 
             case Dragging(_), AwaitingChoice(_, _, _):
-                // A second press can't start before the first one's release; prompts suspend the gestures.
+                // no press before the first one's release; prompts suspend the gestures
         }
     }
 
@@ -208,7 +197,7 @@ class PieceMoveTool
                 dragHex = null;
                 dragPoint = null;
 
-                // Released where it was picked up: a click, which selects the piece.
+                // released where picked up: a click, selecting the piece
                 if (hex != null && hex.equals(picked.from))
                 {
                     state = Selected(picked);
@@ -221,7 +210,7 @@ class PieceMoveTool
                     abort();
 
             default:
-                // A click on a destination completes the move on its press.
+                // a click on a destination completes the move on its press
         }
     }
 
@@ -234,7 +223,7 @@ class PieceMoveTool
             case Selected(_), Dragging(_):
                 abort();
             case AwaitingChoice(_, _, _):
-                // The prompt handles its own Esc.
+                // the prompt handles its own Esc
         }
     }
 
@@ -276,11 +265,7 @@ class PieceMoveTool
         refreshHover();
     }
 
-    /*
-        Whether a pending premove choice stays open across a move: while the policy says so (other
-        premoves are still queued), the premove's piece is still on its departure and the policy
-        still has it premoved.
-    */
+    // while the policy allows it and the piece is still on its departure, still premoved
     private function keepsChoice(picked:PickedPiece):Bool
     {
         if (picked.mode != Premove || !policy.keepsChoiceAcrossMove(board.getPosition()))
@@ -290,11 +275,7 @@ class PieceMoveTool
         return repicked != null && repicked.mode == Premove;
     }
 
-    /*
-        The piece picked up before a move came in, as it can be held on to in the new position:
-        the same piece still on its departure, and the policy (asked again) still letting it be
-        picked up. `null` if it can't.
-    */
+    // the same piece, still on its departure and still allowed to be picked up; `null` otherwise
     private function repick(picked:PickedPiece):Null<PickedPiece>
     {
         var position:Position = board.getPosition();
@@ -314,7 +295,7 @@ class PieceMoveTool
         };
     }
 
-    // Starts dragging the piece on `hex`, if it can be picked up. Returns whether it was.
+    // returns whether the piece on `hex` could be picked up
     private function tryPickUp(hex:Null<HexCoords>):Bool
     {
         if (hex == null)
@@ -398,10 +379,7 @@ class PieceMoveTool
         }
     }
 
-    /*
-        `morphInto`: the promotion or (for a move) chameleon choice; `chameleon`: a premove's
-        chameleon choice.
-    */
+    // `morphInto` is the promotion or a move's chameleon choice; `chameleon` a premove's
     private function report(mode:PieceMoveMode, from:HexCoords, to:HexCoords, morphInto:Null<PieceKind>, chameleon:Null<PieceKind>):Void
     {
         switch mode
@@ -415,7 +393,7 @@ class PieceMoveTool
         }
     }
 
-    // The board shows the move as though made while the choice is pending: the piece on the anchor hex, a captured one gone.
+    // the board shows the move as made while the choice is pending
     private function awaitChoice(picked:PickedPiece, to:HexCoords, prompt:MovePrompt):Void
     {
         showChoice(picked.from, to);
@@ -428,14 +406,14 @@ class PieceMoveTool
         refreshHover();
     }
 
-    // The moving piece drawn on the anchor, whatever stands there hidden (redone after a new position).
+    // the moving piece on the anchor, hiding whatever stands there
     private function showChoice(from:HexCoords, to:HexCoords):Void
     {
         board.movePieceToHex(from, to);
         board.setPieceVisible(to, false);
     }
 
-    // Closes the pending choice's prompt (if still open) and undoes what awaitChoice showed.
+    // undoes what `awaitChoice` showed
     private function closeChoice():Void
     {
         switch state
@@ -456,7 +434,7 @@ class PieceMoveTool
         }
     }
 
-    // Back to Idle, undoing whatever the gesture in flight showed. Reports nothing.
+    // back to `Idle`, undoing what the gesture showed, reporting nothing
     private function abort():Void
     {
         switch state
@@ -507,7 +485,7 @@ class PieceMoveTool
                 return isDestination(picked, hoveredHex) ? {hex: hoveredHex, tint: DestinationHover} : null;
 
             case Dragging(picked):
-                // Touch has no hover: the pointer's own position while dragging counts.
+                // touch has no hover, so the dragging pointer counts
                 var hex:Null<HexCoords> = dragHex ?? hoveredHex;
                 return isDestination(picked, hex) ? {hex: hex, tint: DestinationHover} : null;
 

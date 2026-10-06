@@ -12,34 +12,29 @@ import morestd.Detachable;
 import morestd.Signal;
 
 /**
-    A position editor's place or clear mode: every hex pressed - or dragged over while pressed - is
-    reported as an edit (placing `piece` on it, or clearing it). The hex under the cursor is
-    tinted `EditorHover`.
+    A position editor's place or clear mode: every hex pressed or dragged over is reported as an
+    edit. The hex under the cursor is tinted `EditorHover`.
 **/
 class HexEditTool
 {
     private final tints:HexTints;
     private final intents:Signal<EditIntent>;
-    // null: clears hexes instead
+    // `null` clears hexes instead
     private final piece:Null<PieceData>;
 
     private var bindingHandles:Array<Detachable> = [];
     private var hoveredHex:Null<HexCoords> = null;
-    // The last hex edited by the press in progress, so a drag edits each hex once.
+    // so a drag edits each hex once
     private var lastEditedHex:Null<HexCoords> = null;
     private var pressed:Bool = false;
 
-    /**
-        Places `piece` on the hexes the user presses.
-    **/
+    /** Places `piece` on the hexes the user presses **/
     public static function placing(tints:HexTints, intents:Signal<EditIntent>, piece:PieceData):HexEditTool
     {
         return new HexEditTool(tints, intents, piece);
     }
 
-    /**
-        Clears the hexes the user presses.
-    **/
+    /** Clears the hexes the user presses **/
     public static function clearing(tints:HexTints, intents:Signal<EditIntent>):HexEditTool
     {
         return new HexEditTool(tints, intents, null);
@@ -53,8 +48,8 @@ class HexEditTool
     }
 
     /**
-        Starts editing with `button` on `gestures`; detaching the returned handle ends any press in
-        progress and removes the hover tint. One binding at a time.
+        Starts editing with `button`; detaching the handle ends the press and the hover. One
+        binding at a time.
     **/
     public function bind(gestures:BoardGestures, button:PointerButton):Detachable
     {

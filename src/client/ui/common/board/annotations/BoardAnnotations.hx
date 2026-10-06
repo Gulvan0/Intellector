@@ -11,12 +11,9 @@ import morestd.Detachable;
 using Lambda;
 
 /**
-    The user's annotations on one board: at most one per hex and one arrow per ordered pair of
-    hexes (A to B and B to A are distinct), each in its own color. Drawing an annotation that's
-    already there - whatever its color - removes it instead.
-
-    Hex annotations are shown as rings or as `AnnotationFill` tints, per the hex style; arrows
-    always on the board's annotation layer. Usable on any board, interactive or not.
+    The user's annotations on one board: at most one per hex and one arrow per ordered pair of hexes.
+    Drawing one that's already there, in any color, removes it. Hex annotations show as rings or
+    `AnnotationFill` tints, per the hex style.
 **/
 class BoardAnnotations
 {
@@ -59,9 +56,7 @@ class BoardAnnotations
         }
     }
 
-    /**
-        Removes the annotation on `hex` if there is one, otherwise adds one in `color`.
-    **/
+    /** Removes the annotation on `hex` if there is one, otherwise adds one in `color` **/
     public function toggleHex(hex:HexCoords, color:AnnotationColor):Void
     {
         var existing:Null<HexAnnotation> = hexAnnotations.find(annotation -> annotation.hex.equals(hex));
@@ -72,9 +67,7 @@ class BoardAnnotations
         render();
     }
 
-    /**
-        Removes the arrow from `from` to `to` if there is one, otherwise adds one in `color`.
-    **/
+    /** Removes the arrow from `from` to `to` if there is one, otherwise adds one in `color` **/
     public function toggleArrow(from:HexCoords, to:HexCoords, color:AnnotationColor):Void
     {
         var existing:Null<ArrowAnnotation> = arrows.find(arrow -> arrow.from.equals(from) && arrow.to.equals(to));
@@ -101,10 +94,7 @@ class BoardAnnotations
         render();
     }
 
-    /**
-        Whether every change of the shown position (moves, replacements, premoves queued or
-        cancelled) clears the annotations.
-    **/
+    /** Whether any change of the shown position clears the annotations **/
     public function setClearsOnPositionChange(clearsOnPositionChange:Bool):Void
     {
         this.clearsOnPositionChange = clearsOnPositionChange;

@@ -11,21 +11,15 @@ import haxefolio.structure.TabLock;
 import haxefolio.structure.TabPage;
 
 /*
-    Logging in and registering are alternative forms (a Choose region), one LoginForm per tab, under
-    a fixed "Account" title (knowledge/plans/login-overlay.md §7): the tab names the mode and the
-    button names the action. The overlay owns what the tabs share - the footer's primary button,
-    relabelled per tab, and the tab lock held while the active form has a request in flight - and the
-    cross-tab rules of §4: the Login value carries over (each tab keeps its own "Remember me"), both
-    status lines clear, and focus goes to the first empty field.
+    Log In and Register as tabs, one `LoginForm` each. The overlay owns what they share: the primary
+    button, relabelled per tab, and the tab lock held during a request. Switching tabs carries the
+    login over, clears both status lines and focuses the first empty field.
 */
 class LoginOverlay
 {
-    private static inline final DIALOG_WIDTH:Int = 430;
-    private static inline final DIALOG_HEIGHT:Int = 413;
-
     public static function present():Void
     {
-        HaxeFolioApp.present("login", build, null, {geometry: {dialogWidth: DIALOG_WIDTH, dialogHeight: DIALOG_HEIGHT}});
+        HaxeFolioApp.present("login", build, null, {geometry: {dialogWidth: StyleVars.LOGIN_OVERLAY_WIDTH, dialogHeight: StyleVars.LOGIN_OVERLAY_HEIGHT}});
     }
 
     private static function build(dismiss:Void->Void):OverlayContent
@@ -47,7 +41,7 @@ class LoginOverlay
         var registerForm:LoginForm = new LoginForm(true, dismiss, refreshShared);
         activeForm = signInForm;
 
-        submitButton = new ActionButton(submitLabel(false), () -> activeForm.submit(), true);
+        submitButton = new ActionButton(GroupedLocaleResolvers.loginOverlaySubmit(false), () -> activeForm.submit(), true);
         refreshShared();
 
         function onTabSelected(index:Int):Void
@@ -59,7 +53,7 @@ class LoginOverlay
             previousForm.clearStatus();
             activeForm.clearStatus();
 
-            submitButton.text = submitLabel(index == 1);
+            submitButton.text = GroupedLocaleResolvers.loginOverlaySubmit(index == 1);
             refreshShared();
 
             // the page is only shown once this click has been handled
@@ -67,8 +61,8 @@ class LoginOverlay
         }
 
         var pages:Array<TabPage> = [
-            {label: LocaleUtils.localeBinding("intellector.overlay.login.tab.sign_in"), content: signInForm},
-            {label: LocaleUtils.localeBinding("intellector.overlay.login.tab.register"), content: registerForm}
+            {label: GroupedLocaleResolvers.loginOverlayTab(false), content: signInForm},
+            {label: GroupedLocaleResolvers.loginOverlayTab(true), content: registerForm}
         ];
 
         // the frame is put on screen right after this factory returns
@@ -85,10 +79,5 @@ class LoginOverlay
                 registerForm.dispose();
             }
         };
-    }
-
-    private static function submitLabel(isSignUp:Bool):String
-    {
-        return LocaleUtils.localeBinding(isSignUp ? "intellector.overlay.login.submit.register" : "intellector.overlay.login.submit.sign_in");
     }
 }

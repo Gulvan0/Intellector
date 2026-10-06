@@ -3,9 +3,7 @@ package client.ui.common.board.tools;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 
-/**
-    A position editor's free move: any piece to any other hex, rules ignored, nothing to choose.
-**/
+/** A position editor's free move: any piece to any other hex, rules ignored, nothing to choose **/
 class EditorMovePolicy implements PieceMovePolicy
 {
     public function new() {}

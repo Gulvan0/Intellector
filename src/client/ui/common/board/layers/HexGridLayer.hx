@@ -9,16 +9,14 @@ import haxefolio.graphics.SvgLayer;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.hex.HexCoordsIterator;
 
-/**
-    The hex shapes: their border, their base fill and any per-hex fill overriding it.
-**/
+/** The hex shapes: their border, their base fill and any per-hex fill overriding it **/
 class HexGridLayer implements BoardLayer
 {
     private final layer:SvgLayer;
     private final projection:BoardProjection;
     private var palette:BoardPalette;
 
-    // Overriding fills by scalar coord; a hex absent from here shows its base fill.
+    // by scalar coord; an absent hex shows its base fill
     private var fills:Map<Int, String> = [];
     private var hexPaths:Map<Int, SVGPathBuilder> = [];
 
@@ -29,19 +27,14 @@ class HexGridLayer implements BoardLayer
         this.palette = palette;
     }
 
-    /**
-        Overrides the fill of the hex at `coords` with `color`. Tints go through `HexTints`, the
-        only writer meant to call this, so that their priority is respected.
-    **/
+    /** Overrides the fill at `coords`; only `HexTints` calls this, to respect tint priority **/
     public function setHexFill(coords:HexCoords, color:String):Void
     {
         fills.set(coords.toScalarCoord(), color);
         applyFill(coords);
     }
 
-    /**
-        Reverts the hex at `coords` to its base fill. Same caveat as `setHexFill`.
-    **/
+    /** Reverts `coords` to its base fill; only `HexTints` calls this **/
     public function resetHexFill(coords:HexCoords):Void
     {
         if (fills.remove(coords.toScalarCoord()))

@@ -5,9 +5,7 @@ import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceData;
 
-/**
-    Legal moves by whichever side is to move.
-**/
+/** Legal moves by whichever side is to move **/
 class AnalysisMovePolicy implements PieceMovePolicy
 {
     private final rules:MoveRules;

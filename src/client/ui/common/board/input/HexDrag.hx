@@ -3,10 +3,7 @@ package client.ui.common.board.input;
 import client.ui.common.board.BoardPoint;
 import intellectorboard.primitives.hex.HexCoords;
 
-/**
-    The pointer moved while a button is held. `hex` is the hex under it (`null` off the board),
-    `point` its exact position on the board, wherever it is.
-**/
+/** The pointer moved with a button held: over `hex` (`null` off the board), at `point` **/
 typedef HexDrag =
 {
     hex:Null<HexCoords>,

@@ -12,10 +12,8 @@ private typedef TintCoverage =
 }
 
 /**
-    Resolves which `HexTint` each hex shows: every writer only says which hexes its own tint
-    covers, and a hex shows the highest-priority tint covering it (`HexTint`'s declaration order),
-    or its base fill if none does. Paints the result onto a `HexGridLayer`, whose per-hex fills it
-    is the only writer of. One per board, created by whoever assembles the board.
+    Each writer sets which hexes its tint covers; a hex shows its highest-priority tint, or its base
+    fill if none. The sole writer of its `HexGridLayer`'s per-hex fills; one per board.
 **/
 class HexTints
 {
@@ -42,9 +40,7 @@ class HexTints
             repaint(coords);
     }
 
-    /**
-        Makes `tint` cover exactly `hexes`.
-    **/
+    /** Makes `tint` cover exactly `hexes` **/
     public function set(tint:HexTint, hexes:Array<HexCoords>):Void
     {
         var coverage:TintCoverage = coverageOf(tint);

@@ -20,36 +20,21 @@ import morestd.Detachable;
 import morestd.Signal;
 
 /**
-    A board the user interacts with, as used by every page that has one: assembles the
-    `BoardSurface`, its gestures, tints and tools, and follows the board preferences itself.
-
-    The page owns the position: it calls `setPosition` with every new one, and learns of the
-    user's moves through `playMove` (fired premoves included), applying them and calling
-    `setPosition(newPosition, Move)` from the same handler. Call `dispose` when the page closes.
-
-    On touch screens (per the "Show board controls" preference) a control row stands in for the
-    right button and the modifier keys: above the board, or in a column to its left in the wide
-    layout.
+    A board the user interacts with, following the board preferences. The page owns the position:
+    it learns of moves through `playMove` and calls `setPosition(newPosition, Move)` from the same
+    handler.
 **/
 class InteractiveBoard extends Box
 {
-    /**
-        A move the user made (or a premove that fired), for the page to apply.
-    **/
+    /** A move the user made (or a premove that fired), for the page to apply **/
     public final playMove:Signal<RawPly> = new Signal();
 
     public final premoveIntents:Signal<PremoveIntent> = new Signal();
     public final editIntents:Signal<EditIntent> = new Signal();
 
-    /**
-        What the user asked of the annotations. Applied to the board's own annotations unless the
-        page takes them over (`setAnnotationsOwnedByPage`).
-    **/
+    /** Applied to the board's own `annotations` unless the page owns them **/
     public final annotationIntents:Signal<AnnotationIntent> = new Signal();
 
-    /**
-        The board's own annotations, which `annotationIntents` are applied to by default.
-    **/
     public final annotations:BoardAnnotations;
 
     private final board:BoardSurface;
@@ -110,7 +95,7 @@ class InteractiveBoard extends Box
             options.autoPromoteMode = mode;
         }));
 
-        // Starts from the preference each time a board opens; never written back.
+        // starts from the preference each time a board opens; never written back
         options.autoPromoteToggle = options.autoPromoteMode == ALWAYS;
         controlRow.refresh();
 
@@ -137,7 +122,7 @@ class InteractiveBoard extends Box
         controlRow.hidden = !shown;
         options.controlsShown = shown;
 
-        // Hidden controls can't be used to leave an annotation mode.
+        // hidden controls can't be used to leave an annotation mode
         if (!shown && options.annotationColorToggle != null)
         {
             options.annotationColorToggle = null;
@@ -146,12 +131,12 @@ class InteractiveBoard extends Box
         }
     }
 
-    // A column to the left of the board in the wide layout, a row above it otherwise.
+    // a column left of the board in the wide layout, a row above it otherwise
     private function setControlsBeside(beside:Bool):Void
     {
         layoutName = beside ? "horizontal" : "vertical";
-        customStyle.horizontalSpacing = 8;
-        customStyle.verticalSpacing = 8;
+        customStyle.horizontalSpacing = StyleVars.BOARD_CONTROLS_GAP;
+        customStyle.verticalSpacing = StyleVars.BOARD_CONTROLS_GAP;
         invalidateComponentStyle();
         controlRow.setVertical(beside);
     }
@@ -162,9 +147,8 @@ class InteractiveBoard extends Box
     }
 
     /*
-        What the primary button does: annotating in the control row's annotation color, if one is
-        selected; otherwise moving pieces, or the edit mode's placing/clearing. The secondary
-        button annotates whenever the primary one doesn't.
+        The primary button annotates in the control row's selected color, or else moves or edits;
+        the secondary one annotates whenever the primary doesn't.
     */
     private function rebindTools():Void
     {
@@ -193,10 +177,7 @@ class InteractiveBoard extends Box
         }
     }
 
-    /**
-        Releases the board's listeners and preference subscriptions; any gesture in flight is
-        aborted.
-    **/
+    /** Releases listeners and subscriptions, aborting any gesture in flight **/
     public function dispose():Void
     {
         moveToolBinding.detach();
@@ -216,11 +197,7 @@ class InteractiveBoard extends Box
         preferenceHandles = [];
     }
 
-    /**
-        The real position changed: `Move` for a move played by either side, `Replacement` for
-        anything else (history navigation, rollback, reset). With premoves enabled, the board shows
-        it with the queued premoves played on top.
-    **/
+    /** The real position changed; with premoves, the board shows them played on top **/
     public function setPosition(position:Position, cause:PositionChangeCause):Void
     {
         if (premoves != null)
@@ -239,38 +216,27 @@ class InteractiveBoard extends Box
         return board.getOrientation();
     }
 
-    /**
-        Tints the departure and destination of `lastMove`, the move that led to the shown position
-        (`null`: none).
-    **/
+    /** Tints `lastMove`'s departure and destination; `null` for none **/
     public function setLastMove(lastMove:Null<RawPly>):Void
     {
         var hexes:Array<HexCoords> = lastMove != null ? [lastMove.from, lastMove.to] : [];
         tints.set(LastMove, hexes);
     }
 
-    /**
-        What the primary button does in a position editor (`Moving` everywhere else). Aborts any
-        gesture in flight.
-    **/
+    /** What the primary button does in a position editor; aborts any gesture in flight **/
     public function setEditMode(editMode:EditMode):Void
     {
         this.editMode = editMode;
         rebindTools();
     }
 
-    /**
-        Aborts any gesture in flight and applies `policy` from then on.
-    **/
+    /** Aborts any gesture in flight and applies `policy` from then on **/
     public function setPolicy(policy:PieceMovePolicy):Void
     {
         moveTool.setPolicy(policy);
     }
 
-    /**
-        Whether the page applies `annotationIntents` itself (e.g. keeping annotations per position)
-        instead of the board's own `annotations`.
-    **/
+    /** Whether the page applies `annotationIntents` itself instead of the board's `annotations` **/
     public function setAnnotationsOwnedByPage(owned:Bool):Void
     {
         if (owned && annotationRoutingHandle != null)
@@ -282,10 +248,7 @@ class InteractiveBoard extends Box
             annotationRoutingHandle = annotationIntents.subscribe(annotations.apply);
     }
 
-    /**
-        Lets `userColor` queue premoves (live games), following the premove preference. Returns
-        the queue, for the page's move policy to consult (see `LiveGameMovePolicy`).
-    **/
+    /** Lets `userColor` queue premoves, per the preference; returns the queue for the move policy **/
     public function enablePremoves(userColor:PieceColor, rules:MoveRules):Premoves
     {
         disablePremoves();
@@ -296,9 +259,7 @@ class InteractiveBoard extends Box
         return queue;
     }
 
-    /**
-        Drops the queued premoves and stops queuing new ones (e.g. at the end of a game).
-    **/
+    /** Drops the queued premoves and stops queuing new ones **/
     public function disablePremoves():Void
     {
         if (premoves == null)

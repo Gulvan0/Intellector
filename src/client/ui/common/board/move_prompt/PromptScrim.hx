@@ -6,21 +6,14 @@ import js.html.Element;
 import js.html.WheelEvent;
 
 /**
-    A very light veil over the whole viewport, menu bar included, laid just under a prompt's own
-    elements: a press on it reaches nothing underneath (the prompt treats it as a press outside
-    itself), while the wheel still scrolls whatever is under the cursor.
+    A light veil over the whole viewport, just under a prompt: presses on it count as outside the
+    prompt, while the wheel still scrolls whatever is under the cursor.
 **/
 class PromptScrim
 {
-    private static inline final COLOR:String = "rgba(42, 33, 26, 0.1)";
-
-    private static inline final LINE_HEIGHT_PIXELS:Float = 16;
-
     private final element:DivElement;
 
-    /**
-        Shows the scrim right under `firstPromptElement`, which must already be on screen.
-    **/
+    /** Shows the scrim right under `firstPromptElement`, which must already be on screen **/
     public function new(firstPromptElement:Element)
     {
         element = Browser.document.createDivElement();
@@ -29,7 +22,7 @@ class PromptScrim
         element.style.top = "0";
         element.style.width = "100vw";
         element.style.height = "100vh";
-        element.style.background = COLOR;
+        element.style.background = StyleVars.MOVE_PROMPT_SCRIM_COLOR;
         element.addEventListener("wheel", onWheel);
 
         firstPromptElement.parentElement.insertBefore(element, firstPromptElement);
@@ -41,10 +34,7 @@ class PromptScrim
         element.remove();
     }
 
-    /*
-        The browser only scrolls what's under the cursor natively, and here that's the scrim: the
-        scroll is applied by hand to the nearest scrollable element beneath it.
-    */
+    // the scrim is what's under the cursor, so the scroll is passed by hand to what's beneath it
     private function onWheel(e:WheelEvent):Void
     {
         element.style.pointerEvents = "none";
@@ -59,7 +49,7 @@ class PromptScrim
             return;
 
         var unit:Float = switch e.deltaMode {
-            case WheelEvent.DOM_DELTA_LINE: LINE_HEIGHT_PIXELS;
+            case WheelEvent.DOM_DELTA_LINE: StyleVars.MOVE_PROMPT_SCRIM_WHEEL_LINE_HEIGHT;
             case WheelEvent.DOM_DELTA_PAGE: scrollable.clientHeight;
             default: 1;
         }

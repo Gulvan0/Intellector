@@ -12,12 +12,12 @@ import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceData;
 import intellectorboard.primitives.piece.PieceKind;
 
-// Where a piece is drawn instead of on its own hex, for the duration of a gesture.
+// where a piece is drawn instead of on its own hex, during a gesture
 private enum PieceDisplacement
 {
-    // Dragged: centered on a free point (a point, not a hex, so it stays under the cursor).
+    /** Dragged: centered on a free point, so it stays under the cursor **/
     AtPoint(point:BoardPoint);
-    // Drawn as though already moved, while the move's details are still being chosen.
+    /** Drawn as though moved, while the move's details are being chosen **/
     OnHex(coords:HexCoords);
 }
 
@@ -29,13 +29,9 @@ private typedef PieceImage =
 }
 
 /**
-    The piece images: the position, plus temporary changes made by a gesture in flight (a piece
-    displaced or hidden, the dragged piece lifted above everything else on the board). All of them
-    are keyed by the hex the piece stands on in the position, and are dropped by `setPosition`.
-
-    Draws into two groups: its own place in the stack (below markers and annotations), and
-    `liftedLayer`, which the assembler puts at the very top of the stack, for the dragged piece
-    only.
+    The piece images, plus a gesture's temporary changes (displaced, hidden or lifted pieces), keyed
+    by the piece's hex in the position and dropped by `setPosition`. The dragged piece alone is
+    drawn into `liftedLayer`, at the very top of the stack.
 **/
 class PiecesLayer implements BoardLayer
 {
@@ -46,7 +42,7 @@ class PiecesLayer implements BoardLayer
 
     private var displacements:Map<Int, PieceDisplacement> = [];
     private var hiddenPieces:Map<Int, Bool> = [];
-    // The piece drawn in liftedLayer (the dragged one), if any.
+    // the dragged piece, drawn in `liftedLayer`
     private var liftedPiece:Null<HexCoords> = null;
 
     private var images:Map<Int, PieceImage> = [];
@@ -59,9 +55,7 @@ class PiecesLayer implements BoardLayer
         this.position = position;
     }
 
-    /**
-        Shows `position`, dropping every gesture change.
-    **/
+    /** Shows `position`, dropping every gesture change **/
     public function setPosition(position:Position):Void
     {
         this.position = position;
@@ -71,10 +65,7 @@ class PiecesLayer implements BoardLayer
         redraw();
     }
 
-    /**
-        Draws the piece standing on `coords` centered on `point` instead (dragged), lifted above
-        everything else on the board.
-    **/
+    /** Draws the piece on `coords` centered on `point` (dragged), above everything on the board **/
     public function movePieceToPoint(coords:HexCoords, point:BoardPoint):Void
     {
         displacements.set(coords.toScalarCoord(), AtPoint(point));
@@ -82,10 +73,7 @@ class PiecesLayer implements BoardLayer
         setLifted(coords, true);
     }
 
-    /**
-        Draws the piece standing on `coords` on the hex `destination` instead, above the other
-        pieces but, like them, below markers and annotations.
-    **/
+    /** Draws the piece on `coords` on `destination`, above the other pieces but below markers **/
     public function movePieceToHex(coords:HexCoords, destination:HexCoords):Void
     {
         displacements.set(coords.toScalarCoord(), OnHex(destination));
@@ -93,9 +81,7 @@ class PiecesLayer implements BoardLayer
         setLifted(coords, false);
     }
 
-    /**
-        Draws the piece standing on `coords` back on its own hex, among the other pieces.
-    **/
+    /** Draws the piece on `coords` back on its own hex **/
     public function resetPiece(coords:HexCoords):Void
     {
         if (!displacements.remove(coords.toScalarCoord()))
@@ -105,9 +91,7 @@ class PiecesLayer implements BoardLayer
         setLifted(coords, false);
     }
 
-    /**
-        Shows or hides the piece standing on `coords` (no effect on an empty hex).
-    **/
+    /** Shows or hides the piece on `coords`, if any **/
     public function setPieceVisible(coords:HexCoords, visible:Bool):Void
     {
         if (visible)
@@ -130,11 +114,7 @@ class PiecesLayer implements BoardLayer
             drawPiece(occupiedHex.coords, occupiedHex.piece);
     }
 
-    /*
-        Moves the piece on `coords` into liftedLayer or back into the own group - in both cases to
-        the end of it, as SVG paint order is the only stacking control, so a displaced piece is
-        drawn over the other pieces.
-    */
+    // appended last either way: SVG paint order is the only stacking control
     private function setLifted(coords:HexCoords, lifted:Bool):Void
     {
         if (lifted && liftedPiece != null && !liftedPiece.equals(coords))
@@ -152,7 +132,7 @@ class PiecesLayer implements BoardLayer
 
     private function drawPiece(coords:HexCoords, piece:PieceData):Void
     {
-        var height:Float = BoardGeometry.HEX_HEIGHT * 0.85 * relativeScale(piece.type);
+        var height:Float = BoardGeometry.HEX_HEIGHT * StyleVars.BOARD_PIECE_HEIGHT_SHARE * relativeScale(piece.type);
         var width:Float = height * Assets.pieceAspectRatio(piece.type);
         var lifted:Bool = liftedPiece != null && liftedPiece.equals(coords);
         var image:SVGImageBuilder = (lifted ? liftedLayer : layer).svgImage(Assets.pieceImage(piece.type, piece.color), 0, 0, width, height);
@@ -164,7 +144,7 @@ class PiecesLayer implements BoardLayer
         placeImage(coords);
     }
 
-    // Writes the image's x/y from its displacement (or its own hex) - no redraw.
+    // positions the image without redrawing it
     private function placeImage(coords:HexCoords):Void
     {
         var pieceImage:Null<PieceImage> = images.get(coords.toScalarCoord());
@@ -182,8 +162,9 @@ class PiecesLayer implements BoardLayer
     private static function relativeScale(kind:PieceKind):Float
     {
         return switch kind {
-            case Progressor: 0.7;
-            case Liberator, Defensor: 0.9;
+            case Progressor: StyleVars.BOARD_PROGRESSOR_SCALE;
+            case Liberator: StyleVars.BOARD_LIBERATOR_SCALE;
+            case Defensor: StyleVars.BOARD_DEFENSOR_SCALE;
             default: 1;
         }
     }

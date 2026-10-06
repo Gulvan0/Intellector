@@ -27,47 +27,14 @@ private enum RingSlot
 }
 
 /**
-    The two move-detail choices `PieceMoveTool` can't resolve on its own, presented as
-    popovers anchored to a board hex (knowledge/plans/promotion-and-morph-popovers.md): which piece
-    a Progressor promotes into, or a premoved piece morphs into (a ring of round buttons around the
-    moving piece), and whether a capturing piece morphs into the type it captured (two labelled
-    buttons).
-
-    Both keep the board visible under a very light scrim, and can be cancelled: by their own cancel
-    button (the ring's cross, the morph popover's close button), by a press anywhere outside
-    them (which lands on the scrim, so nothing underneath reacts to it), or by Esc. Cancelling only closes the popover and calls `onCancelled`; the owner also
-    closes it, via `close`, when the position changes underneath it. Follows the anchor hex while
-    the board rescales, flips or the page scrolls.
+    The move choices `PieceMoveTool` can't make, as popovers following a hex: a ring of pieces to
+    promote or premove-morph into, or a capture's become/stay pair. Callbacks are called once it's
+    closed; it's cancelled by its own button, a press outside or Esc.
 **/
 class MovePrompt
 {
-    private static inline final RING_SHADOW:String = "0 4px 14px rgba(42, 33, 26, 0.18)";
-    private static inline final POPOVER_SHADOW:String = "0 8px 28px rgba(42, 33, 26, 0.16)";
-
-    private static inline final VIEWPORT_MARGIN:Float = 8;
-
-    /*
-        A piece ring: six slots around the anchor hex, at its vertex angles (counterclockwise from
-        the right one), the same for every anchor and both ring prompts. The hub sits over the anchor.
-    */
+    // at the anchor's vertex angles, counterclockwise from the right; the hub sits over the anchor
     private static final RING_SLOTS:Array<RingSlot> = [Piece(Aggressor), Piece(Liberator), Piece(Dominator), Cancel, Piece(Progressor), Piece(Defensor)];
-    private static inline final RING_GAP:Float = 6;
-    private static inline final RING_MINIMUM_DIAMETER:Float = 44;
-
-    // A button's diameter as a share of the hex's on-screen height: its radius is close to the hex's inner radius.
-    private static inline final RING_DIAMETER_SHARE:Float = 0.9;
-
-    private static inline final MORPH_POPOVER_WIDTH:Int = 390;
-    private static inline final MORPH_POPOVER_SPACING:Int = 12;
-    private static inline final MORPH_BUTTON_HEIGHT:Int = 84;
-    private static inline final MORPH_ART_SLOT_DIAMETER:Int = 60;
-    private static inline final MORPH_CLOSE_SIZE:Int = 42;
-    private static inline final MORPH_CLOSE_FONT_SIZE:Int = 21;
-    private static inline final MORPH_CLOSE_RADIUS:Int = 6;
-    private static inline final MORPH_ANCHOR_GAP:Float = 12;
-
-    // Before the popover has been laid out for the first time and its real height can be measured.
-    private static inline final MORPH_ESTIMATED_HEIGHT:Float = 264;
 
     private final roots:Array<Component>;
     private final place:Void->Void;
@@ -78,22 +45,13 @@ class MovePrompt
     private var geometryChangeHandle:Detachable;
     private var closed:Bool = false;
 
-    /**
-        A ring of the four promotion options, in `color`, and a cancel button around the hex
-        `anchor`, with the promoting Progressor in the middle. `onChosen` is called after the ring
-        is closed; `onCancelled` after it is closed by cancelling.
-    **/
+    /** A ring of the promotion options around `anchor`, the Progressor in the middle **/
     public static function promotion(board:BoardSurface, anchor:HexCoords, color:PieceColor, onChosen:PieceKind->Void, onCancelled:Void->Void):MovePrompt
     {
         return pieceRing(board, anchor, Progressor, color, [Aggressor, Liberator, Dominator, Defensor], onChosen, onCancelled);
     }
 
-    /**
-        A ring of the five kinds a premoved `movingKind` (of `color`) could morph into on capture -
-        its own kind among them, styled as staying as is - and a cancel button, around the hex
-        `anchor`. `onChosen` is called after the ring is closed; `onCancelled` after it is closed
-        by cancelling.
-    **/
+    /** A ring of the kinds a premoved `movingKind` could morph into on capture, its own included **/
     public static function premoveChameleon(board:BoardSurface, anchor:HexCoords, movingKind:PieceKind, color:PieceColor, onChosen:PieceKind->Void, onCancelled:Void->Void):MovePrompt
     {
         return pieceRing(board, anchor, movingKind, color, [Aggressor, Liberator, Dominator, Progressor, Defensor], onChosen, onCancelled);
@@ -103,7 +61,7 @@ class MovePrompt
     {
         var prompt:Null<MovePrompt> = null;
 
-        // By slot; null for a slot left empty.
+        // by slot; `null` for an empty one
         var buttons:Array<Null<PromptButton>> = [
             for (slot in RING_SLOTS)
             {
@@ -127,16 +85,11 @@ class MovePrompt
             if (button != null)
                 roots.push(button);
 
-        prompt = new MovePrompt(board, roots, RING_SHADOW, () -> placeRing(board, anchor, hub, buttons), onCancelled);
+        prompt = new MovePrompt(board, roots, StyleVars.MOVE_PROMPT_RING_SHADOW, () -> placeRing(board, anchor, hub, buttons), onCancelled);
         return prompt;
     }
 
-    /**
-        The "become the captured piece / stay as is" pair for `capturingKind` (of `capturingColor`)
-        having captured `capturedKind`, next to the hex `anchor`, on the side facing the board's
-        centre. `onDecided` is called with whether to morph, after the popover is closed;
-        `onCancelled` after it is closed by cancelling.
-    **/
+    /** The become/stay pair for `capturingKind` capturing `capturedKind`, beside `anchor` **/
     public static function captureMorph(board:BoardSurface, anchor:HexCoords, capturingKind:PieceKind, capturingColor:PieceColor, capturedKind:PieceKind, onDecided:Bool->Void, onCancelled:Void->Void):MovePrompt
     {
         var prompt:Null<MovePrompt> = null;
@@ -149,36 +102,36 @@ class MovePrompt
 
         var closeButton:Button = new Button();
         closeButton.text = "✕";
-        closeButton.addClass("haxefolio-close-button");
+        closeButton.addClass(StyleClass.HAXEFOLIO_CLOSE_BUTTON);
         closeButton.verticalAlign = "center";
-        // Through the style, not width/height: the framework's close-button class sets its own fixed size.
-        closeButton.customStyle.width = MORPH_CLOSE_SIZE;
-        closeButton.customStyle.height = MORPH_CLOSE_SIZE;
-        closeButton.customStyle.fontSize = MORPH_CLOSE_FONT_SIZE;
-        closeButton.customStyle.borderRadius = MORPH_CLOSE_RADIUS;
+        // via the style: the close-button class sets its own fixed size
+        closeButton.customStyle.width = StyleVars.MOVE_PROMPT_MORPH_CLOSE_SIZE;
+        closeButton.customStyle.height = StyleVars.MOVE_PROMPT_MORPH_CLOSE_SIZE;
+        closeButton.customStyle.fontSize = StyleVars.MOVE_PROMPT_MORPH_CLOSE_FONT_SIZE;
+        closeButton.customStyle.borderRadius = StyleVars.MOVE_PROMPT_MORPH_CLOSE_RADIUS;
         closeButton.invalidateComponentStyle();
         closeButton.onClick = _ -> prompt.cancel();
 
         var title:Label = new Label();
         title.text = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.board.prompt.chameleon.title"));
-        title.addClass("intellector-prompt-title");
+        title.addClass(StyleClass.PROMPT_TITLE);
         title.percentWidth = 100;
         title.verticalAlign = "center";
 
         var headerRow:HBox = new HBox();
         headerRow.percentWidth = 100;
-        headerRow.height = MORPH_CLOSE_SIZE;
+        headerRow.height = StyleVars.MOVE_PROMPT_MORPH_CLOSE_SIZE;
         headerRow.addComponent(title);
         headerRow.addComponent(closeButton);
 
-        // Both keep the capturing piece's colour: it's the mover's own piece that changes type or stays.
+        // both in the capturing piece's colour: it's the mover's piece either way
         var become:PromptButton = PromptButton.labelled(
             capturedKind,
             capturingColor,
             LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.board.prompt.become"), pieceName("intellector.board.prompt.become", capturedKind)),
             true,
-            MORPH_BUTTON_HEIGHT,
-            MORPH_ART_SLOT_DIAMETER,
+            StyleVars.MOVE_PROMPT_MORPH_BUTTON_HEIGHT,
+            StyleVars.MOVE_PROMPT_MORPH_ART_SLOT_DIAMETER,
             () -> decide(true)
         );
         var stay:PromptButton = PromptButton.labelled(
@@ -186,26 +139,24 @@ class MovePrompt
             capturingColor,
             LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.board.prompt.stay"), pieceName("intellector.board.prompt.stay", capturingKind)),
             false,
-            MORPH_BUTTON_HEIGHT,
-            MORPH_ART_SLOT_DIAMETER,
+            StyleVars.MOVE_PROMPT_MORPH_BUTTON_HEIGHT,
+            StyleVars.MOVE_PROMPT_MORPH_ART_SLOT_DIAMETER,
             () -> decide(false)
         );
 
         var popover:VBox = new VBox();
-        popover.addClass("intellector-prompt-popover");
-        popover.width = MORPH_POPOVER_WIDTH;
-        popover.verticalSpacing = MORPH_POPOVER_SPACING;
+        popover.addClass(StyleClass.PROMPT_POPOVER);
+        popover.width = StyleVars.MOVE_PROMPT_MORPH_POPOVER_WIDTH;
+        popover.verticalSpacing = StyleVars.MOVE_PROMPT_MORPH_POPOVER_SPACING;
         popover.addComponent(headerRow);
         popover.addComponent(become);
         popover.addComponent(stay);
 
-        prompt = new MovePrompt(board, [popover], POPOVER_SHADOW, () -> placeMorphPopover(board, anchor, popover), onCancelled);
+        prompt = new MovePrompt(board, [popover], StyleVars.MOVE_PROMPT_POPOVER_SHADOW, () -> placeMorphPopover(board, anchor, popover), onCancelled);
         return prompt;
     }
 
-    /**
-        Takes the popover off screen. Safe to call more than once; never calls either callback.
-    **/
+    /** Takes the prompt off screen without calling back; safe to repeat **/
     public function close():Void
     {
         if (closed)
@@ -240,22 +191,19 @@ class MovePrompt
 
         place();
 
-        // The board rescales with its container, and the popover's own height is only known after layout.
+        // the board rescales with its container; the popover's height is known only after layout
         resizeObserver = js.Syntax.code("new ResizeObserver({0})", onViewportChanged);
         resizeObserver.observe(board.element);
         for (root in roots)
             resizeObserver.observe(root.element);
 
-        // A flip or a coordinates mode change moves the anchor without resizing anything.
+        // a flip or coordinates mode change moves the anchor without resizing
         geometryChangeHandle = board.onGeometryChanged.subscribe(place);
 
         Browser.window.addEventListener("scroll", onViewportChanged, true);
         Browser.window.addEventListener("resize", onViewportChanged);
 
-        /*
-            Only once the event that opened the prompt is over: a prompt opened by a press would
-            otherwise receive that same press in its bubble phase and cancel itself at once.
-        */
+        // deferred, or the press that opened the prompt would cancel it in its bubble phase
         Browser.window.setTimeout(listenForOutsidePresses, 0);
         Browser.document.addEventListener("keydown", onKeyDown, true);
     }
@@ -275,7 +223,7 @@ class MovePrompt
         onCancelled();
     }
 
-    // Shared by the ResizeObserver and the window's scroll/resize events, hence the untyped argument.
+    // untyped: shared by the ResizeObserver and the window's scroll/resize events
     private function onViewportChanged(_:Dynamic):Void
     {
         if (!closed)
@@ -303,12 +251,12 @@ class MovePrompt
         var center:{x:Float, y:Float} = board.hexClientCenter(anchor);
         var hexHeight:Float = board.hexClientHeight();
 
-        var diameter:Float = Math.max(RING_MINIMUM_DIAMETER, Math.round(hexHeight * RING_DIAMETER_SHARE));
+        var diameter:Float = Math.max(StyleVars.MOVE_PROMPT_RING_MINIMUM_DIAMETER, Math.round(hexHeight * StyleVars.MOVE_PROMPT_RING_DIAMETER_SHARE));
         var half:Float = diameter / 2;
 
-        // Far enough that neighbouring buttons clear each other by RING_GAP, and clear the hex itself (its corners, a side length from the centre).
+        // buttons clear each other and the hex's corners (a side length from its centre) by the gap
         var hexSideLength:Float = hexHeight / Math.sqrt(3);
-        var radius:Float = Math.max(diameter + RING_GAP, hexSideLength + half + RING_GAP);
+        var radius:Float = Math.max(diameter + StyleVars.MOVE_PROMPT_RING_GAP, hexSideLength + half + StyleVars.MOVE_PROMPT_RING_GAP);
 
         var items:Array<{button:PromptButton, x:Float, y:Float}> = [{button: hub, x: center.x, y: center.y}];
         for (i in 0...buttons.length)
@@ -325,7 +273,7 @@ class MovePrompt
         var minY:Float = center.y - radius - half;
         var maxY:Float = center.y + radius + half;
 
-        // Near a viewport edge the whole ring, hub included, slides inward as a unit.
+        // near a viewport edge the whole ring slides inward as a unit
         var shiftX:Float = shiftIntoViewport(minX, maxX, Browser.window.innerWidth);
         var shiftY:Float = shiftIntoViewport(minY, maxY, Browser.window.innerHeight);
 
@@ -342,57 +290,52 @@ class MovePrompt
         var hexHeight:Float = board.hexClientHeight();
 
         var measuredHeight:Float = popover.element.getBoundingClientRect().height;
-        var height:Float = measuredHeight > 0 ? measuredHeight : MORPH_ESTIMATED_HEIGHT;
+        var height:Float = measuredHeight > 0 ? measuredHeight : StyleVars.MOVE_PROMPT_MORPH_ESTIMATED_HEIGHT;
 
-        // Toward the board's centre, both ways: below an upper-half hex and above a lower-half one; and
-        // sideways so that, the closer the hex is to an edge, the more the popover reaches inward
-        // (flush with the hex's outer corner at the very edge, centred on the hex in the middle).
-        var width:Float = Math.min(MORPH_POPOVER_WIDTH, Browser.window.innerWidth - 2 * VIEWPORT_MARGIN);
+        /*
+            Toward the board's centre: below an upper-half hex, above a lower-half one, reaching
+            further inward the closer the hex is to an edge.
+        */
+        var width:Float = Math.min(StyleVars.MOVE_PROMPT_MORPH_POPOVER_WIDTH, Browser.window.innerWidth - 2 * StyleVars.MOVE_PROMPT_VIEWPORT_MARGIN);
         popover.width = width;
 
         var reach:Float = Math.max(0, width / 2 - hexHeight / Math.sqrt(3));
         var left:Float = center.x - board.horizontalPosition(anchor) * reach - width / 2;
 
         var top:Float = board.isInLowerHalf(anchor)
-            ? center.y - hexHeight / 2 - MORPH_ANCHOR_GAP - height
-            : center.y + hexHeight / 2 + MORPH_ANCHOR_GAP;
+            ? center.y - hexHeight / 2 - StyleVars.MOVE_PROMPT_MORPH_ANCHOR_GAP - height
+            : center.y + hexHeight / 2 + StyleVars.MOVE_PROMPT_MORPH_ANCHOR_GAP;
 
-        // Only to make sure it fits on screen.
+        // only to fit on screen
         left += shiftIntoViewport(left, left + width, Browser.window.innerWidth);
         top += shiftIntoViewport(top, top + height, Browser.window.innerHeight);
 
         moveTo(popover, left, top);
     }
 
-    /*
-        How far a span [low, high] must move along one axis to lie within the viewport minus its
-        margin (low edge wins if it can't fit at all).
-    */
+    // how far [low, high] must move to fit within the viewport's margins; the low edge wins if it can't
     private static function shiftIntoViewport(low:Float, high:Float, viewportSize:Float):Float
     {
-        if (low < VIEWPORT_MARGIN)
-            return VIEWPORT_MARGIN - low;
+        if (low < StyleVars.MOVE_PROMPT_VIEWPORT_MARGIN)
+            return StyleVars.MOVE_PROMPT_VIEWPORT_MARGIN - low;
 
-        if (high > viewportSize - VIEWPORT_MARGIN)
-            return Math.max(viewportSize - VIEWPORT_MARGIN - high, VIEWPORT_MARGIN - low);
+        if (high > viewportSize - StyleVars.MOVE_PROMPT_VIEWPORT_MARGIN)
+            return Math.max(viewportSize - StyleVars.MOVE_PROMPT_VIEWPORT_MARGIN - high, StyleVars.MOVE_PROMPT_VIEWPORT_MARGIN - low);
 
         return 0;
     }
 
-    // Takes viewport pixels; components are positioned in HaxeUI's own (scale-divided) space.
+    // takes viewport pixels; components are positioned in HaxeUI's scale-divided space
     private static function moveTo(component:Component, clientX:Float, clientY:Float):Void
     {
         component.left = clientX / Toolkit.scaleX;
         component.top = clientY / Toolkit.scaleY;
     }
 
-    /*
-        The piece's name in whichever grammatical case the template `templateKey` asks for (its
-        `.case` key), which differs between languages.
-    */
+    // in the grammatical case `templateKey.case` asks for
     private static function pieceName(templateKey:String, kind:PieceKind):String
     {
         var grammaticalCase:String = LocaleUtils.resolveText(LocaleUtils.localeBinding('$templateKey.case'));
-        return LocaleUtils.resolveText(LocaleUtils.localeBinding('intellector.piece.${Std.string(kind).toLowerCase()}.$grammaticalCase'));
+        return LocaleUtils.resolveText(GroupedLocaleResolvers.pieceName(kind, grammaticalCase));
     }
 }

@@ -14,18 +14,11 @@ import morestd.Signal;
 import morestd.VoidSignal;
 
 /**
-    Turns browser pointer and key events into hex-level events for one board. Knows nothing about
-    pieces, positions or rules: it reports presses, drag moves and releases per button, hover
-    changes and Esc - never "clicks" or "drags", whose meaning belongs to whoever subscribes.
+    Turns pointer and key events into hex-level presses, drag moves, releases, hover changes and
+    Esc for one board, knowing nothing of pieces or rules. Only the primary pointer is followed.
 
-    Handles, once for every subscriber: hit-testing (a press or hover on something covering the
-    board, like an overlay, is not on the board); releases outside the board or the window;
-    the right button's context menu; touch (no hover); chorded buttons (a second button pressed
-    while one is held arrives as a `pointermove`, turned into its own press and release here).
-
-    A press off the board is reported (with `hex == null`) only if it lands on bare page
-    background (`HaxeFolioApp.isPageBackground`) outside `ownArea` - an outside press; any other
-    press off the board is ignored through its release. Only the primary pointer is followed.
+    A press off the board is reported, with a `null` hex, only on bare page background outside
+    `ownArea`; any other is ignored through its release.
 **/
 class BoardGestures
 {
@@ -41,9 +34,9 @@ class BoardGestures
     private final releases:Map<PointerButton, Signal<HexPress>> = [Primary => new Signal(), Secondary => new Signal()];
     private final escapes:VoidSignal = new VoidSignal();
 
-    // The buttons held, as of the last pointer event (a `PointerEvent.buttons` bitmask).
+    // a `PointerEvent.buttons` bitmask, as of the last pointer event
     private var heldButtons:Int = 0;
-    // The held buttons whose press was reported, and so whose drag moves and release will be.
+    // held buttons whose press was reported, so their drag moves and release will be too
     private var reportedButtons:Int = 0;
 
     private var hoveredHex:Null<HexCoords> = null;
@@ -51,23 +44,16 @@ class BoardGestures
 
     private var suspended:Bool = false;
 
-    /**
-        `ownArea`: the element holding the board and its own controls, presses on which are never
-        outside presses.
-    **/
+    /** `ownArea` holds the board and its controls: presses on it are never outside presses **/
     public function new(board:BoardSurface, ownArea:Element)
     {
         this.board = board;
         this.ownArea = ownArea;
 
-        // Without it, a touch drag over the board would scroll the page instead.
+        // a touch drag would scroll the page otherwise
         board.element.style.touchAction = "none";
 
-        /*
-            Presses in the capture phase, so that a press which closes something holding a
-            suspension (a prompt) is seen while still suspended, whatever order the listeners
-            were registered in.
-        */
+        // capture phase: a press closing a suspension holder (a prompt) is seen while still suspended
         Browser.window.addEventListener("pointerdown", onPointerEvent, true);
         Browser.window.addEventListener("pointermove", onPointerEvent);
         Browser.window.addEventListener("pointerup", onPointerEvent);
@@ -88,9 +74,7 @@ class BoardGestures
         board.element.removeEventListener("contextmenu", onContextMenu);
     }
 
-    /**
-        The hex under the cursor changed (`null`: off the board). Never on touch.
-    **/
+    /** The hex under the cursor changed (`null` off the board); never on touch **/
     public function onHoverChanged(handler:Null<HexCoords>->Void):Detachable
     {
         return hoverChanged.subscribe(handler);
@@ -101,37 +85,27 @@ class BoardGestures
         return presses.get(button).subscribe(handler);
     }
 
-    /**
-        The pointer moved while `button`, whose press was reported, is held.
-    **/
+    /** The pointer moved while `button`, whose press was reported, is held **/
     public function onDragMove(button:PointerButton, handler:HexDrag->Void):Detachable
     {
         return dragMoves.get(button).subscribe(handler);
     }
 
-    /**
-        `button`, whose press was reported, was released - or lost, e.g. when the window lost
-        focus, in which case `hex` is `null`.
-    **/
+    /** `button`, whose press was reported, was released, or lost (with a `null` hex) **/
     public function onRelease(button:PointerButton, handler:HexPress->Void):Detachable
     {
         return releases.get(button).subscribe(handler);
     }
 
-    /**
-        Esc was pressed and nothing else handled it: an Esc that something marked with
-        `preventDefault()` (closing a prompt, an overlay, a menu, the sidebar) is ignored.
-    **/
+    /** Esc was pressed and nothing else handled it with `preventDefault()` **/
     public function onEscape(handler:Void->Void):Detachable
     {
         return escapes.subscribe(handler);
     }
 
     /**
-        Stops reporting anything until the returned handle is detached: no hover, Esc, presses,
-        drag moves or releases. A press made while suspended stays unreported through its
-        release, even if the suspension ends in between. On resuming, the hover is brought up to
-        date. One suspension at a time.
+        Reports nothing until the handle is detached; a press made meanwhile stays unreported
+        through its release. One suspension at a time.
     **/
     public function suspend():Detachable
     {
@@ -154,11 +128,7 @@ class BoardGestures
 
         var hex:Null<HexCoords> = board.hexAtClientPoint(e.clientX, e.clientY);
 
-        /*
-            Whatever covers the board (an overlay, a popup) takes the pointer away from it: a press
-            or a hover counts as being on a hex only if the board itself is the target. A drag
-            already in progress follows the pointer's coordinates wherever it goes.
-        */
+        // presses and hovers count only on the board itself; a drag follows the pointer anywhere
         var target:Node = cast e.target;
         var hexAtTarget:Null<HexCoords> = board.element.contains(target) ? hex : null;
 
@@ -190,7 +160,7 @@ class BoardGestures
                     dragMoves.get(buttonOf(bit)).dispatch({hex: hex, point: board.clientPointToBoardPoint(e.clientX, e.clientY), modifiers: modifiers});
     }
 
-    // The pointer is gone without a proper release (a touch taken over by the browser, the window losing focus).
+    // gone without a release: a touch taken over by the browser, or the window losing focus
     private function onPointerCancel(_:Event):Void
     {
         for (bit in [PRIMARY_BIT, SECONDARY_BIT])
@@ -209,7 +179,7 @@ class BoardGestures
         if (hex == null && (ownArea.contains(target) || !HaxeFolioApp.isPageBackground(target)))
             return;
 
-        // Keeps the browser from starting a text selection or a native image drag.
+        // no text selection or native image drag
         if (hex != null)
             e.preventDefault();
 

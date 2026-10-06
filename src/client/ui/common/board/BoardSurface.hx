@@ -15,36 +15,22 @@ import morestd.Signal;
 import morestd.VoidSignal;
 
 /**
-    Renders a `Position` on the hex board - rendering only, no interaction and no preferences: it
-    displays the plain state it's given. A non-interactive preview is a bare `BoardSurface`;
-    interaction is added by tools driving one from outside, never by subclassing it.
-
-    Assembled from layers, bottom to top: the hex grid (`grid`), the coordinate labels, the
-    pieces, the move markers, the annotations, and finally the piece being dragged, if any. Each
-    redraws only when its own state changes; all of them share one `BoardProjection`.
+    Renders a `Position`, with no interaction or preferences; tools add interaction from outside.
+    Layers, bottom to top: hex grid, coordinate labels, pieces, move markers, annotations, the
+    dragged piece.
 **/
 class BoardSurface extends SvgSurface
 {
-    /**
-        The hex grid layer, for `HexTints` to paint fills on. Nothing else should write to it.
-    **/
+    /** For `HexTints` alone to paint fills on **/
     public final grid:HexGridLayer;
 
-    /**
-        The annotation layer, for `BoardAnnotations` and the annotation tool to draw on.
-    **/
+    /** For `BoardAnnotations` and `AnnotationTool` to draw on **/
     public final annotationLayer:AnnotationLayer;
 
-    /**
-        Dispatched after anything drawn on the board may have moved on screen without the board
-        being resized: a flip, or a coordinates mode change (the board's height changes with it).
-        For outsiders positioned against the board, e.g. an open prompt.
-    **/
+    /** Dispatched after a flip or a coordinates mode change, for things positioned against the board **/
     public final onGeometryChanged:VoidSignal = new VoidSignal();
 
-    /**
-        Dispatched after `setPosition`, with the cause it was given.
-    **/
+    /** Dispatched after `setPosition`, with the cause it was given **/
     public final onPositionChanged:Signal<PositionChangeCause> = new Signal();
 
     private final projection:BoardProjection;
@@ -71,7 +57,7 @@ class BoardSurface extends SvgSurface
         var piecesLayer:SvgLayer = addLayer();
         glyphs = new GlyphLayer(addLayer(), projection, palette);
         annotationLayer = new AnnotationLayer(addLayer(), projection, palette);
-        // Last: the dragged piece is drawn above everything else.
+        // last, so the dragged piece is drawn above everything
         pieces = new PiecesLayer(piecesLayer, addLayer(), projection, position);
 
         grid.redraw();
@@ -84,9 +70,6 @@ class BoardSurface extends SvgSurface
         return BoardGeometry.GRID_HEIGHT + CoordinateLabelsLayer.stripHeight(coordinatesMode);
     }
 
-    /**
-        The position currently displayed.
-    **/
     public function getPosition():Position
     {
         return position;
@@ -97,11 +80,7 @@ class BoardSurface extends SvgSurface
         return projection.orientation;
     }
 
-    /**
-        Displays `position`, then dispatches `onPositionChanged` with `cause`. Drops every gesture
-        change to the pieces (see `movePieceToPoint` and the like); move markers stay until
-        cleared by whoever added them.
-    **/
+    /** Displays `position`, dropping gesture changes to the pieces (but not move markers) **/
     public function setPosition(position:Position, cause:PositionChangeCause):Void
     {
         this.position = position;
@@ -109,10 +88,7 @@ class BoardSurface extends SvgSurface
         onPositionChanged.dispatch(cause);
     }
 
-    /**
-        Flips the board so that `orientation` is drawn at the bottom. Everything drawn - fills,
-        markers, gesture changes to the pieces - is kept and redrawn in the new orientation.
-    **/
+    /** Flips the board so `orientation` is at the bottom, keeping everything drawn **/
     public function setOrientation(orientation:PieceColor):Void
     {
         if (orientation == projection.orientation)
@@ -149,10 +125,7 @@ class BoardSurface extends SvgSurface
         annotationLayer.setPalette(palette);
     }
 
-    /**
-        Draws a move-destination marker at `coords`: a dot if the hex is empty in the displayed
-        position, a ring if it's occupied (a capture).
-    **/
+    /** Draws a move-destination marker at `coords`: a dot, or a ring on a capture **/
     public function addMoveMarker(coords:HexCoords):Void
     {
         glyphs.addMoveMarker(coords, !position.get(coords).isEmpty());
@@ -163,88 +136,62 @@ class BoardSurface extends SvgSurface
         glyphs.clearMoveMarkers();
     }
 
-    /**
-        Draws the piece standing on `coords` centered on `point` instead, above everything else on
-        the board - e.g. to keep a dragged piece under the cursor.
-    **/
+    /** Draws the piece on `coords` centered on `point`, above everything on the board **/
     public function movePieceToPoint(coords:HexCoords, point:BoardPoint):Void
     {
         pieces.movePieceToPoint(coords, point);
     }
 
-    /**
-        Draws the piece standing on `coords` on top of the hex `destination` instead, as though it
-        already moved there - a purely visual stand-in while a move's details are being chosen.
-    **/
+    /** Draws the piece on `coords` on `destination`, as though it already moved there **/
     public function movePieceToHex(coords:HexCoords, destination:HexCoords):Void
     {
         pieces.movePieceToHex(coords, destination);
     }
 
-    /**
-        Draws the piece standing on `coords` back on its own hex, undoing `movePieceToPoint`/
-        `movePieceToHex`.
-    **/
+    /** Draws the piece on `coords` back on its own hex **/
     public function resetPiece(coords:HexCoords):Void
     {
         pieces.resetPiece(coords);
     }
 
-    /**
-        Shows or hides the piece standing on `coords` (no effect on an empty hex). Reset by the
-        next `setPosition`.
-    **/
+    /** Shows or hides the piece on `coords`, if any, until the next `setPosition` **/
     public function setPieceVisible(coords:HexCoords, visible:Bool):Void
     {
         pieces.setPieceVisible(coords, visible);
     }
 
-    /**
-        The hex under `(clientX, clientY)` (a native DOM event's viewport coordinates), or `null`
-        when the point isn't over the board at all.
-    **/
+    /** The hex under the viewport point `(clientX, clientY)`, or `null` off the board **/
     public function hexAtClientPoint(clientX:Float, clientY:Float):Null<HexCoords>
     {
         return projection.hexAt(clientPointToViewBox(clientX, clientY));
     }
 
-    /**
-        The board point under `(clientX, clientY)` (the space `movePieceToPoint` takes).
-    **/
+    /** The board point under the viewport point `(clientX, clientY)` **/
     public function clientPointToBoardPoint(clientX:Float, clientY:Float):BoardPoint
     {
         return clientPointToViewBox(clientX, clientY);
     }
 
-    /**
-        The center of the hex at `coords`, in viewport (`clientX`/`clientY`) coordinates.
-    **/
+    /** The center of `coords`, in viewport coordinates **/
     public function hexClientCenter(coords:HexCoords):{x:Float, y:Float}
     {
         var center:BoardPoint = projection.hexCenter(coords);
         return viewBoxPointToClient(center.x, center.y);
     }
 
-    /**
-        The hex's current on-screen height, in pixels (the board scales with its container).
-    **/
+    /** A hex's current on-screen height, in pixels **/
     public function hexClientHeight():Float
     {
         return BoardGeometry.HEX_HEIGHT * viewBoxUnitInPixels();
     }
 
-    /**
-        How far left or right of the board's vertical midline the hex at `coords` is drawn: -1 for
-        the leftmost file, 1 for the rightmost, 0 for the middle one.
-    **/
+    /** Where `coords` is drawn horizontally: -1 for the leftmost file, 0 the middle, 1 the rightmost **/
     public function horizontalPosition(coords:HexCoords):Float
     {
         return projection.horizontalPosition(coords);
     }
 
-    /**
-        Whether the hex at `coords` is drawn below the board's horizontal midline.
-    **/
+    /** Whether the hex at `coords` is drawn below the board's horizontal midline **/
     public function isInLowerHalf(coords:HexCoords):Bool
     {
         return projection.isInLowerHalf(coords);

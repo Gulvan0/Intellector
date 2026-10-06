@@ -3,9 +3,7 @@ package client.ui.common.board.tools;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 
-/**
-    No piece can be moved: spectating, or browsing an older position of a game.
-**/
+/** No piece can be moved: spectating, or browsing an older position of a game **/
 class InertMovePolicy implements PieceMovePolicy
 {
     public function new() {}

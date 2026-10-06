@@ -32,7 +32,7 @@ import client.ui.common.board.Premoves;
 
 class AnalysisPage extends PageBase
 {
-    // Temporary (premove testing): how long the replies harness's random opponent thinks.
+    // temporary: the replies harness's thinking time
     private static inline final HARNESS_REPLY_DELAY_MS:Int = 3000;
 
     private final studyId:Null<Int>;
@@ -44,10 +44,10 @@ class AnalysisPage extends PageBase
     private var historyHandle:Detachable;
     private var browsingHistory:Bool = false;
 
-    // The position being edited, while the temporary editor controls are in use; null otherwise.
+    // while the temporary editor controls are in use
     private var editedPosition:Null<Position> = null;
 
-    // Temporary (premove testing): the user plays White against random replies, with premoves.
+    // temporary: the user plays White against random replies, with premoves
     private var harnessButton:Button;
     private var harnessPremoves:Null<Premoves> = null;
     private var harnessTimer:Null<Timer> = null;
@@ -60,9 +60,7 @@ class AnalysisPage extends PageBase
 
     private override function init():Void
     {
-        var titleKey:String = studyId != null
-            ? LocaleUtils.localeBinding("intellector.analysis.study_title")
-            : LocaleUtils.localeBinding("intellector.analysis.title");
+        var titleKey:String = GroupedLocaleResolvers.analysisTitle(studyId != null);
         setTitle(titleKey, studyId);
 
         var content:VBox = new VBox();
@@ -73,10 +71,7 @@ class AnalysisPage extends PageBase
         label.text = LocaleUtils.resolveText(titleKey, studyId);
         content.addComponent(label);
 
-        /*
-            Interim smoke test for the interactive board (local hot-seat play, no session/network
-            layer) until the position editor and the analysis session replace it.
-        */
+        // temporary: local hot-seat play until the position editor and analysis session replace it
         var startingPosition:Position = Position.defaultStarting();
 
         mainBoard = new InteractiveBoard(startingPosition, White, new AnalysisMovePolicy(MoveRulesAdapter.DEFAULT));
@@ -88,13 +83,13 @@ class AnalysisPage extends PageBase
         var debugRow:HBox = new HBox();
         content.addComponent(debugRow);
 
-        // Temporary (board_plan.md step 6): exercises flips until a page has a real flip control.
+        // temporary: until a page has a real flip control
         var flipButton:Button = new Button();
         flipButton.text = "Flip";
         flipButton.onClick = _ -> mainBoard.setOrientation(mainBoard.getOrientation() == White ? Black : White);
         debugRow.addComponent(flipButton);
 
-        // Temporary (board_plan.md step 28): history navigation until the page has its real controls.
+        // temporary: until the page has its real history controls
         var navigations:Array<{text:String, type:PlyNavigationType}> = [
             {text: "|<", type: Start},
             {text: "<", type: Previous},
@@ -109,14 +104,14 @@ class AnalysisPage extends PageBase
             debugRow.addComponent(button);
         }
 
-        // Temporary (premove testing): play White against random replies; premoves follow the preference.
+        // temporary: White against random replies; premoves follow the preference
         harnessButton = new Button();
         harnessButton.text = "Replies harness";
         harnessButton.toggle = true;
         harnessButton.onChange = _ -> setHarnessEnabled(harnessButton.selected);
         debugRow.addComponent(harnessButton);
 
-        // Temporary (board_plan.md steps 30-31): position editor modes until the editor has its real UI.
+        // temporary: until the position editor has its real UI
         var editRow:HBox = new HBox();
         content.addComponent(editRow);
         var editModes:Array<{text:String, mode:EditMode}> = [
@@ -149,8 +144,7 @@ class AnalysisPage extends PageBase
             var previewWrapper:VBox = new VBox();
             previewWrapper.width = 150;
 
-            // Separate Position - previews stay at the starting position regardless of mainBoard's game.
-            // Fixed coordinates mode by design (demo of all three modes) - must not track the live preference.
+            // fixed position and coordinates mode: a demo of all three modes
             var preview:BoardSurface = new BoardSurface(Position.defaultStarting(), previewOrientations[i], previewModes[i]);
             previewWrapper.addComponent(preview);
             previewRow.addComponent(previewWrapper);
@@ -159,14 +153,14 @@ class AnalysisPage extends PageBase
 
     private function onMoveChosen(ply:RawPly):Void
     {
-        // Moves are only possible at the latest position (see onShownChanged), so the view follows.
+        // moves only happen at the latest position, so the view follows
         history.append(ply, true);
 
         if (harnessPremoves != null && history.latestPosition().turnColor == Black)
             scheduleHarnessReply();
     }
 
-    // The policy for the latest position: hot-seat analysis, or White's side against the harness.
+    // hot-seat analysis, or White's side against the harness
     private function livePolicy():PieceMovePolicy
     {
         return harnessPremoves != null
@@ -228,7 +222,7 @@ class AnalysisPage extends PageBase
         mainBoard.setPosition(shown.position, shown.cause);
         mainBoard.setLastMove(shown.lastMove);
 
-        // A linear history has nowhere to put a move made from an older position.
+        // a linear history has nowhere to put a move made from an older position
         var browsing:Bool = !history.isShowingLatest();
         if (browsing != browsingHistory)
         {

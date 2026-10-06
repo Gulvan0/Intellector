@@ -7,12 +7,9 @@ import morestd.Detachable;
 import morestd.Signal;
 
 /**
-    The premove queue of a live game, sitting between the real position and the board: shows the
-    real position with the queued premoves already played (tinted `Premove`), and fires the first
-    one through `playMove` when the user's turn comes.
-
-    Obeys `PremoveIntent`s. Drops the queue on a `Replacement`, when disabled, on `clear` (game
-    end), when the premove to fire turns out to be impossible.
+    A live game's premove queue, between the real position and the board: shows the position with
+    the queued premoves played (tinted `Premove`) and fires the first one through `playMove` on the
+    user's turn. Drops the queue on a `Replacement`, when disabled, or when a premove fails.
 **/
 class Premoves
 {
@@ -27,7 +24,7 @@ class Premoves
     private var realPosition:Position;
     private var enabled:Bool;
 
-    // Incremented on every setRealPosition, to tell whether firing a premove brought a new one in.
+    // tells whether firing a premove brought in a new real position
     private var realPositionVersion:Int = 0;
 
     public function new(board:BoardSurface, tints:HexTints, rules:MoveRules, userColor:PieceColor, realPosition:Position, enabled:Bool, playMove:Signal<RawPly>, intents:Signal<PremoveIntent>)
@@ -43,26 +40,19 @@ class Premoves
         intentsHandle = intents.subscribe(onIntent);
     }
 
-    /**
-        Stops obeying intents and drops the queue, leaving the board showing the real position.
-    **/
+    /** Stops obeying intents and drops the queue, leaving the board showing the real position **/
     public function dispose():Void
     {
         intentsHandle.detach();
         clear();
     }
 
-    /**
-        Whose turn it is in the real position (the shown one may differ, with premoves queued).
-    **/
+    /** Whose turn it is in the real position, not the premove-advanced one **/
     public function realTurn():PieceColor
     {
         return realPosition.turnColor;
     }
 
-    /**
-        Whether any premove is queued.
-    **/
     public function hasQueued():Bool
     {
         return !queue.isEmpty();
@@ -80,9 +70,6 @@ class Premoves
             clear();
     }
 
-    /**
-        Drops every queued premove.
-    **/
     public function clear():Void
     {
         if (queue.isEmpty())
@@ -93,9 +80,8 @@ class Premoves
     }
 
     /**
-        The real position changed. On a `Move` that hands the turn to the user, the first queued
-        premove is fired through `playMove` - whose handler is expected to call this again with the
-        position after it - or the whole queue dropped if it can't be played.
+        On a `Move` handing the turn to the user, fires the first premove through `playMove` (whose
+        handler calls this again with the resulting position), or drops the queue if it can't be played.
     **/
     public function setRealPosition(position:Position, cause:PositionChangeCause):Void
     {
@@ -112,7 +98,7 @@ class Premoves
                 var version:Int = realPositionVersion;
                 playMove.dispatch(ply);
 
-                // The handler already showed the position after the fired premove.
+                // the handler already showed the position after it
                 if (realPositionVersion != version)
                     return;
             }
