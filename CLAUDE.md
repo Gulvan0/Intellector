@@ -24,7 +24,7 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
 
 # Project structure
 
-Source code folder (`src`):
+## Source code folder (`src`)
 
 - `client` - code specific to the client
     - `client.botengine` - wrappers around engines for playing against the computer
@@ -39,7 +39,7 @@ Source code folder (`src`):
     - `net.rest` - REST endpoint definitions and REST client
     - `net.ws` - Websocket channel and event type definitions and PubSub client
 
-Assets folder (`assets`):
+## Assets folder (`assets`)
 
 - `favicons` - website icons
 - `images` - all image assets
@@ -49,6 +49,14 @@ Assets folder (`assets`):
 - `styles` - all CSS HaxeUI/HaxeFolio styling (except for when it's so short it's embedded into the XML layout)
 
 `images` and `layouts` should be divided into subfolders by pages making use of these images and components.
+
+## Knowledge base (`knowledge`)
+
+@knowledge/ holds design docs.
+
+Do not incorporate @knowledge/todo.md into your reasoning and do not edit it; this is a human-only checklist. Other docs are at your full disposal; you may read and edit them as you will.
+
+@knowledge/backlog.md should only have tiny descriptions, not elaborate by any margin. They do not describe the implementation, they just clarify what the header means.
 
 # Transition
 
