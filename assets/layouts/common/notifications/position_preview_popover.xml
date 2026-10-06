@@ -1,0 +1,12 @@
+<!--
+    A custom starting position, previewed (knowledge/plans/challenge-notification.md §3): whose
+    turn it is, over a small board. It sizes itself - paddings in main.css, the board's size set by
+    PositionPreviewPopover, which also fills in the values.
+-->
+<vbox styleName="intellector-challenge-preview" verticalSpacing="6">
+    <hbox height="20" horizontalSpacing="6" horizontalAlign="center">
+        <image id="sideToMoveIcon" width="11" height="11" scaleMode="fitinside" verticalAlign="center" />
+        <label id="sideToMoveLabel" styleName="intellector-challenge-preview-turn" verticalAlign="center" />
+    </hbox>
+    <box id="boardSlot" horizontalAlign="center" />
+</vbox>

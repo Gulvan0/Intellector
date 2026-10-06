@@ -33,17 +33,4 @@ Player Profile) — and no dialog/overlay equivalent exists yet for any of them.
   `onWatchPlayerPressed`, `onPlayerProfilePressed` in `Main.hx`) specifically so they're easy to
   find and fill in later — bodies currently empty.
 
-## 3. Challenge notification widget (`challengesMenu`)
-
-**Why deferred:** the old `gfx.menubar.ChallengeList`/`ChallengeMenuIcon` (incoming/outgoing
-challenge list, live-updated via WS, blinking on incoming challenge) is its own subsystem that
-depends on login (whose challenges are "mine") and a dedicated WS channel — not just menu
-configuration.
-
-**How to apply:** once login exists, this would be a `Widget(componentFactory, true)`
-menu-bar-only entry (per `haxefolio.menu.MenuBarItem.Widget` — note `SideBarBuilder` never mirrors
-`Widget` items into the sidebar, so the mobile sidebar would need its own equivalent if this
-needs to be reachable on mobile too, unlike every `NormalMenu` here which mirrors automatically).
-Sits between the last left-side `NormalMenu` and the Account menu on the right, per the old
-layout (`scene_template.xml`: `<challenge-list id="challengesMenu" />` right before
-`<menu id="accountMenu">`).
+## 3. < Removed >

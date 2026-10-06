@@ -53,7 +53,7 @@ class RestOperationRegistry
 	public static final GET_MY_DIRECT_CHALLENGES = new GetOperaton<UnserializableArray<ChallengePublic>>("/challenge/my_direct");
 	public static final GET_CHALLENGE = new GetOperaton<ChallengePublic>("/challenge/{challenge_id}");
 	public static final CANCEL_CHALLENGE = new GenericRestOperation<NoPayload, NoResponse>("/challenge/{challenge_id}", Delete);
-	public static final ACCEPT_CHALLENGE = new GenericRestOperation<NoPayload, GamePublic>("/challenge/{challenge_id}/accept", Post);
+	public static final ACCEPT_CHALLENGE = new GenericRestOperation<NoPayload, GameSummaryPublic>("/challenge/{challenge_id}/accept", Post);
 	public static final DECLINE_CHALLENGE = new GenericRestOperation<NoPayload, NoResponse>("/challenge/{challenge_id}/decline", Post);
 
 	public static final GET_CURRENT_GAMES = new GenericRestOperation<GameFilter, UnserializableArray<GameSummaryPublic>>("/game/current", Post);

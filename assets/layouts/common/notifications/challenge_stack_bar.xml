@@ -1,0 +1,11 @@
+<!--
+    The top of a stack of two or more challenges (knowledge/plans/challenge-notification.md §5.3):
+    the count, Decline all (outlined like Decline: a reply goes out) and Hide all (carrying the
+    card's ✕: nothing is sent). Heights per breakpoint are in main.css. The count is filled in by
+    ChallengeStackBar.
+-->
+<hbox styleName="intellector-challenge-bar" width="100%" horizontalSpacing="6">
+    <label id="countLabel" styleName="intellector-challenge-bar-count" width="100%" verticalAlign="center" />
+    <button id="declineAllButton" text="{{intellector.challenge_notification.decline_all}}" styleName="intellector-challenge-bar-decline-all" verticalAlign="center" />
+    <button id="hideAllButton" text="{{intellector.challenge_notification.hide_all}}" styleName="intellector-challenge-bar-hide-all" verticalAlign="center" />
+</hbox>

@@ -1,0 +1,36 @@
+<notification-card caption="{{intellector.challenge_notification.challenge_from}}">
+    <vbox id="facts" styleName="intellector-challenge-facts" width="100%" verticalSpacing="1">
+        <hbox width="100%" horizontalSpacing="1">
+            <vbox styleName="intellector-challenge-fact" width="50%" height="56" verticalSpacing="4">
+                <label text="{{intellector.challenge_notification.time_control}}" styleName="intellector-challenge-fact-label" width="100%" height="14" />
+                <hbox width="100%" height="20">
+                    <time-control-tag id="timeControlTag" />
+                </hbox>
+            </vbox>
+            <vbox styleName="intellector-challenge-fact" width="50%" height="56" verticalSpacing="4">
+                <label text="{{intellector.challenge_notification.game}}" styleName="intellector-challenge-fact-label" width="100%" height="14" />
+                <hbox width="100%" height="20" horizontalSpacing="6">
+                    <label id="ratedLabel" styleName="intellector-challenge-fact-value" verticalAlign="center" />
+                </hbox>
+            </vbox>
+        </hbox>
+        <hbox width="100%" horizontalSpacing="1">
+            <vbox styleName="intellector-challenge-fact" width="50%" height="56" verticalSpacing="4">
+                <label text="{{intellector.challenge_notification.you_play}}" styleName="intellector-challenge-fact-label" width="100%" height="14" />
+                <hbox width="100%" height="20" horizontalSpacing="6">
+                    <image id="sideIcon" width="13" height="13" scaleMode="fitinside" verticalAlign="center" />
+                    <label id="sideLabel" styleName="intellector-challenge-fact-value" verticalAlign="center" />
+                </hbox>
+            </vbox>
+            <vbox styleName="intellector-challenge-fact" width="50%" height="56" verticalSpacing="4">
+                <label text="{{intellector.challenge_notification.position}}" styleName="intellector-challenge-fact-label" width="100%" height="14" />
+                <hbox id="positionValue" width="100%" height="20" horizontalSpacing="6">
+                    <label id="positionLabel" styleName="intellector-challenge-fact-value" verticalAlign="center" />
+                </hbox>
+            </vbox>
+        </hbox>
+    </vbox>
+
+    <action-button id="declineButton" text="{{intellector.challenge_notification.decline}}" />
+    <action-button id="acceptButton" text="{{intellector.challenge_notification.accept}}" primary="true" />
+</notification-card>

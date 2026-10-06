@@ -1,6 +1,6 @@
 package client.ui.common.board;
 
-import client.Assets;
+import client.ui.Assets;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;

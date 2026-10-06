@@ -7,6 +7,11 @@
         <resource path="assets/fonts" prefix="intellector/fonts" />
     </resources>
 
+    <components>
+        <!-- classes usable as XML layout tags (each needs a no-argument constructor) -->
+        <class name="client.ui.common.notifications.challenges.TimeControlTag" />
+    </components>
+
     <locales>
         <locale id="en">
             <resource path="intellector/locale/en.properties" />
@@ -18,12 +23,6 @@
 
     <themes>
         <default>
-            <!--
-                The site name label is HaxeFolio's one third-party face outside the ui/mono split
-                (see haxefolio's Typography section); Intellector's own choice replaces its Jost
-                default, per knowledge/intellector-style.md §9. Latin only - the site name itself
-                ("Intellector") is a literal string, never a localized/Cyrillic one.
-            -->
             <var name="site-name-family" value="intellector/fonts/MontserratAlternates-Medium.woff2" />
 
             <style resource="intellector/styles/main.css" priority="10" />

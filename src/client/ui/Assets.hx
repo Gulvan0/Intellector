@@ -1,5 +1,6 @@
-package client;
+package client.ui;
 
+import client.datatypes.TimeControlKind;
 import intellectorboard.primitives.piece.PieceKind;
 import intellectorboard.primitives.piece.PieceColor;
 
@@ -10,16 +11,22 @@ class Assets
         return 'assets/images/menubar/menu_items/$name.svg';
     }
 
+    public static function timeControlKindIcon(kind:TimeControlKind):String
+    {
+        return 'assets/images/common/time_controls/${kind.getName().toLowerCase()}.svg';
+    }
+
+    public static function colorIcon(color:Null<PieceColor>):String
+    {
+        var name:String = color != null? color.getName().toLowerCase() : "both";
+        return 'assets/images/common/piece_color_indicators/$name.svg';
+    }
+
     public static function pieceImage(kind:PieceKind, color:PieceColor):String
     {
         return 'assets/images/common/board/pieces/${kind}_${color}.svg';
     }
 
-    /*
-        Each piece kind's own SVG asset has a fixed aspect ratio (width/height of its own viewBox),
-        close enough between the white/black variants of the same kind to treat as one constant -
-        the couple-percent difference between color variants isn't visually distinguishable.
-    */
     public static function pieceAspectRatio(kind:PieceKind):Float
     {
         return switch kind {

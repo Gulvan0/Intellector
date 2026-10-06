@@ -1,0 +1,4 @@
+<hbox horizontalSpacing="6" verticalAlign="center">
+    <image id="kindIcon" width="18" height="18" scaleMode="fitinside" verticalAlign="center" />
+    <label id="valueLabel" styleName="intellector-challenge-time" verticalAlign="center" />
+</hbox>

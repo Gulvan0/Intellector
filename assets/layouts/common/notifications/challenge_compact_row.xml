@@ -1,0 +1,10 @@
+<!--
+    A waiting challenge in the stack (knowledge/plans/challenge-notification.md §5.1): caller, time
+    control, and - collapsed - how many more wait behind it. Heights per breakpoint are in main.css.
+    Values are filled in by ChallengeCompactRow.
+-->
+<hbox styleName="intellector-challenge-row" width="100%" horizontalSpacing="10">
+    <label id="nickname" styleName="intellector-challenge-row-nickname" width="100%" verticalAlign="center" />
+    <time-control-tag id="timeControlTag" compact="true" />
+    <label id="countPill" styleName="intellector-challenge-row-pill" verticalAlign="center" hidden="true" />
+</hbox>

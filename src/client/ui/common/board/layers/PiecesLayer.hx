@@ -1,6 +1,6 @@
 package client.ui.common.board.layers;
 
-import client.Assets;
+import client.ui.Assets;
 import client.ui.common.board.BoardGeometry;
 import client.ui.common.board.BoardPoint;
 import client.ui.common.board.BoardProjection;

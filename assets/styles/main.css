@@ -727,3 +727,235 @@
     font-size: 20px;
     color: #b5a892;
 }
+
+/*
+    Incoming challenge notification (knowledge/plans/challenge-notification.md): the active card,
+    the compact rows and the bar above them, and the position preview. Shadows are applied by
+    ElementShadow.
+*/
+
+/* the notification card's chrome (HaxeFolio's NotificationCard) in the theme's colours */
+.haxefolio-notification-card {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+}
+
+.haxefolio-notification-card-caption {
+    color: #6d6152;
+}
+
+.haxefolio-notification-card-title {
+    color: #2a211a;
+}
+
+.haxefolio-notification-card-close {
+    color: #6d6152;
+}
+
+.haxefolio-notification-card-close:hover,
+.haxefolio-notification-card-close:down {
+    background-color: #f0ebe2;
+    color: #2a211a;
+}
+
+.intellector-challenge-facts {
+    background-color: #e6dfd3;
+    border-radius: 6px;
+    padding: 1px;
+}
+
+.intellector-challenge-fact {
+    background-color: #f0ebe2;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.intellector-challenge-fact-label {
+    font-name: $ui-family-medium;
+    font-size: 11px;
+    color: #6d6152;
+}
+
+.intellector-challenge-fact-value {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-challenge-fact-value-emphasised {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+.intellector-challenge-time {
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-challenge-time-value {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+}
+
+.intellector-challenge-time-word {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+}
+
+.intellector-challenge-time-value.intellector-challenge-time-compact {
+    font-size: 13px;
+}
+
+.intellector-challenge-preview-toggle {
+    font-name: $ui-family-semibold;
+    font-size: 11px;
+    font-weight: 600;
+    color: #8a5a1f;
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    border-radius: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.intellector-challenge-preview-toggle:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-challenge-preview-toggle-selected,
+.intellector-challenge-preview-toggle-selected:hover {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+}
+
+.intellector-challenge-preview {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+    padding-top: 10px;
+    padding-bottom: 14px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.intellector-challenge-preview-turn {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-challenge-row {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.intellector-challenge-row {
+    height: 40px;
+}
+
+.intellector-challenge-row-collapsed {
+    height: 44px;
+}
+
+.intellector-challenge-row-hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-challenge-row-nickname {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-challenge-row-pill {
+    font-name: $mono-family-medium;
+    font-size: 11px;
+    color: #6d6152;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 10px;
+    height: 20px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 3px;
+}
+
+.intellector-challenge-bar {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    border-radius: 9px;
+    padding-left: 12px;
+    padding-right: 6px;
+}
+
+.intellector-challenge-bar {
+    height: 38px;
+}
+
+.intellector-challenge-bar-collapsed {
+    height: 44px;
+}
+
+.intellector-challenge-bar-count {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-challenge-bar-decline-all {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.intellector-challenge-bar-decline-all,
+.intellector-challenge-bar-hide-all {
+    height: 26px;
+}
+
+/* collapsed, Hide all's hit area fills the bar's height */
+.intellector-challenge-bar-collapsed .intellector-challenge-bar-hide-all {
+    height: 44px;
+}
+
+.intellector-challenge-bar-decline-all:hover {
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+.intellector-challenge-bar-hide-all {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.intellector-challenge-bar-hide-all:hover {
+    background-color: #e6dfd3;
+    color: #2a211a;
+}

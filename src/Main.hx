@@ -1,5 +1,5 @@
 import client.auth.AuthBootstrap;
-import client.Assets;
+import client.ui.Assets;
 import client.formatters.IdentityFormatters;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
@@ -16,11 +16,24 @@ import client.ui.analysis.AnalysisPage;
 import client.ui.game.LiveGamePage;
 import client.ui.profile.ProfilePage;
 import client.ui.challenge.ChallengeJoiningPage;
+import client.datatypes.IncomingChallenge;
+import client.ui.common.notifications.challenges.ChallengeNotificationStack;
+import easypubsub.Subscription;
+import net.models.challenge.mappers.IncomingChallengeMapper;
 import net.rest.Rest;
+import net.rest.RestOperationRegistry;
 import net.ws.PubSub;
+import net.ws.channels.IncomingChallenges;
+import net.ws.events.IncomingChallengeCancelled;
+import net.ws.events.IncomingChallengeReceived;
+import net.ws.events.IncomingChallengesCancelledByServer;
+import net.ws.events.IncomingChallengesRefresh;
 
 class Main
 {
+    private static var challengeStack:ChallengeNotificationStack;
+    private static var incomingChallengesSubscription:Null<Subscription<IncomingChallenges>> = null;
+
     public static function main():Void
     {
         var config:HaxeFolioConfig = HaxeFolioConfigBuilder.init("intellector", Preferences)
@@ -66,7 +79,8 @@ class Main
         var tokenRetriever:Void->Null<String> = HaxeFolioApp.valueStorage.read.bind(LocalStorageKey.TOKEN);
         Rest.init(tokenRetriever);
         PubSub.start(tokenRetriever, ActivityTracker.getLastActivityTs);
-        IdentityKeeper.init([refreshAccountMenu]);
+        challengeStack = new ChallengeNotificationStack(acceptChallenge, declineChallenge);
+        IdentityKeeper.init([refreshAccountMenu, subscribeToIncomingChallenges]);
         AuthBootstrap.run();
     }
 
@@ -92,5 +106,57 @@ class Main
         MenuFacade.setMenuItemHidden("account", "my_profile", newIdentity.isGuest());
         MenuFacade.setMenuItemHidden("account", "log_in", !newIdentity.isGuest());
         MenuFacade.setMenuItemHidden("account", "log_out", newIdentity.isGuest());
+    }
+
+    private static function subscribeToIncomingChallenges(identity:Identity):Void
+    {
+        if (incomingChallengesSubscription != null)
+        {
+            incomingChallengesSubscription.detach();
+            incomingChallengesSubscription = null;
+        }
+
+        challengeStack.reset();
+
+        var userRef:Null<String> = switch identity {
+            case Player(login, _): login;
+            case Guest(guestId): guestId != null ? '_$guestId' : null;
+        }
+
+        if (userRef == null)
+            return;
+
+        incomingChallengesSubscription = PubSub.sub(new IncomingChallenges(userRef))
+            .onEventLight(IncomingChallengesRefresh, refresh -> challengeStack.sync(refresh.challenges.map(IncomingChallengeMapper.dtoToDatatype)))
+            .onEventLight(IncomingChallengeReceived, challenge -> challengeStack.announce(IncomingChallengeMapper.dtoToDatatype(challenge)))
+            .onEventLight(IncomingChallengeCancelled, cancelled -> challengeStack.remove(cancelled.id))
+            .onEventLight(IncomingChallengesCancelledByServer, cancelled -> {
+                for (id in cancelled.ids)
+                    challengeStack.remove(id);
+            });
+    }
+
+    private static function acceptChallenge(challenge:IncomingChallenge):Void
+    {
+        Rest.client().execute(
+            RestOperationRegistry.ACCEPT_CHALLENGE,
+            game -> {
+                challengeStack.hideAll();
+                HaxeFolioApp.navigateTo('live/${game.id}');
+            },
+            _ -> challengeStack.acceptFailed(challenge.id),
+            ["challenge_id" => Std.string(challenge.id)]
+        );
+    }
+
+    // already off display; a failed decline leaves the challenge pending, see knowledge/plans/challenge_notification_deferred.md
+    private static function declineChallenge(challenge:IncomingChallenge):Void
+    {
+        Rest.client().execute(
+            RestOperationRegistry.DECLINE_CHALLENGE,
+            _ -> {},
+            _ -> {},
+            ["challenge_id" => Std.string(challenge.id)]
+        );
     }
 }
