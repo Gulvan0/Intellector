@@ -9,8 +9,12 @@ Example (illustrates all principles except for p. 1):
 */
 class SomeClass
 {
+    /** An one-liner docstring **/
+    public var requestCount:Int;
+
     /**
-        Some docstring
+        Some docstring.
+        Spans multiple lines.
     **/
     public static function someMethod(someArg:SomeType, someCallback:SomeCallbackArgType->OtherCallbackArgType->SomeCallbackReturnType):OtherType
     {
@@ -125,6 +129,12 @@ Do not use vertical alignment (extra spaces to align values into columns across 
 
 10. Comments
 
+Comments should only be used when you can't find a way to express the same thing in code. They tend to add noise to the code base.
+
+If the comment IS needed, only the crucial information, written in a concise and succinct manner, must be included and the unimportant details should be stripped. Comments should not be discursive, neither should they incorporate details having to do with planning, prompts, interaction with the programmer using the agent that has written the code. Comments should not include the information about how this piece of code or codebase in general used to look, only the present state should get described.
+
+If complementing the existing comment, make sure to rewrite it in a way that will keep it tight, losing the duplicated ideas or ideas that stopped being relevant.
+
 A comment that fits on one line uses `//`. A comment spanning more than one line uses `/* */` instead of several consecutive `//` lines: `/*` opens on its own line, `*/` closes on its own line, and the text in between is indented one level deeper than the delimiters (no leading `*` on each line). For example:
 
 ```
@@ -134,10 +144,19 @@ A comment that fits on one line uses `//`. A comment spanning more than one line
 */
 ```
 
-A doc comment documents the API contract of the class/field/method it's attached to (what a caller needs to know to use it correctly) rather than the implementation rationale behind it (which stays a regular comment, see p. 9). Doc comments use `/**` to open and `**/` to close (note the double star on both ends, unlike a regular multi-line comment's `*/`), formatted the same way otherwise: each on its own line, with the text in between indented one level deeper and no leading `*` per line. For example:
+A doc comment documents the API contract of the class/field/method it's attached to (what a caller needs to know to use it correctly). Doc comments should satisfy the same requirements in regard to conciseness and succinctness.
+
+Doc comments use `/**` to open and `**/` to close (note the double star on both ends, unlike a regular multi-line comment's `*/`), formatted the same way otherwise: each on its own line, with the text in between indented one level deeper and no leading `*` per line. For example:
 
 ```
 /**
-    What this method does and how a caller should use it.
+    What this method does.
+    How a caller should use it.
 **/
+```
+
+A single-line doc comment should fit on one line:
+
+```
+/** Short doc comment **/
 ```
