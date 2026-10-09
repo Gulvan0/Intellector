@@ -576,6 +576,24 @@
     Intellector-specific components (not framework-provided haxefolio-* classes).
 */
 
+/* the right padding plus the scroll area's reserved 10px lane matches the left one */
+.intellector-login-page {
+    vertical-spacing: 0;
+    padding-top: 18px;
+    padding-right: 12px;
+    padding-bottom: 14px;
+    padding-left: 22px;
+}
+
+.intellector-login-fields {
+    vertical-spacing: 14px;
+}
+
+.intellector-login-bottom {
+    margin-top: 18px;
+    vertical-spacing: 4px;
+}
+
 .intellector-login-status {
     height: 18px;
     font-name: $ui-family-medium;
@@ -601,6 +619,7 @@
     border: 1px solid #d8cfc0;
     border-radius: 14px;
     padding: 15px;
+    vertical-spacing: 12px;
 }
 
 .intellector-prompt-button {
@@ -611,6 +630,10 @@
 .intellector-prompt-button-labelled {
     border-radius: 8px;
     padding: 0px 18px;
+}
+
+.intellector-prompt-button-labelled-row {
+    horizontal-spacing: 18px;
 }
 
 .intellector-prompt-button-neutral {
@@ -687,6 +710,11 @@
     color: #8a5a1f;
 }
 
+/* the gap between the board and its control row */
+.intellector-interactive-board {
+    spacing: 8px;
+}
+
 /*
     Board control row (touch screens): annotation mode and promotion/chameleon toggles - chips,
     selection outlined (style guide §5.1), on a surface panel so the sunken chips have something
@@ -697,6 +725,7 @@
     border: 1px solid #d8cfc0;
     border-radius: 9px;
     padding: 6px;
+    spacing: 6px;
 }
 
 .intellector-board-control {
@@ -733,6 +762,11 @@
     the compact rows and the bar above them, and the position preview. Shadows are applied by
     ElementShadow.
 */
+
+.intellector-challenge-stack,
+.intellector-challenge-stack-rows {
+    vertical-spacing: 6px;
+}
 
 /* the notification card's chrome (HaxeFolio's NotificationCard) in the theme's colours */
 .haxefolio-notification-card {
@@ -805,7 +839,7 @@
     font-size: 13px;
 }
 
-.intellector-challenge-time-value.intellector-challenge-time-compact {
+.intellector-challenge-time-compact .intellector-challenge-time-value {
     font-size: 13px;
 }
 
@@ -827,8 +861,7 @@
     border-color: #bdb2a0;
 }
 
-.intellector-challenge-preview-toggle-selected,
-.intellector-challenge-preview-toggle-selected:hover {
+.intellector-challenge-preview-toggle:down {
     background-color: #f6e6c6;
     border: 1px solid #c79a56;
 }
@@ -841,6 +874,14 @@
     padding-bottom: 14px;
     padding-left: 16px;
     padding-right: 16px;
+}
+
+.haxefolio-expanded .intellector-challenge-preview {
+    margin-right: 10px;
+}
+
+.haxefolio-collapsed .intellector-challenge-preview {
+    margin-bottom: 8px;
 }
 
 .intellector-challenge-preview-turn {
@@ -856,18 +897,39 @@
     border-radius: 9px;
     padding-left: 14px;
     padding-right: 14px;
+    pointer-events: true;
 }
 
 .intellector-challenge-row {
     height: 40px;
 }
 
-.intellector-challenge-row-collapsed {
+.haxefolio-collapsed .intellector-challenge-row {
     height: 44px;
 }
 
-.intellector-challenge-row-hover {
+.intellector-challenge-row:hover {
     border-color: #bdb2a0;
+}
+
+/* a new arrival: highlighted, held, then faded back */
+@keyframes intellectorChallengeRowArrival {
+    0% {
+        background-color: #f6e6c6;
+        border-color: #c79a56;
+    }
+    78% {
+        background-color: #f6e6c6;
+        border-color: #c79a56;
+    }
+    100% {
+        background-color: #faf7f2;
+        border-color: #d8cfc0;
+    }
+}
+
+.intellector-challenge-row-arrived {
+    animation: intellectorChallengeRowArrival 1.8s linear 0s 1;
 }
 
 .intellector-challenge-row-nickname {
@@ -903,7 +965,7 @@
     height: 38px;
 }
 
-.intellector-challenge-bar-collapsed {
+.haxefolio-collapsed .intellector-challenge-bar {
     height: 44px;
 }
 
@@ -933,7 +995,7 @@
 }
 
 /* collapsed, Hide all's hit area fills the bar's height */
-.intellector-challenge-bar-collapsed .intellector-challenge-bar-hide-all {
+.haxefolio-collapsed .intellector-challenge-bar-hide-all {
     height: 44px;
 }
 

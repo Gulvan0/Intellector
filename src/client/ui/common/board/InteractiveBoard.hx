@@ -63,6 +63,7 @@ class InteractiveBoard extends Box
     {
         super();
         this.percentWidth = 100;
+        addClass(StyleClass.INTERACTIVE_BOARD);
 
         controlRow = new BoardControlRow(options, BoardPalette.DEFAULT);
         controlRow.onAnnotationModeChanged = onAnnotationModeChanged;
@@ -135,9 +136,6 @@ class InteractiveBoard extends Box
     private function setControlsBeside(beside:Bool):Void
     {
         layoutName = beside ? "horizontal" : "vertical";
-        customStyle.horizontalSpacing = StyleVars.BOARD_CONTROLS_GAP;
-        customStyle.verticalSpacing = StyleVars.BOARD_CONTROLS_GAP;
-        invalidateComponentStyle();
         controlRow.setVertical(beside);
     }
 

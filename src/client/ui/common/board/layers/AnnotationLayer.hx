@@ -68,10 +68,13 @@ class AnnotationLayer implements BoardLayer
     private function drawRing(ring:HexAnnotation):Void
     {
         var center:BoardPoint = projection.hexCenter(ring.hex);
-        var circle:SVGCircleBuilder = layer.svgCircle(center.x, center.y, StyleVars.BOARD_ANNOTATION_RING_RADIUS);
+        var radius:Float = StyleVars.BOARD_ANNOTATION_RING_RADIUS_SLU * BoardGeometry.SIDE_LENGTH;
+        var thickness:Float = StyleVars.BOARD_ANNOTATION_RING_THICKNESS_SLU * BoardGeometry.SIDE_LENGTH;
+
+        var circle:SVGCircleBuilder = layer.svgCircle(center.x, center.y, radius);
         circle.fill({color: "transparent"});
-        circle.stroke({color: palette.annotationMark(ring.color), thickness: StyleVars.BOARD_ANNOTATION_RING_THICKNESS});
-        circle.element.setAttribute("stroke-opacity", StyleVars.BOARD_ANNOTATION_OPACITY);
+        circle.stroke({color: palette.annotationMark(ring.color), thickness: thickness});
+        circle.element.setAttribute("stroke-opacity", Std.string(StyleVars.BOARD_ANNOTATION_OPACITY));
     }
 
     private function drawArrow(arrow:ArrowAnnotation):Void
@@ -83,6 +86,6 @@ class AnnotationLayer implements BoardLayer
             path.lineTo(vertices[i].x, vertices[i].y);
         path.close();
         path.fill({color: palette.annotationMark(arrow.color)});
-        path.element.setAttribute("fill-opacity", StyleVars.BOARD_ANNOTATION_OPACITY);
+        path.element.setAttribute("fill-opacity", Std.string(StyleVars.BOARD_ANNOTATION_OPACITY));
     }
 }

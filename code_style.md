@@ -135,6 +135,8 @@ If the comment IS needed, only the crucial information, written in a concise and
 
 If complementing the existing comment, make sure to rewrite it in a way that will keep it tight, losing the duplicated ideas or ideas that stopped being relevant.
 
+A comment that relates to a single line goes at the end of that line, separated by one space (`var x:Int = 5; // why`), not on its own line above it.
+
 A comment that fits on one line uses `//`. A comment spanning more than one line uses `/* */` instead of several consecutive `//` lines: `/*` opens on its own line, `*/` closes on its own line, and the text in between is indented one level deeper than the delimiters (no leading `*` on each line). For example:
 
 ```

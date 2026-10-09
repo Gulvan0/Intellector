@@ -1,0 +1,9 @@
+-cp src
+-cp test
+-main TestMain
+
+-lib utest
+-lib morestd
+-lib intellectorboard
+
+--interp

@@ -2,29 +2,27 @@ package client.ui.common.notifications.challenges;
 
 import client.datatypes.IncomingChallenge;
 import client.ui.Assets;
-import haxe.ui.components.Label;
+import haxefolio.AnchorPlacement;
+import haxefolio.Anchoring;
+import haxefolio.ByWidth;
 import haxefolio.notification.NotificationCard;
-
-using client.ui.ComponentExtension;
+import morestd.Detachable;
 
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/notifications/challenge_card.xml"))
 class ChallengeCard extends NotificationCard
 {
     public final challenge:IncomingChallenge;
 
-    private final collapsed:Bool;
-    private final previewToggle:Null<PreviewToggle>;
-
     private var preview:Null<PositionPreviewPopover> = null;
+    private var previewAnchoring:Null<Detachable> = null;
 
-    public function new(challenge:IncomingChallenge, collapsed:Bool, onClose:Void->Void, onDecline:Void->Void, onAccept:Void->Void)
+    public function new(challenge:IncomingChallenge, onClose:Void->Void, onDecline:Void->Void, onAccept:Void->Void)
     {
         super();
 
         this.challenge = challenge;
-        this.collapsed = collapsed;
 
-        // clips the cells' square corners to the grid's rounded ones
+        // clips the cells' square corners to the grid's rounded ones, which HaxeUI's clip: true doesn't
         facts.element.style.overflow = "hidden";
 
         title = challenge.callerNickname;
@@ -44,15 +42,8 @@ class ChallengeCard extends NotificationCard
 
         sideIcon.resource = Assets.colorIcon(challenge.acceptorColor.getColor());
 
-        if (isCustomPosition)
-        {
-            previewToggle = new PreviewToggle(togglePreview);
-            previewToggle.verticalAlign = "center";
-            positionLabel.percentWidth = 100;
-            positionValue.addComponent(previewToggle);
-        }
-        else
-            previewToggle = null;
+        previewToggle.hidden = !isCustomPosition;
+        previewToggle.onChange = _ -> updatePreview();
 
         declineButton.onClick = _ -> onDecline();
         acceptButton.onClick = _ -> onAccept();
@@ -66,44 +57,33 @@ class ChallengeCard extends NotificationCard
 
     public function closePreview():Void
     {
-        if (preview == null)
-            return;
-
-        detach(preview);
-        preview = null;
-        previewToggle.setClass(StyleClass.CHALLENGE_PREVIEW_TOGGLE_SELECTED, false);
+        previewToggle.selected = false;
     }
 
-    private function togglePreview():Void
+    private override function onDestroy():Void
     {
-        if (preview != null)
+        if (previewAnchoring != null)
+            previewAnchoring.detach();
+        super.onDestroy();
+    }
+
+    // shown while the toggle is selected
+    private function updatePreview():Void
+    {
+        if (preview == null)
         {
-            closePreview();
-            return;
+            if (!previewToggle.selected)
+                return;
+
+            preview = new PositionPreviewPopover(challenge.customStartingPosition, challenge.acceptorColor);
+            attach(preview);
+
+            var expanded:AnchorPlacement = {side: Left, align: End};
+            var collapsed:AnchorPlacement = {side: Above, align: Start, stretch: true};
+            var placement:ByWidth<AnchorPlacement> = {expanded: expanded, collapsed: collapsed};
+            previewAnchoring = Anchoring.attach(preview, this, placement);
         }
 
-        preview = new PositionPreviewPopover(challenge.customStartingPosition, challenge.acceptorColor);
-
-        // an attached component isn't sized by the card's layout
-        if (collapsed)
-            preview.width = width;
-
-        attach(preview);
-
-        // measured now to be placed by its real size; safe, as the card is already laid out
-        preview.validateNow();
-
-        if (collapsed)
-        {
-            preview.left = 0;
-            preview.top = -(preview.height + StyleVars.CHALLENGE_PREVIEW_GAP_COLLAPSED);
-        }
-        else
-        {
-            preview.left = -(preview.width + StyleVars.CHALLENGE_PREVIEW_GAP_EXPANDED);
-            preview.top = height - preview.height;
-        }
-
-        previewToggle.setClass(StyleClass.CHALLENGE_PREVIEW_TOGGLE_SELECTED, true);
+        preview.hidden = !previewToggle.selected;
     }
 }

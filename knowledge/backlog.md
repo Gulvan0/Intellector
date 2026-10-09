@@ -21,3 +21,5 @@ Haxefolio implementation + Turn color only active for Tree mode + Rename labels 
 ## Tests (board?)
 
 Deferred while implementing the board plan
+
+## Challenge notification: make the whole position grid clickable, not just "Preview" button

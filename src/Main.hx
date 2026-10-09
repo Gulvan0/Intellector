@@ -17,7 +17,8 @@ import client.ui.game.LiveGamePage;
 import client.ui.profile.ProfilePage;
 import client.ui.challenge.ChallengeJoiningPage;
 import client.datatypes.IncomingChallenge;
-import client.ui.common.notifications.challenges.ChallengeNotificationStack;
+import client.ui.StyleVars;
+import client.ui.common.notifications.challenges.IncomingChallengesController;
 import easypubsub.Subscription;
 import net.models.challenge.mappers.IncomingChallengeMapper;
 import net.rest.Rest;
@@ -31,7 +32,7 @@ import net.ws.events.IncomingChallengesRefresh;
 
 class Main
 {
-    private static var challengeStack:ChallengeNotificationStack;
+    private static var incomingChallenges:IncomingChallengesController;
     private static var incomingChallengesSubscription:Null<Subscription<IncomingChallenges>> = null;
 
     public static function main():Void
@@ -40,7 +41,7 @@ class Main
             .setAppIcon("assets/favicons/normal.png")
             .setSiteName("Intellector")
             .setDebounceMs(100)
-            .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}}) // outlined: brass shares the board's hue family (knowledge/intellector-style.md §5.1); field heights: §5.2/§5.4
+            .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}, shadows: StyleVars.HAXEFOLIO_SHADOWS}) // outlined: brass shares the board's hue family (knowledge/intellector-style.md §5.1); field heights: §5.2/§5.4
             .addLocale("en", "English")
             .addLocale("ru", "Русский")
             .addPage("home", params -> new HomePage(), true)
@@ -79,7 +80,7 @@ class Main
         var tokenRetriever:Void->Null<String> = HaxeFolioApp.valueStorage.read.bind(LocalStorageKey.TOKEN);
         Rest.init(tokenRetriever);
         PubSub.start(tokenRetriever, ActivityTracker.getLastActivityTs);
-        challengeStack = new ChallengeNotificationStack(acceptChallenge, declineChallenge);
+        incomingChallenges = new IncomingChallengesController(acceptChallenge, declineChallenge);
         IdentityKeeper.init([refreshAccountMenu, subscribeToIncomingChallenges]);
         AuthBootstrap.run();
     }
@@ -116,7 +117,7 @@ class Main
             incomingChallengesSubscription = null;
         }
 
-        challengeStack.reset();
+        incomingChallenges.reset();
 
         var userRef:Null<String> = switch identity {
             case Player(login, _): login;
@@ -127,12 +128,12 @@ class Main
             return;
 
         incomingChallengesSubscription = PubSub.sub(new IncomingChallenges(userRef))
-            .onEventLight(IncomingChallengesRefresh, refresh -> challengeStack.sync(refresh.challenges.map(IncomingChallengeMapper.dtoToDatatype)))
-            .onEventLight(IncomingChallengeReceived, challenge -> challengeStack.announce(IncomingChallengeMapper.dtoToDatatype(challenge)))
-            .onEventLight(IncomingChallengeCancelled, cancelled -> challengeStack.remove(cancelled.id))
+            .onEventLight(IncomingChallengesRefresh, refresh -> incomingChallenges.sync(refresh.challenges.map(IncomingChallengeMapper.dtoToDatatype)))
+            .onEventLight(IncomingChallengeReceived, challenge -> incomingChallenges.announce(IncomingChallengeMapper.dtoToDatatype(challenge)))
+            .onEventLight(IncomingChallengeCancelled, cancelled -> incomingChallenges.remove(cancelled.id))
             .onEventLight(IncomingChallengesCancelledByServer, cancelled -> {
                 for (id in cancelled.ids)
-                    challengeStack.remove(id);
+                    incomingChallenges.remove(id);
             });
     }
 
@@ -141,10 +142,10 @@ class Main
         Rest.client().execute(
             RestOperationRegistry.ACCEPT_CHALLENGE,
             game -> {
-                challengeStack.hideAll();
+                incomingChallenges.acceptSucceeded();
                 HaxeFolioApp.navigateTo('live/${game.id}');
             },
-            _ -> challengeStack.acceptFailed(challenge.id),
+            _ -> incomingChallenges.acceptFailed(challenge.id),
             ["challenge_id" => Std.string(challenge.id)]
         );
     }

@@ -64,12 +64,13 @@ class GlyphLayer implements BoardLayer
     private function drawMarker(marker:MoveMarker):Void
     {
         var center:BoardPoint = projection.hexCenter(marker.coords);
-        var circle:SVGCircleBuilder = layer.svgCircle(center.x, center.y, marker.capture ? StyleVars.BOARD_MARKER_RING_RADIUS : StyleVars.BOARD_MARKER_DOT_RADIUS);
+        var radiusInSideLengthUnits:Float = marker.capture ? StyleVars.BOARD_MARKER_RING_RADIUS_SLU : StyleVars.BOARD_MARKER_DOT_RADIUS_SLU;
+        var circle:SVGCircleBuilder = layer.svgCircle(center.x, center.y, radiusInSideLengthUnits * BoardGeometry.SIDE_LENGTH);
 
         if (marker.capture)
         {
             circle.fill({color: "transparent"});
-            circle.stroke({color: palette.moveMarker, thickness: StyleVars.BOARD_MARKER_RING_THICKNESS});
+            circle.stroke({color: palette.moveMarker, thickness: StyleVars.BOARD_MARKER_RING_THICKNESS_SLU * BoardGeometry.SIDE_LENGTH});
         }
         else
             circle.fill({color: palette.moveMarker});

@@ -18,15 +18,19 @@ class ArrowGeometry
         // toward the outline's clockwise side, where `capClockwise` is
         var orthogonal:BoardPoint = {x: unit.y, y: -unit.x};
 
-        var capBack:BoardPoint = {x: -unit.x * StyleVars.BOARD_ARROW_CAP_SIDE, y: -unit.y * StyleVars.BOARD_ARROW_CAP_SIDE};
+        var capSide:Float = StyleVars.BOARD_ARROW_CAP_SIDE_SLU * BoardGeometry.SIDE_LENGTH;
+        var trunkThickness:Float = StyleVars.BOARD_ARROW_TRUNK_THICKNESS_SLU * BoardGeometry.SIDE_LENGTH;
+        var startOffset:Float = StyleVars.BOARD_ARROW_START_OFFSET_SLU * BoardGeometry.SIDE_LENGTH;
+
+        var capBack:BoardPoint = {x: -unit.x * capSide, y: -unit.y * capSide};
         var capCounterclockwise:BoardPoint = add(to, rotated(capBack, -Math.PI / 6));
         var capClockwise:BoardPoint = add(to, rotated(capBack, Math.PI / 6));
 
-        var source:BoardPoint = add(from, scaled(unit, StyleVars.BOARD_ARROW_START_OFFSET));
-        var sourceClockwise:BoardPoint = add(source, scaled(orthogonal, StyleVars.BOARD_ARROW_TRUNK_THICKNESS / 2));
-        var sourceCounterclockwise:BoardPoint = add(source, scaled(orthogonal, -StyleVars.BOARD_ARROW_TRUNK_THICKNESS / 2));
+        var source:BoardPoint = add(from, scaled(unit, startOffset));
+        var sourceClockwise:BoardPoint = add(source, scaled(orthogonal, trunkThickness / 2));
+        var sourceCounterclockwise:BoardPoint = add(source, scaled(orthogonal, -trunkThickness / 2));
 
-        var jointInset:Float = (StyleVars.BOARD_ARROW_CAP_SIDE - StyleVars.BOARD_ARROW_TRUNK_THICKNESS) / 2;
+        var jointInset:Float = (capSide - trunkThickness) / 2;
         var jointClockwise:BoardPoint = add(capClockwise, scaled(orthogonal, -jointInset));
         var jointCounterclockwise:BoardPoint = add(capCounterclockwise, scaled(orthogonal, jointInset));
 

@@ -25,7 +25,8 @@
             <vbox styleName="intellector-challenge-fact" width="50%" height="56" verticalSpacing="4">
                 <label text="{{intellector.challenge_notification.position}}" styleName="intellector-challenge-fact-label" width="100%" height="14" />
                 <hbox id="positionValue" width="100%" height="20" horizontalSpacing="6">
-                    <label id="positionLabel" styleName="intellector-challenge-fact-value" verticalAlign="center" />
+                    <label id="positionLabel" styleName="intellector-challenge-fact-value" width="100%" verticalAlign="center" />
+                    <button id="previewToggle" text="{{intellector.challenge_notification.preview}}" styleName="intellector-challenge-preview-toggle" toggle="true" verticalAlign="center" hidden="true" />
                 </hbox>
             </vbox>
         </hbox>

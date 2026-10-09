@@ -63,16 +63,11 @@ class LoginForm extends VBox
         this.fieldOrder = [Login, Password];
 
         this.percentWidth = 100;
-        this.verticalSpacing = 0;
-        this.paddingTop = StyleVars.LOGIN_FORM_PADDING_TOP;
-        this.paddingRight = StyleVars.LOGIN_FORM_PADDING_RIGHT;
-        this.paddingBottom = StyleVars.LOGIN_FORM_PADDING_BOTTOM;
-        this.paddingLeft = StyleVars.LOGIN_FORM_PADDING_LEFT;
         this.addClass(StyleClass.LOGIN_PAGE);
 
         var fieldBox:VBox = new VBox();
         fieldBox.percentWidth = 100;
-        fieldBox.verticalSpacing = StyleVars.LOGIN_FORM_FIELD_SPACING;
+        fieldBox.addClass(StyleClass.LOGIN_FIELDS);
         this.addComponent(fieldBox);
 
         for (field in fieldOrder)
@@ -93,8 +88,7 @@ class LoginForm extends VBox
 
         var bottomBox:VBox = new VBox();
         bottomBox.percentWidth = 100;
-        bottomBox.marginTop = StyleVars.LOGIN_FORM_GAP_ABOVE_BOTTOM;
-        bottomBox.verticalSpacing = StyleVars.LOGIN_FORM_BOTTOM_SPACING;
+        bottomBox.addClass(StyleClass.LOGIN_BOTTOM);
         this.addComponent(bottomBox);
 
         rememberRow = new CheckBoxRow(LocaleUtils.localeBinding("intellector.overlay.login.remember_me"), _ -> {}, true);

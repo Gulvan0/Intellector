@@ -93,10 +93,6 @@ class BoardControlRow extends Box
         // centered along the board's side it sits on
         horizontalAlign = vertical ? null : "center";
         verticalAlign = vertical ? "center" : null;
-
-        customStyle.horizontalSpacing = StyleVars.BOARD_CONTROL_SPACING;
-        customStyle.verticalSpacing = StyleVars.BOARD_CONTROL_SPACING;
-        invalidateComponentStyle();
     }
 
     /** Syncs the buttons' selected states with `options` **/

@@ -21,8 +21,7 @@ class PositionPreviewPopover extends VBox
 
         sideToMoveLabel.text = GroupedLocaleResolvers.turnColor(position.turnColor);
 
-        boardSlot.width = StyleVars.CHALLENGE_PREVIEW_BOARD_WIDTH;
-        boardSlot.height = StyleVars.CHALLENGE_PREVIEW_BOARD_WIDTH * BoardGeometry.GRID_HEIGHT / BoardGeometry.GRID_WIDTH;
+        boardSlot.height = boardSlot.width * BoardGeometry.GRID_HEIGHT / BoardGeometry.GRID_WIDTH;
 
         var board:BoardSurface = new BoardSurface(position, acceptorColor.getColor() ?? White, NONE);
         boardSlot.addComponent(board);

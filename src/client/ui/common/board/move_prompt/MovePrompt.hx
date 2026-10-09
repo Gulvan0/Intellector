@@ -8,6 +8,7 @@ import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
 import haxe.ui.core.Screen;
 import haxefolio.ElementShadow;
+import haxefolio.Shadow;
 import haxefolio.LocaleUtils;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceColor;
@@ -147,7 +148,6 @@ class MovePrompt
         var popover:VBox = new VBox();
         popover.addClass(StyleClass.PROMPT_POPOVER);
         popover.width = StyleVars.MOVE_PROMPT_MORPH_POPOVER_WIDTH;
-        popover.verticalSpacing = StyleVars.MOVE_PROMPT_MORPH_POPOVER_SPACING;
         popover.addComponent(headerRow);
         popover.addComponent(become);
         popover.addComponent(stay);
@@ -176,7 +176,7 @@ class MovePrompt
             Screen.instance.removeComponent(root, true);
     }
 
-    private function new(board:BoardSurface, roots:Array<Component>, shadow:String, place:Void->Void, onCancelled:Void->Void)
+    private function new(board:BoardSurface, roots:Array<Component>, shadow:Shadow, place:Void->Void, onCancelled:Void->Void)
     {
         this.roots = roots;
         this.place = place;

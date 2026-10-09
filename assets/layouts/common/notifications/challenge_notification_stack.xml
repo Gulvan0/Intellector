@@ -1,0 +1,7 @@
+<!--
+    The incoming challenge notification (knowledge/plans/challenge-notification.md): the bar and the
+    active card are added around the rows by ChallengeNotificationStack.
+-->
+<vbox styleName="intellector-challenge-stack">
+    <vbox id="rowBox" styleName="intellector-challenge-stack-rows" width="100%" hidden="true" />
+</vbox>

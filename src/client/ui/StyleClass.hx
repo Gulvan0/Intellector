@@ -8,18 +8,15 @@ enum abstract StyleClass(String) from String to String
     var BOARD_CONTROL_SELECTED = "intellector-board-control-selected";
     var BOARD_CONTROLS = "intellector-board-controls";
     var BOARD_CONTROLS_SEPARATOR = "intellector-board-controls-separator";
+    var INTERACTIVE_BOARD = "intellector-interactive-board";
 
-    var CHALLENGE_BAR_COLLAPSED = "intellector-challenge-bar-collapsed";
     var CHALLENGE_FACT_VALUE_EMPHASISED = "intellector-challenge-fact-value-emphasised";
-    var CHALLENGE_PREVIEW_TOGGLE = "intellector-challenge-preview-toggle";
-    var CHALLENGE_PREVIEW_TOGGLE_SELECTED = "intellector-challenge-preview-toggle-selected";
-    var CHALLENGE_ROW_COLLAPSED = "intellector-challenge-row-collapsed";
-    var CHALLENGE_ROW_HOVER = "intellector-challenge-row-hover";
-    var CHALLENGE_STACK = "intellector-challenge-stack";
-    var CHALLENGE_TIME_COMPACT = "intellector-challenge-time-compact";
+    var CHALLENGE_ROW_ARRIVED = "intellector-challenge-row-arrived";
     var CHALLENGE_TIME_VALUE = "intellector-challenge-time-value";
     var CHALLENGE_TIME_WORD = "intellector-challenge-time-word";
 
+    var LOGIN_BOTTOM = "intellector-login-bottom";
+    var LOGIN_FIELDS = "intellector-login-fields";
     var LOGIN_PAGE = "intellector-login-page";
     var LOGIN_STATUS = "intellector-login-status";
     var LOGIN_STATUS_ERROR = "intellector-login-status-error";
@@ -31,6 +28,7 @@ enum abstract StyleClass(String) from String to String
     var PROMPT_BUTTON_EMPHASISED = "intellector-prompt-button-emphasised";
     var PROMPT_BUTTON_LABEL = "intellector-prompt-button-label";
     var PROMPT_BUTTON_LABELLED = "intellector-prompt-button-labelled";
+    var PROMPT_BUTTON_LABELLED_ROW = "intellector-prompt-button-labelled-row";
     var PROMPT_BUTTON_NEUTRAL = "intellector-prompt-button-neutral";
     var PROMPT_BUTTON_PRESSED = "intellector-prompt-button-pressed";
     var PROMPT_BUTTON_ROUND = "intellector-prompt-button-round";

@@ -29,7 +29,7 @@ class CoordinateLabelsLayer implements BoardLayer
     /** The height of the file-letter strip below the grid in `mode`; 0 if there's none **/
     public static function stripHeight(mode:BoardCoordinatesMode):Float
     {
-        return mode == NONE ? 0 : StyleVars.BOARD_FILE_LETTER_GAP + StyleVars.BOARD_FILE_LETTER_ROW_HEIGHT;
+        return mode == NONE ? 0 : (StyleVars.BOARD_FILE_LETTER_GAP_SLU + StyleVars.BOARD_FILE_LETTER_ROW_HEIGHT_SLU) * BoardGeometry.SIDE_LENGTH;
     }
 
     public function setMode(mode:BoardCoordinatesMode):Void
@@ -61,9 +61,12 @@ class CoordinateLabelsLayer implements BoardLayer
         var center:BoardPoint = projection.hexCenter(coords);
         var rowNumber:Int = 7 - coords.j - coords.i % 2;
 
-        var label:SVGTextBuilder = layer.svgText('$rowNumber', center.x - StyleVars.BOARD_ROW_NUMBER_INSET, center.y);
+        var inset:Float = StyleVars.BOARD_ROW_NUMBER_INSET_SLU * BoardGeometry.SIDE_LENGTH;
+
+        var label:SVGTextBuilder = layer.svgText('$rowNumber', center.x - inset, center.y);
         label.fill({color: coords.isDark() ? palette.rowNumber.dark : palette.rowNumber.light});
-        label.font({size: Std.int(StyleVars.BOARD_ROW_NUMBER_FONT_SIZE), anchor: "start"});
+        label.font({anchor: "start"});
+        label.element.setAttribute("font-size", Std.string(StyleVars.BOARD_ROW_NUMBER_FONT_SIZE_SLU * BoardGeometry.SIDE_LENGTH));
         label.element.setAttribute("dominant-baseline", "central");
         label.element.setAttribute("font-weight", "bold");
     }
@@ -77,11 +80,12 @@ class CoordinateLabelsLayer implements BoardLayer
 
             // per file: adjoining files' bottom hexes sit at different heights
             var bottomBorderY:Float = center.y + BoardGeometry.HEX_HEIGHT / 2;
-            var y:Float = bottomBorderY + StyleVars.BOARD_FILE_LETTER_GAP + StyleVars.BOARD_FILE_LETTER_ROW_HEIGHT / 2;
+            var y:Float = bottomBorderY + (StyleVars.BOARD_FILE_LETTER_GAP_SLU + StyleVars.BOARD_FILE_LETTER_ROW_HEIGHT_SLU / 2) * BoardGeometry.SIDE_LENGTH;
 
             var label:SVGTextBuilder = layer.svgText(String.fromCharCode('a'.code + i), center.x, y);
             label.fill({color: palette.fileLetter});
-            label.font({size: Std.int(StyleVars.BOARD_FILE_LETTER_FONT_SIZE), anchor: "middle"});
+            label.font({anchor: "middle"});
+        label.element.setAttribute("font-size", Std.string(StyleVars.BOARD_FILE_LETTER_FONT_SIZE_SLU * BoardGeometry.SIDE_LENGTH));
             label.element.setAttribute("dominant-baseline", "central");
             label.element.setAttribute("font-weight", "bold");
         }

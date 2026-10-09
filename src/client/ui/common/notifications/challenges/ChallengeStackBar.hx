@@ -6,12 +6,9 @@ import haxefolio.LocaleUtils;
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/notifications/challenge_stack_bar.xml"))
 class ChallengeStackBar extends HBox
 {
-    public function new(collapsed:Bool, onDeclineAll:Void->Void, onHideAll:Void->Void)
+    public function new(onDeclineAll:Void->Void, onHideAll:Void->Void)
     {
         super();
-
-        if (collapsed)
-            addClass(StyleClass.CHALLENGE_BAR_COLLAPSED);
 
         declineAllButton.onClick = _ -> onDeclineAll();
         hideAllButton.onClick = _ -> onHideAll();

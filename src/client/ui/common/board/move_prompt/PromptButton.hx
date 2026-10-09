@@ -95,7 +95,7 @@ class PromptButton extends Box
         var row:HBox = new HBox();
         row.percentWidth = 100;
         row.verticalAlign = "center";
-        row.horizontalSpacing = StyleVars.MOVE_PROMPT_LABELLED_BUTTON_SPACING;
+        row.addClass(StyleClass.PROMPT_BUTTON_LABELLED_ROW);
         // inherited by the subtree, so the button is always the event target
         row.element.style.pointerEvents = "none";
 
