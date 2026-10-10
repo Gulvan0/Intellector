@@ -59,10 +59,13 @@ class ChallengesController
         render();
     }
 
-    /** A new incoming challenge: notified, unless the widget's dropdown is open **/
+    /**
+        A new incoming challenge: notified, unless the widget's dropdown is open or incoming
+        challenges are ignored (then it's only listed, already seen)
+    **/
     public function receiveIncoming(challenge:IncomingChallenge):Void
     {
-        var newIds:Array<Int> = newIncomingIds(() -> inbox.receive(challenge, !widget.dropdown.isOpen));
+        var newIds:Array<Int> = newIncomingIds(() -> inbox.receive(challenge, notifies()));
         render();
         highlightInDropdown(newIds);
     }
@@ -70,7 +73,7 @@ class ChallengesController
     /** See `ChallengeInbox.syncIncoming` **/
     public function syncIncoming(pending:Array<IncomingChallenge>):Void
     {
-        var newIds:Array<Int> = newIncomingIds(() -> inbox.syncIncoming(pending, !widget.dropdown.isOpen));
+        var newIds:Array<Int> = newIncomingIds(() -> inbox.syncIncoming(pending, notifies()));
         render();
         highlightInDropdown(newIds);
     }
@@ -216,6 +219,11 @@ class ChallengesController
     {
         inbox.markSeen();
         render();
+    }
+
+    private function notifies():Bool
+    {
+        return !widget.dropdown.isOpen && !Preferences.silentChallenges.get();
     }
 
     // the ids `change` adds to the pending incoming challenges
