@@ -10,9 +10,3 @@ page (which decides "an ongoing game is open") isn't built, so the check is stub
 
 **How to apply:** replace `Main.isOngoingGameOpen` with the live game page's state. Only the tab
 `GameRedirect` picks gets to decide ([[multi_tab_challenges_plan]] §1).
-
-## 2. Ongoing games widget
-
-**Why deferred:** requested together with item 1 but not designed.
-
-**How to apply:** design it as another `DropdownWidget` in the menu bar.

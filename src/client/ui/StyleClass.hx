@@ -20,6 +20,13 @@ enum abstract StyleClass(String) from String to String
     var CHALLENGE_TIME_VALUE = "intellector-challenge-time-value";
     var CHALLENGE_TIME_WORD = "intellector-challenge-time-word";
 
+    var GAME_ENTRY_CLOCK_RUNNING = "intellector-game-entry-clock-running";
+    var GAME_ENTRY_FACT_EMPHASISED = "intellector-game-entry-fact-emphasised";
+    var GAME_ENTRY_FIRST = "intellector-game-entry-first";
+    var GAME_ENTRY_GROUP_BOUNDARY = "intellector-game-entry-group-boundary";
+    var GAME_ENTRY_TURN_OWN_TIMED = "intellector-game-entry-turn-own-timed";
+    var GAME_ENTRY_TURN_OWN_CORRESPONDENCE = "intellector-game-entry-turn-own-correspondence";
+
     var LOGIN_BOTTOM = "intellector-login-bottom";
     var LOGIN_FIELDS = "intellector-login-fields";
     var LOGIN_PAGE = "intellector-login-page";

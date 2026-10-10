@@ -7,6 +7,7 @@ import haxefolio.Anchoring;
 import haxefolio.LocaleUtils;
 import haxefolio.ResponsivityController;
 import haxefolio.menu.DropdownWidget;
+import intellectorboard.primitives.piece.PieceColor;
 import morestd.Detachable;
 
 /**
@@ -105,13 +106,13 @@ class ChallengesWidget
 
         if (ResponsivityController.isCollapsed)
         {
-            preview = new PositionPreviewPopover(entry.customStartingPosition, entry.ownColor, entry.previewTitle(), closePreview);
+            preview = new PositionPreviewPopover(entry.customStartingPosition, entry.ownColor.getColor() ?? White, entry.previewTitle(), closePreview);
             preview.addClass(StyleClass.CHALLENGE_PREVIEW_COVER);
             dropdown.setCover(preview);
         }
         else
         {
-            preview = new PositionPreviewPopover(entry.customStartingPosition, entry.ownColor, entry.previewTitle());
+            preview = new PositionPreviewPopover(entry.customStartingPosition, entry.ownColor.getColor() ?? White, entry.previewTitle());
             dropdown.attach(preview);
 
             var placement:AnchorPlacement = {side: Left, align: Start};

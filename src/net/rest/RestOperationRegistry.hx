@@ -25,6 +25,7 @@ import net.models.game.GameSendChatMessagePayload;
 import net.models.game.GameFilter;
 import net.models.game.internal.InternalGameAppendPlyPayload;
 import net.models.game.internal.InternalGamePerformOfferActionPayload;
+import net.models.game.internal.InternalGameResignPayload;
 import net.models.game.external.ExternalGameAppendPlyResponse;
 import net.models.game.GamePublic;
 import net.models.game.GameSummaryPublic;
@@ -71,6 +72,7 @@ class RestOperationRegistry
 		InternalGameAppendPlyResponse>("/game/internal/append_ply", Post);
 	public static final PERFORM_OFFER_ACTION_IN_INTERNAL_GAME = new GenericRestOperation<InternalGamePerformOfferActionPayload,
 		NoResponse>("/game/internal/perform_offer_action", Post);
+	public static final RESIGN_INTERNAL_GAME = new GenericRestOperation<InternalGameResignPayload, NoResponse>("/game/internal/resign", Post);
 
 	public static final CHECK_COMPATIBILITY = new GenericRestOperation<CompatibilityCheckPayload, CompatibilityResponse>("/check_compatibility", Post);
 

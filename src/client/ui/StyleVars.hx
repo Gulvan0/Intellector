@@ -25,6 +25,13 @@ class StyleVars
     public static final CHALLENGE_ROW_SHADOW:Shadow = {offsetX: 0, offsetY: 2, blur: 10, color: SHADOW_COLOR, opacity: 0.08};
     public static final CHALLENGE_PREVIEW_SHADOW:Shadow = {offsetX: 0, offsetY: 8, blur: 28, color: SHADOW_COLOR, opacity: 0.16};
 
+    public static inline final GAMES_DROPDOWN_WIDTH:Int = 372;
+    public static inline final GAMES_ICON_HEXAGONS:String = "#bdb2a0";
+    public static inline final GAMES_ICON_PIECE:String = "#2a211a";
+    public static inline final GAMES_ICON_PIECE_MUTED:String = "#6d6152";
+    public static inline final GAMES_ICON_HALO:String = "#f2eee6"; // the menu bar
+    public static inline final GAMES_ICON_HALO_OPEN:String = "#f0ebe2"; // the open target
+
     public static inline final BOARD_DEFAULT_BASE_FILL_LIGHT:String = "#ffcf9f";
     public static inline final BOARD_DEFAULT_BASE_FILL_DARK:String = "#d18b47";
     public static inline final BOARD_DEFAULT_BORDER:String = "#664126";

@@ -5,16 +5,16 @@ class PieceColorMapper
     public static function datatypeToDto(datatype:intellectorboard.primitives.piece.PieceColor):net.models.common.PieceColor
     {
         return switch datatype {
-            case White: WHITE
-            case Black: BLACK
+            case White: WHITE;
+            case Black: BLACK;
         }
     }
 
     public static function dtoToDatatype(dto:net.models.common.PieceColor):intellectorboard.primitives.piece.PieceColor
     {
         return switch dto {
-            case WHITE: White
-            case BLACK: Black
+            case WHITE: White;
+            case BLACK: Black;
         }
     }
 }

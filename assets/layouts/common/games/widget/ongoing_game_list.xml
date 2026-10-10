@@ -1,0 +1,18 @@
+<!--
+    The ongoing games widget's dropdown content (knowledge/plans/ongoing_games_widget_plan.md):
+    Timed, then Correspondence, each with its count, its games, or a line saying it's empty.
+-->
+<vbox styleName="intellector-challenge-list" width="100%">
+    <hbox styleName="intellector-challenge-list-header" width="100%">
+        <label text="{{intellector.games_widget.timed}}" styleName="intellector-challenge-list-header-name" verticalAlign="center" />
+        <label id="timedCount" styleName="intellector-challenge-list-header-count" verticalAlign="center" />
+    </hbox>
+    <vbox id="timedEntries" styleName="intellector-challenge-list-entries" width="100%" />
+    <label id="noTimed" text="{{intellector.games_widget.no_timed}}" styleName="intellector-challenge-list-empty" width="100%" />
+    <hbox styleName="intellector-challenge-list-header intellector-game-list-header-divided" width="100%">
+        <label text="{{intellector.games_widget.correspondence}}" styleName="intellector-challenge-list-header-name" verticalAlign="center" />
+        <label id="correspondenceCount" styleName="intellector-challenge-list-header-count" verticalAlign="center" />
+    </hbox>
+    <vbox id="correspondenceEntries" styleName="intellector-challenge-list-entries" width="100%" />
+    <label id="noCorrespondence" text="{{intellector.games_widget.no_correspondence}}" styleName="intellector-challenge-list-empty" width="100%" />
+</vbox>

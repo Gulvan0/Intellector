@@ -1276,3 +1276,123 @@
     border-radius: 9px;
     margin-bottom: 0px;
 }
+
+/*
+    Ongoing games widget (knowledge/plans/ongoing_games_widget_plan.md): what differs from the
+    challenges widget, whose list, header, fact and button classes it shares.
+*/
+
+.intellector-game-list-header-divided {
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-game-entry {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+    vertical-spacing: 6px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-game-entry-first {
+    border-top-width: 0px;
+    border-top-size: 0px;
+}
+
+/* the first game on the opponent's move after the ones on the user's */
+.intellector-game-entry-group-boundary {
+    border-top: 1px solid #d8cfc0;
+}
+
+.intellector-game-entry-head {
+    horizontal-spacing: 8px;
+}
+
+/* an empty slot on the opponent's move */
+.intellector-game-entry-turn {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.intellector-game-entry-turn-own-timed {
+    background-color: #2a211a;
+}
+
+.intellector-game-entry-turn-own-correspondence {
+    border: 1.6px solid #2a211a;
+}
+
+.intellector-game-entry-fact-group {
+    height: 20px;
+    horizontal-spacing: 6px;
+}
+
+.haxefolio-collapsed .intellector-game-entry-fact-group {
+    height: 28px;
+}
+
+.intellector-game-entry-fact {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-entry-fact-emphasised {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #2a211a;
+}
+
+/* no visible border until selected: the dropdown's own colour */
+.intellector-game-entry-preview {
+    border: 1px solid #faf7f2;
+}
+
+.haxefolio-collapsed .intellector-challenge-entry-facts .intellector-game-entry-preview {
+    height: 28px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.intellector-game-entry-footer {
+    horizontal-spacing: 8px;
+    vertical-spacing: 6px;
+}
+
+.intellector-game-entry-clocks {
+    horizontal-spacing: 12px;
+}
+
+.intellector-game-entry-clock-group {
+    horizontal-spacing: 5px;
+}
+
+.intellector-game-entry-clock {
+    font-name: $mono-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-entry-clock-running {
+    color: #2a211a;
+    text-decoration: underline;
+}
+
+.intellector-game-entry-last-move {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-entry-open {
+    font-size: 13px;
+}
+
+.haxefolio-collapsed .intellector-game-entry-open {
+    width: 100%;
+}

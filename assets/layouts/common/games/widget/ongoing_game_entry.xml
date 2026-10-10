@@ -1,0 +1,43 @@
+<!--
+    An ongoing game in the ongoing games widget (knowledge/plans/ongoing_games_widget_plan.md): the
+    turn marker, opponent and time control; the facts with the Preview button; the clocks (or the
+    time of the last move) with Open game, stacked on a narrow screen.
+-->
+<vbox styleName="intellector-game-entry" width="100%">
+    <hbox width="100%" styleName="intellector-game-entry-head">
+        <box id="turnMarker" styleName="intellector-game-entry-turn" verticalAlign="center" />
+        <label id="opponentLabel" styleName="intellector-challenge-entry-opponent" width="100%" verticalAlign="center" />
+        <time-control-tag id="timeControlTag" styleName="intellector-challenge-time-compact" hidden="true" />
+    </hbox>
+    <hbox styleName="intellector-challenge-entry-facts" width="100%">
+        <hbox styleName="intellector-challenge-entry-fact-flow" width="100%" continuous="true">
+            <hbox styleName="intellector-game-entry-fact-group">
+                <image id="colorIcon" width="11" height="11" scaleMode="fitinside" verticalAlign="center" />
+                <label id="colorLabel" styleName="intellector-game-entry-fact" verticalAlign="center" />
+            </hbox>
+            <hbox styleName="intellector-game-entry-fact-group">
+                <label text="·" styleName="intellector-challenge-entry-separator" verticalAlign="center" />
+                <label id="ratedLabel" styleName="intellector-game-entry-fact" verticalAlign="center" />
+            </hbox>
+            <hbox styleName="intellector-game-entry-fact-group">
+                <label text="·" styleName="intellector-challenge-entry-separator" verticalAlign="center" />
+                <label id="moveLabel" styleName="intellector-game-entry-fact" verticalAlign="center" />
+            </hbox>
+        </hbox>
+        <button id="previewToggle" text="{{intellector.games_widget.preview}}" styleName="intellector-challenge-preview-toggle intellector-game-entry-preview" toggle="true" verticalAlign="top" />
+    </hbox>
+    <box id="footer" styleName="intellector-game-entry-footer" width="100%">
+        <hbox id="clocks" styleName="intellector-game-entry-clocks" width="100%" verticalAlign="center">
+            <hbox styleName="intellector-game-entry-clock-group">
+                <image id="ownClockIcon" width="11" height="11" scaleMode="fitinside" verticalAlign="center" />
+                <label id="ownClockLabel" styleName="intellector-game-entry-clock" verticalAlign="center" />
+            </hbox>
+            <hbox styleName="intellector-game-entry-clock-group">
+                <image id="opponentClockIcon" width="11" height="11" scaleMode="fitinside" verticalAlign="center" />
+                <label id="opponentClockLabel" styleName="intellector-game-entry-clock" verticalAlign="center" />
+            </hbox>
+        </hbox>
+        <label id="lastMoveLabel" styleName="intellector-game-entry-last-move" width="100%" verticalAlign="center" hidden="true" />
+        <button id="openButton" styleName="intellector-challenge-entry-action intellector-game-entry-open" />
+    </box>
+</vbox>

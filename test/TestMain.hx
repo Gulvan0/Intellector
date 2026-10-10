@@ -1,5 +1,8 @@
 import client.datatypes.ChallengeInboxTest;
 import client.datatypes.ChallengeQueueTest;
+import client.datatypes.GameClockTest;
+import client.datatypes.OngoingGameOrderingTest;
+import client.formatters.ClockFormattersTest;
 import client.ui.common.board.BoardGeometryTest;
 import client.ui.common.board.BoardInputOptionsTest;
 import client.ui.common.board.BoardProjectionTest;
@@ -26,6 +29,9 @@ class TestMain
             new ChallengeQueueTest(),
             new ChallengeInboxTest(),
             new ChallengeStackLayoutTest(),
+            new GameClockTest(),
+            new OngoingGameOrderingTest(),
+            new ClockFormattersTest(),
             new BoardGeometryTest(),
             new BoardProjectionTest(),
             new BoardInputOptionsTest(),

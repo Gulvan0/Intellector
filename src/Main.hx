@@ -28,6 +28,8 @@ import client.datatypes.StartedGame;
 import client.ui.StyleVars;
 import client.ui.common.challenges.ChallengesController;
 import client.ui.common.challenges.widget.ChallengesWidget;
+import client.ui.common.games.OngoingGamesController;
+import client.ui.common.games.widget.OngoingGamesWidget;
 import client.ui.common.notifications.GameStartedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import easypubsub.Subscription;
@@ -36,11 +38,13 @@ import http.HttpError;
 import net.models.challenge.mappers.IncomingChallengeMapper;
 import net.models.challenge.mappers.OutgoingChallengeMapper;
 import net.models.challenge.mappers.StartedGameMapper;
+import net.models.game.mappers.OngoingGameMapper;
 import net.rest.Rest;
 import net.rest.RestOperationRegistry;
 import net.ws.PubSub;
 import net.ws.channels.IncomingChallenges;
 import net.ws.channels.OutgoingChallenges;
+import net.ws.channels.PlayerOngoingGames;
 import net.ws.events.IncomingChallengeAccepted;
 import net.ws.events.IncomingChallengeCancelled;
 import net.ws.events.IncomingChallengeDeclined;
@@ -53,6 +57,10 @@ import net.ws.events.OutgoingChallengeCreated;
 import net.ws.events.OutgoingChallengeRejected;
 import net.ws.events.OutgoingChallengesCancelledByServer;
 import net.ws.events.OutgoingChallengesRefresh;
+import net.ws.events.OngoingGameEnded;
+import net.ws.events.OngoingGameStarted;
+import net.ws.events.OngoingGameUpdated;
+import net.ws.events.PlayerOngoingGamesRefresh;
 
 class Main
 {
@@ -61,6 +69,9 @@ class Main
     private static var incomingChallengesSubscription:Null<Subscription<IncomingChallenges>> = null;
     private static var outgoingChallengesSubscription:Null<Subscription<OutgoingChallenges>> = null;
     private static var challengesUserRef:Null<String> = null;
+    private static var ongoingGamesWidget:OngoingGamesWidget;
+    private static var ongoingGames:OngoingGamesController;
+    private static var ongoingGamesSubscription:Null<Subscription<PlayerOngoingGames>> = null;
 
     public static function main():Void
     {
@@ -94,6 +105,7 @@ class Main
             .addNormalMenuItem("social", "vk", Link("https://vk.com/intellectorgroup", true), Assets.menuItemIcon("vk"))
             .addNormalMenuItem("social", "discord", Link("https://discord.gg/f8chehcnV5", true), Assets.menuItemIcon("discord"))
             .addNormalMenuItem("social", "iteration", Link("https://t.me/iteracia_club", true), Assets.menuItemIcon("iteration"))
+            .addRightMenubarItem(Widget(createOngoingGamesWidget, true))
             .addRightMenubarItem(Widget(createChallengesWidget, true))
             .addRightMenubarItem(NormalMenu("account", []))
             .addNormalMenuItem("account", "my_profile", NavigateTo(getMyProfilePath), Assets.menuItemIcon("my_profile"), null, true)
@@ -112,8 +124,11 @@ class Main
         PubSub.start(tokenRetriever, ActivityTracker.getLastActivityTs);
         challenges = new ChallengesController(challengesWidget, acceptChallenge, declineChallenge, cancelChallenge, saveChallengeMarks);
         ChallengeMarksStorage.addExternalChangeHandler(() -> challengesUserRef, challenges.applyMarks);
+        ongoingGames = new OngoingGamesController(ongoingGamesWidget);
+        ongoingGamesWidget.onOpen = gameId -> HaxeFolioApp.navigateTo('live/$gameId');
+        ongoingGamesWidget.currentGameId = () -> LiveGamePage.openGameId;
         GameRedirect.init(openStartedGame);
-        IdentityKeeper.init([refreshAccountMenu, subscribeToChallenges]);
+        IdentityKeeper.init([refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);
         AuthBootstrap.run();
     }
 
@@ -141,6 +156,12 @@ class Main
         MenuFacade.setMenuItemHidden("account", "log_out", newIdentity.isGuest());
     }
 
+    private static function createOngoingGamesWidget():Component
+    {
+        ongoingGamesWidget = new OngoingGamesWidget();
+        return ongoingGamesWidget.dropdown;
+    }
+
     private static function createChallengesWidget():Component
     {
         challengesWidget = new ChallengesWidget();
@@ -164,11 +185,7 @@ class Main
         challengesUserRef = null;
         challenges.reset();
 
-        var userRef:Null<String> = switch identity {
-            case Player(login, _): login;
-            case Guest(guestId): guestId != null ? '_$guestId' : null;
-        }
-
+        var userRef:Null<String> = userRefOf(identity);
         if (userRef == null)
             return;
 
@@ -196,6 +213,35 @@ class Main
                 for (id in cancelled.ids)
                     challenges.removeOutgoing(id);
             });
+    }
+
+    private static function subscribeToOngoingGames(identity:Identity):Void
+    {
+        if (ongoingGamesSubscription != null)
+        {
+            ongoingGamesSubscription.detach();
+            ongoingGamesSubscription = null;
+        }
+
+        ongoingGames.reset();
+
+        var userRef:Null<String> = userRefOf(identity);
+        if (userRef == null)
+            return;
+
+        ongoingGamesSubscription = PubSub.sub(new PlayerOngoingGames(userRef))
+            .onEventLight(PlayerOngoingGamesRefresh, refresh -> ongoingGames.sync([for (game in refresh.current_games) OngoingGameMapper.dtoToDatatype(game, userRef)]))
+            .onEventLight(OngoingGameStarted, game -> ongoingGames.add(OngoingGameMapper.startedToDatatype(game, userRef)))
+            .onEventLight(OngoingGameUpdated, update -> ongoingGames.update(update.game_id, game -> OngoingGameMapper.applyUpdate(game, update)))
+            .onEventLight(OngoingGameEnded, ended -> ongoingGames.remove(ended.id));
+    }
+
+    private static function userRefOf(identity:Identity):Null<String>
+    {
+        return switch identity {
+            case Player(login, _): login;
+            case Guest(guestId): guestId != null ? '_$guestId' : null;
+        }
     }
 
     private static function saveChallengeMarks(marks:ChallengeMarks):Void

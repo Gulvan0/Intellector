@@ -7,6 +7,7 @@ import haxefolio.AnchorPlacement;
 import haxefolio.Anchoring;
 import haxefolio.ByWidth;
 import haxefolio.notification.NotificationCard;
+import intellectorboard.primitives.piece.PieceColor;
 import morestd.Detachable;
 
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/notifications/challenge_card.xml"))
@@ -80,7 +81,7 @@ class ChallengeCard extends NotificationCard
             if (!previewToggle.selected)
                 return;
 
-            preview = new PositionPreviewPopover(challenge.customStartingPosition, challenge.acceptorColor);
+            preview = new PositionPreviewPopover(challenge.customStartingPosition, challenge.acceptorColor.getColor() ?? White);
             attach(preview);
 
             var expanded:AnchorPlacement = {side: Left, align: End};
