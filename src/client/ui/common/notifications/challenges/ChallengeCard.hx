@@ -2,6 +2,7 @@ package client.ui.common.notifications.challenges;
 
 import client.datatypes.IncomingChallenge;
 import client.ui.Assets;
+import client.ui.common.challenges.PositionPreviewPopover;
 import haxefolio.AnchorPlacement;
 import haxefolio.Anchoring;
 import haxefolio.ByWidth;
@@ -16,7 +17,7 @@ class ChallengeCard extends NotificationCard
     private var preview:Null<PositionPreviewPopover> = null;
     private var previewAnchoring:Null<Detachable> = null;
 
-    public function new(challenge:IncomingChallenge, onClose:Void->Void, onDecline:Void->Void, onAccept:Void->Void)
+    public function new(challenge:IncomingChallenge, onClose:Void->Void, onDecline:Void->Void, onAccept:Void->Void, onPreviewOpened:Void->Void)
     {
         super();
 
@@ -43,7 +44,11 @@ class ChallengeCard extends NotificationCard
         sideIcon.resource = Assets.colorIcon(challenge.acceptorColor.getColor());
 
         previewToggle.hidden = !isCustomPosition;
-        previewToggle.onChange = _ -> updatePreview();
+        previewToggle.onChange = _ -> {
+            updatePreview();
+            if (previewToggle.selected)
+                onPreviewOpened();
+        };
 
         declineButton.onClick = _ -> onDecline();
         acceptButton.onClick = _ -> onAccept();

@@ -22,6 +22,8 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
 
 `HaxeUI`, `http`, `hxWebSockets`, `json2object` are third-party libraries. They may have bugs, but such bugs should be identified with care and special approval is needed for implementing the fixes. Each bug found needs to be demonstrated with a minimal reproducible example. For `HaxeUI`, this example should be a single XML file that defines a component eliciting the problem.
 
+`haxeui-core` is used from the `intellector` branch of the `Gulvan0/haxeui-core` fork: upstream master plus the open fix PRs. Its local checkout must never hold uncommitted changes; fixes go through per-PR branches and `scripts/sync_haxeui_core.sh`. See @knowledge/haxeui_pending.md for the workflow.
+
 # Project structure
 
 ## Source code folder (`src`)
@@ -49,6 +51,10 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
 - `styles` - all CSS HaxeUI/HaxeFolio styling (except for when it's so short it's embedded into the XML layout)
 
 `images` and `layouts` should be divided into subfolders by pages making use of these images and components.
+
+## Scripts folder (`scripts`)
+
+Developer tooling, not part of the build: `sync_haxeui_core.sh` rebuilds the haxeui-core fork's `intellector` branch.
 
 ## Knowledge base (`knowledge`)
 

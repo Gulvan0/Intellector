@@ -1,0 +1,16 @@
+<!--
+    A custom starting position, previewed (knowledge/plans/challenge-notification.md §3): an
+    optional title line, whose turn it is, and a small board, whose height PositionPreviewPopover
+    derives from its width.
+-->
+<vbox styleName="intellector-challenge-preview" verticalSpacing="6">
+    <hbox id="titleRow" styleName="intellector-challenge-preview-title-row" width="100%" hidden="true">
+        <label id="titleLabel" styleName="intellector-challenge-preview-title" width="100%" verticalAlign="center" />
+        <button id="closeButton" text="✕" styleName="intellector-challenge-preview-close" verticalAlign="center" hidden="true" />
+    </hbox>
+    <hbox height="20" horizontalSpacing="6" horizontalAlign="center">
+        <image id="sideToMoveIcon" width="11" height="11" scaleMode="fitinside" verticalAlign="center" />
+        <label id="sideToMoveLabel" styleName="intellector-challenge-preview-turn" verticalAlign="center" />
+    </hbox>
+    <box id="boardSlot" width="164" horizontalAlign="center" />
+</vbox>

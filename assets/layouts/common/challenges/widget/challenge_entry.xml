@@ -1,0 +1,33 @@
+<!--
+    A pending challenge in the challenges widget (knowledge/plans/challenges-widget.md §3): the
+    opponent and time control, the facts with the Preview button for a custom position, and the
+    replies (Decline and Accept for an incoming one, Cancel challenge for an outgoing one).
+-->
+<vbox styleName="intellector-challenge-entry" width="100%">
+    <hbox width="100%" horizontalSpacing="10">
+        <label id="opponentLabel" styleName="intellector-challenge-entry-opponent" width="100%" verticalAlign="center" />
+        <time-control-tag id="timeControlTag" styleName="intellector-challenge-time-compact" />
+    </hbox>
+    <hbox id="factsRow" styleName="intellector-challenge-entry-facts" width="100%">
+        <hbox styleName="intellector-challenge-entry-fact-flow" width="100%" continuous="true">
+            <hbox styleName="intellector-challenge-entry-fact-group">
+                <image id="colorIcon" width="11" height="11" scaleMode="fitinside" verticalAlign="center" />
+                <label id="colorLabel" styleName="intellector-challenge-entry-fact" verticalAlign="center" />
+            </hbox>
+            <hbox styleName="intellector-challenge-entry-fact-group">
+                <label text="·" styleName="intellector-challenge-entry-separator" verticalAlign="center" />
+                <label id="ratedLabel" styleName="intellector-challenge-entry-fact" verticalAlign="center" />
+            </hbox>
+            <hbox styleName="intellector-challenge-entry-fact-group">
+                <label text="·" styleName="intellector-challenge-entry-separator" verticalAlign="center" />
+                <label id="positionLabel" styleName="intellector-challenge-entry-fact" verticalAlign="center" />
+            </hbox>
+        </hbox>
+        <button id="previewToggle" text="{{intellector.challenge_notification.preview}}" styleName="intellector-challenge-preview-toggle" toggle="true" verticalAlign="top" hidden="true" />
+    </hbox>
+    <hbox id="actions" styleName="intellector-challenge-entry-actions" horizontalAlign="right">
+        <button id="declineButton" text="{{intellector.challenge_notification.decline}}" styleName="intellector-challenge-entry-action" hidden="true" />
+        <button id="acceptButton" text="{{intellector.challenge_notification.accept}}" styleName="intellector-challenge-entry-action intellector-challenge-entry-accept" hidden="true" />
+        <button id="cancelButton" text="{{intellector.challenges_widget.cancel}}" styleName="intellector-challenge-entry-action intellector-challenge-entry-cancel" hidden="true" />
+    </hbox>
+</vbox>

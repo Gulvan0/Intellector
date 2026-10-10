@@ -55,6 +55,12 @@ class ChallengeNotificationStack extends VBox
     }
 
     // the row limit is the only thing that changes with the breakpoint; the rest is styled per breakpoint
+    public function closePreview():Void
+    {
+        if (card != null)
+            card.closePreview();
+    }
+
     private function onBreakpointChanged(collapsed:Bool):Void
     {
         this.collapsed = collapsed;
@@ -98,7 +104,7 @@ class ChallengeNotificationStack extends VBox
         if (card == null || card.challenge.id != active.id)
         {
             removeCard();
-            card = new ChallengeCard(active, handlers.onCardClose, handlers.onCardDecline, handlers.onCardAccept);
+            card = new ChallengeCard(active, handlers.onCardClose, handlers.onCardDecline, handlers.onCardAccept, handlers.onPreviewOpened);
             addComponent(card);
             shownIds.set(active.id, true);
         }

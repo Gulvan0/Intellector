@@ -7,4 +7,6 @@ enum abstract LocalStorageKey(String) from String to String
     var REMEMBER_ME:String = "session.saved_credentials.remember_me";
     var SAVED_LOGIN:String = "session.saved_credentials.login";
     var SAVED_PASSWORD:String = "session.saved_credentials.password";
+    var CHALLENGE_MARKS:String = "challenges.marks";
+    var REDIRECTED_GAME_ID:String = "challenges.redirected_game_id";
 }

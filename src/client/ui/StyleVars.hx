@@ -17,6 +17,9 @@ class StyleVars
     };
 
     public static inline final CHALLENGE_STACK_EXPANDED_WIDTH:Int = 340;
+    public static inline final CHALLENGES_DROPDOWN_WIDTH:Int = 372;
+    public static inline final CHALLENGES_ICON_INK:String = "#2a211a";
+    public static inline final CHALLENGES_ICON_ACCENT:String = "#8a5a1f";
     public static final CHALLENGE_ROW_SHADOW:Shadow = {offsetX: 0, offsetY: 2, blur: 10, color: SHADOW_COLOR, opacity: 0.08};
     public static final CHALLENGE_PREVIEW_SHADOW:Shadow = {offsetX: 0, offsetY: 8, blur: 28, color: SHADOW_COLOR, opacity: 0.16};
 

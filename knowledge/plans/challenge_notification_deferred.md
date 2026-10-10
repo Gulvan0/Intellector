@@ -1,16 +1,5 @@
 # Incoming challenge notification - deferred
 
-## 1. Challenges widget interplay
-
-**Why deferred:** the menu-bar challenges widget ([[challenges-widget]]) doesn't exist yet. Its rules
-for notifications - "no notification while the dropdown is open", "one preview at a time across the
-dropdown and the notifications" - have nothing to hook into, and hidden challenges have no permanent
-home until it's built.
-
-**How to apply:** when building the widget, have `IncomingChallengesController` own it next to the
-stack, both rendered from the controller's `ChallengeQueue`; the cross-view rules (suppressing
-arrivals, one preview at a time) go in the controller.
-
 ## 2. Request error handling
 
 **Why deferred:** there is no app-wide presentation for failed requests yet. Decline (single and
@@ -19,3 +8,13 @@ stays pending on the server. A failed Accept re-enables the card's buttons.
 
 **How to apply:** once failed requests have a common presentation, route Accept/Decline failures
 through it; a 404 on Accept (challenge already gone) should remove the entry instead.
+
+## 3. "Ignore incoming challenges" preference
+
+**Why deferred:** `Preferences.silentChallenges` exists (with its migration and locale label) but
+nothing reads it, so the notification still appears with the preference enabled. In the old app the
+challenge still reached the challenges menu, only the dialog, tab blink and sound were skipped.
+
+**How to apply:** while it's enabled, receive incoming challenges without putting them on the
+notification. `ChallengeInbox.receive` with `notify` off is close, but it also marks them seen, so
+decide first whether ignored challenges should still turn the widget's incoming arrow accent.

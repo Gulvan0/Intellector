@@ -1,2 +1,4 @@
 bin/
 knowledge/todo.md
+.claude/*
+!.claude/skills/

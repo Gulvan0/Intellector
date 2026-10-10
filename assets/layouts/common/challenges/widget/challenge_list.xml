@@ -1,0 +1,18 @@
+<!--
+    The challenges widget's dropdown content (knowledge/plans/challenges-widget.md §2): Incoming,
+    then Outgoing, each with its count, its entries newest first, or a line saying it's empty.
+-->
+<vbox styleName="intellector-challenge-list" width="100%">
+    <hbox styleName="intellector-challenge-list-header" width="100%">
+        <label text="{{intellector.challenges_widget.incoming}}" styleName="intellector-challenge-list-header-name" verticalAlign="center" />
+        <label id="incomingCount" styleName="intellector-challenge-list-header-count" verticalAlign="center" />
+    </hbox>
+    <vbox id="incomingEntries" styleName="intellector-challenge-list-entries" width="100%" />
+    <label id="noIncoming" text="{{intellector.challenges_widget.no_incoming}}" styleName="intellector-challenge-list-empty" width="100%" />
+    <hbox styleName="intellector-challenge-list-header" width="100%">
+        <label text="{{intellector.challenges_widget.outgoing}}" styleName="intellector-challenge-list-header-name" verticalAlign="center" />
+        <label id="outgoingCount" styleName="intellector-challenge-list-header-count" verticalAlign="center" />
+    </hbox>
+    <vbox id="outgoingEntries" styleName="intellector-challenge-list-entries" width="100%" />
+    <label id="noOutgoing" text="{{intellector.challenges_widget.no_outgoing}}" styleName="intellector-challenge-list-empty" width="100%" />
+</vbox>

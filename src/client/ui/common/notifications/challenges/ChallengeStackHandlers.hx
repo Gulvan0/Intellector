@@ -8,5 +8,6 @@ typedef ChallengeStackHandlers =
     onCardDecline:Void->Void,
     onCardAccept:Void->Void,
     onDeclineAll:Void->Void,
-    onHideAll:Void->Void
+    onHideAll:Void->Void,
+    onPreviewOpened:Void->Void
 }

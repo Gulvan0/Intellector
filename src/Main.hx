@@ -16,24 +16,45 @@ import client.ui.analysis.AnalysisPage;
 import client.ui.game.LiveGamePage;
 import client.ui.profile.ProfilePage;
 import client.ui.challenge.ChallengeJoiningPage;
+import client.ui.demo.DemoChallengeServer;
+import client.ui.demo.DemoPage;
+import client.ChallengeMarksStorage;
+import client.GameRedirect;
+import client.datatypes.ChallengeMarks;
 import client.datatypes.IncomingChallenge;
+import client.datatypes.OutgoingChallenge;
 import client.ui.StyleVars;
-import client.ui.common.notifications.challenges.IncomingChallengesController;
+import client.ui.common.challenges.ChallengesController;
+import client.ui.common.challenges.widget.ChallengesWidget;
 import easypubsub.Subscription;
+import haxe.ui.core.Component;
 import net.models.challenge.mappers.IncomingChallengeMapper;
+import net.models.challenge.mappers.OutgoingChallengeMapper;
 import net.rest.Rest;
 import net.rest.RestOperationRegistry;
 import net.ws.PubSub;
 import net.ws.channels.IncomingChallenges;
+import net.ws.channels.OutgoingChallenges;
+import net.ws.events.IncomingChallengeAccepted;
 import net.ws.events.IncomingChallengeCancelled;
+import net.ws.events.IncomingChallengeDeclined;
 import net.ws.events.IncomingChallengeReceived;
 import net.ws.events.IncomingChallengesCancelledByServer;
 import net.ws.events.IncomingChallengesRefresh;
+import net.ws.events.OutgoingChallengeAccepted;
+import net.ws.events.OutgoingChallengeCancelled;
+import net.ws.events.OutgoingChallengeCreated;
+import net.ws.events.OutgoingChallengeRejected;
+import net.ws.events.OutgoingChallengesCancelledByServer;
+import net.ws.events.OutgoingChallengesRefresh;
 
 class Main
 {
-    private static var incomingChallenges:IncomingChallengesController;
+    @:allow(client.ui.demo) private static var challengesWidget:ChallengesWidget;
+    @:allow(client.ui.demo) private static var challenges:ChallengesController;
     private static var incomingChallengesSubscription:Null<Subscription<IncomingChallenges>> = null;
+    private static var outgoingChallengesSubscription:Null<Subscription<OutgoingChallenges>> = null;
+    private static var challengesUserRef:Null<String> = null;
 
     public static function main():Void
     {
@@ -50,6 +71,7 @@ class Main
             .addPage("live/{gameID}", params -> new LiveGamePage(Std.parseInt(params.get("gameID"))))
             .addPage("player/{login}", params -> new ProfilePage(params.get("login")))
             .addPage("join/{id}", params -> new ChallengeJoiningPage(Std.parseInt(params.get("id"))))
+            .addPage("demo", params -> new DemoPage())
             .setMenubarChevronsShown(false)
             .addLeftMenubarItem(NormalMenu("play", []))
             .addNormalMenuItem("play", "create_game", Execute(onCreateGamePressed), Assets.menuItemIcon("new_game"))
@@ -60,11 +82,13 @@ class Main
             .addNormalMenuItem("watch", "watch_player", Execute(onWatchPlayerPressed), Assets.menuItemIcon("watch_player"))
             .addLeftMenubarItem(NormalMenu("learn", []))
             .addNormalMenuItem("learn", "analysis_board", NavigateTo(() -> "analysis"), Assets.menuItemIcon("analysis_board"))
+            .addNormalMenuItem("learn", "demo", NavigateTo(() -> "demo"))
             .addLeftMenubarItem(NormalMenu("social", []))
             .addNormalMenuItem("social", "player_profile", Execute(onPlayerProfilePressed), Assets.menuItemIcon("player_profile"))
             .addNormalMenuItem("social", "vk", Link("https://vk.com/intellectorgroup", true), Assets.menuItemIcon("vk"))
             .addNormalMenuItem("social", "discord", Link("https://discord.gg/f8chehcnV5", true), Assets.menuItemIcon("discord"))
             .addNormalMenuItem("social", "iteration", Link("https://t.me/iteracia_club", true), Assets.menuItemIcon("iteration"))
+            .addRightMenubarItem(Widget(createChallengesWidget, true))
             .addRightMenubarItem(NormalMenu("account", []))
             .addNormalMenuItem("account", "my_profile", NavigateTo(getMyProfilePath), Assets.menuItemIcon("my_profile"), null, true)
             .addNormalMenuItem("account", "preferences", Execute(HaxeFolioApp.showPreferences), Assets.menuItemIcon("settings"))
@@ -80,8 +104,10 @@ class Main
         var tokenRetriever:Void->Null<String> = HaxeFolioApp.valueStorage.read.bind(LocalStorageKey.TOKEN);
         Rest.init(tokenRetriever);
         PubSub.start(tokenRetriever, ActivityTracker.getLastActivityTs);
-        incomingChallenges = new IncomingChallengesController(acceptChallenge, declineChallenge);
-        IdentityKeeper.init([refreshAccountMenu, subscribeToIncomingChallenges]);
+        challenges = new ChallengesController(challengesWidget, acceptChallenge, declineChallenge, cancelChallenge, saveChallengeMarks);
+        ChallengeMarksStorage.addExternalChangeHandler(() -> challengesUserRef, challenges.applyMarks);
+        GameRedirect.init(openStartedGame);
+        IdentityKeeper.init([refreshAccountMenu, subscribeToChallenges]);
         AuthBootstrap.run();
     }
 
@@ -109,7 +135,13 @@ class Main
         MenuFacade.setMenuItemHidden("account", "log_out", newIdentity.isGuest());
     }
 
-    private static function subscribeToIncomingChallenges(identity:Identity):Void
+    private static function createChallengesWidget():Component
+    {
+        challengesWidget = new ChallengesWidget();
+        return challengesWidget.dropdown;
+    }
+
+    private static function subscribeToChallenges(identity:Identity):Void
     {
         if (incomingChallengesSubscription != null)
         {
@@ -117,7 +149,14 @@ class Main
             incomingChallengesSubscription = null;
         }
 
-        incomingChallenges.reset();
+        if (outgoingChallengesSubscription != null)
+        {
+            outgoingChallengesSubscription.detach();
+            outgoingChallengesSubscription = null;
+        }
+
+        challengesUserRef = null;
+        challenges.reset();
 
         var userRef:Null<String> = switch identity {
             case Player(login, _): login;
@@ -127,25 +166,98 @@ class Main
         if (userRef == null)
             return;
 
+        challengesUserRef = userRef;
+        challenges.applyMarks(ChallengeMarksStorage.read(userRef));
+
         incomingChallengesSubscription = PubSub.sub(new IncomingChallenges(userRef))
-            .onEventLight(IncomingChallengesRefresh, refresh -> incomingChallenges.sync(refresh.challenges.map(IncomingChallengeMapper.dtoToDatatype)))
-            .onEventLight(IncomingChallengeReceived, challenge -> incomingChallenges.announce(IncomingChallengeMapper.dtoToDatatype(challenge)))
-            .onEventLight(IncomingChallengeCancelled, cancelled -> incomingChallenges.remove(cancelled.id))
+            .onEventLight(IncomingChallengesRefresh, refresh -> challenges.syncIncoming(refresh.challenges.map(IncomingChallengeMapper.dtoToDatatype)))
+            .onEventLight(IncomingChallengeReceived, challenge -> challenges.receiveIncoming(IncomingChallengeMapper.dtoToDatatype(challenge)))
+            .onEventLight(IncomingChallengeCancelled, cancelled -> challenges.removeIncoming(cancelled.id))
+            .onEventLight(IncomingChallengeAccepted, accepted -> challenges.removeIncoming(accepted.id))
+            .onEventLight(IncomingChallengeDeclined, declined -> challenges.removeIncoming(declined.id))
             .onEventLight(IncomingChallengesCancelledByServer, cancelled -> {
                 for (id in cancelled.ids)
-                    incomingChallenges.remove(id);
+                    challenges.removeIncoming(id);
+            });
+
+        outgoingChallengesSubscription = PubSub.sub(new OutgoingChallenges(userRef))
+            .onEventLight(OutgoingChallengesRefresh, refresh -> onOutgoingChallengesRefresh(refresh.challenges.map(OutgoingChallengeMapper.dtoToDatatype)))
+            .onEventLight(OutgoingChallengeCreated, challenge -> challenges.addOutgoing(OutgoingChallengeMapper.dtoToDatatype(challenge)))
+            .onEventLight(OutgoingChallengeCancelled, cancelled -> challenges.removeOutgoing(cancelled.id))
+            .onEventLight(OutgoingChallengeAccepted, accepted -> onOutgoingChallengeAccepted(accepted.id))
+            .onEventLight(OutgoingChallengeRejected, rejected -> challenges.removeOutgoing(rejected.id))
+            .onEventLight(OutgoingChallengesCancelledByServer, cancelled -> {
+                for (id in cancelled.ids)
+                    challenges.removeOutgoing(id);
             });
     }
 
+    private static function saveChallengeMarks(marks:ChallengeMarks):Void
+    {
+        if (DemoChallengeServer.used) // temporary: the demo page's fake ids would outrank the real ones for good
+            return;
+
+        if (challengesUserRef != null)
+            ChallengeMarksStorage.save(challengesUserRef, marks);
+    }
+
+    // a challenge missing from a refresh may have been accepted while disconnected
+    private static function onOutgoingChallengesRefresh(pending:Array<OutgoingChallenge>):Void
+    {
+        for (dropped in challenges.syncOutgoing(pending))
+            redirectToResultingGame(dropped.id);
+    }
+
+    private static function onOutgoingChallengeAccepted(challengeId:Int):Void
+    {
+        challenges.removeOutgoing(challengeId);
+        redirectToResultingGame(challengeId);
+    }
+
+    private static function redirectToResultingGame(challengeId:Int):Void
+    {
+        Rest.client().execute(
+            RestOperationRegistry.GET_CHALLENGE,
+            challenge -> {
+                if (challenge.resulting_game != null)
+                    GameRedirect.request(challenge.resulting_game.id);
+            },
+            _ -> {},
+            ["challenge_id" => Std.string(challengeId)]
+        );
+    }
+
+    private static function openStartedGame(gameId:Int):Void
+    {
+        if (isOngoingGameOpen())
+            showGameStartedNotification(gameId);
+        else
+            HaxeFolioApp.navigateTo('live/$gameId');
+    }
+
+    // stubs until the live game page exists, see knowledge/plans/challenges_widget_deferred.md §1
+    private static function isOngoingGameOpen():Bool
+    {
+        return false;
+    }
+
+    private static function showGameStartedNotification(gameId:Int):Void {}
+
     private static function acceptChallenge(challenge:IncomingChallenge):Void
     {
+        if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
+        {
+            DemoChallengeServer.accept(challenge);
+            return;
+        }
+
         Rest.client().execute(
             RestOperationRegistry.ACCEPT_CHALLENGE,
             game -> {
-                incomingChallenges.acceptSucceeded();
+                challenges.acceptSucceeded();
                 HaxeFolioApp.navigateTo('live/${game.id}');
             },
-            _ -> incomingChallenges.acceptFailed(challenge.id),
+            _ -> challenges.acceptFailed(challenge.id),
             ["challenge_id" => Std.string(challenge.id)]
         );
     }
@@ -153,8 +265,31 @@ class Main
     // already off display; a failed decline leaves the challenge pending, see knowledge/plans/challenge_notification_deferred.md
     private static function declineChallenge(challenge:IncomingChallenge):Void
     {
+        if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
+        {
+            DemoChallengeServer.decline(challenge);
+            return;
+        }
+
         Rest.client().execute(
             RestOperationRegistry.DECLINE_CHALLENGE,
+            _ -> {},
+            _ -> {},
+            ["challenge_id" => Std.string(challenge.id)]
+        );
+    }
+
+    // already off display; a failed cancel leaves the challenge pending, see knowledge/plans/challenges_widget_deferred.md §5
+    private static function cancelChallenge(challenge:OutgoingChallenge):Void
+    {
+        if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
+        {
+            DemoChallengeServer.cancel(challenge);
+            return;
+        }
+
+        Rest.client().execute(
+            RestOperationRegistry.CANCEL_CHALLENGE,
             _ -> {},
             _ -> {},
             ["challenge_id" => Std.string(challenge.id)]

@@ -9,7 +9,7 @@
 
     <components>
         <!-- classes usable as XML layout tags (each needs a no-argument constructor) -->
-        <class name="client.ui.common.notifications.challenges.TimeControlTag" />
+        <class name="client.ui.common.challenges.TimeControlTag" />
     </components>
 
     <locales>

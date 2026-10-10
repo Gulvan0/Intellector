@@ -1,4 +1,4 @@
-package client.ui.common.notifications.challenges;
+package client.ui.common.challenges;
 
 import client.datatypes.TimeControl;
 import client.datatypes.TimeControlKind;
@@ -8,7 +8,7 @@ import haxe.ui.containers.HBox;
 
 using client.ui.ComponentExtension;
 
-@:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/notifications/time_control_tag.xml"))
+@:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/challenges/time_control_tag.xml"))
 class TimeControlTag extends HBox
 {
     public function new()

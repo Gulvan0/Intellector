@@ -1021,3 +1021,251 @@
     background-color: #e6dfd3;
     color: #2a211a;
 }
+
+/*
+    Challenges widget (knowledge/plans/challenges-widget.md): the menu bar target and badge, the
+    dropdown, its sections and entries, and the preview's narrow cover.
+*/
+
+.haxefolio-dropdown-widget {
+    border-radius: 5px;
+}
+
+.haxefolio-dropdown-widget:hover,
+.haxefolio-dropdown-widget-open {
+    background-color: #f0ebe2;
+}
+
+.haxefolio-dropdown-widget-badge {
+    font-name: $mono-family-medium;
+    font-weight: 600;
+    background-color: #8a5a1f;
+    border: 1.5px solid #f2eee6;
+    color: #fffefb;
+}
+
+.haxefolio-dropdown-widget-frame {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-challenge-list {
+    vertical-spacing: 0;
+    padding-bottom: 4px;
+}
+
+.intellector-challenge-list-header {
+    height: 32px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-challenge-list-header-name {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6d6152;
+}
+
+.intellector-challenge-list-header-count {
+    font-name: $mono-family-regular;
+    font-size: 11px;
+    color: #a79b8a;
+}
+
+.intellector-challenge-list-entries {
+    vertical-spacing: 0;
+}
+
+.intellector-challenge-list-empty {
+    height: 36px;
+    padding-left: 14px;
+    padding-top: 10px;
+    font-name: $ui-family-regular;
+    font-size: 12px;
+    color: #a79b8a;
+}
+
+.haxefolio-collapsed .intellector-challenge-list-empty {
+    height: 44px;
+    padding-top: 14px;
+}
+
+.intellector-challenge-entry {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+    vertical-spacing: 6px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-challenge-entry-first {
+    border-top-width: 0px;
+    border-top-size: 0px;
+}
+
+/* a new arrival while the dropdown is open: highlighted, held, then faded back */
+@keyframes intellectorChallengeEntryArrival {
+    0% {
+        background-color: #f6e6c6;
+    }
+    78% {
+        background-color: #f6e6c6;
+    }
+    100% {
+        background-color: #faf7f2;
+    }
+}
+
+.intellector-challenge-entry-arrived {
+    animation: intellectorChallengeEntryArrival 1.8s linear 0s 1;
+}
+
+.intellector-challenge-entry-opponent {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-challenge-entry-opponent-open {
+    font-name: $ui-family-medium;
+    font-weight: 500;
+    color: #6d6152;
+}
+
+/* the facts wrap when they don't fit beside the Preview button, which stays on the first line */
+.intellector-challenge-entry-facts {
+    horizontal-spacing: 6px;
+}
+
+.intellector-challenge-entry-fact-flow {
+    horizontal-spacing: 6px;
+    vertical-spacing: 0px;
+}
+
+.intellector-challenge-entry-fact-group {
+    height: 20px;
+    horizontal-spacing: 6px;
+}
+
+.haxefolio-collapsed .intellector-challenge-entry-fact-group {
+    height: 28px;
+}
+
+.haxefolio-collapsed .intellector-challenge-entry-facts .intellector-challenge-preview-toggle {
+    height: 28px;
+}
+
+.intellector-challenge-entry-fact {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-challenge-entry-fact-emphasised {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+.intellector-challenge-entry-separator {
+    font-size: 12px;
+    color: #a79b8a;
+}
+
+.intellector-challenge-entry-actions {
+    horizontal-spacing: 6px;
+}
+
+.haxefolio-collapsed .intellector-challenge-entry-actions {
+    width: 100%;
+    horizontal-spacing: 8px;
+}
+
+.intellector-challenge-entry-action {
+    height: 30px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border-radius: 5px;
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    text-align: center;
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    color: #6d6152;
+}
+
+.haxefolio-collapsed .intellector-challenge-entry-action {
+    width: 50%;
+    height: 44px;
+    font-size: 13px;
+}
+
+.haxefolio-collapsed .intellector-challenge-entry-cancel {
+    width: 100%;
+}
+
+.intellector-challenge-entry-action:hover {
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+/* several Accepts can be on screen and a screen has one filled primary: the selected treatment */
+.intellector-challenge-entry-accept {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    color: #8a5a1f;
+}
+
+.intellector-challenge-entry-accept:hover {
+    border-color: #8a5a1f;
+    color: #8a5a1f;
+}
+
+.intellector-challenge-entry-action:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+.intellector-challenge-preview-title-row {
+    horizontal-spacing: 6px;
+}
+
+.intellector-challenge-preview-title {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-challenge-preview-close {
+    width: 44px;
+    height: 44px;
+    margin-top: -10px;
+    margin-right: -12px;
+    margin-bottom: -10px;
+    font-size: 15px;
+    text-align: center;
+    background-color: transparent;
+    border: none;
+    color: #6d6152;
+}
+
+.intellector-challenge-preview-close:hover {
+    color: #2a211a;
+}
+
+/* over the top of the narrow dropdown, at its width */
+.intellector-challenge-preview-cover {
+    border-radius: 9px;
+    margin-bottom: 0px;
+}

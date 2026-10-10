@@ -58,6 +58,12 @@ class GroupedLocaleResolvers
         return LocaleUtils.localeBinding('intellector.challenge_notification.position.$key');
     }
 
+    public static function positionFact(custom:Bool):String
+    {
+        var key:String = custom ? "custom" : "default";
+        return LocaleUtils.localeBinding('intellector.challenges_widget.position.$key');
+    }
+
     public static function turnColor(color:PieceColor):String
     {
         return LocaleUtils.localeBinding('intellector.common.turn_color.${color.getName().toLowerCase()}');

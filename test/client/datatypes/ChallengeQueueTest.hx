@@ -28,13 +28,13 @@ class ChallengeQueueTest extends Test
     private function testEmptyQueue():Void
     {
         assertState(null, []);
-        Assert.isFalse(queue.accepting);
     }
 
     private function testFirstAnnouncedIsActiveOthersWaitInArrivalOrder():Void
     {
         announceAll([5, 3, 8]);
         assertState(5, [3, 8]);
+        Assert.same([5, 3, 8], Challenges.ids(queue.all));
     }
 
     private function testAnnounceIgnoresRepeats():Void
@@ -49,6 +49,13 @@ class ChallengeQueueTest extends Test
         queue.remove(2);
         announceAll([2]);
         assertState(1, []);
+    }
+
+    private function testSkippedChallengeIsNeverAnnounced():Void
+    {
+        queue.skip(1);
+        announceAll([1, 2]);
+        assertState(2, []);
     }
 
     private function testRemovingActivePromotesNewest():Void
@@ -79,21 +86,6 @@ class ChallengeQueueTest extends Test
         assertState(1, [2]);
     }
 
-    private function testSyncAnnouncesNewInIdOrderAndRemovesUnlisted():Void
-    {
-        announceAll([1, 2]);
-        queue.sync(Challenges.makeAll([6, 2, 4]));
-        assertState(2, [4, 6]);
-    }
-
-    private function testSyncDoesNotBringBackHidden():Void
-    {
-        announceAll([1, 2]);
-        queue.hideAll();
-        queue.sync(Challenges.makeAll([1, 2, 3]));
-        assertState(3, []);
-    }
-
     private function testSelectSwitchesActive():Void
     {
         announceAll([1, 2, 3]);
@@ -108,100 +100,12 @@ class ChallengeQueueTest extends Test
         assertState(1, [2]);
     }
 
-    private function testBeginAcceptReturnsActive():Void
+    private function testClearedChallengesStayAnnounced():Void
     {
         announceAll([1, 2]);
-        Assert.equals(1, queue.beginAccept()?.id);
-        Assert.isTrue(queue.accepting);
-        assertState(1, [2]);
-    }
-
-    private function testBeginAcceptOnEmptyQueue():Void
-    {
-        Assert.isNull(queue.beginAccept());
-        Assert.isFalse(queue.accepting);
-    }
-
-    private function testOnlyOneAcceptanceAtATime():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
-        Assert.isNull(queue.beginAccept());
-    }
-
-    private function testSelectIgnoredWhileAccepting():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
-        queue.select(2);
-        assertState(1, [2]);
-    }
-
-    private function testAcceptFailedEndsAcceptance():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
-        queue.acceptFailed(1);
-        Assert.isFalse(queue.accepting);
-        assertState(1, [2]);
-    }
-
-    private function testAcceptFailedForAnotherIdIsIgnored():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
-        queue.acceptFailed(2);
-        Assert.isTrue(queue.accepting);
-    }
-
-    private function testRemovingAcceptedChallengeEndsAcceptance():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
-        queue.remove(1);
-        Assert.isFalse(queue.accepting);
-        assertState(2, []);
-    }
-
-    private function testRemovingAnotherChallengeKeepsAcceptance():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
-        queue.remove(2);
-        Assert.isTrue(queue.accepting);
-    }
-
-    private function testDeclineAllReturnsEveryChallenge():Void
-    {
-        announceAll([1, 2, 3]);
-        queue.select(2);
-        Assert.same([1, 2, 3], Challenges.ids(queue.declineAll()));
-        assertState(null, []);
-    }
-
-    private function testDeclineAllIgnoredWhileAccepting():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
-        Assert.same([], queue.declineAll());
-        assertState(1, [2]);
-    }
-
-    private function testHideAllIgnoredWhileAccepting():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
-        queue.hideAll();
-        assertState(1, [2]);
-    }
-
-    private function testClearWorksWhileAccepting():Void
-    {
-        announceAll([1, 2]);
-        queue.beginAccept();
         queue.clear();
-        assertState(null, []);
-        Assert.isFalse(queue.accepting);
+        announceAll([1, 2, 3]);
+        assertState(3, []);
     }
 
     private function testResetForgetsAnnounced():Void

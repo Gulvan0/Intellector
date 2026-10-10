@@ -10,7 +10,12 @@ enum abstract StyleClass(String) from String to String
     var BOARD_CONTROLS_SEPARATOR = "intellector-board-controls-separator";
     var INTERACTIVE_BOARD = "intellector-interactive-board";
 
+    var CHALLENGE_ENTRY_ARRIVED = "intellector-challenge-entry-arrived";
+    var CHALLENGE_ENTRY_FACT_EMPHASISED = "intellector-challenge-entry-fact-emphasised";
+    var CHALLENGE_ENTRY_FIRST = "intellector-challenge-entry-first";
+    var CHALLENGE_ENTRY_OPPONENT_OPEN = "intellector-challenge-entry-opponent-open";
     var CHALLENGE_FACT_VALUE_EMPHASISED = "intellector-challenge-fact-value-emphasised";
+    var CHALLENGE_PREVIEW_COVER = "intellector-challenge-preview-cover";
     var CHALLENGE_ROW_ARRIVED = "intellector-challenge-row-arrived";
     var CHALLENGE_TIME_VALUE = "intellector-challenge-time-value";
     var CHALLENGE_TIME_WORD = "intellector-challenge-time-word";
