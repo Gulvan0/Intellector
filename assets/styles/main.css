@@ -792,8 +792,8 @@
     color: #2a211a;
 }
 
-/* the failed request notice's reason line, under the card's title */
-.intellector-request-failure-reason {
+/* a notice's text line, under the card's title */
+.intellector-notice-text {
     font-name: $ui-family-medium;
     font-size: 13px;
     color: #6d6152;

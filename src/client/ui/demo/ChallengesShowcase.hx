@@ -3,8 +3,10 @@ package client.ui.demo;
 import client.datatypes.ChallengeAcceptorColor;
 import client.datatypes.IncomingChallenge;
 import client.datatypes.OutgoingChallenge;
+import client.datatypes.StartedGame;
 import client.datatypes.TimeControl;
 import client.datatypes.TimeControlKind;
+import client.ui.common.notifications.GameStartedNotice;
 import haxe.Timer;
 import haxe.ui.components.Button;
 import haxe.ui.components.CheckBox;
@@ -26,6 +28,7 @@ class ChallengesShowcase extends VBox
     private static final NICKNAMES:Array<String> = ["Kestrel", "hexmaster_77", "Morozova", "Lin Wei", "Aurelian", "tactician"];
 
     private var nicknameIndex:Int = 0;
+    private var fakeGameId:Int = 4271;
     private var delayedArrival:CheckBox;
 
     public function new()
@@ -54,6 +57,11 @@ class ChallengesShowcase extends VBox
             button("Direct, custom position", () -> send(None, false, Black, endgamePosition(), nextNickname())),
             button("Open, custom position", () -> send(TimeControlFactory.constructFischer(15, 10), true, White, openingPosition(), null)),
             button("Callee rejects oldest", DemoChallengeServer.calleeRejects)
+        ]);
+
+        addRow("Outgoing accepted while in an ongoing game", [
+            button("Game started", () -> GameStartedNotice.show(new StartedGame(fakeGameId++, nextNickname()))),
+            button("Game started, long nickname", () -> GameStartedNotice.show(new StartedGame(fakeGameId++, "Constantinople_Grandmaster_2026")))
         ]);
 
         delayedArrival = new CheckBox();

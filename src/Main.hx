@@ -24,15 +24,18 @@ import client.datatypes.ChallengeMarks;
 import client.datatypes.FailedAction;
 import client.datatypes.IncomingChallenge;
 import client.datatypes.OutgoingChallenge;
+import client.datatypes.StartedGame;
 import client.ui.StyleVars;
 import client.ui.common.challenges.ChallengesController;
 import client.ui.common.challenges.widget.ChallengesWidget;
+import client.ui.common.notifications.GameStartedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import easypubsub.Subscription;
 import haxe.ui.core.Component;
 import http.HttpError;
 import net.models.challenge.mappers.IncomingChallengeMapper;
 import net.models.challenge.mappers.OutgoingChallengeMapper;
+import net.models.challenge.mappers.StartedGameMapper;
 import net.rest.Rest;
 import net.rest.RestOperationRegistry;
 import net.ws.PubSub;
@@ -222,29 +225,28 @@ class Main
         Rest.client().execute(
             RestOperationRegistry.GET_CHALLENGE,
             challenge -> {
-                if (challenge.resulting_game != null)
-                    GameRedirect.request(challenge.resulting_game.id);
+                var game:Null<StartedGame> = StartedGameMapper.resultingGameToDatatype(challenge);
+                if (game != null)
+                    GameRedirect.request(game);
             },
             RequestFailureNotice.showHttpError.bind(OPEN_STARTED_GAME),
             ["challenge_id" => Std.string(challengeId)]
         );
     }
 
-    private static function openStartedGame(gameId:Int):Void
+    private static function openStartedGame(game:StartedGame):Void
     {
         if (isOngoingGameOpen())
-            showGameStartedNotification(gameId);
+            GameStartedNotice.show(game);
         else
-            HaxeFolioApp.navigateTo('live/$gameId');
+            HaxeFolioApp.navigateTo('live/${game.id}');
     }
 
-    // stubs until the live game page exists, see knowledge/plans/challenges_widget_deferred.md §1
+    // stub until the live game page exists, see knowledge/plans/challenges_widget_deferred.md §1
     private static function isOngoingGameOpen():Bool
     {
         return false;
     }
-
-    private static function showGameStartedNotification(gameId:Int):Void {}
 
     private static function acceptChallenge(challenge:IncomingChallenge):Void
     {

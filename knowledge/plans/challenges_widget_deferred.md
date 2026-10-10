@@ -2,15 +2,14 @@
 
 Items consciously left out of [[challenges_widget_plan]].
 
-## 1. "Game started" notification
+## 1. "Game started" notification: the ongoing game check
 
 **Why deferred:** when the other side accepts an outgoing challenge while the user is in an ongoing
-non-correspondence game, the app should show a notification instead of navigating away. Its design
-doesn't exist, and the live game page (which decides "an ongoing game is open") isn't built.
+non-correspondence game, the app shows `GameStartedNotice` instead of navigating away. The live game
+page (which decides "an ongoing game is open") isn't built, so the check is stubbed.
 
-**How to apply:** design the notification; replace the stubbed check in `Main` with the live game
-page's state and show the notification there. Only the tab `GameRedirect` picks gets to decide
-([[multi_tab_challenges_plan]] §1).
+**How to apply:** replace `Main.isOngoingGameOpen` with the live game page's state. Only the tab
+`GameRedirect` picks gets to decide ([[multi_tab_challenges_plan]] §1).
 
 ## 2. Ongoing games widget
 

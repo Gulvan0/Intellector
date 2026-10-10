@@ -1,5 +1,6 @@
 package client;
 
+import client.datatypes.StartedGame;
 import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.browser.Blinker;
@@ -14,12 +15,12 @@ class GameRedirect
 {
     private static inline final BLINK_FAVICON:String = "assets/favicons/notification.png";
 
-    private static var onClaimed:Int->Void;
-    private static var pendingGameId:Null<Int> = null;
+    private static var onClaimed:StartedGame->Void;
+    private static var pendingGame:Null<StartedGame> = null;
     private static var blinker:Null<Blinker> = null;
 
     /** `onClaimed` opens the game in this tab **/
-    public static function init(onClaimed:Int->Void):Void
+    public static function init(onClaimed:StartedGame->Void):Void
     {
         GameRedirect.onClaimed = onClaimed;
 
@@ -28,49 +29,49 @@ class GameRedirect
         HaxeFolioApp.valueStorage.addExternalChangeHandler(LocalStorageKey.REDIRECTED_GAME_ID, onExternalClaim);
     }
 
-    /** Game `gameId` has started; ignored if some tab has already opened it **/
-    public static function request(gameId:Int):Void
+    /** `game` has started; ignored if some tab has already opened it **/
+    public static function request(game:StartedGame):Void
     {
-        if (gameId <= readRedirectedGameId())
+        if (game.id <= readRedirectedGameId())
             return;
 
         if (Browser.document.hasFocus())
         {
-            claim(gameId);
+            claim(game);
             return;
         }
 
-        pendingGameId = gameId;
+        pendingGame = game;
         startBlinking();
     }
 
     private static function onFocusMaybeGained(_:Event):Void
     {
-        var gameId:Null<Int> = pendingGameId;
-        if (gameId == null || !Browser.document.hasFocus())
+        var game:Null<StartedGame> = pendingGame;
+        if (game == null || !Browser.document.hasFocus())
             return;
 
         dropPending();
 
-        if (gameId > readRedirectedGameId())
-            claim(gameId);
+        if (game.id > readRedirectedGameId())
+            claim(game);
     }
 
     private static function onExternalClaim(serializedGameId:Null<String>):Void
     {
-        if (pendingGameId != null && pendingGameId <= parseGameId(serializedGameId))
+        if (pendingGame != null && pendingGame.id <= parseGameId(serializedGameId))
             dropPending();
     }
 
-    private static function claim(gameId:Int):Void
+    private static function claim(game:StartedGame):Void
     {
-        HaxeFolioApp.valueStorage.write(LocalStorageKey.REDIRECTED_GAME_ID, Std.string(gameId));
-        onClaimed(gameId);
+        HaxeFolioApp.valueStorage.write(LocalStorageKey.REDIRECTED_GAME_ID, Std.string(game.id));
+        onClaimed(game);
     }
 
     private static function dropPending():Void
     {
-        pendingGameId = null;
+        pendingGame = null;
 
         if (blinker != null)
             blinker.stop();

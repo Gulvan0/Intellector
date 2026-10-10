@@ -61,7 +61,7 @@ class RequestFailureNotice
         var reasonLabel:Label = new Label();
         reasonLabel.percentWidth = 100;
         reasonLabel.text = GroupedLocaleResolvers.requestFailureReason(reason);
-        reasonLabel.addClass(StyleClass.REQUEST_FAILURE_REASON);
+        reasonLabel.addClass(StyleClass.NOTICE_TEXT);
 
         card = new NotificationCard();
         card.title = GroupedLocaleResolvers.requestFailureTitle(action);
