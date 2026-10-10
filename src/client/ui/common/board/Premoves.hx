@@ -11,9 +11,9 @@ import morestd.Signal;
     the queued premoves played (tinted `Premove`) and fires the first one through `playMove` on the
     user's turn. Drops the queue on a `Replacement`, when disabled, or when a premove fails.
 **/
-class Premoves
+class Premoves implements PremoveState
 {
-    private final board:BoardSurface;
+    private final board:BoardView;
     private final tints:HexTints;
     private final rules:MoveRules;
     private final userColor:PieceColor;
@@ -27,7 +27,7 @@ class Premoves
     // tells whether firing a premove brought in a new real position
     private var realPositionVersion:Int = 0;
 
-    public function new(board:BoardSurface, tints:HexTints, rules:MoveRules, userColor:PieceColor, realPosition:Position, enabled:Bool, playMove:Signal<RawPly>, intents:Signal<PremoveIntent>)
+    public function new(board:BoardView, tints:HexTints, rules:MoveRules, userColor:PieceColor, realPosition:Position, enabled:Bool, playMove:Signal<RawPly>, intents:Signal<PremoveIntent>)
     {
         this.board = board;
         this.tints = tints;

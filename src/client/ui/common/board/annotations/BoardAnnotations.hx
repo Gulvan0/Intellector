@@ -2,7 +2,7 @@ package client.ui.common.board.annotations;
 
 import client.datatypes.AnnotationHexStyle;
 import client.ui.common.board.AnnotationColor;
-import client.ui.common.board.BoardSurface;
+import client.ui.common.board.BoardView;
 import client.ui.common.board.HexTints;
 import client.ui.common.board.PositionChangeCause;
 import intellectorboard.primitives.hex.HexCoords;
@@ -17,7 +17,8 @@ using Lambda;
 **/
 class BoardAnnotations
 {
-    private final board:BoardSurface;
+    private final board:BoardView;
+    private final canvas:AnnotationCanvas;
     private final tints:HexTints;
     private final positionHandle:Detachable;
 
@@ -27,9 +28,10 @@ class BoardAnnotations
     private var hexStyle:AnnotationHexStyle;
     private var clearsOnPositionChange:Bool;
 
-    public function new(board:BoardSurface, tints:HexTints, hexStyle:AnnotationHexStyle, clearsOnPositionChange:Bool)
+    public function new(board:BoardView, canvas:AnnotationCanvas, tints:HexTints, hexStyle:AnnotationHexStyle, clearsOnPositionChange:Bool)
     {
         this.board = board;
+        this.canvas = canvas;
         this.tints = tints;
         this.hexStyle = hexStyle;
         this.clearsOnPositionChange = clearsOnPositionChange;
@@ -110,7 +112,7 @@ class BoardAnnotations
     {
         var asTints:Bool = hexStyle == TINT;
 
-        board.annotationLayer.setAnnotations(asTints ? [] : hexAnnotations.copy(), arrows.copy());
+        canvas.setAnnotations(asTints ? [] : hexAnnotations.copy(), arrows.copy());
 
         for (color in AnnotationColor.createAll())
         {

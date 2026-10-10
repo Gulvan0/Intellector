@@ -2,18 +2,19 @@ package client.ui.common.board.tools;
 
 import client.ui.common.board.BoardInputOptions;
 import client.ui.common.board.BoardPoint;
-import client.ui.common.board.BoardSurface;
+import client.ui.common.board.BoardView;
 import client.ui.common.board.EditIntent;
 import client.ui.common.board.HexTint;
 import client.ui.common.board.HexTints;
 import client.ui.common.board.PositionChangeCause;
 import client.ui.common.board.PremoveIntent;
-import client.ui.common.board.input.BoardGestures;
+import client.ui.common.board.input.GestureSource;
 import client.ui.common.board.input.HexDrag;
 import client.ui.common.board.input.HexPress;
 import client.ui.common.board.input.Modifiers;
 import client.ui.common.board.input.PointerButton;
-import client.ui.common.board.move_prompt.MovePrompt;
+import client.ui.common.board.move_prompt.MovePrompts;
+import client.ui.common.board.move_prompt.OpenPrompt;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceData;
@@ -39,7 +40,7 @@ private enum ToolState
     Selected(picked:PickedPiece);
     Dragging(picked:PickedPiece);
     /** A choice completing the move is pending in `prompt`; the moving piece is drawn on `to` **/
-    AwaitingChoice(picked:PickedPiece, to:HexCoords, prompt:MovePrompt);
+    AwaitingChoice(picked:PickedPiece, to:HexCoords, prompt:OpenPrompt);
 }
 
 private typedef HexTintPlacement =
@@ -58,7 +59,8 @@ private typedef HexTintPlacement =
 **/
 class PieceMoveTool
 {
-    private final board:BoardSurface;
+    private final board:BoardView;
+    private final prompts:MovePrompts;
     private final tints:HexTints;
     private final options:BoardInputOptions;
     private var policy:PieceMovePolicy;
@@ -69,7 +71,7 @@ class PieceMoveTool
 
     private final positionHandle:Detachable;
 
-    private var gestures:Null<BoardGestures> = null;
+    private var gestures:Null<GestureSource> = null;
     private var bindingHandles:Array<Detachable> = [];
     private var suspension:Null<Detachable> = null;
 
@@ -83,9 +85,10 @@ class PieceMoveTool
 
     private var hoverTint:Null<HexTintPlacement> = null;
 
-    public function new(board:BoardSurface, tints:HexTints, options:BoardInputOptions, policy:PieceMovePolicy, playMove:Signal<RawPly>, premoveIntents:Signal<PremoveIntent>, editIntents:Signal<EditIntent>)
+    public function new(board:BoardView, prompts:MovePrompts, tints:HexTints, options:BoardInputOptions, policy:PieceMovePolicy, playMove:Signal<RawPly>, premoveIntents:Signal<PremoveIntent>, editIntents:Signal<EditIntent>)
     {
         this.board = board;
+        this.prompts = prompts;
         this.tints = tints;
         this.options = options;
         this.policy = policy;
@@ -100,7 +103,7 @@ class PieceMoveTool
         Starts moving pieces with `button`; detaching the handle aborts the gesture in flight. One
         binding at a time.
     **/
-    public function bind(gestures:BoardGestures, button:PointerButton):Detachable
+    public function bind(gestures:GestureSource, button:PointerButton):Detachable
     {
         unbind();
 
@@ -354,14 +357,14 @@ class PieceMoveTool
                     report(mode, from, to, Dominator, null);
                 else
                 {
-                    awaitChoice(picked, to, MovePrompt.promotion(board, to, picked.piece.color, kind -> {
+                    awaitChoice(picked, to, prompts.promotion(to, picked.piece.color, kind -> {
                         closeChoice();
                         report(mode, from, to, kind, null);
                     }, closeChoice));
                 }
 
             case Chameleon(capturedKind):
-                awaitChoice(picked, to, MovePrompt.captureMorph(board, to, picked.piece.type, picked.piece.color, capturedKind, morph -> {
+                awaitChoice(picked, to, prompts.captureMorph(to, picked.piece.type, picked.piece.color, capturedKind, morph -> {
                     closeChoice();
                     report(mode, from, to, morph ? capturedKind : null, null);
                 }, closeChoice));
@@ -369,7 +372,7 @@ class PieceMoveTool
             case PremoveChameleon:
                 if (options.asksChameleon(modifiers))
                 {
-                    awaitChoice(picked, to, MovePrompt.premoveChameleon(board, to, picked.piece.type, picked.piece.color, kind -> {
+                    awaitChoice(picked, to, prompts.premoveChameleon(to, picked.piece.type, picked.piece.color, kind -> {
                         closeChoice();
                         report(mode, from, to, null, kind);
                     }, closeChoice));
@@ -394,7 +397,7 @@ class PieceMoveTool
     }
 
     // the board shows the move as made while the choice is pending
-    private function awaitChoice(picked:PickedPiece, to:HexCoords, prompt:MovePrompt):Void
+    private function awaitChoice(picked:PickedPiece, to:HexCoords, prompt:OpenPrompt):Void
     {
         showChoice(picked.from, to);
         tints.add(PromptAnchor, to);

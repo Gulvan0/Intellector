@@ -2,10 +2,10 @@ package client.ui.common.board.tools;
 
 import client.ui.common.board.AnnotationColor;
 import client.ui.common.board.BoardInputOptions;
-import client.ui.common.board.BoardSurface;
+import client.ui.common.board.annotations.AnnotationCanvas;
 import client.ui.common.board.annotations.ArrowAnnotation;
 import client.ui.common.board.annotations.AnnotationIntent;
-import client.ui.common.board.input.BoardGestures;
+import client.ui.common.board.input.GestureSource;
 import client.ui.common.board.input.HexDrag;
 import client.ui.common.board.input.HexPress;
 import client.ui.common.board.input.PointerButton;
@@ -29,7 +29,7 @@ class AnnotationTool
     /** Whether a `Primary` press anywhere clears the annotations, when bound to another button **/
     public var clearsOnPrimaryPress:Bool = true;
 
-    private final board:BoardSurface;
+    private final canvas:AnnotationCanvas;
     private final options:BoardInputOptions;
     private final intents:Signal<AnnotationIntent>;
 
@@ -37,9 +37,9 @@ class AnnotationTool
     private var started:Null<StartedAnnotation> = null;
     private var previewArrow:Null<ArrowAnnotation> = null;
 
-    public function new(board:BoardSurface, options:BoardInputOptions, intents:Signal<AnnotationIntent>)
+    public function new(canvas:AnnotationCanvas, options:BoardInputOptions, intents:Signal<AnnotationIntent>)
     {
-        this.board = board;
+        this.canvas = canvas;
         this.options = options;
         this.intents = intents;
     }
@@ -48,7 +48,7 @@ class AnnotationTool
         Starts drawing with `drawButton`; detaching the handle drops the annotation in progress. One
         binding at a time.
     **/
-    public function bind(gestures:BoardGestures, drawButton:PointerButton):Detachable
+    public function bind(gestures:GestureSource, drawButton:PointerButton):Detachable
     {
         unbind();
 
@@ -130,6 +130,6 @@ class AnnotationTool
             return;
 
         previewArrow = arrow;
-        board.annotationLayer.setPreviewArrow(arrow);
+        canvas.setPreviewArrow(arrow);
     }
 }

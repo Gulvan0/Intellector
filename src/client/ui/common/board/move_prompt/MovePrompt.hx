@@ -32,7 +32,7 @@ private enum RingSlot
     promote or premove-morph into, or a capture's become/stay pair. Callbacks are called once it's
     closed; it's cancelled by its own button, a press outside or Esc.
 **/
-class MovePrompt
+class MovePrompt implements OpenPrompt
 {
     // at the anchor's vertex angles, counterclockwise from the right; the hub sits over the anchor
     private static final RING_SLOTS:Array<RingSlot> = [Piece(Aggressor), Piece(Liberator), Piece(Dominator), Cancel, Piece(Progressor), Piece(Defensor)];

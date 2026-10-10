@@ -1,6 +1,5 @@
 package client.ui.common.board;
 
-import client.ui.common.board.layers.HexGridLayer;
 import intellectorboard.primitives.hex.HexCoords;
 
 using Lambda;
@@ -13,15 +12,15 @@ private typedef TintCoverage =
 
 /**
     Each writer sets which hexes its tint covers; a hex shows its highest-priority tint, or its base
-    fill if none. The sole writer of its `HexGridLayer`'s per-hex fills; one per board.
+    fill if none. The sole writer of its `HexFillTarget`; one per board.
 **/
 class HexTints
 {
-    private final grid:HexGridLayer;
+    private final grid:HexFillTarget;
     private var palette:BoardPalette;
     private var coverages:Array<TintCoverage> = [];
 
-    public function new(grid:HexGridLayer, palette:BoardPalette)
+    public function new(grid:HexFillTarget, palette:BoardPalette)
     {
         this.grid = grid;
         this.palette = palette;

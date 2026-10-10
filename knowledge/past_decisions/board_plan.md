@@ -829,7 +829,25 @@ None at the moment.
 ### 6.3 Not verified in the browser
 
 - A premove chameleon choice of the capturing piece's own kind firing as a plain move, and a
-  chosen morph that is possible when it fires (only the impossible-morph case was exercised).
+  chosen morph that is possible when it fires (only the impossible-morph case was exercised;
+  `PremoveQueueTest` covers both).
 - Promotion chosen up front for a premove (shares the move path, which was checked).
 - Anchors on every file and both edge rows for the ring (top edge and a 390 px viewport checked).
 - Real touch hardware (only devtools emulation).
+
+### 6.4 Test seams
+
+The board logic depends on interfaces, not the UI classes, so `test.hxml` (`--interp`) runs it
+against fakes in `test/testutils/board`:
+
+| Interface | Real implementation | Used by |
+|---|---|---|
+| `BoardView` | `BoardSurface` | `PieceMoveTool`, `BoardAnnotations`, `Premoves` |
+| `annotations.AnnotationCanvas` | `AnnotationLayer` | `BoardAnnotations`, `AnnotationTool` (a separate argument, not part of `BoardView`) |
+| `HexFillTarget` | `HexGridLayer` | `HexTints` |
+| `input.GestureSource` | `BoardGestures` | every tool's `bind` |
+| `move_prompt.MovePrompts` / `OpenPrompt` | `BoardMovePrompts` / `MovePrompt` | `PieceMoveTool` |
+| `PremoveState` | `Premoves` | `LiveGameMovePolicy` |
+
+`test.hxml` includes haxefolio so `StyleVars`, and with it `BoardPalette` and `ArrowGeometry`,
+compile under `--interp`.

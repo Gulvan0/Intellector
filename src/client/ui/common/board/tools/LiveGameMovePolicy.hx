@@ -1,7 +1,7 @@
 package client.ui.common.board.tools;
 
 import client.ui.common.board.MoveRules;
-import client.ui.common.board.Premoves;
+import client.ui.common.board.PremoveState;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceColor;
@@ -15,9 +15,9 @@ class LiveGameMovePolicy implements PieceMovePolicy
 {
     private final rules:MoveRules;
     private final userColor:PieceColor;
-    private final premoves:Null<Premoves>;
+    private final premoves:Null<PremoveState>;
 
-    public function new(rules:MoveRules, userColor:PieceColor, premoves:Null<Premoves>)
+    public function new(rules:MoveRules, userColor:PieceColor, premoves:Null<PremoveState>)
     {
         this.rules = rules;
         this.userColor = userColor;

@@ -20,7 +20,7 @@ import morestd.VoidSignal;
     A press off the board is reported, with a `null` hex, only on bare page background outside
     `ownArea`; any other is ignored through its release.
 **/
-class BoardGestures
+class BoardGestures implements GestureSource
 {
     private static inline final PRIMARY_BIT:Int = 1;
     private static inline final SECONDARY_BIT:Int = 2;

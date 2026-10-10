@@ -18,10 +18,6 @@ The user is able to choose the accent colour from the selected presets, plus fre
 
 Haxefolio implementation + Turn color only active for Tree mode + Rename labels more fittingly
 
-## Tests (board?)
-
-Deferred while implementing the board plan
-
 ## Challenge notification: make the whole position grid clickable, not just "Preview" button
 
 ## Red error notifcations

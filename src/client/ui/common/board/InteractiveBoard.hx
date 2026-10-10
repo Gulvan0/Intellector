@@ -3,6 +3,7 @@ package client.ui.common.board;
 import client.ui.common.board.annotations.AnnotationIntent;
 import client.ui.common.board.annotations.BoardAnnotations;
 import client.ui.common.board.input.BoardGestures;
+import client.ui.common.board.move_prompt.BoardMovePrompts;
 import client.ui.common.board.tools.AnnotationTool;
 import client.ui.common.board.tools.HexEditTool;
 import client.ui.common.board.tools.PieceMovePolicy;
@@ -75,12 +76,12 @@ class InteractiveBoard extends Box
         gestures = new BoardGestures(board, this.element);
         tints = new HexTints(board.grid, BoardPalette.DEFAULT);
 
-        moveTool = new PieceMoveTool(board, tints, options, policy, playMove, premoveIntents, editIntents);
+        moveTool = new PieceMoveTool(board, new BoardMovePrompts(board), tints, options, policy, playMove, premoveIntents, editIntents);
         moveToolBinding = moveTool.bind(gestures, Primary);
 
-        annotations = new BoardAnnotations(board, tints, Preferences.annotationHexStyle.get(), Preferences.clearAnnotationsOnPositionChange.get());
+        annotations = new BoardAnnotations(board, board.annotationLayer, tints, Preferences.annotationHexStyle.get(), Preferences.clearAnnotationsOnPositionChange.get());
         annotationRoutingHandle = annotationIntents.subscribe(annotations.apply);
-        annotationTool = new AnnotationTool(board, options, annotationIntents);
+        annotationTool = new AnnotationTool(board.annotationLayer, options, annotationIntents);
         annotationTool.clearsOnPrimaryPress = Preferences.clearAnnotationsOnClick.get();
         annotationToolBinding = annotationTool.bind(gestures, Secondary);
 

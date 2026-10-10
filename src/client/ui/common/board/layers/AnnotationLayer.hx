@@ -4,6 +4,7 @@ import client.ui.common.board.BoardGeometry;
 import client.ui.common.board.BoardPalette;
 import client.ui.common.board.BoardPoint;
 import client.ui.common.board.BoardProjection;
+import client.ui.common.board.annotations.AnnotationCanvas;
 import client.ui.common.board.annotations.ArrowAnnotation;
 import client.ui.common.board.annotations.ArrowGeometry;
 import client.ui.common.board.annotations.HexAnnotation;
@@ -15,7 +16,7 @@ import haxefolio.graphics.SvgLayer;
     Translucent annotation rings and arrows, above the pieces (except a dragged one), plus the
     preview arrow being dragged out. Draws what it's given, knowing no annotation rules.
 **/
-class AnnotationLayer implements BoardLayer
+class AnnotationLayer implements BoardLayer implements AnnotationCanvas
 {
     private final layer:SvgLayer;
     private final projection:BoardProjection;

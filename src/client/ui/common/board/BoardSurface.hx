@@ -19,7 +19,7 @@ import morestd.VoidSignal;
     Layers, bottom to top: hex grid, coordinate labels, pieces, move markers, annotations, the
     dragged piece.
 **/
-class BoardSurface extends SvgSurface
+class BoardSurface extends SvgSurface implements BoardView
 {
     /** For `HexTints` alone to paint fills on **/
     public final grid:HexGridLayer;

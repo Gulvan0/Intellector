@@ -4,13 +4,14 @@ import client.ui.common.board.BoardGeometry;
 import client.ui.common.board.BoardPalette;
 import client.ui.common.board.BoardPoint;
 import client.ui.common.board.BoardProjection;
+import client.ui.common.board.HexFillTarget;
 import haxe.ui.backend.html5.svg.SVGPathBuilder;
 import haxefolio.graphics.SvgLayer;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.hex.HexCoordsIterator;
 
 /** The hex shapes: their border, their base fill and any per-hex fill overriding it **/
-class HexGridLayer implements BoardLayer
+class HexGridLayer implements BoardLayer implements HexFillTarget
 {
     private final layer:SvgLayer;
     private final projection:BoardProjection;

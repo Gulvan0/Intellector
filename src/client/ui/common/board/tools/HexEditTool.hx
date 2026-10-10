@@ -2,7 +2,7 @@ package client.ui.common.board.tools;
 
 import client.ui.common.board.EditIntent;
 import client.ui.common.board.HexTints;
-import client.ui.common.board.input.BoardGestures;
+import client.ui.common.board.input.GestureSource;
 import client.ui.common.board.input.HexDrag;
 import client.ui.common.board.input.HexPress;
 import client.ui.common.board.input.PointerButton;
@@ -51,7 +51,7 @@ class HexEditTool
         Starts editing with `button`; detaching the handle ends the press and the hover. One
         binding at a time.
     **/
-    public function bind(gestures:BoardGestures, button:PointerButton):Detachable
+    public function bind(gestures:GestureSource, button:PointerButton):Detachable
     {
         unbind();
 
