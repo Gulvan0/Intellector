@@ -9,6 +9,7 @@ import haxe.Timer;
 import haxe.ui.components.Button;
 import haxe.ui.components.CheckBox;
 import haxe.ui.components.Label;
+import haxe.ui.components.OptionBox;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
@@ -16,6 +17,7 @@ import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 
 import client.datatypes.TimeControl.TimeControlFactory;
+import client.ui.demo.DemoChallengeServer.DemoReplyOutcome;
 
 /** Fake challenges fed to the real incoming challenge notification and challenges widget **/
 class ChallengesShowcase extends VBox
@@ -57,14 +59,15 @@ class ChallengesShowcase extends VBox
         delayedArrival = new CheckBox();
         delayedArrival.text = 'New challenges arrive ${ARRIVAL_DELAY_MS / 1000} s later (to open the dropdown first)';
 
-        var acceptSucceeds:CheckBox = new CheckBox();
-        acceptSucceeds.text = "Accepting succeeds (otherwise fails), after 1.5 s";
-        acceptSucceeds.selected = DemoChallengeServer.acceptSucceeds;
-        acceptSucceeds.onChange = _ -> DemoChallengeServer.acceptSucceeds = acceptSucceeds.selected;
+        addRow("Accept, Decline and Cancel end after 1.5 s with", [
+            replyOutcomeOption("Success", Success),
+            replyOutcomeOption("No connection", NoConnection),
+            replyOutcomeOption("Server error", ServerError),
+            replyOutcomeOption("Challenge gone", ChallengeGone)
+        ]);
 
         addRow("Options", [
             delayedArrival,
-            acceptSucceeds,
             button("Open the dropdown", Main.challengesWidget.dropdown.open),
             button("Remove all fake challenges", DemoChallengeServer.clear)
         ]);
@@ -166,6 +169,19 @@ class ChallengesShowcase extends VBox
         for (item in items)
             row.addComponent(item);
         addComponent(row);
+    }
+
+    private static function replyOutcomeOption(text:String, outcome:DemoReplyOutcome):OptionBox
+    {
+        var option:OptionBox = new OptionBox();
+        option.text = text;
+        option.componentGroup = "demo-reply-outcome";
+        option.selected = DemoChallengeServer.replyOutcome == outcome;
+        option.onChange = _ -> {
+            if (option.selected)
+                DemoChallengeServer.replyOutcome = outcome;
+        };
+        return option;
     }
 
     private static function button(text:String, action:Void->Void):Button

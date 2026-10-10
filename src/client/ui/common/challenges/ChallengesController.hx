@@ -26,9 +26,9 @@ class ChallengesController
     private final onMarksChanged:ChallengeMarks->Void;
 
     /**
-        `onDecline` and `onCancel` are called once the challenge is off display. After `onAccept`,
-        every reply stays disabled until `acceptSucceeded` or `acceptFailed`. `onMarksChanged` may be
-        called with unchanged marks.
+        `onDecline` and `onCancel` are called once the challenge is off display; a failure is reported
+        through `declineFailed`/`cancelFailed`. After `onAccept`, every reply stays disabled until
+        `acceptSucceeded` or `acceptFailed`. `onMarksChanged` may be called with unchanged marks.
     **/
     public function new(widget:ChallengesWidget, onAccept:IncomingChallenge->Void, onDecline:IncomingChallenge->Void, onCancel:OutgoingChallenge->Void, onMarksChanged:ChallengeMarks->Void)
     {
@@ -116,6 +116,19 @@ class ChallengesController
     {
         inbox.acceptFailed(id);
         render();
+    }
+
+    /** Puts `challenge` back: still pending after a failed decline **/
+    public function declineFailed(challenge:IncomingChallenge):Void
+    {
+        inbox.restoreIncoming(challenge);
+        render();
+    }
+
+    /** Puts `challenge` back: still pending after a failed cancel **/
+    public function cancelFailed(challenge:OutgoingChallenge):Void
+    {
+        addOutgoing(challenge);
     }
 
     /** Marks made in another tab **/

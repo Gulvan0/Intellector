@@ -3,6 +3,8 @@ package client;
 import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.piece.PieceKind;
 import client.datatypes.ChallengeAcceptorColor;
+import client.datatypes.FailedAction;
+import client.datatypes.RequestFailureReason;
 import client.ui.common.overlays.login.LoginFormField;
 import haxefolio.LocaleUtils;
 
@@ -78,5 +80,20 @@ class GroupedLocaleResolvers
     {
         var key:String = isStudy ? "study_title" : "title";
         return LocaleUtils.localeBinding('intellector.analysis.$key');
+    }
+
+    public static function requestFailureTitle(action:FailedAction):String
+    {
+        return LocaleUtils.localeBinding('intellector.request_failure.title.$action');
+    }
+
+    public static function requestFailureReason(reason:RequestFailureReason):String
+    {
+        return switch reason {
+            case NoConnection: LocaleUtils.localeBinding("intellector.request_failure.reason.no_connection");
+            case ServerError(httpStatus): LocaleUtils.localeBinding("intellector.request_failure.reason.server_error", Std.string(httpStatus));
+            case Unexpected: LocaleUtils.localeBinding("intellector.request_failure.reason.unexpected");
+            case ChallengeUnavailable: LocaleUtils.localeBinding("intellector.request_failure.reason.challenge_unavailable");
+        }
     }
 }

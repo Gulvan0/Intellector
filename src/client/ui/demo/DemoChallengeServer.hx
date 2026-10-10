@@ -3,6 +3,15 @@ package client.ui.demo;
 import client.datatypes.IncomingChallenge;
 import client.datatypes.OutgoingChallenge;
 import haxe.Timer;
+import http.HttpError;
+
+enum DemoReplyOutcome
+{
+    Success;
+    NoConnection;
+    ServerError;
+    ChallengeGone;
+}
 
 /**
     Stands in for the server for the demo page's fake challenges: feeds them to the app's challenges
@@ -11,10 +20,10 @@ import haxe.Timer;
 class DemoChallengeServer
 {
     private static inline final FIRST_ID:Int = 1000000000; // above any real challenge id
-    private static inline final ACCEPT_DELAY_MS:Int = 1500;
+    private static inline final REPLY_DELAY_MS:Int = 1500;
 
-    /** Whether accepting a fake challenge starts its game rather than failing **/
-    public static var acceptSucceeds:Bool = false;
+    /** How the user's replies to fake challenges end **/
+    public static var replyOutcome:DemoReplyOutcome = Success;
     /** A fake challenge has been made in this tab, so its challenge marks are fake too **/
     public static var used(default, null):Bool = false;
 
@@ -72,26 +81,45 @@ class DemoChallengeServer
         outgoing = [];
     }
 
-    public static function accept(challenge:IncomingChallenge):Void
+    public static function accept(challenge:IncomingChallenge, onFailed:HttpError->Void):Void
+    {
+        reply(challenge.id, Main.challenges.acceptSucceeded, onFailed);
+    }
+
+    public static function decline(challenge:IncomingChallenge, onFailed:HttpError->Void):Void
+    {
+        reply(challenge.id, () -> {}, onFailed);
+    }
+
+    public static function cancel(challenge:OutgoingChallenge, onFailed:HttpError->Void):Void
+    {
+        reply(challenge.id, () -> {}, onFailed);
+    }
+
+    // a failed reply leaves the challenge pending, unless it's gone
+    private static function reply(id:Int, onSucceeded:Void->Void, onFailed:HttpError->Void):Void
     {
         Timer.delay(() -> {
-            if (acceptSucceeds)
-            {
-                incomingIds.remove(challenge.id);
-                Main.challenges.acceptSucceeded();
+            var error:Null<HttpError> = switch replyOutcome {
+                case Success: null;
+                case NoConnection: new HttpError("Demo: no connection");
+                case ServerError: new HttpError("Demo: server error", 500);
+                case ChallengeGone: new HttpError("Demo: challenge not found", 404);
             }
+
+            if (error == null || replyOutcome == ChallengeGone)
+                forget(id);
+
+            if (error == null)
+                onSucceeded();
             else
-                Main.challenges.acceptFailed(challenge.id);
-        }, ACCEPT_DELAY_MS);
+                onFailed(error);
+        }, REPLY_DELAY_MS);
     }
 
-    public static function decline(challenge:IncomingChallenge):Void
+    private static function forget(id:Int):Void
     {
-        incomingIds.remove(challenge.id);
-    }
-
-    public static function cancel(challenge:OutgoingChallenge):Void
-    {
-        outgoing = outgoing.filter(pending -> pending.id != challenge.id);
+        incomingIds.remove(id);
+        outgoing = outgoing.filter(challenge -> challenge.id != id);
     }
 }

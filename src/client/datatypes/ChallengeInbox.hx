@@ -108,6 +108,19 @@ class ChallengeInbox
         return challenge;
     }
 
+    /** Puts `challenge` back after a failed decline, in the notification too unless dismissed **/
+    public function restoreIncoming(challenge:IncomingChallenge):Void
+    {
+        if (findIncoming(challenge.id) != null)
+            return;
+
+        incomingList.push(challenge);
+        incomingList.sort((a, b) -> a.id - b.id);
+
+        if (!marks.dismissedIds.contains(challenge.id))
+            notification.restore(challenge);
+    }
+
     /** Removes every challenge on display in the notification and returns them, to be declined; nothing while accepting **/
     public function declineNotified():Array<IncomingChallenge>
     {

@@ -792,6 +792,13 @@
     color: #2a211a;
 }
 
+/* the failed request notice's reason line, under the card's title */
+.intellector-request-failure-reason {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
 .intellector-challenge-facts {
     background-color: #e6dfd3;
     border-radius: 6px;

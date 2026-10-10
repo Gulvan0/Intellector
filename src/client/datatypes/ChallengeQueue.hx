@@ -4,8 +4,8 @@ package client.datatypes;
     The incoming challenges on display in the notification: the active one and the others waiting,
     in arrival order.
 
-    Each challenge is announced once: once off display, or skipped, it never comes back. Removing
-    the active challenge promotes the newest remaining one.
+    Each challenge is announced once: once off display, or skipped, it never comes back unless
+    restored. Removing the active challenge promotes the newest remaining one.
 **/
 class ChallengeQueue
 {
@@ -44,6 +44,20 @@ class ChallengeQueue
 
         announcedIds.set(challenge.id, true);
         entries.push(challenge);
+
+        if (activeId == null)
+            activeId = challenge.id;
+    }
+
+    /** Puts `challenge` back on display in arrival order, announced before or not; it's active only if nothing else is **/
+    public function restore(challenge:IncomingChallenge):Void
+    {
+        if (find(challenge.id) != null)
+            return;
+
+        announcedIds.set(challenge.id, true);
+        entries.push(challenge);
+        entries.sort((a, b) -> a.id - b.id);
 
         if (activeId == null)
             activeId = challenge.id;

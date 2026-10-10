@@ -43,5 +43,7 @@ enum abstract StyleClass(String) from String to String
     var PROMPT_POPOVER = "intellector-prompt-popover";
     var PROMPT_TITLE = "intellector-prompt-title";
 
+    var REQUEST_FAILURE_REASON = "intellector-request-failure-reason";
+
     var HAXEFOLIO_CLOSE_BUTTON = "haxefolio-close-button";
 }

@@ -21,13 +21,16 @@ import client.ui.demo.DemoPage;
 import client.ChallengeMarksStorage;
 import client.GameRedirect;
 import client.datatypes.ChallengeMarks;
+import client.datatypes.FailedAction;
 import client.datatypes.IncomingChallenge;
 import client.datatypes.OutgoingChallenge;
 import client.ui.StyleVars;
 import client.ui.common.challenges.ChallengesController;
 import client.ui.common.challenges.widget.ChallengesWidget;
+import client.ui.common.notifications.RequestFailureNotice;
 import easypubsub.Subscription;
 import haxe.ui.core.Component;
+import http.HttpError;
 import net.models.challenge.mappers.IncomingChallengeMapper;
 import net.models.challenge.mappers.OutgoingChallengeMapper;
 import net.rest.Rest;
@@ -222,7 +225,7 @@ class Main
                 if (challenge.resulting_game != null)
                     GameRedirect.request(challenge.resulting_game.id);
             },
-            _ -> {},
+            RequestFailureNotice.showHttpError.bind(OPEN_STARTED_GAME),
             ["challenge_id" => Std.string(challengeId)]
         );
     }
@@ -247,7 +250,7 @@ class Main
     {
         if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
         {
-            DemoChallengeServer.accept(challenge);
+            DemoChallengeServer.accept(challenge, onAcceptFailed.bind(challenge));
             return;
         }
 
@@ -257,42 +260,79 @@ class Main
                 challenges.acceptSucceeded();
                 HaxeFolioApp.navigateTo('live/${game.id}');
             },
-            _ -> challenges.acceptFailed(challenge.id),
+            onAcceptFailed.bind(challenge),
             ["challenge_id" => Std.string(challenge.id)]
         );
     }
 
-    // already off display; a failed decline leaves the challenge pending, see knowledge/plans/challenge_notification_deferred.md
+    private static function onAcceptFailed(challenge:IncomingChallenge, error:HttpError):Void
+    {
+        challenges.acceptFailed(challenge.id);
+
+        if (isChallengeResolved(error))
+        {
+            challenges.removeIncoming(challenge.id);
+            RequestFailureNotice.show(ACCEPT_CHALLENGE, ChallengeUnavailable);
+        }
+        else
+            RequestFailureNotice.showHttpError(ACCEPT_CHALLENGE, error);
+    }
+
     private static function declineChallenge(challenge:IncomingChallenge):Void
     {
         if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
         {
-            DemoChallengeServer.decline(challenge);
+            DemoChallengeServer.decline(challenge, onDeclineFailed.bind(challenge));
             return;
         }
 
         Rest.client().execute(
             RestOperationRegistry.DECLINE_CHALLENGE,
             _ -> {},
-            _ -> {},
+            onDeclineFailed.bind(challenge),
             ["challenge_id" => Std.string(challenge.id)]
         );
     }
 
-    // already off display; a failed cancel leaves the challenge pending, see knowledge/plans/challenges_widget_deferred.md §5
+    // already off display: put back unless the challenge is gone anyway
+    private static function onDeclineFailed(challenge:IncomingChallenge, error:HttpError):Void
+    {
+        if (isChallengeResolved(error))
+            return;
+
+        challenges.declineFailed(challenge);
+        RequestFailureNotice.showHttpError(DECLINE_CHALLENGE, error);
+    }
+
     private static function cancelChallenge(challenge:OutgoingChallenge):Void
     {
         if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
         {
-            DemoChallengeServer.cancel(challenge);
+            DemoChallengeServer.cancel(challenge, onCancelFailed.bind(challenge));
             return;
         }
 
         Rest.client().execute(
             RestOperationRegistry.CANCEL_CHALLENGE,
             _ -> {},
-            _ -> {},
+            onCancelFailed.bind(challenge),
             ["challenge_id" => Std.string(challenge.id)]
         );
+    }
+
+    // already off display: put back unless the challenge is gone anyway
+    private static function onCancelFailed(challenge:OutgoingChallenge, error:HttpError):Void
+    {
+        if (isChallengeResolved(error))
+            return;
+
+        challenges.cancelFailed(challenge);
+        RequestFailureNotice.showHttpError(CANCEL_CHALLENGE, error);
+    }
+
+    // not found, or no longer active: cancelled, accepted or declined already
+    private static function isChallengeResolved(error:HttpError):Bool
+    {
+        return error.httpStatus == 404 || error.httpStatus == 422;
     }
 }
