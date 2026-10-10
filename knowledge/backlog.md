@@ -23,3 +23,7 @@ Haxefolio implementation + Turn color only active for Tree mode + Rename labels 
 Deferred while implementing the board plan
 
 ## Challenge notification: make the whole position grid clickable, not just "Preview" button
+
+## Red error notifcations
+
+Error notifications might benefit from the red-ish tint, but this needs Claude Design planning first
