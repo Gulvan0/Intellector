@@ -2,8 +2,6 @@ package client;
 
 import client.datatypes.StartedGame;
 import haxefolio.HaxeFolioApp;
-import haxefolio.LocaleUtils;
-import haxefolio.browser.Blinker;
 import js.Browser;
 import js.html.Event;
 
@@ -13,11 +11,8 @@ import js.html.Event;
 **/
 class GameRedirect
 {
-    private static inline final BLINK_FAVICON:String = "assets/favicons/notification.png";
-
     private static var onClaimed:StartedGame->Void;
     private static var pendingGame:Null<StartedGame> = null;
-    private static var blinker:Null<Blinker> = null;
 
     /** `onClaimed` opens the game in this tab **/
     public static function init(onClaimed:StartedGame->Void):Void
@@ -42,7 +37,7 @@ class GameRedirect
         }
 
         pendingGame = game;
-        startBlinking();
+        TabBlink.start(GameStarted);
     }
 
     private static function onFocusMaybeGained(_:Event):Void
@@ -72,19 +67,7 @@ class GameRedirect
     private static function dropPending():Void
     {
         pendingGame = null;
-
-        if (blinker != null)
-            blinker.stop();
-    }
-
-    private static function startBlinking():Void
-    {
-        if (blinker != null && blinker.isActive)
-            return;
-
-        var title:String = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.browser_tab.game_started"));
-        blinker = new Blinker(title, BLINK_FAVICON);
-        blinker.start();
+        TabBlink.stop(GameStarted);
     }
 
     private static function readRedirectedGameId():Int

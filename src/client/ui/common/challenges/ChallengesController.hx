@@ -1,5 +1,6 @@
 package client.ui.common.challenges;
 
+import client.IncomingChallengeBlink;
 import client.datatypes.ChallengeInbox;
 import client.datatypes.ChallengeMarks;
 import client.datatypes.IncomingChallenge;
@@ -18,6 +19,7 @@ import client.ui.common.notifications.challenges.ChallengeNotificationStack;
 class ChallengesController
 {
     private final inbox:ChallengeInbox = new ChallengeInbox();
+    private final blink:IncomingChallengeBlink = new IncomingChallengeBlink();
     private final stack:ChallengeNotificationStack;
     private final widget:ChallengesWidget;
     private final onAccept:IncomingChallenge->Void;
@@ -68,6 +70,7 @@ class ChallengesController
         var newIds:Array<Int> = newIncomingIds(() -> inbox.receive(challenge, notifies()));
         render();
         highlightInDropdown(newIds);
+        blink.arrive(newIds);
     }
 
     /** See `ChallengeInbox.syncIncoming` **/
@@ -76,6 +79,7 @@ class ChallengesController
         var newIds:Array<Int> = newIncomingIds(() -> inbox.syncIncoming(pending, notifies()));
         render();
         highlightInDropdown(newIds);
+        blink.arrive(newIds);
     }
 
     /** The other side or the server resolved incoming challenge `id` **/
@@ -247,6 +251,7 @@ class ChallengesController
     {
         stack.render(inbox.notification.active, inbox.notification.waiting, inbox.accepting);
         widget.render(inbox.incoming, inbox.outgoing, inbox.accepting, inbox.hasUnseenIncoming);
+        blink.setPending([for (challenge in inbox.incoming) challenge.id]);
         onMarksChanged(inbox.marks);
     }
 }

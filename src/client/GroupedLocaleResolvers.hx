@@ -5,6 +5,7 @@ import intellectorboard.primitives.piece.PieceKind;
 import client.datatypes.ChallengeAcceptorColor;
 import client.datatypes.FailedAction;
 import client.datatypes.RequestFailureReason;
+import client.datatypes.TabBlinkReason;
 import client.ui.common.overlays.login.LoginFormField;
 import haxefolio.LocaleUtils;
 
@@ -80,6 +81,14 @@ class GroupedLocaleResolvers
     {
         var key:String = isStudy ? "study_title" : "title";
         return LocaleUtils.localeBinding('intellector.analysis.$key');
+    }
+
+    public static function browserTabTitle(reason:TabBlinkReason):String
+    {
+        return switch reason {
+            case IncomingChallenge: LocaleUtils.localeBinding("intellector.browser_tab.new_challenge");
+            case GameStarted: LocaleUtils.localeBinding("intellector.browser_tab.game_started");
+        }
     }
 
     public static function requestFailureTitle(action:FailedAction):String
