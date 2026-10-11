@@ -2,9 +2,9 @@ package client;
 
 import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.piece.PieceKind;
-import client.datatypes.ChallengeAcceptorColor;
-import client.datatypes.FailedAction;
-import client.datatypes.RequestFailureReason;
+import client.datatypes.challenge.ChallengeAcceptorColor;
+import client.datatypes.request.FailedAction;
+import client.datatypes.request.RequestFailureReason;
 import client.datatypes.TabBlinkReason;
 import client.ui.common.overlays.login.LoginFormField;
 import haxefolio.LocaleUtils;
@@ -42,6 +42,11 @@ class GroupedLocaleResolvers
     {
         var key:String = isSignUp ? "register" : "sign_in";
         return LocaleUtils.localeBinding('intellector.overlay.login.in_flight.$key');
+    }
+
+    public static function challengeOverlay(key:String):String
+    {
+        return LocaleUtils.localeBinding('intellector.overlay.challenge.$key');
     }
 
     public static function acceptorColor(acceptorColor:ChallengeAcceptorColor):String
@@ -103,6 +108,10 @@ class GroupedLocaleResolvers
             case ServerError(httpStatus): LocaleUtils.localeBinding("intellector.request_failure.reason.server_error", Std.string(httpStatus));
             case Unexpected: LocaleUtils.localeBinding("intellector.request_failure.reason.unexpected");
             case ChallengeUnavailable: LocaleUtils.localeBinding("intellector.request_failure.reason.challenge_unavailable");
+            case ChallengeAlreadyExists: LocaleUtils.localeBinding("intellector.request_failure.reason.challenge_already_exists");
+            case TooManyActiveChallenges(maxActiveChallenges): LocaleUtils.localeBinding("intellector.request_failure.reason.too_many_active_challenges", Std.string(maxActiveChallenges));
+            case TooManyDirectChallenges(maxActiveChallenges): LocaleUtils.localeBinding("intellector.request_failure.reason.too_many_direct_challenges", Std.string(maxActiveChallenges));
+            case ServerRestarting: LocaleUtils.localeBinding("intellector.request_failure.reason.server_restarting");
         }
     }
 }

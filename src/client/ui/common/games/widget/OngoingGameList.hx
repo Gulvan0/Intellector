@@ -1,7 +1,7 @@
 package client.ui.common.games.widget;
 
-import client.datatypes.OngoingGame;
-import client.datatypes.OngoingGameOrdering;
+import client.datatypes.game.OngoingGame;
+import client.logic.game.OngoingGameOrdering;
 import haxe.ui.containers.VBox;
 import haxefolio.ByWidth;
 import haxefolio.ResponsivityController;

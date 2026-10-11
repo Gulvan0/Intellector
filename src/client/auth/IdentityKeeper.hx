@@ -1,5 +1,6 @@
 package client.auth;
 
+import client.storage.LocalStorageKey;
 import haxefolio.HaxeFolioApp;
 
 class IdentityKeeper

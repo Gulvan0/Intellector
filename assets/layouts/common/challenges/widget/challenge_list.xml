@@ -1,5 +1,5 @@
 <!--
-    The challenges widget's dropdown content (knowledge/plans/challenges-widget.md §2): Incoming,
+    The challenges widget's dropdown content: Incoming,
     then Outgoing, each with its count, its entries newest first, or a line saying it's empty.
 -->
 <vbox styleName="intellector-challenge-list" width="100%">

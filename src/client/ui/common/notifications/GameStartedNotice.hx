@@ -1,6 +1,6 @@
 package client.ui.common.notifications;
 
-import client.datatypes.StartedGame;
+import client.datatypes.game.StartedGame;
 import haxe.ui.components.Label;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.HaxeFolioApp;

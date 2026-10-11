@@ -1,9 +1,8 @@
 /*
-    Intellector's override of HaxeFolio's default theme (see knowledge/intellector-style.md for the
-    full token/type/shape rationale; knowledge/plans/haxefolio/haxefolio-theme.md for what this
-    replaces). Registered at priority 10 in module.xml, above the framework's own priority-0
-    stylesheet, so every rule here only needs to restate the properties that actually change -
-    sizing, spacing and structural properties left out keep the framework's own values.
+    Intellector's override of HaxeFolio's default theme. Registered at priority 10 in module.xml,
+    above the framework's own priority-0 stylesheet, so every rule here only needs to restate the
+    properties that actually change - sizing, spacing and structural properties left out keep the
+    framework's own values.
 
     Token -> hex, for readers matching a value back to its name:
 
@@ -399,6 +398,10 @@
     color: #2a211a;
 }
 
+.haxefolio-commit-input-pending {
+    border-color: #c79a56;
+}
+
 .haxefolio-commit-input-invalid {
     border-color: #b8462c;
 }
@@ -431,6 +434,10 @@
     background-color: #f0ebe2;
     border-color: #e6dfd3;
     color: #a79b8a;
+}
+
+.haxefolio-text-input-prefix {
+    color: #6d6152;
 }
 
 /* its reveal toggle (theme §5.3): inkMuted glyph, ink on hover, inkFaint while disabled */
@@ -758,7 +765,7 @@
 }
 
 /*
-    Incoming challenge notification (knowledge/plans/challenge-notification.md): the active card,
+    Incoming challenge notification: the active card,
     the compact rows and the bar above them, and the position preview. Shadows are applied by
     ElementShadow.
 */
@@ -1030,7 +1037,7 @@
 }
 
 /*
-    Challenges widget (knowledge/plans/challenges-widget.md): the menu bar target and badge, the
+    Challenges widget: the menu bar target and badge, the
     dropdown, its sections and entries, and the preview's narrow cover.
 */
 
@@ -1278,7 +1285,7 @@
 }
 
 /*
-    Ongoing games widget (knowledge/plans/ongoing_games_widget_plan.md): what differs from the
+    Ongoing games widget: what differs from the
     challenges widget, whose list, header, fact and button classes it shares.
 */
 
@@ -1395,4 +1402,108 @@
 
 .haxefolio-collapsed .intellector-game-entry-open {
     width: 100%;
+}
+
+/*
+    Challenge creation overlay: sections under a
+    titled divider, the type's variants in an inset slot, numeric values in mono.
+*/
+
+.intellector-challenge-form {
+    width: 100%;
+    vertical-spacing: 18px;
+    padding-top: 18px;
+    padding-right: 12px;
+    padding-bottom: 18px;
+    padding-left: 22px;
+}
+
+.intellector-challenge-form-section {
+    width: 100%;
+    vertical-spacing: 10px;
+}
+
+.intellector-challenge-form-section-heading {
+    width: 100%;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-challenge-form-section-title {
+    width: 100%;
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-challenge-type-slot {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    border-radius: 5px;
+    padding: 12px;
+}
+
+.intellector-challenge-direct-slot {
+    width: 100%;
+    vertical-spacing: 8px;
+}
+
+.intellector-challenge-slot-note {
+    width: 100%;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+.intellector-challenge-guest-number-field .haxefolio-text-input {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+}
+
+.intellector-challenge-time-presets .haxefolio-choice-button {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    text-align: left;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.intellector-challenge-time-presets .haxefolio-choice-button:down {
+    font-name: $mono-family-medium;
+}
+
+.intellector-challenge-time-presets .haxefolio-choice-button > .icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* level with the steppers below their 22px header row while side by side, centred on them once stacked */
+.intellector-challenge-kind-icon {
+    vertical-align: top;
+    margin-top: 28px;
+}
+
+.haxefolio-collapsed .intellector-challenge-kind-icon {
+    vertical-align: center;
+    margin-top: 0;
+}
+
+.intellector-challenge-sip-field .haxefolio-commit-input {
+    font-name: $mono-family-medium;
+    font-size: 12px;
+}
+
+.intellector-challenge-preview-row {
+    width: 100%;
+}
+
+.intellector-challenge-form .haxefolio-preview-pane-caption-row > .image {
+    width: 11px;
+    height: 11px;
+}
+
+/* the board draws its own edge; a fill around it shows in the corners its hexes leave */
+.intellector-challenge-form .haxefolio-preview-pane-area {
+    background-opacity: 0;
+    border-size: 0px;
 }

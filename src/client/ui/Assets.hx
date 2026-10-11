@@ -1,6 +1,6 @@
 package client.ui;
 
-import client.datatypes.TimeControlKind;
+import client.datatypes.timecontrol.TimeControlKind;
 import intellectorboard.primitives.piece.PieceKind;
 import intellectorboard.primitives.piece.PieceColor;
 

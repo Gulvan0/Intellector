@@ -1,11 +1,11 @@
 package client.ui.demo;
 
-import client.datatypes.ChallengeAcceptorColor;
-import client.datatypes.IncomingChallenge;
-import client.datatypes.OutgoingChallenge;
-import client.datatypes.StartedGame;
-import client.datatypes.TimeControl;
-import client.datatypes.TimeControlKind;
+import client.datatypes.challenge.ChallengeAcceptorColor;
+import client.datatypes.challenge.IncomingChallenge;
+import client.datatypes.challenge.OutgoingChallenge;
+import client.datatypes.game.StartedGame;
+import client.datatypes.timecontrol.TimeControl;
+import client.datatypes.timecontrol.TimeControlKind;
 import client.ui.common.notifications.GameStartedNotice;
 import haxe.Timer;
 import haxe.ui.components.Button;
@@ -18,7 +18,7 @@ import haxe.ui.core.Component;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 
-import client.datatypes.TimeControl.TimeControlFactory;
+import client.datatypes.timecontrol.TimeControl.TimeControlFactory;
 import client.ui.demo.DemoChallengeServer.DemoReplyOutcome;
 
 /** Fake challenges fed to the real incoming challenge notification and challenges widget **/

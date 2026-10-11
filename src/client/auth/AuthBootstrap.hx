@@ -1,5 +1,6 @@
 package client.auth;
 
+import client.storage.LocalStorageKey;
 import haxe.Timer;
 import haxefolio.HaxeFolioApp;
 import http.HttpError;

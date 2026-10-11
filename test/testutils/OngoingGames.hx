@@ -1,8 +1,8 @@
 package testutils;
 
-import client.datatypes.FischerTimeControl;
-import client.datatypes.GameClock;
-import client.datatypes.OngoingGame;
+import client.datatypes.timecontrol.FischerTimeControl;
+import client.datatypes.game.GameClock;
+import client.datatypes.game.OngoingGame;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
 

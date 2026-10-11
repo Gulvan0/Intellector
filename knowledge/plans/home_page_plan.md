@@ -139,7 +139,7 @@ class OpenChallengeRow implements TimeControlCellData
 {
     public var id:Int;
     public var mode:OpenChallengeModeData;   // {color:ChallengeAcceptorColor, hasCustomPosition:Bool}
-    public var time:client.datatypes.TimeControl;
+    public var time:client.datatypes.timecontrol.TimeControl;
     public var player:String;                // caller.nickname, plain
     public var bracket:String;               // resolved "Rated"/"Unrated" text, see locale note below
 }
@@ -147,12 +147,12 @@ class OpenChallengeRow implements TimeControlCellData
 class CurrentGameRow implements TimeControlCellData
 {
     public var id:Int;
-    public var time:client.datatypes.TimeControl;
+    public var time:client.datatypes.timecontrol.TimeControl;
     public var players:String;               // "white vs black", plain
     public var bracket:String;
 }
 ```
-`TimeControlCellData` is a one-field interface (`var time:client.datatypes.TimeControl`) letting
+`TimeControlCellData` is a one-field interface (`var time:client.datatypes.timecontrol.TimeControl`) letting
 `TimeControlCellRenderer` be shared with a real typed cast instead of `Dynamic`/`Reflect`. Both
 DTO→row conversions build `time` via
 `net.models.common.mappers.TimeControlMapper.dtoToDatatype(dto.fischer_time_control)`.
@@ -160,7 +160,7 @@ DTO→row conversions build `time` via
 **Reused existing utility (found mid-planning, not written new):**
 `src/client/formatters/TimeControlFormatters.formatTimeControl(TimeControl):String` plus
 `net.models.common.mappers.TimeControlMapper`/`TimeControlKindMapper` — no new formatting code
-needed. `client.datatypes.TimeControl`'s own `TimeControlExtension.getKind()` gives the icon
+needed. `client.datatypes.timecontrol.TimeControl`'s own `TimeControlExtension.getKind()` gives the icon
 lookup key.
 
 **Locale-resolved fields — important limitation, see `[[home_page_deferred]]` item "Live locale

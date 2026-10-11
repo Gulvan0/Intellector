@@ -1,5 +1,5 @@
 <!--
-    The ongoing games widget's dropdown content (knowledge/plans/ongoing_games_widget_plan.md):
+    The ongoing games widget's dropdown content:
     Timed, then Correspondence, each with its count, its games, or a line saying it's empty.
 -->
 <vbox styleName="intellector-challenge-list" width="100%">

@@ -1,8 +1,8 @@
 package net.models.game.mappers;
 
-import client.datatypes.GameClock;
-import client.datatypes.OngoingGame;
-import client.datatypes.TimeControl;
+import client.datatypes.game.GameClock;
+import client.datatypes.game.OngoingGame;
+import client.datatypes.timecontrol.TimeControl;
 import intellectorboard.mappers.Sip;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;

@@ -1,6 +1,6 @@
 package client.ui.common.notifications.challenges;
 
-import client.datatypes.IncomingChallenge;
+import client.datatypes.challenge.IncomingChallenge;
 
 /** Which waiting challenges get a row, and where the count of those without one goes **/
 class ChallengeStackLayout

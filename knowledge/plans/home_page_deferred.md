@@ -11,19 +11,6 @@ renderers, and three prerequisite bug fixes in `net.models`/`net.ws` (`TimeContr
 
 Everything below is still open.
 
-## 1. < Removed >
-
-## 2. Challenge-creation dialog
-
-**Why deferred:** the old `ChallengeParamsDialog` (time control presets/manual editor, ranked
-checkbox, color choice, and a custom-starting-position board editor) is a large separate
-subsystem; the board editor specifically depends on board-rendering UI that doesn't exist yet.
-
-**How to apply:** build as a `HaxeFolioApp.showOverlay()` overlay (per CLAUDE.md's
-dialog-to-overlay migration rule, not a ported `BaseDialog`), triggered from the Create Game
-button after login. `RestOperationRegistry.CREATE_OPEN_CHALLENGE`/`CREATE_DIRECT_CHALLENGE`
-already exist and are unused so far.
-
 ## 3. Challenge-joining screen / Live game screen (row-click navigation targets)
 
 **Why deferred:** neither destination page exists yet.
@@ -71,8 +58,6 @@ pass's bug fix) but only to *remove* the game from Current Games — the same ev
 live-update source a Recent Games list would need. `RestOperationRegistry.GET_RECENT_GAMES` exists
 and is unused so far.
 
-## 7. < Removed >
-
 ## 8. Live locale rebinding for table-row text
 
 **Why deferred (a real limitation, not just an unbuilt feature):** `Label.text`'s `"{{key}}"`
@@ -88,26 +73,3 @@ If/when it matters, either have the tables re-`load()` on a `Preferences.languag
 design a general reusable "live-rebinding table cell" pattern before the next page that needs a
 data-driven table (there will be several: challenge lists, game lists, study lists all follow the
 same shape).
-
-## Bugs found, not fixed this pass
-
-Same bug pattern as two of the three fixes made for Home page (`GamePublic` used where the server
-actually sends `GameSummaryPublic`), found in files unrelated to Home:
-
-- `net/models/player/StartedPlayerGamesStateRefresh.hx`: `current_games:Array<GamePublic>` should
-  be `Array<GameSummaryPublic>` (server: `IntellectorServerV2/src/pubsub/models/state.py:19-20`,
-  `current_games: list[GameSummaryPublic]`).
-- `net/ws/events/GameStarted.hx`: `IEvent<GamePublic, StartedPlayerGames>` should be
-  `IEvent<GameSummaryPublic, StartedPlayerGames>` (server:
-  `IntellectorServerV2/src/pubsub/outgoing_event/update.py:42`,
-  `OutgoingEvent[GameSummaryPublic, StartedPlayerGamesEventChannel]`).
-
-**Why not fixed now:** both belong to the `StartedPlayerGames` channel (watching a specific
-player's live games) — a Profile-page feature, not touched by Home page at all.
-
-**How to apply:** fix alongside whichever page first wires up the `StartedPlayerGames` channel
-(likely Profile). Worth a full audit of every remaining `net.models`/`net.ws` DTO tied to a WS
-refresh/update event against the actual server contract at that point, too — this bug (and the
-unrelated `TimeControl`/`FischerTimeControl` naming bug fixed this pass) both suggest the
-`net.models`/`net.ws` package was generated/copied with some systematic mismatches, not just
-isolated typos, so more may be lurking in channels no page has exercised yet.

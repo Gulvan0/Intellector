@@ -2,7 +2,7 @@ package net.models.common.mappers;
 
 class TimeControlKindMapper
 {
-    public static function datatypeToDto(datatype:client.datatypes.TimeControlKind):net.models.common.TimeControlKind
+    public static function datatypeToDto(datatype:client.datatypes.timecontrol.TimeControlKind):net.models.common.TimeControlKind
     {
         return switch datatype {
             case Hyperbullet: HYPERBULLET;
@@ -14,7 +14,7 @@ class TimeControlKindMapper
         }
     }
 
-    public static function dtoToDatatype(dto:net.models.common.TimeControlKind):client.datatypes.TimeControlKind
+    public static function dtoToDatatype(dto:net.models.common.TimeControlKind):client.datatypes.timecontrol.TimeControlKind
     {
         return switch dto {
             case HYPERBULLET: Hyperbullet;

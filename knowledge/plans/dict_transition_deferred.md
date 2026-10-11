@@ -67,7 +67,7 @@ site per page rather than centralized in a shared title-resolution function.
 ## 4. `Utils.getTimeControl`, `getTimeControlName`, and `TimeControlKind` display names
 
 Covers `Utils.getTimeControl`, `Utils.getTimeControlName`, the `CORRESPONDENCE_TIME_CONTROL_NAME`
-phrase, and — now that this project has its own `client.datatypes.TimeControlKind`
+phrase, and — now that this project has its own `client.datatypes.timecontrol.TimeControlKind`
 (`Hyperbullet`/`Bullet`/`Blitz`/`Rapid`/`Classic`/`Correspondence`) — display names for the other
 five kinds, which the original never localized at all (`TimeControlType.getName()` returned raw
 English only; only `Correspondence` went through the dictionary).
@@ -79,7 +79,7 @@ pass but held back, so it's tracked here instead of in the resolved list.
 
 **Open questions:** (a) drop `getTimeControl` entirely, or reimplement it properly once there's a
 clear source of `start_seconds`/`increment_seconds` to format (check whether
-`client.datatypes.TimeControl` still has that shape); (b) how the six `TimeControlKind` names
+`client.datatypes.timecontrol.TimeControl` still has that shape); (b) how the six `TimeControlKind` names
 should be keyed/worded once this is picked back up.
 
 ## 5. `Utils.getUserStatusText` / `Dictionary`'s `PROFILE_STATUS_TEXT(status:UserStatus)`

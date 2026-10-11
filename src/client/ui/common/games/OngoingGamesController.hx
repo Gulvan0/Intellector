@@ -1,6 +1,6 @@
 package client.ui.common.games;
 
-import client.datatypes.OngoingGame;
+import client.datatypes.game.OngoingGame;
 import client.ui.common.games.widget.OngoingGamesWidget;
 
 /** Keeps the ongoing games widget in sync with the current user's ongoing games **/

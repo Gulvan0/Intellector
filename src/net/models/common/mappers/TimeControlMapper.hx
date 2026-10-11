@@ -2,7 +2,7 @@ package net.models.common.mappers;
 
 class TimeControlMapper
 {
-    public static function datatypeToDto(datatype:client.datatypes.TimeControl):Null<net.models.common.FischerTimeControl>
+    public static function datatypeToDto(datatype:client.datatypes.timecontrol.TimeControl):Null<net.models.common.FischerTimeControl>
     {
         return switch datatype {
             case None: null;
@@ -10,7 +10,7 @@ class TimeControlMapper
         }
     }
 
-    public static function dtoToDatatype(dto:Null<net.models.common.FischerTimeControl>):client.datatypes.TimeControl
+    public static function dtoToDatatype(dto:Null<net.models.common.FischerTimeControl>):client.datatypes.timecontrol.TimeControl
     {
         if (dto == null)
             return None;

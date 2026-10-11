@@ -1,7 +1,7 @@
 package client.ui.common.challenges;
 
-import client.datatypes.TimeControl;
-import client.datatypes.TimeControlKind;
+import client.datatypes.timecontrol.TimeControl;
+import client.datatypes.timecontrol.TimeControlKind;
 import client.formatters.TimeControlFormatters;
 import client.ui.Assets;
 import haxe.ui.containers.HBox;

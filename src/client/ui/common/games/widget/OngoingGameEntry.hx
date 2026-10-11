@@ -1,7 +1,7 @@
 package client.ui.common.games.widget;
 
-import client.datatypes.GameClock;
-import client.datatypes.OngoingGame;
+import client.datatypes.game.GameClock;
+import client.datatypes.game.OngoingGame;
 import client.formatters.ClockFormatters;
 import client.formatters.OngoingGameFormatters;
 import client.ui.Assets;

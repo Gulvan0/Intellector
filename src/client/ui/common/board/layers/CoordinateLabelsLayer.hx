@@ -1,6 +1,6 @@
 package client.ui.common.board.layers;
 
-import client.datatypes.BoardCoordinatesMode;
+import client.datatypes.board.BoardCoordinatesMode;
 import client.ui.common.board.BoardGeometry;
 import client.ui.common.board.BoardPalette;
 import client.ui.common.board.BoardPoint;

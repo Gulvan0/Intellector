@@ -1,13 +1,15 @@
 package client.ui.common.notifications;
 
-import client.datatypes.FailedAction;
-import client.datatypes.RequestFailureReason;
+import client.datatypes.request.FailedAction;
+import client.datatypes.request.RequestFailureReason;
 import haxe.Timer;
 import haxe.ui.components.Label;
 import haxefolio.HaxeFolioApp;
 import haxefolio.notification.Notification;
 import haxefolio.notification.NotificationCard;
 import http.HttpError;
+import net.models.common.RestErrorResponse;
+import net.rest.RestErrors;
 
 /**
     A toast telling the user that a request made on their behalf failed: the action as the title, the
@@ -45,13 +47,30 @@ class RequestFailureNotice
     private static function reasonOf(error:HttpError):RequestFailureReason
     {
         var httpStatus:Null<Int> = error.httpStatus;
+        var codedReason:Null<RequestFailureReason> = codedReasonOf(RestErrors.responseOf(error));
 
-        if (httpStatus == null || httpStatus == 0)
+        if (codedReason != null)
+            return codedReason;
+        else if (httpStatus == null || httpStatus == 0)
             return NoConnection;
         else if (httpStatus >= 500)
             return ServerError(httpStatus);
         else
             return Unexpected;
+    }
+
+    private static function codedReasonOf(response:Null<RestErrorResponse>):Null<RequestFailureReason>
+    {
+        if (response == null)
+            return null;
+
+        return switch response.code {
+            case CHALLENGE_ALREADY_EXISTS: ChallengeAlreadyExists;
+            case TOO_MANY_ACTIVE_CHALLENGES if (response.max_active_challenges != null): TooManyActiveChallenges(response.max_active_challenges);
+            case TOO_MANY_DIRECT_CHALLENGES if (response.max_active_challenges != null): TooManyDirectChallenges(response.max_active_challenges);
+            case SERVER_RESTARTING: ServerRestarting;
+            default: null;
+        }
     }
 
     private function new(key:String, action:FailedAction, reason:RequestFailureReason)

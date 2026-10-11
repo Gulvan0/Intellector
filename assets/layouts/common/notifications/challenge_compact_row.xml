@@ -1,5 +1,5 @@
 <!--
-    A waiting challenge in the stack (knowledge/plans/challenge-notification.md §5.1): caller, time
+    A waiting challenge in the stack: caller, time
     control and, collapsed, how many more wait behind it.
 -->
 <hbox styleName="intellector-challenge-row" width="100%" horizontalSpacing="10">

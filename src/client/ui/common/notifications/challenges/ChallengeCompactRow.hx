@@ -1,6 +1,6 @@
 package client.ui.common.notifications.challenges;
 
-import client.datatypes.IncomingChallenge;
+import client.datatypes.challenge.IncomingChallenge;
 import haxe.ui.containers.HBox;
 import haxe.ui.events.MouseEvent;
 import haxefolio.ElementShadow;

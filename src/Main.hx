@@ -3,8 +3,9 @@ import client.ui.Assets;
 import client.formatters.IdentityFormatters;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
-import client.LocalStorageKey;
-import client.PreferenceMigration;
+import client.storage.LocalStorageKey;
+import client.storage.PreferenceMigration;
+import client.ui.common.overlays.challenge.ChallengeCreationOverlay;
 import client.ui.common.overlays.login.LoginOverlay;
 import haxefolio.browser.ActivityTracker;
 import haxefolio.HaxeFolioApp;
@@ -18,28 +19,36 @@ import client.ui.profile.ProfilePage;
 import client.ui.challenge.ChallengeJoiningPage;
 import client.ui.demo.DemoChallengeServer;
 import client.ui.demo.DemoPage;
-import client.ChallengeMarksStorage;
-import client.GameRedirect;
-import client.datatypes.ChallengeMarks;
-import client.datatypes.FailedAction;
-import client.datatypes.IncomingChallenge;
-import client.datatypes.OutgoingChallenge;
-import client.datatypes.StartedGame;
+import client.storage.ChallengeMarksStorage;
+import client.tabs.GameRedirect;
+import client.datatypes.challenge.creation.ChallengeCreationOutcome;
+import client.datatypes.challenge.ChallengeMarks;
+import client.datatypes.challenge.creation.ChallengeParams;
+import client.datatypes.request.FailedAction;
+import client.datatypes.challenge.IncomingChallenge;
+import client.datatypes.challenge.OutgoingChallenge;
+import client.datatypes.game.StartedGame;
 import client.ui.StyleVars;
 import client.ui.common.challenges.ChallengesController;
 import client.ui.common.challenges.widget.ChallengesWidget;
 import client.ui.common.games.OngoingGamesController;
 import client.ui.common.games.widget.OngoingGamesWidget;
+import client.ui.common.notifications.CalleeOfflineNotice;
 import client.ui.common.notifications.GameStartedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import easypubsub.Subscription;
 import haxe.ui.core.Component;
 import http.HttpError;
+import net.models.challenge.ChallengeCreateResponse;
+import net.models.challenge.mappers.ChallengeParamsMapper;
 import net.models.challenge.mappers.IncomingChallengeMapper;
 import net.models.challenge.mappers.OutgoingChallengeMapper;
 import net.models.challenge.mappers.StartedGameMapper;
+import net.models.common.RestErrorCode;
+import net.models.common.UserRefWithNickname;
 import net.models.game.mappers.OngoingGameMapper;
 import net.rest.Rest;
+import net.rest.RestErrors;
 import net.rest.RestOperationRegistry;
 import net.ws.PubSub;
 import net.ws.channels.IncomingChallenges;
@@ -79,7 +88,7 @@ class Main
             .setAppIcon("assets/favicons/normal.png")
             .setSiteName("Intellector")
             .setDebounceMs(100)
-            .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}, shadows: StyleVars.HAXEFOLIO_SHADOWS}) // outlined: brass shares the board's hue family (knowledge/intellector-style.md §5.1); field heights: §5.2/§5.4
+            .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}, shadows: StyleVars.HAXEFOLIO_SHADOWS}) // outlined: brass shares the board's hue family
             .addLocale("en", "English")
             .addLocale("ru", "Русский")
             .addPage("home", params -> new HomePage(), true)
@@ -132,13 +141,22 @@ class Main
         AuthBootstrap.run();
     }
 
+    private static function onCreateGamePressed():Void
+    {
+        var identity:Identity = IdentityKeeper.currentIdentity;
+        ChallengeCreationOverlay.present(identity.isGuest(), userRefOf(identity), createChallenge);
+    }
+
+    private static function onVersusBotPressed():Void
+    {
+        var identity:Identity = IdentityKeeper.currentIdentity;
+        ChallengeCreationOverlay.present(identity.isGuest(), userRefOf(identity), createChallenge, BOT);
+    }
+
     /*
-        Stub handlers for menu items that used to open a Dialogs.* popup (challenge params dialog
-        or a plain login-input prompt) in the original iteration. No dialog/overlay equivalent
-        exists yet - see knowledge/menu_deferred.md item 2.
+        Stub handlers for menu items that used to open a login-input prompt in the original
+        iteration. No overlay equivalent exists yet.
     */
-    private static function onCreateGamePressed():Void {}
-    private static function onVersusBotPressed():Void {}
     private static function onWatchPlayerPressed():Void {}
     private static function onPlayerProfilePressed():Void {}
 
@@ -288,10 +306,56 @@ class Main
             HaxeFolioApp.navigateTo('live/${game.id}');
     }
 
-    // stub until the live game page exists, see knowledge/plans/challenges_widget_deferred.md §1
+    // stub until the live game page exists
     private static function isOngoingGameOpen():Bool
     {
         return false;
+    }
+
+    private static function createChallenge(params:ChallengeParams, onOutcome:ChallengeCreationOutcome->Void):Void
+    {
+        var calleeRef:Null<String> = params.target.calleeRef();
+        var onCreated:ChallengeCreateResponse->Void = onChallengeCreated.bind(_, onOutcome);
+        var onFailed:HttpError->Void = onCreateChallengeFailed.bind(_, calleeRef != null, onOutcome);
+
+        switch params.target
+        {
+            case Player(_) | Guest(_):
+                Rest.client().execute(RestOperationRegistry.CREATE_DIRECT_CHALLENGE, onCreated, onFailed, null, null, ChallengeParamsMapper.datatypeToDirectDto(params, calleeRef));
+            case Public | LinkOnly:
+                Rest.client().execute(RestOperationRegistry.CREATE_OPEN_CHALLENGE, onCreated, onFailed, null, null, ChallengeParamsMapper.datatypeToOpenDto(params, params.target == LinkOnly));
+            case Bot:
+                onOutcome(Failed); // no bot to play yet
+        }
+    }
+
+    private static function onChallengeCreated(response:ChallengeCreateResponse, onOutcome:ChallengeCreationOutcome->Void):Void
+    {
+        switch response.result
+        {
+            case MERGED:
+                var ownUserRef:Null<String> = userRefOf(IdentityKeeper.currentIdentity);
+                if (response.game != null && ownUserRef != null)
+                    GameRedirect.request(StartedGameMapper.summaryToDatatype(response.game, ownUserRef));
+                onOutcome(GameStarted);
+            case CREATED:
+                var callee:Null<UserRefWithNickname> = response.challenge?.callee;
+                if (response.callee_online == false && callee != null)
+                    CalleeOfflineNotice.show(callee.nickname);
+                onOutcome(Created);
+        }
+    }
+
+    private static function onCreateChallengeFailed(error:HttpError, direct:Bool, onOutcome:ChallengeCreationOutcome->Void):Void
+    {
+        if (direct && RestErrors.codeOf(error) == RestErrorCode.CALLEE_NOT_FOUND)
+        {
+            onOutcome(CalleeNotFound);
+            return;
+        }
+
+        RequestFailureNotice.showHttpError(CREATE_CHALLENGE, error);
+        onOutcome(Failed);
     }
 
     private static function acceptChallenge(challenge:IncomingChallenge):Void

@@ -1,7 +1,7 @@
 package client.ui.common.challenges.widget;
 
-import client.datatypes.IncomingChallenge;
-import client.datatypes.OutgoingChallenge;
+import client.datatypes.challenge.IncomingChallenge;
+import client.datatypes.challenge.OutgoingChallenge;
 import haxefolio.AnchorPlacement;
 import haxefolio.Anchoring;
 import haxefolio.LocaleUtils;

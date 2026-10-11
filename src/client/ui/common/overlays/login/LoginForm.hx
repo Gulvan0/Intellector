@@ -2,6 +2,7 @@ package client.ui.common.overlays.login;
 
 import client.auth.IdentityKeeper;
 import client.auth.SavedCredentials;
+import client.storage.LocalStorageKey;
 import client.ui.common.overlays.login.LoginFormField;
 import easyrest.GenericRestOperation;
 import haxe.ui.components.Label;

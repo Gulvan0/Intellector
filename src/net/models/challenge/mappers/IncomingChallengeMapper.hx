@@ -1,7 +1,7 @@
 package net.models.challenge.mappers;
 
-import client.datatypes.ChallengeAcceptorColor as DatatypeChallengeAcceptorColor;
-import client.datatypes.IncomingChallenge;
+import client.datatypes.challenge.ChallengeAcceptorColor as DatatypeChallengeAcceptorColor;
+import client.datatypes.challenge.IncomingChallenge;
 import intellectorboard.mappers.Sip;
 import net.models.common.mappers.TimeControlKindMapper;
 import net.models.common.mappers.TimeControlMapper;

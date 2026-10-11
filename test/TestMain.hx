@@ -1,7 +1,10 @@
-import client.datatypes.ChallengeInboxTest;
-import client.datatypes.ChallengeQueueTest;
-import client.datatypes.GameClockTest;
-import client.datatypes.OngoingGameOrderingTest;
+import client.logic.challenge.creation.CalleeParsingTest;
+import client.logic.challenge.creation.ChallengeDraftRulesTest;
+import client.datatypes.challenge.ChallengeInboxTest;
+import client.datatypes.challenge.ChallengeQueueTest;
+import client.logic.challenge.creation.ChallengeTimeControlRulesTest;
+import client.datatypes.game.GameClockTest;
+import client.logic.game.OngoingGameOrderingTest;
 import client.formatters.ClockFormattersTest;
 import client.ui.common.board.BoardGeometryTest;
 import client.ui.common.board.BoardInputOptionsTest;
@@ -19,6 +22,7 @@ import client.ui.common.board.tools.LiveGameMovePolicyTest;
 import client.ui.common.board.tools.MoveCompletionTest;
 import client.ui.common.board.tools.PieceMoveToolTest;
 import client.ui.common.notifications.challenges.ChallengeStackLayoutTest;
+import net.models.challenge.mappers.ChallengeParamsMapperTest;
 import utest.UTest;
 
 class TestMain
@@ -28,6 +32,9 @@ class TestMain
         UTest.run([
             new ChallengeQueueTest(),
             new ChallengeInboxTest(),
+            new CalleeParsingTest(),
+            new ChallengeDraftRulesTest(),
+            new ChallengeTimeControlRulesTest(),
             new ChallengeStackLayoutTest(),
             new GameClockTest(),
             new OngoingGameOrderingTest(),
@@ -46,7 +53,8 @@ class TestMain
             new PremovesTest(),
             new AnnotationToolTest(),
             new HexEditToolTest(),
-            new PieceMoveToolTest()
+            new PieceMoveToolTest(),
+            new ChallengeParamsMapperTest()
         ]);
     }
 }

@@ -1,7 +1,7 @@
 package client.ui.demo;
 
-import client.datatypes.IncomingChallenge;
-import client.datatypes.OutgoingChallenge;
+import client.datatypes.challenge.IncomingChallenge;
+import client.datatypes.challenge.OutgoingChallenge;
 import haxe.Timer;
 import http.HttpError;
 

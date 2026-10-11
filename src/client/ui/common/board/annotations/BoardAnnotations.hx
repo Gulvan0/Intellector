@@ -1,6 +1,6 @@
 package client.ui.common.board.annotations;
 
-import client.datatypes.AnnotationHexStyle;
+import client.datatypes.board.AnnotationHexStyle;
 import client.ui.common.board.AnnotationColor;
 import client.ui.common.board.BoardView;
 import client.ui.common.board.HexTints;

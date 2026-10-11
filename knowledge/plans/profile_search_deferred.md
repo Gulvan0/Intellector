@@ -5,16 +5,6 @@ See `[[profile_search_plan]]` for what's actually being built this pass: `GET /p
 backward-compatible cancellation extension to `http`/`easyrest`, a new generic
 `haxefolio.components.AutoComplete&lt;T&gt;`, and the Player Profile overlay wiring it all together.
 
-## 1. Real avatar retrieval
-
-**Why deferred:** explicit user instruction — a stub/placeholder avatar image ships this pass.
-Also consistent with the wider state of the project: avatar upload is unimplemented server-side
-(`POST /player/{login}/avatar` returns `501` today) and `Player` has no avatar column at all.
-
-**How to apply:** once server-side avatar storage exists, `PlayerSearchResult` gains an avatar
-field (URL or asset id) and `PlayerSearchResultRow` swaps the placeholder `Image` for it. No
-other part of this feature's design should need to change.
-
 ## 2. Rate limiting on `/player/search`
 
 **Why deferred:** explicit user instruction — tracked as the user's own separate initiative, not
@@ -66,13 +56,6 @@ the same `PlayerSearchOverlay`/`AutoComplete&lt;PlayerSearchResult&gt;` built he
 different on-select action (look up the player's current game, navigate to `live/{gameID}` if one
 exists, otherwise show some "not currently playing" state — that last part isn't designed at all
 yet).
-
-## 6. Keyboard accessibility
-
-**Why deferred:** explicit user instruction — not needed for this feature. Noting it as a
-deliberate scope decision (not an oversight) since every other list/search UI pattern in the
-industry defaults to arrow-key navigation + Enter-to-select; if that expectation changes later,
-`AutoComplete&lt;T&gt;` would need real key handling added (it has none today, mouse-click-only).
 
 ## 7. Match highlighting / richer result cards
 

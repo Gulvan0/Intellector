@@ -27,6 +27,19 @@ enum abstract StyleClass(String) from String to String
     var GAME_ENTRY_TURN_OWN_TIMED = "intellector-game-entry-turn-own-timed";
     var GAME_ENTRY_TURN_OWN_CORRESPONDENCE = "intellector-game-entry-turn-own-correspondence";
 
+    var CHALLENGE_FORM = "intellector-challenge-form";
+    var CHALLENGE_FORM_SECTION = "intellector-challenge-form-section";
+    var CHALLENGE_FORM_SECTION_HEADING = "intellector-challenge-form-section-heading";
+    var CHALLENGE_FORM_SECTION_TITLE = "intellector-challenge-form-section-title";
+    var CHALLENGE_DIRECT_SLOT = "intellector-challenge-direct-slot";
+    var CHALLENGE_GUEST_NUMBER_FIELD = "intellector-challenge-guest-number-field";
+    var CHALLENGE_KIND_ICON = "intellector-challenge-kind-icon";
+    var CHALLENGE_PREVIEW_ROW = "intellector-challenge-preview-row";
+    var CHALLENGE_SIP_FIELD = "intellector-challenge-sip-field";
+    var CHALLENGE_SLOT_NOTE = "intellector-challenge-slot-note";
+    var CHALLENGE_TIME_PRESETS = "intellector-challenge-time-presets";
+    var CHALLENGE_TYPE_SLOT = "intellector-challenge-type-slot";
+
     var LOGIN_BOTTOM = "intellector-login-bottom";
     var LOGIN_FIELDS = "intellector-login-fields";
     var LOGIN_PAGE = "intellector-login-page";

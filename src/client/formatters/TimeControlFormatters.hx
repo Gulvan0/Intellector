@@ -1,8 +1,8 @@
 package client.formatters;
 
 import haxefolio.LocaleUtils;
-import client.datatypes.TimeControl;
-import client.datatypes.FischerTimeControl;
+import client.datatypes.timecontrol.TimeControl;
+import client.datatypes.timecontrol.FischerTimeControl;
 
 class TimeControlFormatters
 {

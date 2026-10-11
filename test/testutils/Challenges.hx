@@ -1,7 +1,7 @@
 package testutils;
 
-import client.datatypes.IncomingChallenge;
-import client.datatypes.OutgoingChallenge;
+import client.datatypes.challenge.IncomingChallenge;
+import client.datatypes.challenge.OutgoingChallenge;
 
 class Challenges
 {

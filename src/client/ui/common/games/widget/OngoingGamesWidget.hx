@@ -1,6 +1,6 @@
 package client.ui.common.games.widget;
 
-import client.datatypes.OngoingGame;
+import client.datatypes.game.OngoingGame;
 import client.ui.common.challenges.PositionPreviewPopover;
 import client.ui.common.games.widget.OngoingGamesIcon.OngoingGamesSignal;
 import haxe.Timer;

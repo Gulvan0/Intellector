@@ -1,10 +1,10 @@
 package client.ui.common.challenges;
 
-import client.IncomingChallengeBlink;
-import client.datatypes.ChallengeInbox;
-import client.datatypes.ChallengeMarks;
-import client.datatypes.IncomingChallenge;
-import client.datatypes.OutgoingChallenge;
+import client.tabs.IncomingChallengeBlink;
+import client.datatypes.challenge.ChallengeInbox;
+import client.datatypes.challenge.ChallengeMarks;
+import client.datatypes.challenge.IncomingChallenge;
+import client.datatypes.challenge.OutgoingChallenge;
 import client.ui.common.challenges.widget.ChallengesWidget;
 import client.ui.common.notifications.challenges.ChallengeNotificationStack;
 

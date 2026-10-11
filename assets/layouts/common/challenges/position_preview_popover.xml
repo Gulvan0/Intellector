@@ -1,5 +1,5 @@
 <!--
-    A custom starting position, previewed (knowledge/plans/challenge-notification.md §3): an
+    A custom starting position, previewed: an
     optional title line, whose turn it is, and a small board, whose height PositionPreviewPopover
     derives from its width.
 -->

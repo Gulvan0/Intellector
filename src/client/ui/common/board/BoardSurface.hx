@@ -1,6 +1,6 @@
 package client.ui.common.board;
 
-import client.datatypes.BoardCoordinatesMode;
+import client.datatypes.board.BoardCoordinatesMode;
 import client.ui.common.board.layers.AnnotationLayer;
 import client.ui.common.board.layers.CoordinateLabelsLayer;
 import client.ui.common.board.layers.GlyphLayer;

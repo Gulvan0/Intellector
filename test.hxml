@@ -5,6 +5,7 @@
 -lib utest
 -lib morestd
 -lib intellectorboard
+-lib jsonmodel
 -lib haxefolio
 
 --interp

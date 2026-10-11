@@ -1,6 +1,6 @@
 package client.ui.common.notifications.challenges;
 
-import client.datatypes.IncomingChallenge;
+import client.datatypes.challenge.IncomingChallenge;
 import client.ui.Assets;
 import client.ui.common.challenges.PositionPreviewPopover;
 import haxefolio.AnchorPlacement;

@@ -1,5 +1,6 @@
 package client.ui;
 
+import haxefolio.ByWidth;
 import haxefolio.Shadow;
 import haxefolio.appearance.PartialShadowTokens;
 
@@ -19,6 +20,7 @@ class StyleVars
     public static inline final CHALLENGE_STACK_EXPANDED_WIDTH:Int = 340;
     public static inline final REQUEST_FAILURE_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final GAME_STARTED_NOTICE_EXPANDED_WIDTH:Int = 340;
+    public static inline final CALLEE_OFFLINE_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final CHALLENGES_DROPDOWN_WIDTH:Int = 372;
     public static inline final CHALLENGES_ICON_INK:String = "#2a211a";
     public static inline final CHALLENGES_ICON_ACCENT:String = "#8a5a1f";
@@ -91,6 +93,23 @@ class StyleVars
 
     public static inline final LOGIN_OVERLAY_WIDTH:Int = 430;
     public static inline final LOGIN_OVERLAY_HEIGHT:Int = 413;
+
+    public static inline final CHALLENGE_OVERLAY_WIDTH:Int = 620;
+    public static inline final CHALLENGE_OVERLAY_HEIGHT:Int = 720;
+    public static inline final CHALLENGE_OVERLAY_HEADER_HEIGHT:Int = 65;
+    public static final CHALLENGE_OVERLAY_FOOTER_HEIGHT:ByWidth<Int> = {expanded: 66, collapsed: 74};
+    public static inline final CHALLENGE_OVERLAY_CANCEL_WIDTH_PERCENT:Float = 36;
+    public static final CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHT:ByWidth<Int> = {expanded: 150, collapsed: 164}; // fits the tallest variant, Direct with the Player / Guest switch
+    public static inline final CHALLENGE_OVERLAY_GUEST_NUMBER_INPUT_PADDING_LEFT:Int = 58; // keeps the typed number clear of the "Guest #" prefix inside the input, in any locale
+    public static inline final CHALLENGE_OVERLAY_PAIR_FIELD_WIDTH_PERCENT:Float = 50; // each of two fields sharing a row
+    public static inline final CHALLENGE_OVERLAY_GAME_COLOUR_GAP:Int = 14;
+    public static inline final CHALLENGE_OVERLAY_TIME_PRESETS_PER_ROW:Int = 3;
+    public static inline final CHALLENGE_OVERLAY_TIME_PRESET_GAP:Int = 6;
+    public static inline final CHALLENGE_OVERLAY_TIME_SETTER_GAP:Int = 10;
+    public static inline final CHALLENGE_OVERLAY_KIND_ICON_GAP:Int = 12;
+    public static inline final CHALLENGE_OVERLAY_KIND_ICON_SIZE:Int = 26;
+    public static inline final CHALLENGE_OVERLAY_POSITION_SWITCH_WIDTH:Int = 176;
+    public static inline final CHALLENGE_OVERLAY_PREVIEW_BOARD_WIDTH:Int = 164;
 
     public static inline final BOARD_CONTROL_BUTTON_WIDTH:Float = 40;
     public static inline final BOARD_CONTROL_BUTTON_HEIGHT:Float = 36;

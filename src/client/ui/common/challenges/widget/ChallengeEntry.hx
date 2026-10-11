@@ -1,10 +1,10 @@
 package client.ui.common.challenges.widget;
 
-import client.datatypes.ChallengeAcceptorColor;
-import client.datatypes.IncomingChallenge;
-import client.datatypes.OutgoingChallenge;
-import client.datatypes.TimeControl;
-import client.datatypes.TimeControlKind;
+import client.datatypes.challenge.ChallengeAcceptorColor;
+import client.datatypes.challenge.IncomingChallenge;
+import client.datatypes.challenge.OutgoingChallenge;
+import client.datatypes.timecontrol.TimeControl;
+import client.datatypes.timecontrol.TimeControlKind;
 import client.ui.Assets;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;

@@ -1,6 +1,6 @@
 package net.models.challenge.mappers;
 
-import client.datatypes.StartedGame;
+import client.datatypes.game.StartedGame;
 import net.models.common.UserRefWithNickname;
 import net.models.game.GameSummaryPublic;
 
@@ -14,6 +14,13 @@ class StartedGameMapper
             return null;
 
         var opponent:UserRefWithNickname = game.white_player.user_ref == dto.caller.user_ref ? game.black_player : game.white_player;
+        return new StartedGame(game.id, opponent.nickname);
+    }
+
+    /** `game` as started for the user `ownUserRef` **/
+    public static function summaryToDatatype(game:GameSummaryPublic, ownUserRef:String):StartedGame
+    {
+        var opponent:UserRefWithNickname = game.white_player.user_ref == ownUserRef ? game.black_player : game.white_player;
         return new StartedGame(game.id, opponent.nickname);
     }
 }

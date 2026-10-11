@@ -1,6 +1,6 @@
 package client.ui.common.board;
 
-import client.datatypes.AutoPromoteMode;
+import client.datatypes.board.AutoPromoteMode;
 import client.ui.common.board.input.Modifiers;
 
 /**
