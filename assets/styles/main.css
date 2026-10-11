@@ -1507,3 +1507,555 @@
     background-opacity: 0;
     border-size: 0px;
 }
+
+/*
+    Live game page. Wide: three columns (info and chat | board | moves and actions) on the page
+    background, cards on surface. Compact: one column; the open tab's card replaces the chat peek.
+*/
+
+.intellector-game-page {
+    padding: 14px;
+}
+
+.haxefolio-collapsed .intellector-game-page {
+    padding: 8px;
+}
+
+.intellector-game-status {
+    padding-top: 48px;
+    vertical-spacing: 12px;
+}
+
+.intellector-game-status-text {
+    font-name: $ui-family-semibold;
+    font-size: 15px;
+    font-weight: 600;
+    color: #2a211a;
+}
+
+.intellector-game-status-hint {
+    font-name: $ui-family-regular;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+.intellector-game-wide-row {
+    horizontal-spacing: 14px;
+}
+
+.intellector-game-side-column {
+    vertical-spacing: 14px;
+}
+
+.intellector-game-compact-column {
+    vertical-spacing: 8px;
+}
+
+.intellector-game-card {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-game-card-title {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+}
+
+.intellector-game-hint {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-mono {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-game-tight-stack {
+    vertical-spacing: 0;
+}
+
+/* buttons: the theme's Normal button (§5.2), the filled primary, and the outlined "on" state */
+.intellector-game-button {
+    height: 37px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 5px;
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    color: #6d6152;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    font-weight: 500;
+    horizontal-spacing: 6px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.intellector-game-button .label {
+    word-wrap: false;
+}
+
+.intellector-game-button:hover {
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+.intellector-game-button:down {
+    background-color: #f0ebe2;
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+.intellector-game-button:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+.intellector-game-button:disabled .icon {
+    opacity: 0.45;
+}
+
+.intellector-game-button-primary {
+    background-color: #8a5a1f;
+    border: 1px solid #8a5a1f;
+    color: #fffefb;
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+.intellector-game-button-primary:hover {
+    background-color: #70491a;
+    border-color: #70491a;
+    color: #fffefb;
+}
+
+.intellector-game-button-primary:down {
+    background-color: #70491a;
+    border-color: #70491a;
+    color: #fffefb;
+}
+
+.intellector-game-button-primary:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}
+
+.intellector-game-button-on {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    color: #8a5a1f;
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+.haxefolio-collapsed .intellector-game-button {
+    height: 44px;
+}
+
+/* info card */
+.intellector-game-info-card {
+    padding: 14px;
+    vertical-spacing: 12px;
+}
+
+.intellector-game-info-card > .hbox {
+    horizontal-spacing: 10px;
+}
+
+.intellector-game-resolution {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+}
+
+.intellector-game-opening {
+    font-name: $ui-family-regular;
+    font-size: 13px;
+    font-italic: true;
+    color: #6d6152;
+}
+
+.intellector-game-players-box {
+    background-color: #f0ebe2;
+    border-radius: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    vertical-spacing: 8px;
+}
+
+.intellector-game-player-row {
+    horizontal-spacing: 8px;
+}
+
+.intellector-game-nickname {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-game-nickname-link {
+    cursor: pointer;
+}
+
+.intellector-game-nickname-link:hover {
+    color: #8a5a1f;
+}
+
+.intellector-game-rating {
+    font-name: $mono-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+/* presence: filled accent while on the game page, a faint ring otherwise */
+.intellector-game-presence-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    border: 1.5px solid #a79b8a;
+}
+
+/* same footprint either way, so the nickname beside it never shifts */
+.intellector-game-presence-dot-on {
+    background-color: #8a5a1f;
+    border: 1.5px solid #8a5a1f;
+}
+
+/* chat */
+.intellector-game-chat-card {
+    vertical-spacing: 0;
+}
+
+.intellector-game-chat-messages {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 14px;
+    padding-right: 4px;
+    vertical-spacing: 10px;
+}
+
+.intellector-game-chat-message {
+    vertical-spacing: 1px;
+}
+
+.intellector-game-chat-message > .hbox {
+    horizontal-spacing: 6px;
+}
+
+.intellector-game-chat-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-game-chat-text-spectator {
+    font-italic: true;
+    color: #6d6152;
+}
+
+.intellector-game-chat-send-row {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 10px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-game-chat-send-row .textfield {
+    height: 37px;
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+    border-radius: 4px;
+    color: #2a211a;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+}
+
+.haxefolio-collapsed .intellector-game-chat-send-row .textfield {
+    height: 44px;
+}
+
+/* the placeholder: faint, so it doesn't read as a typed message */
+.intellector-game-chat-send-row .textfield:empty {
+    color: #a79b8a;
+}
+
+/* moves */
+.intellector-game-moves-card {
+    vertical-spacing: 0;
+}
+
+.intellector-game-moves-header {
+    padding-top: 14px;
+    padding-bottom: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+    vertical-spacing: 10px;
+}
+
+.intellector-game-navigation-row {
+    horizontal-spacing: 10px;
+}
+
+.intellector-game-moves-scroll {
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-game-moves-table {
+    padding-top: 8px;
+    padding-bottom: 14px;
+    padding-left: 14px;
+    padding-right: 4px;
+    vertical-spacing: 2px;
+}
+
+.intellector-game-moves-row {
+    horizontal-spacing: 4px;
+}
+
+.intellector-game-move-cell {
+    height: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 4px;
+    horizontal-spacing: 6px;
+    cursor: pointer;
+}
+
+.intellector-game-move-cell:hover {
+    background-color: #f0ebe2;
+}
+
+.intellector-game-move-cell-current {
+    background-color: #f6e6c6;
+}
+
+.intellector-game-move-cell-current:hover {
+    background-color: #f6e6c6;
+}
+
+.intellector-game-move-number {
+    width: 22px;
+    font-name: $mono-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-move-notation {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-game-move-cell-current .intellector-game-move-number,
+.intellector-game-move-cell-current .intellector-game-move-notation {
+    color: #8a5a1f;
+}
+
+/* actions */
+.intellector-game-actions-card {
+    padding: 14px;
+    vertical-spacing: 10px;
+}
+
+.intellector-game-actions-row {
+    horizontal-spacing: 10px;
+}
+
+.haxefolio-collapsed .intellector-game-actions-card {
+    padding: 0;
+    background-color: transparent;
+    border: 0px solid #faf7f2;
+}
+
+.haxefolio-collapsed .intellector-game-actions-row {
+    horizontal-spacing: 6px;
+}
+
+.haxefolio-collapsed .intellector-game-actions-card .intellector-game-button {
+    background-color: #faf7f2;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.haxefolio-collapsed .intellector-game-actions-card .intellector-game-button-on {
+    background-color: #f6e6c6;
+}
+
+.haxefolio-collapsed .intellector-game-actions-card .intellector-game-button:disabled {
+    background-color: #f0ebe2;
+}
+
+/* the board between its player bars */
+.intellector-game-stage-column {
+    vertical-spacing: 12px;
+}
+
+.intellector-game-player-bar {
+    height: 48px;
+    padding-left: 14px;
+    padding-right: 7px;
+    horizontal-spacing: 10px;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+}
+
+.intellector-game-player-bar-top,
+.intellector-game-player-bar-bottom {
+    border-radius: 9px;
+}
+
+.haxefolio-collapsed .intellector-game-player-bar {
+    height: 44px;
+    padding-left: 12px;
+    padding-right: 5px;
+}
+
+.intellector-game-clock {
+    height: 34px;
+    width: 88px;
+    padding-top: 4px;
+    border-radius: 5px;
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    font-name: $mono-family-medium;
+    font-size: 20px;
+    color: #6d6152;
+    text-align: center;
+    word-wrap: false;
+}
+
+.haxefolio-collapsed .intellector-game-clock {
+    width: 80px;
+}
+
+.intellector-game-clock-running {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+    color: #8a5a1f;
+}
+
+.intellector-game-clock-low {
+    color: #9e2f1c;
+    border-color: #b8462c;
+}
+
+.intellector-game-requests {
+    vertical-spacing: 8px;
+}
+
+.intellector-game-offer-bar {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 14px;
+    padding-right: 8px;
+    horizontal-spacing: 8px;
+    background-color: #faf7f2;
+    border: 1px solid #c79a56;
+    border-radius: 9px;
+}
+
+.intellector-game-offer-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+/* compact only */
+.intellector-game-compact-head {
+    padding-left: 4px;
+    padding-right: 4px;
+    horizontal-spacing: 8px;
+}
+
+.intellector-game-move-strip {
+    horizontal-spacing: 6px;
+}
+
+.intellector-game-move-strip .intellector-game-button {
+    padding-left: 0;
+    padding-right: 0;
+    background-color: #faf7f2;
+}
+
+.intellector-game-move-strip .intellector-game-button:disabled {
+    background-color: #f0ebe2;
+}
+
+.intellector-game-move-strip .intellector-game-strip-move {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+}
+
+.intellector-game-peek {
+    height: 44px;
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 8px;
+    border-radius: 5px;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    cursor: pointer;
+}
+
+.intellector-game-peek:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-game-peek-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-badge {
+    height: 18px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 9px;
+    background-color: #8a5a1f;
+    font-name: $mono-family-medium;
+    font-size: 11px;
+    color: #fffefb;
+    text-align: center;
+}
+
+.intellector-game-sheet {
+    height: 180px;
+}
+
+.intellector-game-tabs {
+    horizontal-spacing: 6px;
+}
+
+.intellector-game-tab {
+    background-color: #faf7f2;
+}
+
+.intellector-game-tab-on {
+    border: 1px solid #c79a56;
+    color: #8a5a1f;
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}

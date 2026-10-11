@@ -1,5 +1,6 @@
 package client.ui.common.games.widget;
 
+import client.ServerTime;
 import client.datatypes.game.OngoingGame;
 import client.logic.game.OngoingGameOrdering;
 import haxe.ui.containers.VBox;
@@ -47,7 +48,7 @@ class OngoingGameList extends VBox
     /** Refreshes every clock and time since the last move **/
     public function updateTime():Void
     {
-        var nowMs:Float = Date.now().getTime();
+        var nowMs:Float = ServerTime.now();
         for (entry in entryMap)
             entry.updateTime(nowMs);
     }
@@ -63,7 +64,7 @@ class OngoingGameList extends VBox
 
     private function update():Void
     {
-        var timed:Array<OngoingGame> = OngoingGameOrdering.timed(games.filter(game -> game.isTimed()), Date.now().getTime());
+        var timed:Array<OngoingGame> = OngoingGameOrdering.timed(games.filter(game -> game.isTimed()), ServerTime.now());
         var correspondence:Array<OngoingGame> = OngoingGameOrdering.correspondence(games.filter(game -> !game.isTimed()));
 
         var shownIds:Map<Int, Bool> = [for (game in games) game.id => true];

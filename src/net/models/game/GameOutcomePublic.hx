@@ -11,4 +11,6 @@ class GameOutcomePublic
 	public var kind:OutcomeKind;
 	@:default(null) public var winner:Null<PieceColor>;
 	@:default(null) public var time_update:Null<GameTimeUpdatePublic>;
+	@:optional @:default(null) public var white_elo_delta:Null<Int>;
+	@:optional @:default(null) public var black_elo_delta:Null<Int>;
 }

@@ -11,7 +11,7 @@ enum TimeControl  //TODO: Use everywhere instead of dto TimeControl and struct's
 
 class TimeControlExtension
 {
-    public function getKind(timeControl:TimeControl):TimeControlKind
+    public static function getKind(timeControl:TimeControl):TimeControlKind
     {
         return switch timeControl {
             case None: Correspondence;

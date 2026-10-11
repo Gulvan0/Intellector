@@ -8,4 +8,15 @@ enum abstract FailedAction(String) from String to String
     var CANCEL_CHALLENGE = "cancel_challenge";
     var OPEN_STARTED_GAME = "open_started_game";
     var CREATE_CHALLENGE = "create_challenge";
+    var LOAD_GAME = "load_game";
+    var MAKE_MOVE = "make_move";
+    var OFFER_DRAW = "offer_draw";
+    var CANCEL_DRAW = "cancel_draw";
+    var ANSWER_DRAW = "answer_draw";
+    var OFFER_TAKEBACK = "offer_takeback";
+    var CANCEL_TAKEBACK = "cancel_takeback";
+    var ANSWER_TAKEBACK = "answer_takeback";
+    var RESIGN = "resign";
+    var ADD_TIME = "add_time";
+    var SEND_CHAT_MESSAGE = "send_chat_message";
 }

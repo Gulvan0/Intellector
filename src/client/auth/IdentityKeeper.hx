@@ -7,11 +7,12 @@ class IdentityKeeper
 {
     public static var currentIdentity(default, null):Identity = Guest(null);
 
-    private static var changeListeners:Array<Identity->Void>;
+    private static var changeListeners:Array<Identity->Void> = [];
 
     public static function init(?initialChangeListeners:Array<Identity->Void>):Void
     {
-        changeListeners = initialChangeListeners ?? [];
+        if (initialChangeListeners != null)
+            changeListeners = initialChangeListeners.concat(changeListeners);
         HaxeFolioApp.valueStorage.addExternalChangeHandler(LocalStorageKey.IDENTITY, onExternalIdentityChange);
     }
 
@@ -40,5 +41,10 @@ class IdentityKeeper
     public static function addChangeListener(callback:Identity->Void):Void
     {
         changeListeners.push(callback);
+    }
+
+    public static function removeChangeListener(callback:Identity->Void):Void
+    {
+        changeListeners.remove(callback);
     }
 }

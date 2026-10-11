@@ -4,6 +4,7 @@ import client.datatypes.challenge.ChallengeInboxTest;
 import client.datatypes.challenge.ChallengeQueueTest;
 import client.logic.challenge.creation.ChallengeTimeControlRulesTest;
 import client.datatypes.game.GameClockTest;
+import client.datatypes.game.LiveGameStateTest;
 import client.logic.game.OngoingGameOrderingTest;
 import client.formatters.ClockFormattersTest;
 import client.ui.common.board.BoardGeometryTest;
@@ -37,6 +38,7 @@ class TestMain
             new ChallengeTimeControlRulesTest(),
             new ChallengeStackLayoutTest(),
             new GameClockTest(),
+            new LiveGameStateTest(),
             new OngoingGameOrderingTest(),
             new ClockFormattersTest(),
             new BoardGeometryTest(),

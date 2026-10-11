@@ -68,6 +68,18 @@ class PlyHistory
         return positions[shownPlyCount];
     }
 
+    /** The position after `plyCount` plies **/
+    public function positionAt(plyCount:Int):Position
+    {
+        return positions[plyCount];
+    }
+
+    /** The ply at `index`, counting from 0 **/
+    public function plyAt(index:Int):RawPly
+    {
+        return plies[index];
+    }
+
     /**
         Adds `ply` to the end of the history. The view follows it if it was showing the latest
         position (as a `Move`), or if `followLatestMove` (snapping back from an older position, as
@@ -84,6 +96,19 @@ class PlyHistory
             show(plies.length, Move);
         else if (followLatestMove)
             show(plies.length, Replacement);
+    }
+
+    /** Drops the plies after the first `plyCount`; a shown position among them gives way to the new latest one **/
+    public function truncate(plyCount:Int):Void
+    {
+        if (plyCount >= plies.length)
+            return;
+
+        plies.splice(plyCount, plies.length - plyCount);
+        positions.splice(plyCount + 1, positions.length - plyCount - 1);
+
+        if (shownPlyCount > plyCount)
+            show(plyCount, Replacement);
     }
 
     public function navigate(type:PlyNavigationType):Void

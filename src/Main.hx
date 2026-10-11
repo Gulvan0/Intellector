@@ -1,3 +1,4 @@
+import client.ServerTime;
 import client.auth.AuthBootstrap;
 import client.ui.Assets;
 import client.formatters.IdentityFormatters;
@@ -124,13 +125,15 @@ class Main
             .setLanguagePreference(Preferences.language)
             .buildConfig();
 
+        // before the first page opens: it may load data right away
+        var tokenRetriever:Void->Null<String> = () -> HaxeFolioApp.valueStorage.read(LocalStorageKey.TOKEN);
+        Rest.init(tokenRetriever);
+        ServerTime.init(Rest.serverClock().now);
+        PubSub.start(tokenRetriever, () -> ActivityTracker.getLastActivityTs());
+
         HaxeFolioApp.init(config);
         PreferenceMigration.run();
         ActivityTracker.activate();
-
-        var tokenRetriever:Void->Null<String> = HaxeFolioApp.valueStorage.read.bind(LocalStorageKey.TOKEN);
-        Rest.init(tokenRetriever);
-        PubSub.start(tokenRetriever, ActivityTracker.getLastActivityTs);
         challenges = new ChallengesController(challengesWidget, acceptChallenge, declineChallenge, cancelChallenge, saveChallengeMarks);
         ChallengeMarksStorage.addExternalChangeHandler(() -> challengesUserRef, challenges.applyMarks);
         ongoingGames = new OngoingGamesController(ongoingGamesWidget);
@@ -144,13 +147,13 @@ class Main
     private static function onCreateGamePressed():Void
     {
         var identity:Identity = IdentityKeeper.currentIdentity;
-        ChallengeCreationOverlay.present(identity.isGuest(), userRefOf(identity), createChallenge);
+        ChallengeCreationOverlay.present(identity.isGuest(), identity.getUserRef(), createChallenge);
     }
 
     private static function onVersusBotPressed():Void
     {
         var identity:Identity = IdentityKeeper.currentIdentity;
-        ChallengeCreationOverlay.present(identity.isGuest(), userRefOf(identity), createChallenge, BOT);
+        ChallengeCreationOverlay.present(identity.isGuest(), identity.getUserRef(), createChallenge, BOT);
     }
 
     /*
@@ -203,7 +206,7 @@ class Main
         challengesUserRef = null;
         challenges.reset();
 
-        var userRef:Null<String> = userRefOf(identity);
+        var userRef:Null<String> = identity.getUserRef();
         if (userRef == null)
             return;
 
@@ -243,7 +246,7 @@ class Main
 
         ongoingGames.reset();
 
-        var userRef:Null<String> = userRefOf(identity);
+        var userRef:Null<String> = identity.getUserRef();
         if (userRef == null)
             return;
 
@@ -252,14 +255,6 @@ class Main
             .onEventLight(OngoingGameStarted, game -> ongoingGames.add(OngoingGameMapper.startedToDatatype(game, userRef)))
             .onEventLight(OngoingGameUpdated, update -> ongoingGames.update(update.game_id, game -> OngoingGameMapper.applyUpdate(game, update)))
             .onEventLight(OngoingGameEnded, ended -> ongoingGames.remove(ended.id));
-    }
-
-    private static function userRefOf(identity:Identity):Null<String>
-    {
-        return switch identity {
-            case Player(login, _): login;
-            case Guest(guestId): guestId != null ? '_$guestId' : null;
-        }
     }
 
     private static function saveChallengeMarks(marks:ChallengeMarks):Void
@@ -300,17 +295,12 @@ class Main
 
     private static function openStartedGame(game:StartedGame):Void
     {
-        if (isOngoingGameOpen())
+        if (LiveGamePage.isShowingOwnOngoingGame())
             GameStartedNotice.show(game);
         else
             HaxeFolioApp.navigateTo('live/${game.id}');
     }
 
-    // stub until the live game page exists
-    private static function isOngoingGameOpen():Bool
-    {
-        return false;
-    }
 
     private static function createChallenge(params:ChallengeParams, onOutcome:ChallengeCreationOutcome->Void):Void
     {
@@ -334,7 +324,7 @@ class Main
         switch response.result
         {
             case MERGED:
-                var ownUserRef:Null<String> = userRefOf(IdentityKeeper.currentIdentity);
+                var ownUserRef:Null<String> = IdentityKeeper.currentIdentity.getUserRef();
                 if (response.game != null && ownUserRef != null)
                     GameRedirect.request(StartedGameMapper.summaryToDatatype(response.game, ownUserRef));
                 onOutcome(GameStarted);

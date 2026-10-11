@@ -17,6 +17,7 @@ enum DrawishOutcomeKind
     Repetition;
     NoProgress;
     Abort;
+    CheatingAbort;
 }
 
 enum Outcome

@@ -1,5 +1,6 @@
 package client.ui.common.games.widget;
 
+import client.ServerTime;
 import client.datatypes.game.GameClock;
 import client.datatypes.game.OngoingGame;
 import client.formatters.ClockFormatters;
@@ -66,7 +67,7 @@ class OngoingGameEntry extends VBox
         ownClockIcon.resource = Assets.colorIcon(game.ownColor);
         opponentClockIcon.resource = Assets.colorIcon(game.ownColor.opposite());
 
-        updateTime(Date.now().getTime());
+        updateTime(ServerTime.now());
     }
 
     /** Whether the game is the one open on the page: it can't be opened again **/

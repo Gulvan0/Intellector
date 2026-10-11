@@ -7,7 +7,6 @@ import intellectorboard.mappers.Sip;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
 import net.models.common.UserRefWithNickname;
-import net.models.common.mappers.PieceColorMapper;
 import net.models.common.mappers.TimeControlMapper;
 
 class OngoingGameMapper
@@ -27,7 +26,7 @@ class OngoingGameMapper
             dto.latest_sip,
             dto.ply_cnt,
             lastPlyAtMs,
-            clockToDatatype(dto.latest_time_update)
+            GameClockMapper.dtoToDatatype(dto.latest_time_update)
         );
     }
 
@@ -46,7 +45,7 @@ class OngoingGameMapper
     public static function applyUpdate(game:OngoingGame, dto:OngoingGameUpdate):OngoingGame
     {
         var lastPlyAtMs:Null<Float> = dto.last_ply_at != null ? dto.last_ply_at.getUnixMs() : null;
-        return game.updated(sipToPosition(dto.latest_sip), dto.ply_cnt, lastPlyAtMs, clockToDatatype(dto.latest_time_update));
+        return game.updated(sipToPosition(dto.latest_sip), dto.ply_cnt, lastPlyAtMs, GameClockMapper.dtoToDatatype(dto.latest_time_update));
     }
 
     private static function create(id:Int, whitePlayer:UserRefWithNickname, blackPlayer:UserRefWithNickname, ownRef:String, timeControl:TimeControl, rated:Bool, startedAtMs:Float, sip:String, plyCount:Int, lastPlyAtMs:Null<Float>, clock:Null<GameClock>):OngoingGame
@@ -59,14 +58,5 @@ class OngoingGameMapper
     private static function sipToPosition(sip:String):Position
     {
         return new Sip(sip).toPosition() ?? Position.defaultStarting();
-    }
-
-    private static function clockToDatatype(dto:Null<GameTimeUpdatePublic>):Null<GameClock>
-    {
-        if (dto == null)
-            return null;
-
-        var tickingSide:Null<PieceColor> = dto.ticking_side != null ? PieceColorMapper.dtoToDatatype(dto.ticking_side) : null;
-        return new GameClock(dto.white_ms, dto.black_ms, tickingSide, dto.updated_at.getUnixMs());
     }
 }

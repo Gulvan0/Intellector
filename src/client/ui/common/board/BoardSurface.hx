@@ -65,6 +65,12 @@ class BoardSurface extends SvgSurface implements BoardView
         pieces.redraw();
     }
 
+    /** Width over height, coordinate labels included **/
+    public static function aspectRatioOf(coordinatesMode:BoardCoordinatesMode):Float
+    {
+        return BoardGeometry.GRID_WIDTH / boardHeight(coordinatesMode);
+    }
+
     private static function boardHeight(coordinatesMode:BoardCoordinatesMode):Float
     {
         return BoardGeometry.GRID_HEIGHT + CoordinateLabelsLayer.stripHeight(coordinatesMode);
