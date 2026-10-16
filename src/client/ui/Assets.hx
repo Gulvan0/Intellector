@@ -22,6 +22,11 @@ class Assets
         return 'assets/images/common/piece_color_indicators/$name.svg';
     }
 
+    public static function analysisIcon(name:String):String
+    {
+        return 'assets/images/analysis/$name.svg';
+    }
+
     public static function pieceImage(kind:PieceKind, color:PieceColor):String
     {
         return 'assets/images/common/board/pieces/${kind}_${color}.svg';
@@ -36,6 +41,17 @@ class Assets
             case Liberator: 0.79958;
             case Defensor: 0.65379;
             case Intellector: 0.62913;
+        }
+    }
+
+    /** A piece's art height relative to the Intellector's, as the board draws it **/
+    public static function pieceRelativeScale(kind:PieceKind):Float
+    {
+        return switch kind {
+            case Progressor: StyleVars.BOARD_PROGRESSOR_SCALE;
+            case Liberator: StyleVars.BOARD_LIBERATOR_SCALE;
+            case Defensor: StyleVars.BOARD_DEFENSOR_SCALE;
+            default: 1;
         }
     }
 }

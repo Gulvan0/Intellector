@@ -1,6 +1,7 @@
 import client.ServerTime;
 import client.auth.AuthBootstrap;
 import client.ui.Assets;
+import client.ui.BoardLayoutTier;
 import client.formatters.IdentityFormatters;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
@@ -89,6 +90,9 @@ class Main
             .setAppIcon("assets/favicons/normal.png")
             .setSiteName("Intellector")
             .setDebounceMs(100)
+            .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Compact, 0)
+            .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Medium, BoardLayoutTier.MEDIUM_MIN_WIDTH, BoardLayoutTier.fitsMedium)
+            .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Wide, BoardLayoutTier.WIDE_MIN_WIDTH, BoardLayoutTier.fitsWide)
             .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}, shadows: StyleVars.HAXEFOLIO_SHADOWS}) // outlined: brass shares the board's hue family
             .addLocale("en", "English")
             .addLocale("ru", "Русский")

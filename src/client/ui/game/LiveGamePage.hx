@@ -19,6 +19,8 @@ import client.datatypes.game.PlyNavigationType;
 import client.datatypes.request.FailedAction;
 import client.formatters.GameFormatters;
 import client.logic.game.OpeningLookup;
+import client.openings.OpeningEntry;
+import client.ui.BoardLayoutTier;
 import client.ui.common.board.InteractiveBoard;
 import client.ui.common.board.MoveRulesAdapter;
 import client.ui.common.board.Premoves;
@@ -36,7 +38,6 @@ import haxe.ui.containers.VBox;
 import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.PageBase;
-import haxefolio.ResponsivityController;
 import http.HttpError;
 import intellectorboard.mappers.notation.PlyFormatter;
 import intellectorboard.position.Position;
@@ -171,7 +172,8 @@ class LiveGamePage extends PageBase
     {
         loadAttempt++;
         var attempt:Int = loadAttempt;
-        showStatus(LocaleUtils.localeBinding("intellector.live_game.status.loading"));
+        if (state == null)
+            showStatus(LocaleUtils.localeBinding("intellector.live_game.status.loading"));
 
         stopLoadTimer();
         loadTimer = Timer.delay(() -> {
@@ -209,7 +211,8 @@ class LiveGamePage extends PageBase
     {
         stopLoadTimer();
         loadAttempt++;
-        showStatus(LocaleUtils.localeBinding(textKey), null, "intellector.live_game.status.retry", load);
+        if (state == null)
+            showStatus(LocaleUtils.localeBinding(textKey), null, "intellector.live_game.status.retry", load);
     }
 
     // nothing to retry: the user goes looking for another game
@@ -298,10 +301,13 @@ class LiveGamePage extends PageBase
 
     private function build(info:LiveGameInfo):Void
     {
+        var shownPlyCount:Int = state.history.shownPlyIndex();
         board = new InteractiveBoard(state.history.shownPosition(), orientation, new InertMovePolicy());
+        board.setLastMove(shownPlyCount > 0 ? state.history.plyAt(shownPlyCount - 1) : null);
         handles.push(board.playMove.subscribe(onOwnMove));
 
         stage = new BoardStage(board, openProfile);
+        stage.onFitted = fitLayoutHeight; // compact: the parts around the board can change height after it's fitted
         infoCard = new GameInfoCard(openProfile);
         chatCard = new ChatCard(sendChatMessage, message -> openProfileOfRef(message.authorRef));
         movesCard = new MovesCard(navigate);
@@ -319,10 +325,10 @@ class LiveGamePage extends PageBase
         moveStrip = new MoveStrip(navigate, () -> gameLayout.setOpenTab(Moves));
 
         gameLayout = new GameLayout(infoCard, chatCard, movesCard, actionsCard, stage, moveStrip);
-        gameLayout.setHeadTexts(() -> GameFormatters.timeControl(info.timeControl), () -> GameFormatters.resolution(state.getEnding()));
+        refreshHeadTexts();
         addComponent(gameLayout);
-        handles.push(ResponsivityController.bind({expanded: false, collapsed: true}, compact -> {
-            gameLayout.setCompact(compact);
+        handles.push(BoardLayoutTier.bind(tier -> {
+            gameLayout.setTier(tier);
             fitLayoutHeight();
         }));
 
@@ -348,23 +354,28 @@ class LiveGamePage extends PageBase
 
     /*
         Pages flow in a scrolling area, so the wide layout takes the area's height explicitly: the
-        area's visible height less the insets above the layout, mirrored below it.
+        area's visible height less the insets above the layout, mirrored below it. The compact
+        layout flows, its board shrinking for the rest to fit that height too.
     */
     private function fitLayoutHeight():Void
     {
         if (gameLayout == null)
             return;
 
-        if (gameLayout.isCompact())
-            return;
-
         Toolkit.callLater(() -> {
             var scrollArea:Null<js.html.Element> = this.element.closest(".haxefolio-scroll-area");
-            if (scrollArea == null || gameLayout == null || gameLayout.isCompact())
+            if (scrollArea == null || gameLayout == null)
                 return;
 
             var inset:Float = gameLayout.element.getBoundingClientRect().top - scrollArea.getBoundingClientRect().top + scrollArea.scrollTop;
-            gameLayout.height = Math.max(MIN_WIDE_HEIGHT, Math.floor(scrollArea.clientHeight - 2 * inset));
+            var availableHeight:Float = Math.floor(scrollArea.clientHeight - 2 * inset);
+            if (gameLayout.isCompact())
+                stage.setMaxHeight(Math.floor(gameLayout.compactStageMaxHeight(availableHeight)));
+            else
+            {
+                stage.setMaxHeight(null);
+                gameLayout.height = Math.max(MIN_WIDE_HEIGHT, availableHeight);
+            }
         });
     }
 
@@ -424,9 +435,13 @@ class LiveGamePage extends PageBase
         if (state.isOver())
             return;
 
+        var wasPlaying:Bool = isPlaying();
         state.end(ending);
         Sounds.play(NOTIFY);
         GameEndedNotice.show(state.info, ending, userColor);
+
+        if (wasPlaying)
+            load(); // brings in the spectators' messages, kept from players until now
     }
 
     private function onPresenceRefresh(refresh:SubscriberListChannelStateRefresh):Void
@@ -445,7 +460,11 @@ class LiveGamePage extends PageBase
 
     private function onShownChanged(shown:ShownPly):Void
     {
+        var shownPlyCount:Int = state.history.shownPlyIndex();
         board.setPosition(shown.position, shown.cause);
+        if (state.history.shownPlyIndex() != shownPlyCount)
+            return; // a premove fired by the new position has already shown the one after it
+
         board.setLastMove(shown.lastMove);
         refreshShown();
         refreshPolicy();
@@ -499,6 +518,7 @@ class LiveGamePage extends PageBase
             board.disablePremoves();
             premoves = null;
         }
+        board.setUserMovesEnabled(playing);
 
         if (playing)
             actionsCard.showPlayerActions(state.info.isTimed());
@@ -599,9 +619,6 @@ class LiveGamePage extends PageBase
             notations.push(PlyFormatter.toNotation(state.history.plyAt(i), state.history.positionAt(i)));
 
         movesCard.setMoves(notations, state.info.startingPosition.turnColor);
-
-        if (!state.info.customStartingPosition)
-            infoCard.setOpening(OpeningLookup.find([for (i in 0...plyCount + 1) state.history.positionAt(i)]));
     }
 
     // the ply count changed, which the shown position may not have: the move list and what offers allow follow it
@@ -618,7 +635,27 @@ class LiveGamePage extends PageBase
         var plyCount:Int = state.history.plyCount();
         movesCard.setShown(shownPlyCount, plyCount);
         moveStrip.setShown(shownPlyCount, plyCount, shownPlyCount > 0 ? notations[shownPlyCount - 1] : null);
+        refreshOpening(shownPlyCount);
         refreshClocks();
+    }
+
+    // the opening of the line up to the shown position
+    private function refreshOpening(shownPlyCount:Int):Void
+    {
+        var custom:Bool = state.info.customStartingPosition;
+        var opening:Null<OpeningEntry> = custom ? null : OpeningLookup.find([for (i in 0...shownPlyCount + 1) state.history.positionAt(i)]);
+        infoCard.setOpening(opening);
+        movesCard.setOpening(opening, custom);
+    }
+
+    private function refreshHeadTexts():Void
+    {
+        var info:LiveGameInfo = state.info;
+        gameLayout.setHeadTexts(
+            () -> GameFormatters.timeControl(info.timeControl),
+            () -> GameFormatters.ratedAndStart(info.rated, info.startedAtMs),
+            () -> GameFormatters.resolution(state.getEnding())
+        );
     }
 
     private function refreshChat():Void
@@ -637,7 +674,7 @@ class LiveGamePage extends PageBase
     private function refreshEnding():Void
     {
         infoCard.setEnding(state.getEnding());
-        gameLayout.setHeadTexts(() -> GameFormatters.timeControl(state.info.timeControl), () -> GameFormatters.resolution(state.getEnding()));
+        refreshHeadTexts();
         if (state.isOver())
             resignAsked = false;
         refreshChat();

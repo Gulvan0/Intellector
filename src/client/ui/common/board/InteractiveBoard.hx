@@ -1,5 +1,6 @@
 package client.ui.common.board;
 
+import client.ui.BoardLayoutTier;
 import client.ui.common.board.annotations.AnnotationIntent;
 import client.ui.common.board.annotations.BoardAnnotations;
 import client.ui.common.board.input.BoardGestures;
@@ -12,7 +13,6 @@ import client.datatypes.board.AutoPromoteMode;
 import client.datatypes.board.BoardControlsVisibility;
 import haxe.ui.containers.Box;
 import haxefolio.PrimaryPointer;
-import haxefolio.ResponsivityController;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.hex.HexCoords;
@@ -68,6 +68,7 @@ class InteractiveBoard extends Box
 
         controlRow = new BoardControlRow(options, BoardPalette.DEFAULT);
         controlRow.onAnnotationModeChanged = onAnnotationModeChanged;
+        controlRow.setAskChameleonEnabled(false);
         addComponent(controlRow);
 
         board = new BoardSurface(position, orientation, Preferences.boardCoordinates.get());
@@ -110,7 +111,7 @@ class InteractiveBoard extends Box
             pointerIsCoarse = coarse;
             updateControlsVisibility();
         }));
-        preferenceHandles.push(ResponsivityController.bind({expanded: true, collapsed: false}, setControlsBeside));
+        preferenceHandles.push(BoardLayoutTier.bind(tier -> setControlsBeside(tier != Compact)));
     }
 
     private function updateControlsVisibility():Void
@@ -133,7 +134,36 @@ class InteractiveBoard extends Box
         }
     }
 
-    // a column left of the board in the wide layout, a row above it otherwise
+    /** Narrows the board itself, centred, while the control row keeps the full width; null returns it to the full width **/
+    public function setBoardMaxWidth(maxWidth:Null<Float>):Void
+    {
+        if (maxWidth == null)
+        {
+            if (board.percentWidth == 100)
+                return;
+            board.width = null; // a stale width would make the next identical one a no-op
+            board.percentWidth = 100;
+            board.horizontalAlign = null;
+            invalidateComponentLayout();
+        }
+        else if (board.percentWidth != null || board.width != maxWidth)
+        {
+            board.percentWidth = null;
+            board.width = maxWidth;
+            board.horizontalAlign = "center";
+        }
+    }
+
+    /** What the control row adds to the board's height: nothing while it's hidden or beside the board **/
+    public function controlsHeight():Float
+    {
+        if (controlRow.hidden || layoutName == "horizontal")
+            return 0;
+        var spacing:Float = style.verticalSpacing ?? 0.0;
+        return controlRow.element.offsetHeight + spacing;
+    }
+
+    // a column left of the board in the medium and wide layouts, a row above it in the compact one
     private function setControlsBeside(beside:Bool):Void
     {
         layoutName = beside ? "horizontal" : "vertical";
@@ -247,6 +277,12 @@ class InteractiveBoard extends Box
             annotationRoutingHandle = annotationIntents.subscribe(annotations.apply);
     }
 
+    /** Whether the user moves pieces on this board at all (not a spectator); enabled by default **/
+    public function setUserMovesEnabled(enabled:Bool):Void
+    {
+        controlRow.setAutoPromoteEnabled(enabled);
+    }
+
     /** Lets `userColor` queue premoves, per the preference; returns the queue for the move policy **/
     public function enablePremoves(userColor:PieceColor, rules:MoveRules):Premoves
     {
@@ -255,6 +291,7 @@ class InteractiveBoard extends Box
         var queue:Premoves = new Premoves(board, tints, rules, userColor, board.getPosition(), Preferences.premoveEnabled.get(), playMove, premoveIntents);
         premoveEnabledHandle = Preferences.premoveEnabled.onChange(queue.setEnabled);
         premoves = queue;
+        controlRow.setAskChameleonEnabled(true);
         return queue;
     }
 
@@ -268,5 +305,6 @@ class InteractiveBoard extends Box
         premoveEnabledHandle = null;
         premoves.dispose();
         premoves = null;
+        controlRow.setAskChameleonEnabled(false);
     }
 }

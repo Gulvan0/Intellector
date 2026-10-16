@@ -14,8 +14,14 @@ class GameButtons
     /** An icon button labelled `captionKey`'s text; `showCaption` false keeps the caption for the tooltip only **/
     public static function action(iconName:String, captionKey:String, onPress:Void->Void, showCaption:Bool = true):Button
     {
+        return actionWithIcon(icon(iconName), captionKey, onPress, showCaption);
+    }
+
+    /** `action` with an icon from anywhere, `iconPath` being its path **/
+    public static function actionWithIcon(iconPath:String, captionKey:String, onPress:Void->Void, showCaption:Bool = true):Button
+    {
         var button:Button = new Button();
-        button.icon = icon(iconName);
+        button.icon = iconPath;
         button.addClass(StyleClass.GAME_BUTTON);
         button.onClick = _ -> onPress();
         setCaption(button, captionKey, showCaption);

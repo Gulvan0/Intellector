@@ -12,8 +12,8 @@ class PreferenceMigration
         migrateOption(cookies, "lang", Preferences.language, ["EN" => "en", "RU" => "ru"]);
         migrateOption(cookies, "marking", Preferences.boardCoordinates, ["None" => "none", "Side" => "files_only", "Over" => "all"]);
         migrateToggle(cookies, "Premoves", Preferences.premoveEnabled);
-        migrateOption(cookies, "BranchingType", Preferences.branchingTabType, ["Tree" => "tree", "Outline" => "outline", "PlainText" => "plain_text"]);
-        migrateToggle(cookies, "BranchingShowTurnColor", Preferences.branchingTurnColorIndicators);
+        migrateOption(cookies, "BranchingType", Preferences.variationView, ["Tree" => "tree", "Outline" => "tree", "PlainText" => "plain_text"]);
+        Cookie.remove("BranchingShowTurnColor"); // the turn colour always shows now
         migrateToggle(cookies, "SilentChallenges", Preferences.silentChallenges);
         migrateOption(cookies, "AutoScrollOnMoveReceived", Preferences.followLatestMove, ["Always" => "always", "OwnGameOnly" => "own_game_only", "Never" => "never"]);
     }

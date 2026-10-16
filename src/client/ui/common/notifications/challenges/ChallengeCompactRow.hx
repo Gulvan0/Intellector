@@ -5,6 +5,8 @@ import haxe.ui.containers.HBox;
 import haxe.ui.events.MouseEvent;
 import haxefolio.ElementShadow;
 
+using client.ui.ComponentExtension;
+
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/notifications/challenge_compact_row.xml"))
 class ChallengeCompactRow extends HBox
 {
@@ -22,6 +24,7 @@ class ChallengeCompactRow extends HBox
         timeControlTag.setTimeControl(challenge.timeControl, challenge.timeControlKind);
 
         registerEvent(MouseEvent.CLICK, _ -> onPress());
+        this.trackHover();
     }
 
     /** Shows "+`count`" challenges waiting without a row; hidden for 0 **/

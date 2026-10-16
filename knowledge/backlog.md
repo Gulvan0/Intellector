@@ -16,7 +16,7 @@ The user is able to choose the accent colour from the selected presets, plus fre
 
 ## Dependent preferences
 
-Haxefolio implementation + Turn color only active for Tree mode + Rename labels more fittingly
+Haxefolio implementation + Rename labels more fittingly
 
 ## Challenge notification: make the whole position grid clickable, not just "Preview" button
 
@@ -35,3 +35,11 @@ Make auto-expiring notifications show a thin left-aligned bottom strip with widt
 ## Convenient deployment
 
 Frontend and backend, with build number update. Consider the DB migration simplifications in the future
+
+## Lower-resolution icons
+
+Right now when they get resized to small sizes, they get messy. A lower resolution version should get more straightforward shapes and less details
+
+## Move animations
+
+The board slides the moved piece on a `Move`-cause position change, instead of redrawing at once.

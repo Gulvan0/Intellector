@@ -115,7 +115,9 @@ class StyleVars
     public static inline final BOARD_CONTROL_BUTTON_WIDTH:Float = 40;
     public static inline final BOARD_CONTROL_BUTTON_HEIGHT:Float = 36;
     public static inline final BOARD_CONTROL_BUTTON_RADIUS:Float = 5;
-    public static inline final BOARD_CONTROL_COLOR_DISC_SIZE:Float = 22;
+    public static inline final BOARD_CONTROL_PEN_ICON_SIZE:Float = 24;
+    public static inline final BOARD_CONTROLS_SEPARATOR_DIAMETER:Float = 8;
+    public static inline final BOARD_CONTROLS_SEPARATOR_MARGIN:Float = 6;
     public static inline final BOARD_CONTROL_ART_SIZE:Float = 28;
     public static inline final BOARD_CONTROL_CHAMELEON_ICON_SIZE:Float = BOARD_CONTROL_ART_SIZE + 8;
 

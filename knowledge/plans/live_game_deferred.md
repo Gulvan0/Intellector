@@ -19,35 +19,7 @@ and starting position).
 showed a bot chat instead of the real one.
 
 **How to apply:** once `client.botengine` exists, the page drives the bot's replies and swaps the
-chat card for the bot's messages (as well as usual informational messages). E
-
-## 4. External games
-
-**Why deferred:** games uploaded by an external client (`external_uploader_ref`) are shown read-only
-like a spectated game; the uploader's own controls (append ply, rollback, end) have no UI.
-
-**How to apply:** if ever needed, a separate action set for the uploader.
-
-## 5. Server changes not yet live locally
-
-**Why deferred:** the local server must be restarted to pick up the rating snapshot, the outcome
-deltas, `X-Server-Time` and the chat fix, and its DB needs the new nullable columns
-(`game.white_elo`, `white_elo_provisional`, `black_elo`, `black_elo_provisional`,
-`gameoutcome.white_elo_delta`, `black_elo_delta`). Until then the page shows no ratings and
-estimates server time with the local clock.
-
-**How to apply:** stop the server, add the columns (`ALTER TABLE ... ADD COLUMN ... NULL`), start it.
-Then check ratings in the bars and info card, the rating line of the game-over notice, and sending
-chat messages.
-
-## 6. End-to-end checks not yet run
-
-**Why deferred:** the browser window kept getting hidden during the session, and the server
-restart is pending (item 5).
-
-**How to apply:** premoves, timeout (`CHECK_TIMEOUT`), sending chat from the page, spectating a live
-game (no requests, spectator chat hidden from players), a reload mid-game, presence dots of a
-second open tab.
+chat card for the bot's messages (as well as usual informational messages). This should be done via external games system.
 
 ## 7. HaxeFolio swallows page init errors
 
@@ -55,3 +27,16 @@ second open tab.
 page with nothing logged, which hides bugs.
 
 **How to apply:** have `HaxeFolioApp.switchToPage` log the error (with its stack) before redirecting.
+
+## 8. A failed re-sync goes unnoticed
+
+**Why deferred:** once the game is shown, `load()` only re-syncs it (after missed events, a rejected
+move, or a player's game ending). If that request fails or times out, the page keeps the stale state
+and says nothing: the load status screen would cover the board, and nothing lighter exists yet.
+
+**How to apply:** surface it without hiding the board (e.g. a notification with a retry), or retry
+in the background.
+
+## 9. Chameleon/Promotion button icons
+
+Make them more clear. Moreover, clarify the chameleon's tooltip (it doesn't mention premoves)

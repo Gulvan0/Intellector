@@ -16,6 +16,8 @@ import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
 import intellectorboard.primitives.piece.PieceColor;
 
+using client.ui.ComponentExtension;
+
 /** The game's facts: time control, start, resolution, players and opening **/
 class GameInfoCard extends VBox
 {
@@ -62,6 +64,8 @@ class GameInfoCard extends VBox
 
         timeControlLabel = new Label();
         timeControlLabel.addClass(StyleClass.GAME_MONO);
+        timeControlLabel.percentWidth = 100;
+        timeControlLabel.wordWrap = true; // a long one ("15s+0 · Hyperbullet") would run under the start date
         timeControlColumn.addComponent(timeControlLabel);
 
         ratedLabel = new Label();
@@ -138,16 +142,10 @@ class GameInfoCard extends VBox
 
     private function refreshOpening():Void
     {
-        if (info != null && info.customStartingPosition)
-        {
-            openingLabel.text = LocaleUtils.localeBinding("intellector.common.custom_starting_position");
-            return;
-        }
-
-        var shown:Null<OpeningEntry> = opening;
-        openingLabel.hidden = shown == null;
-        if (shown != null)
-            LocaleManager.instance.registerComponent(openingLabel, "text", () -> LocaleManager.instance.language == "ru" ? shown.name_ru : shown.name_en);
+        var openingText:Null<Void->String> = GameFormatters.opening(opening, info != null && info.customStartingPosition);
+        openingLabel.hidden = openingText == null;
+        if (openingText != null)
+            LocaleManager.instance.registerComponent(openingLabel, "text", openingText);
     }
 
     private function createPlayerRow(dot:Box, color:PieceColor):HBox
@@ -165,6 +163,7 @@ class GameInfoCard extends VBox
             if (info != null)
                 onNicknameClicked(info.participant(color));
         };
+        nicknameLabel.trackHover();
         row.addComponent(nicknameLabel);
 
         var ratingLabel:Label = new Label();

@@ -17,6 +17,17 @@ using client.ui.ComponentExtension;
 **/
 class BoardControlRow extends Box
 {
+    // a pen over a stroke; both the stroke and the pen's tip and band take the current CSS color
+    private static final PEN_ICON_SVG:String = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true" style="display: block; width: 100%; height: 100%; overflow: visible;">'
+        + '<path d="M6 27.5 H25" fill="none" stroke="currentColor" stroke-opacity="0.4" stroke-width="5" stroke-linecap="round"/>'
+        + '<g transform="translate(16 14) rotate(45)" stroke="#2a211a" stroke-width="1.5" stroke-linejoin="round">'
+        + '<path d="M-5.5 -10.8Q-5.5 -13 -3.3 -13L3.3 -13Q5.5 -13 5.5 -10.8L5.5 4.3Q5.5 6.5 4.32 8.36L3.18 10.14Q2 12 -0.2 12L-3.3 12Q-5.5 12 -5.5 9.8Z" fill="#fffefb" stroke="none"/>'
+        + '<path d="M-5.5 1L5.5 1L5.5 4.3Q5.5 6.5 4.32 8.36L3.18 10.14Q2 12 -0.2 12L-3.3 12Q-5.5 12 -5.5 9.8Z" fill="currentColor" stroke="none"/>'
+        + '<rect x="-5.5" y="-8" width="11" height="3" fill="currentColor"/>'
+        + '<path d="M-5.5 1H5.5" fill="none"/>'
+        + '<path d="M-5.5 -10.8Q-5.5 -13 -3.3 -13L3.3 -13Q5.5 -13 5.5 -10.8L5.5 4.3Q5.5 6.5 4.32 8.36L3.18 10.14Q2 12 -0.2 12L-3.3 12Q-5.5 12 -5.5 9.8Z" fill="none"/>'
+        + '</g></svg>';
+
     /** Called with the new annotation color (`null` for the normal mode) after the user picks one **/
     public var onAnnotationModeChanged:Null<AnnotationColor>->Void = _ -> {};
 
@@ -41,14 +52,13 @@ class BoardControlRow extends Box
 
         for (color in AnnotationColor.createAll())
         {
-            var disc:Box = new Box();
-            disc.width = StyleVars.BOARD_CONTROL_COLOR_DISC_SIZE;
-            disc.height = StyleVars.BOARD_CONTROL_COLOR_DISC_SIZE;
-            disc.customStyle.backgroundColor = Std.parseInt("0x" + palette.annotationMark(color).substr(1));
-            disc.customStyle.borderRadius = StyleVars.BOARD_CONTROL_COLOR_DISC_SIZE / 2;
-            disc.invalidateComponentStyle();
+            var pen:Box = new Box();
+            pen.width = StyleVars.BOARD_CONTROL_PEN_ICON_SIZE;
+            pen.height = StyleVars.BOARD_CONTROL_PEN_ICON_SIZE;
+            pen.element.innerHTML = PEN_ICON_SVG;
+            pen.element.style.color = palette.annotationMark(color);
 
-            var button:Box = createButton(disc, () -> selectAnnotationMode(color));
+            var button:Box = createButton(pen, () -> selectAnnotationMode(color));
             colorButtons.push(button);
             addComponent(button);
         }
@@ -85,7 +95,7 @@ class BoardControlRow extends Box
         refresh();
     }
 
-    /** A column if `vertical`, a row otherwise **/
+    /** A column of fixed-size buttons if `vertical`, otherwise a row as wide as the board, its buttons sharing the width **/
     public function setVertical(vertical:Bool):Void
     {
         layoutName = vertical ? "vertical" : "horizontal";
@@ -93,6 +103,35 @@ class BoardControlRow extends Box
         // centered along the board's side it sits on
         horizontalAlign = vertical ? null : "center";
         verticalAlign = vertical ? "center" : null;
+
+        percentWidth = vertical ? null : 100;
+        var buttons:Array<Box> = [normalModeButton].concat(colorButtons).concat([autoPromoteButton, askChameleonButton]);
+        for (button in buttons)
+        {
+            if (vertical)
+            {
+                button.percentWidth = null;
+                button.width = StyleVars.BOARD_CONTROL_BUTTON_WIDTH;
+            }
+            else
+            {
+                button.width = null; // the percent layout bypasses the setter, so a stale width would make the next identical one a no-op
+                button.percentWidth = 100 / buttons.length;
+            }
+        }
+        invalidateComponentLayout(); // a null size alone doesn't return the column to its auto width
+    }
+
+    /** Auto-promote only matters to a user who moves pieces **/
+    public function setAutoPromoteEnabled(enabled:Bool):Void
+    {
+        autoPromoteButton.disabled = !enabled;
+    }
+
+    /** Ask-about-chameleon only matters for premoves **/
+    public function setAskChameleonEnabled(enabled:Bool):Void
+    {
+        askChameleonButton.disabled = !enabled;
     }
 
     /** Syncs the buttons' selected states with `options` **/
@@ -120,11 +159,9 @@ class BoardControlRow extends Box
     {
         var button:Box = new Box();
         button.addClass(StyleClass.BOARD_CONTROL);
-        button.width = StyleVars.BOARD_CONTROL_BUTTON_WIDTH;
         button.height = StyleVars.BOARD_CONTROL_BUTTON_HEIGHT;
         button.customStyle.borderRadius = StyleVars.BOARD_CONTROL_BUTTON_RADIUS;
         button.invalidateComponentStyle();
-        button.element.style.cursor = "pointer";
 
         content.horizontalAlign = "center";
         content.verticalAlign = "center";
@@ -137,13 +174,24 @@ class BoardControlRow extends Box
     }
 
     // between the annotation mode, auto-promote and ask-about-chameleon sections
-    private static function createSeparator():Label
+    private static function createSeparator():Box
     {
-        var separator:Label = new Label();
-        separator.text = "·";
-        separator.addClass(StyleClass.BOARD_CONTROLS_SEPARATOR);
+        var dot:Box = new Box();
+        dot.addClass(StyleClass.BOARD_CONTROLS_SEPARATOR);
+        dot.width = StyleVars.BOARD_CONTROLS_SEPARATOR_DIAMETER;
+        dot.height = StyleVars.BOARD_CONTROLS_SEPARATOR_DIAMETER;
+        dot.customStyle.borderRadius = StyleVars.BOARD_CONTROLS_SEPARATOR_DIAMETER / 2;
+        dot.invalidateComponentStyle();
+        dot.horizontalAlign = "center";
+        dot.verticalAlign = "center";
+
+        // widens the gap to the neighboring buttons along either orientation
+        var separator:Box = new Box();
+        separator.width = StyleVars.BOARD_CONTROLS_SEPARATOR_DIAMETER + 2 * StyleVars.BOARD_CONTROLS_SEPARATOR_MARGIN;
+        separator.height = StyleVars.BOARD_CONTROLS_SEPARATOR_DIAMETER + 2 * StyleVars.BOARD_CONTROLS_SEPARATOR_MARGIN;
         separator.horizontalAlign = "center";
         separator.verticalAlign = "center";
+        separator.addComponent(dot);
         return separator;
     }
 

@@ -1,65 +1,57 @@
 package net.models.study.mappers;
 
-import intellectorboard.primitives.hex.HexCoords;
-import intellectorboard.primitives.ply.RawPly;
-import intellectorboard.plytree.PlyTreeNodeBase;
-import intellectorboard.plytree.path.PlyTreePath;
+import client.datatypes.variations.PlyTree;
+import client.datatypes.variations.PlyTreeNode;
+import client.datatypes.variations.PlyTreePath;
 import intellectorboard.position.Position;
-import intellectorboard.plytree.PlyTreePlyNode;
-import intellectorboard.plytree.PlyTree;
+import intellectorboard.primitives.hex.HexCoords;
+import intellectorboard.primitives.piece.PieceKind;
+import intellectorboard.primitives.ply.RawPly;
+import net.models.common.mappers.PieceKindMapper;
 
 class StudyPlyTreeMapper
 {
-    public static function toDto(plyTree:PlyTree):Array<ApiPlyTreeNode>
+    /** Every node but the root, parents before their children **/
+    public static function toDto(tree:PlyTree):Array<ApiPlyTreeNode>
     {
-        return [
-            for (nodeData in plyTree.collectPlyNodes())
-            {path: nodeData.path.toString(), ply: ApiPlyMapper.toDto(nodeData.node.ply)}
-        ];
+        var dtos:Array<ApiPlyTreeNode> = [];
+        collect(tree.root, dtos);
+        return dtos;
     }
 
-    private static function rawPlyFromNodeDto(dto:StudyPlyTreeNodePublic):RawPly
+    private static function collect(node:PlyTreeNode, dtos:Array<ApiPlyTreeNode>):Void
     {
-        return RawPly.construct(new HexCoords(dto.ply_from_i, dto.ply_from_j), new HexCoords(dto.ply_to_i, dto.ply_to_j), dto.ply_morph_into);
-    }
-
-    private static function addNode(tree:PlyTree, createdNodes:Map<String, PlyTreePlyNode>, pendingNodes:Map<String, StudyPlyTreeNodePublic>, path:PlyTreePath, dto:StudyPlyTreeNodePublic)
-    {
-        var parentPath:Null<PlyTreePath> = path.getParent();
-        var parentNode:PlyTreeNodeBase = parentPath != null? createdNodes.get(parentPath.toString()) : tree.root;
-        var createdNode:PlyTreePlyNode = parentNode.addChild(rawPlyFromNodeDto(nodeDto));
-
-        var pathStr:String = path.toString();
-        var dependentDto:Null<StudyPlyTreeNodePublic> = pendingNodes.get(pathStr);
-        if (dependentDto == null)
-            return;
-
-        pendingNodes.remove(pathStr);
-        addNode(tree, createdNodes, pendingNodes, PlyTreePath.fromString(dto.path), dependentDto);
-    }
-
-    public static function fromDto(startingPosition:Position, nodeDtos:Array<StudyPlyTreeNodePublic>):PlyTree
-    {
-        var tree:PlyTree = new PlyTree(startingPosition);
-        var createdNodes:Map<String, PlyTreePlyNode> = [];
-        var pendingNodes:Map<String, StudyPlyTreeNodePublic> = [];
-
-        for (nodeDto in nodeDtos)
+        for (child in node.children)
         {
-            var nodePath:PlyTreePath = PlyTreePath.fromString(nodeDto.path);
-
-            var dependencyPath:Null<PlyTreePath> = nodePath.getDependency();
-            if (dependencyPath != null)
-            {
-                var dependencyPathStr:String = dependencyPath.toString();
-                if (!createdNodes.exists(dependencyPathStr))
-                {
-                    pendingNodes.set(dependencyPathStr, nodeDto);
-                    continue;
-                }
-            }
-
-            addNode(tree, createdNodes, pendingNodes, nodePath, nodeDto);
+            dtos.push({path: PlyTreePath.of(child).toStudyString(), ply: ApiPlyMapper.toDto(child.ply)});
+            collect(child, dtos);
         }
+    }
+
+    /** The nodes may come in any order; a node whose parent or earlier sibling is missing is dropped with its descendants **/
+    public static function fromDto(startingPosition:Position, dtos:Array<StudyPlyTreeNodePublic>):PlyTree
+    {
+        var entries:Array<{path:PlyTreePath, dto:StudyPlyTreeNodePublic}> = [
+            for (dto in dtos)
+                {path: PlyTreePath.fromStudyString(dto.path), dto: dto}
+        ];
+        entries.sort((a, b) -> PlyTreePath.compare(a.path, b.path));
+
+        var tree:PlyTree = new PlyTree(startingPosition);
+        for (entry in entries)
+        {
+            var indices:Array<Int> = entry.path.childIndices();
+            var parent:Null<PlyTreeNode> = entry.path.parent().find(tree);
+            if (indices.length == 0 || parent == null || parent.children.length != indices[indices.length - 1])
+                continue;
+            tree.play(parent, plyOf(entry.dto));
+        }
+        return tree;
+    }
+
+    private static function plyOf(dto:StudyPlyTreeNodePublic):RawPly
+    {
+        var morphInto:Null<PieceKind> = dto.ply_morph_into != null ? PieceKindMapper.dtoToDatatype(dto.ply_morph_into) : null;
+        return RawPly.construct(new HexCoords(dto.ply_from_i, dto.ply_from_j), new HexCoords(dto.ply_to_i, dto.ply_to_j), morphInto);
     }
 }

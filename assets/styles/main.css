@@ -738,11 +738,23 @@
 .intellector-board-control {
     background-color: #f0ebe2;
     border: 1px solid #d8cfc0;
+    cursor: pointer;
 }
 
 .intellector-board-control-selected {
     background-color: #f6e6c6;
     border: 1px solid #c79a56;
+}
+
+.intellector-board-control:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    cursor: not-allowed;
+}
+
+.intellector-board-control:disabled .image,
+.intellector-board-control:disabled .label {
+    opacity: 0.45;
 }
 
 .intellector-board-control-cross {
@@ -759,9 +771,7 @@
 }
 
 .intellector-board-controls-separator {
-    font-name: $ui-family-semibold;
-    font-size: 20px;
-    color: #b5a892;
+    background-color: #b5a892;
 }
 
 /*
@@ -797,6 +807,16 @@
 .haxefolio-notification-card-close:down {
     background-color: #f0ebe2;
     color: #2a211a;
+}
+
+/* tooltips: ink with accentInk text */
+.tooltip {
+    background-color: #2a211a;
+    border-color: #2a211a;
+}
+
+.tooltip .label {
+    color: #fffefb;
 }
 
 /* a notice's text line, under the card's title */
@@ -1510,14 +1530,15 @@
 
 /*
     Live game page. Wide: three columns (info and chat | board | moves and actions) on the page
-    background, cards on surface. Compact: one column; the open tab's card replaces the chat peek.
+    background, cards on surface. Medium: two columns (header and board | moves, chat and actions).
+    Compact: one column; the open tab's card replaces the chat peek.
 */
 
 .intellector-game-page {
     padding: 14px;
 }
 
-.haxefolio-collapsed .intellector-game-page {
+.haxefolio-tier-board-compact .intellector-game-page {
     padding: 8px;
 }
 
@@ -1658,7 +1679,7 @@
     font-weight: 600;
 }
 
-.haxefolio-collapsed .intellector-game-button {
+.haxefolio-tier-board-compact .intellector-game-button {
     height: 44px;
 }
 
@@ -1788,7 +1809,7 @@
     font-size: 13px;
 }
 
-.haxefolio-collapsed .intellector-game-chat-send-row .textfield {
+.haxefolio-tier-board-compact .intellector-game-chat-send-row .textfield {
     height: 44px;
 }
 
@@ -1881,27 +1902,27 @@
     horizontal-spacing: 10px;
 }
 
-.haxefolio-collapsed .intellector-game-actions-card {
+.haxefolio-tier-board-compact .intellector-game-actions-card {
     padding: 0;
     background-color: transparent;
     border: 0px solid #faf7f2;
 }
 
-.haxefolio-collapsed .intellector-game-actions-row {
+.haxefolio-tier-board-compact .intellector-game-actions-row {
     horizontal-spacing: 6px;
 }
 
-.haxefolio-collapsed .intellector-game-actions-card .intellector-game-button {
+.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button {
     background-color: #faf7f2;
     padding-left: 0;
     padding-right: 0;
 }
 
-.haxefolio-collapsed .intellector-game-actions-card .intellector-game-button-on {
+.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button-on {
     background-color: #f6e6c6;
 }
 
-.haxefolio-collapsed .intellector-game-actions-card .intellector-game-button:disabled {
+.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button:disabled {
     background-color: #f0ebe2;
 }
 
@@ -1924,7 +1945,7 @@
     border-radius: 9px;
 }
 
-.haxefolio-collapsed .intellector-game-player-bar {
+.haxefolio-tier-board-compact .intellector-game-player-bar {
     height: 44px;
     padding-left: 12px;
     padding-right: 5px;
@@ -1944,7 +1965,7 @@
     word-wrap: false;
 }
 
-.haxefolio-collapsed .intellector-game-clock {
+.haxefolio-tier-board-compact .intellector-game-clock {
     width: 80px;
 }
 
@@ -1980,11 +2001,18 @@
     color: #2a211a;
 }
 
-/* compact only */
-.intellector-game-compact-head {
+/* compact, plus the header line and the move strip in medium */
+.intellector-game-head {
     padding-left: 4px;
     padding-right: 4px;
     horizontal-spacing: 8px;
+}
+
+/* medium: as wide as the board, over it */
+.haxefolio-tier-board-medium .intellector-game-head {
+    padding-left: 0;
+    padding-right: 0;
+    horizontal-spacing: 12px;
 }
 
 .intellector-game-move-strip {
@@ -2058,4 +2086,630 @@
     color: #8a5a1f;
     font-name: $ui-family-semibold;
     font-weight: 600;
+}
+
+/*
+    Analysis page. Shares the live game page's frame, cards, buttons and move list; adds the
+    variations card (tree or text view), the position editor's cards and the locked look.
+*/
+
+/* medium: the variations and the moves are tabs of one card, the tabs naming them */
+.intellector-analysis-panel-tabs {
+    padding-top: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.intellector-analysis-tabbed .intellector-variations-header,
+.intellector-analysis-tabbed .intellector-game-moves-header {
+    padding-top: 10px;
+}
+
+/* variations card */
+.intellector-variations-card {
+    vertical-spacing: 0;
+}
+
+.intellector-variations-header {
+    padding-top: 12px;
+    padding-bottom: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 10px;
+}
+
+.intellector-variations-hint {
+    clip: true;
+}
+
+.intellector-variations-delete {
+    horizontal-spacing: 6px;
+}
+
+.intellector-variations-delete .label {
+    word-wrap: false;
+}
+
+/* the button is an HBox, which doesn't pass the game button's text styles to its labels */
+.intellector-variations-delete .intellector-variations-delete-caption {
+    color: #6d6152;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.intellector-variations-delete:hover .intellector-variations-delete-caption {
+    color: #2a211a;
+}
+
+.intellector-variations-delete:down .intellector-variations-delete-caption {
+    color: #2a211a;
+}
+
+.intellector-variations-delete:disabled .intellector-variations-delete-caption {
+    color: #a79b8a;
+}
+
+.intellector-variations-delete:disabled .image {
+    opacity: 0.45;
+}
+
+.intellector-variations-delete-pill {
+    height: 22px;
+    padding-left: 7px;
+    padding-right: 7px;
+    horizontal-spacing: 5px;
+    border-radius: 4px;
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+}
+
+.intellector-variations-delete-pill .label {
+    font-name: $mono-family-medium;
+    font-size: 12px;
+    color: #8a5a1f;
+}
+
+.intellector-variations-body {
+    margin-left: 14px;
+    margin-right: 14px;
+    margin-bottom: 14px;
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    border-radius: 5px;
+    clip: true;
+}
+
+.intellector-variations-tools {
+    margin-right: 16px;
+    margin-bottom: 16px;
+    horizontal-spacing: 8px;
+}
+
+.intellector-variations-tool-group {
+    horizontal-spacing: 0;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    clip: true;
+}
+
+.intellector-variations-tool-group .intellector-game-button {
+    border: 0px solid #d8cfc0;
+    border-radius: 0;
+    background-color: transparent;
+}
+
+.intellector-variations-tool-group .intellector-game-button:disabled {
+    background-color: #f0ebe2;
+}
+
+.intellector-variations-tool-button {
+    width: 37px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.intellector-variations-zoom-percent {
+    width: 56px;
+    padding-left: 0;
+    padding-right: 0;
+    border-left: 1px solid #e6dfd3;
+    border-right: 1px solid #e6dfd3;
+    font-name: $mono-family-medium;
+    font-size: 12px;
+}
+
+.haxefolio-tier-board-compact .intellector-variations-tool-button {
+    width: 44px;
+}
+
+.intellector-variations-confirmation {
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    padding: 12px;
+    vertical-spacing: 10px;
+    background-color: #faf7f2;
+    border: 1px solid #c79a56;
+    border-radius: 9px;
+}
+
+.intellector-variations-confirmation-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-variation-scroller {
+    background-color: transparent;
+    border: 0px solid #f0ebe2;
+}
+
+.intellector-variation-tree-canvas {
+    clip: false;
+}
+
+.intellector-variation-tree-scroller {
+    cursor: grab;
+}
+
+.intellector-variation-tree-scroller .scrollview-contents {
+    padding: 0px;
+}
+
+.intellector-variation-tree-panning {
+    cursor: grabbing;
+}
+
+/* the colour of a move: the piece art's cream with a brown ring, or its dark brown */
+.intellector-variation-disc {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    border: 1.5px solid #664126;
+    opacity: 1; /* HaxeUI keeps the locked opacity once no rule sets one */
+}
+
+.intellector-variation-disc-white {
+    background-color: #f7f1e6;
+}
+
+.intellector-variation-disc-black {
+    background-color: #2a211a;
+    border-color: #2a211a;
+}
+
+/* tree view */
+.intellector-variation-tree-gutter {
+    clip: false;
+    background-color: #f0ebe2;
+    border-right: 1px solid #e6dfd3;
+}
+
+.intellector-variation-tree-row-number {
+    padding-right: 7px;
+    padding-top: 14px;
+    font-name: $mono-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    text-align: right;
+}
+
+.intellector-variation-edge {
+    background-color: #bdb2a0;
+}
+
+.intellector-variation-edge-on-line {
+    background-color: #8a5a1f;
+}
+
+.intellector-variation-node {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-variation-node:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-variation-node-content {
+    horizontal-spacing: 6px;
+}
+
+.intellector-variation-node-text {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-variation-node-root .intellector-variation-node-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+}
+
+.intellector-variation-node-off-line .intellector-variation-node-text {
+    color: #6d6152;
+}
+
+.intellector-variation-node-selected,
+.intellector-variation-node-selected:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-variation-node-selected .intellector-variation-node-text {
+    color: #8a5a1f;
+}
+
+.intellector-variation-node-selected.intellector-variation-node-root .intellector-variation-node-text {
+    font-name: $ui-family-semibold;
+}
+
+/* text view */
+.intellector-variation-text-list {
+    padding-top: 6px;
+    padding-bottom: 56px;
+    vertical-spacing: 0;
+}
+
+.intellector-variation-text-block {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-right: 12px;
+    horizontal-spacing: 2px;
+    vertical-spacing: 0;
+}
+
+.intellector-variation-token {
+    height: 30px;
+    padding-left: 8px;
+    padding-right: 8px;
+    horizontal-spacing: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.intellector-variation-token:hover {
+    background-color: #faf7f2;
+}
+
+.intellector-variation-token-number {
+    font-name: $mono-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-variation-token-text {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-variation-token-root .intellector-variation-token-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+}
+
+.intellector-variation-token-off-line .intellector-variation-token-text {
+    color: #6d6152;
+}
+
+.intellector-variation-token-selected,
+.intellector-variation-token-selected:hover {
+    background-color: #f6e6c6;
+}
+
+.intellector-variation-token-selected .intellector-variation-token-text,
+.intellector-variation-token-selected .intellector-variation-token-number {
+    color: #8a5a1f;
+}
+
+.intellector-variation-token-selected.intellector-variation-token-root .intellector-variation-token-text {
+    font-name: $ui-family-semibold;
+}
+
+/* locked while the position editor is open: disabled in place, never hidden */
+.intellector-analysis-locked {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+}
+
+.intellector-analysis-locked .intellector-variations-body {
+    background-color: transparent;
+}
+
+.intellector-analysis-locked .intellector-game-card-title,
+.intellector-analysis-locked .intellector-game-hint,
+.intellector-analysis-locked .intellector-game-move-number,
+.intellector-analysis-locked .intellector-game-move-notation,
+.intellector-analysis-locked .intellector-variation-token-text,
+.intellector-analysis-locked .intellector-variation-token-number,
+.intellector-analysis-locked .intellector-variation-tree-row-number,
+.intellector-analysis-locked .intellector-variation-node-text {
+    color: #a79b8a;
+}
+
+.intellector-analysis-locked .intellector-variation-node,
+.intellector-analysis-locked .intellector-variation-node:hover {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    cursor: default;
+}
+
+.intellector-analysis-locked .intellector-variation-node-selected,
+.intellector-analysis-locked .intellector-variation-node-selected:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-analysis-locked .intellector-variation-edge,
+.intellector-analysis-locked .intellector-variation-edge-on-line {
+    background-color: #e6dfd3;
+}
+
+.intellector-analysis-locked .intellector-variation-disc {
+    opacity: 0.45;
+}
+
+.intellector-analysis-locked .intellector-variation-token,
+.intellector-analysis-locked .intellector-variation-token:hover,
+.intellector-analysis-locked .intellector-game-move-cell,
+.intellector-analysis-locked .intellector-game-move-cell:hover {
+    background-color: transparent;
+    cursor: default;
+}
+
+.intellector-analysis-locked .intellector-variation-token-selected,
+.intellector-analysis-locked .intellector-game-move-cell-current {
+    border: 1px solid #bdb2a0;
+}
+
+/* the board, with the editor's tool card under it */
+.intellector-analysis-stage-column {
+    vertical-spacing: 8px;
+}
+
+.intellector-editor-tool-card {
+    padding: 8px;
+    vertical-spacing: 6px;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-editor-tool-row {
+    horizontal-spacing: 6px;
+}
+
+.intellector-editor-tool {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    background-color: #f0ebe2;
+    cursor: pointer;
+}
+
+.intellector-editor-tool-content {
+    horizontal-spacing: 6px;
+}
+
+/* a Box passes neither colour nor font on to its labels */
+.intellector-editor-tool .label {
+    word-wrap: false;
+    color: #6d6152;
+    font-name: $ui-family-medium;
+    font-size: 14px;
+}
+
+.intellector-editor-tool:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-editor-tool:hover .label {
+    color: #2a211a;
+}
+
+.intellector-editor-tool-wide {
+    width: 150px;
+}
+
+.intellector-editor-tool-on,
+.intellector-editor-tool-on:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-editor-tool-on .label,
+.intellector-editor-tool-on:hover .label {
+    color: #8a5a1f;
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+/* on a stage too narrow for the labels, Free move and Delete piece become icon-only */
+.intellector-editor-tool-card-narrow .intellector-editor-tool-wide {
+    width: 48px;
+}
+
+.intellector-editor-tool-card-compact {
+    padding: 5px;
+    vertical-spacing: 4px;
+}
+
+.intellector-editor-tool-card-compact .intellector-editor-tool-row {
+    horizontal-spacing: 4px;
+}
+
+.intellector-editor-tool-card-compact .intellector-editor-tool {
+    width: 44px;
+    height: 44px;
+}
+
+/* the editor card */
+.intellector-editor-card {
+    padding: 14px;
+    vertical-spacing: 16px;
+}
+
+.intellector-editor-field {
+    vertical-spacing: 6px;
+    horizontal-spacing: 12px;
+}
+
+.intellector-editor-field-label {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-editor-wrapping-hint {
+    word-wrap: true;
+}
+
+/* a recessed track of options (side to move, the medium analysis tabs), unlike outlined buttons */
+.intellector-game-segments {
+    padding: 3px;
+    horizontal-spacing: 2px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-game-segment {
+    height: 37px;
+    border: 1px solid #f0ebe2;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-game-segment-content {
+    horizontal-spacing: 8px;
+}
+
+.intellector-game-segment .label {
+    word-wrap: false;
+    color: #6d6152;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+}
+
+.intellector-game-segment:hover .label {
+    color: #2a211a;
+}
+
+.intellector-game-segment-on,
+.intellector-game-segment-on:hover {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+}
+
+.intellector-game-segment-on .label,
+.intellector-game-segment-on:hover .label {
+    color: #8a5a1f;
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+/*
+    The chosen side's disc gets a 2px accent ring 2px out, as nested filled circles. The browser
+    snaps each circle to whole pixels separately, so their sizes differ by even amounts only:
+    otherwise they snap apart and the ring's thickness varies around it.
+*/
+.intellector-editor-side-ring {
+    width: 26px;
+    height: 26px;
+    border-radius: 13px;
+    background-color: transparent;
+}
+
+.intellector-editor-side-ring-gap {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: transparent;
+}
+
+.intellector-game-segment-on .intellector-editor-side-ring {
+    background-color: #8a5a1f;
+}
+
+.intellector-game-segment-on .intellector-editor-side-ring-gap {
+    background-color: #f6e6c6;
+}
+
+/* the analysis panel's tabs while it's locked; after the segment rules, which they override */
+.intellector-analysis-locked .intellector-game-segment,
+.intellector-analysis-locked .intellector-game-segment-on {
+    cursor: default;
+}
+
+.intellector-analysis-locked .intellector-game-segment-on,
+.intellector-analysis-locked .intellector-game-segment-on:hover {
+    background-color: #f0ebe2;
+    border: 1px solid #bdb2a0;
+}
+
+.intellector-analysis-locked .intellector-game-segment .label,
+.intellector-analysis-locked .intellector-game-segment:hover .label,
+.intellector-analysis-locked .intellector-game-segment-on .label,
+.intellector-analysis-locked .intellector-game-segment-on:hover .label {
+    color: #a79b8a;
+}
+
+.intellector-editor-side-disc {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    border: 2px solid #664126;
+}
+
+.intellector-editor-side-disc.intellector-variation-disc-black {
+    border-color: #2a211a;
+}
+
+.intellector-editor-actions {
+    spacing: 10px;
+}
+
+.intellector-editor-action {
+    text-align: left;
+}
+
+.intellector-editor-footer {
+    padding-top: 12px;
+    vertical-spacing: 10px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-editor-card-compact {
+    padding: 12px;
+    vertical-spacing: 10px;
+}
+
+.intellector-editor-card-compact .intellector-game-segments {
+    width: 196px;
+}
+
+.intellector-editor-card-compact .intellector-game-segment {
+    height: 44px;
+}
+
+.intellector-editor-card-compact .intellector-editor-actions {
+    spacing: 8px;
+}
+
+.intellector-editor-card-compact .intellector-editor-action {
+    text-align: center;
+}
+
+.intellector-editor-card-compact .intellector-editor-footer {
+    padding-top: 10px;
+    vertical-spacing: 8px;
 }

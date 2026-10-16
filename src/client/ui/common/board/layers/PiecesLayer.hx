@@ -10,7 +10,6 @@ import intellectorboard.position.OccupiedHexesIterator;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.piece.PieceData;
-import intellectorboard.primitives.piece.PieceKind;
 
 // where a piece is drawn instead of on its own hex, during a gesture
 private enum PieceDisplacement
@@ -132,7 +131,7 @@ class PiecesLayer implements BoardLayer
 
     private function drawPiece(coords:HexCoords, piece:PieceData):Void
     {
-        var height:Float = BoardGeometry.HEX_HEIGHT * StyleVars.BOARD_PIECE_HEIGHT_SHARE * relativeScale(piece.type);
+        var height:Float = BoardGeometry.HEX_HEIGHT * StyleVars.BOARD_PIECE_HEIGHT_SHARE * Assets.pieceRelativeScale(piece.type);
         var width:Float = height * Assets.pieceAspectRatio(piece.type);
         var lifted:Bool = liftedPiece != null && liftedPiece.equals(coords);
         var image:SVGImageBuilder = (lifted ? liftedLayer : layer).svgImage(Assets.pieceImage(piece.type, piece.color), 0, 0, width, height);
@@ -157,15 +156,5 @@ class PiecesLayer implements BoardLayer
             case null: projection.hexCenter(coords);
         }
         pieceImage.image.position(center.x - pieceImage.width / 2, center.y - pieceImage.height / 2);
-    }
-
-    private static function relativeScale(kind:PieceKind):Float
-    {
-        return switch kind {
-            case Progressor: StyleVars.BOARD_PROGRESSOR_SCALE;
-            case Liberator: StyleVars.BOARD_LIBERATOR_SCALE;
-            case Defensor: StyleVars.BOARD_DEFENSOR_SCALE;
-            default: 1;
-        }
     }
 }

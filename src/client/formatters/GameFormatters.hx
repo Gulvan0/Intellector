@@ -1,9 +1,12 @@
 package client.formatters;
 
+import client.GroupedLocaleResolvers;
 import client.datatypes.game.GameEnding;
 import client.datatypes.game.Outcome;
 import client.datatypes.game.PlayerRating;
 import client.datatypes.timecontrol.TimeControl;
+import client.openings.OpeningEntry;
+import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
 import intellectorboard.primitives.piece.PieceColor;
 
@@ -41,6 +44,25 @@ class GameFormatters
     public static function dateTime(unixMs:Float):String
     {
         return DateTools.format(Date.fromTime(unixMs), "%d.%m.%Y %H:%M:%S");
+    }
+
+    /** Whether the game is rated, then when it started: `Rated · dd.mm.yyyy hh:mm:ss` **/
+    public static function ratedAndStart(rated:Bool, startedAtMs:Float):String
+    {
+        return '${LocaleUtils.resolveText(GroupedLocaleResolvers.challengeRated(rated))} · ${dateTime(startedAtMs)}';
+    }
+
+    /**
+        The opening line's text for the current language, null when there's no line: no known
+        opening reached yet. A game from a custom position says so instead.
+    **/
+    public static function opening(opening:Null<OpeningEntry>, customStartingPosition:Bool):Null<Void->String>
+    {
+        if (customStartingPosition)
+            return () -> resolve("intellector.common.custom_starting_position");
+        if (opening == null)
+            return null;
+        return () -> LocaleManager.instance.language == "ru" ? opening.name_ru : opening.name_en;
     }
 
     /** The resolution line: in progress, or how the game ended **/

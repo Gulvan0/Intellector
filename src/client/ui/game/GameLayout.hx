@@ -20,15 +20,19 @@ enum CompactTab
 }
 
 /**
-    Arranges the page's parts. Wide: info and chat | the board | moves and actions. Compact: a
-    header line, the move strip, the board, the actions, then a chat peek with the Chat / Moves /
-    Info tabs under it; an open tab shows its card in the peek's place.
+    Arranges the page's parts. Wide: info and chat | the board | moves and actions. Medium: a header
+    line over the board | moves, chat and actions; the info card's facts move to the header and the
+    moves card. Compact: a header line, the move strip, the board, the actions, then a chat peek with
+    the Chat / Moves / Info tabs under it; an open tab shows its card in the peek's place.
 **/
 class GameLayout extends Box
 {
     private static inline final SIDE_COLUMN_WIDTH:Float = 312;
     // until the page measures the height there is: the wide columns resolve their heights against a fixed one
     private static inline final PROVISIONAL_WIDE_HEIGHT:Float = 520;
+    // medium: the moves and the chat share the column's height 3:2
+    private static inline final MEDIUM_MOVES_SHARE:Float = 60;
+    private static inline final MEDIUM_CHAT_SHARE:Float = 40;
 
     private final infoCard:GameInfoCard;
     private final chatCard:ChatCard;
@@ -45,6 +49,8 @@ class GameLayout extends Box
     private final headRow:HBox;
     private final tabRow:HBox;
     private final headTimeControlLabel:Label;
+    private final headDetailsLabel:Label;
+    private final headSpacer:Box;
     private final headResolutionLabel:Label;
     private final peekButton:HBox;
     private final peekLabel:Label;
@@ -52,9 +58,10 @@ class GameLayout extends Box
     private final sheet:Box;
     private final tabButtons:Map<CompactTab, Button> = [];
 
-    private var compact:Null<Bool> = null;
+    private var tier:Null<BoardLayoutTier> = null;
     private var openTab:Null<CompactTab> = null;
     private var unreadCount:Int = 0;
+    private var peekHeight:Float = 0; // last measured while shown: a tab hides the peek
 
     public function new(infoCard:GameInfoCard, chatCard:ChatCard, movesCard:MovesCard, actionsCard:ActionsCard, stage:BoardStage, moveStrip:MoveStrip)
     {
@@ -83,12 +90,18 @@ class GameLayout extends Box
 
         headRow = new HBox();
         headRow.percentWidth = 100;
-        headRow.addClass(StyleClass.GAME_COMPACT_HEAD);
+        headRow.addClass(StyleClass.GAME_HEAD);
         headTimeControlLabel = new Label();
         headTimeControlLabel.addClass(StyleClass.GAME_MONO);
         headTimeControlLabel.verticalAlign = "center";
         headRow.addComponent(headTimeControlLabel);
-        var headSpacer:Box = new Box();
+        headDetailsLabel = new Label();
+        headDetailsLabel.percentWidth = 100;
+        headDetailsLabel.addClass(StyleClass.GAME_HINT);
+        headDetailsLabel.wordWrap = true; // it wraps before the resolution would have to
+        headDetailsLabel.verticalAlign = "center";
+        headRow.addComponent(headDetailsLabel);
+        headSpacer = new Box();
         headSpacer.percentWidth = 100;
         headRow.addComponent(headSpacer);
         headResolutionLabel = new Label();
@@ -102,6 +115,7 @@ class GameLayout extends Box
         peekButton.addClass(StyleClass.GAME_PEEK);
         peekButton.tooltip = LocaleUtils.localeBinding("intellector.live_game.tab.open_chat");
         peekButton.onClick = _ -> setOpenTab(Chat);
+        peekButton.trackHover();
         peekLabel = new Label();
         peekLabel.percentWidth = 100;
         peekLabel.addClass(StyleClass.GAME_PEEK_TEXT);
@@ -133,18 +147,23 @@ class GameLayout extends Box
         }
     }
 
-    public function setCompact(compact:Bool):Void
+    public function setTier(tier:BoardLayoutTier):Void
     {
-        if (this.compact == compact)
+        if (this.tier == tier)
             return;
-        this.compact = compact;
+        this.tier = tier;
 
+        stage.setHeader(null);
         detachParts();
         removeAllComponents(false);
 
+        var compact:Bool = tier == Compact;
         actionsCard.setCompact(compact);
         movesCard.setNavigationShown(!compact);
+        movesCard.setOpeningShown(tier == Medium);
         stage.setFitsHeight(!compact);
+        headDetailsLabel.hidden = tier != Medium;
+        headSpacer.hidden = tier == Medium;
 
         if (compact)
         {
@@ -162,6 +181,21 @@ class GameLayout extends Box
             compactColumn.addComponent(tabRow);
             addComponent(compactColumn);
             refreshTab();
+        }
+        else if (tier == Medium)
+        {
+            if (height == null)
+                height = PROVISIONAL_WIDE_HEIGHT;
+            movesCard.percentHeight = MEDIUM_MOVES_SHARE;
+            chatCard.percentHeight = MEDIUM_CHAT_SHARE;
+
+            rightColumn.addComponent(movesCard);
+            rightColumn.addComponent(chatCard);
+            rightColumn.addComponent(actionsCard);
+            wideRow.addComponent(stage);
+            wideRow.addComponent(rightColumn);
+            addComponent(wideRow);
+            stage.setHeader(headRow);
         }
         else
         {
@@ -182,16 +216,39 @@ class GameLayout extends Box
         }
     }
 
-    /** Whether the board, columns and cards fit a height of their own (wide) or flow (compact) **/
+    /** Whether the board, columns and cards fit a height of their own (wide, medium) or flow (compact) **/
     public function isCompact():Bool
     {
-        return compact == true;
+        return tier == Compact;
     }
 
-    /** The compact header's time control text and resolution line **/
-    public function setHeadTexts(timeControlText:Void->String, resolutionText:Void->String):Void
+    /** Compact: the most the stage can take of `availableHeight` with the tabs closed (an open one scrolls the page instead); measured, so call it after a layout **/
+    public function compactStageMaxHeight(availableHeight:Float):Float
+    {
+        if (!peekButton.hidden)
+            peekHeight = peekButton.element.offsetHeight;
+
+        var height:Float = 0;
+        var partCount:Int = 0;
+        for (part in compactColumn.childComponents)
+        {
+            if (part == sheet || (part.hidden && part != peekButton))
+                continue;
+            partCount++;
+            if (part == peekButton)
+                height += peekHeight;
+            else if (part != stage)
+                height += part.element.offsetHeight;
+        }
+        var spacing:Float = compactColumn.style.verticalSpacing ?? 0.0;
+        return availableHeight - height - spacing * Math.max(0, partCount - 1);
+    }
+
+    /** The header's time control text, details (medium only) and resolution line **/
+    public function setHeadTexts(timeControlText:Void->String, detailsText:Void->String, resolutionText:Void->String):Void
     {
         LocaleManager.instance.registerComponent(headTimeControlLabel, "text", timeControlText);
+        LocaleManager.instance.registerComponent(headDetailsLabel, "text", detailsText);
         LocaleManager.instance.registerComponent(headResolutionLabel, "text", resolutionText);
     }
 
@@ -207,7 +264,7 @@ class GameLayout extends Box
     public function setLatestMessage(message:Null<GameChatMessage>, unseen:Bool):Void
     {
         peekLabel.text = message != null ? '${message.authorNickname}: ${message.text}' : LocaleUtils.localeBinding("intellector.live_game.chat.empty_peek");
-        if (unseen && compact == true && openTab != Chat)
+        if (unseen && tier == Compact && openTab != Chat)
             setUnreadCount(unreadCount + 1);
     }
 
@@ -223,7 +280,7 @@ class GameLayout extends Box
         for (tab => button in tabButtons)
             button.setClass(StyleClass.GAME_TAB_ON, tab == openTab);
 
-        if (compact != true)
+        if (tier != Compact)
             return;
 
         for (part in [infoCard, chatCard, movesCard])
