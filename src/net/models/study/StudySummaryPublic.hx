@@ -16,4 +16,5 @@ class StudySummaryPublic implements IJsonUnserializableMacro
 	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var created_at:DateTime;
 	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var modified_at:DateTime;
 	public var author:UserRefWithNickname;
+	public var tags:Array<StudyTagPublic>;
 }

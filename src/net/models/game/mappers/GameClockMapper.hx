@@ -12,6 +12,6 @@ class GameClockMapper
             return null;
 
         var tickingSide:Null<PieceColor> = dto.ticking_side != null ? PieceColorMapper.dtoToDatatype(dto.ticking_side) : null;
-        return new GameClock(dto.white_ms, dto.black_ms, tickingSide, dto.updated_at.getUnixMs());
+        return new GameClock(dto.white_ms, dto.black_ms, tickingSide, dto.updated_at != null ? dto.updated_at.getUnixMs() : null);
     }
 }

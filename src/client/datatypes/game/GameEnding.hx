@@ -5,14 +5,14 @@ import intellectorboard.primitives.piece.PieceColor;
 class GameEnding
 {
     public final outcome:Outcome;
-    /** Unix time, in milliseconds **/
-    public final endedAtMs:Float;
+    /** Unix time, in milliseconds; null when not recorded **/
+    public final endedAtMs:Null<Float>;
     /** Both clocks when the game ended, null for a correspondence game **/
     public final finalClock:Null<GameClock>;
     private final whiteEloDelta:Null<Int>;
     private final blackEloDelta:Null<Int>;
 
-    public function new(outcome:Outcome, endedAtMs:Float, finalClock:Null<GameClock>, whiteEloDelta:Null<Int>, blackEloDelta:Null<Int>)
+    public function new(outcome:Outcome, endedAtMs:Null<Float>, finalClock:Null<GameClock>, whiteEloDelta:Null<Int>, blackEloDelta:Null<Int>)
     {
         this.outcome = outcome;
         this.endedAtMs = endedAtMs;

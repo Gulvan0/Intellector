@@ -22,7 +22,7 @@ class OngoingGameMapper
             ownRef,
             TimeControlMapper.dtoToDatatype(dto.fischer_time_control),
             dto.rated,
-            dto.started_at.getUnixMs(),
+            dto.started_at != null ? dto.started_at.getUnixMs() : null,
             dto.latest_sip,
             dto.ply_cnt,
             lastPlyAtMs,
@@ -34,7 +34,7 @@ class OngoingGameMapper
     public static function startedToDatatype(dto:GameSummaryPublic, ownRef:String):OngoingGame
     {
         var timeControl:TimeControl = TimeControlMapper.dtoToDatatype(dto.fischer_time_control);
-        var startedAtMs:Float = dto.started_at.getUnixMs();
+        var startedAtMs:Null<Float> = dto.started_at != null ? dto.started_at.getUnixMs() : null;
         var clock:Null<GameClock> = switch timeControl {
             case None: null;
             case Fischer(instance): new GameClock(instance.startSeconds * 1000, instance.startSeconds * 1000, null, startedAtMs);
@@ -48,7 +48,7 @@ class OngoingGameMapper
         return game.updated(sipToPosition(dto.latest_sip), dto.ply_cnt, lastPlyAtMs, GameClockMapper.dtoToDatatype(dto.latest_time_update));
     }
 
-    private static function create(id:Int, whitePlayer:UserRefWithNickname, blackPlayer:UserRefWithNickname, ownRef:String, timeControl:TimeControl, rated:Bool, startedAtMs:Float, sip:String, plyCount:Int, lastPlyAtMs:Null<Float>, clock:Null<GameClock>):OngoingGame
+    private static function create(id:Int, whitePlayer:UserRefWithNickname, blackPlayer:UserRefWithNickname, ownRef:String, timeControl:TimeControl, rated:Bool, startedAtMs:Null<Float>, sip:String, plyCount:Int, lastPlyAtMs:Null<Float>, clock:Null<GameClock>):OngoingGame
     {
         var ownColor:PieceColor = whitePlayer.user_ref == ownRef ? White : Black;
         var opponent:UserRefWithNickname = ownColor == White ? blackPlayer : whitePlayer;

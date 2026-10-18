@@ -17,6 +17,7 @@ import haxefolio.menu.MenuFacade;
 import client.ui.home.HomePage;
 import client.ui.analysis.AnalysisPage;
 import client.ui.game.LiveGamePage;
+import client.ui.profile.ProfileLayoutTier;
 import client.ui.profile.ProfilePage;
 import client.ui.challenge.ChallengeJoiningPage;
 import client.ui.demo.DemoChallengeServer;
@@ -93,6 +94,9 @@ class Main
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Compact, 0)
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Medium, BoardLayoutTier.MEDIUM_MIN_WIDTH, BoardLayoutTier.fitsMedium)
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Wide, BoardLayoutTier.WIDE_MIN_WIDTH, BoardLayoutTier.fitsWide)
+            .addWidthTier(ProfileLayoutTier.SCALE, ProfileLayoutTier.Narrow, 0)
+            .addWidthTier(ProfileLayoutTier.SCALE, ProfileLayoutTier.Medium, ProfileLayoutTier.MEDIUM_MIN_WIDTH)
+            .addWidthTier(ProfileLayoutTier.SCALE, ProfileLayoutTier.Wide, ProfileLayoutTier.WIDE_MIN_WIDTH)
             .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}, shadows: StyleVars.HAXEFOLIO_SHADOWS}) // outlined: brass shares the board's hue family
             .addLocale("en", "English")
             .addLocale("ru", "Русский")

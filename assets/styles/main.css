@@ -2713,3 +2713,479 @@
     padding-top: 10px;
     vertical-spacing: 8px;
 }
+
+/*
+    Shared list controls: status dots, load placeholders, underline tabs, filter dropdowns, pagers,
+    game cards and sideways-scrolling rows.
+*/
+
+.intellector-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+}
+
+.intellector-status-dot-playing {
+    background-color: #c2412d;
+}
+
+.intellector-status-dot-online {
+    background-color: #3f7d4e;
+}
+
+.intellector-status-dot-away {
+    background-color: #c4930a;
+}
+
+.intellector-status-dot-offline {
+    background-color: transparent;
+    border: 1.5px solid #a79b8a;
+}
+
+.intellector-load-status {
+    padding-top: 24px;
+    padding-bottom: 24px;
+    vertical-spacing: 10px;
+}
+
+.intellector-load-status-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+/* tabs drawn as their captions, the selected one underlined in brass */
+.intellector-underline-tabs {
+    height: 44px;
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 18px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-underline-tabs-large {
+    height: 48px;
+    horizontal-spacing: 22px;
+}
+
+.intellector-underline-tab {
+    horizontal-spacing: 6px;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+}
+
+.intellector-underline-tab-selected {
+    border-bottom: 2px solid #8a5a1f;
+}
+
+.intellector-underline-tab-caption {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-underline-tabs-large .intellector-underline-tab-caption {
+    font-size: 17px;
+}
+
+.intellector-underline-tab:hover .intellector-underline-tab-caption,
+.intellector-underline-tab-selected .intellector-underline-tab-caption {
+    color: #2a211a;
+}
+
+.intellector-underline-tab-count {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+/* a filter facet: the button and its list of options */
+.intellector-filter-dropdown {
+    clip: false;
+}
+
+.intellector-filter-button {
+    height: 32px;
+    padding-left: 10px;
+    padding-right: 8px;
+    horizontal-spacing: 6px;
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-filter-button-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-filter-button:hover,
+.intellector-filter-button-open {
+    border-color: #bdb2a0;
+}
+
+.intellector-filter-button:hover .intellector-filter-button-text,
+.intellector-filter-button-open .intellector-filter-button-text {
+    color: #2a211a;
+}
+
+.intellector-filter-button-active {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-filter-button-active .intellector-filter-button-text,
+.intellector-filter-button-active:hover .intellector-filter-button-text {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #8a5a1f;
+}
+
+.intellector-filter-button-disabled,
+.intellector-filter-button-disabled:hover {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    cursor: default;
+}
+
+.intellector-filter-button-disabled .intellector-filter-button-text,
+.intellector-filter-button-disabled:hover .intellector-filter-button-text {
+    color: #a79b8a;
+}
+
+.intellector-filter-popup {
+    margin-top: 4px;
+    padding: 8px;
+    vertical-spacing: 0;
+    background-color: #fffefb;
+    border: 1px solid #bdb2a0;
+    border-radius: 9px;
+}
+
+.intellector-filter-popup-hint {
+    padding-top: 2px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+}
+
+.intellector-filter-option {
+    height: 37px;
+    padding-left: 6px;
+    padding-right: 6px;
+    horizontal-spacing: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.intellector-filter-option:hover {
+    background-color: #f0ebe2;
+}
+
+.intellector-filter-option-caption {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-filter-option-count {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-filter-option-disabled,
+.intellector-filter-option-disabled:hover {
+    background-color: transparent;
+    cursor: default;
+}
+
+.intellector-filter-option-disabled .intellector-filter-option-caption,
+.intellector-filter-option-disabled .intellector-filter-option-count {
+    color: #a79b8a;
+}
+
+.intellector-filter-option-disabled .image {
+    opacity: 0.45;
+}
+
+.intellector-filter-checkbox,
+.intellector-filter-radio {
+    width: 16px;
+    height: 16px;
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+}
+
+.intellector-filter-checkbox {
+    border-radius: 4px;
+}
+
+.intellector-filter-radio {
+    border-radius: 8px;
+}
+
+.intellector-filter-checkbox .image {
+    opacity: 0;
+}
+
+.intellector-filter-option-disabled .intellector-filter-checkbox,
+.intellector-filter-option-disabled .intellector-filter-radio {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+}
+
+.intellector-filter-box-on {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-filter-checkbox.intellector-filter-box-on .image {
+    opacity: 1;
+}
+
+.intellector-filter-radio-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: transparent;
+}
+
+.intellector-filter-box-on .intellector-filter-radio-dot {
+    background-color: #8a5a1f;
+}
+
+/* a small outlined button beside the facets: Reset, Add, Clear */
+.intellector-filter-reset {
+    height: 32px;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    color: #6d6152;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.intellector-filter-reset:hover {
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+.intellector-filter-reset:down {
+    background-color: #f0ebe2;
+    border-color: #bdb2a0;
+    color: #2a211a;
+}
+
+.intellector-filter-reset:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+    cursor: default;
+}
+
+/* numbered pages */
+.intellector-pager {
+    padding-top: 12px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 6px;
+    horizontal-spacing: 10px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-pager-controls {
+    horizontal-spacing: 10px;
+}
+
+.intellector-pager-text {
+    height: 37px;
+    padding-top: 10px;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-pager-button {
+    width: 37px;
+    height: 37px;
+    padding: 0;
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.intellector-pager-button:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-pager-button:down {
+    background-color: #f0ebe2;
+    border-color: #bdb2a0;
+}
+
+.intellector-pager-button:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    cursor: default;
+}
+
+.intellector-pager-button:disabled .icon {
+    opacity: 0.45;
+}
+
+/* as wide as the field: the message under it is centred and may stick out on both sides without moving the field */
+.intellector-pager-field-column {
+    width: 52px;
+    vertical-spacing: 2px;
+}
+
+.intellector-pager-field {
+    width: 52px;
+    height: 37px;
+    padding-left: 6px;
+    padding-right: 6px;
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+    border-radius: 4px;
+    color: #2a211a;
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    text-align: center;
+}
+
+.intellector-pager-field:active {
+    border-color: #c79a56;
+}
+
+.intellector-pager-field-invalid,
+.intellector-pager-field-invalid:active {
+    border-color: #b8462c;
+}
+
+.intellector-pager-message {
+    height: 16px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-pager-message-invalid {
+    color: #9e2f1c;
+}
+
+/* a game or study as a card: position on the left, facts on the right */
+.intellector-game-record-card {
+    height: 138px;
+    padding: 12px;
+    horizontal-spacing: 14px;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.intellector-game-record-card:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-game-record-card-column {
+    vertical-spacing: 5px;
+}
+
+.intellector-game-record-line {
+    height: 20px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-game-record-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-game-record-muted {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-record-mono {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-game-record-rating {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-record-winner {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+.intellector-game-record-white-dot,
+.intellector-game-record-black-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    border: 1px solid #2a211a;
+}
+
+.intellector-game-record-white-dot {
+    background-color: #ffffff;
+}
+
+.intellector-game-record-black-dot {
+    background-color: #2a211a;
+}
+
+.intellector-game-record-status {
+    height: 18px;
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-game-record-detail {
+    height: 16px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+/* a one-line row scrolled sideways by dragging */
+.intellector-drag-scroll-row {
+    height: 24px;
+}
+
+.intellector-drag-scroll-row-content {
+    horizontal-spacing: 5px;
+}

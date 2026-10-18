@@ -6,7 +6,6 @@ import client.datatypes.game.Outcome;
 import client.datatypes.game.PlayerRating;
 import client.datatypes.timecontrol.TimeControl;
 import client.openings.OpeningEntry;
-import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
 import intellectorboard.primitives.piece.PieceColor;
 
@@ -18,6 +17,12 @@ class GameFormatters
         if (rating == null)
             return "";
         return rating.provisional ? '(${rating.elo}?)' : '(${rating.elo})';
+    }
+
+    /** `1624`, or `1200?` while provisional **/
+    public static function bareRating(rating:PlayerRating):String
+    {
+        return rating.provisional ? '${rating.elo}?' : Std.string(rating.elo);
     }
 
     /** `+12`, `-8` or `±0` **/
@@ -46,15 +51,21 @@ class GameFormatters
         return DateTools.format(Date.fromTime(unixMs), "%d.%m.%Y %H:%M:%S");
     }
 
-    /** Whether the game is rated, then when it started: `Rated · dd.mm.yyyy hh:mm:ss` **/
-    public static function ratedAndStart(rated:Bool, startedAtMs:Float):String
+    /** `dateTime`, or a locale binding saying the date is unknown when `unixMs` is null **/
+    public static function optionalDateTime(unixMs:Null<Float>):String
     {
-        return '${LocaleUtils.resolveText(GroupedLocaleResolvers.challengeRated(rated))} · ${dateTime(startedAtMs)}';
+        return unixMs != null ? dateTime(unixMs) : LocaleUtils.localeBinding("intellector.common.date_unknown");
+    }
+
+    /** Whether the game is rated, then when it started: `Rated · dd.mm.yyyy hh:mm:ss`; the start is null when not recorded **/
+    public static function ratedAndStart(rated:Bool, startedAtMs:Null<Float>):String
+    {
+        return '${LocaleUtils.resolveText(GroupedLocaleResolvers.challengeRated(rated))} · ${LocaleUtils.resolveText(optionalDateTime(startedAtMs))}';
     }
 
     /**
         The opening line's text for the current language, null when there's no line: no known
-        opening reached yet. A game from a custom position says so instead.
+        opening reached yet. Opening names stay in English. A game from a custom position says so instead.
     **/
     public static function opening(opening:Null<OpeningEntry>, customStartingPosition:Bool):Null<Void->String>
     {
@@ -62,7 +73,7 @@ class GameFormatters
             return () -> resolve("intellector.common.custom_starting_position");
         if (opening == null)
             return null;
-        return () -> LocaleManager.instance.language == "ru" ? opening.name_ru : opening.name_en;
+        return () -> opening.name;
     }
 
     /** The resolution line: in progress, or how the game ended **/
@@ -90,7 +101,8 @@ class GameFormatters
         return LocaleUtils.resolveText(LocaleUtils.localeBinding(key));
     }
 
-    private static function snakeCase(name:String):String
+    /** `CheatingAbort` → `cheating_abort` **/
+    public static function snakeCase(name:String):String
     {
         var result:String = "";
         for (i in 0...name.length)

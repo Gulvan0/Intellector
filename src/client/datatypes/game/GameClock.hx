@@ -8,10 +8,10 @@ class GameClock
     public final whiteMs:Int;
     public final blackMs:Int;
     public final tickingSide:Null<PieceColor>;
-    /** Unix time, in milliseconds **/
-    public final updatedAtMs:Float;
+    /** Unix time, in milliseconds; null when not recorded, which only happens with neither clock running **/
+    public final updatedAtMs:Null<Float>;
 
-    public function new(whiteMs:Int, blackMs:Int, tickingSide:Null<PieceColor>, updatedAtMs:Float)
+    public function new(whiteMs:Int, blackMs:Int, tickingSide:Null<PieceColor>, updatedAtMs:Null<Float>)
     {
         this.whiteMs = whiteMs;
         this.blackMs = blackMs;
@@ -45,7 +45,7 @@ class GameClock
     public function remainingMs(color:PieceColor, nowMs:Float):Float
     {
         var storedMs:Float = color == White ? whiteMs : blackMs;
-        if (color == tickingSide)
+        if (color == tickingSide && updatedAtMs != null)
             storedMs -= nowMs - updatedAtMs;
         return Math.max(0, storedMs);
     }

@@ -22,6 +22,17 @@ class Assets
         return 'assets/images/common/piece_color_indicators/$name.svg';
     }
 
+    /** An icon of the shared controls: dropdowns, checkboxes, pagers **/
+    public static function controlIcon(name:String):String
+    {
+        return 'assets/images/common/controls/$name.svg';
+    }
+
+    public static function profileIcon(name:String):String
+    {
+        return 'assets/images/profile/$name.svg';
+    }
+
     public static function analysisIcon(name:String):String
     {
         return 'assets/images/analysis/$name.svg';

@@ -28,6 +28,10 @@ class StyleVars
     public static final CHALLENGE_ROW_SHADOW:Shadow = {offsetX: 0, offsetY: 2, blur: 10, color: SHADOW_COLOR, opacity: 0.08};
     public static final CHALLENGE_PREVIEW_SHADOW:Shadow = {offsetX: 0, offsetY: 8, blur: 28, color: SHADOW_COLOR, opacity: 0.16};
 
+    public static final FILTER_POPUP_SHADOW:Shadow = {offsetX: 0, offsetY: 4, blur: 14, color: SHADOW_COLOR, opacity: 0.12};
+    public static inline final RATING_CHART_GRID:String = "#e6dfd3"; // divider
+    public static inline final RATING_CHART_LINE:String = "#8a5a1f"; // accent
+
     public static inline final GAMES_DROPDOWN_WIDTH:Int = 372;
     public static inline final GAMES_ICON_HEXAGONS:String = "#bdb2a0";
     public static inline final GAMES_ICON_PIECE:String = "#2a211a";

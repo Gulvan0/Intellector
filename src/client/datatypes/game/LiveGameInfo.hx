@@ -13,13 +13,13 @@ class LiveGameInfo
     public final timeControl:TimeControl;
     public final rated:Bool;
     /** Unix time, in milliseconds **/
-    public final startedAtMs:Float;
+    public final startedAtMs:Null<Float>;
     public final startingPosition:Position;
     public final customStartingPosition:Bool;
     /** Uploaded by an external client rather than played on the site **/
     public final external:Bool;
 
-    public function new(id:Int, white:GameParticipant, black:GameParticipant, timeControl:TimeControl, rated:Bool, startedAtMs:Float, startingPosition:Position, customStartingPosition:Bool, external:Bool)
+    public function new(id:Int, white:GameParticipant, black:GameParticipant, timeControl:TimeControl, rated:Bool, startedAtMs:Null<Float>, startingPosition:Position, customStartingPosition:Bool, external:Bool)
     {
         this.id = id;
         this.white = white;

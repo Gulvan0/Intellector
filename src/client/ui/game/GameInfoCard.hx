@@ -109,7 +109,7 @@ class GameInfoCard extends VBox
         timeControlIcon.resource = kindIconPath;
         LocaleManager.instance.registerComponent(timeControlLabel, "text", () -> GameFormatters.timeControl(info.timeControl));
         ratedLabel.text = GroupedLocaleResolvers.challengeRated(info.rated);
-        startedAtLabel.text = GameFormatters.dateTime(info.startedAtMs);
+        startedAtLabel.text = GameFormatters.optionalDateTime(info.startedAtMs);
 
         fillPlayerRow(whiteRow, info.white);
         fillPlayerRow(blackRow, info.black);

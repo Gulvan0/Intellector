@@ -12,16 +12,16 @@ class OngoingGame
     public final ownColor:PieceColor;
     public final timeControl:TimeControl;
     public final rated:Bool;
-    /** Unix time, in milliseconds **/
-    public final startedAtMs:Float;
+    /** Unix time, in milliseconds; null when not recorded **/
+    public final startedAtMs:Null<Float>;
     public final position:Position;
     public final plyCount:Int;
-    /** Unix time of the latest move in milliseconds, or null before the first one **/
+    /** Unix time of the latest move in milliseconds, null before the first one or when not recorded **/
     public final lastPlyAtMs:Null<Float>;
     /** Null for a correspondence game **/
     public final clock:Null<GameClock>;
 
-    public function new(id:Int, opponentNickname:String, ownColor:PieceColor, timeControl:TimeControl, rated:Bool, startedAtMs:Float, position:Position, plyCount:Int, lastPlyAtMs:Null<Float>, clock:Null<GameClock>)
+    public function new(id:Int, opponentNickname:String, ownColor:PieceColor, timeControl:TimeControl, rated:Bool, startedAtMs:Null<Float>, position:Position, plyCount:Int, lastPlyAtMs:Null<Float>, clock:Null<GameClock>)
     {
         this.id = id;
         this.opponentNickname = opponentNickname;
@@ -51,10 +51,10 @@ class OngoingGame
         return plyCount + 1;
     }
 
-    /** Unix time in milliseconds since which the side to move has been thinking **/
-    public function waitingSinceMs():Float
+    /** Unix time in milliseconds since which the side to move has been thinking, null when not recorded **/
+    public function waitingSinceMs():Null<Float>
     {
-        return lastPlyAtMs ?? startedAtMs;
+        return plyCount > 0 ? lastPlyAtMs : startedAtMs;
     }
 
     /** A copy with the state after a move, a rollback or time being added **/

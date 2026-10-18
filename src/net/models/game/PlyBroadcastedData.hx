@@ -7,7 +7,7 @@ import net.models.common.PieceKind;
 
 class PlyBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var occurred_at:DateTime;
+	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
 	public var event_index:Int;
 	public var ply_index:Int;
 	public var from_i:Int;

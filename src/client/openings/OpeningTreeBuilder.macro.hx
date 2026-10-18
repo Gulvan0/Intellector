@@ -18,9 +18,8 @@ class OpeningTreeBuilder
             var entry:Dynamic = Reflect.field(raw, sip);
             var code:String = Reflect.field(entry, "code");
             var prefix:String = code != "" ? code + ". " : "";
-            var name_ru:String = prefix + Reflect.field(entry, "name_ru");
-            var name_en:String = prefix + Reflect.field(entry, "name_en");
-            map.push(macro $v{sip} => new client.openings.OpeningEntry($v{name_ru}, $v{name_en}));
+            var name:String = prefix + Reflect.field(entry, "name_en");
+            map.push(macro $v{sip} => new client.openings.OpeningEntry($v{name}));
         }
 
         fields.push({

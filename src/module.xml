@@ -26,6 +26,7 @@
             <var name="site-name-family" value="intellector/fonts/MontserratAlternates-Medium.woff2" />
 
             <style resource="intellector/styles/main.css" priority="10" />
+            <style resource="intellector/styles/profile.css" priority="10" />
         </default>
     </themes>
 </module>

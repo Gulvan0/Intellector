@@ -8,7 +8,7 @@ import net.models.common.TimeControlKind;
 
 class GameStartedBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var started_at:DateTime;
+	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var started_at:Null<DateTime>;
 	public var time_control_kind:TimeControlKind;
 	public var rated:Bool;
 	@:default(null) public var custom_starting_sip:Null<String>;

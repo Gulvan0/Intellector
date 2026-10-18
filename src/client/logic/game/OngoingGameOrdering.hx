@@ -11,10 +11,10 @@ class OngoingGameOrdering
         return ordered(games, game -> game.clock != null ? game.clock.remainingMs(game.ownColor, nowMs) : 0);
     }
 
-    /** Correspondence games, the one waiting the longest at the top of each group **/
+    /** Correspondence games, the one waiting the longest at the top of each group; an unrecorded wait counts as the longest **/
     public static function correspondence(games:Array<OngoingGame>):Array<OngoingGame>
     {
-        return ordered(games, game -> game.waitingSinceMs());
+        return ordered(games, game -> game.waitingSinceMs() ?? Math.NEGATIVE_INFINITY);
     }
 
     private static function ordered(games:Array<OngoingGame>, key:OngoingGame->Float):Array<OngoingGame>

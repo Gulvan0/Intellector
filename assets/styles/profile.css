@@ -1,0 +1,653 @@
+/*
+    Player profile page. Wide: the header, then the games with the aside to their right. Medium and
+    narrow: the aside above the games, its cards collapsed into bars.
+*/
+
+.intellector-profile-frame {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 26px;
+    vertical-spacing: 18px;
+}
+
+.intellector-profile-columns {
+    horizontal-spacing: 18px;
+}
+
+.intellector-profile-column {
+    vertical-spacing: 18px;
+}
+
+.intellector-profile-card {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-profile-section {
+    vertical-spacing: 0;
+}
+
+.intellector-profile-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-profile-muted {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-profile-small-text {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-profile-small-muted {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-profile-mono {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+/* header */
+.intellector-profile-header {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 18px;
+}
+
+.intellector-profile-header-content {
+    horizontal-spacing: 22px;
+    vertical-spacing: 14px;
+}
+
+.intellector-profile-header-identity {
+    vertical-spacing: 6px;
+}
+
+.intellector-profile-header-name-row {
+    horizontal-spacing: 14px;
+}
+
+.intellector-profile-header-row {
+    horizontal-spacing: 6px;
+}
+
+.intellector-profile-nickname {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-profile-title {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a5a1f;
+    word-wrap: false;
+}
+
+.intellector-profile-header-actions {
+    vertical-spacing: 3px;
+}
+
+.intellector-profile-header-buttons {
+    horizontal-spacing: 10px;
+}
+
+.intellector-profile-action-button,
+.haxefolio-tier-board-compact .intellector-profile-action-button {
+    height: 37px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 8px;
+}
+
+.haxefolio-tier-profile-narrow .intellector-profile-action-button {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.intellector-profile-header-hint {
+    height: 16px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+/* tabs, filter rows and panels of the games cards */
+.intellector-profile-filter-row {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 8px;
+    vertical-spacing: 6px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-profile-ongoing-panel {
+    padding-top: 14px;
+    padding-left: 14px;
+    padding-right: 14px;
+    background-color: #f0ebe2;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+.intellector-profile-card-grid {
+    vertical-spacing: 14px;
+    padding-bottom: 14px;
+}
+
+.intellector-profile-card-row {
+    horizontal-spacing: 14px;
+}
+
+.intellector-profile-archive-area {
+    height: 1150px;
+}
+
+.intellector-profile-study-panel {
+    padding: 14px;
+    background-color: #f0ebe2;
+}
+
+/* past games table */
+.intellector-past-games-table {
+    vertical-spacing: 0;
+}
+
+.intellector-past-games-header {
+    height: 30px;
+    padding-left: 12px;
+    padding-right: 22px;
+    horizontal-spacing: 12px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-past-games-heading {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-past-games-rows {
+    vertical-spacing: 0;
+}
+
+.intellector-past-games-row {
+    height: 112px;
+    padding-left: 12px;
+    padding-right: 22px;
+    horizontal-spacing: 12px;
+    border-bottom: 1px solid #e6dfd3;
+    cursor: pointer;
+}
+
+.intellector-past-games-row:hover {
+    background-color: #f0ebe2;
+}
+
+.intellector-past-games-date-cell {
+    width: 76px;
+}
+
+.intellector-past-games-time-control-cell,
+.intellector-past-games-type-cell {
+    width: 84px;
+}
+
+.intellector-past-games-stack-cell {
+    width: 104px;
+}
+
+.intellector-past-games-result-cell {
+    width: 165px;
+}
+
+.intellector-past-games-narrow-result-cell {
+    width: 140px;
+}
+
+.intellector-past-games-date,
+.intellector-past-games-players,
+.intellector-past-games-result {
+    vertical-spacing: 2px;
+}
+
+.intellector-past-games-players .intellector-game-record-line {
+    height: 18px;
+}
+
+.intellector-past-games-time-control {
+    horizontal-spacing: 6px;
+}
+
+.intellector-past-games-stack {
+    vertical-spacing: 3px;
+}
+
+.intellector-past-games-mobile-column {
+    vertical-spacing: 4px;
+}
+
+.intellector-past-games-outcome {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+/* studies */
+.intellector-study-card-name {
+    height: 20px;
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-study-card-description {
+    height: 51px;
+    clip: true;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: true;
+}
+
+.intellector-study-tag {
+    height: 24px;
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    color: #6d6152;
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.intellector-study-tag:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-study-tag-selected,
+.intellector-study-tag-selected:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+    color: #8a5a1f;
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+.intellector-study-tag-field {
+    width: 160px;
+    height: 32px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+    border-radius: 4px;
+    color: #2a211a;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+}
+
+.intellector-study-tag-field:active {
+    border-color: #c79a56;
+}
+
+.intellector-study-tag-field:empty {
+    color: #a79b8a;
+}
+
+.intellector-study-token {
+    height: 32px;
+    padding-left: 10px;
+    padding-right: 2px;
+    horizontal-spacing: 4px;
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    border-radius: 5px;
+}
+
+.intellector-study-token-text {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a5a1f;
+    word-wrap: false;
+}
+
+.intellector-study-token-remove {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* aside cards: titled in a column, collapsible bars above the games */
+.intellector-profile-aside-card {
+    vertical-spacing: 0;
+}
+
+.intellector-profile-card-title {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 4px;
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-profile-aside-toggle {
+    height: 44px;
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 10px;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.intellector-profile-aside-toggle:hover {
+    background-color: #f0ebe2;
+}
+
+.intellector-profile-aside-toggle-text {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-profile-aside-body {
+    vertical-spacing: 0;
+}
+
+/* connections */
+.intellector-profile-connections-frame {
+    height: 264px;
+}
+
+.intellector-profile-connections-list {
+    vertical-spacing: 0;
+}
+
+.intellector-profile-connection-row {
+    height: 44px;
+    padding-left: 22px;
+    padding-right: 12px;
+    horizontal-spacing: 10px;
+    border-bottom: 1px solid #e6dfd3;
+    cursor: pointer;
+}
+
+.intellector-profile-connection-row:hover {
+    background-color: #f0ebe2;
+}
+
+.intellector-profile-connection-rating {
+    width: 40px;
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    text-align: right;
+    word-wrap: false;
+}
+
+/* game stats */
+.intellector-profile-stats-body {
+    padding-top: 10px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 18px;
+}
+
+.intellector-profile-stats-table {
+    vertical-spacing: 2px;
+}
+
+.intellector-profile-stats-header {
+    padding-left: 11px;
+    padding-right: 11px;
+    padding-bottom: 4px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-profile-stats-games-group {
+    vertical-spacing: 0;
+}
+
+.intellector-profile-stats-columns {
+    horizontal-spacing: 6px;
+}
+
+.intellector-profile-stats-heading {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    text-align: center;
+    word-wrap: false;
+}
+
+.intellector-profile-stats-games-heading {
+    padding-bottom: 3px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-profile-stats-columns .intellector-profile-stats-heading {
+    padding-top: 3px;
+}
+
+.intellector-profile-stats-total-cell {
+    width: 36px;
+}
+
+.intellector-profile-stats-rated-cell {
+    width: 48px;
+}
+
+.intellector-profile-stats-rating-cell {
+    width: 40px;
+}
+
+.intellector-profile-stats-row {
+    height: 37px;
+    padding-left: 10px;
+    padding-right: 10px;
+    horizontal-spacing: 6px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-profile-stats-row:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-profile-stats-row-selected,
+.intellector-profile-stats-row-selected:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-profile-stats-row-disabled,
+.intellector-profile-stats-row-disabled:hover {
+    border-color: transparent;
+    cursor: default;
+}
+
+.intellector-profile-stats-name-cell {
+    horizontal-spacing: 8px;
+}
+
+.intellector-profile-stats-name {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-profile-stats-row-selected .intellector-profile-stats-name {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #8a5a1f;
+}
+
+.intellector-profile-stats-count {
+    font-name: $mono-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    text-align: center;
+    word-wrap: false;
+}
+
+.intellector-profile-stats-rating {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    text-align: center;
+    word-wrap: false;
+}
+
+.intellector-profile-stats-row-disabled .intellector-profile-stats-name,
+.intellector-profile-stats-row-disabled .intellector-profile-stats-count,
+.intellector-profile-stats-row-disabled .intellector-profile-stats-rating {
+    color: #a79b8a;
+}
+
+.intellector-profile-stats-row-disabled .image {
+    opacity: 0.45;
+}
+
+.intellector-profile-stats-no-games {
+    height: 37px;
+    padding-top: 10px;
+}
+
+.intellector-profile-stats-note {
+    margin-top: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: #f0ebe2;
+    border-radius: 5px;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: true;
+}
+
+.intellector-profile-stats-chart {
+    margin-top: 14px;
+    vertical-spacing: 6px;
+}
+
+.intellector-profile-stats-chart-head {
+    height: 18px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-profile-stats-chart-status {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+/* rating history chart */
+.intellector-rating-chart {
+    horizontal-spacing: 6px;
+}
+
+.intellector-rating-chart-column {
+    vertical-spacing: 0;
+}
+
+.intellector-rating-chart-layer {
+    clip: false;
+}
+
+.intellector-rating-chart-tick {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    text-align: right;
+    word-wrap: false;
+}
+
+.intellector-rating-chart-dates {
+    height: 18px;
+}
+
+.intellector-rating-chart-date {
+    padding-top: 4px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-rating-chart-date-start {
+    text-align: left;
+}
+
+.intellector-rating-chart-date-middle {
+    text-align: center;
+}
+
+.intellector-rating-chart-date-end {
+    text-align: right;
+}
+
+.intellector-rating-chart-hover-line {
+    width: 1px;
+    background-color: #bdb2a0;
+}
+
+.intellector-rating-chart-marker {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #8a5a1f;
+    border: 2px solid #faf7f2;
+}
+
+.intellector-rating-chart-tooltip {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    vertical-spacing: 2px;
+    background-color: #fffefb;
+    border: 1px solid #bdb2a0;
+    border-radius: 9px;
+}

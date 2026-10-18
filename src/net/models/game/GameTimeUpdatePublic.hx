@@ -6,7 +6,7 @@ import morestd.DateTime;
 
 class GameTimeUpdatePublic
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var updated_at:DateTime;
+	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var updated_at:Null<DateTime>;
 	public var white_ms:Int;
 	public var black_ms:Int;
 	@:default(null) public var ticking_side:Null<PieceColor>;

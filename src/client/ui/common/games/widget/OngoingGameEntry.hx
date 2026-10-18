@@ -100,7 +100,7 @@ class OngoingGameEntry extends VBox
         var clock:Null<GameClock> = game.clock;
         if (clock == null)
         {
-            lastMoveLabel.text = OngoingGameFormatters.lastMoveAgo(nowMs - game.waitingSinceMs());
+            lastMoveLabel.text = OngoingGameFormatters.lastMoveAgo(OngoingGameFormatters.elapsedSince(game.waitingSinceMs(), nowMs));
             return;
         }
 

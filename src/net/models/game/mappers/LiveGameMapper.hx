@@ -30,7 +30,7 @@ class LiveGameMapper
             participantToDatatype(dto.black_player, dto.black_rating),
             TimeControlMapper.dtoToDatatype(dto.fischer_time_control),
             dto.rated,
-            dto.started_at.getUnixMs(),
+            dto.started_at != null ? dto.started_at.getUnixMs() : null,
             startingPosition,
             startingSip != null,
             dto.external_uploader_ref != null
@@ -85,7 +85,7 @@ class LiveGameMapper
             return null;
 
         var outcome:Outcome = outcomeKindToDatatype(dto.kind, dto.winner);
-        return new GameEnding(outcome, dto.game_ended_at.getUnixMs(), GameClockMapper.dtoToDatatype(dto.time_update), dto.white_elo_delta, dto.black_elo_delta);
+        return new GameEnding(outcome, dto.game_ended_at != null ? dto.game_ended_at.getUnixMs() : null, GameClockMapper.dtoToDatatype(dto.time_update), dto.white_elo_delta, dto.black_elo_delta);
     }
 
     public static function endedToDatatype(dto:GameEndedBroadcastedData):GameEnding
@@ -93,7 +93,7 @@ class LiveGameMapper
         var outcome:Outcome = outcomeKindToDatatype(dto.kind, dto.winner);
         var whiteDelta:Null<Int> = dto.elo != null ? dto.elo.white.delta : null;
         var blackDelta:Null<Int> = dto.elo != null ? dto.elo.black.delta : null;
-        return new GameEnding(outcome, dto.game_ended_at.getUnixMs(), GameClockMapper.dtoToDatatype(dto.time_update), whiteDelta, blackDelta);
+        return new GameEnding(outcome, dto.game_ended_at != null ? dto.game_ended_at.getUnixMs() : null, GameClockMapper.dtoToDatatype(dto.time_update), whiteDelta, blackDelta);
     }
 
     public static function plyToDto(gameId:Int, ply:RawPly):InternalGameAppendPlyPayload

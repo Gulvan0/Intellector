@@ -98,11 +98,17 @@ class SpecialParsers
 		}
 	}
 
+	private static function getOptionalDate(eventKind:String, eventIndex:Int, fields:Map<String, JsonValue>, key:String):Null<DateTime>
+	{
+		var iso:Null<String> = getString(eventKind, eventIndex, fields, key, false);
+		return iso != null ? DateTime.fromIso(iso) : null;
+	}
+
 	public static function parsePlyEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
 		var rawTimeUpdate:Null<JsonValue> = fields.get("time_update");
 		return Ply(
-			DateTime.fromIso(getString("ply", eventIndex, fields, "occurred_at")),
+			getOptionalDate("ply", eventIndex, fields, "occurred_at"),
 			getInt("ply", eventIndex, fields, "event_index"),
 			getInt("ply", eventIndex, fields, "ply_index"),
 			new HexCoords(getInt("ply", eventIndex, fields, "from_i"), getInt("ply", eventIndex, fields, "from_j")),
@@ -116,7 +122,7 @@ class SpecialParsers
 	public static function parseChatMessageEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
 		return ChatMessage(
-			DateTime.fromIso(getString("chat_message", eventIndex, fields, "occurred_at")),
+			getOptionalDate("chat_message", eventIndex, fields, "occurred_at"),
 			getInt("chat_message", eventIndex, fields, "event_index"),
 			getString("chat_message", eventIndex, fields, "text"),
 			getBool("chat_message", eventIndex, fields, "spectator"),
@@ -127,7 +133,7 @@ class SpecialParsers
 	public static function parseOfferEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
 		return Offer(
-			DateTime.fromIso(getString("offer", eventIndex, fields, "occurred_at")),
+			getOptionalDate("offer", eventIndex, fields, "occurred_at"),
 			getInt("offer", eventIndex, fields, "event_index"),
 			getString("offer", eventIndex, fields, "action"),
 			getString("offer", eventIndex, fields, "offer_kind"),
@@ -138,7 +144,7 @@ class SpecialParsers
 	public static function parseTimeAddedEvent(fields:Map<String, JsonValue>, eventIndex:Int):GameEvent
 	{
 		return TimeAdded(
-			DateTime.fromIso(getString("time_added", eventIndex, fields, "occurred_at")),
+			getOptionalDate("time_added", eventIndex, fields, "occurred_at"),
 			getInt("time_added", eventIndex, fields, "event_index"),
 			getInt("time_added", eventIndex, fields, "amount_seconds"),
 			getString("time_added", eventIndex, fields, "receiver"),
@@ -150,7 +156,7 @@ class SpecialParsers
 	{
 		var rawTimeUpdate:Null<JsonValue> = fields.get("time_update");
 		return Rollback(
-			DateTime.fromIso(getString("rollback", eventIndex, fields, "occurred_at")),
+			getOptionalDate("rollback", eventIndex, fields, "occurred_at"),
 			getInt("rollback", eventIndex, fields, "event_index"),
 			getInt("rollback", eventIndex, fields, "ply_cnt_before"),
 			getInt("rollback", eventIndex, fields, "ply_cnt_after"),
