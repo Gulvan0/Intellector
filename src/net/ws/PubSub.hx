@@ -27,4 +27,16 @@ class PubSub
     {
         return _engine.sub(channel);
     }
+
+    /** Subscribes to every channel in a single message **/
+    public static function subMany<T:IChannel>(channels:Array<T>):Array<Subscription<T>>
+    {
+        return _engine.subMany(channels);
+    }
+
+    /** Detaches every subscription in a single message **/
+    public static function unsubMany<T:IChannel>(subscriptions:Array<Subscription<T>>):Void
+    {
+        _engine.unsubMany(subscriptions);
+    }
 }

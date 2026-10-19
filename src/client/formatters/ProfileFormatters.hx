@@ -8,7 +8,8 @@ import haxefolio.LocaleUtils;
 
 class ProfileFormatters
 {
-    private static inline final HOUR_MS:Float = 60 * 60 * 1000;
+    private static inline final MINUTE_MS:Float = 60 * 1000;
+    private static inline final HOUR_MS:Float = 60 * MINUTE_MS;
     private static inline final DAY_MS:Float = 24 * HOUR_MS;
     private static inline final MONTH_DAYS:Float = 30.44;
     private static inline final YEAR_DAYS:Float = 365.25;
@@ -48,9 +49,10 @@ class ProfileFormatters
         return DateTools.format(Date.fromTime(unixMs), "%H:%M");
     }
 
-    /** `2 years ago`, in the largest whole unit from years down to hours **/
+    /** `2 years ago`, in the largest whole unit from years down to minutes; `just now` under a minute **/
     public static function ago(elapsedMs:Float):String
     {
+        var minutes:Int = Math.floor(elapsedMs / MINUTE_MS);
         var hours:Int = Math.floor(elapsedMs / HOUR_MS);
         var days:Int = Math.floor(elapsedMs / DAY_MS);
         var months:Int = Math.floor(days / MONTH_DAYS);
@@ -62,7 +64,11 @@ class ProfileFormatters
             return counted("intellector.common.ago.months", months);
         if (days >= 1)
             return counted("intellector.common.ago.days", days);
-        return counted("intellector.common.ago.hours", Std.int(Math.max(hours, 1)));
+        if (hours >= 1)
+            return counted("intellector.common.ago.hours", hours);
+        if (minutes >= 1)
+            return counted("intellector.common.ago.minutes", minutes);
+        return resolve("intellector.common.ago.just_now");
     }
 
     /** `Joined 12 March 2024 (2 years ago)` **/

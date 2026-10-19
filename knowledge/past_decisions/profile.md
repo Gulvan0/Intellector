@@ -9,9 +9,10 @@ canvas. Deferred: `[[profile_deferred]]`.
 
 1. **Four statuses**: playing, online, away, offline. 10 px dots: playing `#c2412d`, online
    `#3f7d4e`, away `#c4930a` (filled), offline a 1.5 px `#a79b8a` ring. Labels: Playing now / Online /
-   Away / Offline (Играет / В сети / Нет на месте / Не в сети). Status is read when the data loads;
-   it does not update live. An offline player's status is followed by "Last seen 5 hours ago"
-   (Был в сети …), from the profile's `last_active_unixsecs`; the status line wraps when it doesn't fit.
+   Away / Offline (Играет / В сети / Нет на месте / Не в сети). Status updates live over the
+   per-player `PlayerStatus(watched_ref=login)` channels, which the server checks every 5 s; a list of
+   players subscribes in one `sub_many`. An offline player's status is followed by "Last seen 5 hours
+   ago" (Был в сети …), from `last_active_unixsecs`; the status line wraps when it doesn't fit.
 2. **Playing** (server): the player's WS activity is ONLINE (not AWAY) and they play an ongoing game
    that isn't correspondence.
 3. **Title** = the localized `main_role` (Administrator / Anaconda developer). No role: no line.
@@ -24,7 +25,8 @@ canvas. Deferred: `[[profile_deferred]]`.
    loads. The own profile shows no buttons and no relation line.
 7. **Connections** entries: status dot, nickname, main rating with its kind icon; a player with no
    rating shows only status and nickname. Sorted by status (playing, online, away, offline), then
-   nickname. Clicking navigates to `player/<login>`.
+   nickname; a live status change only updates the dot, the order catches up on the next render
+   (tab switch, reload). Clicking navigates to `player/<login>`.
 8. **Nicknames** are shown everywhere the design says "login"; logins are used in routes and requests.
 9. **Ongoing games** come from the `PlayerOngoingGames(watched_ref=login)` channel (refresh plus
    started/updated/ended events), filtered client-side. Opens on Correspondence when there is no live

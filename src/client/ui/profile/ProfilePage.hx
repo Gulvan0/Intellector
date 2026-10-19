@@ -3,12 +3,15 @@ package client.ui.profile;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
 import client.datatypes.game.GameRecord;
+import client.datatypes.player.ConnectionKind;
+import client.datatypes.player.Connections;
 import client.datatypes.player.GameStats;
 import client.datatypes.player.PlayerRelation;
 import client.datatypes.study.StudySummary;
 import client.datatypes.timecontrol.TimeControlKind;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.login.LoginOverlay;
+import client.utils.PlayerStatusFeed;
 import client.utils.TimedLoad;
 import easypubsub.Subscription;
 import haxe.Timer;
@@ -38,7 +41,8 @@ import net.ws.events.PlayerOngoingGamesRefresh;
 /**
     A player's profile. Each card loads on its own: the header (profile, main rating, relation), the
     ongoing games (followed live over the player's ongoing games channel), past games and studies,
-    connections, and game stats with the rating history of the picked kind.
+    connections, and game stats with the rating history of the picked kind. The statuses of the
+    player and their connections are followed live.
 **/
 class ProfilePage extends PageBase
 {
@@ -65,6 +69,8 @@ class ProfilePage extends PageBase
     private var ongoingSubscription:Null<Subscription<PlayerOngoingGames>> = null;
     private var ongoingGames:Null<Array<GameRecord>> = null;
     private var ongoingTimer:Null<Timer> = null;
+    private var statusFeed:Null<PlayerStatusFeed> = null;
+    private var connectionStatusFeed:Null<PlayerStatusFeed> = null;
     private var timeRefreshTimer:Null<Timer> = null;
     private var tierHandle:Null<Detachable> = null;
     private var friendRequestPending:Bool = false;
@@ -102,13 +108,17 @@ class ProfilePage extends PageBase
 
         IdentityKeeper.addChangeListener(onIdentityChanged);
         timeRefreshTimer = new Timer(TIME_REFRESH_MS);
-        timeRefreshTimer.run = ongoingCard.refreshTimes;
+        timeRefreshTimer.run = () -> {
+            ongoingCard.refreshTimes();
+            header.refreshTimes();
+        };
 
         loadProfile();
         loadStats();
         loadRelation();
         loadConnections();
         subscribeOngoing();
+        statusFeed = new PlayerStatusFeed([login], (_, status, lastActiveMs) -> header.setStatus(status, lastActiveMs));
         archiveCard.start();
     }
 
@@ -133,6 +143,10 @@ class ProfilePage extends PageBase
         if (ongoingSubscription != null)
             ongoingSubscription.detach();
         ongoingSubscription = null;
+        if (statusFeed != null)
+            statusFeed.detach();
+        statusFeed = null;
+        stopConnectionStatusFeed();
         stopOngoingTimer();
         if (timeRefreshTimer != null)
             timeRefreshTimer.stop();
@@ -207,9 +221,28 @@ class ProfilePage extends PageBase
         connectionsCard.showLoading();
         connectionsLoad.start(
             (onResponse, onError) -> Rest.client().execute(RestOperationRegistry.GET_PLAYER_CONNECTIONS, onResponse, onError, ["login" => login]),
-            response -> connectionsCard.setConnections(PlayerMapper.connectionsToDatatype(response)),
+            response -> {
+                var connections:Connections = PlayerMapper.connectionsToDatatype(response);
+                connectionsCard.setConnections(connections);
+                followConnectionStatuses(connections);
+            },
             error -> connectionsCard.showFailure(error == null, loadConnections)
         );
+    }
+
+    private function followConnectionStatuses(connections:Connections):Void
+    {
+        stopConnectionStatusFeed();
+        var logins:Array<String> = [for (kind in ConnectionKind.createAll()) for (connection in connections.get(kind)) connection.login];
+        if (logins.length > 0)
+            connectionStatusFeed = new PlayerStatusFeed(logins, (login, status, _) -> connectionsCard.setStatus(login, status));
+    }
+
+    private function stopConnectionStatusFeed():Void
+    {
+        if (connectionStatusFeed != null)
+            connectionStatusFeed.detach();
+        connectionStatusFeed = null;
     }
 
     private function loadHistory(kind:TimeControlKind):Void

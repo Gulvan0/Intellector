@@ -1,6 +1,7 @@
 package client.ui.common.overlays.playersearch;
 
 import client.datatypes.player.FoundPlayer;
+import client.datatypes.player.PlayerStatus;
 import client.formatters.PlayerSearchFormatters;
 import client.ui.common.LoadStatus;
 import haxe.ui.components.Label;
@@ -21,6 +22,7 @@ class PlayerSearchResultList extends VBox
     private final messageText:Label;
     private final messageHint:Label;
     private final loadStatus:LoadStatus;
+    private final shownRows:Map<String, PlayerSearchRow> = []; // by login
 
     private var startShown:Bool = false;
 
@@ -82,9 +84,22 @@ class PlayerSearchResultList extends VBox
         }
 
         rows.removeAllComponents();
+        shownRows.clear();
         for (player in players)
-            rows.addComponent(new PlayerSearchRow(player, query, onPicked));
+        {
+            var row:PlayerSearchRow = new PlayerSearchRow(player, query, onPicked);
+            shownRows.set(player.login, row);
+            rows.addComponent(row);
+        }
         showParts(true, false, false);
+    }
+
+    /** Updates the shown player's dot, if any **/
+    public function setStatus(login:String, status:PlayerStatus):Void
+    {
+        var row:Null<PlayerSearchRow> = shownRows.get(login);
+        if (row != null)
+            row.setStatus(status);
     }
 
     public function showRetrying():Void
@@ -115,6 +130,9 @@ class PlayerSearchResultList extends VBox
         loadStatus.hidden = !statusShown;
 
         if (!rowsShown)
+        {
             rows.removeAllComponents();
+            shownRows.clear();
+        }
     }
 }

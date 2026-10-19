@@ -3,6 +3,7 @@ package client.ui.profile;
 import client.datatypes.player.Connection;
 import client.datatypes.player.ConnectionKind;
 import client.datatypes.player.Connections;
+import client.datatypes.player.PlayerStatus;
 import client.formatters.GameFormatters;
 import client.formatters.ProfileFormatters;
 import client.ui.common.LoadStatus;
@@ -34,6 +35,8 @@ class ConnectionsCard extends AsideCard
 
     private var connections:Null<Connections> = null;
     private var shownKind:ConnectionKind = Friends;
+    private final statuses:Map<String, PlayerStatus> = []; // by login, kept live
+    private final shownDots:Map<String, StatusDot> = []; // by login
 
     /** `onPlayerClicked` gets the clicked player's login **/
     public function new(onPlayerClicked:String->Void)
@@ -92,11 +95,30 @@ class ConnectionsCard extends AsideCard
     public function setConnections(connections:Connections):Void
     {
         this.connections = connections;
+        statuses.clear();
+        for (kind in KINDS)
+            for (connection in connections.get(kind))
+                statuses.set(connection.login, connection.status);
         loadStatus.hidden = true;
         listFrame.hidden = false;
         for (i in 0...KINDS.length)
             tabs.setCount(i, connections.get(KINDS[i]).length);
         renderList();
+    }
+
+    /** Updates the player's dot in place; the list is re-sorted by status on its next render **/
+    public function setStatus(login:String, status:PlayerStatus):Void
+    {
+        if (!statuses.exists(login))
+            return;
+
+        statuses.set(login, status);
+        var dot:Null<StatusDot> = shownDots.get(login);
+        if (dot != null)
+        {
+            dot.setStatus(status);
+            dot.tooltip = ProfileFormatters.status(status);
+        }
     }
 
     private function renderList():Void
@@ -108,6 +130,7 @@ class ConnectionsCard extends AsideCard
         shown.sort(compare);
 
         list.removeAllComponents();
+        shownDots.clear();
         for (connection in shown)
             list.addComponent(createRow(connection));
         emptyLabel.hidden = shown.length > 0;
@@ -121,8 +144,10 @@ class ConnectionsCard extends AsideCard
         row.trackHover();
         row.registerEvent(MouseEvent.CLICK, _ -> onPlayerClicked(connection.login));
 
-        var dot:StatusDot = new StatusDot(connection.status);
-        dot.tooltip = ProfileFormatters.status(connection.status);
+        var status:PlayerStatus = statuses.get(connection.login);
+        var dot:StatusDot = new StatusDot(status);
+        dot.tooltip = ProfileFormatters.status(status);
+        shownDots.set(connection.login, dot);
         row.addComponent(dot);
 
         var nicknameLabel:Label = new Label();
@@ -146,10 +171,12 @@ class ConnectionsCard extends AsideCard
         return row;
     }
 
-    private static function compare(a:Connection, b:Connection):Int
+    private function compare(a:Connection, b:Connection):Int
     {
-        if (a.status != b.status)
-            return a.status.getIndex() - b.status.getIndex();
+        var aStatus:PlayerStatus = statuses.get(a.login);
+        var bStatus:PlayerStatus = statuses.get(b.login);
+        if (aStatus != bStatus)
+            return aStatus.getIndex() - bStatus.getIndex();
         return Reflect.compare(a.nickname.toLowerCase(), b.nickname.toLowerCase());
     }
 }

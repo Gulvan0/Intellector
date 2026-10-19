@@ -4,6 +4,7 @@ import client.ServerTime;
 import client.datatypes.player.MainRating;
 import client.datatypes.player.PlayerProfile;
 import client.datatypes.player.PlayerRelation;
+import client.datatypes.player.PlayerStatus;
 import client.formatters.GameFormatters;
 import client.formatters.ProfileFormatters;
 import client.ui.common.LoadStatus;
@@ -53,6 +54,8 @@ class ProfileHeaderCard extends Box
     private final hintLabel:Label;
 
     private var relation:PlayerRelation = Unrelated;
+    private var lastActiveMs:Float = 0;
+    private var joinedAtMs:Float = 0;
     private var tier:ProfileLayoutTier = Wide;
 
     public function new(onFriendPressed:PlayerRelation->Void, onWatchPressed:Void->Void)
@@ -228,13 +231,31 @@ class ProfileHeaderCard extends Box
         titleRow.hidden = profile.role == null;
         if (profile.role != null)
             titleLabel.text = ProfileFormatters.role(profile.role);
-        statusDot.setStatus(profile.status);
-        statusLabel.text = ProfileFormatters.status(profile.status);
-        var offline:Bool = profile.status == Offline;
+        joinedAtMs = profile.joinedAtMs;
+        setStatus(profile.status, profile.lastActiveMs);
+    }
+
+    /** `lastActiveMs`: Unix time of the player's latest activity, in milliseconds; null keeps the one known **/
+    public function setStatus(status:PlayerStatus, lastActiveMs:Null<Float>):Void
+    {
+        if (lastActiveMs != null)
+            this.lastActiveMs = lastActiveMs;
+
+        statusDot.setStatus(status);
+        statusLabel.text = ProfileFormatters.status(status);
+        var offline:Bool = status == Offline;
         lastSeenSeparator.hidden = !offline;
         lastSeenLabel.hidden = !offline;
-        LocaleManager.instance.registerComponent(lastSeenLabel, "text", () -> ProfileFormatters.lastSeen(profile.lastActiveMs, ServerTime.now()));
-        LocaleManager.instance.registerComponent(joinedLabel, "text", () -> ProfileFormatters.joined(profile.joinedAtMs, ServerTime.now()));
+        refreshTimes();
+    }
+
+    /** Re-renders "last seen" and "joined" against the current time **/
+    public function refreshTimes():Void
+    {
+        var shownLastActiveMs:Float = lastActiveMs;
+        var shownJoinedAtMs:Float = joinedAtMs;
+        LocaleManager.instance.registerComponent(lastSeenLabel, "text", () -> ProfileFormatters.lastSeen(shownLastActiveMs, ServerTime.now()));
+        LocaleManager.instance.registerComponent(joinedLabel, "text", () -> ProfileFormatters.joined(shownJoinedAtMs, ServerTime.now()));
     }
 
     /** The main rating, or that there is none yet; null hides both until known **/

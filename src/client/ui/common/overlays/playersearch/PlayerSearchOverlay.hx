@@ -3,6 +3,7 @@ package client.ui.common.overlays.playersearch;
 import client.datatypes.player.FoundPlayer;
 import client.datatypes.player.PlayerSearchResults;
 import client.formatters.PlayerSearchFormatters;
+import client.utils.PlayerStatusFeed;
 import client.utils.TimedLoad;
 import haxe.Timer;
 import haxe.ui.Toolkit;
@@ -17,8 +18,9 @@ import net.rest.RestOperationRegistry;
 using StringTools;
 
 /**
-    Picking a player by nickname: the best matches update as the user types. Picking one closes the
-    overlay, then hands the player to the call site. Cancel closes it with nothing picked.
+    Picking a player by nickname: the best matches update as the user types, their statuses live.
+    Picking one closes the overlay, then hands the player to the call site. Cancel closes it with
+    nothing picked.
 **/
 class PlayerSearchOverlay
 {
@@ -43,12 +45,20 @@ class PlayerSearchOverlay
         var load:TimedLoad = new TimedLoad();
         var debounce:Null<Timer> = null;
         var searchBar:Null<SearchBar> = null;
+        var statusFeed:Null<PlayerStatusFeed> = null;
 
         function stopDebounce():Void
         {
             if (debounce != null)
                 debounce.stop();
             debounce = null;
+        }
+
+        function stopStatusFeed():Void
+        {
+            if (statusFeed != null)
+                statusFeed.detach();
+            statusFeed = null;
         }
 
         function pick(player:FoundPlayer):Void
@@ -68,8 +78,12 @@ class PlayerSearchOverlay
                     var results:PlayerSearchResults = PlayerMapper.searchResultToDatatype(response);
                     searchBar.message = results.totalCount > 0 ? PlayerSearchFormatters.count(results.totalCount) : null;
                     list.showPlayers(results.players, query);
+                    stopStatusFeed();
+                    if (results.players.length > 0)
+                        statusFeed = new PlayerStatusFeed(results.players.map(player -> player.login), (login, status, _) -> list.setStatus(login, status));
                 },
                 error -> {
+                    stopStatusFeed();
                     searchBar.message = null;
                     list.showFailure(error == null, () -> {
                         list.showRetrying();
@@ -87,6 +101,7 @@ class PlayerSearchOverlay
             if (query == "")
             {
                 load.cancel();
+                stopStatusFeed();
                 searchBar.message = null;
                 list.showStart();
                 return;
@@ -113,6 +128,7 @@ class PlayerSearchOverlay
             ],
             onDismissed: () -> {
                 stopDebounce();
+                stopStatusFeed();
                 load.cancel();
                 searchBar.dispose();
             }

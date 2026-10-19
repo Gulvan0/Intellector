@@ -1,6 +1,7 @@
 package client.ui.common.overlays.playersearch;
 
 import client.datatypes.player.FoundPlayer;
+import client.datatypes.player.PlayerStatus;
 import client.formatters.GameFormatters;
 import client.formatters.PlayerSearchFormatters;
 import client.formatters.ProfileFormatters;
@@ -18,6 +19,8 @@ using client.ui.ComponentExtension;
 /** A found player as a card: status, nickname with the matched part highlighted, role, relation, main rating **/
 class PlayerSearchRow extends HBox
 {
+    private final dot:StatusDot;
+
     /** `query`: what the player was found by **/
     public function new(player:FoundPlayer, query:String, onClick:FoundPlayer->Void)
     {
@@ -30,7 +33,7 @@ class PlayerSearchRow extends HBox
         var statusSlot:Box = new Box();
         statusSlot.addClass(StyleClass.PLAYER_SEARCH_STATUS_SLOT);
         statusSlot.verticalAlign = "center";
-        var dot:StatusDot = new StatusDot(player.status);
+        dot = new StatusDot(player.status);
         dot.horizontalAlign = "center";
         dot.tooltip = ProfileFormatters.status(player.status);
         statusSlot.addComponent(dot);
@@ -73,6 +76,12 @@ class PlayerSearchRow extends HBox
             ratingLabel.addClass(StyleClass.PLAYER_SEARCH_RATING);
             ratingGroup.addComponent(ratingLabel);
         }
+    }
+
+    public function setStatus(status:PlayerStatus):Void
+    {
+        dot.setStatus(status);
+        dot.tooltip = ProfileFormatters.status(status);
     }
 
     private static function detailLabel(text:String):Label
