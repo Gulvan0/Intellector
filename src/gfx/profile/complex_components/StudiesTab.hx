@@ -3,7 +3,6 @@ package gfx.profile.complex_components;
 import haxe.ui.containers.VBox;
 import gfx.profile.data.StudyData;
 import gfx.popups.StudyParamsDialog;
-import tests.SimpleTests;
 import haxe.ds.BalancedTree;
 import dict.Dictionary;
 import gfx.profile.simple_components.StudyWidget;
@@ -69,7 +68,7 @@ class StudiesTab extends VBox
     private function onStudyEdited(id:Int, newParams:StudyInfo)
     {
         var newWidgetData:StudyWidgetData = generateStudyWidgetData(id, newParams);
-        
+
         widgetByStudyID.get(id).updateData(newWidgetData);
         loadedStudies.set(id, newParams);
     }
@@ -106,7 +105,7 @@ class StudiesTab extends VBox
             var id:Int = -negID;
             var studyWidgetData:StudyWidgetData = generateStudyWidgetData(id, info);
             var studyWidget:StudyWidget = new StudyWidget(studyWidgetData);
-            
+
             studiesList.addComponent(studyWidget);
             loadedStudies.set(id, info);
             widgetByStudyID.set(id, studyWidget);
@@ -136,7 +135,7 @@ class StudiesTab extends VBox
         super();
         this.percentWidth = 100;
         this.text = Dictionary.getPhrase(PROFILE_STUDIES_TAB_TITLE);
-        
+
         this.profileOwner = profileOwner;
 
         studyFilterList = new StudyFilterList(Percent(100), 27, onTagFilterAdded, onTagFilterRemoved, onFiltersCleared, PROFILE_TAG_FILTERS_PREPENDER, PROFILE_TAG_NO_FILTERS_PLACEHOLDER_TEXT, PROFILE_ADD_TAG_FILTER_BTN_TEXT, PROFILE_REMOVE_TAG_FILTER_BTN_TOOLTIP, PROFILE_CLEAR_TAG_FILTERS_BTN_TEXT, PROFILE_TAG_FILTER_PROMPT_QUESTION_TEXT);

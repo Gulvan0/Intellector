@@ -14,6 +14,7 @@ import haxe.ui.containers.Card;
 import utils.TimeControl;
 import haxe.ui.components.Label;
 import haxe.ui.macros.ComponentMacros;
+import lib.std.MathTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/layouts/live/clock.xml"))
 class Clock extends Card implements INetObserver implements IGameBoardObserver
@@ -34,6 +35,19 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
     private var invisible:Bool = false;
 
     private var timer:Timer;
+
+    private static inline function formatTimeComponent(v:Float):String
+    {
+        return v < 10? '0$v' : '$v';
+    }
+
+    private static function formatTime(totalSeconds:Float)
+    {
+        var formattedMins:String = formatTimeComponent(Math.floor(totalSeconds / 60));
+        var formattedSecs:String = formatTimeComponent(MathTools.floorWithPrecision(totalSeconds % 60, 2));
+
+        return formattedMins + ":" + formattedSecs;
+    }
 
     public function resize(newHeight:Float)
     {
@@ -56,7 +70,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         if (active)
             throw "You can only set time manually for inactive clocks. For active clocks, it is set as a result of processing the corresponding events";
 
-        label.text = TimeControl.secsToString(secondsLeft);
+        label.text = formatTime(secondsLeft);
     }
 
     public function handleNetEvent(event:ServerEvent)
@@ -64,7 +78,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         if (!active)
             return;
 
-        switch event 
+        switch event
         {
             case TimeCorrection(timeData):
                 correctTime(timeData);
@@ -84,7 +98,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
                 active = false;
                 pauseTimer();
                 if (remainingTimeMs != null)
-                    label.text = TimeControl.secsToString(remainingTimeMs[ownerColor] / 1000);
+                    label.text = formatTime(remainingTimeMs[ownerColor] / 1000);
                 refreshColoring();
             default:
         }
@@ -95,7 +109,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         if (!active)
             return;
 
-        switch event 
+        switch event
         {
             case ContinuationMove(_, _, _):
                 moveNum++;
@@ -140,7 +154,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         this.customStyle = newCardStyle;
     }
 
-    private function updateTimeLeft() 
+    private function updateTimeLeft()
     {
         if (running)
             secondsLeft = Math.max(secondsLeftAtReliableTimestamp - (Date.now().getTime() - reliableTimestamp) / 1000, 0);
@@ -148,7 +162,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
             secondsLeft = secondsLeftAtReliableTimestamp;
 
         if (label != null)
-            label.text = TimeControl.secsToString(secondsLeft);
+            label.text = formatTime(secondsLeft);
         else
             return;
 
@@ -178,7 +192,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         running = true;
     }
 
-    private function pauseTimer() 
+    private function pauseTimer()
     {
         if (timer != null)
             timer.stop();
@@ -191,7 +205,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         pauseTimer();
     }
 
-    private function correctTime(timeData:TimeReservesData) 
+    private function correctTime(timeData:TimeReservesData)
     {
         secondsLeftAtReliableTimestamp = ownerColor == White? timeData.whiteSeconds : timeData.blackSeconds;
         reliableTimestamp = timeData.timestamp;
@@ -202,7 +216,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
     {
         secondsLeftAtReliableTimestamp = timeControlStartSecs;
         reliableTimestamp = startDatetime.getTime();
-        label.text = TimeControl.secsToString(timeControlStartSecs);
+        label.text = formatTime(timeControlStartSecs);
         secondsLeft = timeControlStartSecs;
     }
 
@@ -220,7 +234,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
     public function init(constructor:LiveGameConstructor, ownerColor:PieceColor)
     {
         this.ownerColor = ownerColor;
-        switch constructor 
+        switch constructor
         {
             case New(whiteRef, blackRef, _, timeControl, startingSituation, startDatetime):
                 if (timeControl.getType() == Correspondence)
@@ -267,7 +281,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
             case Past(parsedData, _):
                 this.active = false;
                 if (parsedData.msLeftWhenEnded != null)
-                    label.text = TimeControl.secsToString(parsedData.msLeftWhenEnded[ownerColor] / 1000);
+                    label.text = formatTime(parsedData.msLeftWhenEnded[ownerColor] / 1000);
                 else
                     hidden = true;
         }
@@ -280,7 +294,7 @@ class Clock extends Card implements INetObserver implements IGameBoardObserver
         else
             return v;
     }
-    
+
     public function new()
     {
         super();

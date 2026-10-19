@@ -1,16 +1,16 @@
 package dict.utils;
 
+import client.datatypes.Outcome;
 import utils.StringUtils;
 import net.shared.EloValue;
 import net.shared.PieceColor;
-import net.shared.Outcome;
 import utils.SpecialChar;
 
 class OutcomePhrases
 {
     private static function getWinningGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType):Array<String>
     {
-        return switch outcomeType 
+        return switch outcomeType
         {
             case Mate:
                 ["Your opponent's Intellector has been captured. You won!", "Интеллектор противника пал. Вы победили!"];
@@ -27,7 +27,7 @@ class OutcomePhrases
 
     private static function getLosingGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType):Array<String>
     {
-        return switch outcomeType 
+        return switch outcomeType
         {
             case Mate:
                 ["Your Intellector has been captured. You lost.", "Ваш Интеллектор пал. Вы проиграли."];
@@ -44,7 +44,7 @@ class OutcomePhrases
 
     private static function getDecisiveSpectatorGameOverDialogMessageTL(outcomeType:DecisiveOutcomeType, winner:String, loser:String):Array<String>
     {
-        return switch outcomeType 
+        return switch outcomeType
         {
             case Mate:
                 ['$loser\'s Intellector has been captured. $winner won.', 'Интеллектор игрока $loser повержен. Победитель: $winner.'];
@@ -61,7 +61,7 @@ class OutcomePhrases
 
     private static function getDrawishGameOverDialogMessageTL(outcomeType:DrawishOutcomeType):Array<String>
     {
-        return switch outcomeType 
+        return switch outcomeType
         {
             case DrawAgreement:
                 ["Game has ended up in a draw. Reason: mutual agreement.", "Игра завершена вничью. Причина: взаимное согласие"];
@@ -77,8 +77,8 @@ class OutcomePhrases
     public static function getSpectatorGameOverDialogMessage(outcome:Outcome, whitePlayer:String, blackPlayer:String)
     {
         var translations:Array<String>;
-        
-        switch outcome 
+
+        switch outcome
         {
             case Decisive(type, winnerColor):
                 var winner:String = winnerColor == White? whitePlayer : blackPlayer;
@@ -96,7 +96,7 @@ class OutcomePhrases
     {
         var personalOutcome:PersonalOutcome = toPersonal(outcome, playerColor);
 
-        var translations:Array<String> = switch personalOutcome 
+        var translations:Array<String> = switch personalOutcome
         {
             case Win(type):
                 getWinningGameOverDialogMessageTL(type);
@@ -122,7 +122,7 @@ class OutcomePhrases
         var loserStr:String = Utils.getColorName(opposite(winnerColor));
         var dot:String = SpecialChar.Dot;
 
-        var halfBakedTranslations:Array<String> = switch outcomeType 
+        var halfBakedTranslations:Array<String> = switch outcomeType
         {
             case Mate:
                 ['Fatum $dot $winnerStr is victorious', 'Фатум $dot $winnerStr победили'];
@@ -141,15 +141,15 @@ class OutcomePhrases
 
     private static function getDrawishResolution(outcomeType:DrawishOutcomeType):String
     {
-        var translations:Array<String> = switch outcomeType 
+        var translations:Array<String> = switch outcomeType
         {
-            case DrawAgreement: 
+            case DrawAgreement:
                 ["Draw by agreement", "Ничья по согласию"];
-            case Repetition: 
+            case Repetition:
                 ["Draw by repetition", "Ничья по троекратному повторению"];
-            case NoProgress: 
+            case NoProgress:
                 ["Draw by sixty-move rule", "Ничья по правилу 60 ходов"];
-            case Abort: 
+            case Abort:
                 ["Game aborted", "Игра прервана"];
         }
 
@@ -158,11 +158,11 @@ class OutcomePhrases
 
     public static function getResolution(outcome:Null<Outcome>):String
     {
-        switch outcome 
+        switch outcome
         {
             case null:
                 return Dictionary.chooseTranslation(["Game is in progress", "Идет игра"]);
-            case Drawish(type): 
+            case Drawish(type):
                 return getDrawishResolution(type);
             case Decisive(type, winnerColor):
                 return getDecisiveResolution(type, winnerColor);
@@ -174,7 +174,7 @@ class OutcomePhrases
         var winnerStr:String = Utils.getColorName(winnerColor);
         var loserStr:String = Utils.getColorName(opposite(winnerColor));
 
-        return switch outcomeType 
+        return switch outcomeType
         {
             case Mate:
                 ['$winnerStr won', '$winnerStr победили'];
@@ -191,7 +191,7 @@ class OutcomePhrases
 
     private static function getDrawishChatboxGameOverMessageTL(outcomeType:DrawishOutcomeType):Array<String>
     {
-        return switch outcomeType 
+        return switch outcomeType
         {
             case DrawAgreement:
                 ['Game ended with a draw (mutual agreement)', 'Игра окончена вничью (по договоренности)'];
@@ -201,12 +201,12 @@ class OutcomePhrases
                 ['Game ended with a draw (sixty-move rule)', 'Игра окончена вничью (по правилу 60 ходов)'];
             case Abort:
                 ['Game aborted', 'Игра прервана'];
-        } 
+        }
     }
 
     public static function chatboxGameOverMessage(outcome:Outcome):String
     {
-        var translations:Array<String> = switch outcome 
+        var translations:Array<String> = switch outcome
         {
             case Decisive(type, winnerColor):
                 getDecisiveChatboxGameOverMessageTL(type, winnerColor);
@@ -215,5 +215,27 @@ class OutcomePhrases
         }
 
         return Dictionary.chooseTranslation(translations);
+    }
+
+    public static function getPinOutcomeText(outcome:Null<Outcome>):String
+    {
+        return switch outcome
+        {
+            case Decisive(Mate, White): 'Fatum. White won';
+            case Decisive(Mate, Black): 'Fatum. Black won';
+            case Decisive(Breakthrough, White): 'Breakthrough. White won';
+            case Decisive(Breakthrough, Black): 'Breakthrough. Black won';
+            case Decisive(Timeout, White): 'Black lost on time';
+            case Decisive(Timeout, Black): 'White lost on time';
+            case Decisive(Resign, White): 'Black resigned';
+            case Decisive(Resign, Black): 'White resigned';
+            case Decisive(Abandon, White): 'Black left the game';
+            case Decisive(Abandon, Black): 'White left the game';
+            case Drawish(DrawAgreement): 'Draw by agreement';
+            case Drawish(Repetition): 'Draw by repetition';
+            case Drawish(NoProgress): 'Draw by quiescence';
+            case Drawish(Abort): 'Game aborted';
+            case null: '...To be continued';
+        }
     }
 }

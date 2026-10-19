@@ -10,7 +10,6 @@ import utils.SpecialChar;
 import net.shared.dataobj.UserStatus;
 import gfx.game.LiveGameConstructor;
 import utils.StringUtils;
-import utils.TimeControl;
 import serialization.GameLogParser;
 import serialization.GameLogParser.GameLogParserOutput;
 import gfx.ScreenType;
@@ -35,9 +34,9 @@ class Utils
         return 'Guest $guestID';
     }
 
-    public static function playerRef(ref:PlayerRef):String 
+    public static function playerRef(ref:PlayerRef):String
     {
-        return switch ref.concretize() 
+        return switch ref.concretize()
         {
             case Normal(login): login;
             case Guest(guestID): guestName(guestID);
@@ -58,9 +57,9 @@ class Utils
         }
     }
 
-    public static function getUserStatusText(status:UserStatus) 
+    public static function getUserStatusText(status:UserStatus)
     {
-        switch status 
+        switch status
         {
             case Offline(secondsSinceLastAction):
                 var activityStr:String = getTimePassedString(secondsSinceLastAction);
@@ -77,7 +76,7 @@ class Utils
 
     private static function getLiveGameScreenTitle(id:Int, constructor:LiveGameConstructor):Array<String>
     {
-        switch constructor 
+        switch constructor
         {
             case New(whiteRef, blackRef, _, _, _, _):
                 var opponent:String = opponentRef(whiteRef, blackRef);
@@ -104,10 +103,10 @@ class Utils
     public static function getScreenTitle(type:ScreenType):String
     {
         var translations = [null, null];
-        
-        switch type 
+
+        switch type
         {
-            case MainMenu: 
+            case MainMenu:
                 translations = ["Home", "Главная"];
             case Analysis(_, _, exploredStudyData):
                 if (exploredStudyData != null)
@@ -117,9 +116,9 @@ class Utils
                 }
                 else
                     translations = ["Analysis Board", "Доска анализа"];
-            case LiveGame(gameID, constructor): 
+            case LiveGame(gameID, constructor):
                 translations = getLiveGameScreenTitle(gameID, constructor);
-            case PlayerProfile(ownerLogin, _): 
+            case PlayerProfile(ownerLogin, _):
                 translations = ['$ownerLogin\'s profile', 'Профиль $ownerLogin'];
             case ChallengeJoining(data):
                 translations = ['Challenge by ${data.ownerLogin}', 'Вызов ${data.ownerLogin}'];
@@ -147,5 +146,18 @@ class Utils
     public static function chatboxGameOverMessage(outcome:Outcome):String
     {
         return OutcomePhrases.chatboxGameOverMessage(outcome);
+    }
+
+    public static function getTimeControl(timeControl:TimeControl):String  //TODO: Use
+    {
+        if (timeControl.isCorrespondence())
+            return Dictionary.getPhrase(CORRESPONDENCE_TIME_CONTROL_NAME);
+        else if (timeControl.start_seconds % 60 == 0)
+        {
+            var startMins:Int = Math.round(startSecs / 60);
+            return '$startMins+${timeControl.increment_seconds}';
+        }
+        else
+            return '${timeControl.start_seconds}' + 's+${timeControl.increment_seconds}';
     }
 }

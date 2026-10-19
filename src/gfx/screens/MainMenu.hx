@@ -1,6 +1,5 @@
 package gfx.screens;
 
-import tests.Interceptor;
 import gfx.popups.LogIn;
 import gfx.popups.ChallengeParamsDialog;
 import gfx.popups.ChangelogDialog;
@@ -31,9 +30,9 @@ class MainMenu extends Screen implements INetObserver
         SceneManager.removeResizeHandler(onResize);
     }
 
-    public function handleNetEvent(event:ServerEvent) 
+    public function handleNetEvent(event:ServerEvent)
     {
-        switch event 
+        switch event
         {
             case MainMenuData(openChallenges, currentGames, recentGames):
                 openChallengesTable.appendChallenges(openChallenges);
@@ -79,7 +78,7 @@ class MainMenu extends Screen implements INetObserver
         SceneManager.addResizeHandler(onResize);
     }
 
-    private function onResize() 
+    private function onResize()
     {
         var compact:Bool = HaxeUIScreen.instance.actualWidth / HaxeUIScreen.instance.actualHeight < 1.2;
 
@@ -96,7 +95,7 @@ class MainMenu extends Screen implements INetObserver
         var tableHeaderReloadBtnHeightRule:ResponsivenessRule = Min([Exact(20), VMIN(3.33)]);
 
         ResponsiveToolbox.resizeComponent(contentHBox, [StyleProp(HorizontalSpacing) => VW(8)]);
-        
+
         ResponsiveToolbox.resizeComponent(openChallengesTable.tableTitleBox, [Height => tableHeaderBoxHeightRule]);
         ResponsiveToolbox.resizeComponent(openChallengesTable.title, [StyleProp(FontSize) => tableHeaderHeightRule]);
         ResponsiveToolbox.resizeComponent(openChallengesTable.reloadBtn, [StyleProp(FontSize) => tableHeaderReloadBtnHeightRule, IconWidth => tableHeaderReloadBtnHeightRule, IconHeight => tableHeaderReloadBtnHeightRule]);
@@ -112,7 +111,7 @@ class MainMenu extends Screen implements INetObserver
     public function new()
     {
         super();
-        
+
         customEnterHandler = onEnter;
         customCloseHandler = onClose;
     }

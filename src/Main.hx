@@ -5,18 +5,15 @@ import haxe.ui.containers.dialogs.Dialog;
 import assets.StandaloneAssetPath;
 import gfx.preloader.DefaultPreloader;
 import haxe.ui.HaxeUIApp;
-import tests.Interceptor;
 import browser.Blinker;
 import gfx.ScreenNavigator;
 import net.shared.dataobj.GreetingResponseData;
-import tests.SimpleTests;
 import gfx.basic_components.AutosizingLabel;
 import struct.ChallengeParams;
 import serialization.GameLogParser;
 import utils.Changelog;
 import gfx.screens.OpenChallengeJoining;
 import gfx.Dialogs;
-import tests.ui.analysis.TAnalysisScreen;
 import haxe.ui.locale.LocaleManager;
 import net.shared.PieceColor;
 import utils.TimeControl;
@@ -28,7 +25,6 @@ import gfx.screens.Analysis;
 import gfx.screens.LanguageSelectIntro;
 import haxe.ui.Toolkit;
 import js.Browser;
-import tests.UITest;
 
 using StringTools;
 
@@ -70,10 +66,6 @@ class Main
 				event.preventDefault();
 		}, true);
 		Browser.document.body.style.overflow = "auto";
-
-		#if debug
-		Interceptor.init();
-		#end
 
 		Blinker.init();
 		Changelog.init();
