@@ -301,6 +301,7 @@ enum abstract StyleClass(String) from String to String
     var PROFILE_HEADER_IDENTITY = "intellector-profile-header-identity";
     var PROFILE_HEADER_NAME_ROW = "intellector-profile-header-name-row";
     var PROFILE_HEADER_ROW = "intellector-profile-header-row";
+    var PROFILE_STATUS_ROW = "intellector-profile-status-row";
     var PROFILE_MONO = "intellector-profile-mono";
     var PROFILE_MUTED = "intellector-profile-muted";
     var PROFILE_NICKNAME = "intellector-profile-nickname";

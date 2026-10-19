@@ -19,7 +19,7 @@ class PlayerMapper
     public static function profileToDatatype(dto:PlayerPublic):PlayerProfile
     {
         var role:Null<PlayerRole> = dto.main_role != null ? roleToDatatype(dto.main_role) : null;
-        return new PlayerProfile(dto.login, dto.nickname, dto.joined_at.getUnixMs(), role, statusToDatatype(dto.activity.status));
+        return new PlayerProfile(dto.login, dto.nickname, dto.joined_at.getUnixMs(), role, statusToDatatype(dto.activity.status), dto.activity.last_active_unixsecs * 1000.0);
     }
 
     public static function statusToDatatype(dto:UserStatus):PlayerStatus

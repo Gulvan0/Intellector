@@ -71,6 +71,12 @@ class ProfileFormatters
         return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.profile.joined"), longDate(joinedAtMs), ago(nowMs - joinedAtMs));
     }
 
+    /** `Last seen 5 hours ago` **/
+    public static function lastSeen(lastActiveMs:Float, nowMs:Float):String
+    {
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.profile.last_seen"), ago(nowMs - lastActiveMs));
+    }
+
     /** The relation line under the status, null for none **/
     public static function relation(relation:PlayerRelation):Null<String>
     {

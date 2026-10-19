@@ -40,6 +40,8 @@ class ProfileHeaderCard extends Box
     private final titleLabel:Label;
     private final statusDot:StatusDot;
     private final statusLabel:Label;
+    private final lastSeenSeparator:Label;
+    private final lastSeenLabel:Label;
     private final joinedLabel:Label;
     private final relationRow:HBox;
     private final relationLabel:Label;
@@ -124,7 +126,10 @@ class ProfileHeaderCard extends Box
         titleRow.addComponent(titleLabel);
 
         var statusRow:HBox = new HBox();
+        statusRow.percentWidth = 100;
+        statusRow.continuous = true;
         statusRow.addClass(StyleClass.PROFILE_HEADER_ROW);
+        statusRow.addClass(StyleClass.PROFILE_STATUS_ROW);
         identity.addComponent(statusRow);
 
         statusDot = new StatusDot(Offline);
@@ -135,11 +140,15 @@ class ProfileHeaderCard extends Box
         statusLabel.verticalAlign = "center";
         statusRow.addComponent(statusLabel);
 
-        var separator:Label = new Label();
-        separator.text = "·";
-        separator.addClass(StyleClass.PROFILE_MUTED);
-        separator.verticalAlign = "center";
-        statusRow.addComponent(separator);
+        lastSeenSeparator = createSeparator();
+        statusRow.addComponent(lastSeenSeparator);
+
+        lastSeenLabel = new Label();
+        lastSeenLabel.addClass(StyleClass.PROFILE_MUTED);
+        lastSeenLabel.verticalAlign = "center";
+        statusRow.addComponent(lastSeenLabel);
+
+        statusRow.addComponent(createSeparator());
 
         joinedLabel = new Label();
         joinedLabel.addClass(StyleClass.PROFILE_MUTED);
@@ -221,6 +230,10 @@ class ProfileHeaderCard extends Box
             titleLabel.text = ProfileFormatters.role(profile.role);
         statusDot.setStatus(profile.status);
         statusLabel.text = ProfileFormatters.status(profile.status);
+        var offline:Bool = profile.status == Offline;
+        lastSeenSeparator.hidden = !offline;
+        lastSeenLabel.hidden = !offline;
+        LocaleManager.instance.registerComponent(lastSeenLabel, "text", () -> ProfileFormatters.lastSeen(profile.lastActiveMs, ServerTime.now()));
         LocaleManager.instance.registerComponent(joinedLabel, "text", () -> ProfileFormatters.joined(profile.joinedAtMs, ServerTime.now()));
     }
 
@@ -288,5 +301,14 @@ class ProfileHeaderCard extends Box
         friendButton.text = LocaleUtils.localeBinding('intellector.profile.action.$friendKey');
         friendButton.icon = Assets.profileIcon(relation.match(Unrelated | FollowsYou) ? "add_friend" : "remove_friend");
         watchButton.text = LocaleUtils.localeBinding(short ? "intellector.profile.action.watch_short" : "intellector.profile.action.watch");
+    }
+
+    private static function createSeparator():Label
+    {
+        var separator:Label = new Label();
+        separator.text = "·";
+        separator.addClass(StyleClass.PROFILE_MUTED);
+        separator.verticalAlign = "center";
+        return separator;
     }
 }

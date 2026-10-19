@@ -89,6 +89,11 @@
     horizontal-spacing: 6px;
 }
 
+/* wraps when the status, last seen and joined parts don't fit on one line */
+.intellector-profile-status-row {
+    vertical-spacing: 4px;
+}
+
 .intellector-profile-nickname {
     font-name: $ui-family-semibold;
     font-size: 17px;

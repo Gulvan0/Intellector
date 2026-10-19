@@ -10,7 +10,8 @@ canvas. Deferred: `[[profile_deferred]]`.
 1. **Four statuses**: playing, online, away, offline. 10 px dots: playing `#c2412d`, online
    `#3f7d4e`, away `#c4930a` (filled), offline a 1.5 px `#a79b8a` ring. Labels: Playing now / Online /
    Away / Offline (Играет / В сети / Нет на месте / Не в сети). Status is read when the data loads;
-   it does not update live.
+   it does not update live. An offline player's status is followed by "Last seen 5 hours ago"
+   (Был в сети …), from the profile's `last_active_unixsecs`; the status line wraps when it doesn't fit.
 2. **Playing** (server): the player's WS activity is ONLINE (not AWAY) and they play an ongoing game
    that isn't correspondence.
 3. **Title** = the localized `main_role` (Administrator / Anaconda developer). No role: no line.
