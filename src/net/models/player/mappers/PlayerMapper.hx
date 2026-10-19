@@ -3,12 +3,14 @@ package net.models.player.mappers;
 import client.datatypes.game.PlayerRating;
 import client.datatypes.player.Connection;
 import client.datatypes.player.Connections;
+import client.datatypes.player.FoundPlayer;
 import client.datatypes.player.GameStats;
 import client.datatypes.player.KindStats;
 import client.datatypes.player.MainRating;
 import client.datatypes.player.PlayerProfile;
 import client.datatypes.player.PlayerRelation;
 import client.datatypes.player.PlayerRole;
+import client.datatypes.player.PlayerSearchResults;
 import client.datatypes.player.PlayerStatus;
 import client.datatypes.player.RatingPoint;
 import client.datatypes.timecontrol.TimeControlKind;
@@ -86,12 +88,27 @@ class PlayerMapper
         return [for (dto in dtos) new RatingPoint(dto.ts.getUnixMs(), dto.elo)];
     }
 
+    public static function searchResultToDatatype(dto:PlayerSearchResult):PlayerSearchResults
+    {
+        return new PlayerSearchResults(dto.players.map(searchEntryToDatatype), dto.total_count);
+    }
+
+    private static function searchEntryToDatatype(dto:PlayerSearchEntry):FoundPlayer
+    {
+        var role:Null<PlayerRole> = dto.main_role != null ? roleToDatatype(dto.main_role) : null;
+        return new FoundPlayer(dto.player.user_ref, dto.player.nickname, statusToDatatype(dto.status), role, relationToDatatype(dto.relation), mainRatingToDatatype(dto.main_rating));
+    }
+
     private static function cardToDatatype(dto:PlayerCard):Connection
     {
-        var mainRating:Null<MainRating> = null;
-        if (dto.main_rating != null)
-            mainRating = new MainRating(TimeControlKindMapper.dtoToDatatype(dto.main_rating.time_control_kind), new PlayerRating(dto.main_rating.elo, dto.main_rating.provisional));
-        return new Connection(dto.player.user_ref, dto.player.nickname, statusToDatatype(dto.status), mainRating);
+        return new Connection(dto.player.user_ref, dto.player.nickname, statusToDatatype(dto.status), mainRatingToDatatype(dto.main_rating));
+    }
+
+    private static function mainRatingToDatatype(dto:Null<PlayerMainRating>):Null<MainRating>
+    {
+        if (dto == null)
+            return null;
+        return new MainRating(TimeControlKindMapper.dtoToDatatype(dto.time_control_kind), new PlayerRating(dto.elo, dto.provisional));
     }
 
     private static function roleToDatatype(dto:UserRole):PlayerRole

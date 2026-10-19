@@ -9,8 +9,10 @@ import client.storage.LocalStorageKey;
 import client.storage.PreferenceMigration;
 import client.ui.common.overlays.challenge.ChallengeCreationOverlay;
 import client.ui.common.overlays.login.LoginOverlay;
+import client.ui.common.overlays.playersearch.PlayerSearchOverlay;
 import haxefolio.browser.ActivityTracker;
 import haxefolio.HaxeFolioApp;
+import haxefolio.LocaleUtils;
 import haxefolio.HaxeFolioConfig;
 import haxefolio.HaxeFolioConfigBuilder;
 import haxefolio.menu.MenuFacade;
@@ -164,12 +166,12 @@ class Main
         ChallengeCreationOverlay.present(identity.isGuest(), identity.getUserRef(), createChallenge, BOT);
     }
 
-    /*
-        Stub handlers for menu items that used to open a login-input prompt in the original
-        iteration. No overlay equivalent exists yet.
-    */
-    private static function onWatchPlayerPressed():Void {}
-    private static function onPlayerProfilePressed():Void {}
+    private static function onWatchPlayerPressed():Void {} // no watching yet
+
+    private static function onPlayerProfilePressed():Void
+    {
+        PlayerSearchOverlay.present(LocaleUtils.localeBinding("intellector.overlay.player_search.title.find_player"), false, player -> HaxeFolioApp.navigateTo('player/${player.login}'));
+    }
 
     private static function getMyProfilePath():String
     {

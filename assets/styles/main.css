@@ -1529,6 +1529,157 @@
 }
 
 /*
+    Player search overlay: the search bar, result cards in a padded list, messages placed where
+    they are centred in the dialog's results area, and a footer with the status legend and Cancel.
+*/
+
+.haxefolio-search-bar {
+    padding-top: 18px;
+}
+
+.haxefolio-search-input {
+    font-name: $ui-family-medium;
+}
+
+.haxefolio-search-placeholder {
+    font-name: $ui-family-medium;
+    color: #a79b8a;
+}
+
+.haxefolio-search-magnifier {
+    color: #6d6152;
+}
+
+.haxefolio-clear-button {
+    color: #6d6152;
+}
+
+.haxefolio-clear-button:hover {
+    color: #2a211a;
+}
+
+.intellector-player-search-list {
+    padding-left: 22px;
+    padding-right: 12px;
+    padding-bottom: 14px;
+}
+
+.intellector-player-search-rows {
+    vertical-spacing: 8px;
+}
+
+.intellector-player-search-row {
+    height: 56px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 8px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.intellector-player-search-row:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-player-search-status-slot {
+    width: 18px;
+    height: 18px;
+}
+
+.intellector-player-search-row-text {
+    vertical-spacing: 2px;
+}
+
+.intellector-player-search-row-headline {
+    horizontal-spacing: 8px;
+}
+
+.intellector-player-search-nickname {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-player-search-row-detail {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-player-search-rating-group {
+    horizontal-spacing: 6px;
+}
+
+.intellector-player-search-rating {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-player-search-empty {
+    padding-top: 156px;
+    vertical-spacing: 6px;
+}
+
+.intellector-player-search-empty-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+.intellector-player-search-empty-hint {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+}
+
+.intellector-player-search-footer {
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 12px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-player-search-legend {
+    horizontal-spacing: 14px;
+    vertical-spacing: 4px;
+}
+
+.haxefolio-collapsed .intellector-player-search-legend {
+    horizontal-spacing: 12px;
+}
+
+.intellector-player-search-legend-item {
+    horizontal-spacing: 6px;
+}
+
+.intellector-player-search-legend-label {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-player-search-cancel {
+    height: 37px;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.haxefolio-collapsed .intellector-player-search-cancel {
+    height: 44px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/*
     Live game page. Wide: three columns (info and chat | board | moves and actions) on the page
     background, cards on surface. Medium: two columns (header and board | moves, chat and actions).
     Compact: one column; the open tab's card replaces the chat peek.
@@ -2746,6 +2897,11 @@
     padding-top: 24px;
     padding-bottom: 24px;
     vertical-spacing: 10px;
+}
+
+/* after .intellector-load-status, which it overrides: centred in the player search dialog's results area */
+.intellector-player-search-failure {
+    padding-top: 141px;
 }
 
 .intellector-load-status-text {

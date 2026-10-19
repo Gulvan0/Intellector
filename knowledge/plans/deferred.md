@@ -19,19 +19,13 @@ this position" (analysis, live game) and a direct challenge from a profile. Give
 caller asks so, as the old `dontCacheParams`), and call it from those pages. The home page's own
 Create Game button should call the same entry point as the menu item.
 
-## 4. Watch Player / Player Profile stubs
+## 4. Watch Player stub
 
 Create Game and Versus Bot (the same overlay, bot type preselected) are built:
-`[[challenge_creation_overlay_plan]]`.
+`[[challenge_creation_overlay_plan]]`. Player Profile opens the player search overlay:
+`[[player_search_plan]]`.
 
-**Why deferred:** each used to open a plain `Dialogs.prompt` login-input, and no overlay
-equivalent exists yet.
+**Why deferred:** watching a player isn't built yet.
 
-**How to apply:**
-- Watch Player / Player Profile: need a simple login-input prompt overlay — smaller in scope than
-  the challenge-params dialog, but no generic "prompt for a string" overlay utility exists in
-  `haxefolio` yet (only `showOverlay` with a full custom content factory). Worth checking whether
-  a small reusable prompt-overlay helper belongs in `haxefolio` itself (used by more than one
-  future page) before building a one-off.
-- Both handler stubs are named (`onWatchPlayerPressed`, `onPlayerProfilePressed` in `Main.hx`)
-  specifically so they're easy to find and fill in later — bodies currently empty.
+**How to apply:** `onWatchPlayerPressed` in `Main.hx` presents `PlayerSearchOverlay` with its own
+title and pick handler (`[[player_search_deferred]]` item 1).

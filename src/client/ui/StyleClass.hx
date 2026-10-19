@@ -272,6 +272,26 @@ enum abstract StyleClass(String) from String to String
     var PAST_GAMES_TIME_CONTROL_CELL = "intellector-past-games-time-control-cell";
     var PAST_GAMES_TYPE_CELL = "intellector-past-games-type-cell";
 
+    var PLAYER_SEARCH_CANCEL = "intellector-player-search-cancel";
+    var PLAYER_SEARCH_EMPTY = "intellector-player-search-empty";
+    var PLAYER_SEARCH_EMPTY_HINT = "intellector-player-search-empty-hint";
+    var PLAYER_SEARCH_EMPTY_TEXT = "intellector-player-search-empty-text";
+    var PLAYER_SEARCH_FOOTER = "intellector-player-search-footer";
+    var PLAYER_SEARCH_LEGEND = "intellector-player-search-legend";
+    var PLAYER_SEARCH_LEGEND_ITEM = "intellector-player-search-legend-item";
+    var PLAYER_SEARCH_LEGEND_LABEL = "intellector-player-search-legend-label";
+    var PLAYER_SEARCH_LIST = "intellector-player-search-list";
+    var PLAYER_SEARCH_NICKNAME = "intellector-player-search-nickname";
+    var PLAYER_SEARCH_FAILURE = "intellector-player-search-failure";
+    var PLAYER_SEARCH_RATING = "intellector-player-search-rating";
+    var PLAYER_SEARCH_RATING_GROUP = "intellector-player-search-rating-group";
+    var PLAYER_SEARCH_ROW = "intellector-player-search-row";
+    var PLAYER_SEARCH_ROWS = "intellector-player-search-rows";
+    var PLAYER_SEARCH_ROW_DETAIL = "intellector-player-search-row-detail";
+    var PLAYER_SEARCH_ROW_HEADLINE = "intellector-player-search-row-headline";
+    var PLAYER_SEARCH_ROW_TEXT = "intellector-player-search-row-text";
+    var PLAYER_SEARCH_STATUS_SLOT = "intellector-player-search-status-slot";
+
     var PROFILE_ACTION_BUTTON = "intellector-profile-action-button";
     var PROFILE_ARCHIVE_AREA = "intellector-profile-archive-area";
     var PROFILE_ARCHIVE_STATUS = "intellector-profile-archive-status";

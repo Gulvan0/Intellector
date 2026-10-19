@@ -36,6 +36,7 @@ import net.models.player.PlayerPublic;
 import net.models.player.PlayerGameStats;
 import net.models.player.PlayerConnections;
 import net.models.player.PlayerRelation;
+import net.models.player.PlayerSearchResult;
 import net.models.player.EloHistoryEntry;
 import net.models.study.ListStudiesPayload;
 import net.models.study.ListStudiesResult;
@@ -78,7 +79,8 @@ class RestOperationRegistry
 
 	public static final CHECK_COMPATIBILITY = new GenericRestOperation<CompatibilityCheckPayload, CompatibilityResponse>("/check_compatibility", Post);
 
-	public static final GET_PLAYER_CONNECTIONS = new GetOperaton<PlayerConnections>("/player/{login}/connections");
+	public static final SEARCH_PLAYERS = new GetOperaton<PlayerSearchResult>("/player/search");
+	public static final GET_PLAYER_CONNECTIONS =new GetOperaton<PlayerConnections>("/player/{login}/connections");
 	public static final GET_PLAYER_RELATION = new GetOperaton<PlayerRelation>("/player/{login}/relation");
 	public static final GET_ELO_HISTORY = new GetOperaton<UnserializableArray<EloHistoryEntry>>("/player/{login}/elo_history");
 	public static final GET_PLAYER = new GetOperaton<PlayerPublic>("/player/{login}");

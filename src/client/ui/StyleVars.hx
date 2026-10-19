@@ -116,6 +116,13 @@ class StyleVars
     public static inline final CHALLENGE_OVERLAY_POSITION_SWITCH_WIDTH:Int = 176;
     public static inline final CHALLENGE_OVERLAY_PREVIEW_BOARD_WIDTH:Int = 164;
 
+    public static inline final PLAYER_SEARCH_OVERLAY_WIDTH:Int = 520;
+    public static inline final PLAYER_SEARCH_OVERLAY_HEIGHT:Int = 560;
+    public static inline final PLAYER_SEARCH_OVERLAY_HEADER_HEIGHT:Int = 56;
+    public static final PLAYER_SEARCH_OVERLAY_SEARCH_HEIGHT:ByWidth<Int> = {expanded: 86, collapsed: 93}; // 18 above the field, 5 above the count line (16), 10 below it
+    public static final PLAYER_SEARCH_OVERLAY_FOOTER_HEIGHT:ByWidth<Int> = {expanded: 56, collapsed: 76}; // collapsed, the legend takes two lines
+    public static inline final PLAYER_SEARCH_MATCH_HIGHLIGHT:String = "#f6e6c6";
+
     public static inline final BOARD_CONTROL_BUTTON_WIDTH:Float = 40;
     public static inline final BOARD_CONTROL_BUTTON_HEIGHT:Float = 36;
     public static inline final BOARD_CONTROL_BUTTON_RADIUS:Float = 5;
