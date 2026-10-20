@@ -3,11 +3,13 @@ package client.ui.game;
 import client.datatypes.game.GameParticipant;
 import client.formatters.ClockFormatters;
 import client.formatters.GameFormatters;
+import client.utils.PagePaths;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.core.Component;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 
 using client.ui.ComponentExtension;
 
@@ -18,12 +20,11 @@ class PlayerBar extends HBox
 
     private final presenceDot:Box;
     private final nicknameLabel:Label;
+    private final nicknameLink:PageLink;
     private final ratingLabel:Label;
     private final clockLabel:Label;
-    private var participant:Null<GameParticipant> = null;
 
-    /** `onNicknameClicked`: called with the participant whose nickname was clicked **/
-    public function new(onNicknameClicked:GameParticipant->Void)
+    public function new()
     {
         super();
         percentWidth = 100;
@@ -35,10 +36,7 @@ class PlayerBar extends HBox
         nicknameLabel = new Label();
         nicknameLabel.addClass(StyleClass.GAME_NICKNAME);
         nicknameLabel.verticalAlign = "center";
-        nicknameLabel.onClick = _ -> {
-            if (participant != null)
-                onNicknameClicked(participant);
-        };
+        nicknameLink = PageLink.attach(nicknameLabel, null);
         addComponent(nicknameLabel);
 
         ratingLabel = new Label();
@@ -74,9 +72,9 @@ class PlayerBar extends HBox
 
     public function setParticipant(participant:GameParticipant):Void
     {
-        this.participant = participant;
         nicknameLabel.text = participant.nickname;
         nicknameLabel.setClass(StyleClass.GAME_NICKNAME_LINK, isPlayer(participant));
+        nicknameLink.setPath(PagePaths.playerProfile(participant.ref));
         ratingLabel.text = GameFormatters.rating(participant.rating);
         ratingLabel.hidden = participant.rating == null;
     }
@@ -101,6 +99,6 @@ class PlayerBar extends HBox
     /** Guests have no profile to open **/
     public static function isPlayer(participant:GameParticipant):Bool
     {
-        return !StringTools.startsWith(participant.ref, "_") && !StringTools.startsWith(participant.ref, "+");
+        return PagePaths.playerProfile(participant.ref) != null;
     }
 }

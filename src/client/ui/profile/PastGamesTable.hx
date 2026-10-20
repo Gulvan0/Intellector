@@ -10,13 +10,14 @@ import client.formatters.TimeControlFormatters;
 import client.ui.common.TimeControlKindIcon;
 import client.ui.common.WidthObserver;
 import client.ui.common.board.BoardPreview;
+import client.utils.PagePaths;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
-import haxe.ui.events.MouseEvent;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 import intellectorboard.primitives.piece.PieceColor;
 import morestd.Detachable;
 
@@ -40,7 +41,6 @@ class PastGamesTable extends VBox
     private static inline final BOARD_WIDTH:Float = 104;
 
     private final login:String;
-    private final onOpen:GameRecord->Void;
 
     private final header:HBox;
     private final rowList:VBox;
@@ -50,11 +50,10 @@ class PastGamesTable extends VBox
     private var tier:TableTier = SixColumns;
 
     /** `login`: the profile's player, whose results the rows tell **/
-    public function new(login:String, onOpen:GameRecord->Void)
+    public function new(login:String)
     {
         super();
         this.login = login;
-        this.onOpen = onOpen;
         percentWidth = 100;
         addClass(StyleClass.PAST_GAMES_TABLE);
 
@@ -94,6 +93,7 @@ class PastGamesTable extends VBox
     private function render():Void
     {
         renderHeader();
+
         rowList.removeAllComponents();
         for (game in games)
             rowList.addComponent(createRow(game));
@@ -140,7 +140,7 @@ class PastGamesTable extends VBox
         row.percentWidth = 100;
         row.addClass(StyleClass.PAST_GAMES_ROW);
         row.trackHover();
-        row.registerEvent(MouseEvent.CLICK, _ -> onOpen(game));
+        PageLink.attach(row, PagePaths.liveGame(game.id));
 
         row.addComponent(new BoardPreview(game.position, ownColor, BOARD_WIDTH));
 

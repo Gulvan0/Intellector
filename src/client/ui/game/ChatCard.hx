@@ -1,6 +1,7 @@
 package client.ui.game;
 
 import client.datatypes.game.GameChatMessage;
+import client.utils.PagePaths;
 import haxe.ui.Toolkit;
 import haxe.ui.components.Button;
 import haxe.ui.components.Label;
@@ -9,6 +10,7 @@ import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.events.KeyboardEvent;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 import haxefolio.structure.ScrollArea;
 
 using client.ui.ComponentExtension;
@@ -26,14 +28,12 @@ class ChatCard extends VBox
     private final input:TextField;
     private final sendButton:Button;
     private final onSend:String->Void;
-    private final onAuthorClicked:GameChatMessage->Void;
 
     /** `onSend`: called with a trimmed, non-empty message; the draft is cleared with `clearDraft` **/
-    public function new(onSend:String->Void, onAuthorClicked:GameChatMessage->Void)
+    public function new(onSend:String->Void)
     {
         super();
         this.onSend = onSend;
-        this.onAuthorClicked = onAuthorClicked;
         percentWidth = 100;
         percentHeight = 100;
         addClass(StyleClass.GAME_CARD);
@@ -107,7 +107,7 @@ class ChatCard extends VBox
         authorLabel.text = message.authorNickname;
         authorLabel.addClass(StyleClass.GAME_NICKNAME);
         authorLabel.setClass(StyleClass.GAME_NICKNAME_LINK, !StringTools.startsWith(message.authorRef, "_"));
-        authorLabel.onClick = _ -> onAuthorClicked(message);
+        PageLink.attach(authorLabel, PagePaths.playerProfile(message.authorRef));
         authorRow.addComponent(authorLabel);
 
         if (message.spectator)

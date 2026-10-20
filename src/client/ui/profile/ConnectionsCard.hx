@@ -10,12 +10,13 @@ import client.ui.common.LoadStatus;
 import client.ui.common.StatusDot;
 import client.ui.common.TimeControlKindIcon;
 import client.ui.common.UnderlineTabs;
+import client.utils.PagePaths;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
-import haxe.ui.events.MouseEvent;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 import haxefolio.structure.ScrollArea;
 
 using client.ui.ComponentExtension;
@@ -25,7 +26,6 @@ class ConnectionsCard extends AsideCard
 {
     private static final KINDS:Array<ConnectionKind> = [Friends, Following, Followers];
 
-    private final onPlayerClicked:String->Void;
 
     private final tabs:UnderlineTabs;
     private final loadStatus:LoadStatus;
@@ -38,11 +38,9 @@ class ConnectionsCard extends AsideCard
     private final statuses:Map<String, PlayerStatus> = []; // by login, kept live
     private final shownDots:Map<String, StatusDot> = []; // by login
 
-    /** `onPlayerClicked` gets the clicked player's login **/
-    public function new(onPlayerClicked:String->Void)
+    public function new()
     {
         super(LocaleUtils.localeBinding("intellector.profile.connections.title"));
-        this.onPlayerClicked = onPlayerClicked;
 
         tabs = new UnderlineTabs([for (kind in KINDS) LocaleUtils.localeBinding('intellector.profile.connections.${kind.getName().toLowerCase()}')], false, index -> {
             shownKind = KINDS[index];
@@ -142,13 +140,14 @@ class ConnectionsCard extends AsideCard
         row.percentWidth = 100;
         row.addClass(StyleClass.PROFILE_CONNECTION_ROW);
         row.trackHover();
-        row.registerEvent(MouseEvent.CLICK, _ -> onPlayerClicked(connection.login));
+        var link:PageLink = PageLink.attach(row, PagePaths.playerProfile(connection.login));
 
         var status:PlayerStatus = statuses.get(connection.login);
         var dot:StatusDot = new StatusDot(status);
         dot.tooltip = ProfileFormatters.status(status);
         shownDots.set(connection.login, dot);
         row.addComponent(dot);
+        link.keepInteractive(dot);
 
         var nicknameLabel:Label = new Label();
         nicknameLabel.text = connection.nickname;

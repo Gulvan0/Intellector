@@ -2,6 +2,7 @@ package client.ui.game;
 
 import client.datatypes.game.GameChatMessage;
 import haxe.ui.components.Button;
+import haxe.ui.components.Image;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
@@ -23,8 +24,8 @@ enum CompactTab
 /**
     Arranges the page's parts. Wide: info and chat | the board | moves and actions. Medium: a header
     line over the board | moves, chat and actions; the info card's facts move to the header and the
-    moves card. Compact: a header line, the move strip, the board, the actions, then a chat peek with
-    the Chat / Moves / Info tabs under it; an open tab shows its card on a sheet floating just above
+    moves card. Compact: a header line, the move strip, the board, the actions, then a chat peek (the
+    only way to open the chat) with the Moves / Info tabs under it; an open tab shows its card on a sheet floating just above
     the tabs, over the peek and whatever else it reaches, so the page never grows.
 **/
 class GameLayout extends Box
@@ -120,6 +121,12 @@ class GameLayout extends Box
         peekButton.tooltip = LocaleUtils.localeBinding("intellector.live_game.tab.open_chat");
         peekButton.onClick = _ -> setOpenTab(Chat);
         peekButton.trackHover();
+        var peekIcon:Image = new Image();
+        peekIcon.resource = GameButtons.icon("chat");
+        peekIcon.width = 16;
+        peekIcon.height = 16;
+        peekIcon.verticalAlign = "center";
+        peekButton.addComponent(peekIcon);
         peekLabel = new Label();
         peekLabel.percentWidth = 100;
         peekLabel.addClass(StyleClass.GAME_PEEK_TEXT);
@@ -147,10 +154,10 @@ class GameLayout extends Box
         tabRow = new HBox();
         tabRow.percentWidth = 100;
         tabRow.addClass(StyleClass.GAME_TABS);
-        for (tab in [Chat, Moves, Info])
+        for (tab in [Moves, Info])
         {
             var button:Button = new Button();
-            button.percentWidth = 100 / 3;
+            button.percentWidth = 50;
             button.text = LocaleUtils.localeBinding('intellector.live_game.tab.${tab.getName().toLowerCase()}');
             button.addClass(StyleClass.GAME_BUTTON);
             button.addClass(StyleClass.GAME_TAB);

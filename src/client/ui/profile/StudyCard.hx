@@ -3,19 +3,20 @@ package client.ui.profile;
 import client.datatypes.study.StudySummary;
 import client.ui.common.DragScrollRow;
 import client.ui.common.board.BoardPreview;
+import client.utils.PagePaths;
 import haxe.ui.components.Button;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
-import haxe.ui.events.MouseEvent;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 
 using StringTools;
 using client.ui.ComponentExtension;
 
 /**
-    A study as a card: its key position, name, description and tags. The card opens the study; a tag
+    A study as a card: its key position, name, description and tags. The card links to the study; a tag
     adds itself to the tag filter, and one already in it is shown selected.
 **/
 class StudyCard extends HBox
@@ -23,13 +24,13 @@ class StudyCard extends HBox
     private static inline final BOARD_WIDTH:Float = 132;
 
     /** `filterTags`: the tags of the filter, compared case-insensitively **/
-    public function new(study:StudySummary, filterTags:Array<String>, onOpen:StudySummary->Void, onTagPicked:String->Void)
+    public function new(study:StudySummary, filterTags:Array<String>, onTagPicked:String->Void)
     {
         super();
         percentWidth = 100;
         addClass(StyleClass.GAME_RECORD_CARD);
         this.trackHover();
-        registerEvent(MouseEvent.CLICK, _ -> onOpen(study));
+        var link:PageLink = PageLink.attach(this, PagePaths.study(study.id));
 
         addComponent(new BoardPreview(study.keyPosition, White, BOARD_WIDTH));
 
@@ -58,6 +59,7 @@ class StudyCard extends HBox
         var tagRow:DragScrollRow = new DragScrollRow();
         tagRow.percentWidth = 100;
         column.addComponent(tagRow);
+        link.keepInteractive(tagRow);
 
         var normalizedFilter:Array<String> = [for (tag in filterTags) normalize(tag)];
         for (tag in study.tags)

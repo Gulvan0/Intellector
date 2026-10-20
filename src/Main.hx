@@ -147,7 +147,6 @@ class Main
         challenges = new ChallengesController(challengesWidget, acceptChallenge, declineChallenge, cancelChallenge, saveChallengeMarks);
         ChallengeMarksStorage.addExternalChangeHandler(() -> challengesUserRef, challenges.applyMarks);
         ongoingGames = new OngoingGamesController(ongoingGamesWidget);
-        ongoingGamesWidget.onOpen = gameId -> HaxeFolioApp.navigateTo('live/$gameId');
         ongoingGamesWidget.currentGameId = () -> LiveGamePage.openGameId;
         GameRedirect.init(openStartedGame);
         IdentityKeeper.init([refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);

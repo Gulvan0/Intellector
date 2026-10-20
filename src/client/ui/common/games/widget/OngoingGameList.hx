@@ -11,7 +11,7 @@ import haxefolio.ResponsivityController;
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/games/widget/ongoing_game_list.xml"))
 class OngoingGameList extends VBox
 {
-    private final onOpen:Int->Void;
+    private final onFollowed:Void->Void;
     private final onPreviewToggled:OngoingGameEntry->Bool->Void;
 
     private var games:Array<OngoingGame> = [];
@@ -19,12 +19,12 @@ class OngoingGameList extends VBox
 
     private var entryMap:Map<Int, OngoingGameEntry> = [];
 
-    /** `onOpen` is called with the id of the game to open **/
-    public function new(onOpen:Int->Void, onPreviewToggled:OngoingGameEntry->Bool->Void)
+    /** `onFollowed` is called when an entry's link is used to navigate in the app **/
+    public function new(onFollowed:Void->Void, onPreviewToggled:OngoingGameEntry->Bool->Void)
     {
         super();
 
-        this.onOpen = onOpen;
+        this.onFollowed = onFollowed;
         this.onPreviewToggled = onPreviewToggled;
 
         // entries are laid out for one breakpoint, so they're rebuilt for the other
@@ -97,7 +97,7 @@ class OngoingGameList extends VBox
 
             if (entry == null)
             {
-                entry = new OngoingGameEntry(game, onOpen.bind(game.id));
+                entry = new OngoingGameEntry(game, onFollowed);
                 entry.onPreviewToggled = onPreviewToggled.bind(entry);
                 box.addComponentAt(entry, i);
                 entryMap.set(game.id, entry);

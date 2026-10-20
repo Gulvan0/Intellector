@@ -6,8 +6,10 @@ import client.datatypes.game.OngoingGame;
 import client.formatters.ClockFormatters;
 import client.formatters.OngoingGameFormatters;
 import client.ui.Assets;
+import client.utils.PagePaths;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 import haxefolio.ResponsivityController;
 import intellectorboard.primitives.piece.PieceColor;
 
@@ -19,11 +21,17 @@ class OngoingGameEntry extends VBox
 {
     public var game(default, null):OngoingGame;
 
+    private final openLink:PageLink;
+    private var current:Bool = false;
+
     /** Called with whether the Preview button became selected **/
     public var onPreviewToggled:Bool->Void = _ -> {};
 
-    /** Laid out for the current breakpoint: rebuild it after a flip **/
-    public function new(game:OngoingGame, onOpen:Void->Void)
+    /**
+        Laid out for the current breakpoint: rebuild it after a flip.
+        `onFollowed` runs when the Open button is used to navigate in the app.
+    **/
+    public function new(game:OngoingGame, onFollowed:Void->Void)
     {
         super();
 
@@ -31,7 +39,7 @@ class OngoingGameEntry extends VBox
         turnMarker.element.setAttribute("role", "img");
 
         previewToggle.onChange = _ -> onPreviewToggled(previewToggle.selected);
-        openButton.onClick = _ -> onOpen();
+        openLink = PageLink.attach(openButton, null, null, null, onFollowed);
 
         setGame(game);
         setCurrent(false);
@@ -40,6 +48,7 @@ class OngoingGameEntry extends VBox
     public function setGame(game:OngoingGame):Void
     {
         this.game = game;
+        refreshOpenLink();
 
         var ownMove:Bool = game.isOwnMove();
         turnMarker.setClass(StyleClass.GAME_ENTRY_TURN_OWN_TIMED, ownMove && game.isTimed());
@@ -73,8 +82,15 @@ class OngoingGameEntry extends VBox
     /** Whether the game is the one open on the page: it can't be opened again **/
     public function setCurrent(current:Bool):Void
     {
+        this.current = current;
         openButton.disabled = current;
+        refreshOpenLink();
         openButton.text = LocaleUtils.localeBinding(current ? "intellector.games_widget.current_game" : "intellector.games_widget.open_game");
+    }
+
+    private function refreshOpenLink():Void
+    {
+        openLink.setPath(current ? null : PagePaths.liveGame(game.id));
     }
 
     public function setPreviewSelected(selected:Bool):Void

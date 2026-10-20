@@ -6,13 +6,14 @@ import client.formatters.GameFormatters;
 import client.formatters.TimeControlFormatters;
 import client.ui.common.TimeControlKindIcon;
 import client.ui.common.board.BoardPreview;
+import client.utils.PagePaths;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
-import haxe.ui.events.MouseEvent;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 import intellectorboard.primitives.piece.PieceColor;
 
 using client.ui.ComponentExtension;
@@ -20,7 +21,7 @@ using client.ui.ComponentExtension;
 /**
     A game as a card: its position, time control, players and two lines of status under them,
     which the owner supplies (the result and how it came about, or whose move it is and when the
-    last one was made). Clicking it anywhere calls `onOpen`.
+    last one was made). It links to the game anywhere.
 **/
 class GameCard extends HBox
 {
@@ -28,6 +29,7 @@ class GameCard extends HBox
 
     public var game(default, null):GameRecord;
 
+    private final link:PageLink;
     private final board:BoardPreview;
     private final kindIcon:TimeControlKindIcon;
     private final timeControlLabel:Label;
@@ -37,14 +39,14 @@ class GameCard extends HBox
     private final statusLabel:Label;
     private final detailLabel:Label;
 
-    public function new(game:GameRecord, orientation:PieceColor, onOpen:GameRecord->Void)
+    public function new(game:GameRecord, orientation:PieceColor)
     {
         super();
         this.game = game;
         percentWidth = 100;
         addClass(StyleClass.GAME_RECORD_CARD);
         this.trackHover();
-        registerEvent(MouseEvent.CLICK, _ -> onOpen(this.game));
+        link = PageLink.attach(this, null);
 
         board = new BoardPreview(game.position, orientation, BOARD_WIDTH);
         addComponent(board);
@@ -95,6 +97,7 @@ class GameCard extends HBox
     public function setGame(game:GameRecord, winner:Null<PieceColor>):Void
     {
         this.game = game;
+        link.setPath(PagePaths.liveGame(game.id));
         board.setPosition(game.position);
         kindIcon.setKind(game.timeControl.getKind());
 

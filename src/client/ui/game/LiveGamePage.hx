@@ -6,7 +6,6 @@ import client.auth.IdentityKeeper;
 import client.datatypes.game.GameChatMessage;
 import client.datatypes.game.GameClock;
 import client.datatypes.game.GameEnding;
-import client.datatypes.game.GameParticipant;
 import client.datatypes.game.LiveGameChange;
 import client.datatypes.game.LiveGameEvent;
 import client.datatypes.game.LiveGameInfo;
@@ -39,6 +38,7 @@ import haxe.ui.containers.VBox;
 import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.PageBase;
+import haxefolio.PageLink;
 import http.HttpError;
 import intellectorboard.mappers.notation.PlyFormatter;
 import intellectorboard.position.Position;
@@ -221,11 +221,11 @@ class LiveGamePage extends PageBase
     {
         stopLoadTimer();
         loadAttempt++;
-        showStatus(LocaleUtils.localeBinding("intellector.live_game.status.not_found", Std.string(gameId)), "intellector.live_game.status.not_found_hint", "intellector.live_game.status.to_main_page", HaxeFolioApp.navigateToDefault);
+        showStatus(LocaleUtils.localeBinding("intellector.live_game.status.not_found", Std.string(gameId)), "intellector.live_game.status.not_found_hint", "intellector.live_game.status.to_main_page", null, HaxeFolioApp.defaultPagePath);
     }
 
-    /** `text`: a locale binding; `actionKey`/`onAction`: the button under it, if any **/
-    private function showStatus(text:String, ?hintKey:String, ?actionKey:String, ?onAction:Void->Void):Void
+    /** `text`: a locale binding; `actionKey`: the button under it, if any, running `onAction` or - if there is none - linking to `actionPath` **/
+    private function showStatus(text:String, ?hintKey:String, ?actionKey:String, ?onAction:Void->Void, ?actionPath:String):Void
     {
         if (statusBox != null)
             removeComponent(statusBox);
@@ -250,14 +250,17 @@ class LiveGamePage extends PageBase
             statusBox.addComponent(hintLabel);
         }
 
-        if (actionKey != null && onAction != null)
+        if (actionKey != null)
         {
             var actionButton:Button = new Button();
             actionButton.text = LocaleUtils.localeBinding(actionKey);
             actionButton.horizontalAlign = "center";
             actionButton.addClass(StyleClass.GAME_BUTTON);
             actionButton.addClass(StyleClass.GAME_BUTTON_PRIMARY); // the screen's only action, on the bare page background
-            actionButton.onClick = _ -> onAction();
+            if (onAction != null)
+                actionButton.onClick = _ -> onAction();
+            else
+                PageLink.attach(actionButton, actionPath);
             statusBox.addComponent(actionButton);
         }
 
@@ -307,10 +310,10 @@ class LiveGamePage extends PageBase
         board.setLastMove(shownPlyCount > 0 ? state.history.plyAt(shownPlyCount - 1) : null);
         handles.push(board.playMove.subscribe(onOwnMove));
 
-        stage = new BoardStage(board, openProfile);
+        stage = new BoardStage(board);
         stage.onFitted = fitLayoutHeight; // compact: the parts around the board can change height after it's fitted
-        infoCard = new GameInfoCard(openProfile);
-        chatCard = new ChatCard(sendChatMessage, message -> openProfileOfRef(message.authorRef));
+        infoCard = new GameInfoCard();
+        chatCard = new ChatCard(sendChatMessage);
         movesCard = new MovesCard(navigate);
         actionsCard = new ActionsCard({
             onFlip: flip,
@@ -842,17 +845,6 @@ class LiveGamePage extends PageBase
             null,
             ({game_id: gameId, text: text} : GameSendChatMessagePayload)
         );
-    }
-
-    private function openProfile(participant:GameParticipant):Void
-    {
-        openProfileOfRef(participant.ref);
-    }
-
-    private function openProfileOfRef(userRef:String):Void
-    {
-        if (!StringTools.startsWith(userRef, "_") && !StringTools.startsWith(userRef, "+"))
-            HaxeFolioApp.navigateTo('player/$userRef');
     }
 
     private function isPlaying():Bool

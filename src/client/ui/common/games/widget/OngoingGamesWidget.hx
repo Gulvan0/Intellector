@@ -24,9 +24,6 @@ class OngoingGamesWidget
     /** What goes into the menu bar **/
     public final dropdown:DropdownWidget;
 
-    /** Called with the id of the game to open, once the dropdown is closed **/
-    public var onOpen:Int->Void = _ -> {};
-
     /** Tells which game the page shows, if any; asked on every render **/
     public var currentGameId:Void->Null<Int> = () -> null;
 
@@ -43,7 +40,7 @@ class OngoingGamesWidget
     public function new()
     {
         icon = new OngoingGamesIcon();
-        list = new OngoingGameList(open, onPreviewToggled);
+        list = new OngoingGameList(closeDropdown, onPreviewToggled);
         dropdown = new DropdownWidget(icon, list, StyleVars.GAMES_DROPDOWN_WIDTH);
         dropdown.onOpened = onDropdownOpened;
         dropdown.onClosed = onDropdownClosed;
@@ -84,10 +81,9 @@ class OngoingGamesWidget
             return NoGames;
     }
 
-    private function open(gameId:Int):Void
+    private function closeDropdown():Void
     {
         dropdown.close();
-        onOpen(gameId);
     }
 
     private function onDropdownOpened():Void

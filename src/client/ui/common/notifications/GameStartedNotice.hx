@@ -1,10 +1,12 @@
 package client.ui.common.notifications;
 
 import client.datatypes.game.StartedGame;
+import client.utils.PagePaths;
 import haxe.ui.components.Label;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 import haxefolio.notification.Notification;
 import haxefolio.notification.NotificationCard;
 import haxefolio.structure.ActionButton;
@@ -38,7 +40,9 @@ class GameStartedNotice
         card.title = LocaleUtils.localeBinding("intellector.game_started_notice.title");
         card.onClose = dismiss;
         card.addComponent(textLabel);
-        card.addAction(new ActionButton(LocaleUtils.localeBinding("intellector.game_started_notice.open"), open, true));
+        var openButton:ActionButton = new ActionButton(LocaleUtils.localeBinding("intellector.game_started_notice.open"), null, true);
+        PageLink.attach(openButton, PagePaths.liveGame(game.id), null, null, dismiss);
+        card.addAction(openButton);
 
         notification = HaxeFolioApp.notify(card, StyleVars.GAME_STARTED_NOTICE_EXPANDED_WIDTH);
     }
@@ -46,12 +50,6 @@ class GameStartedNotice
     private function resolveText():String
     {
         return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.game_started_notice.text"), game.id, game.opponentNickname);
-    }
-
-    private function open():Void
-    {
-        dismiss();
-        HaxeFolioApp.navigateTo('live/${game.id}');
     }
 
     private function dismiss():Void

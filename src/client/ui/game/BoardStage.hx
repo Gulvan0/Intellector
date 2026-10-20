@@ -1,6 +1,5 @@
 package client.ui.game;
 
-import client.datatypes.game.GameParticipant;
 import client.ui.common.board.BoardSurface;
 import client.ui.common.board.InteractiveBoard;
 import haxe.ui.containers.Box;
@@ -38,7 +37,7 @@ class BoardStage extends Box
     private var header:Null<Component> = null;
     private var maxHeight:Null<Float> = null;
 
-    public function new(board:InteractiveBoard, onNicknameClicked:GameParticipant->Void)
+    public function new(board:InteractiveBoard)
     {
         super();
         this.board = board;
@@ -53,7 +52,7 @@ class BoardStage extends Box
         column.width = PROVISIONAL_WIDTH;
         addComponent(column);
 
-        topBar = new PlayerBar(onNicknameClicked);
+        topBar = new PlayerBar();
         topBar.addClass(StyleClass.GAME_PLAYER_BAR_TOP);
         column.addComponent(topBar);
 
@@ -70,7 +69,7 @@ class BoardStage extends Box
         requests.top = REQUESTS_INSET;
         boardHolder.addComponent(requests);
 
-        bottomBar = new PlayerBar(onNicknameClicked);
+        bottomBar = new PlayerBar();
         bottomBar.addClass(StyleClass.GAME_PLAYER_BAR_BOTTOM);
         column.addComponent(bottomBar);
 

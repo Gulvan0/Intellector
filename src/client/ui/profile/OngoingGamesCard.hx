@@ -40,7 +40,6 @@ class OngoingGamesCard extends VBox
     private static inline final MAX_FULL_ROWS:Int = 2;
 
     private final login:String;
-    private final onOpen:GameRecord->Void;
 
     private final tabs:UnderlineTabs;
     private final kindFilter:FilterDropdown;
@@ -61,11 +60,10 @@ class OngoingGamesCard extends VBox
     private var cards:Array<GameCard> = [];
 
     /** `login`: the profile's player, whose side the boards are seen from **/
-    public function new(login:String, onOpen:GameRecord->Void)
+    public function new(login:String)
     {
         super();
         this.login = login;
-        this.onOpen = onOpen;
         percentWidth = 100;
         addClass(StyleClass.PROFILE_CARD);
         addClass(StyleClass.PROFILE_SECTION);
@@ -247,7 +245,7 @@ class OngoingGamesCard extends VBox
             }
 
             var game:GameRecord = shown[i];
-            var card:GameCard = new GameCard(game, orientationOf(game), onOpen);
+            var card:GameCard = new GameCard(game, orientationOf(game));
             setCardStatus(card);
             cards.push(card);
             row.addComponent(card);

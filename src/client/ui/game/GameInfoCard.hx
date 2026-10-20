@@ -7,6 +7,7 @@ import client.datatypes.game.LiveGameInfo;
 import client.formatters.GameFormatters;
 import client.openings.OpeningEntry;
 import client.ui.Assets;
+import client.utils.PagePaths;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
@@ -14,6 +15,7 @@ import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 import intellectorboard.primitives.piece.PieceColor;
 
 using client.ui.ComponentExtension;
@@ -31,16 +33,15 @@ class GameInfoCard extends VBox
     private final whiteDot:Box;
     private final blackDot:Box;
     private final openingLabel:Label;
-    private final onNicknameClicked:GameParticipant->Void;
+    private final nicknameLinks:Map<PieceColor, PageLink> = [];
 
     private var info:Null<LiveGameInfo> = null;
     private var ending:Null<GameEnding> = null;
     private var opening:Null<OpeningEntry> = null;
 
-    public function new(onNicknameClicked:GameParticipant->Void)
+    public function new()
     {
         super();
-        this.onNicknameClicked = onNicknameClicked;
         percentWidth = 100;
         addClass(StyleClass.GAME_CARD);
         addClass(StyleClass.GAME_INFO_CARD);
@@ -111,8 +112,8 @@ class GameInfoCard extends VBox
         ratedLabel.text = GroupedLocaleResolvers.challengeRated(info.rated);
         startedAtLabel.text = GameFormatters.optionalDateTime(info.startedAtMs);
 
-        fillPlayerRow(whiteRow, info.white);
-        fillPlayerRow(blackRow, info.black);
+        fillPlayerRow(whiteRow, White, info.white);
+        fillPlayerRow(blackRow, Black, info.black);
         refreshOpening();
         refreshResolution();
     }
@@ -159,10 +160,7 @@ class GameInfoCard extends VBox
         nicknameLabel.id = "nickname";
         nicknameLabel.addClass(StyleClass.GAME_NICKNAME);
         nicknameLabel.verticalAlign = "center";
-        nicknameLabel.onClick = _ -> {
-            if (info != null)
-                onNicknameClicked(info.participant(color));
-        };
+        nicknameLinks.set(color, PageLink.attach(nicknameLabel, null));
         nicknameLabel.trackHover();
         row.addComponent(nicknameLabel);
 
@@ -185,12 +183,13 @@ class GameInfoCard extends VBox
         return row;
     }
 
-    private function fillPlayerRow(row:HBox, participant:GameParticipant):Void
+    private function fillPlayerRow(row:HBox, color:PieceColor, participant:GameParticipant):Void
     {
         var nicknameLabel:Label = row.findComponent("nickname", Label);
         nicknameLabel.text = participant.nickname;
         if (PlayerBar.isPlayer(participant))
             nicknameLabel.addClass(StyleClass.GAME_NICKNAME_LINK);
+        nicknameLinks.get(color).setPath(PagePaths.playerProfile(participant.ref));
 
         var ratingLabel:Label = row.findComponent("rating", Label);
         ratingLabel.text = GameFormatters.rating(participant.rating);

@@ -7,7 +7,6 @@ import client.datatypes.player.ConnectionKind;
 import client.datatypes.player.Connections;
 import client.datatypes.player.GameStats;
 import client.datatypes.player.PlayerRelation;
-import client.datatypes.study.StudySummary;
 import client.datatypes.timecontrol.TimeControlKind;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.login.LoginOverlay;
@@ -21,6 +20,7 @@ import haxe.ui.containers.VBox;
 import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.PageBase;
+import haxefolio.PageLink;
 import morestd.Detachable;
 import net.models.common.mappers.TimeControlKindMapper;
 import net.models.game.GameSearchPayload;
@@ -86,14 +86,12 @@ class ProfilePage extends PageBase
         setTitle(LocaleUtils.localeBinding("intellector.profile.title"), login);
 
         header = new ProfileHeaderCard(onFriendPressed, () -> {});
-        ongoingCard = new OngoingGamesCard(login, openGame);
+        ongoingCard = new OngoingGamesCard(login);
         archiveCard = new ArchiveCard(login, {
             onPastGamesQuery: loadPastGames,
-            onStudiesQuery: loadStudies,
-            onOpenGame: openGame,
-            onOpenStudy: openStudy
+            onStudiesQuery: loadStudies
         });
-        connectionsCard = new ConnectionsCard(login -> HaxeFolioApp.navigateTo('player/$login'));
+        connectionsCard = new ConnectionsCard();
         statsCard = new GameStatsCard(loadHistory);
 
         profileLayout = new ProfileLayout(header, [ongoingCard, archiveCard], [connectionsCard, statsCard]);
@@ -382,16 +380,6 @@ class ProfilePage extends PageBase
         header.setFriendBusy(false);
     }
 
-    private function openGame(game:GameRecord):Void
-    {
-        HaxeFolioApp.navigateTo('live/${game.id}');
-    }
-
-    private function openStudy(study:StudySummary):Void
-    {
-        HaxeFolioApp.navigateTo('study/${study.id}');
-    }
-
     // nothing to retry: the user goes looking for another player
     private function showNotFound():Void
     {
@@ -413,7 +401,7 @@ class ProfilePage extends PageBase
         actionButton.horizontalAlign = "center";
         actionButton.addClass(StyleClass.GAME_BUTTON);
         actionButton.addClass(StyleClass.GAME_BUTTON_PRIMARY);
-        actionButton.onClick = _ -> HaxeFolioApp.navigateToDefault();
+        PageLink.attach(actionButton, HaxeFolioApp.defaultPagePath);
         statusBox.addComponent(actionButton);
 
         addComponent(statusBox);

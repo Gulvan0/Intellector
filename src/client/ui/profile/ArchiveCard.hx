@@ -30,9 +30,7 @@ typedef ArchiveCallbacks =
 {
     /** Asks for a page of past games; `withCounts` when the filter changed, so the options' counts are stale **/
     onPastGamesQuery:(kinds:Array<TimeControlKind>, rated:Null<Bool>, page:Int, pageSize:Int, withCounts:Bool)->Void,
-    onStudiesQuery:(tags:Array<String>, page:Int, pageSize:Int)->Void,
-    onOpenGame:GameRecord->Void,
-    onOpenStudy:StudySummary->Void
+    onStudiesQuery:(tags:Array<String>, page:Int, pageSize:Int)->Void
 }
 
 /** The player's past games and studies, as two tabs with a filter row each and one pager **/
@@ -157,7 +155,7 @@ class ArchiveCard extends VBox
         pastArea.addClass(StyleClass.PROFILE_ARCHIVE_AREA);
         addComponent(pastArea);
 
-        pastTable = new PastGamesTable(login, callbacks.onOpenGame);
+        pastTable = new PastGamesTable(login);
         pastArea.addComponent(pastTable);
 
         pastStatus = new LoadStatus();
@@ -374,7 +372,7 @@ class ArchiveCard extends VBox
                 row.addClass(StyleClass.PROFILE_CARD_ROW);
                 studyGrid.addComponent(row);
             }
-            row.addComponent(new StudyCard(studies[i], tags, callbacks.onOpenStudy, addTag));
+            row.addComponent(new StudyCard(studies[i], tags, addTag));
         }
 
         if (row != null && studies.length % studyColumns != 0)
