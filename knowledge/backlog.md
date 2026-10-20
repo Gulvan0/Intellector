@@ -77,3 +77,7 @@ Same system as for puzzle comments and article comments
 ## Study node notes and annotations
 
 Allow to leave annotations and textual comments to the specific variation nodes.
+
+## Update nickname
+
+## Avatars

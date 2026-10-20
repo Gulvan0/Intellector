@@ -5,15 +5,7 @@ then 7.
 
 ## Performance
 
-### 1. A DB commit per WS message
-
-**Problem:** every outgoing message is logged as a `WSLog` row in its own session and commit
-(`WebSocketWrapper._send_logged_jsons`), so a broadcast to N subscribers costs N commits; incoming
-messages are logged the same way. The cost grows with the audience (spectators of a popular game).
-
-**How to apply:** take logging off the send path: a buffered writer (an in-memory queue flushed in
-batches by a background task), or a log file. At minimum, one batch per broadcast instead of one per
-recipient.
+### 1. <done>
 
 ### 2. A slow client stalls a broadcast
 
@@ -42,6 +34,8 @@ broadcast in between reaches neither the snapshot nor the new subscriber.
 **How to apply:** register first, then take the snapshot. Events that arrive before the snapshot are
 then possible, so number them per channel and include the number in the snapshot; the client drops
 events the snapshot already covers.
+
+**My take:** Sounds like it increases complexity. Do we really need that?
 
 ### 5. Failed subscriptions are invisible
 
@@ -75,6 +69,8 @@ members, `detach` via `unsubMany`. `PlayerStatusFeed` becomes a thin wrapper ove
 
 **How to apply:** the client sends one message as soon as the user becomes active after the idle
 threshold, rather than waiting for the next ping.
+
+**My take:** Can we just send a ping? Will it be fine?
 
 ## Bugs
 
