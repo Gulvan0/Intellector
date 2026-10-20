@@ -17,6 +17,7 @@ import client.ui.common.board.MoveRulesAdapter;
 import client.ui.common.board.PositionChangeCause;
 import client.ui.common.board.tools.AnalysisMovePolicy;
 import client.ui.common.board.tools.EditorMovePolicy;
+import client.ui.common.overlays.share.ShareOverlay;
 import client.ui.game.MoveStrip;
 import client.ui.game.MovesCard;
 import haxe.ui.Toolkit;
@@ -84,7 +85,7 @@ class AnalysisPage extends PageBase
         actionsCard = new AnalysisActionsCard({
             onFlip: flip,
             onEditPosition: openEditor,
-            onShare: () -> {},
+            onShare: share,
             onPlayFromHere: () -> {}
         });
         editorCard = new EditorCard({
@@ -210,6 +211,11 @@ class AnalysisPage extends PageBase
         var orientation:PieceColor = board.getOrientation().opposite();
         board.setOrientation(orientation);
         toolCard.setOrientation(orientation);
+    }
+
+    private function share():Void
+    {
+        ShareOverlay.present({position: shownNode.position, orientation: board.getOrientation(), lastMove: shownNode.ply, game: null});
     }
 
     private function toggleExpanded():Void

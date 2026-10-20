@@ -52,6 +52,7 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
 - `locale` - HaxeUI/HaxeFolio locale `.properties` files
 - `resources` - static configuration files, most often JSON ones
 - `styles` - all CSS HaxeUI/HaxeFolio styling (except for when it's so short it's embedded into the XML layout)
+- `vendor` - third-party JS loaded by `index.html`, one folder per library with its license (`gifenc` for GIF exports)
 
 `images` and `layouts` should be divided into subfolders by pages making use of these images and components.
 

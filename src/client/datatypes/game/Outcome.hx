@@ -9,6 +9,8 @@ enum DecisiveOutcomeKind
     Timeout;
     Resign;
     Abandon;
+    /** Ended by the moderation, the cheater losing **/
+    CheatingAbort;
 }
 
 enum DrawishOutcomeKind
@@ -17,7 +19,6 @@ enum DrawishOutcomeKind
     Repetition;
     NoProgress;
     Abort;
-    CheatingAbort;
 }
 
 enum Outcome

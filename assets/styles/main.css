@@ -440,6 +440,36 @@
     color: #6d6152;
 }
 
+.haxefolio-text-input-suffix {
+    color: #6d6152;
+}
+
+.haxefolio-color-field-box {
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+}
+
+.haxefolio-color-field-box-focused {
+    border-color: #c79a56;
+}
+
+.haxefolio-color-field-box-invalid {
+    border-color: #b8462c;
+}
+
+.haxefolio-color-field-box-disabled {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+}
+
+.haxefolio-color-field-input {
+    color: #2a211a;
+}
+
+.haxefolio-color-field-input:disabled {
+    color: #a79b8a;
+}
+
 /* its reveal toggle (theme §5.3): inkMuted glyph, ink on hover, inkFaint while disabled */
 .haxefolio-password-reveal {
     color: #6d6152;
@@ -2220,8 +2250,10 @@
     text-align: center;
 }
 
+/* floats over the compact column, its bottom edge one gap above the 44px tabs */
 .intellector-game-sheet {
     height: 180px;
+    margin-bottom: 52px;
 }
 
 .intellector-game-tabs {
@@ -3344,4 +3376,84 @@
 
 .intellector-drag-scroll-row-content {
     horizontal-spacing: 5px;
+}
+
+/*
+    Share overlay: sections under field labels; each export's settings and preview in a sunken
+    panel, its inputs and the unselected Transparent toggle on surfaceDeep.
+*/
+
+.intellector-share-body {
+    padding-top: 18px;
+    padding-right: 12px;
+    padding-bottom: 18px;
+    padding-left: 22px;
+    vertical-spacing: 18px;
+}
+
+.intellector-share-mono .haxefolio-text-input,
+.intellector-share-mono .haxefolio-color-field-input {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+}
+
+.intellector-share-mono .haxefolio-color-field-input-unused {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+}
+
+.intellector-share-panel {
+    background-color: #f0ebe2;
+    border-radius: 5px;
+    padding: 14px;
+}
+
+.intellector-share-settings {
+    vertical-spacing: 14px;
+}
+
+.intellector-share-preview-image {
+    border: 1px solid #d8cfc0;
+}
+
+.intellector-share-transparent {
+    background-color: #fffefb;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.intellector-share-transparent:down {
+    background-color: #f6e6c6;
+}
+
+.intellector-share-transparent:disabled {
+    background-color: #f0ebe2;
+}
+
+.intellector-share-link-toggle {
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.intellector-share-link-toggle:hover {
+    background-color: #e6dfd3;
+}
+
+.intellector-share-link-toggle:down {
+    background-color: #e6dfd3;
+}
+
+.intellector-share-link-toggle:disabled {
+    background-color: transparent;
+    cursor: not-allowed;
+}
+
+.intellector-share-link-toggle .icon {
+    width: 18px;
+    height: 18px;
 }

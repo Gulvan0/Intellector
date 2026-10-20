@@ -69,3 +69,11 @@ Requires it to be designed first, may break the layout or not fit on the screen
 Filter past games by opening.
 
 Maybe not needed because of Game Archive
+
+## Study comments
+
+Same system as for puzzle comments and article comments
+
+## Study node notes and annotations
+
+Allow to leave annotations and textual comments to the specific variation nodes.

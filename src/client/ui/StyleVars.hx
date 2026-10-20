@@ -123,6 +123,28 @@ class StyleVars
     public static final PLAYER_SEARCH_OVERLAY_FOOTER_HEIGHT:ByWidth<Int> = {expanded: 56, collapsed: 76}; // collapsed, the legend takes two lines
     public static inline final PLAYER_SEARCH_MATCH_HIGHLIGHT:String = "#f6e6c6";
 
+    public static inline final SHARE_OVERLAY_WIDTH:Int = 760;
+    public static inline final SHARE_OVERLAY_HEADER_HEIGHT:Int = 56;
+    public static inline final SHARE_BODY_PADDING_VERTICAL:Int = 18;
+    public static inline final SHARE_SECTION_GAP:Int = 18;
+    public static inline final SHARE_LABEL_GAP:Int = 6; // under a field label, as `.haxefolio-field-header`'s margin
+    public static inline final SHARE_COPY_BUTTON_WIDTH:Int = 112; // fits "Скопировано"
+    public static inline final SHARE_PIN_HEIGHT:Int = 96;
+    public static inline final SHARE_PANEL_PADDING:Int = 14;
+    public static inline final SHARE_PANEL_GAP:Int = 14; // between the preview and the settings, and between settings
+    public static inline final SHARE_SETTINGS_WIDTH:Int = 304; // each size field fits "Height" beside "must be 64–4096"
+    public static final SHARE_LINK_TOGGLE_WIDTH:ByWidth<Int> = {expanded: 28, collapsed: 44};
+    public static inline final SHARE_TRANSPARENT_WIDTH:Int = 116; // fits "Прозрачный" in semibold
+    public static inline final SHARE_UNIT_LANE_WIDTH:Int = 34; // the input's right padding, room for "px"/"ms"/"мс"
+    public static inline final SHARE_NARROW_PREVIEW_HEIGHT:Int = 220;
+    public static inline final SHARE_PREVIEW_CHECKER_LIGHT:String = "#fffefb";
+    public static inline final SHARE_PREVIEW_CHECKER_DARK:String = "#e3dccf";
+    public static inline final SHARE_PREVIEW_CHECKER_CELL:Int = 8;
+    public static inline final SHARE_DEFAULT_IMAGE_WIDTH:Int = 800;
+    public static inline final SHARE_DEFAULT_ANIMATION_WIDTH:Int = 480;
+    public static inline final SHARE_DEFAULT_INTERVAL_MS:Int = 400;
+    public static inline final SHARE_DEFAULT_BACKGROUND:String = "#faf7f2";
+
     public static inline final BOARD_CONTROL_BUTTON_WIDTH:Float = 40;
     public static inline final BOARD_CONTROL_BUTTON_HEIGHT:Float = 36;
     public static inline final BOARD_CONTROL_BUTTON_RADIUS:Float = 5;

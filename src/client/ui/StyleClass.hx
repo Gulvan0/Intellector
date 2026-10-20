@@ -288,6 +288,16 @@ enum abstract StyleClass(String) from String to String
     var PLAYER_SEARCH_ROW = "intellector-player-search-row";
     var PLAYER_SEARCH_ROWS = "intellector-player-search-rows";
     var PLAYER_SEARCH_ROW_DETAIL = "intellector-player-search-row-detail";
+
+    var SHARE_BODY = "intellector-share-body";
+    var SHARE_LINK_TOGGLE = "intellector-share-link-toggle";
+    var SHARE_MONO = "intellector-share-mono";
+    var SHARE_PANEL = "intellector-share-panel";
+    var SHARE_PREVIEW = "intellector-share-preview";
+    var SHARE_PREVIEW_IMAGE = "intellector-share-preview-image";
+    var SHARE_SECTION_LABEL = "intellector-share-section-label";
+    var SHARE_SETTINGS = "intellector-share-settings";
+    var SHARE_TRANSPARENT = "intellector-share-transparent";
     var PLAYER_SEARCH_ROW_HEADLINE = "intellector-player-search-row-headline";
     var PLAYER_SEARCH_ROW_TEXT = "intellector-player-search-row-text";
     var PLAYER_SEARCH_STATUS_SLOT = "intellector-player-search-status-slot";

@@ -52,6 +52,33 @@ class BoardPalette
     public final annotationMarkGreen:String;
     public final annotationMarkYellow:String;
 
+    /** This palette, its file letters in `fileLetter` **/
+    public function withFileLetter(fileLetter:String):BoardPalette
+    {
+        return {
+            baseFill: baseFill,
+            border: border,
+            fileLetter: fileLetter,
+            rowNumber: rowNumber,
+            moveMarker: moveMarker,
+            departureHover: departureHover,
+            selectedDeparture: selectedDeparture,
+            destinationHover: destinationHover,
+            promptAnchor: promptAnchor,
+            editorHover: editorHover,
+            premove: premove,
+            lastMove: lastMove,
+            annotationFillRed: annotationFillRed,
+            annotationFillBlue: annotationFillBlue,
+            annotationFillGreen: annotationFillGreen,
+            annotationFillYellow: annotationFillYellow,
+            annotationMarkRed: annotationMarkRed,
+            annotationMarkBlue: annotationMarkBlue,
+            annotationMarkGreen: annotationMarkGreen,
+            annotationMarkYellow: annotationMarkYellow
+        };
+    }
+
     public function annotationFill(color:AnnotationColor):ShadedColor
     {
         return switch color {

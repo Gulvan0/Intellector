@@ -324,7 +324,7 @@ class PastGamesTable extends VBox
     private static function outcomeText(ending:Null<GameEnding>, ownColor:PieceColor):String
     {
         var winner:Null<PieceColor> = winnerOf(ending);
-        var aborted:Bool = ending != null && ending.outcome.match(Drawish(Abort | CheatingAbort));
+        var aborted:Bool = ending != null && ending.outcome.match(Drawish(Abort));
         var key:String = aborted ? "aborted" : winner == null ? "draw" : winner == ownColor ? "won" : "lost";
         return LocaleUtils.localeBinding('intellector.profile.past.outcome.$key');
     }

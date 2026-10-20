@@ -178,6 +178,7 @@ class LiveGameMapper
                 case BREAKTHROUGH: Breakthrough;
                 case TIMEOUT: Timeout;
                 case RESIGN: Resign;
+                case CHEATING_ABORT: CheatingAbort;
                 default: Abandon;
             }
             return Decisive(decisiveKind, PieceColorMapper.dtoToDatatype(winner));
@@ -187,7 +188,6 @@ class LiveGameMapper
             case DRAW_AGREEMENT: DrawAgreement;
             case REPETITION: Repetition;
             case NO_PROGRESS: NoProgress;
-            case CHEATING_ABORT: CheatingAbort;
             default: Abort;
         }
         return Drawish(drawishKind);

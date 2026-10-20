@@ -28,6 +28,7 @@ import client.ui.common.board.tools.InertMovePolicy;
 import client.ui.common.board.tools.LiveGameMovePolicy;
 import client.ui.common.notifications.GameEndedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
+import client.ui.common.overlays.share.ShareOverlay;
 import client.ui.game.GameLayout.CompactTab;
 import easypubsub.Subscription;
 import haxe.Timer;
@@ -318,7 +319,7 @@ class LiveGamePage extends PageBase
             onResign: askResign,
             onAddTime: addTime,
             onAnalyze: () -> {},
-            onShare: () -> {},
+            onShare: share,
             onPlayFromHere: () -> {},
             onRematch: () -> {}
         });
@@ -736,6 +737,24 @@ class LiveGamePage extends PageBase
         orientation = orientation.opposite();
         board.setOrientation(orientation);
         refreshPlayerBars();
+    }
+
+    private function share():Void
+    {
+        var plyCount:Int = state.history.plyCount();
+        var shownPlyCount:Int = state.history.shownPlyIndex();
+
+        ShareOverlay.present({
+            position: state.history.shownPosition(),
+            orientation: orientation,
+            lastMove: shownPlyCount > 0 ? state.history.plyAt(shownPlyCount - 1) : null,
+            game: {
+                info: state.info,
+                plies: [for (i in 0...plyCount) state.history.plyAt(i)],
+                positions: [for (i in 0...plyCount + 1) state.history.positionAt(i)],
+                ending: state.getEnding()
+            }
+        });
     }
 
     private function onOwnMove(ply:RawPly):Void

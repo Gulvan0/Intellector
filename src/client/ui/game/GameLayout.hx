@@ -9,6 +9,7 @@ import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
+import haxefolio.structure.ScrollArea;
 
 using client.ui.ComponentExtension;
 
@@ -23,7 +24,8 @@ enum CompactTab
     Arranges the page's parts. Wide: info and chat | the board | moves and actions. Medium: a header
     line over the board | moves, chat and actions; the info card's facts move to the header and the
     moves card. Compact: a header line, the move strip, the board, the actions, then a chat peek with
-    the Chat / Moves / Info tabs under it; an open tab shows its card in the peek's place.
+    the Chat / Moves / Info tabs under it; an open tab shows its card on a sheet floating just above
+    the tabs, over the peek and whatever else it reaches, so the page never grows.
 **/
 class GameLayout extends Box
 {
@@ -56,12 +58,14 @@ class GameLayout extends Box
     private final peekLabel:Label;
     private final unreadBadge:Label;
     private final sheet:Box;
+    // compact: the sheet is shorter than the info card, so the card scrolls inside a frame of its own
+    private final infoFrame:VBox;
+    private final infoScrollArea:ScrollArea;
     private final tabButtons:Map<CompactTab, Button> = [];
 
     private var tier:Null<BoardLayoutTier> = null;
     private var openTab:Null<CompactTab> = null;
     private var unreadCount:Int = 0;
-    private var peekHeight:Float = 0; // last measured while shown: a tab hides the peek
 
     public function new(infoCard:GameInfoCard, chatCard:ChatCard, movesCard:MovesCard, actionsCard:ActionsCard, stage:BoardStage, moveStrip:MoveStrip)
     {
@@ -129,7 +133,16 @@ class GameLayout extends Box
 
         sheet = new Box();
         sheet.percentWidth = 100;
+        sheet.verticalAlign = "bottom";
         sheet.addClass(StyleClass.GAME_SHEET);
+
+        infoScrollArea = new ScrollArea(infoCard);
+        infoScrollArea.percentHeight = 100;
+        infoFrame = new VBox();
+        infoFrame.percentWidth = 100;
+        infoFrame.percentHeight = 100;
+        infoFrame.addClass(StyleClass.GAME_CARD);
+        infoFrame.addComponent(infoScrollArea);
 
         tabRow = new HBox();
         tabRow.percentWidth = 100;
@@ -158,6 +171,7 @@ class GameLayout extends Box
         removeAllComponents(false);
 
         var compact:Bool = tier == Compact;
+        infoCard.setClass(StyleClass.GAME_CARD, !compact); // compact: its frame draws the card
         actionsCard.setCompact(compact);
         movesCard.setNavigationShown(!compact);
         movesCard.setOpeningShown(tier == Medium);
@@ -169,17 +183,19 @@ class GameLayout extends Box
         {
             height = null;
             invalidateComponentLayout();
-            for (part in [infoCard, chatCard, movesCard])
-                part.percentHeight = 100;
+            infoCard.percentHeight = null;
+            chatCard.percentHeight = 100;
+            movesCard.percentHeight = 100;
 
+            infoScrollArea.addComponent(infoCard);
             compactColumn.addComponent(headRow);
             compactColumn.addComponent(moveStrip);
             compactColumn.addComponent(stage);
             compactColumn.addComponent(actionsCard);
             compactColumn.addComponent(peekButton);
-            compactColumn.addComponent(sheet);
             compactColumn.addComponent(tabRow);
             addComponent(compactColumn);
+            addComponent(sheet);
             refreshTab();
         }
         else if (tier == Medium)
@@ -222,22 +238,17 @@ class GameLayout extends Box
         return tier == Compact;
     }
 
-    /** Compact: the most the stage can take of `availableHeight` with the tabs closed (an open one scrolls the page instead); measured, so call it after a layout **/
+    /** Compact: the most the stage can take of `availableHeight`; the sheet floats, so it takes none. Measured, so call it after a layout **/
     public function compactStageMaxHeight(availableHeight:Float):Float
     {
-        if (!peekButton.hidden)
-            peekHeight = peekButton.element.offsetHeight;
-
         var height:Float = 0;
         var partCount:Int = 0;
         for (part in compactColumn.childComponents)
         {
-            if (part == sheet || (part.hidden && part != peekButton))
+            if (part.hidden)
                 continue;
             partCount++;
-            if (part == peekButton)
-                height += peekHeight;
-            else if (part != stage)
+            if (part != stage)
                 height += part.element.offsetHeight;
         }
         var spacing:Float = compactColumn.style.verticalSpacing ?? 0.0;
@@ -283,23 +294,22 @@ class GameLayout extends Box
         if (tier != Compact)
             return;
 
-        for (part in [infoCard, chatCard, movesCard])
+        for (part in ([infoFrame, chatCard, movesCard] : Array<Component>))
             if (part.parentComponent == sheet)
                 sheet.removeComponent(part, false);
 
-        peekButton.hidden = openTab != null;
         sheet.hidden = openTab == null;
         if (openTab != null)
             sheet.addComponent(switch openTab {
                 case Chat: chatCard;
                 case Moves: movesCard;
-                case Info: infoCard;
+                case Info: infoFrame;
             });
     }
 
     private function detachParts():Void
     {
-        for (part in ([infoCard, chatCard, movesCard, actionsCard, stage, moveStrip, peekButton, sheet, headRow, tabRow] : Array<Component>))
+        for (part in ([infoCard, infoFrame, chatCard, movesCard, actionsCard, stage, moveStrip, peekButton, sheet, headRow, tabRow] : Array<Component>))
             if (part.parentComponent != null)
                 part.parentComponent.removeComponent(part, false);
         for (container in [leftColumn, rightColumn, wideRow, compactColumn])
