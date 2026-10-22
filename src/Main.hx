@@ -78,6 +78,9 @@ import net.ws.events.PlayerOngoingGamesRefresh;
 
 class Main
 {
+    /** Shorter than the server's away threshold, so that a resumed user never stays "away" until the next scheduled heartbeat **/
+    private static inline final IDLE_THRESHOLD_SECS:Int = 60;
+
     @:allow(client.ui.demo) private static var challengesWidget:ChallengesWidget;
     @:allow(client.ui.demo) private static var challenges:ChallengesController;
     private static var incomingChallengesSubscription:Null<Subscription<IncomingChallenges>> = null;
@@ -139,17 +142,17 @@ class Main
         var tokenRetriever:Void->Null<String> = () -> HaxeFolioApp.valueStorage.read(LocalStorageKey.TOKEN);
         Rest.init(tokenRetriever);
         ServerTime.init(Rest.serverClock().now);
-        PubSub.start(tokenRetriever, () -> ActivityTracker.getLastActivityTs());
+        PubSub.start(tokenRetriever, () -> ActivityTracker.getLastActivityTs(), null, AuthBootstrap.run); // the token was rejected: revalidate it, falling back to the guest
 
         HaxeFolioApp.init(config);
         PreferenceMigration.run();
-        ActivityTracker.activate();
+        ActivityTracker.activate(IDLE_THRESHOLD_SECS, PubSub.sendHeartbeat);
         challenges = new ChallengesController(challengesWidget, acceptChallenge, declineChallenge, cancelChallenge, saveChallengeMarks);
         ChallengeMarksStorage.addExternalChangeHandler(() -> challengesUserRef, challenges.applyMarks);
         ongoingGames = new OngoingGamesController(ongoingGamesWidget);
         ongoingGamesWidget.currentGameId = () -> LiveGamePage.openGameId;
         GameRedirect.init(openStartedGame);
-        IdentityKeeper.init([refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);
+        IdentityKeeper.init([_ -> PubSub.reauth(), refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);
         AuthBootstrap.run();
     }
 
