@@ -8,6 +8,7 @@ import client.utils.TimedLoad;
 import haxe.Timer;
 import haxe.ui.Toolkit;
 import haxefolio.HaxeFolioApp;
+import haxefolio.appearance.AppearanceOverrides;
 import haxefolio.LocaleUtils;
 import haxefolio.overlay.OverlayContent;
 import haxefolio.structure.SearchBar;
@@ -27,20 +28,30 @@ class PlayerSearchOverlay
     private static inline final DEBOUNCE_MS:Int = 250;
     private static inline final QUERY_MAX_CHARS:Int = 64;
 
-    /** `title` names what the pick is for. `excludeOwn` leaves the user's own account out of the results **/
-    public static function present(title:String, excludeOwn:Bool, onPicked:FoundPlayer->Void):Void
+    /**
+        `title` names what the pick is for. `excludeOwn` leaves the user's own account out of the
+        results. `initialQuery` is searched right away. `overOpenOverlay` opens it over the overlay
+        that is open (and does nothing if there is none) instead of requiring none.
+    **/
+    public static function present(title:String, excludeOwn:Bool, onPicked:FoundPlayer->Void, initialQuery:String = "", overOpenOverlay:Bool = false):Void
     {
-        HaxeFolioApp.present("player_search", build.bind(title, excludeOwn, onPicked), null, {
+        var appearance:AppearanceOverrides = {
             geometry: {
                 dialogWidth: StyleVars.PLAYER_SEARCH_OVERLAY_WIDTH,
                 dialogHeight: StyleVars.PLAYER_SEARCH_OVERLAY_HEIGHT,
                 headerHeight: StyleVars.PLAYER_SEARCH_OVERLAY_HEADER_HEIGHT,
                 searchBarHeight: StyleVars.PLAYER_SEARCH_OVERLAY_SEARCH_HEIGHT
             }
-        });
+        };
+        var factory:(Void->Void)->OverlayContent = build.bind(title, excludeOwn, onPicked, initialQuery);
+
+        if (overOpenOverlay)
+            HaxeFolioApp.presentOver("player_search", factory, null, appearance);
+        else
+            HaxeFolioApp.present("player_search", factory, null, appearance);
     }
 
-    private static function build(title:String, excludeOwn:Bool, onPicked:FoundPlayer->Void, dismiss:Void->Void):OverlayContent
+    private static function build(title:String, excludeOwn:Bool, onPicked:FoundPlayer->Void, initialQuery:String, dismiss:Void->Void):OverlayContent
     {
         var load:TimedLoad = new TimedLoad();
         var debounce:Null<Timer> = null;
@@ -115,6 +126,12 @@ class PlayerSearchOverlay
         }
 
         searchBar = new SearchBar(LocaleUtils.localeBinding("intellector.overlay.player_search.placeholder"), onQuery, true, QUERY_MAX_CHARS);
+
+        if (initialQuery.trim() != "")
+        {
+            searchBar.query = initialQuery;
+            onQuery(initialQuery);
+        }
 
         // the frame is put on screen right after this factory returns
         Toolkit.callLater(searchBar.focus);

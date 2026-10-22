@@ -9,6 +9,8 @@ import client.logic.challenge.creation.ChallengeDraftRules;
 import client.datatypes.challenge.creation.ChallengeTarget;
 import client.datatypes.challenge.creation.ChallengeType;
 import client.datatypes.challenge.creation.OpenChallengeVisibility;
+import client.datatypes.player.FoundPlayer;
+import client.ui.common.overlays.playersearch.PlayerSearchOverlay;
 import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;
@@ -25,6 +27,8 @@ import morestd.Detachable;
 **/
 class OpponentSection extends VBox
 {
+    private static inline final FIND_PLAYER_GLYPH:String = '<circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/>';
+
     private final draft:ChallengeDraft;
     private final ownUserRef:Null<String>;
     private final onEdit:Void->Void;
@@ -64,6 +68,7 @@ class OpponentSection extends VBox
 
         loginField = new TextInputField(phrase("field.login"), onLoginEdited);
         loginField.currentText = draft.calleeLogin;
+        loginField.setAction(FIND_PLAYER_GLYPH, LocaleUtils.resolveText(phrase("find_player")), openPlayerSearch);
 
         guestField = new TextInputField(phrase("field.guest_number"), onGuestNumberEdited);
         guestField.currentText = draft.calleeGuestNumber;
@@ -146,6 +151,17 @@ class OpponentSection extends VBox
         loginTouched = true;
         render();
         onEdit();
+    }
+
+    private function openPlayerSearch():Void
+    {
+        PlayerSearchOverlay.present(phrase("choose_opponent"), true, onOpponentPicked, loginField.currentText, true);
+    }
+
+    private function onOpponentPicked(player:FoundPlayer):Void
+    {
+        loginField.currentText = player.login;
+        onLoginEdited(player.login);
     }
 
     private function onGuestNumberEdited(value:String):Void
