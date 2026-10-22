@@ -18,8 +18,11 @@ class BoardInputOptions
     /** The control row's "Auto-promote to Dominator" toggle; stands in for `always` while shown **/
     public var autoPromoteToggle:Bool = false;
 
-    /** The control row's "Ask about chameleon" toggle **/
-    public var askChameleonToggle:Bool = false;
+    /** The control row's choice among asking about, auto-approving and auto-declining a chameleon **/
+    public var chameleonModeToggle:ChameleonMode = Ask;
+
+    /** The control row's "Enable chameleon choice for premoves" toggle **/
+    public var askPremoveChameleonToggle:Bool = false;
 
     /** The color the primary button annotates in, or `null` for the normal mode (moving pieces) **/
     public var annotationColorToggle:Null<AnnotationColor> = null;
@@ -52,9 +55,22 @@ class BoardInputOptions
         return autoPromoteMode == ALWAYS || byShift;
     }
 
-    /** Whether a possible chameleon premove completed with `modifiers` asks which kind to morph into **/
-    public function asksChameleon(modifiers:Modifiers):Bool
+    /**
+        How a chameleon move completed with `modifiers` gets decided: Shift approves, Ctrl declines;
+        otherwise (neither or both held) the control row's choice if shown, else ask.
+    **/
+    public function chameleonMode(modifiers:Modifiers):ChameleonMode
     {
-        return (controlsShown && askChameleonToggle) || modifiers.shift;
+        return switch [modifiers.shift, modifiers.ctrl] {
+            case [true, false]: AutoApprove;
+            case [false, true]: AutoDecline;
+            default: controlsShown ? chameleonModeToggle : Ask;
+        }
+    }
+
+    /** Whether a possible chameleon premove completed with `modifiers` asks which kind to morph into **/
+    public function asksPremoveChameleon(modifiers:Modifiers):Bool
+    {
+        return (controlsShown && askPremoveChameleonToggle) || modifiers.shift;
     }
 }

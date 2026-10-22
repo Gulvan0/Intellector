@@ -68,7 +68,7 @@ class InteractiveBoard extends Box
 
         controlRow = new BoardControlRow(options, BoardPalette.DEFAULT);
         controlRow.onAnnotationModeChanged = onAnnotationModeChanged;
-        controlRow.setAskChameleonEnabled(false);
+        controlRow.setPremoveChameleonEnabled(false);
         addComponent(controlRow);
 
         board = new BoardSurface(position, orientation, Preferences.boardCoordinates.get());
@@ -280,7 +280,7 @@ class InteractiveBoard extends Box
     /** Whether the user moves pieces on this board at all (not a spectator); enabled by default **/
     public function setUserMovesEnabled(enabled:Bool):Void
     {
-        controlRow.setAutoPromoteEnabled(enabled);
+        controlRow.setMoveControlsEnabled(enabled);
     }
 
     /** Lets `userColor` queue premoves, per the preference; returns the queue for the move policy **/
@@ -291,7 +291,7 @@ class InteractiveBoard extends Box
         var queue:Premoves = new Premoves(board, tints, rules, userColor, board.getPosition(), Preferences.premoveEnabled.get(), playMove, premoveIntents);
         premoveEnabledHandle = Preferences.premoveEnabled.onChange(queue.setEnabled);
         premoves = queue;
-        controlRow.setAskChameleonEnabled(true);
+        controlRow.setPremoveChameleonEnabled(true);
         return queue;
     }
 
@@ -305,6 +305,6 @@ class InteractiveBoard extends Box
         premoveEnabledHandle = null;
         premoves.dispose();
         premoves = null;
-        controlRow.setAskChameleonEnabled(false);
+        controlRow.setPremoveChameleonEnabled(false);
     }
 }

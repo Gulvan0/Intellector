@@ -4,9 +4,11 @@ enum abstract StyleClass(String) from String to String
 {
     var BOARD_CONTROL = "intellector-board-control";
     var BOARD_CONTROL_CROSS = "intellector-board-control-cross";
-    var BOARD_CONTROL_QUESTION = "intellector-board-control-question";
+    var BOARD_CONTROL_SEGMENT = "intellector-board-control-segment";
+    var BOARD_CONTROL_SEGMENTS = "intellector-board-control-segments";
     var BOARD_CONTROL_SELECTED = "intellector-board-control-selected";
     var BOARD_CONTROLS = "intellector-board-controls";
+    var BOARD_CONTROLS_PAGE = "intellector-board-controls-page";
     var BOARD_CONTROLS_SEPARATOR = "intellector-board-controls-separator";
     var INTERACTIVE_BOARD = "intellector-interactive-board";
 
@@ -39,6 +41,10 @@ enum abstract StyleClass(String) from String to String
     var CHALLENGE_SLOT_NOTE = "intellector-challenge-slot-note";
     var CHALLENGE_TIME_PRESETS = "intellector-challenge-time-presets";
     var CHALLENGE_TYPE_SLOT = "intellector-challenge-type-slot";
+
+    var IMPORT_POSITION_BODY = "intellector-import-position-body";
+    var IMPORT_POSITION_INSET = "intellector-import-position-inset";
+    var IMPORT_POSITION_SIP = "intellector-import-position-sip";
 
     var LOGIN_BOTTOM = "intellector-login-bottom";
     var LOGIN_FIELDS = "intellector-login-fields";
@@ -252,25 +258,25 @@ enum abstract StyleClass(String) from String to String
     var PAGER_RANGE = "intellector-pager-range";
     var PAGER_TEXT = "intellector-pager-text";
 
-    var PAST_GAMES_DATE = "intellector-past-games-date";
-    var PAST_GAMES_DATE_CELL = "intellector-past-games-date-cell";
-    var PAST_GAMES_HEADER = "intellector-past-games-header";
-    var PAST_GAMES_HEADING = "intellector-past-games-heading";
-    var PAST_GAMES_MOBILE_COLUMN = "intellector-past-games-mobile-column";
-    var PAST_GAMES_NARROW_RESULT_CELL = "intellector-past-games-narrow-result-cell";
+    var PAST_GAMES_LINE = "intellector-past-games-line";
+    var PAST_GAMES_LIST = "intellector-past-games-list";
+    var PAST_GAMES_NARROW_BODY = "intellector-past-games-narrow-body";
+    var PAST_GAMES_NARROW_NICKNAME = "intellector-past-games-narrow-nickname";
+    var PAST_GAMES_NARROW_PLAYER_LINE = "intellector-past-games-narrow-player-line";
+    var PAST_GAMES_NARROW_RESULT = "intellector-past-games-narrow-result";
+    var PAST_GAMES_NARROW_ROW = "intellector-past-games-narrow-row";
+    var PAST_GAMES_NARROW_TEXT = "intellector-past-games-narrow-text";
     var PAST_GAMES_OUTCOME = "intellector-past-games-outcome";
     var PAST_GAMES_PLAYERS = "intellector-past-games-players";
-    var PAST_GAMES_PLAYERS_CELL = "intellector-past-games-players-cell";
-    var PAST_GAMES_RESULT = "intellector-past-games-result";
-    var PAST_GAMES_RESULT_CELL = "intellector-past-games-result-cell";
     var PAST_GAMES_ROW = "intellector-past-games-row";
-    var PAST_GAMES_ROWS = "intellector-past-games-rows";
-    var PAST_GAMES_STACK = "intellector-past-games-stack";
-    var PAST_GAMES_STACK_CELL = "intellector-past-games-stack-cell";
-    var PAST_GAMES_TABLE = "intellector-past-games-table";
-    var PAST_GAMES_TIME_CONTROL = "intellector-past-games-time-control";
-    var PAST_GAMES_TIME_CONTROL_CELL = "intellector-past-games-time-control-cell";
-    var PAST_GAMES_TYPE_CELL = "intellector-past-games-type-cell";
+    var PAST_GAMES_SEPARATOR = "intellector-past-games-separator";
+    var PAST_GAMES_TOP_LINE = "intellector-past-games-top-line";
+    var PAST_GAMES_WIDE_NICKNAME = "intellector-past-games-wide-nickname";
+    var PAST_GAMES_WIDE_PLAYER_LINE = "intellector-past-games-wide-player-line";
+    var PAST_GAMES_WIDE_ROW = "intellector-past-games-wide-row";
+    var PAST_GAMES_WIDE_TEXT = "intellector-past-games-wide-text";
+    var PAST_GAMES_WINNER = "intellector-past-games-winner";
+    var PAST_GAMES_WRAPPING_REASON = "intellector-past-games-wrapping-reason";
 
     var PLAYER_SEARCH_CANCEL = "intellector-player-search-cancel";
     var PLAYER_SEARCH_EMPTY = "intellector-player-search-empty";
@@ -303,7 +309,6 @@ enum abstract StyleClass(String) from String to String
     var PLAYER_SEARCH_STATUS_SLOT = "intellector-player-search-status-slot";
 
     var PROFILE_ACTION_BUTTON = "intellector-profile-action-button";
-    var PROFILE_ARCHIVE_AREA = "intellector-profile-archive-area";
     var PROFILE_ARCHIVE_STATUS = "intellector-profile-archive-status";
     var PROFILE_ASIDE_BODY = "intellector-profile-aside-body";
     var PROFILE_ASIDE_CARD = "intellector-profile-aside-card";

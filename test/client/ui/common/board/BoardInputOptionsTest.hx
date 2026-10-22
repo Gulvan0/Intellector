@@ -87,19 +87,38 @@ class BoardInputOptionsTest extends Test
         assertAutoPromotes(SHIFT, false, true);
     }
 
-    private function testAsksChameleonWithShift():Void
+    private function testChameleonModeByModifiers():Void
     {
-        Assert.isFalse(options.asksChameleon(NO_KEYS));
-        Assert.isFalse(options.asksChameleon(CTRL_HELD));
-        Assert.isTrue(options.asksChameleon(SHIFT_HELD));
+        Assert.equals(ChameleonMode.Ask, options.chameleonMode(NO_KEYS));
+        Assert.equals(ChameleonMode.AutoApprove, options.chameleonMode(SHIFT_HELD));
+        Assert.equals(ChameleonMode.AutoDecline, options.chameleonMode(CTRL_HELD));
+        Assert.equals(ChameleonMode.Ask, options.chameleonMode(SHIFT_CTRL_HELD));
     }
 
-    private function testAsksChameleonByShownToggle():Void
+    private function testChameleonModeByShownToggle():Void
     {
-        options.askChameleonToggle = true;
-        Assert.isFalse(options.asksChameleon(NO_KEYS));
+        options.chameleonModeToggle = AutoDecline;
+        Assert.equals(ChameleonMode.Ask, options.chameleonMode(NO_KEYS));
 
         options.controlsShown = true;
-        Assert.isTrue(options.asksChameleon(NO_KEYS));
+        Assert.equals(ChameleonMode.AutoDecline, options.chameleonMode(NO_KEYS));
+        Assert.equals(ChameleonMode.AutoDecline, options.chameleonMode(SHIFT_CTRL_HELD));
+        Assert.equals(ChameleonMode.AutoApprove, options.chameleonMode(SHIFT_HELD));
+    }
+
+    private function testAsksPremoveChameleonWithShift():Void
+    {
+        Assert.isFalse(options.asksPremoveChameleon(NO_KEYS));
+        Assert.isFalse(options.asksPremoveChameleon(CTRL_HELD));
+        Assert.isTrue(options.asksPremoveChameleon(SHIFT_HELD));
+    }
+
+    private function testAsksPremoveChameleonByShownToggle():Void
+    {
+        options.askPremoveChameleonToggle = true;
+        Assert.isFalse(options.asksPremoveChameleon(NO_KEYS));
+
+        options.controlsShown = true;
+        Assert.isTrue(options.asksPremoveChameleon(NO_KEYS));
     }
 }

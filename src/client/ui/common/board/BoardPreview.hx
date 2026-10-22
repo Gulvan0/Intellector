@@ -13,11 +13,16 @@ class BoardPreview extends Box
     {
         super();
         width = boardWidth;
-        height = boardWidth / BoardSurface.aspectRatioOf(NONE);
+        height = heightFor(boardWidth);
         verticalAlign = "center";
 
         surface = new BoardSurface(position, orientation, NONE);
         addComponent(surface);
+    }
+
+    public static function heightFor(boardWidth:Float):Int
+    {
+        return Math.round(boardWidth / BoardSurface.aspectRatioOf(NONE));
     }
 
     public function setPosition(position:Position):Void

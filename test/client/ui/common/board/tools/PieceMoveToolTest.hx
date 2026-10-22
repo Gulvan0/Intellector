@@ -26,6 +26,7 @@ import utest.Test;
 class PieceMoveToolTest extends Test
 {
     private static final SHIFT_HELD:Modifiers = {shift: true, ctrl: false};
+    private static final CTRL_HELD:Modifiers = {shift: false, ctrl: true};
     private static final DRAG_POINT:BoardPoint = {x: 123, y: 456};
 
     private var board:FakeBoardView;
@@ -341,6 +342,26 @@ class PieceMoveToolTest extends Test
         gestures.click(Primary, hex(4, 2));
         prompts.decide(false);
 
+        Assert.same(["4,5>4,2"], played);
+    }
+
+    private function testShiftAutoApprovesChameleon():Void
+    {
+        board.setPosition(capturePosition(), Replacement);
+        gestures.press(Primary, hex(4, 5));
+        gestures.release(Primary, hex(4, 2), SHIFT_HELD);
+
+        Assert.isNull(prompts.last);
+        Assert.same(["4,5>4,2=Aggressor"], played);
+    }
+
+    private function testCtrlAutoDeclinesChameleon():Void
+    {
+        board.setPosition(capturePosition(), Replacement);
+        gestures.press(Primary, hex(4, 5));
+        gestures.release(Primary, hex(4, 2), CTRL_HELD);
+
+        Assert.isNull(prompts.last);
         Assert.same(["4,5>4,2"], played);
     }
 

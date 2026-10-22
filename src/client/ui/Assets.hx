@@ -38,6 +38,11 @@ class Assets
         return 'assets/images/analysis/$name.svg';
     }
 
+    public static function boardControlIcon(name:String):String
+    {
+        return 'assets/images/common/board/controls/$name.svg';
+    }
+
     public static function pieceImage(kind:PieceKind, color:PieceColor):String
     {
         return 'assets/images/common/board/pieces/${kind}_${color}.svg';

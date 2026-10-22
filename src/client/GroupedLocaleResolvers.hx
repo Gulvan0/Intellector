@@ -49,6 +49,11 @@ class GroupedLocaleResolvers
         return LocaleUtils.localeBinding('intellector.overlay.challenge.$key');
     }
 
+    public static function importPositionOverlay(key:String):String
+    {
+        return LocaleUtils.localeBinding('intellector.overlay.import_position.$key');
+    }
+
     public static function acceptorColor(acceptorColor:ChallengeAcceptorColor):String
     {
         return LocaleUtils.localeBinding('intellector.challenge_notification.acceptor_color.${acceptorColor.getName().toLowerCase()}');

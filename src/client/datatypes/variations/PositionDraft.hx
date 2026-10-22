@@ -64,6 +64,11 @@ class PositionDraft
         position = Position.defaultStarting();
     }
 
+    public function setPosition(newPosition:Position):Void
+    {
+        position = newPosition.copy();
+    }
+
     public function isChanged():Bool
     {
         return position.turnColor != original.turnColor || position.getHash() != original.getHash();

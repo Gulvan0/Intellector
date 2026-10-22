@@ -145,14 +145,24 @@ class StyleVars
     public static inline final SHARE_DEFAULT_INTERVAL_MS:Int = 400;
     public static inline final SHARE_DEFAULT_BACKGROUND:String = "#faf7f2";
 
+    public static inline final IMPORT_POSITION_OVERLAY_WIDTH:Int = 480;
+    public static inline final IMPORT_POSITION_OVERLAY_HEADER_HEIGHT:Int = 56;
+    public static final IMPORT_POSITION_OVERLAY_FOOTER_HEIGHT:ByWidth<Int> = {expanded: 66, collapsed: 74};
+    public static inline final IMPORT_POSITION_BODY_PADDING_VERTICAL:Int = 18;
+    public static inline final IMPORT_POSITION_SECTION_GAP:Int = 18;
+    public static inline final IMPORT_POSITION_INSET_PADDING:Int = 14;
+    public static inline final IMPORT_POSITION_BOARD_WIDTH:Int = 164;
+    public static inline final IMPORT_POSITION_CANCEL_WIDTH_PERCENT:Float = 36;
+
     public static inline final BOARD_CONTROL_BUTTON_WIDTH:Float = 40;
     public static inline final BOARD_CONTROL_BUTTON_HEIGHT:Float = 36;
     public static inline final BOARD_CONTROL_BUTTON_RADIUS:Float = 5;
-    public static inline final BOARD_CONTROL_PEN_ICON_SIZE:Float = 24;
+    public static inline final BOARD_CONTROL_ICON_SIZE:Float = 26;
     public static inline final BOARD_CONTROLS_SEPARATOR_DIAMETER:Float = 8;
     public static inline final BOARD_CONTROLS_SEPARATOR_MARGIN:Float = 6;
-    public static inline final BOARD_CONTROL_ART_SIZE:Float = 28;
-    public static inline final BOARD_CONTROL_CHAMELEON_ICON_SIZE:Float = BOARD_CONTROL_ART_SIZE + 8;
+    public static inline final BOARD_CONTROLS_PAGE_SLIDE:Float = 24; // how far a page travels while switching
+    public static inline final BOARD_CONTROLS_PAGE_OUT_MS:Float = 90;
+    public static inline final BOARD_CONTROLS_PAGE_IN_MS:Float = 160;
 
     public static inline final MOVE_PROMPT_SLOT_SHARE:Float = 0.72; // of a round button's diameter taken by its art slot
     public static inline final MOVE_PROMPT_ART_SHARE:Float = 0.76; // of the slot taken by the art

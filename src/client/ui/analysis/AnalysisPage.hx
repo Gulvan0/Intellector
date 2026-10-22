@@ -10,6 +10,7 @@ import client.ui.BoardLayoutTier;
 import client.ui.analysis.editor.EditorCard;
 import client.ui.analysis.editor.EditorTool;
 import client.ui.analysis.editor.EditorToolCard;
+import client.ui.analysis.editor.ImportPositionOverlay;
 import client.ui.analysis.variations.VariationsCard;
 import client.ui.common.board.EditIntent;
 import client.ui.common.board.InteractiveBoard;
@@ -90,7 +91,7 @@ class AnalysisPage extends PageBase
         });
         editorCard = new EditorCard({
             onSideChosen: color -> editDraft(() -> draft.setTurnColor(color)),
-            onImport: () -> {},
+            onImport: openImport,
             onClear: () -> editDraft(() -> draft.clear()),
             onReset: () -> editDraft(() -> draft.reset()),
             onStarting: () -> editDraft(() -> draft.setStarting()),
@@ -313,6 +314,16 @@ class AnalysisPage extends PageBase
         edit();
         board.setPosition(draft.position, Replacement);
         refreshEditor();
+    }
+
+    private function openImport():Void
+    {
+        ImportPositionOverlay.present(importPosition);
+    }
+
+    private function importPosition(position:Position):Void
+    {
+        editDraft(() -> draft.setPosition(position));
     }
 
     private function refreshEditor():Void

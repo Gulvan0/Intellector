@@ -753,21 +753,40 @@
 }
 
 /*
-    Board control row (touch screens): annotation mode and promotion/chameleon toggles - chips,
-    selection outlined (style guide §5.1), on a surface panel so the sunken chips have something
-    to be recessed into (§2.1) rather than sitting on the page background.
+    Board control row (touch screens): chips with the selection outlined, on a surface panel so the
+    sunken chips have something to be recessed into rather than sitting on the page background. It
+    shows one page at a time and clips the page sliding in or out.
 */
 .intellector-board-controls {
     background-color: #faf7f2;
     border: 1px solid #d8cfc0;
     border-radius: 9px;
     padding: 6px;
+    clip: true;
+}
+
+.intellector-board-controls-page {
     spacing: 6px;
 }
 
 .intellector-board-control {
     background-color: #f0ebe2;
     border: 1px solid #d8cfc0;
+    cursor: pointer;
+}
+
+/* a pick-one group: the tray's own color shows through the 1px gaps as the dividers */
+.intellector-board-control-segments {
+    background-color: #d8cfc0;
+    border: 1px solid #d8cfc0;
+    padding: 1px; /* the layout doesn't reserve the border, so this keeps the segments inside it */
+    spacing: 1px;
+    clip: true;
+}
+
+.intellector-board-control-segment {
+    background-color: #f0ebe2;
+    border: 1px solid #f0ebe2;
     cursor: pointer;
 }
 
@@ -782,8 +801,20 @@
     cursor: not-allowed;
 }
 
+.intellector-board-control-segments:disabled {
+    background-color: #e6dfd3;
+    border: 1px solid #e6dfd3;
+}
+
+.intellector-board-control-segment:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #f0ebe2;
+    cursor: not-allowed;
+}
+
 .intellector-board-control:disabled .image,
-.intellector-board-control:disabled .label {
+.intellector-board-control:disabled .label,
+.intellector-board-control-segment:disabled .image {
     opacity: 0.45;
 }
 
@@ -791,13 +822,6 @@
     font-name: $ui-family-medium;
     font-size: 18px;
     color: #6d6152;
-}
-
-.intellector-board-control-question {
-    font-name: $ui-family-semibold;
-    font-size: 14px;
-    font-weight: 600;
-    color: #8a5a1f;
 }
 
 .intellector-board-controls-separator {
@@ -3400,6 +3424,27 @@
 .intellector-share-mono .haxefolio-color-field-input-unused {
     font-name: $ui-family-medium;
     font-size: 13px;
+}
+
+/* Import position overlay: the SIP field over a sunken inset holding the read-only board */
+
+.intellector-import-position-body {
+    padding-top: 18px;
+    padding-right: 22px;
+    padding-bottom: 18px;
+    padding-left: 22px;
+    vertical-spacing: 18px;
+}
+
+.intellector-import-position-sip .haxefolio-text-input {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+}
+
+.intellector-import-position-inset {
+    background-color: #f0ebe2;
+    border-radius: 5px;
+    padding: 14px;
 }
 
 .intellector-share-panel {

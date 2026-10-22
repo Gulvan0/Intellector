@@ -364,13 +364,21 @@ class PieceMoveTool
                 }
 
             case Chameleon(capturedKind):
-                awaitChoice(picked, to, prompts.captureMorph(to, picked.piece.type, picked.piece.color, capturedKind, morph -> {
-                    closeChoice();
-                    report(mode, from, to, morph ? capturedKind : null, null);
-                }, closeChoice));
+                switch options.chameleonMode(modifiers)
+                {
+                    case Ask:
+                        awaitChoice(picked, to, prompts.captureMorph(to, picked.piece.type, picked.piece.color, capturedKind, morph -> {
+                            closeChoice();
+                            report(mode, from, to, morph ? capturedKind : null, null);
+                        }, closeChoice));
+                    case AutoApprove:
+                        report(mode, from, to, capturedKind, null);
+                    case AutoDecline:
+                        report(mode, from, to, null, null);
+                }
 
             case PremoveChameleon:
-                if (options.asksChameleon(modifiers))
+                if (options.asksPremoveChameleon(modifiers))
                 {
                     awaitChoice(picked, to, prompts.premoveChameleon(to, picked.piece.type, picked.piece.color, kind -> {
                         closeChoice();
