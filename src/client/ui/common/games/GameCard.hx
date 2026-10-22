@@ -19,7 +19,8 @@ import intellectorboard.primitives.piece.PieceColor;
 using client.ui.ComponentExtension;
 
 /**
-    A game as a card: its position, time control, players and two lines of status under them,
+    A game as a card: its position, time control and rated status (correspondence leaves the latter
+    out, as it wouldn't fit beside the kind name), players and two lines of status under them,
     which the owner supplies (the result and how it came about, or whose move it is and when the
     last one was made). It links to the game anywhere.
 **/
@@ -106,6 +107,7 @@ class GameCard extends HBox
         timeControlLabel.setClass(StyleClass.GAME_RECORD_MONO, timed);
         timeControlLabel.setClass(StyleClass.GAME_RECORD_TEXT, !timed);
         ratedLabel.text = LocaleUtils.localeBinding(game.rated ? "intellector.common.game_type.rated" : "intellector.common.game_type.casual");
+        ratedLabel.hidden = !timed;
 
         whiteRow.setParticipant(game.white, game.rated, winner == White);
         blackRow.setParticipant(game.black, game.rated, winner == Black);

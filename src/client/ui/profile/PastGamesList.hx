@@ -1,6 +1,5 @@
 package client.ui.profile;
 
-import client.ServerTime;
 import client.datatypes.game.GameEnding;
 import client.datatypes.game.GameParticipant;
 import client.datatypes.game.GameRecord;
@@ -8,46 +7,36 @@ import client.formatters.GameFormatters;
 import client.formatters.ProfileFormatters;
 import client.formatters.TimeControlFormatters;
 import client.ui.common.TimeControlKindIcon;
-import client.ui.common.WidthObserver;
 import client.ui.common.board.BoardPreview;
 import client.utils.PagePaths;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
+import haxe.ui.core.Component;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
 import haxefolio.PageLink;
 import intellectorboard.primitives.piece.PieceColor;
-import morestd.Detachable;
 
 using client.ui.ComponentExtension;
 
-private enum TableTier
-{
-    SixColumns;
-    FourColumns; // the start, time control and type stacked into one column
-    Stacked; // a summary line, the players and the result beside the board
-}
-
 /**
-    A page of the player's past games, each row with its final position, laid out by the table's
-    own width. Rows open the game.
+    A page of the player's past games, one row each with its final position, newest first.
+    Rows open the game. The owner picks the wide or the narrow row layout.
 **/
-class PastGamesTable extends VBox
+class PastGamesList extends VBox
 {
-    private static inline final SIX_COLUMNS_MIN_WIDTH:Float = 760;
-    private static inline final FOUR_COLUMNS_MIN_WIDTH:Float = 540;
-    private static inline final BOARD_WIDTH:Float = 104;
+    public static inline final WIDE_ROW_HEIGHT:Float = 168;
+    public static inline final NARROW_ROW_HEIGHT:Float = 176;
+
+    private static inline final WIDE_BOARD_WIDTH:Float = 160;
+    private static inline final NARROW_BOARD_WIDTH:Float = 132;
 
     private final login:String;
 
-    private final header:HBox;
-    private final rowList:VBox;
-    private final widthHandle:Detachable;
-
     private var games:Array<GameRecord> = [];
-    private var tier:TableTier = SixColumns;
+    private var narrow:Bool = false;
 
     /** `login`: the profile's player, whose results the rows tell **/
     public function new(login:String)
@@ -55,28 +44,7 @@ class PastGamesTable extends VBox
         super();
         this.login = login;
         percentWidth = 100;
-        addClass(StyleClass.PAST_GAMES_TABLE);
-
-        header = new HBox();
-        header.percentWidth = 100;
-        header.addClass(StyleClass.PAST_GAMES_HEADER);
-        addComponent(header);
-
-        rowList = new VBox();
-        rowList.percentWidth = 100;
-        rowList.addClass(StyleClass.PAST_GAMES_ROWS);
-        addComponent(rowList);
-
-        widthHandle = WidthObserver.observe(this, width -> {
-            var newTier:TableTier = width >= SIX_COLUMNS_MIN_WIDTH ? SixColumns : width >= FOUR_COLUMNS_MIN_WIDTH ? FourColumns : Stacked;
-            if (newTier != tier)
-            {
-                tier = newTier;
-                render();
-            }
-        });
-
-        render();
+        addClass(StyleClass.PAST_GAMES_LIST);
     }
 
     public function setGames(games:Array<GameRecord>):Void
@@ -85,182 +53,185 @@ class PastGamesTable extends VBox
         render();
     }
 
-    public function dispose():Void
+    public function setNarrow(narrow:Bool):Void
     {
-        widthHandle.detach();
+        if (narrow == this.narrow)
+            return;
+        this.narrow = narrow;
+        render();
     }
 
     private function render():Void
     {
-        renderHeader();
-
-        rowList.removeAllComponents();
+        removeAllComponents();
         for (game in games)
-            rowList.addComponent(createRow(game));
+            addComponent(narrow ? createNarrowRow(game) : createWideRow(game));
     }
 
-    private function renderHeader():Void
+    private function createWideRow(game:GameRecord):HBox
     {
-        header.removeAllComponents();
-        header.hidden = tier == Stacked;
-        if (tier == Stacked)
-            return;
-
-        header.addComponent(sized(new Box(), BOARD_WIDTH));
-        switch tier
-        {
-            case SixColumns:
-                header.addComponent(headingCell("started", StyleClass.PAST_GAMES_DATE_CELL));
-                header.addComponent(headingCell("time_control", StyleClass.PAST_GAMES_TIME_CONTROL_CELL));
-                header.addComponent(headingCell("type", StyleClass.PAST_GAMES_TYPE_CELL));
-            default:
-                header.addComponent(headingCell("started", StyleClass.PAST_GAMES_STACK_CELL));
-        }
-        var playersHeading:Label = headingCell("players", StyleClass.PAST_GAMES_PLAYERS_CELL);
-        playersHeading.percentWidth = 100;
-        header.addComponent(playersHeading);
-        header.addComponent(headingCell("result", tier == SixColumns ? StyleClass.PAST_GAMES_RESULT_CELL : StyleClass.PAST_GAMES_NARROW_RESULT_CELL));
-    }
-
-    private function headingCell(key:String, cellClass:StyleClass):Label
-    {
-        var heading:Label = new Label();
-        heading.text = LocaleUtils.localeBinding('intellector.profile.past.column.$key');
-        heading.addClass(StyleClass.PAST_GAMES_HEADING);
-        heading.addClass(cellClass);
-        heading.verticalAlign = "center";
-        return heading;
-    }
-
-    private function createRow(game:GameRecord):HBox
-    {
-        var ownColor:PieceColor = game.colorOf(login) ?? White;
-
         var row:HBox = new HBox();
-        row.percentWidth = 100;
-        row.addClass(StyleClass.PAST_GAMES_ROW);
-        row.trackHover();
-        PageLink.attach(row, PagePaths.liveGame(game.id));
+        row.addClass(StyleClass.PAST_GAMES_WIDE_ROW);
+        attachLink(row, game);
 
-        row.addComponent(new BoardPreview(game.position, ownColor, BOARD_WIDTH));
+        var board:BoardPreview = new BoardPreview(game.position, orientationOf(game), WIDE_BOARD_WIDTH);
+        board.verticalAlign = "center";
+        row.addComponent(board);
 
-        switch tier
+        var column:VBox = new VBox();
+        column.percentWidth = 100;
+        column.addClass(StyleClass.PAST_GAMES_WIDE_TEXT);
+        column.verticalAlign = "center";
+        row.addComponent(column);
+
+        var metaLine:HBox = createLine();
+        metaLine.addComponent(new TimeControlKindIcon(game.timeControl.getKind()));
+        metaLine.addComponent(timeControlLabel(game));
+        metaLine.addComponent(separator());
+        var ratedLabel:Label = mutedLabel();
+        ratedLabel.text = LocaleUtils.localeBinding(game.rated ? "intellector.common.game_type.rated" : "intellector.common.game_type.casual");
+        metaLine.addComponent(ratedLabel);
+        metaLine.addComponent(separator());
+        metaLine.addComponent(dateLabel(game));
+        column.addComponent(metaLine);
+
+        column.addComponent(playersBlock(game, false));
+
+        var resultLine:HBox = createLine();
+        resultLine.addComponent(outcomeLabel(game));
+        if (hasReason(game.ending))
         {
-            case SixColumns:
-                row.addComponent(dateCell(game, StyleClass.PAST_GAMES_DATE_CELL));
-                row.addComponent(timeControlCell(game, StyleClass.PAST_GAMES_TIME_CONTROL_CELL));
-                row.addComponent(typeLabel(game, StyleClass.PAST_GAMES_TYPE_CELL));
-                row.addComponent(playersCell(game));
-                row.addComponent(resultCell(game, ownColor, StyleClass.PAST_GAMES_RESULT_CELL));
-            case FourColumns:
-                var stack:VBox = new VBox();
-                stack.addClass(StyleClass.PAST_GAMES_STACK_CELL);
-                stack.addClass(StyleClass.PAST_GAMES_STACK);
-                stack.verticalAlign = "center";
-                stack.addComponent(dateCell(game, null));
-                stack.addComponent(timeControlCell(game, null));
-                stack.addComponent(typeLabel(game, null));
-                row.addComponent(stack);
-                row.addComponent(playersCell(game));
-                row.addComponent(resultCell(game, ownColor, StyleClass.PAST_GAMES_NARROW_RESULT_CELL));
-            case Stacked:
-                var column:VBox = new VBox();
-                column.percentWidth = 100;
-                column.addClass(StyleClass.PAST_GAMES_MOBILE_COLUMN);
-                column.verticalAlign = "center";
-
-                var summaryLabel:Label = new Label();
-                summaryLabel.addClass(StyleClass.PROFILE_SMALL_MUTED);
-                LocaleManager.instance.registerComponent(summaryLabel, "text", () -> summaryText(game));
-                column.addComponent(summaryLabel);
-
-                column.addComponent(playersCell(game));
-                column.addComponent(resultCell(game, ownColor, null));
-                row.addComponent(column);
+            resultLine.addComponent(separator());
+            var reasonLabel:Label = mutedLabel();
+            registerReason(reasonLabel, game.ending);
+            resultLine.addComponent(reasonLabel);
         }
+        column.addComponent(resultLine);
 
         return row;
     }
 
-    private function dateCell(game:GameRecord, cellClass:Null<StyleClass>):VBox
+    /** The players and the result are pinned to the board's top edge, so a wrapped reason grows downward **/
+    private function createNarrowRow(game:GameRecord):VBox
     {
-        var cell:VBox = new VBox();
-        cell.addClass(StyleClass.PAST_GAMES_DATE);
-        if (cellClass != null)
-            cell.addClass(cellClass);
-        cell.verticalAlign = "center";
+        var row:VBox = new VBox();
+        row.addClass(StyleClass.PAST_GAMES_NARROW_ROW);
+        attachLink(row, game);
 
-        var dateLabel:Label = new Label();
-        dateLabel.addClass(StyleClass.PROFILE_TEXT);
-        var startedAtMs:Null<Float> = game.startedAtMs;
-        if (startedAtMs == null)
+        var topLine:HBox = createLine();
+        topLine.percentWidth = 100;
+        topLine.addClass(StyleClass.PAST_GAMES_TOP_LINE);
+        var timeControlGroup:HBox = createLine();
+        timeControlGroup.addComponent(new TimeControlKindIcon(game.timeControl.getKind()));
+        timeControlGroup.addComponent(timeControlLabel(game));
+        topLine.addComponent(timeControlGroup);
+        var spacer:Box = new Box();
+        spacer.percentWidth = 100;
+        topLine.addComponent(spacer);
+        topLine.addComponent(dateLabel(game));
+        row.addComponent(topLine);
+
+        var body:HBox = new HBox();
+        body.percentWidth = 100;
+        body.addClass(StyleClass.PAST_GAMES_NARROW_BODY);
+        row.addComponent(body);
+
+        body.addComponent(new BoardPreview(game.position, orientationOf(game), NARROW_BOARD_WIDTH));
+
+        var column:VBox = new VBox();
+        column.percentWidth = 100;
+        column.addClass(StyleClass.PAST_GAMES_NARROW_TEXT);
+        body.addComponent(column);
+
+        column.addComponent(playersBlock(game, true));
+
+        var result:VBox = new VBox();
+        result.percentWidth = 100;
+        result.addClass(StyleClass.PAST_GAMES_NARROW_RESULT);
+        result.addComponent(outcomeLabel(game));
+        if (hasReason(game.ending))
         {
-            dateLabel.percentWidth = 100;
-            dateLabel.wordWrap = true;
-            dateLabel.text = LocaleUtils.localeBinding("intellector.common.date_unknown");
-            cell.addComponent(dateLabel);
-            return cell;
+            var reasonLabel:Label = new Label();
+            reasonLabel.percentWidth = 100;
+            reasonLabel.addClass(StyleClass.PAST_GAMES_WRAPPING_REASON);
+            registerReason(reasonLabel, game.ending);
+            result.addComponent(reasonLabel);
         }
+        column.addComponent(result);
 
-        LocaleManager.instance.registerComponent(dateLabel, "text", () -> ProfileFormatters.shortDate(startedAtMs, ServerTime.now()));
-        cell.addComponent(dateLabel);
-
-        var timeLabel:Label = new Label();
-        timeLabel.text = ProfileFormatters.timeOfDay(startedAtMs);
-        timeLabel.addClass(StyleClass.PROFILE_SMALL_MUTED);
-        cell.addComponent(timeLabel);
-
-        return cell;
+        return row;
     }
 
-    private function timeControlCell(game:GameRecord, cellClass:Null<StyleClass>):HBox
+    private function attachLink(row:Component, game:GameRecord):Void
     {
-        var cell:HBox = new HBox();
-        cell.addClass(StyleClass.PAST_GAMES_TIME_CONTROL);
-        if (cellClass != null)
-            cell.addClass(cellClass);
-        cell.verticalAlign = "center";
+        row.percentWidth = 100;
+        row.addClass(StyleClass.PAST_GAMES_ROW);
+        row.trackHover();
+        PageLink.attach(row, PagePaths.liveGame(game.id));
+    }
 
-        cell.addComponent(new TimeControlKindIcon(game.timeControl.getKind()));
+    private function createLine():HBox
+    {
+        var line:HBox = new HBox();
+        line.addClass(StyleClass.PAST_GAMES_LINE);
+        return line;
+    }
 
+    /** Correspondence names its kind instead of a time control **/
+    private function timeControlLabel(game:GameRecord):Label
+    {
         var timed:Bool = !game.timeControl.match(None);
-        var valueLabel:Label = new Label();
-        valueLabel.text = timed ? TimeControlFormatters.formatTimeControl(game.timeControl) : LocaleUtils.localeBinding("intellector.common.no_clock");
-        valueLabel.addClass(timed ? StyleClass.PROFILE_MONO : StyleClass.PROFILE_TEXT);
-        valueLabel.verticalAlign = "center";
-        cell.addComponent(valueLabel);
-
-        return cell;
-    }
-
-    private function typeLabel(game:GameRecord, cellClass:Null<StyleClass>):Label
-    {
         var label:Label = new Label();
-        label.text = LocaleUtils.localeBinding(game.rated ? "intellector.common.game_type.rated" : "intellector.common.game_type.casual");
-        label.addClass(StyleClass.PROFILE_MUTED);
-        if (cellClass != null)
-            label.addClass(cellClass);
+        label.text = timed ? TimeControlFormatters.formatTimeControl(game.timeControl) : LocaleUtils.localeBinding("intellector.common.time_control_kind.correspondence");
+        label.addClass(timed ? StyleClass.GAME_RECORD_MONO : StyleClass.GAME_RECORD_TEXT);
         label.verticalAlign = "center";
         return label;
     }
 
-    private function playersCell(game:GameRecord):VBox
+    private function dateLabel(game:GameRecord):Label
     {
-        var winner:Null<PieceColor> = winnerOf(game.ending);
-
-        var cell:VBox = new VBox();
-        cell.percentWidth = 100;
-        cell.addClass(StyleClass.PAST_GAMES_PLAYERS);
-        cell.verticalAlign = "center";
-        cell.addComponent(playerLine(game.white, White, winner == White));
-        cell.addComponent(playerLine(game.black, Black, winner == Black));
-        return cell;
+        var label:Label = mutedLabel();
+        var startedAtMs:Null<Float> = game.startedAtMs;
+        if (startedAtMs == null)
+            label.text = LocaleUtils.localeBinding("intellector.common.date_unknown");
+        else
+            LocaleManager.instance.registerComponent(label, "text", () -> '${ProfileFormatters.longDate(startedAtMs)}, ${ProfileFormatters.timeOfDay(startedAtMs)}');
+        return label;
     }
 
-    private function playerLine(participant:GameParticipant, color:PieceColor, winner:Bool):HBox
+    private function separator():Label
+    {
+        var label:Label = new Label();
+        label.text = "·";
+        label.addClass(StyleClass.PAST_GAMES_SEPARATOR);
+        label.verticalAlign = "center";
+        return label;
+    }
+
+    private function mutedLabel():Label
+    {
+        var label:Label = new Label();
+        label.addClass(StyleClass.GAME_RECORD_MUTED);
+        label.verticalAlign = "center";
+        return label;
+    }
+
+    private function playersBlock(game:GameRecord, narrow:Bool):VBox
+    {
+        var winner:Null<PieceColor> = winnerOf(game.ending);
+        var block:VBox = new VBox();
+        block.percentWidth = 100;
+        block.addClass(StyleClass.PAST_GAMES_PLAYERS);
+        block.addComponent(playerLine(game.white, White, game.rated, winner == White, narrow));
+        block.addComponent(playerLine(game.black, Black, game.rated, winner == Black, narrow));
+        return block;
+    }
+
+    private function playerLine(participant:GameParticipant, color:PieceColor, rated:Bool, winner:Bool, narrow:Bool):HBox
     {
         var line:HBox = new HBox();
-        line.addClass(StyleClass.GAME_RECORD_LINE);
+        line.percentWidth = 100;
+        line.addClass(narrow ? StyleClass.PAST_GAMES_NARROW_PLAYER_LINE : StyleClass.PAST_GAMES_WIDE_PLAYER_LINE);
 
         var colorDot:Box = new Box();
         colorDot.addClass(color == White ? StyleClass.GAME_RECORD_WHITE_DOT : StyleClass.GAME_RECORD_BLACK_DOT);
@@ -269,12 +240,12 @@ class PastGamesTable extends VBox
 
         var nicknameLabel:Label = new Label();
         nicknameLabel.text = participant.nickname;
-        nicknameLabel.addClass(StyleClass.GAME_RECORD_TEXT);
-        nicknameLabel.setClass(StyleClass.GAME_RECORD_WINNER, winner);
+        nicknameLabel.addClass(narrow ? StyleClass.PAST_GAMES_NARROW_NICKNAME : StyleClass.PAST_GAMES_WIDE_NICKNAME);
+        nicknameLabel.setClass(StyleClass.PAST_GAMES_WINNER, winner);
         nicknameLabel.verticalAlign = "center";
         line.addComponent(nicknameLabel);
 
-        if (participant.rating != null)
+        if (rated && participant.rating != null)
         {
             var ratingLabel:Label = new Label();
             ratingLabel.text = GameFormatters.bareRating(participant.rating);
@@ -286,38 +257,23 @@ class PastGamesTable extends VBox
         return line;
     }
 
-    private function resultCell(game:GameRecord, ownColor:PieceColor, cellClass:Null<StyleClass>):VBox
+    private function outcomeLabel(game:GameRecord):Label
     {
-        var cell:VBox = new VBox();
-        cell.addClass(StyleClass.PAST_GAMES_RESULT);
-        if (cellClass != null)
-            cell.addClass(cellClass);
-        cell.verticalAlign = "center";
-
-        var outcomeLabel:Label = new Label();
-        outcomeLabel.text = outcomeText(game.ending, ownColor);
-        outcomeLabel.addClass(StyleClass.PAST_GAMES_OUTCOME);
-        cell.addComponent(outcomeLabel);
-
-        var reasonLabel:Label = new Label();
-        reasonLabel.addClass(StyleClass.PROFILE_SMALL_MUTED);
-        LocaleManager.instance.registerComponent(reasonLabel, "text", () -> reasonText(game.ending));
-        cell.addComponent(reasonLabel);
-
-        return cell;
+        var label:Label = new Label();
+        label.text = outcomeText(game.ending, orientationOf(game));
+        label.addClass(StyleClass.PAST_GAMES_OUTCOME);
+        label.verticalAlign = "center";
+        return label;
     }
 
-    private function summaryText(game:GameRecord):String
+    private function registerReason(label:Label, ending:Null<GameEnding>):Void
     {
-        var timeControl:String = game.timeControl.match(None)
-            ? LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.common.no_clock"))
-            : TimeControlFormatters.formatTimeControl(game.timeControl);
-        var type:String = LocaleUtils.resolveText(LocaleUtils.localeBinding(game.rated ? "intellector.common.game_type.rated" : "intellector.common.game_type.casual"));
-        var startedAtMs:Null<Float> = game.startedAtMs;
-        var start:String = startedAtMs != null
-            ? '${ProfileFormatters.shortDate(startedAtMs, ServerTime.now())} ${ProfileFormatters.timeOfDay(startedAtMs)}'
-            : LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.common.date_unknown"));
-        return '$start · $timeControl · $type';
+        LocaleManager.instance.registerComponent(label, "text", () -> reasonText(ending));
+    }
+
+    private function orientationOf(game:GameRecord):PieceColor
+    {
+        return game.colorOf(login) ?? White;
     }
 
     /** A locale binding: won, lost or drawn, for the player **/
@@ -329,17 +285,20 @@ class PastGamesTable extends VBox
         return LocaleUtils.localeBinding('intellector.profile.past.outcome.$key');
     }
 
+    private static function hasReason(ending:Null<GameEnding>):Bool
+    {
+        return ending != null && !ending.outcome.match(Drawish(Abort));
+    }
+
     private static function reasonText(ending:Null<GameEnding>):String
     {
-        if (ending == null)
+        if (!hasReason(ending))
             return "";
 
         return switch ending.outcome {
             case Decisive(kind, winner):
                 var key:String = 'intellector.profile.past.reason.${GameFormatters.snakeCase(kind.getName())}';
                 LocaleUtils.resolveText(LocaleUtils.localeBinding(key), GameFormatters.colorName(winner), GameFormatters.colorName(winner.opposite()));
-            case Drawish(Abort):
-                "";
             case Drawish(kind):
                 LocaleUtils.resolveText(LocaleUtils.localeBinding('intellector.profile.past.reason.${GameFormatters.snakeCase(kind.getName())}'));
         }
@@ -353,11 +312,5 @@ class PastGamesTable extends VBox
             case Decisive(_, winner): winner;
             case Drawish(_): null;
         }
-    }
-
-    private static function sized(box:Box, width:Float):Box
-    {
-        box.width = width;
-        return box;
     }
 }

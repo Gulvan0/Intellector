@@ -168,44 +168,21 @@
     horizontal-spacing: 14px;
 }
 
-.intellector-profile-archive-area {
-    height: 1150px;
-}
-
 .intellector-profile-study-panel {
     padding: 14px;
     background-color: #f0ebe2;
 }
 
-/* past games table */
-.intellector-past-games-table {
-    vertical-spacing: 0;
-}
-
-.intellector-past-games-header {
-    height: 30px;
-    padding-left: 12px;
-    padding-right: 22px;
-    horizontal-spacing: 12px;
-    border-bottom: 1px solid #e6dfd3;
-}
-
-.intellector-past-games-heading {
-    font-name: $ui-family-medium;
-    font-size: 12px;
-    color: #6d6152;
-    word-wrap: false;
-}
-
-.intellector-past-games-rows {
+/* past games list */
+.intellector-past-games-list {
     vertical-spacing: 0;
 }
 
 .intellector-past-games-row {
-    height: 112px;
-    padding-left: 12px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    padding-left: 22px;
     padding-right: 22px;
-    horizontal-spacing: 12px;
     border-bottom: 1px solid #e6dfd3;
     cursor: pointer;
 }
@@ -214,47 +191,85 @@
     background-color: #f0ebe2;
 }
 
-.intellector-past-games-date-cell {
-    width: 76px;
+.intellector-past-games-wide-row {
+    height: 168px;
+    horizontal-spacing: 22px;
 }
 
-.intellector-past-games-time-control-cell,
-.intellector-past-games-type-cell {
-    width: 84px;
+.intellector-past-games-narrow-row {
+    height: 176px;
+    vertical-spacing: 10px;
 }
 
-.intellector-past-games-stack-cell {
-    width: 104px;
+.intellector-past-games-wide-text {
+    vertical-spacing: 8px;
 }
 
-.intellector-past-games-result-cell {
-    width: 165px;
+.intellector-past-games-narrow-body {
+    horizontal-spacing: 14px;
 }
 
-.intellector-past-games-narrow-result-cell {
-    width: 140px;
+.intellector-past-games-narrow-text {
+    vertical-spacing: 10px;
 }
 
-.intellector-past-games-date,
-.intellector-past-games-players,
-.intellector-past-games-result {
-    vertical-spacing: 2px;
-}
-
-.intellector-past-games-players .intellector-game-record-line {
-    height: 18px;
-}
-
-.intellector-past-games-time-control {
+.intellector-past-games-line {
+    height: 20px;
     horizontal-spacing: 6px;
+    clip: true;
 }
 
-.intellector-past-games-stack {
-    vertical-spacing: 3px;
+.intellector-past-games-top-line {
+    horizontal-spacing: 12px;
 }
 
-.intellector-past-games-mobile-column {
-    vertical-spacing: 4px;
+.intellector-past-games-separator {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #a79b8a;
+    word-wrap: false;
+}
+
+.intellector-past-games-players {
+    vertical-spacing: 0;
+}
+
+.intellector-past-games-wide-player-line,
+.intellector-past-games-narrow-player-line {
+    horizontal-spacing: 8px;
+    clip: true;
+}
+
+.intellector-past-games-wide-player-line {
+    height: 24px;
+}
+
+.intellector-past-games-narrow-player-line {
+    height: 22px;
+}
+
+.intellector-past-games-wide-nickname,
+.intellector-past-games-narrow-nickname {
+    font-name: $ui-family-medium;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-past-games-wide-nickname {
+    font-size: 17px;
+}
+
+.intellector-past-games-narrow-nickname {
+    font-size: 15px;
+}
+
+.intellector-past-games-winner {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+}
+
+.intellector-past-games-narrow-result {
+    vertical-spacing: 2px;
 }
 
 .intellector-past-games-outcome {
@@ -265,6 +280,13 @@
     word-wrap: false;
 }
 
+.intellector-past-games-wrapping-reason {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: true;
+}
+
 /* studies */
 .intellector-study-card-name {
     height: 20px;
@@ -273,6 +295,7 @@
     font-weight: 600;
     color: #2a211a;
     word-wrap: false;
+    clip: true;
 }
 
 .intellector-study-card-description {

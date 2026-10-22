@@ -40,12 +40,13 @@ class ArchiveCard extends VBox
     private static final TYPE_RATED:Array<Null<Bool>> = [null, true, false];
 
     private static inline final ENTER_KEY_CODE:Int = 13;
-    private static inline final PAST_PAGE_SIZE:Int = 10;
-    private static inline final WIDE_STUDY_PAGE_SIZE:Int = 14;
-    private static inline final NARROW_STUDY_PAGE_SIZE:Int = 7;
-    private static inline final STUDY_CARD_MIN_WIDTH:Float = 300;
+    private static inline final PAST_PAGE_SIZE:Int = 5;
+    private static inline final CARD_BORDERS_WIDTH:Float = 2;
+    private static inline final WIDE_LIST_MIN_WIDTH:Float = 600;
+    private static inline final STUDY_CARD_HEIGHT:Float = 138;
     private static inline final STUDY_CARD_GAP:Float = 14;
-    private static inline final STUDY_PANEL_HORIZONTAL_PADDING:Float = 28;
+    private static inline final STUDY_PANEL_PADDING:Float = 28;
+    private static inline final TWO_STUDY_COLUMNS_MIN_WIDTH:Float = 614;
 
     private final callbacks:ArchiveCallbacks;
     private final login:String;
@@ -56,7 +57,7 @@ class ArchiveCard extends VBox
     private final typeFilter:FilterDropdown;
     private final resetButton:Button;
     private final pastArea:Box;
-    private final pastTable:PastGamesTable;
+    private final pastList:PastGamesList;
     private final pastStatus:LoadStatus;
     private final pastEmptyLabel:Label;
 
@@ -81,9 +82,10 @@ class ArchiveCard extends VBox
     private var tags:Array<String> = [];
     private var studyPage:Int = 1;
     private var studyTotal:Null<Int> = null;
+    private var studiesRequested:Bool = false;
     private var studies:Array<StudySummary> = [];
     private var studyColumns:Int = 1;
-    private var studyPageSize:Int = WIDE_STUDY_PAGE_SIZE;
+    private var studyPageSize:Int = 0;
 
     /** `login`: the profile's player **/
     public function new(login:String, callbacks:ArchiveCallbacks)
@@ -152,11 +154,10 @@ class ArchiveCard extends VBox
 
         pastArea = new Box();
         pastArea.percentWidth = 100;
-        pastArea.addClass(StyleClass.PROFILE_ARCHIVE_AREA);
         addComponent(pastArea);
 
-        pastTable = new PastGamesTable(login);
-        pastArea.addComponent(pastTable);
+        pastList = new PastGamesList(login);
+        pastArea.addComponent(pastList);
 
         pastStatus = new LoadStatus();
         pastStatus.addClass(StyleClass.PROFILE_ARCHIVE_STATUS);
@@ -196,7 +197,6 @@ class ArchiveCard extends VBox
 
         studyArea = new Box();
         studyArea.percentWidth = 100;
-        studyArea.addClass(StyleClass.PROFILE_ARCHIVE_AREA);
         studyArea.addClass(StyleClass.PROFILE_STUDY_PANEL);
         addComponent(studyArea);
 
@@ -222,15 +222,9 @@ class ArchiveCard extends VBox
         });
         addComponent(pager);
 
-        widthHandle = WidthObserver.observe(studyArea, width -> {
-            var columns:Int = Std.int(Math.max(1, Math.floor((width - STUDY_PANEL_HORIZONTAL_PADDING + STUDY_CARD_GAP) / (STUDY_CARD_MIN_WIDTH + STUDY_CARD_GAP))));
-            if (columns != studyColumns)
-            {
-                studyColumns = columns;
-                renderStudies();
-            }
-        });
+        widthHandle = WidthObserver.observe(this, width -> applyListWidth(width - CARD_BORDERS_WIDTH));
 
+        applyListWidth(0);
         renderTab();
         renderTags();
     }
@@ -240,17 +234,6 @@ class ArchiveCard extends VBox
     {
         queryPastGames(1, true);
         queryStudies(1);
-    }
-
-    public function setTier(tier:ProfileLayoutTier):Void
-    {
-        var pageSize:Int = tier == Narrow ? NARROW_STUDY_PAGE_SIZE : WIDE_STUDY_PAGE_SIZE;
-        if (pageSize == studyPageSize)
-            return;
-
-        studyPageSize = pageSize;
-        if (studyTotal != null)
-            queryStudies(1);
     }
 
     /** `counts` is null when they weren't asked for **/
@@ -266,8 +249,8 @@ class ArchiveCard extends VBox
         }
 
         pastStatus.hidden = true;
-        pastTable.hidden = games.length == 0;
-        pastTable.setGames(games);
+        pastList.hidden = games.length == 0;
+        pastList.setGames(games);
         pastEmptyLabel.hidden = games.length > 0;
         pastEmptyLabel.text = LocaleUtils.localeBinding(anyPastGames ? "intellector.profile.past.no_match" : "intellector.profile.past.no_finished");
         tabs.setCount(0, total);
@@ -276,7 +259,7 @@ class ArchiveCard extends VBox
 
     public function showPastGamesFailure(timedOut:Bool):Void
     {
-        pastTable.hidden = true;
+        pastList.hidden = true;
         pastEmptyLabel.hidden = true;
         pastStatus.showFailure(timedOut, () -> queryPastGames(pastPage, true));
         pastStatus.hidden = false;
@@ -305,9 +288,36 @@ class ArchiveCard extends VBox
     public function dispose():Void
     {
         widthHandle.detach();
-        pastTable.dispose();
         kindFilter.close();
         typeFilter.close();
+    }
+
+    /**
+        Both tabs share a frame five past game rows tall, so switching tabs never moves the page.
+        Studies fill it with as many rows of cards as fit, two cards per row when the list allows.
+    **/
+    private function applyListWidth(listWidth:Float):Void
+    {
+        var narrow:Bool = listWidth > 0 && listWidth < WIDE_LIST_MIN_WIDTH;
+        var frameHeight:Float = PAST_PAGE_SIZE * (narrow ? PastGamesList.NARROW_ROW_HEIGHT : PastGamesList.WIDE_ROW_HEIGHT);
+        pastList.setNarrow(narrow);
+        pastArea.height = frameHeight;
+        studyArea.height = frameHeight;
+
+        var columns:Int = listWidth - STUDY_PANEL_PADDING >= TWO_STUDY_COLUMNS_MIN_WIDTH ? 2 : 1;
+        var rows:Int = Math.floor((frameHeight - STUDY_PANEL_PADDING + STUDY_CARD_GAP) / (STUDY_CARD_HEIGHT + STUDY_CARD_GAP));
+        var pageSize:Int = rows * columns;
+        if (columns != studyColumns)
+        {
+            studyColumns = columns;
+            renderStudies();
+        }
+        if (pageSize != studyPageSize)
+        {
+            studyPageSize = pageSize;
+            if (studiesRequested)
+                queryStudies(1);
+        }
     }
 
     private function queryPastGames(page:Int, withCounts:Bool):Void
@@ -317,7 +327,7 @@ class ArchiveCard extends VBox
         typeFilter.setSelection([TYPE_RATED.indexOf(rated)]);
         resetButton.disabled = selectedKinds.length == 0 && rated == null;
 
-        pastTable.hidden = true;
+        pastList.hidden = true;
         pastEmptyLabel.hidden = true;
         pastStatus.showLoading();
         pastStatus.hidden = false;
@@ -327,6 +337,7 @@ class ArchiveCard extends VBox
     private function queryStudies(page:Int):Void
     {
         studyPage = page;
+        studiesRequested = true;
         studyGrid.removeAllComponents();
         studyEmptyLabel.hidden = true;
         studyStatus.showLoading();

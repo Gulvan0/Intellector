@@ -30,8 +30,6 @@ class OngoingGamesCard extends VBox
     private static final TYPE_RATED:Array<Null<Bool>> = [null, true, false];
 
     private static inline final TWO_COLUMNS_MIN_WIDTH:Float = 680;
-    // a correspondence card's head line ("Correspondence · Rated", longest in Russian) needs wider cards
-    private static inline final CORRESPONDENCE_TWO_COLUMNS_MIN_WIDTH:Float = 780;
     private static inline final CARD_HEIGHT:Float = 138;
     private static inline final CARD_GAP:Float = 14;
     private static inline final PANEL_VERTICAL_PADDING:Float = 28;
@@ -68,10 +66,15 @@ class OngoingGamesCard extends VBox
         addClass(StyleClass.PROFILE_CARD);
         addClass(StyleClass.PROFILE_SECTION);
 
+        var titleLabel:Label = new Label();
+        titleLabel.text = LocaleUtils.localeBinding("intellector.profile.ongoing.title");
+        titleLabel.addClass(StyleClass.PROFILE_CARD_TITLE);
+        addComponent(titleLabel);
+
         tabs = new UnderlineTabs([
             LocaleUtils.localeBinding("intellector.profile.ongoing.live"),
             LocaleUtils.localeBinding("intellector.profile.ongoing.correspondence")
-        ], true, index -> {
+        ], false, index -> {
             onCorrespondence = index == 1;
             render();
         });
@@ -198,8 +201,7 @@ class OngoingGamesCard extends VBox
 
     private function columnCount():Int
     {
-        var minWidth:Float = onCorrespondence ? CORRESPONDENCE_TWO_COLUMNS_MIN_WIDTH : TWO_COLUMNS_MIN_WIDTH;
-        return panelWidth - PANEL_HORIZONTAL_PADDING >= minWidth ? 2 : 1;
+        return panelWidth - PANEL_HORIZONTAL_PADDING >= TWO_COLUMNS_MIN_WIDTH ? 2 : 1;
     }
 
     private function render():Void

@@ -101,7 +101,6 @@ class ProfilePage extends PageBase
             header.setTier(tier);
             connectionsCard.setTier(tier);
             statsCard.setTier(tier);
-            archiveCard.setTier(tier);
         });
 
         IdentityKeeper.addChangeListener(onIdentityChanged);
