@@ -22,11 +22,11 @@ class ChallengeCreationOverlay
 {
     /**
         `ownUserRef`: the current user's. `create` sends the request and reports how it ended; any
-        notice about it is its own business. `initialType` overrides the remembered type.
+        notice about it is its own business. `prefill` adjusts the remembered values the form opens with.
     **/
-    public static function present(isGuest:Bool, ownUserRef:Null<String>, create:ChallengeParams->(ChallengeCreationOutcome->Void)->Void, ?initialType:ChallengeType):Void
+    public static function present(isGuest:Bool, ownUserRef:Null<String>, create:ChallengeParams->(ChallengeCreationOutcome->Void)->Void, ?prefill:ChallengeDraft->Void):Void
     {
-        HaxeFolioApp.present("challenge", build.bind(isGuest, ownUserRef, create, initialType), null, {
+        HaxeFolioApp.present("challenge", build.bind(isGuest, ownUserRef, create, prefill), null, {
             geometry: {
                 dialogWidth: StyleVars.CHALLENGE_OVERLAY_WIDTH,
                 dialogHeight: StyleVars.CHALLENGE_OVERLAY_HEIGHT,
@@ -36,7 +36,7 @@ class ChallengeCreationOverlay
         });
     }
 
-    private static function build(isGuest:Bool, ownUserRef:Null<String>, create:ChallengeParams->(ChallengeCreationOutcome->Void)->Void, initialType:Null<ChallengeType>, dismiss:Void->Void):OverlayContent
+    private static function build(isGuest:Bool, ownUserRef:Null<String>, create:ChallengeParams->(ChallengeCreationOutcome->Void)->Void, prefill:Null<ChallengeDraft->Void>, dismiss:Void->Void):OverlayContent
     {
         var form:Null<ChallengeCreationForm> = null;
         var submitButton:Null<ActionButton> = null;
@@ -86,8 +86,8 @@ class ChallengeCreationOverlay
         }
 
         var draft:ChallengeDraft = ChallengeDraftStorage.read();
-        if (initialType != null)
-            draft.type = initialType;
+        if (prefill != null)
+            prefill(draft);
         ChallengeDraftRules.normalize(draft, isGuest);
 
         form = new ChallengeCreationForm(draft, isGuest, ownUserRef, refresh);

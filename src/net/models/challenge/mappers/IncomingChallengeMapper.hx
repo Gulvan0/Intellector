@@ -22,8 +22,8 @@ class IncomingChallengeMapper
         );
     }
 
-    // `acceptor_color` is already the recipient's colour (the server assigns it to the acceptor as is)
-    private static function acceptorColorToDatatype(dto:ChallengeAcceptorColor):DatatypeChallengeAcceptorColor
+    /** `acceptor_color` is already the recipient's colour: the server assigns it to the acceptor as is **/
+    public static function acceptorColorToDatatype(dto:ChallengeAcceptorColor):DatatypeChallengeAcceptorColor
     {
         return switch dto {
             case WHITE: White;

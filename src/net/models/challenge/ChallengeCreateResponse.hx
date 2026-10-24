@@ -10,5 +10,6 @@ class ChallengeCreateResponse implements IJsonUnserializableMacro
 	public var result:ChallengeCreateResult;
 	@:default(null) public var challenge:Null<ChallengePublic>;
 	@:default(null) public var callee_online:Null<Bool>;
+	@:default(null) public var callee_session_lost:Null<Bool>;
 	@:default(null) public var game:Null<GameSummaryPublic>;
 }

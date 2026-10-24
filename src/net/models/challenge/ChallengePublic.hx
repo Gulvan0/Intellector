@@ -3,6 +3,7 @@ package net.models.challenge;
 import morestd.DateTime;
 import net.models.challenge.ChallengeAcceptorColor;
 import net.models.game.GameSummaryPublic;
+import net.models.game.PlayerRatingPublic;
 import net.models.common.FischerTimeControl;
 import net.models.common.TimeControlKind;
 import net.models.common.UserRefWithNickname;
@@ -23,4 +24,5 @@ class ChallengePublic implements IJsonUnserializableMacro
 	public var active:Bool;
 	@:default(null) public var fischer_time_control:Null<FischerTimeControl>;
 	@:default(null) public var resulting_game:Null<GameSummaryPublic>;
+	@:default(null) public var caller_rating:Null<PlayerRatingPublic>;
 }
