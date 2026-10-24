@@ -1,0 +1,384 @@
+/*
+    Home page. The Play card beside the open challenges, then the ongoing and the recent games.
+    `intellector-home-narrow` is set on each part whose phone layout differs.
+*/
+
+.intellector-home-frame {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 26px;
+    vertical-spacing: 18px;
+}
+
+.intellector-home-frame.intellector-home-narrow {
+    padding-top: 14px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.intellector-home-top-row {
+    horizontal-spacing: 18px;
+}
+
+.intellector-home-top-column {
+    vertical-spacing: 18px;
+}
+
+.intellector-home-card {
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-home-card-title {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+/* Play card */
+.intellector-home-play-card {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    vertical-spacing: 0;
+}
+
+.intellector-home-play-card.intellector-home-narrow {
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.intellector-home-create-button {
+    height: 44px;
+    margin-top: 14px;
+    horizontal-spacing: 8px;
+}
+
+.intellector-home-create-button.intellector-home-narrow {
+    height: 48px;
+}
+
+.intellector-home-quick-start-label {
+    margin-top: 18px;
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-home-preset-grid {
+    margin-top: 6px;
+    vertical-spacing: 6px;
+}
+
+.intellector-home-preset-row {
+    horizontal-spacing: 6px;
+}
+
+.intellector-home-preset {
+    height: 56px;
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-home-narrow .intellector-home-preset {
+    height: 52px;
+}
+
+.intellector-home-preset:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-home-preset:down {
+    background-color: #f0ebe2;
+    border-color: #bdb2a0;
+}
+
+.intellector-home-preset-content {
+    vertical-spacing: 2px;
+    horizontal-spacing: 8px;
+}
+
+.intellector-home-preset-value-line {
+    horizontal-spacing: 6px;
+}
+
+.intellector-home-preset-value {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-home-preset-kind {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-home-preset-hint {
+    height: 16px;
+    margin-top: 5px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+    clip: true;
+}
+
+/* the quietest element of the card */
+.intellector-home-changelog-link {
+    padding-top: 14px;
+    horizontal-spacing: 10px;
+    border-top: 1px solid #e6dfd3;
+    cursor: pointer;
+}
+
+.intellector-home-changelog-link.intellector-home-narrow {
+    height: 44px;
+    padding-top: 10px;
+}
+
+.intellector-home-changelog-text {
+    vertical-spacing: 2px;
+}
+
+.intellector-home-changelog-kicker {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-home-changelog-title {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+    clip: true;
+}
+
+.intellector-home-changelog-caption {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+/* Open challenges */
+.intellector-home-challenges-card {
+    vertical-spacing: 0;
+    clip: true;
+}
+
+.intellector-home-challenges-title {
+    height: 56px;
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-home-challenges-title.intellector-home-narrow {
+    height: 52px;
+    padding-top: 16px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-home-challenges-columns {
+    height: 30px;
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 14px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-home-challenges-column-label {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-home-challenge-list,
+.intellector-home-challenge-list-column {
+    vertical-spacing: 0;
+}
+
+.intellector-home-challenge-row {
+    height: 48px;
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 14px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-home-challenge-row.intellector-home-narrow {
+    height: 64px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 10px;
+}
+
+.intellector-home-challenge-lines {
+    vertical-spacing: 4px;
+}
+
+.intellector-home-challenge-cell {
+    height: 20px;
+    horizontal-spacing: 6px;
+    clip: true;
+}
+
+.intellector-home-challenge-nickname {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-home-challenge-action {
+    width: 84px;
+}
+
+.intellector-home-challenge-action.intellector-home-narrow {
+    width: 76px;
+    height: 44px;
+}
+
+.intellector-home-custom-chip {
+    height: 28px;
+    padding-left: 8px;
+    padding-right: 8px;
+    horizontal-spacing: 5px;
+    background-color: transparent;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-home-custom-chip.intellector-home-narrow {
+    height: 26px;
+}
+
+.intellector-home-custom-chip:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-home-custom-chip.intellector-home-custom-chip-open,
+.intellector-home-custom-chip.intellector-home-custom-chip-open:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-home-custom-chip-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-home-custom-chip-text.intellector-home-custom-chip-open {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #8a5a1f;
+}
+
+/* 44 px tall around a 26 px chip on a 20 px line */
+.intellector-home-custom-tap-target {
+    height: 44px;
+    margin-top: -12px;
+    margin-bottom: -12px;
+    padding-left: 6px;
+    cursor: pointer;
+}
+
+/* games sections */
+.intellector-home-games-section {
+    vertical-spacing: 0;
+}
+
+.intellector-home-games-heading {
+    height: 48px;
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 6px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+/* the tabs bring their own padding and hairline */
+.intellector-home-games-heading.intellector-home-narrow {
+    padding-left: 0;
+    padding-right: 0;
+    border-bottom: none;
+}
+
+.intellector-home-games-title {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-home-pill {
+    height: 32px;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    border-radius: 5px;
+    color: #8a5a1f;
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.intellector-home-pill .label {
+    word-wrap: false;
+}
+
+.intellector-home-pill:hover {
+    background-color: #f0dcb4;
+}
+
+.intellector-home-filter-row {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 8px;
+    vertical-spacing: 8px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-home-games-panel {
+    padding-top: 14px;
+    padding-left: 14px;
+    padding-right: 14px;
+    background-color: #f0ebe2;
+}
+
+.intellector-home-games-grid {
+    vertical-spacing: 14px;
+}
+
+.intellector-home-games-row {
+    horizontal-spacing: 14px;
+}
