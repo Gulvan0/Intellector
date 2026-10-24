@@ -35,8 +35,10 @@ class VariationTextView extends Box
     private final onSelect:PlyTreeNode->Void;
     private final list:VBox;
     private final scroller:NativeScroller;
+    private final previewBadge:PreviewBadge = new PreviewBadge(true);
 
     private var selected:Null<PlyTreeNode> = null;
+    private var previewNode:Null<PlyTreeNode> = null;
     private var tokensByNode:Map<PlyTreeNode, HBox> = [];
     private var blocks:Array<{block:PlainTextBlock, rails:Element}> = [];
 
@@ -58,6 +60,7 @@ class VariationTextView extends Box
     public function showTree(root:PlyTreeNode, selected:PlyTreeNode):Void
     {
         this.selected = selected;
+        detachPreviewBadge(); // removing the blocks disposes what they hold
         list.removeAllComponents();
         tokensByNode = [];
         blocks = [];
@@ -65,7 +68,30 @@ class VariationTextView extends Box
         for (block in PlainTextBlocks.layout(root))
             list.addComponent(createBlock(block));
 
+        attachPreviewBadge();
         restyle();
+    }
+
+    /** Marks `node` as the card preview, `auto` while it's that by default; null for no mark **/
+    public function setCardPreview(node:Null<PlyTreeNode>, auto:Bool):Void
+    {
+        previewNode = node;
+        previewBadge.setAuto(auto);
+        detachPreviewBadge();
+        attachPreviewBadge();
+    }
+
+    private function attachPreviewBadge():Void
+    {
+        var token:Null<HBox> = previewNode != null ? tokensByNode.get(previewNode) : null;
+        if (token != null)
+            token.addComponent(previewBadge);
+    }
+
+    private function detachPreviewBadge():Void
+    {
+        if (previewBadge.parentComponent != null)
+            previewBadge.parentComponent.removeComponent(previewBadge, false);
     }
 
     public function select(selected:PlyTreeNode):Void

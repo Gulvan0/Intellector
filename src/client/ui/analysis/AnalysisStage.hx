@@ -148,10 +148,19 @@ class AnalysisStage extends Box
         if (fitsHeight)
         {
             var reservedHeight:Float = editing || toolCardReserved ? TOOL_CARD_SPACE : 0;
+            reservedHeight += board.controlsHeight();
             if (strip != null)
                 reservedHeight += strip.element.offsetHeight + COLUMN_SPACING;
             var aspectRatio:Float = BoardSurface.aspectRatioOf(Preferences.boardCoordinates.get());
-            columnWidth = Math.min(availableWidth, (this.element.clientHeight - reservedHeight) * aspectRatio);
+            var boardWidth:Float = Math.max(0, Math.floor((this.element.clientHeight - reservedHeight) * aspectRatio));
+            if (board.controlsHeight() > 0) // the control row above the board keeps its width while the board narrows
+            {
+                columnWidth = Math.min(availableWidth, Math.max(boardWidth, BoardLayoutTier.MIN_CONTROL_ROW_WIDTH));
+                if (boardWidth < columnWidth)
+                    boardMaxWidth = boardWidth;
+            }
+            else
+                columnWidth = Math.min(availableWidth, boardWidth);
         }
         else if (maxHeight != null) // only the board narrows: the control row keeps the full width
         {

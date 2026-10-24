@@ -1,16 +1,25 @@
 package client.ui.analysis;
 
+import client.logic.challenge.creation.ChallengePrefills;
+import client.logic.variations.AnalysisStateCodec;
+import client.logic.variations.AnalysisStateCodec.RestoredAnalysis;
+import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
 import client.datatypes.game.PlyNavigationType;
+import client.datatypes.study.Study;
 import client.datatypes.variations.PlyTreeChange;
 import client.datatypes.variations.PlyTreeCursor;
 import client.datatypes.variations.PlyTreeNode;
 import client.datatypes.variations.PositionDraft;
 import client.formatters.VariationFormatters;
+import client.logic.study.StudyContent;
 import client.ui.BoardLayoutTier;
 import client.ui.analysis.editor.EditorCard;
 import client.ui.analysis.editor.EditorTool;
 import client.ui.analysis.editor.EditorToolCard;
+import client.ui.analysis.GameImport.ImportedGame;
 import client.ui.analysis.editor.ImportPositionOverlay;
+import client.ui.analysis.study.StudyMode;
+import client.ui.analysis.study.StudyMode.StudyStatus;
 import client.ui.analysis.variations.VariationsCard;
 import client.ui.common.board.EditIntent;
 import client.ui.common.board.InteractiveBoard;
@@ -18,31 +27,59 @@ import client.ui.common.board.MoveRulesAdapter;
 import client.ui.common.board.PositionChangeCause;
 import client.ui.common.board.tools.AnalysisMovePolicy;
 import client.ui.common.board.tools.EditorMovePolicy;
+import client.ui.common.board.tools.InertMovePolicy;
+import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.share.ShareOverlay;
 import client.ui.game.MoveStrip;
 import client.ui.game.MovesCard;
+import haxe.Timer;
 import haxe.ui.Toolkit;
+import haxefolio.HaxeFolioApp;
+import haxefolio.LocaleUtils;
 import haxefolio.PageBase;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
+import intellectorboard.primitives.ply.RawPly;
+import js.Browser;
+import http.HttpError;
+import js.html.BeforeUnloadEvent;
 import morestd.Detachable;
+
+/** The game to analyze: its id and the number of plies to show; each null when the URL didn't hold a number **/
+typedef AnalysisGameSeed =
+{
+    gameId:Null<Int>,
+    plyCount:Null<Int>
+}
 
 /**
     The analysis board: moves played on it grow a tree of variations; the position editor replaces
-    the tree with one starting from the edited position.
+    the tree with one starting from the edited position. Opened as a study, it shows the study's
+    tree and lets its author save the edits; any board can be saved as a new study. One node may be
+    marked as the study card's preview. Opened on a game, it shows the game's plies as one line and
+    moves to the plain analysis path. Outside of a study, the tree, the selection and the mark
+    are kept in the navigation state, so that a reload brings them back.
 **/
 class AnalysisPage extends PageBase
 {
     // below them, the layout stops shrinking and the page scrolls instead
-    private static inline final MIN_WIDE_HEIGHT:Float = 520;
+    private static inline final MIN_WIDE_HEIGHT:Float = 240;
+    // above it, the wide layout keeps room under the board for the editor's tool card
+    private static inline final ROOMY_WIDE_HEIGHT:Float = 560;
 
     private final studyId:Null<Int>;
+    private final gameSeed:Null<AnalysisGameSeed>;
+    private final gameImport:GameImport = new GameImport();
 
     private var cursor:PlyTreeCursor;
     // the node the board shows outside the editor
     private var shownNode:PlyTreeNode;
     private var draft:Null<PositionDraft> = null;
     private var expanded:Bool = false;
+    // the card preview; the main line's end while null
+    private var markedNode:Null<PlyTreeNode> = null;
+    private var gameLoading:Bool = false;
+    private var missingGameTimer:Null<Timer> = null;
 
     private var board:InteractiveBoard;
     private var stage:AnalysisStage;
@@ -53,12 +90,14 @@ class AnalysisPage extends PageBase
     private var actionsCard:AnalysisActionsCard;
     private var editorCard:EditorCard;
     private var toolCard:EditorToolCard;
+    private var studyMode:StudyMode;
     private var handles:Array<Detachable> = [];
 
-    public function new(?studyId:Null<Int>)
+    public function new(?studyId:Null<Int>, ?gameSeed:AnalysisGameSeed)
     {
         super();
         this.studyId = studyId;
+        this.gameSeed = gameSeed;
     }
 
     private override function init():Void
@@ -67,10 +106,11 @@ class AnalysisPage extends PageBase
         addClass(StyleClass.GAME_PAGE);
 
         cursor = new PlyTreeCursor(Position.defaultStarting());
+        restoreState();
         shownNode = cursor.selected;
 
         board = new InteractiveBoard(shownNode.position, White, analysisPolicy());
-        handles.push(board.playMove.subscribe(cursor.play));
+        handles.push(board.playMove.subscribe(play));
         handles.push(board.editIntents.subscribe(onEdit));
 
         toolCard = new EditorToolCard(onToolChosen);
@@ -79,7 +119,8 @@ class AnalysisPage extends PageBase
         variationsCard = new VariationsCard({
             onSelect: cursor.select,
             onDelete: cursor.deleteSelected,
-            onExpandToggled: toggleExpanded
+            onExpandToggled: toggleExpanded,
+            onPreviewToggled: togglePreviewMark
         });
         movesCard = new MovesCard(navigate);
         moveStrip = new MoveStrip(navigate, () -> analysisLayout.toggleMoves());
@@ -87,7 +128,8 @@ class AnalysisPage extends PageBase
             onFlip: flip,
             onEditPosition: openEditor,
             onShare: share,
-            onPlayFromHere: () -> {}
+            onPlayFromHere: playFromHere,
+            onSaveAsStudy: () -> studyMode.saveAsNew()
         });
         editorCard = new EditorCard({
             onSideChosen: color -> editDraft(() -> draft.setTurnColor(color)),
@@ -99,7 +141,15 @@ class AnalysisPage extends PageBase
             onDiscard: closeEditor
         });
 
-        analysisLayout = new AnalysisLayout(variationsCard, stage, moveStrip, movesCard, actionsCard, editorCard, toolCard);
+        studyMode = new StudyMode({
+            cursor: cursor,
+            getMarked: () -> markedNode,
+            setMarked: setMarkedNode,
+            getOrientation: board.getOrientation,
+            onChanged: onStudyChanged
+        });
+
+        analysisLayout = new AnalysisLayout(variationsCard, stage, moveStrip, movesCard, actionsCard, editorCard, toolCard, studyMode.card, studyMode.bar);
         addComponent(analysisLayout);
         handles.push(BoardLayoutTier.bind(tier -> {
             analysisLayout.setTier(tier);
@@ -112,15 +162,40 @@ class AnalysisPage extends PageBase
 
         variationsCard.showTree(cursor.tree, cursor.selected);
         refreshMoves();
+        refreshCardPreview();
+
+        Browser.window.addEventListener("beforeunload", onBeforeUnload);
+        if (studyId != null)
+            studyMode.open(studyId);
+        else if (gameSeed != null)
+            importGame();
     }
 
     private override function onClose():Void
     {
+        Browser.window.removeEventListener("beforeunload", onBeforeUnload);
         for (handle in handles)
             handle.detach();
         handles = [];
+        studyMode.dispose();
+        gameImport.cancel();
+        if (missingGameTimer != null)
+            missingGameTimer.stop();
         board.dispose();
         stage.dispose();
+    }
+
+    private override function canLeave():Bool
+    {
+        return !studyMode.hasUnsavedChanges();
+    }
+
+    private function onBeforeUnload(event:BeforeUnloadEvent):Void
+    {
+        if (!studyMode.hasUnsavedChanges())
+            return;
+
+        event.preventDefault();
     }
 
     private override function onResize(width:Float, height:Float):Void
@@ -153,6 +228,7 @@ class AnalysisPage extends PageBase
             var inset:Float = analysisLayout.element.getBoundingClientRect().top - scrollArea.getBoundingClientRect().top + scrollArea.scrollTop;
             var availableHeight:Float = Math.floor(scrollArea.clientHeight - 2 * inset);
             var minHeight:Float = MIN_WIDE_HEIGHT;
+            analysisLayout.setRoomy(availableHeight >= ROOMY_WIDE_HEIGHT);
             if (analysisLayout.isCompact())
             {
                 minHeight = analysisLayout.compactMinHeight();
@@ -171,6 +247,81 @@ class AnalysisPage extends PageBase
         return new AnalysisMovePolicy(MoveRulesAdapter.DEFAULT);
     }
 
+    private function isLoading():Bool
+    {
+        return gameLoading || studyMode.isLoading();
+    }
+
+    private function restoreState():Void
+    {
+        if (studyId != null || gameSeed != null)
+            return;
+
+        var restored:Null<RestoredAnalysis> = AnalysisStateCodec.decode(HaxeFolioApp.navigationState);
+        if (restored == null)
+            return;
+
+        cursor.load(restored.tree);
+        cursor.select(restored.selected);
+        markedNode = restored.marked;
+    }
+
+    // a study is saved on the server, so only the bare board is kept in the navigation state
+    private function persistState():Void
+    {
+        if (studyMode.isShown())
+            HaxeFolioApp.setState(null);
+        else
+            HaxeFolioApp.setState(AnalysisStateCodec.encode(cursor.tree, cursor.selected, markedNode));
+    }
+
+    private function importGame():Void
+    {
+        gameLoading = true;
+        refreshLock();
+
+        if (gameSeed.gameId == null)
+            missingGameTimer = Timer.delay(() -> finishImport(() -> RequestFailureNotice.show(LOAD_GAME, GameNotFound)), 0); // the page's URL is only set once it is built
+        else
+            gameImport.start(gameSeed.gameId, gameSeed.plyCount, onGameImported, onGameImportFailed);
+    }
+
+    private function onGameImported(game:ImportedGame):Void
+    {
+        finishImport(() -> {
+            cursor.load(game.tree);
+            cursor.select(game.selected);
+        });
+    }
+
+    private function onGameImportFailed(error:Null<HttpError>):Void
+    {
+        finishImport(() -> {
+            if (error == null)
+                RequestFailureNotice.show(LOAD_GAME, NoConnection);
+            else if (error.httpStatus == 404)
+                RequestFailureNotice.show(LOAD_GAME, GameNotFound);
+            else
+                RequestFailureNotice.showHttpError(LOAD_GAME, error);
+        });
+    }
+
+    // the board is the plain analysis one from here on, whether or not the game arrived
+    private function finishImport(apply:Void->Void):Void
+    {
+        gameLoading = false;
+        HaxeFolioApp.replacePath("analysis");
+        apply();
+        refreshLock();
+        persistState();
+    }
+
+    private function play(ply:RawPly):Void
+    {
+        if (!isLoading())
+            cursor.play(ply);
+    }
+
     private function onCursorChanged(change:PlyTreeChange):Void
     {
         var selected:PlyTreeNode = cursor.selected;
@@ -185,11 +336,58 @@ class AnalysisPage extends PageBase
         switch change
         {
             case Structure:
+                if (markedNode != null && !cursor.tree.root.contains(markedNode))
+                    markedNode = null;
                 variationsCard.showTree(cursor.tree, selected);
+                refreshCardPreview();
+                studyMode.contentChanged();
             case Selection:
                 variationsCard.select(selected);
         }
         refreshMoves();
+        persistState();
+    }
+
+    private function togglePreviewMark():Void
+    {
+        if (draft != null || isLoading())
+            return;
+
+        markedNode = markedNode == cursor.selected ? null : cursor.selected;
+        refreshCardPreview();
+        studyMode.contentChanged();
+        persistState();
+    }
+
+    private function setMarkedNode(node:Null<PlyTreeNode>):Void
+    {
+        markedNode = node;
+        refreshCardPreview();
+    }
+
+    // a visitor sees no preview: it's the author's choice
+    private function refreshCardPreview():Void
+    {
+        if (studyMode.isVisitorOpen())
+            variationsCard.setCardPreview(null, false);
+        else
+            variationsCard.setCardPreview(StudyContent.previewNode(cursor.tree, markedNode), markedNode == null);
+    }
+
+    private function onStudyChanged():Void
+    {
+        analysisLayout.setStudyShown(studyMode.isShown());
+        actionsCard.setSaveAsStudyShown(studyMode.status.match(None | Unavailable(_)));
+        refreshCardPreview();
+        refreshLock();
+        fitLayoutHeight();
+
+        var study:Null<Study> = studyMode.openStudy();
+        if (study != null)
+            setTitle(LocaleUtils.localeBinding("intellector.analysis.named_study_title"), study.details.name);
+        else
+            setTitle(GroupedLocaleResolvers.analysisTitle(studyMode.isShown()), studyId);
+        persistState();
     }
 
     private function refreshMoves():Void
@@ -214,6 +412,12 @@ class AnalysisPage extends PageBase
         toolCard.setOrientation(orientation);
     }
 
+    private function playFromHere():Void
+    {
+        var position:Position = shownNode.position;
+        ChallengeCreationLauncher.launch(draft -> ChallengePrefills.playFrom(draft, position));
+    }
+
     private function share():Void
     {
         ShareOverlay.present({position: shownNode.position, orientation: board.getOrientation(), lastMove: shownNode.ply, game: null});
@@ -231,7 +435,7 @@ class AnalysisPage extends PageBase
 
     private function openEditor():Void
     {
-        if (draft != null)
+        if (draft != null || isLoading())
             return;
         if (expanded)
             toggleExpanded();
@@ -243,7 +447,7 @@ class AnalysisPage extends PageBase
         toolCard.select(FreeMove);
         onToolChosen(FreeMove);
 
-        setLocked(true);
+        refreshLock();
         analysisLayout.setEditing(true);
         fitLayoutHeight();
         refreshEditor();
@@ -259,7 +463,7 @@ class AnalysisPage extends PageBase
         board.setPolicy(analysisPolicy());
         board.setPosition(shownNode.position, Replacement);
         board.setLastMove(shownNode.ply);
-        setLocked(false);
+        refreshLock();
         analysisLayout.setEditing(false);
         fitLayoutHeight();
     }
@@ -277,11 +481,18 @@ class AnalysisPage extends PageBase
             cursor.reset(position);
     }
 
-    private function setLocked(locked:Bool):Void
+    // while the editor is open or the study or the game loads
+    private function refreshLock():Void
     {
+        var loading:Bool = isLoading();
+        var locked:Bool = draft != null || loading;
         variationsCard.setLocked(locked);
         movesCard.setLocked(locked);
         moveStrip.setLocked(locked);
+        studyMode.setLocked(draft != null);
+        actionsCard.setEnabled(!loading);
+        if (draft == null)
+            board.setPolicy(loading ? new InertMovePolicy() : analysisPolicy());
     }
 
     private function onToolChosen(tool:EditorTool):Void

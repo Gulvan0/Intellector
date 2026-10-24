@@ -1,0 +1,433 @@
+/*
+    Studies on the analysis page: the card preview's badge and toggle in the variations card, the
+    study card (wide, medium tab), the compact study bar, the study sheet and the study form overlay.
+*/
+
+/* card preview: a ring over the tree pill's corner, an icon after the text view's notation */
+.intellector-variation-preview-badge {
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    border-radius: 8px;
+}
+
+.intellector-variation-preview-badge .image {
+    width: 12px;
+    height: 12px;
+}
+
+.intellector-variation-preview-badge.intellector-variation-preview-auto {
+    background-color: #faf7f2;
+    border: 1px dashed #bdb2a0;
+}
+
+.intellector-variation-preview-inline {
+    width: 14px;
+    height: 14px;
+}
+
+.intellector-variation-preview-inline .image {
+    width: 14px;
+    height: 14px;
+}
+
+.intellector-analysis-locked .intellector-variation-preview-badge,
+.intellector-analysis-locked .intellector-variation-preview-inline {
+    opacity: 0.45;
+}
+
+.intellector-variations-preview-button {
+    width: 37px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.haxefolio-tier-board-compact .intellector-variations-preview-button {
+    width: 44px;
+    height: 44px;
+}
+
+/* study card */
+.intellector-study-card {
+    padding-top: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 14px;
+    vertical-spacing: 10px;
+}
+
+.intellector-study-card .intellector-analysis-panel-tabs {
+    padding: 0;
+}
+
+.intellector-study-card-top {
+    height: 22px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-study-card-title {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+}
+
+.intellector-study-number {
+    font-name: $mono-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+}
+
+.intellector-study-card-body {
+    vertical-spacing: 10px;
+}
+
+.intellector-study-card-status {
+    padding-top: 40px;
+}
+
+.intellector-study-card-message {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+.intellector-study-publicity-badge {
+    height: 22px;
+    padding-left: 7px;
+    padding-right: 7px;
+    horizontal-spacing: 5px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 4px;
+}
+
+.intellector-study-publicity-badge .image {
+    width: 14px;
+    height: 14px;
+}
+
+.intellector-study-publicity-badge .label {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-study-info {
+    vertical-spacing: 3px;
+    padding-right: 8px;
+}
+
+.intellector-study-name {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+}
+
+.intellector-study-byline {
+    horizontal-spacing: 4px;
+}
+
+.intellector-study-byline-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+.intellector-study-author {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    cursor: pointer;
+}
+
+.intellector-study-author:hover {
+    text-decoration: underline;
+}
+
+.intellector-study-description {
+    padding-top: 8px;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-study-tag-row {
+    height: 24px;
+}
+
+.intellector-study-tag:disabled {
+    color: #a79b8a;
+    border-color: #e6dfd3;
+    cursor: default;
+}
+
+.intellector-study-footer {
+    padding-top: 12px;
+    vertical-spacing: 10px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-study-save-hint {
+    height: 16px;
+    clip: true;
+}
+
+.intellector-study-save-hint-error {
+    color: #9e2f1c;
+}
+
+/* compact study bar */
+.intellector-study-bar {
+    horizontal-spacing: 8px;
+}
+
+.intellector-study-bar-open {
+    height: 44px;
+    padding-left: 12px;
+    padding-right: 8px;
+    horizontal-spacing: 8px;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-study-bar-open:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-study-bar-status,
+.intellector-study-bar-status:hover {
+    border-color: #d8cfc0;
+    cursor: default;
+}
+
+.intellector-study-bar-name {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+    clip: true;
+}
+
+.intellector-study-bar-status .intellector-study-bar-name {
+    font-name: $ui-family-medium;
+    font-weight: 500;
+    color: #6d6152;
+}
+
+.intellector-study-bar-button {
+    height: 44px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+/* study sheet */
+.intellector-study-sheet-body {
+    padding-top: 18px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 18px;
+    vertical-spacing: 6px;
+}
+
+.intellector-study-sheet-body .intellector-study-info {
+    padding-right: 0;
+}
+
+.intellector-study-sheet-tags {
+    padding-top: 10px;
+    horizontal-spacing: 6px;
+    vertical-spacing: 6px;
+}
+
+.intellector-study-sheet-tags .intellector-study-tag {
+    height: 32px;
+}
+
+.intellector-study-sheet-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 14px;
+    vertical-spacing: 8px;
+}
+
+.intellector-study-sheet-footer .intellector-game-button {
+    height: 44px;
+}
+
+/* study form overlay */
+.intellector-study-form-body {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 18px;
+    horizontal-spacing: 22px;
+    vertical-spacing: 18px;
+}
+
+.intellector-study-form {
+    vertical-spacing: 14px;
+}
+
+.intellector-study-visibility {
+    vertical-spacing: 6px;
+}
+
+.intellector-study-visibility-list {
+    vertical-spacing: 6px;
+}
+
+.intellector-study-visibility-option {
+    height: 37px;
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 8px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-study-visibility-option:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-study-visibility-option-on,
+.intellector-study-visibility-option-on:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-study-visibility-name {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-study-visibility-option:hover .intellector-study-visibility-name {
+    color: #2a211a;
+}
+
+.intellector-study-visibility-option-on .intellector-study-visibility-name,
+.intellector-study-visibility-option-on:hover .intellector-study-visibility-name {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #8a5a1f;
+}
+
+.intellector-study-visibility-scope {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.haxefolio-overlay-sheet .intellector-study-visibility-option {
+    height: 44px;
+}
+
+.intellector-study-tags-field {
+    vertical-spacing: 6px;
+}
+
+.intellector-study-tags-input-row {
+    horizontal-spacing: 10px;
+}
+
+/* sized to its caption, which differs a lot between languages */
+.intellector-study-tag-add {
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.intellector-study-tag-tokens {
+    horizontal-spacing: 6px;
+    vertical-spacing: 6px;
+}
+
+.intellector-study-preview-panel {
+    padding: 14px;
+    vertical-spacing: 10px;
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    border-radius: 5px;
+}
+
+.intellector-study-preview-choice {
+    background-color: #fffefb;
+}
+
+.intellector-study-preview-choice .intellector-game-segment {
+    border-color: #fffefb;
+}
+
+.intellector-study-preview-choice .intellector-game-segment-on,
+.intellector-study-preview-choice .intellector-game-segment-on:hover {
+    border-color: #c79a56;
+}
+
+.intellector-study-preview-choice .intellector-game-segment:disabled .label {
+    color: #a79b8a;
+}
+
+.intellector-study-preview-choice .label {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-study-preview-panel .intellector-game-hint {
+    word-wrap: true;
+}
+
+.intellector-study-preview-move {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+}
+
+.intellector-study-form-footer {
+    padding-left: 22px;
+    padding-right: 22px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-study-form-footer-row {
+    horizontal-spacing: 10px;
+}
+
+.intellector-study-form-footer-collapsed {
+    padding-top: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 12px;
+    vertical-spacing: 8px;
+}
+
+.intellector-study-form-footer-collapsed .haxefolio-action-button {
+    height: 44px;
+}
+
+.intellector-study-form-message {
+    font-name: $ui-family-regular;
+    font-size: 12px;
+    color: #9e2f1c;
+}
+
+.intellector-study-form-question {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-study-form-delete {
+    color: #9e2f1c;
+}

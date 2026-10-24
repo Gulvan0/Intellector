@@ -10,14 +10,20 @@ typedef AnalysisActionHandlers =
     onFlip:Void->Void,
     onEditPosition:Void->Void,
     onShare:Void->Void,
-    onPlayFromHere:Void->Void
+    onPlayFromHere:Void->Void,
+    onSaveAsStudy:Void->Void
 }
 
-/** Flip board, Edit position, Share, Play from here: two a row while wide, one icon row while compact **/
+/**
+    Flip board, Edit position, Share, Play from here, then Save as study while no study is open: two
+    a row while wide (the last one alone in its row), one icon row while compact.
+**/
 class AnalysisActionsCard extends VBox
 {
     private final buttons:Array<{button:Button, captionKey:String}>;
+    private final saveAsStudy:{button:Button, captionKey:String};
     private var compact:Bool = false;
+    private var saveAsStudyShown:Bool = true;
 
     public function new(handlers:AnalysisActionHandlers)
     {
@@ -32,6 +38,26 @@ class AnalysisActionsCard extends VBox
             {button: GameButtons.action("share", "intellector.live_game.action.share", handlers.onShare), captionKey: "intellector.live_game.action.share"},
             {button: GameButtons.action("play_from_here", "intellector.live_game.action.play_from_here", handlers.onPlayFromHere), captionKey: "intellector.live_game.action.play_from_here"}
         ];
+        saveAsStudy = {
+            button: GameButtons.actionWithIcon(Assets.analysisIcon("save_study"), "intellector.analysis.action.save_as_study", handlers.onSaveAsStudy),
+            captionKey: "intellector.analysis.action.save_as_study"
+        };
+        arrange();
+    }
+
+    /** Disabled in place while the board isn't ready, a study loading **/
+    public function setEnabled(enabled:Bool):Void
+    {
+        for (entry in buttons.concat([saveAsStudy]))
+            entry.button.disabled = !enabled;
+    }
+
+    public function setSaveAsStudyShown(shown:Bool):Void
+    {
+        if (saveAsStudyShown == shown)
+            return;
+
+        saveAsStudyShown = shown;
         arrange();
     }
 
@@ -43,21 +69,22 @@ class AnalysisActionsCard extends VBox
 
     private function arrange():Void
     {
-        for (entry in buttons)
+        var shownButtons:Array<{button:Button, captionKey:String}> = saveAsStudyShown ? buttons.concat([saveAsStudy]) : buttons;
+        for (entry in buttons.concat([saveAsStudy]))
             if (entry.button.parentComponent != null)
                 entry.button.parentComponent.removeComponent(entry.button, false);
         removeAllComponents();
 
-        var rowSize:Int = compact ? buttons.length : 2;
+        var rowSize:Int = compact ? shownButtons.length : 2;
         var i:Int = 0;
-        while (i < buttons.length)
+        while (i < shownButtons.length)
         {
             var row:HBox = new HBox();
             row.percentWidth = 100;
             row.addClass(StyleClass.GAME_ACTIONS_ROW);
             addComponent(row);
 
-            var rowEntries:Array<{button:Button, captionKey:String}> = buttons.slice(i, i + rowSize);
+            var rowEntries:Array<{button:Button, captionKey:String}> = shownButtons.slice(i, i + rowSize);
             for (entry in rowEntries)
             {
                 entry.button.percentWidth = 100 / rowEntries.length;

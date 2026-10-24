@@ -1,5 +1,6 @@
 package client.ui.analysis;
 
+import client.ui.analysis.AnalysisPanel;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
@@ -7,13 +8,13 @@ import haxefolio.LocaleUtils;
 
 using client.ui.ComponentExtension;
 
-/** Variations | Moves: which of the two views of the ply tree the shared card shows **/
+/** Variations | Moves, plus Study while one is open: which panel the shared card shows **/
 class PanelTabs extends Box
 {
-    private final variationsOption:Box;
-    private final movesOption:Box;
+    private final options:Map<AnalysisPanel, Box> = [];
+    private final studyOption:Box;
 
-    public function new(onMovesShownChosen:Bool->Void)
+    public function new(onChosen:AnalysisPanel->Void)
     {
         super();
         percentWidth = 100;
@@ -24,23 +25,39 @@ class PanelTabs extends Box
         track.addClass(StyleClass.GAME_SEGMENTS);
         addComponent(track);
 
-        variationsOption = createOption("intellector.analysis.variations.title", () -> onMovesShownChosen(false));
-        movesOption = createOption("intellector.live_game.moves.title", () -> onMovesShownChosen(true));
-        track.addComponent(variationsOption);
-        track.addComponent(movesOption);
-        setMovesShown(false);
+        var captionKeys:Map<AnalysisPanel, String> = [
+            Variations => "intellector.analysis.variations.title",
+            Moves => "intellector.live_game.moves.title",
+            Study => "intellector.analysis.study.label"
+        ];
+        for (panel in [Variations, Moves, Study])
+        {
+            var option:Box = createOption(captionKeys.get(panel), () -> onChosen(panel));
+            options.set(panel, option);
+            track.addComponent(option);
+        }
+        studyOption = options.get(Study);
+        setStudyShown(false);
+        setShown(Variations);
     }
 
-    public function setMovesShown(movesShown:Bool):Void
+    public function setShown(shown:AnalysisPanel):Void
     {
-        variationsOption.setClass(StyleClass.GAME_SEGMENT_ON, !movesShown);
-        movesOption.setClass(StyleClass.GAME_SEGMENT_ON, movesShown);
+        for (panel => option in options)
+            option.setClass(StyleClass.GAME_SEGMENT_ON, panel == shown);
+    }
+
+    public function setStudyShown(shown:Bool):Void
+    {
+        studyOption.hidden = !shown;
+        var percentWidth:Float = 100 / (shown ? 3 : 2);
+        for (option in options)
+            option.percentWidth = percentWidth;
     }
 
     private function createOption(captionKey:String, onChosen:Void->Void):Box
     {
         var option:Box = new Box();
-        option.percentWidth = 50;
         option.addClass(StyleClass.GAME_SEGMENT);
         option.onClick = _ -> onChosen();
         option.trackHover();

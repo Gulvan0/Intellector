@@ -38,6 +38,7 @@ class VariationTreeView extends Box
     private static inline final RIGHT_PADDING:Float = 14;
     private static inline final BOTTOM_PADDING:Float = 56; // unscaled: clears the tools over the view's bottom at any zoom
     private static inline final EDGE_WIDTH:Float = 2;
+    private static inline final PREVIEW_BADGE_SIZE:Float = 16;
 
     /** Called with the new scale whenever it changes **/
     public var onScaleChanged:Float->Void = _ -> {};
@@ -48,9 +49,11 @@ class VariationTreeView extends Box
     private final canvas:Absolute;
     private final gutter:Absolute;
     private final gutterRail:Box;
+    private final previewBadge:PreviewBadge;
 
     private var root:Null<PlyTreeNode> = null;
     private var selected:Null<PlyTreeNode> = null;
+    private var previewNode:Null<PlyTreeNode> = null;
     private var cells:Array<TreeCell> = [];
     private var cellsByNode:Map<PlyTreeNode, TreeCell> = [];
     private var pillsByNode:Map<PlyTreeNode, Box> = [];
@@ -75,8 +78,15 @@ class VariationTreeView extends Box
 
         gutter = new Absolute();
         gutter.addClass(StyleClass.VARIATION_TREE_GUTTER);
-        gutter.element.style.zIndex = "1"; // over the pills scrolled under it, including ones added later
+        gutter.element.style.zIndex = "2"; // over the pills and the badge scrolled under it, including ones added later
         canvas.addComponent(gutter);
+
+        previewBadge = new PreviewBadge(false);
+        previewBadge.width = PREVIEW_BADGE_SIZE;
+        previewBadge.height = PREVIEW_BADGE_SIZE;
+        previewBadge.element.style.zIndex = "1"; // over the pills added after it
+        previewBadge.hidden = true;
+        canvas.addComponent(previewBadge);
 
         sizer = new Absolute();
         sizer.addClass(StyleClass.VARIATION_TREE_CANVAS);
@@ -119,6 +129,14 @@ class VariationTreeView extends Box
         restyleNodes();
         rebuildEdges();
         revealSelected();
+    }
+
+    /** Marks `node` as the card preview, `auto` while it's that by default; null for no mark **/
+    public function setCardPreview(node:Null<PlyTreeNode>, auto:Bool):Void
+    {
+        previewNode = node;
+        previewBadge.setAuto(auto);
+        placePreviewBadge();
     }
 
     /** Zooms keeping the viewport's centre in place **/
@@ -257,8 +275,22 @@ class VariationTreeView extends Box
 
         restyleNodes();
         rebuildEdges();
+        placePreviewBadge();
         applyScale();
         keepGutterInView();
+    }
+
+    // centred on the pill's top right corner
+    private function placePreviewBadge():Void
+    {
+        var cell:Null<TreeCell> = previewNode != null ? cellsByNode.get(previewNode) : null;
+        previewBadge.hidden = cell == null;
+        if (cell == null)
+            return;
+
+        var pillWidth:Float = cell.node.isRoot() ? ROOT_WIDTH : columnWidths[cell.column];
+        previewBadge.left = columnX[cell.column] + pillWidth - PREVIEW_BADGE_SIZE / 2;
+        previewBadge.top = TOP_OFFSET + cell.row * ROW_HEIGHT + PILL_TOP - PREVIEW_BADGE_SIZE / 2 + 1;
     }
 
     private function placePill(pill:Box, cell:TreeCell):Void

@@ -1,7 +1,10 @@
 package client.ui.analysis;
 
+import client.ui.analysis.AnalysisPanel;
 import client.ui.analysis.editor.EditorCard;
 import client.ui.analysis.editor.EditorToolCard;
+import client.ui.analysis.study.StudyBar;
+import client.ui.analysis.study.StudyCard;
 import client.ui.analysis.variations.VariationsCard;
 import client.ui.game.MoveStrip;
 import client.ui.game.MovesCard;
@@ -13,11 +16,13 @@ import haxe.ui.core.Component;
 using client.ui.ComponentExtension;
 
 /**
-    Arranges the page's parts. Wide: variations | the board | moves, then the actions or the
-    editor. Medium: the board with the move strip under it | the variations and the moves as tabs of
-    one card, then the actions or the editor (the card shrinking to its tabs meanwhile). Compact: the move strip, the board, the actions, then
-    the variations filling the rest (the editor in their place while it's open); the moves open as a
-    popover over the bottom. Expanded, the variations take the whole area.
+    Arranges the page's parts. Wide: the study over the variations | the board | moves, then the
+    actions or the editor. Medium: the board with the move strip under it | the variations, the
+    moves and the study as tabs of one card, then the actions or the editor (the card shrinking to
+    its tabs meanwhile). Compact: the study bar, the move strip, the board, the actions, then the
+    variations filling the rest (the editor in their place while it's open); the moves open as a
+    popover over the bottom. Expanded, the variations take the whole area. The study's parts show
+    only while a study is open, or loading.
 **/
 class AnalysisLayout extends Box
 {
@@ -32,6 +37,8 @@ class AnalysisLayout extends Box
     private final actionsCard:AnalysisActionsCard;
     private final editorCard:EditorCard;
     private final toolCard:EditorToolCard;
+    private final studyCard:StudyCard;
+    private final studyBar:StudyBar;
     private final panelTabs:PanelTabs;
 
     private final wideRow:HBox;
@@ -42,10 +49,12 @@ class AnalysisLayout extends Box
     private var tier:Null<BoardLayoutTier> = null;
     private var editing:Bool = false;
     private var expanded:Bool = false;
-    // compact: the moves popover is open; medium: the card shows the Moves tab
-    private var movesOpen:Bool = false;
+    private var studyShown:Bool = false;
+    private var roomy:Bool = true;
+    // compact: Moves while the moves popover is open; medium: the shared card's tab
+    private var shownPanel:AnalysisPanel = Variations;
 
-    public function new(variationsCard:VariationsCard, stage:AnalysisStage, moveStrip:MoveStrip, movesCard:MovesCard, actionsCard:AnalysisActionsCard, editorCard:EditorCard, toolCard:EditorToolCard)
+    public function new(variationsCard:VariationsCard, stage:AnalysisStage, moveStrip:MoveStrip, movesCard:MovesCard, actionsCard:AnalysisActionsCard, editorCard:EditorCard, toolCard:EditorToolCard, studyCard:StudyCard, studyBar:StudyBar)
     {
         super();
         percentWidth = 100;
@@ -58,7 +67,9 @@ class AnalysisLayout extends Box
         this.actionsCard = actionsCard;
         this.editorCard = editorCard;
         this.toolCard = toolCard;
-        panelTabs = new PanelTabs(setMovesOpen);
+        this.studyCard = studyCard;
+        this.studyBar = studyBar;
+        panelTabs = new PanelTabs(showPanel);
 
         wideRow = new HBox();
         wideRow.percentWidth = 100;
@@ -114,6 +125,21 @@ class AnalysisLayout extends Box
         return !(tier == Compact && editing);
     }
 
+    /** Wide: whether the height leaves room to keep the editor's tool card space reserved under the board **/
+    public function setRoomy(roomy:Bool):Void
+    {
+        if (this.roomy == roomy)
+            return;
+        this.roomy = roomy;
+        refreshToolCardReserve();
+    }
+
+    // otherwise, as in medium, the board shrinks for the editor rather than staying small without it
+    private function refreshToolCardReserve():Void
+    {
+        stage.setToolCardReserved(tier == Wide && roomy);
+    }
+
     public function setTier(tier:BoardLayoutTier):Void
     {
         if (this.tier == tier)
@@ -130,8 +156,9 @@ class AnalysisLayout extends Box
         movesCard.setTitleShown(!tabbed);
         movesCard.setClass(StyleClass.ANALYSIS_TABBED, tabbed);
         stage.setFitsHeight(!compact);
-        stage.setToolCardReserved(tier == Wide); // medium: the board shrinks for the editor rather than staying small without it
-        movesOpen = false;
+        refreshToolCardReserve();
+        studyCard.setTabbed(tabbed);
+        shownPanel = Variations;
         build();
     }
 
@@ -140,7 +167,7 @@ class AnalysisLayout extends Box
         this.editing = editing;
         stage.setEditing(editing);
         if (editing && tier != Medium) // medium keeps the chosen tab for after editing
-            movesOpen = false;
+            shownPanel = Variations;
         refreshVisibility();
     }
 
@@ -148,20 +175,29 @@ class AnalysisLayout extends Box
     {
         this.expanded = expanded;
         if (expanded)
-            movesOpen = false;
+            shownPanel = Variations;
         refreshVisibility();
     }
 
-    /** Compact: toggles the moves popover; medium: switches between the tabs **/
+    /** Whether a study is open or loading, which gives its card, tab and bar a place **/
+    public function setStudyShown(shown:Bool):Void
+    {
+        studyShown = shown;
+        if (!shown && shownPanel == Study)
+            shownPanel = Variations;
+        refreshVisibility();
+    }
+
+    /** Compact: toggles the moves popover; medium: switches between the Variations and Moves tabs **/
     public function toggleMoves():Void
     {
         if (!editing && !expanded)
-            setMovesOpen(!movesOpen);
+            showPanel(shownPanel == Moves ? Variations : Moves);
     }
 
-    private function setMovesOpen(open:Bool):Void
+    private function showPanel(panel:AnalysisPanel):Void
     {
-        movesOpen = open;
+        shownPanel = panel;
         refreshVisibility();
     }
 
@@ -181,13 +217,13 @@ class AnalysisLayout extends Box
                 movesCard.height = MOVES_POPOVER_HEIGHT;
                 movesCard.verticalAlign = "bottom";
 
-                for (part in ([moveStrip, stage, actionsCard, editorCard, variationsCard] : Array<Component>))
+                for (part in ([studyBar, moveStrip, stage, actionsCard, editorCard, variationsCard] : Array<Component>))
                     compactColumn.addComponent(part);
                 addComponent(compactColumn);
             case Medium:
                 resetMovesSize();
 
-                for (part in ([variationsCard, movesCard, actionsCard, editorCard] : Array<Component>))
+                for (part in ([studyCard, variationsCard, movesCard, actionsCard, editorCard] : Array<Component>))
                     rightColumn.addComponent(part);
                 wideRow.addComponent(stage);
                 wideRow.addComponent(rightColumn);
@@ -196,6 +232,7 @@ class AnalysisLayout extends Box
             default:
                 resetMovesSize();
 
+                leftColumn.addComponent(studyCard);
                 leftColumn.addComponent(variationsCard);
                 rightColumn.addComponent(movesCard);
                 rightColumn.addComponent(actionsCard);
@@ -216,11 +253,14 @@ class AnalysisLayout extends Box
         actionsCard.hidden = editing || (tier != Wide && expanded);
         editorCard.hidden = !editing;
         stage.hidden = expanded;
+        var movesOpen:Bool = shownPanel == Moves;
 
         switch tier
         {
             case Compact:
                 setPanelContentShown(true);
+                studyCard.hidden = true;
+                studyBar.hidden = !studyShown || expanded;
                 moveStrip.hidden = expanded;
                 variationsCard.hidden = editing;
                 movesCard.hidden = false;
@@ -230,12 +270,14 @@ class AnalysisLayout extends Box
                 else if (!movesOpen && movesCard.parentComponent == this)
                     removeComponent(movesCard, false);
             case Medium:
+                studyBar.hidden = true;
                 moveStrip.hidden = false;
-                variationsCard.hidden = movesOpen;
-                movesCard.hidden = !movesOpen;
-                // both are locked while editing: the card shrinks to its tabs and leaves the height to the editor
+                variationsCard.hidden = shownPanel != Variations;
+                movesCard.hidden = shownPanel != Moves;
+                studyCard.hidden = shownPanel != Study;
+                // all are locked while editing: the card shrinks to its tabs and leaves the height to the editor
                 setPanelContentShown(!editing);
-                for (card in ([variationsCard, movesCard] : Array<Component>))
+                for (card in ([variationsCard, movesCard, studyCard] : Array<Component>))
                 {
                     card.percentHeight = editing ? null : 100;
                     card.invalidateComponentLayout(); // a null size alone doesn't return it to its auto height
@@ -244,6 +286,8 @@ class AnalysisLayout extends Box
                 setColumnFullWidth(rightColumn, expanded);
             default:
                 setPanelContentShown(true);
+                studyBar.hidden = true;
+                studyCard.hidden = !studyShown || expanded;
                 variationsCard.hidden = false;
                 movesCard.hidden = false;
                 rightColumn.hidden = expanded;
@@ -256,7 +300,13 @@ class AnalysisLayout extends Box
     // medium: the tabs head whichever card is shown; moved only once it's shown, as a hidden card doesn't lay out its new child
     private function refreshPanelTabs():Void
     {
-        var host:Null<Component> = tier == Medium ? (movesOpen ? movesCard : variationsCard) : null;
+        var host:Null<Component> = if (tier != Medium)
+            null;
+        else switch shownPanel {
+            case Moves: movesCard;
+            case Study: studyCard;
+            default: variationsCard;
+        }
         if (panelTabs.parentComponent != host)
         {
             if (panelTabs.parentComponent != null)
@@ -266,7 +316,8 @@ class AnalysisLayout extends Box
         }
         panelTabs.hidden = expanded;
         panelTabs.disabled = editing;
-        panelTabs.setMovesShown(movesOpen);
+        panelTabs.setStudyShown(studyShown);
+        panelTabs.setShown(shownPanel);
 
         var variationsTabbed:Bool = tier == Medium && !expanded; // expanded, the tabs are hidden and the title names the card again
         variationsCard.setTitleShown(!variationsTabbed);
@@ -277,6 +328,7 @@ class AnalysisLayout extends Box
     {
         variationsCard.setContentShown(shown);
         movesCard.setContentShown(shown);
+        studyCard.setContentShown(shown);
     }
 
     private function resetMovesSize():Void
@@ -302,7 +354,7 @@ class AnalysisLayout extends Box
 
     private function detachParts():Void
     {
-        for (part in ([variationsCard, stage, moveStrip, movesCard, actionsCard, editorCard] : Array<Component>))
+        for (part in ([studyCard, studyBar, variationsCard, stage, moveStrip, movesCard, actionsCard, editorCard] : Array<Component>))
             if (part.parentComponent != null)
                 part.parentComponent.removeComponent(part, false);
         for (container in [leftColumn, rightColumn, wideRow, compactColumn])

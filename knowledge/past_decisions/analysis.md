@@ -5,9 +5,9 @@ and its handoff (https://claude.ai/artifact/QP7XJ7c4Na9Xp7Nztt9QGQ).
 
 ## Decisions
 
-1. **Scope**: the bare `analysis` route only, starting from the default position. `study/{id}`
-   keeps opening the same empty board; loading/saving studies, a SIP or game parameter and local
-   persistence are deferred (`[[analysis_deferred]]` 1-3).
+1. **Scope**: the bare `analysis` route, starting from the default position, and `study/{id}`
+   (study mode, see `[[study_plan]]`). A SIP or game parameter and local persistence are deferred
+   (`[[analysis_deferred]]` 1-3).
 2. **Views**: the `branching_type` preference picks the view, live: `tree` / `plain_text` (the
    `outline` value is dropped; a stored one falls back to the default). The turn colour preference
    is removed: the colour discs always show.

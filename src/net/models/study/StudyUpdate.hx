@@ -11,6 +11,7 @@ class StudyUpdate implements IJsonSerializableMacro
 	public var publicity:Null<StudyPublicity> = null;
 	public var starting_sip:Null<String> = null;
 	public var key_sip:Null<String> = null;
+	public var key_path:Null<String> = null; // replaced together with `nodes`, cleared when null
 	public var tags:Null<Array<String>> = null;
 	public var nodes:Null<Array<ApiPlyTreeNode>> = null;
 }

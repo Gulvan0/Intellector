@@ -72,7 +72,13 @@ class PlyTreeCursor
     /** Starts over from `startingPosition`, with no plies **/
     public function reset(startingPosition:Position):Void
     {
-        tree = new PlyTree(startingPosition);
+        load(new PlyTree(startingPosition));
+    }
+
+    /** Replaces the tree with `tree`, selecting its root **/
+    public function load(tree:PlyTree):Void
+    {
+        this.tree = tree;
         selected = tree.root;
         onChanged.dispatch(Structure);
     }

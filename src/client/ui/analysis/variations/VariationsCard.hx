@@ -5,6 +5,7 @@ import client.datatypes.variations.PlyTreeNode;
 import client.datatypes.variations.VariationViewMode;
 import client.formatters.Plurals;
 import client.formatters.VariationFormatters;
+import client.ui.common.WidthObserver;
 import client.ui.game.GameButtons;
 import haxe.ui.components.Button;
 import haxe.ui.components.Image;
@@ -14,6 +15,9 @@ import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
+import js.Browser;
+import js.html.CSSStyleDeclaration;
+import js.html.CanvasRenderingContext2D;
 
 using client.ui.ComponentExtension;
 
@@ -21,19 +25,25 @@ typedef VariationsCardHandlers =
 {
     onSelect:PlyTreeNode->Void,
     onDelete:Void->Void,
-    onExpandToggled:Void->Void
+    onExpandToggled:Void->Void,
+    /** Marks the selection as the card preview, or unmarks it if it's the marked one **/
+    onPreviewToggled:Void->Void
 }
 
 /**
     The ply tree, as a tree or as text, with Delete for the selected move, zoom (tree only) and
     Expand. Deleting a move with continuations asks first, in a banner over the view's bottom.
+    The node a study's card shows carries a badge, and a header button marks the selection as it.
 **/
 class VariationsCard extends VBox
 {
+    private static var measuringContext:Null<CanvasRenderingContext2D> = null;
+
     private final handlers:VariationsCardHandlers;
     private final header:HBox;
     private final titleLabel:Label;
     private final hintLabel:Label;
+    private final previewButton:Button;
     private final deleteButton:HBox;
     private final deletePill:HBox;
     private final deletePillDisc:Box;
@@ -53,6 +63,9 @@ class VariationsCard extends VBox
     private var tree:Null<PlyTree> = null;
     private var selected:Null<PlyTreeNode> = null;
     private var locked:Bool = false;
+    private var previewNode:Null<PlyTreeNode> = null;
+    private var previewAuto:Bool = false;
+    private var hintWidth:Float = 0;
 
     public function new(handlers:VariationsCardHandlers)
     {
@@ -84,6 +97,16 @@ class VariationsCard extends VBox
         hintLabel.addClass(StyleClass.VARIATIONS_HINT);
         titles.addComponent(hintLabel);
         LocaleManager.instance.registerComponent(hintLabel, "text", hintText);
+        WidthObserver.observe(hintLabel, width -> {
+            hintWidth = width;
+            LocaleManager.instance.refreshFor(hintLabel);
+        });
+
+        previewButton = GameButtons.actionWithIcon(Assets.analysisIcon("card_preview"), "intellector.analysis.variations.preview_mark", handlers.onPreviewToggled, false);
+        previewButton.addClass(StyleClass.VARIATIONS_PREVIEW_BUTTON);
+        previewButton.verticalAlign = "center";
+        LocaleManager.instance.registerComponent(previewButton, "tooltip", previewTooltip);
+        header.addComponent(previewButton);
 
         deleteButton = new HBox();
         deleteButton.addClass(StyleClass.GAME_BUTTON);
@@ -210,6 +233,16 @@ class VariationsCard extends VBox
         refreshHeader();
     }
 
+    /** Badges `node` as the card preview, `auto` while it's that by default; null hides the badge and the toggle **/
+    public function setCardPreview(node:Null<PlyTreeNode>, auto:Bool):Void
+    {
+        previewNode = node;
+        previewAuto = auto;
+        treeView.setCardPreview(node, auto);
+        textView.setCardPreview(node, auto);
+        refreshHeader();
+    }
+
     public function select(selected:PlyTreeNode):Void
     {
         this.selected = selected;
@@ -296,6 +329,27 @@ class VariationsCard extends VBox
             deletePillDisc.setClass(StyleClass.VARIATION_DISC_BLACK, !white);
         }
         LocaleManager.instance.refreshFor(hintLabel); // assigning the text would drop its locale binding
+
+        var marked:Bool = isSelectionMarked();
+        previewButton.hidden = previewNode == null;
+        previewButton.disabled = locked || selected == null;
+        previewButton.setClass(StyleClass.GAME_BUTTON_ON, marked);
+        previewButton.icon = Assets.analysisIcon(marked ? "card_preview_on" : "card_preview");
+        LocaleManager.instance.refreshFor(previewButton);
+    }
+
+    private function isSelectionMarked():Bool
+    {
+        return previewNode != null && !previewAuto && previewNode == selected;
+    }
+
+    private function previewTooltip():String
+    {
+        if (isSelectionMarked())
+            return LocaleUtils.localeBinding("intellector.analysis.variations.preview_unmark");
+        if (selected == null || selected.isRoot())
+            return LocaleUtils.localeBinding("intellector.analysis.variations.preview_mark_root");
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.analysis.variations.preview_mark"), VariationFormatters.notation(selected));
     }
 
     private function hintText():String
@@ -308,7 +362,18 @@ class VariationsCard extends VBox
         var lineCount:Int = tree.lineCount();
         var moves:String = LocaleUtils.resolveText(LocaleUtils.localeBinding(Plurals.key("intellector.analysis.variations.move_count", moveCount, language)), moveCount);
         var lines:String = LocaleUtils.resolveText(LocaleUtils.localeBinding(Plurals.key("intellector.analysis.variations.line_count", lineCount, language)), lineCount);
-        return '$moves · $lines';
+        var oneLine:String = '$moves · $lines';
+        return hintWidth > 0 && singleLineWidth(oneLine) > hintWidth ? '$moves\n$lines' : oneLine;
+    }
+
+    private function singleLineWidth(text:String):Float
+    {
+        if (measuringContext == null)
+            measuringContext = Browser.document.createCanvasElement().getContext2d();
+
+        var style:CSSStyleDeclaration = Browser.window.getComputedStyle(hintLabel.getTextDisplay().element);
+        measuringContext.font = '${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}';
+        return Math.ceil(measuringContext.measureText(text).width);
     }
 
     private function refreshZoom():Void
