@@ -3,6 +3,7 @@ package client.ui.game;
 import haxe.ui.components.Button;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
+import haxefolio.PageLink;
 
 using client.ui.ComponentExtension;
 
@@ -13,7 +14,6 @@ typedef GameActionHandlers =
     onTakeback:Void->Void,
     onResign:Void->Void,
     onAddTime:Void->Void,
-    onAnalyze:Void->Void,
     onShare:Void->Void,
     onPlayFromHere:Void->Void,
     onRematch:Void->Void
@@ -28,6 +28,7 @@ class ActionsCard extends VBox
     private final resignButton:Button;
     private final addTimeButton:Button;
     private final analyzeButton:Button;
+    private final analyzeLink:PageLink;
     private final shareButton:Button;
     private final playFromHereButton:Button;
     private final rematchButton:Button;
@@ -50,7 +51,8 @@ class ActionsCard extends VBox
         takebackButton = GameButtons.action("takeback", "intellector.live_game.action.takeback", handlers.onTakeback);
         resignButton = GameButtons.action("resign", "intellector.live_game.action.resign", handlers.onResign);
         addTimeButton = GameButtons.action("add_time", "intellector.live_game.action.add_time", handlers.onAddTime);
-        analyzeButton = GameButtons.action("analyze", "intellector.live_game.action.analyze", handlers.onAnalyze);
+        analyzeButton = GameButtons.action("analyze", "intellector.live_game.action.analyze", null);
+        analyzeLink = PageLink.attach(analyzeButton, null);
         shareButton = GameButtons.action("share", "intellector.live_game.action.share", handlers.onShare);
         playFromHereButton = GameButtons.action("play_from_here", "intellector.live_game.action.play_from_here", handlers.onPlayFromHere);
         rematchButton = GameButtons.action("rematch", "intellector.live_game.action.rematch", handlers.onRematch);
@@ -72,6 +74,12 @@ class ActionsCard extends VBox
         if (withRematch)
             buttons.push(rematchButton);
         showButtons(buttons);
+    }
+
+    /** Where Analyze leads; null while there is nowhere yet **/
+    public function setAnalysisPath(path:Null<String>):Void
+    {
+        analyzeLink.setPath(path);
     }
 
     /** `outgoing`: the user's own offer is pending, so the button cancels it **/

@@ -1,9 +1,9 @@
 package net.models.game;
 
 import jsonmodel.IJsonUnserializableMacro;
-import net.models.game.GamePublic;
 
+/** All ongoing games, the latest started first **/
 class CurrentGameListStateRefresh implements IJsonUnserializableMacro
 {
-	public var games:Array<GamePublic>;
+    public var games:Array<GameSummaryPublic>;
 }

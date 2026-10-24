@@ -71,7 +71,7 @@ class LiveGameMapper
 
     public static function timeAddedToDatatype(dto:TimeAddedBroadcastedData):LiveGameEvent
     {
-        return LiveGameEvent.TimeAdded(dto.event_index, PieceColorMapper.dtoToDatatype(dto.receiver), GameClockMapper.dtoToDatatype(dto.time_update));
+        return LiveGameEvent.TimeAdded(dto.event_index, PieceColorMapper.dtoToDatatype(dto.receiver), dto.amount_seconds, GameClockMapper.dtoToDatatype(dto.time_update));
     }
 
     public static function rollbackToDatatype(dto:RollbackBroadcastedData):LiveGameEvent
@@ -140,7 +140,7 @@ class LiveGameMapper
                 }
             case ChatMessage(_, eventIndex, text, spectator, author): LiveGameEvent.ChatMessage(eventIndex, new GameChatMessage(author.user_ref, author.nickname, text, spectator));
             case Offer(_, eventIndex, action, kind, author): LiveGameEvent.Offer(eventIndex, offerActionToDatatype(action), offerKindToDatatype(kind), PieceColorMapper.dtoToDatatype(author));
-            case TimeAdded(_, eventIndex, _, receiver, timeUpdate): LiveGameEvent.TimeAdded(eventIndex, PieceColorMapper.dtoToDatatype(receiver), GameClockMapper.dtoToDatatype(timeUpdate));
+            case TimeAdded(_, eventIndex, amountSeconds, receiver, timeUpdate): LiveGameEvent.TimeAdded(eventIndex, PieceColorMapper.dtoToDatatype(receiver), amountSeconds, GameClockMapper.dtoToDatatype(timeUpdate));
             case Rollback(_, eventIndex, _, plyCountAfter, _, timeUpdate): LiveGameEvent.Rollback(eventIndex, plyCountAfter, GameClockMapper.dtoToDatatype(timeUpdate));
         }
     }

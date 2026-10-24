@@ -142,7 +142,11 @@ class BoardStage extends Box
                 reservedHeight += header.element.offsetHeight + COLUMN_SPACING;
             var boardWidth:Float = Math.max(0, Math.floor((heightLimit - reservedHeight) * aspectRatio));
             if (fitsHeight)
-                columnWidth = Math.min(availableWidth, boardWidth);
+            {
+                columnWidth = Math.min(availableWidth, board.controlsHeight() > 0 ? Math.max(boardWidth, BoardLayoutTier.MIN_CONTROL_ROW_WIDTH) : boardWidth);
+                if (boardWidth < columnWidth) // the control row above the board keeps its width while the board narrows
+                    boardMaxWidth = boardWidth;
+            }
             else if (boardWidth < availableWidth) // only the board narrows: the bars and the control row keep the full width
                 boardMaxWidth = boardWidth;
         }

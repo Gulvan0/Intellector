@@ -11,7 +11,7 @@ class GameButtons
         return 'assets/images/game/$name.svg';
     }
 
-    /** An icon button labelled `captionKey`'s text; `showCaption` false keeps the caption for the tooltip only **/
+    /** An icon button labelled `captionKey`'s text, with no click handler if `onPress` is null; `showCaption` false keeps the caption for the tooltip only **/
     public static function action(iconName:String, captionKey:String, onPress:Void->Void, showCaption:Bool = true):Button
     {
         return actionWithIcon(icon(iconName), captionKey, onPress, showCaption);
@@ -23,7 +23,8 @@ class GameButtons
         var button:Button = new Button();
         button.icon = iconPath;
         button.addClass(StyleClass.GAME_BUTTON);
-        button.onClick = _ -> onPress();
+        if (onPress != null)
+            button.onClick = _ -> onPress();
         setCaption(button, captionKey, showCaption);
         return button;
     }

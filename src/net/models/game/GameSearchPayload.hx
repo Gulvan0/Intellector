@@ -10,5 +10,6 @@ class GameSearchPayload implements IJsonSerializableMacro
 	public var time_control_kinds:Null<Array<TimeControlKind>> = null;
 	public var rated:Null<Bool> = null;
 	public var finished:Null<Bool> = null;
+	public var exclude_aborted:Bool = false;
 	public var with_counts:Bool = false;
 }

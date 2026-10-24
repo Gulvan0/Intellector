@@ -10,6 +10,6 @@ enum LiveGameEvent
     Ply(eventIndex:Int, plyIndex:Int, ply:RawPly, clock:Null<GameClock>);
     ChatMessage(eventIndex:Int, message:GameChatMessage);
     Offer(eventIndex:Int, action:OfferAction, kind:OfferKind, author:PieceColor);
-    TimeAdded(eventIndex:Int, receiver:PieceColor, clock:GameClock);
+    TimeAdded(eventIndex:Int, receiver:PieceColor, amountSeconds:Int, clock:GameClock);
     Rollback(eventIndex:Int, plyCountAfter:Int, clock:Null<GameClock>);
 }

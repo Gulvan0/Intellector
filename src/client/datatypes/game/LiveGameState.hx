@@ -26,7 +26,7 @@ class LiveGameState
     // clocksAfterPly[k]: both clocks right after k plies; [0] is the initial one
     private var clocksAfterPly:Array<Null<GameClock>>;
     private var latestClock:Null<GameClock>;
-    private var chat:Array<GameChatMessage> = [];
+    private var chat:Array<GameChatEntry> = [];
     private var offers:Array<ActiveOffer> = [];
     private var ending:Null<GameEnding> = null;
     private var lastEventIndex:Int = -1;
@@ -46,7 +46,10 @@ class LiveGameState
             this.latestClock = latestClock;
         this.ending = ending;
         if (ending != null)
+        {
             offers = [];
+            chat.push(Ended(ending.outcome));
+        }
     }
 
     public function isOver():Bool
@@ -59,7 +62,7 @@ class LiveGameState
         return ending;
     }
 
-    public function getChat():Array<GameChatMessage>
+    public function getChat():Array<GameChatEntry>
     {
         return chat.copy();
     }
@@ -100,15 +103,16 @@ class LiveGameState
                     return false;
                 applyPly(plyIndex, ply, clock, followLatestMove);
             case ChatMessage(_, message):
-                chat.push(message);
-                onChanged.dispatch(Chat(message));
+                appendChatEntry(Message(message));
             case Offer(_, action, kind, author):
                 offers = offers.filter(offer -> offer.kind != kind || offer.author != author);
                 if (action == Create)
                     offers.push({kind: kind, author: author});
+                appendChatEntry(Offer(action, kind, author));
                 onChanged.dispatch(Offers);
-            case TimeAdded(_, _, clock):
+            case TimeAdded(_, receiver, amountSeconds, clock):
                 latestClock = clock;
+                appendChatEntry(TimeAdded(receiver, amountSeconds));
                 onChanged.dispatch(Clock);
             case Rollback(_, plyCountAfter, clock):
                 history.truncate(plyCountAfter);
@@ -138,6 +142,7 @@ class LiveGameState
     {
         this.ending = ending;
         offers = [];
+        appendChatEntry(Ended(ending.outcome));
         onChanged.dispatch(Offers);
         onChanged.dispatch(Ended);
     }
@@ -171,6 +176,12 @@ class LiveGameState
             onChanged.dispatch(Ended);
     }
 
+    private function appendChatEntry(entry:GameChatEntry):Void
+    {
+        chat.push(entry);
+        onChanged.dispatch(Chat(entry));
+    }
+
     // a ply the history has already (the user's own, echoed back) only brings its clocks
     private function applyPly(plyIndex:Int, ply:RawPly, clock:Null<GameClock>, followLatestMove:Bool):Void
     {
@@ -202,7 +213,7 @@ class LiveGameState
             case Ply(eventIndex, _, _, _): eventIndex;
             case ChatMessage(eventIndex, _): eventIndex;
             case Offer(eventIndex, _, _, _): eventIndex;
-            case TimeAdded(eventIndex, _, _): eventIndex;
+            case TimeAdded(eventIndex, _, _, _): eventIndex;
             case Rollback(eventIndex, _, _): eventIndex;
         }
     }

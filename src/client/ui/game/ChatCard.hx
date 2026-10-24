@@ -1,17 +1,21 @@
 package client.ui.game;
 
+import client.datatypes.game.GameChatEntry;
 import client.datatypes.game.GameChatMessage;
+import client.formatters.GameFormatters;
 import client.utils.PagePaths;
 import haxe.ui.Toolkit;
 import haxe.ui.components.Button;
 import haxe.ui.components.Label;
 import haxe.ui.components.TextField;
+import haxe.ui.core.Component;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.events.KeyboardEvent;
 import haxefolio.LocaleUtils;
 import haxefolio.PageLink;
 import haxefolio.structure.ScrollArea;
+import net.models.common.UserRefWithNickname;
 
 using client.ui.ComponentExtension;
 
@@ -23,6 +27,7 @@ class ChatCard extends VBox
     // within this distance of the bottom, a new message keeps the view at the bottom
     private static inline final STICK_TO_BOTTOM_PX:Float = 24;
 
+    private final spectatorStrip:SpectatorStrip;
     private final messageList:VBox;
     private final scrollArea:ScrollArea;
     private final input:TextField;
@@ -38,6 +43,10 @@ class ChatCard extends VBox
         percentHeight = 100;
         addClass(StyleClass.GAME_CARD);
         addClass(StyleClass.GAME_CHAT_CARD);
+
+        spectatorStrip = new SpectatorStrip();
+        spectatorStrip.hidden = true;
+        addComponent(spectatorStrip);
 
         messageList = new VBox();
         messageList.percentWidth = 100;
@@ -70,20 +79,28 @@ class ChatCard extends VBox
         refreshSendButton();
     }
 
-    public function setMessages(messages:Array<GameChatMessage>):Void
+    /** `guestCount` spectators are unauthenticated and so have no nickname; null `spectators` hides the strip **/
+    public function setSpectators(spectators:Null<Array<UserRefWithNickname>>, guestCount:Int):Void
+    {
+        spectatorStrip.hidden = spectators == null;
+        if (spectators != null)
+            spectatorStrip.setSpectators(spectators, guestCount);
+    }
+
+    public function setEntries(entries:Array<GameChatEntry>):Void
     {
         messageList.removeAllComponents();
-        for (message in messages)
-            messageList.addComponent(createMessage(message));
+        for (entry in entries)
+            messageList.addComponent(createEntry(entry));
         scrollToBottom();
     }
 
-    public function appendMessage(message:GameChatMessage):Void
+    public function appendEntry(entry:GameChatEntry):Void
     {
         var nativeElement:js.html.Element = scrollArea.element;
         var atBottom:Bool = nativeElement.scrollHeight - nativeElement.scrollTop - nativeElement.clientHeight <= STICK_TO_BOTTOM_PX;
 
-        messageList.addComponent(createMessage(message));
+        messageList.addComponent(createEntry(entry));
         if (atBottom)
             scrollToBottom();
     }
@@ -92,6 +109,25 @@ class ChatCard extends VBox
     {
         input.text = "";
         refreshSendButton();
+    }
+
+    private function createEntry(entry:GameChatEntry):Component
+    {
+        return switch entry {
+            case Message(message): createMessage(message);
+            case Offer(action, kind, author): createLogLine(GameFormatters.offerLogLine(action, kind, author));
+            case TimeAdded(receiver, amountSeconds): createLogLine(GameFormatters.timeAddedLogLine(receiver, amountSeconds));
+            case Ended(outcome): createLogLine(GameFormatters.outcomeLogLine(outcome));
+        }
+    }
+
+    private function createLogLine(text:String):Label
+    {
+        var line:Label = new Label();
+        line.percentWidth = 100;
+        line.text = text;
+        line.addClass(StyleClass.GAME_CHAT_LOG);
+        return line;
     }
 
     private function createMessage(message:GameChatMessage):VBox

@@ -1,9 +1,9 @@
 package net.ws.events;
 
-import net.models.game.GameEndedBroadcastedData;
-import net.ws.channels.CurrentGameList;
+import net.models.game.GameSummaryPublic;
+import net.ws.channels.RecentGameList;
 import easypubsub.IEvent;
 
-class NewRecentGame implements IEvent<GameEndedBroadcastedData, CurrentGameList>
+class NewRecentGame implements IEvent<GameSummaryPublic, RecentGameList>
 {
 }

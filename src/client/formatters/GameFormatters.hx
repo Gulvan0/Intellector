@@ -2,6 +2,8 @@ package client.formatters;
 
 import client.GroupedLocaleResolvers;
 import client.datatypes.game.GameEnding;
+import client.datatypes.game.OfferAction;
+import client.datatypes.game.OfferKind;
 import client.datatypes.game.Outcome;
 import client.datatypes.game.PlayerRating;
 import client.datatypes.timecontrol.TimeControl;
@@ -88,6 +90,62 @@ class GameFormatters
                 LocaleUtils.resolveText(LocaleUtils.localeBinding(key), colorName(winner), colorName(winner.opposite()));
             case Drawish(kind):
                 resolve('intellector.common.outcome.resolution.drawish.${snakeCase(kind.getName())}');
+        }
+    }
+
+    /** The chat's note about a draw or takeback offer changing state **/
+    public static function offerLogLine(action:OfferAction, kind:OfferKind, author:PieceColor):String
+    {
+        var kindKey:String = kind.getName().toLowerCase();
+        return switch action {
+            case Create: LocaleUtils.resolveText(LocaleUtils.localeBinding('intellector.common.game.$kindKey.offered_by'), colorName(author));
+            case Cancel: resolve('intellector.live_game.chat.log.$kindKey.cancelled');
+            case Accept: resolve('intellector.live_game.chat.log.$kindKey.accepted');
+            case Decline: resolve('intellector.live_game.chat.log.$kindKey.declined');
+        }
+    }
+
+    /** `White: +15 seconds` **/
+    public static function timeAddedLogLine(receiver:PieceColor, amountSeconds:Int):String
+    {
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.live_game.chat.log.time_added"), colorName(receiver), amountSeconds);
+    }
+
+    /** The chat's note about how the game ended: `Black resigned` **/
+    public static function outcomeLogLine(outcome:Outcome):String
+    {
+        return switch outcome {
+            case Decisive(kind, winner):
+                var key:String = 'intellector.common.outcome.chatbox.decisive.${snakeCase(kind.getName())}';
+                LocaleUtils.resolveText(LocaleUtils.localeBinding(key), colorName(winner), colorName(winner.opposite()));
+            case Drawish(kind):
+                resolve('intellector.common.outcome.chatbox.drawish.${snakeCase(kind.getName())}');
+        }
+    }
+
+    /** White won, Black won or Draw **/
+    public static function result(ending:GameEnding):String
+    {
+        return switch ending.outcome {
+            case Decisive(_, winner): resolve('intellector.common.outcome.result.${winner.getName().toLowerCase()}_won');
+            case Drawish(_): resolve("intellector.common.outcome.result.draw");
+        }
+    }
+
+    /** How the game ended, in the site's terms: `Fatum`, `Black resigned`; empty while it goes on or for an aborted game **/
+    public static function outcomeReason(ending:Null<GameEnding>):String
+    {
+        if (ending == null)
+            return "";
+
+        return switch ending.outcome {
+            case Drawish(Abort):
+                "";
+            case Decisive(kind, winner):
+                var key:String = 'intellector.common.outcome_reason.${snakeCase(kind.getName())}';
+                LocaleUtils.resolveText(LocaleUtils.localeBinding(key), colorName(winner), colorName(winner.opposite()));
+            case Drawish(kind):
+                resolve('intellector.common.outcome_reason.${snakeCase(kind.getName())}');
         }
     }
 

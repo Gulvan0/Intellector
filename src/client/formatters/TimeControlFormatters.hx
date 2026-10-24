@@ -6,6 +6,8 @@ import client.datatypes.timecontrol.FischerTimeControl;
 
 class TimeControlFormatters
 {
+    private static inline final HOURS_FORMAT_THRESHOLD_MINUTES:Int = 100;
+
     public static function formatFischerTimeControl(timeControl:FischerTimeControl):String
     {
         var startSecondsRemainder:Int = timeControl.startSeconds % 60;
@@ -14,12 +16,20 @@ class TimeControlFormatters
         var startHours:Int = Math.floor(startMinutes / 60);
 
         var startComponent:String = "";
-        if (startSecondsRemainder == 0 && startHours == 0)
-            startComponent = Std.string(startMinutes);
+        if (startMinutes < HOURS_FORMAT_THRESHOLD_MINUTES)
+        {
+            if (startSecondsRemainder == 0)
+                startComponent = Std.string(startMinutes);
+            else
+            {
+                if (startMinutes != 0)
+                    startComponent += '${startMinutes}m';
+                startComponent += '${startSecondsRemainder}s';
+            }
+        }
         else
         {
-            if (startHours != 0)
-                startComponent += '${startHours}h';
+            startComponent += '${startHours}h';
             if (startMinutesRemainder != 0)
                 startComponent += '${startMinutesRemainder}m';
             if (startSecondsRemainder != 0)

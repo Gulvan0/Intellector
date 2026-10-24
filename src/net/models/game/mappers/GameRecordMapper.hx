@@ -21,7 +21,7 @@ class GameRecordMapper
             dto.started_at != null ? dto.started_at.getUnixMs() : null,
             sipToPosition(dto.latest_sip),
             null,
-            null,
+            dto.last_ply_at != null ? dto.last_ply_at.getUnixMs() : null,
             LiveGameMapper.outcomeToDatatype(dto.outcome)
         );
     }

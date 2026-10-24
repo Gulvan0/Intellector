@@ -1,8 +1,11 @@
 package client.ui.game;
 
+import client.logic.challenge.creation.ChallengePrefills;
+import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
 import client.ServerTime;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
+import client.datatypes.game.GameChatEntry;
 import client.datatypes.game.GameChatMessage;
 import client.datatypes.game.GameClock;
 import client.datatypes.game.GameEnding;
@@ -29,6 +32,7 @@ import client.ui.common.notifications.GameEndedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.share.ShareOverlay;
 import client.ui.game.GameLayout.CompactTab;
+import client.utils.PagePaths;
 import easypubsub.Subscription;
 import haxe.Timer;
 import haxe.ui.Toolkit;
@@ -52,6 +56,7 @@ import net.models.game.GameStateRefresh;
 import net.models.game.mappers.GameClockMapper;
 import net.models.game.internal.InternalGameResignPayload;
 import net.models.game.mappers.LiveGameMapper;
+import net.models.common.UserRefWithNickname;
 import net.models.other.SubscriberListChannelStateRefresh;
 import net.rest.Rest;
 import net.rest.RestOperationRegistry;
@@ -81,7 +86,7 @@ class LiveGamePage extends PageBase
     // a game starting with less has no low time warning: it would sound almost at once
     private static inline final LOW_TIME_WARNING_MIN_START_SECONDS:Int = 90;
     // below it, the wide layout stops shrinking and the page scrolls instead
-    private static inline final MIN_WIDE_HEIGHT:Float = 520;
+    private static inline final MIN_WIDE_HEIGHT:Float = 240;
 
     /** The id of the game the open live game page shows, null while none is open **/
     public static var openGameId(default, null):Null<Int> = null;
@@ -98,7 +103,8 @@ class LiveGamePage extends PageBase
     private var presenceSubscription:Null<Subscription<SubscriberList<Dynamic>>> = null;
     // live events arriving before the game has loaded, applied once it has
     private var pendingEvents:Array<Void->Void> = [];
-    private var presentRefs:Array<String> = [];
+    private var presentSubscribers:Array<UserRefWithNickname> = [];
+    private var presentGuestCount:Int = 0;
 
     private var state:Null<LiveGameState> = null;
     private var userColor:Null<PieceColor> = null;
@@ -291,6 +297,7 @@ class LiveGamePage extends PageBase
 
         var info:LiveGameInfo = LiveGameMapper.infoToDatatype(game);
         state = new LiveGameState(info, events, latestClock, ending);
+        restoreShownPly();
         userColor = info.colorOf(IdentityKeeper.currentIdentity.getUserRef());
         orientation = userColor ?? White;
         build(info);
@@ -321,10 +328,9 @@ class LiveGamePage extends PageBase
             onTakeback: () -> toggleOffer(Takeback),
             onResign: askResign,
             onAddTime: addTime,
-            onAnalyze: () -> {},
             onShare: share,
-            onPlayFromHere: () -> {},
-            onRematch: () -> {}
+            onPlayFromHere: playFromHere,
+            onRematch: rematch
         });
         moveStrip = new MoveStrip(navigate, () -> gameLayout.setOpenTab(Moves));
 
@@ -398,12 +404,10 @@ class LiveGamePage extends PageBase
         presenceSubscription = PubSub.sub(new SubscriberList<Dynamic>(channel))
             .onEventLight(SubscriberListRefreshEvent, onPresenceRefresh)
             .onEventLight(NewSubscriberEvent, subscriber -> {
-                if (subscriber != null)
-                    setPresent(subscriber.user_ref, true);
+                setPresent(subscriber, true);
             })
             .onEventLight(SubscriberLeftEvent, subscriber -> {
-                if (subscriber != null)
-                    setPresent(subscriber.user_ref, false);
+                setPresent(subscriber, false);
             });
     }
 
@@ -441,6 +445,7 @@ class LiveGamePage extends PageBase
 
         var wasPlaying:Bool = isPlaying();
         state.end(ending);
+        refreshPresence();
         Sounds.play(NOTIFY);
         GameEndedNotice.show(state.info, ending, userColor);
 
@@ -450,15 +455,22 @@ class LiveGamePage extends PageBase
 
     private function onPresenceRefresh(refresh:SubscriberListChannelStateRefresh):Void
     {
-        presentRefs = [for (subscriber in refresh.subscribers) subscriber.user_ref];
+        presentSubscribers = refresh.subscribers.copy();
+        presentGuestCount = refresh.unauthenticated_subs_count;
         refreshPresence();
     }
 
-    private function setPresent(userRef:String, present:Bool):Void
+    /** A null `subscriber` is an unauthenticated one **/
+    private function setPresent(subscriber:Null<UserRefWithNickname>, present:Bool):Void
     {
-        presentRefs.remove(userRef);
-        if (present)
-            presentRefs.push(userRef);
+        if (subscriber == null)
+            presentGuestCount = Std.int(Math.max(0, presentGuestCount + (present ? 1 : -1)));
+        else
+        {
+            presentSubscribers = presentSubscribers.filter(known -> known.user_ref != subscriber.user_ref);
+            if (present)
+                presentSubscribers.push(subscriber);
+        }
         refreshPresence();
     }
 
@@ -481,10 +493,15 @@ class LiveGamePage extends PageBase
             case Chat(appended):
                 if (appended == null)
                     refreshChat();
-                else if (isChatMessageVisible(appended))
+                else if (isChatEntryVisible(appended))
                 {
-                    chatCard.appendMessage(appended);
-                    gameLayout.setLatestMessage(appended, appended.authorRef != IdentityKeeper.currentIdentity.getUserRef());
+                    chatCard.appendEntry(appended);
+                    switch appended
+                    {
+                        case Message(message):
+                            gameLayout.setLatestMessage(message, message.authorRef != IdentityKeeper.currentIdentity.getUserRef());
+                        default:
+                    }
                 }
             case Offers:
                 refreshOffers();
@@ -533,6 +550,20 @@ class LiveGamePage extends PageBase
         refreshOffers();
     }
 
+    private function playFromHere():Void
+    {
+        var position:Position = state.history.shownPosition();
+        ChallengeCreationLauncher.launch(draft -> ChallengePrefills.playFrom(draft, position));
+    }
+
+    private function rematch():Void
+    {
+        var info:LiveGameInfo = state.info;
+        var color:Null<PieceColor> = userColor;
+        if (color != null)
+            ChallengeCreationLauncher.launch(draft -> ChallengePrefills.rematch(draft, info, color));
+    }
+
     private function refreshPolicy():Void
     {
         var canMove:Bool = isPlaying() && state.history.isShowingLatest();
@@ -553,12 +584,26 @@ class LiveGamePage extends PageBase
         if (state == null)
             return;
 
+        var participantRefs:Array<String> = [];
         for (color in [White, Black])
         {
-            var present:Bool = presentRefs.contains(state.info.participant(color).ref);
+            var participantRef:String = state.info.participant(color).ref;
+            participantRefs.push(participantRef);
+            var present:Bool = Lambda.exists(presentSubscribers, subscriber -> subscriber.user_ref == participantRef);
             infoCard.setPresent(color, present);
             (color == orientation ? stage.bottomBar : stage.topBar).setPresent(present);
         }
+
+        if (state.isOver())
+        {
+            chatCard.setSpectators(null, 0);
+            return;
+        }
+
+        var spectators:Array<UserRefWithNickname> = presentSubscribers.filter(subscriber -> !participantRefs.contains(subscriber.user_ref));
+        var signedInSpectators:Array<UserRefWithNickname> = spectators.filter(subscriber -> !StringTools.startsWith(subscriber.user_ref, "_"));
+        var guestCount:Int = presentGuestCount + spectators.length - signedInSpectators.length;
+        chatCard.setSpectators(signedInSpectators, guestCount);
     }
 
     private function refreshClocks():Void
@@ -639,8 +684,22 @@ class LiveGamePage extends PageBase
         var plyCount:Int = state.history.plyCount();
         movesCard.setShown(shownPlyCount, plyCount);
         moveStrip.setShown(shownPlyCount, plyCount, shownPlyCount > 0 ? notations[shownPlyCount - 1] : null);
+        actionsCard.setAnalysisPath(PagePaths.gameAnalysis(state.info.id, shownPlyCount));
         refreshOpening(shownPlyCount);
         refreshClocks();
+        HaxeFolioApp.setState(state.history.isShowingLatest() ? null : {shownPlyCount: shownPlyCount});
+    }
+
+    private function restoreShownPly():Void
+    {
+        var raw:Dynamic = HaxeFolioApp.navigationState;
+        var restoredPlyCount:Dynamic = raw != null && Reflect.isObject(raw) ? Reflect.field(raw, "shownPlyCount") : null;
+
+        if (Std.isOfType(restoredPlyCount, Int) && restoredPlyCount > 0)
+        {
+            var targetPlyCount:Int = restoredPlyCount;
+            state.history.navigate(AfterPly(targetPlyCount - 1));
+        }
     }
 
     // the opening of the line up to the shown position
@@ -664,15 +723,29 @@ class LiveGamePage extends PageBase
 
     private function refreshChat():Void
     {
-        var messages:Array<GameChatMessage> = state.getChat().filter(isChatMessageVisible);
-        chatCard.setMessages(messages);
-        gameLayout.setLatestMessage(messages.length > 0 ? messages[messages.length - 1] : null, false);
+        var entries:Array<GameChatEntry> = state.getChat().filter(isChatEntryVisible);
+        chatCard.setEntries(entries);
+
+        var latestMessage:Null<GameChatMessage> = null;
+        for (entry in entries)
+        {
+            switch entry
+            {
+                case Message(message):
+                    latestMessage = message;
+                default:
+            }
+        }
+        gameLayout.setLatestMessage(latestMessage, false);
     }
 
     // a player can't see spectators' messages until the game is over
-    private function isChatMessageVisible(message:GameChatMessage):Bool
+    private function isChatEntryVisible(entry:GameChatEntry):Bool
     {
-        return !message.spectator || !isPlaying();
+        return switch entry {
+            case Message(message): !message.spectator || !isPlaying();
+            default: true;
+        }
     }
 
     private function refreshEnding():Void

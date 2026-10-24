@@ -17,7 +17,7 @@ class GameRecord
     public final position:Position;
     /** The number of plies made, null when not known (a listed game's summary doesn't tell) **/
     public final plyCount:Null<Int>;
-    /** Unix time of the latest move in milliseconds, null before the first one or when not recorded **/
+    /** Unix time of the latest move in milliseconds, null before the first one, when not recorded, or for a finished game **/
     public final lastPlyAtMs:Null<Float>;
     /** Null while the game goes on **/
     public final ending:Null<GameEnding>;
@@ -54,7 +54,9 @@ class GameRecord
     /** Unix time in milliseconds since which the side to move has been thinking, null when not recorded **/
     public function waitingSinceMs():Null<Float>
     {
-        return plyCount != null && plyCount > 0 ? lastPlyAtMs : startedAtMs;
+        if (plyCount == null)
+            return lastPlyAtMs ?? startedAtMs;
+        return plyCount > 0 ? lastPlyAtMs : startedAtMs;
     }
 
     /** A copy with the state after a move, a rollback or time being added **/
