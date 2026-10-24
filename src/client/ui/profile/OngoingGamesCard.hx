@@ -9,6 +9,7 @@ import client.ui.common.LoadStatus;
 import client.ui.common.UnderlineTabs;
 import client.ui.common.WidthObserver;
 import client.ui.common.games.GameCard;
+import client.ui.profile.ProfileState.OngoingGamesState;
 import haxe.ui.components.Button;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
@@ -38,6 +39,7 @@ class OngoingGamesCard extends VBox
     private static inline final MAX_FULL_ROWS:Int = 2;
 
     private final login:String;
+    private final onStateChanged:OngoingGamesState->Void;
 
     private final tabs:UnderlineTabs;
     private final kindFilter:FilterDropdown;
@@ -50,6 +52,7 @@ class OngoingGamesCard extends VBox
     private final widthHandle:Detachable;
 
     private var games:Null<Array<GameRecord>> = null;
+    private var tabRestored:Bool;
     private var onCorrespondence:Bool = false;
     private var selectedKinds:Array<TimeControlKind> = [];
     private var rated:Null<Bool> = null;
@@ -57,11 +60,22 @@ class OngoingGamesCard extends VBox
     private var panelWidth:Float = 0;
     private var cards:Array<GameCard> = [];
 
-    /** `login`: the profile's player, whose side the boards are seen from **/
-    public function new(login:String)
+    /**
+        `login`: the profile's player, whose side the boards are seen from.
+        `restored`: the tab and filters to start with, if any; `onStateChanged` gets them after each pick by the user.
+    **/
+    public function new(login:String, restored:Null<OngoingGamesState>, onStateChanged:OngoingGamesState->Void)
     {
         super();
         this.login = login;
+        this.onStateChanged = onStateChanged;
+        tabRestored = restored != null;
+        if (restored != null)
+        {
+            onCorrespondence = restored.correspondence;
+            selectedKinds = [for (kind in TIMED_KINDS) if (restored.kinds.contains(kind.getName())) kind];
+            rated = restored.rated;
+        }
         percentWidth = 100;
         addClass(StyleClass.PROFILE_CARD);
         addClass(StyleClass.PROFILE_SECTION);
@@ -77,6 +91,7 @@ class OngoingGamesCard extends VBox
         ], false, index -> {
             onCorrespondence = index == 1;
             render();
+            notifyStateChanged();
         });
         tabs.addClass(StyleClass.PROFILE_SECTION_TABS);
         addComponent(tabs);
@@ -95,6 +110,7 @@ class OngoingGamesCard extends VBox
             selection -> {
                 selectedKinds = [for (i in selection) TIMED_KINDS[i]];
                 render();
+                notifyStateChanged();
             },
             LocaleUtils.localeBinding("intellector.common.filter.any_hint")
         );
@@ -112,6 +128,7 @@ class OngoingGamesCard extends VBox
             selection -> {
                 rated = TYPE_RATED[selection[0]];
                 render();
+                notifyStateChanged();
             }
         );
         filterRow.addComponent(typeFilter);
@@ -123,6 +140,7 @@ class OngoingGamesCard extends VBox
             selectedKinds = [];
             rated = null;
             render();
+            notifyStateChanged();
         };
         filterRow.addComponent(resetButton);
 
@@ -179,7 +197,7 @@ class OngoingGamesCard extends VBox
         this.games = games;
         loadStatus.hidden = true;
         panel.hidden = false;
-        if (opening)
+        if (opening && !tabRestored)
             onCorrespondence = !Lambda.exists(games, isLive);
         render();
     }
@@ -197,6 +215,16 @@ class OngoingGamesCard extends VBox
         widthHandle.detach();
         kindFilter.close();
         typeFilter.close();
+    }
+
+    private function notifyStateChanged():Void
+    {
+        tabRestored = true;
+        onStateChanged({
+            correspondence: onCorrespondence,
+            kinds: selectedKinds.map(kind -> kind.getName()),
+            rated: rated
+        });
     }
 
     private function columnCount():Int
@@ -277,7 +305,7 @@ class OngoingGamesCard extends VBox
     {
         var game:GameRecord = card.game;
         if (isLive(game))
-            card.setStatus(() -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.profile.ongoing.in_progress")), () -> "");
+            card.setStatus(() -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.common.outcome.result.in_progress")), () -> "");
         else
         {
             var turnKey:String = 'intellector.common.turn_color.${game.position.turnColor.getName().toLowerCase()}';

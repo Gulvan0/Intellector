@@ -268,7 +268,7 @@ class PastGamesList extends VBox
 
     private function registerReason(label:Label, ending:Null<GameEnding>):Void
     {
-        LocaleManager.instance.registerComponent(label, "text", () -> reasonText(ending));
+        LocaleManager.instance.registerComponent(label, "text", () -> GameFormatters.outcomeReason(ending));
     }
 
     private function orientationOf(game:GameRecord):PieceColor
@@ -288,20 +288,6 @@ class PastGamesList extends VBox
     private static function hasReason(ending:Null<GameEnding>):Bool
     {
         return ending != null && !ending.outcome.match(Drawish(Abort));
-    }
-
-    private static function reasonText(ending:Null<GameEnding>):String
-    {
-        if (!hasReason(ending))
-            return "";
-
-        return switch ending.outcome {
-            case Decisive(kind, winner):
-                var key:String = 'intellector.profile.past.reason.${GameFormatters.snakeCase(kind.getName())}';
-                LocaleUtils.resolveText(LocaleUtils.localeBinding(key), GameFormatters.colorName(winner), GameFormatters.colorName(winner.opposite()));
-            case Drawish(kind):
-                LocaleUtils.resolveText(LocaleUtils.localeBinding('intellector.profile.past.reason.${GameFormatters.snakeCase(kind.getName())}'));
-        }
     }
 
     private static function winnerOf(ending:Null<GameEnding>):Null<PieceColor>

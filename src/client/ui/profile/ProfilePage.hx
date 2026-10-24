@@ -10,6 +10,8 @@ import client.datatypes.player.PlayerRelation;
 import client.datatypes.timecontrol.TimeControlKind;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.login.LoginOverlay;
+import client.ui.profile.ProfileState.ArchiveState;
+import client.ui.profile.ProfileState.OngoingGamesState;
 import client.utils.PlayerStatusFeed;
 import client.utils.TimedLoad;
 import easypubsub.Subscription;
@@ -74,6 +76,7 @@ class ProfilePage extends PageBase
     private var timeRefreshTimer:Null<Timer> = null;
     private var tierHandle:Null<Detachable> = null;
     private var friendRequestPending:Bool = false;
+    private var restoredState:ProfileState = {};
 
     public function new(login:String)
     {
@@ -85,12 +88,15 @@ class ProfilePage extends PageBase
     {
         setTitle(LocaleUtils.localeBinding("intellector.profile.title"), login);
 
+        restoredState = ProfileStateReader.read(HaxeFolioApp.navigationState);
+
         header = new ProfileHeaderCard(onFriendPressed, () -> {});
-        ongoingCard = new OngoingGamesCard(login);
+        ongoingCard = new OngoingGamesCard(login, restoredState.ongoing, onOngoingStateChanged);
         archiveCard = new ArchiveCard(login, {
             onPastGamesQuery: loadPastGames,
-            onStudiesQuery: loadStudies
-        });
+            onStudiesQuery: loadStudies,
+            onStateChanged: onArchiveStateChanged
+        }, restoredState.archive);
         connectionsCard = new ConnectionsCard();
         statsCard = new GameStatsCard(loadHistory);
 
@@ -151,6 +157,18 @@ class ProfilePage extends PageBase
         if (tierHandle != null)
             tierHandle.detach();
         tierHandle = null;
+    }
+
+    private function onOngoingStateChanged(state:OngoingGamesState):Void
+    {
+        restoredState.ongoing = state;
+        HaxeFolioApp.setState(restoredState);
+    }
+
+    private function onArchiveStateChanged(state:ArchiveState):Void
+    {
+        restoredState.archive = state;
+        HaxeFolioApp.setState(restoredState);
     }
 
     private function isOwnProfile():Bool

@@ -9,6 +9,7 @@ import client.ui.common.LoadStatus;
 import client.ui.common.Pager;
 import client.ui.common.UnderlineTabs;
 import client.ui.common.WidthObserver;
+import client.ui.profile.ProfileState.ArchiveState;
 import haxe.ui.components.Button;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
@@ -30,7 +31,8 @@ typedef ArchiveCallbacks =
 {
     /** Asks for a page of past games; `withCounts` when the filter changed, so the options' counts are stale **/
     onPastGamesQuery:(kinds:Array<TimeControlKind>, rated:Null<Bool>, page:Int, pageSize:Int, withCounts:Bool)->Void,
-    onStudiesQuery:(tags:Array<String>, page:Int, pageSize:Int)->Void
+    onStudiesQuery:(tags:Array<String>, page:Int, pageSize:Int)->Void,
+    onStateChanged:ArchiveState->Void
 }
 
 /** The player's past games and studies, as two tabs with a filter row each and one pager **/
@@ -86,9 +88,10 @@ class ArchiveCard extends VBox
     private var studies:Array<StudySummary> = [];
     private var studyColumns:Int = 1;
     private var studyPageSize:Int = 0;
+    private var started:Bool = false;
 
-    /** `login`: the profile's player **/
-    public function new(login:String, callbacks:ArchiveCallbacks)
+    /** `login`: the profile's player; `restored`: the tab, filters and pages to start with, if any **/
+    public function new(login:String, callbacks:ArchiveCallbacks, restored:Null<ArchiveState>)
     {
         super();
         this.login = login;
@@ -103,6 +106,7 @@ class ArchiveCard extends VBox
         ], true, index -> {
             onStudies = index == 1;
             renderTab();
+            notifyStateChanged();
         });
         tabs.addClass(StyleClass.PROFILE_SECTION_TABS);
         addComponent(tabs);
@@ -225,6 +229,15 @@ class ArchiveCard extends VBox
         widthHandle = WidthObserver.observe(this, width -> applyListWidth(width - CARD_BORDERS_WIDTH));
 
         applyListWidth(0);
+        if (restored != null)
+        {
+            onStudies = restored.studies;
+            selectedKinds = [for (kind in KINDS) if (restored.kinds.contains(kind.getName())) kind];
+            rated = restored.rated;
+            pastPage = restored.pastPage;
+            tags = restored.tags.copy();
+            studyPage = Std.int(restored.studyOffset / studyPageSize) + 1;
+        }
         renderTab();
         renderTags();
     }
@@ -232,14 +245,20 @@ class ArchiveCard extends VBox
     /** Asks for the first pages of both tabs **/
     public function start():Void
     {
-        queryPastGames(1, true);
-        queryStudies(1);
+        queryPastGames(pastPage, true);
+        queryStudies(studyPage);
+        started = true;
     }
 
     /** `counts` is null when they weren't asked for **/
     public function setPastGames(games:Array<GameRecord>, total:Int, counts:Null<GameCounts>):Void
     {
         pastTotal = total;
+        if (games.length == 0 && total > 0)
+        {
+            queryPastGames(Math.ceil(total / PAST_PAGE_SIZE), false);
+            return;
+        }
         if (counts != null)
         {
             kindFilter.setCounts([for (kind in KINDS) counts.ofKind(kind)]);
@@ -267,6 +286,12 @@ class ArchiveCard extends VBox
 
     public function setStudies(studies:Array<StudySummary>, total:Int):Void
     {
+        if (studies.length == 0 && total > 0)
+        {
+            studyTotal = total;
+            queryStudies(Math.ceil(total / studyPageSize));
+            return;
+        }
         this.studies = studies;
         studyTotal = total;
         studyStatus.hidden = true;
@@ -314,9 +339,10 @@ class ArchiveCard extends VBox
         }
         if (pageSize != studyPageSize)
         {
+            var firstStudyOffset:Int = (studyPage - 1) * studyPageSize;
             studyPageSize = pageSize;
             if (studiesRequested)
-                queryStudies(1);
+                queryStudies(Std.int(firstStudyOffset / pageSize) + 1);
         }
     }
 
@@ -332,6 +358,7 @@ class ArchiveCard extends VBox
         pastStatus.showLoading();
         pastStatus.hidden = false;
         callbacks.onPastGamesQuery(selectedKinds.copy(), rated, page, PAST_PAGE_SIZE, withCounts);
+        notifyStateChanged();
     }
 
     private function queryStudies(page:Int):Void
@@ -343,6 +370,20 @@ class ArchiveCard extends VBox
         studyStatus.showLoading();
         studyStatus.hidden = false;
         callbacks.onStudiesQuery(tags.copy(), page, studyPageSize);
+        notifyStateChanged();
+    }
+
+    private function notifyStateChanged():Void
+    {
+        if (started)
+            callbacks.onStateChanged({
+                studies: onStudies,
+                kinds: selectedKinds.map(kind -> kind.getName()),
+                rated: rated,
+                pastPage: pastPage,
+                tags: tags.copy(),
+                studyOffset: (studyPage - 1) * studyPageSize
+            });
     }
 
     private function renderTab():Void
