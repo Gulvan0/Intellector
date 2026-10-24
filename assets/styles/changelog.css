@@ -1,0 +1,107 @@
+.intellector-changelog-frame {
+    padding-top: 26px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 64px;
+    vertical-spacing: 18px;
+}
+
+.intellector-changelog-heading {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-changelog-card {
+    padding-top: 4px;
+    padding-left: 26px;
+    padding-right: 26px;
+    padding-bottom: 4px;
+    vertical-spacing: 0;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-changelog-row {
+    vertical-spacing: 0;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-changelog-row-first {
+    border-top-width: 0px;
+    border-top-size: 0px;
+}
+
+.intellector-changelog-row-described {
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.intellector-changelog-row-compact {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.intellector-changelog-side-by-side {
+    horizontal-spacing: 26px;
+}
+
+.intellector-changelog-stacked {
+    vertical-spacing: 5px;
+}
+
+.intellector-changelog-row-compact .intellector-changelog-stacked {
+    vertical-spacing: 2px;
+}
+
+.intellector-changelog-date-column {
+    vertical-spacing: 2px;
+}
+
+.intellector-changelog-date-inline {
+    horizontal-spacing: 6px;
+}
+
+.intellector-changelog-date {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-changelog-number {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #7a6e5d;
+    word-wrap: false;
+}
+
+.intellector-changelog-text-column {
+    vertical-spacing: 4px;
+}
+
+.intellector-changelog-title-described {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+}
+
+.intellector-changelog-title-compact {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-changelog-paragraphs {
+    vertical-spacing: 8px;
+}
+
+.intellector-changelog-paragraph {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
