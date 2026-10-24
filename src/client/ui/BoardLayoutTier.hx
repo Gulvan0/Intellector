@@ -20,6 +20,12 @@ enum abstract BoardLayoutTier(String) from String to String
 
     /** Below it, the medium layout's side column leaves the board too little width to beat the compact one **/
     public static inline final MEDIUM_MIN_WIDTH:Int = 600;
+    /** Below this viewport height, the board's control row goes above the board instead of in a column beside it, which would not fit **/
+    public static inline final SHORT_HEIGHT:Int = 460;
+
+    /** The narrowest a stage keeps its control row when it sits above the board, which may be narrower **/
+    public static inline final MIN_CONTROL_ROW_WIDTH:Float = 330;
+
     /** Below it, no viewport height lets the wide board reach `WIDE_BOARD_SHARE` of the medium one **/
     public static inline final WIDE_MIN_WIDTH:Int = 1150;
 

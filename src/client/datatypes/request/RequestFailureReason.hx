@@ -6,6 +6,7 @@ enum RequestFailureReason
     ServerError(httpStatus:Int);
     Unexpected;
     ChallengeUnavailable;
+    GameNotFound;
     ChallengeAlreadyExists;
     TooManyActiveChallenges(maxActiveChallenges:Int);
     TooManyDirectChallenges(maxActiveChallenges:Int);

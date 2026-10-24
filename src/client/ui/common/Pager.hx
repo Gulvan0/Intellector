@@ -5,6 +5,7 @@ import haxe.ui.components.Label;
 import haxe.ui.components.TextField;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
+import haxe.ui.events.FocusEvent;
 import haxe.ui.events.KeyboardEvent;
 import haxefolio.LocaleUtils;
 
@@ -13,8 +14,8 @@ using client.ui.ComponentExtension;
 
 /**
     Numbered pages: the range shown, previous / next, and a field for jumping to a page, which
-    applies on Enter. While its text isn't the current page, a line under it says to press Enter,
-    or what a page number has to be.
+    applies on Enter or when the field loses focus; Esc restores it. While its text isn't the
+    current page, a line under it says to press Enter, or what a page number has to be.
 **/
 class Pager extends HBox
 {
@@ -67,6 +68,7 @@ class Pager extends HBox
         pageField.addClass(StyleClass.PAGER_FIELD);
         pageField.onChange = _ -> refreshMessage();
         pageField.registerEvent(KeyboardEvent.KEY_DOWN, onFieldKeyDown);
+        pageField.registerEvent(FocusEvent.FOCUS_OUT, _ -> commitTypedPage());
         fieldColumn.addComponent(pageField);
 
         messageLabel = new Label();
@@ -117,16 +119,19 @@ class Pager extends HBox
     private function onFieldKeyDown(event:KeyboardEvent):Void
     {
         if (event.keyCode == ENTER_KEY_CODE)
-        {
-            var target:Null<Int> = typedPage();
-            if (target != null)
-                goTo(target);
-        }
+            commitTypedPage();
         else if (event.keyCode == ESCAPE_KEY_CODE)
         {
             pageField.text = Std.string(page);
             refreshMessage();
         }
+    }
+
+    private function commitTypedPage():Void
+    {
+        var target:Null<Int> = typedPage();
+        if (target != null)
+            goTo(target);
     }
 
     /** The typed page number if it's a valid one, else null **/

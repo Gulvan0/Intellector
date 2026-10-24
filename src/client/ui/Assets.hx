@@ -1,5 +1,6 @@
 package client.ui;
 
+import client.datatypes.study.StudyPublicity;
 import client.datatypes.timecontrol.TimeControlKind;
 import intellectorboard.primitives.piece.PieceKind;
 import intellectorboard.primitives.piece.PieceColor;
@@ -28,6 +29,11 @@ class Assets
         return 'assets/images/common/controls/$name.svg';
     }
 
+    public static function homeIcon(name:String):String
+    {
+        return 'assets/images/home/$name.svg';
+    }
+
     public static function profileIcon(name:String):String
     {
         return 'assets/images/profile/$name.svg';
@@ -36,6 +42,12 @@ class Assets
     public static function analysisIcon(name:String):String
     {
         return 'assets/images/analysis/$name.svg';
+    }
+
+    /** `selected`: in the accent colour, for a chosen option **/
+    public static function studyPublicityIcon(publicity:StudyPublicity, selected:Bool):String
+    {
+        return analysisIcon('publicity_$publicity' + (selected ? "_on" : ""));
     }
 
     public static function boardControlIcon(name:String):String

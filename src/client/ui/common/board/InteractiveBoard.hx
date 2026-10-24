@@ -18,6 +18,7 @@ import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.ply.RawPly;
 import morestd.Detachable;
+import js.Browser;
 import morestd.Signal;
 
 /**
@@ -54,6 +55,9 @@ class InteractiveBoard extends Box
     private final controlRow:BoardControlRow;
     private var controlsVisibility:BoardControlsVisibility;
     private var pointerIsCoarse:Bool = false;
+    private var layoutTier:BoardLayoutTier = Wide;
+    private var controlsBeside:Null<Bool> = null;
+    private var windowResizeListener:Null<js.html.Event->Void> = null;
 
     private var premoves:Null<Premoves> = null;
     private var premoveEnabledHandle:Null<Detachable> = null;
@@ -111,7 +115,12 @@ class InteractiveBoard extends Box
             pointerIsCoarse = coarse;
             updateControlsVisibility();
         }));
-        preferenceHandles.push(BoardLayoutTier.bind(tier -> setControlsBeside(tier != Compact)));
+        preferenceHandles.push(BoardLayoutTier.bind(tier -> {
+            layoutTier = tier;
+            refreshControlsPlacement();
+        }));
+        windowResizeListener = _ -> refreshControlsPlacement();
+        Browser.window.addEventListener("resize", windowResizeListener);
     }
 
     private function updateControlsVisibility():Void
@@ -163,11 +172,21 @@ class InteractiveBoard extends Box
         return controlRow.element.offsetHeight + spacing;
     }
 
-    // a column left of the board in the medium and wide layouts, a row above it in the compact one
+    // a column left of the board in the medium and wide layouts unless the viewport is too short for it, a row above it otherwise
+    private function refreshControlsPlacement():Void
+    {
+        setControlsBeside(layoutTier != Compact && Browser.window.innerHeight >= BoardLayoutTier.SHORT_HEIGHT);
+    }
+
     private function setControlsBeside(beside:Bool):Void
     {
+        if (controlsBeside == beside)
+            return;
+        controlsBeside = beside;
+
         layoutName = beside ? "horizontal" : "vertical";
         controlRow.setVertical(beside);
+        invalidateComponentLayout();
     }
 
     private function onAnnotationModeChanged(_:Null<AnnotationColor>):Void
@@ -221,6 +240,7 @@ class InteractiveBoard extends Box
 
         disablePremoves();
 
+        Browser.window.removeEventListener("resize", windowResizeListener);
         for (handle in preferenceHandles)
             handle.detach();
         preferenceHandles = [];

@@ -1968,6 +1968,42 @@
     vertical-spacing: 0;
 }
 
+/* spectators: wraps and grows, never clips; the messages take the remaining height */
+.intellector-game-spectators {
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 2px;
+    vertical-spacing: 0;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-game-spectators-text {
+    padding: 0;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-spectators-name {
+    padding: 0;
+    font-name: $ui-family-medium;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-game-spectators-name:hover {
+    color: #2a211a;
+}
+
+.intellector-game-spectators-toggle {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 .intellector-game-chat-messages {
     padding-top: 12px;
     padding-bottom: 12px;
@@ -1988,6 +2024,17 @@
     font-name: $ui-family-medium;
     font-size: 13px;
     color: #2a211a;
+}
+
+.intellector-game-chat-log {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    font-italic: true;
+    color: #6d6152;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .intellector-game-chat-text-spectator {
@@ -2159,7 +2206,8 @@
 .intellector-game-clock {
     height: 34px;
     width: 88px;
-    padding-top: 4px;
+    padding-top: 2px;
+    padding-right: 2px;
     border-radius: 5px;
     background-color: #f0ebe2;
     border: 1px solid #e6dfd3;

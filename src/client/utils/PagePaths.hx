@@ -17,6 +17,12 @@ class PagePaths
         return 'live/$gameId';
     }
 
+    /** The analysis board opened on game `gameId` after `plyCount` plies **/
+    public static function gameAnalysis(gameId:Int, plyCount:Int):String
+    {
+        return 'analyze/$gameId/$plyCount';
+    }
+
     public static function study(studyId:Int):String
     {
         return 'study/$studyId';

@@ -113,6 +113,7 @@ class GroupedLocaleResolvers
             case ServerError(httpStatus): LocaleUtils.localeBinding("intellector.request_failure.reason.server_error", Std.string(httpStatus));
             case Unexpected: LocaleUtils.localeBinding("intellector.request_failure.reason.unexpected");
             case ChallengeUnavailable: LocaleUtils.localeBinding("intellector.request_failure.reason.challenge_unavailable");
+            case GameNotFound: LocaleUtils.localeBinding("intellector.request_failure.reason.game_not_found");
             case ChallengeAlreadyExists: LocaleUtils.localeBinding("intellector.request_failure.reason.challenge_already_exists");
             case TooManyActiveChallenges(maxActiveChallenges): LocaleUtils.localeBinding("intellector.request_failure.reason.too_many_active_challenges", Std.string(maxActiveChallenges));
             case TooManyDirectChallenges(maxActiveChallenges): LocaleUtils.localeBinding("intellector.request_failure.reason.too_many_direct_challenges", Std.string(maxActiveChallenges));

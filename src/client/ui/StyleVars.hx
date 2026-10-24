@@ -154,6 +154,22 @@ class StyleVars
     public static inline final IMPORT_POSITION_BOARD_WIDTH:Int = 164;
     public static inline final IMPORT_POSITION_CANCEL_WIDTH_PERCENT:Float = 36;
 
+    public static inline final STUDY_OVERLAY_HEADER_HEIGHT:Int = 56;
+    public static inline final STUDY_CREATE_OVERLAY_WIDTH:Int = 760;
+    public static inline final STUDY_EDIT_OVERLAY_WIDTH:Int = 520;
+    public static inline final STUDY_FORM_OVERLAY_HEIGHT:Int = 776;
+    public static inline final STUDY_FORM_FOOTER_HEIGHT:Int = 69;
+    public static inline final STUDY_FORM_FOOTER_COLLAPSED_HEIGHT:Int = 92; // the failure line over the buttons
+    public static inline final STUDY_FORM_FOOTER_COLLAPSED_DELETABLE_HEIGHT:Int = 120; // Delete study (or the question) over the buttons
+    public static inline final STUDY_FORM_BUTTON_WIDTH:Int = 96;
+    public static inline final STUDY_DESCRIPTION_HEIGHT:Int = 132;
+    public static inline final STUDY_PREVIEW_PANEL_WIDTH:Int = 290;
+    public static inline final STUDY_PREVIEW_BOARD_WIDTH:Int = 260;
+    public static inline final STUDY_SHEET_WIDTH:Int = 420;
+    public static inline final STUDY_SHEET_HEIGHT:Int = 640;
+    public static inline final STUDY_SHEET_OWNER_FOOTER_HEIGHT:Int = 152;
+    public static inline final STUDY_SHEET_VISITOR_FOOTER_HEIGHT:Int = 96;
+
     public static inline final BOARD_CONTROL_BUTTON_WIDTH:Float = 40;
     public static inline final BOARD_CONTROL_BUTTON_HEIGHT:Float = 36;
     public static inline final BOARD_CONTROL_BUTTON_RADIUS:Float = 5;

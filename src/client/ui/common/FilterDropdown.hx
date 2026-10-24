@@ -51,19 +51,23 @@ class FilterDropdown extends Box
     private final boxes:Array<Box> = [];
     private final countLabels:Array<Label> = [];
 
+    private final emptyValue:String;
+
     private var selection:Array<Int>;
     private var counts:Array<Null<Int>>;
     private var lockedValue:Null<String> = null;
     private var anchoring:Null<Detachable> = null;
 
     /**
-        `prefix` and `hint` are locale bindings; `hint`, if given, heads the list. `onChanged` gets the
-        new selection after each pick by the user.
+        `prefix`, `hint` and `emptyValue` are locale bindings; `hint`, if given, heads the list.
+        `emptyValue` is what a `multiple` facet with nothing checked reads, Any by default.
+        `onChanged` gets the new selection after each pick by the user.
     **/
-    public function new(prefix:String, options:Array<FilterOption>, multiple:Bool, popupWidth:Int, onChanged:Array<Int>->Void, ?hint:String)
+    public function new(prefix:String, options:Array<FilterOption>, multiple:Bool, popupWidth:Int, onChanged:Array<Int>->Void, ?hint:String, ?emptyValue:String)
     {
         super();
         this.options = options;
+        this.emptyValue = emptyValue ?? LocaleUtils.localeBinding("intellector.common.filter.any");
         this.multiple = multiple;
         this.onChanged = onChanged;
         this.selection = multiple ? [] : [0];
@@ -286,7 +290,7 @@ class FilterDropdown extends Box
         if (!multiple)
             return LocaleUtils.resolveText(options[selection[0]].caption);
         if (selection.length == 0)
-            return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.common.filter.any"));
+            return LocaleUtils.resolveText(emptyValue);
         if (selection.length <= 2)
             return [for (i in selection) LocaleUtils.resolveText(options[i].caption)].join(", ");
 

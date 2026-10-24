@@ -25,6 +25,12 @@ class BoardPreview extends Box
         return Math.round(boardWidth / BoardSurface.aspectRatioOf(NONE));
     }
 
+    public function setBoardWidth(boardWidth:Float):Void
+    {
+        width = boardWidth;
+        height = heightFor(boardWidth);
+    }
+
     public function setPosition(position:Position):Void
     {
         surface.setPosition(position, Replacement);

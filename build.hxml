@@ -13,3 +13,4 @@
 -js bin/app.js
 
 -resource assets/images/common/board/controls/annotate_generic.svg@annotate_generic
+-resource assets/resources/changelog.json@changelog

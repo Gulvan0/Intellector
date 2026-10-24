@@ -19,14 +19,17 @@ import intellectorboard.primitives.piece.PieceColor;
 using client.ui.ComponentExtension;
 
 /**
-    A game as a card: its position, time control and rated status (correspondence leaves the latter
-    out, as it wouldn't fit beside the kind name), players and two lines of status under them,
-    which the owner supplies (the result and how it came about, or whose move it is and when the
-    last one was made). It links to the game anywhere.
+    A game as a card: its position, time control (correspondence: its short name) and rated status,
+    players and two lines of status under them, which the owner supplies (the result and how it came
+    about, or whose move it is and when the last one was made). It links to the game anywhere.
 **/
 class GameCard extends HBox
 {
-    private static inline final BOARD_WIDTH:Float = 132;
+    public static inline final HEIGHT:Float = 138;
+    public static inline final BOARD_WIDTH:Float = 132;
+    /** For cards narrower than `COMPACT_MAX_WIDTH`, so that the longest result line still fits **/
+    public static inline final COMPACT_BOARD_WIDTH:Float = 112;
+    public static inline final COMPACT_MAX_WIDTH:Float = 360;
 
     public var game(default, null):GameRecord;
 
@@ -103,14 +106,18 @@ class GameCard extends HBox
         kindIcon.setKind(game.timeControl.getKind());
 
         var timed:Bool = !game.timeControl.match(None);
-        timeControlLabel.text = timed ? TimeControlFormatters.formatTimeControl(game.timeControl) : LocaleUtils.localeBinding("intellector.common.time_control_kind.correspondence");
+        timeControlLabel.text = timed ? TimeControlFormatters.formatTimeControl(game.timeControl) : LocaleUtils.localeBinding("intellector.common.time_control_kind.correspondence_short");
         timeControlLabel.setClass(StyleClass.GAME_RECORD_MONO, timed);
         timeControlLabel.setClass(StyleClass.GAME_RECORD_TEXT, !timed);
         ratedLabel.text = LocaleUtils.localeBinding(game.rated ? "intellector.common.game_type.rated" : "intellector.common.game_type.casual");
-        ratedLabel.hidden = !timed;
 
         whiteRow.setParticipant(game.white, game.rated, winner == White);
         blackRow.setParticipant(game.black, game.rated, winner == Black);
+    }
+
+    public function setBoardWidth(boardWidth:Float):Void
+    {
+        board.setBoardWidth(boardWidth);
     }
 
     /** The two lines under the players, re-resolved on a language switch **/

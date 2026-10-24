@@ -6,7 +6,12 @@ import client.formatters.IdentityFormatters;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
 import client.storage.LocalStorageKey;
+import client.storage.ChallengeDraftMigration;
+import client.storage.CredentialsMigration;
 import client.storage.PreferenceMigration;
+import client.datatypes.challenge.creation.ChallengeDraft;
+import client.logic.challenge.creation.ChallengePrefills;
+import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
 import client.ui.common.overlays.challenge.ChallengeCreationOverlay;
 import client.ui.common.overlays.login.LoginOverlay;
 import client.ui.common.overlays.playersearch.PlayerSearchOverlay;
@@ -16,14 +21,14 @@ import haxefolio.LocaleUtils;
 import haxefolio.HaxeFolioConfig;
 import haxefolio.HaxeFolioConfigBuilder;
 import haxefolio.menu.MenuFacade;
+import client.ui.home.HomeLayoutTier;
 import client.ui.home.HomePage;
 import client.ui.analysis.AnalysisPage;
+import client.ui.changelog.ChangelogPage;
 import client.ui.game.LiveGamePage;
 import client.ui.profile.ProfileLayoutTier;
 import client.ui.profile.ProfilePage;
 import client.ui.challenge.ChallengeJoiningPage;
-import client.ui.demo.DemoChallengeServer;
-import client.ui.demo.DemoPage;
 import client.storage.ChallengeMarksStorage;
 import client.tabs.GameRedirect;
 import client.datatypes.challenge.creation.ChallengeCreationOutcome;
@@ -81,8 +86,8 @@ class Main
     /** Shorter than the server's away threshold, so that a resumed user never stays "away" until the next scheduled heartbeat **/
     private static inline final IDLE_THRESHOLD_SECS:Int = 60;
 
-    @:allow(client.ui.demo) private static var challengesWidget:ChallengesWidget;
-    @:allow(client.ui.demo) private static var challenges:ChallengesController;
+    private static var challengesWidget:ChallengesWidget;
+    private static var challenges:ChallengesController;
     private static var incomingChallengesSubscription:Null<Subscription<IncomingChallenges>> = null;
     private static var outgoingChallengesSubscription:Null<Subscription<OutgoingChallenges>> = null;
     private static var challengesUserRef:Null<String> = null;
@@ -95,6 +100,7 @@ class Main
         var config:HaxeFolioConfig = HaxeFolioConfigBuilder.init("intellector", Preferences)
             .setAppIcon("assets/favicons/normal.png")
             .setSiteName("Intellector")
+            .setLeaveConfirmText("{{intellector.common.leave_confirm}}")
             .setDebounceMs(100)
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Compact, 0)
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Medium, BoardLayoutTier.MEDIUM_MIN_WIDTH, BoardLayoutTier.fitsMedium)
@@ -102,16 +108,19 @@ class Main
             .addWidthTier(ProfileLayoutTier.SCALE, ProfileLayoutTier.Narrow, 0)
             .addWidthTier(ProfileLayoutTier.SCALE, ProfileLayoutTier.Medium, ProfileLayoutTier.MEDIUM_MIN_WIDTH)
             .addWidthTier(ProfileLayoutTier.SCALE, ProfileLayoutTier.Wide, ProfileLayoutTier.WIDE_MIN_WIDTH)
+            .addWidthTier(HomeLayoutTier.SCALE, HomeLayoutTier.Narrow, 0)
+            .addWidthTier(HomeLayoutTier.SCALE, HomeLayoutTier.Wide, HomeLayoutTier.WIDE_MIN_WIDTH)
             .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}, shadows: StyleVars.HAXEFOLIO_SHADOWS}) // outlined: brass shares the board's hue family
             .addLocale("en", "English")
             .addLocale("ru", "Русский")
             .addPage("home", params -> new HomePage(), true)
             .addPage("analysis", params -> new AnalysisPage())
+            .addPage("analyze/{gameID}/{plyCount}", params -> new AnalysisPage(null, {gameId: Std.parseInt(params.get("gameID")), plyCount: Std.parseInt(params.get("plyCount"))}))
             .addPage("study/{id}", params -> new AnalysisPage(Std.parseInt(params.get("id"))))
             .addPage("live/{gameID}", params -> new LiveGamePage(Std.parseInt(params.get("gameID"))))
             .addPage("player/{login}", params -> new ProfilePage(params.get("login")))
             .addPage("join/{id}", params -> new ChallengeJoiningPage(Std.parseInt(params.get("id"))))
-            .addPage("demo", params -> new DemoPage())
+            .addPage("changelog", params -> new ChangelogPage())
             .setMenubarChevronsShown(false)
             .addLeftMenubarItem(NormalMenu("play", []))
             .addNormalMenuItem("play", "create_game", Execute(onCreateGamePressed), Assets.menuItemIcon("new_game"))
@@ -122,7 +131,6 @@ class Main
             .addNormalMenuItem("watch", "watch_player", Execute(onWatchPlayerPressed), Assets.menuItemIcon("watch_player"))
             .addLeftMenubarItem(NormalMenu("learn", []))
             .addNormalMenuItem("learn", "analysis_board", NavigateTo(() -> "analysis"), Assets.menuItemIcon("analysis_board"))
-            .addNormalMenuItem("learn", "demo", NavigateTo(() -> "demo"))
             .addLeftMenubarItem(NormalMenu("social", []))
             .addNormalMenuItem("social", "player_profile", Execute(onPlayerProfilePressed), Assets.menuItemIcon("player_profile"))
             .addNormalMenuItem("social", "vk", Link("https://vk.com/intellectorgroup", true), Assets.menuItemIcon("vk"))
@@ -146,26 +154,33 @@ class Main
 
         HaxeFolioApp.init(config);
         PreferenceMigration.run();
+        ChallengeDraftMigration.run();
+        CredentialsMigration.run();
         ActivityTracker.activate(IDLE_THRESHOLD_SECS, PubSub.sendHeartbeat);
         challenges = new ChallengesController(challengesWidget, acceptChallenge, declineChallenge, cancelChallenge, saveChallengeMarks);
         ChallengeMarksStorage.addExternalChangeHandler(() -> challengesUserRef, challenges.applyMarks);
         ongoingGames = new OngoingGamesController(ongoingGamesWidget);
         ongoingGamesWidget.currentGameId = () -> LiveGamePage.openGameId;
         GameRedirect.init(openStartedGame);
+        ChallengeCreationLauncher.launch = presentChallengeCreation;
         IdentityKeeper.init([_ -> PubSub.reauth(), refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);
         AuthBootstrap.run();
     }
 
     private static function onCreateGamePressed():Void
     {
-        var identity:Identity = IdentityKeeper.currentIdentity;
-        ChallengeCreationOverlay.present(identity.isGuest(), identity.getUserRef(), createChallenge);
+        presentChallengeCreation(null);
     }
 
     private static function onVersusBotPressed():Void
     {
+        presentChallengeCreation(ChallengePrefills.versusBot);
+    }
+
+    private static function presentChallengeCreation(?prefill:ChallengeDraft->Void):Void
+    {
         var identity:Identity = IdentityKeeper.currentIdentity;
-        ChallengeCreationOverlay.present(identity.isGuest(), identity.getUserRef(), createChallenge, BOT);
+        ChallengeCreationOverlay.present(identity.isGuest(), identity.getUserRef(), createChallenge, prefill);
     }
 
     private static function onWatchPlayerPressed():Void {} // no watching yet
@@ -271,9 +286,6 @@ class Main
 
     private static function saveChallengeMarks(marks:ChallengeMarks):Void
     {
-        if (DemoChallengeServer.used) // temporary: the demo page's fake ids would outrank the real ones for good
-            return;
-
         if (challengesUserRef != null)
             ChallengeMarksStorage.save(challengesUserRef, marks);
     }
@@ -343,7 +355,7 @@ class Main
             case CREATED:
                 var callee:Null<UserRefWithNickname> = response.challenge?.callee;
                 if (response.callee_online == false && callee != null)
-                    CalleeOfflineNotice.show(callee.nickname);
+                    CalleeOfflineNotice.show(callee.nickname, response.callee_session_lost == true);
                 onOutcome(Created);
         }
     }
@@ -362,12 +374,6 @@ class Main
 
     private static function acceptChallenge(challenge:IncomingChallenge):Void
     {
-        if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
-        {
-            DemoChallengeServer.accept(challenge, onAcceptFailed.bind(challenge));
-            return;
-        }
-
         Rest.client().execute(
             RestOperationRegistry.ACCEPT_CHALLENGE,
             game -> {
@@ -394,12 +400,6 @@ class Main
 
     private static function declineChallenge(challenge:IncomingChallenge):Void
     {
-        if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
-        {
-            DemoChallengeServer.decline(challenge, onDeclineFailed.bind(challenge));
-            return;
-        }
-
         Rest.client().execute(
             RestOperationRegistry.DECLINE_CHALLENGE,
             _ -> {},
@@ -420,12 +420,6 @@ class Main
 
     private static function cancelChallenge(challenge:OutgoingChallenge):Void
     {
-        if (DemoChallengeServer.owns(challenge.id)) // temporary: the demo page's fake challenges never reach the server
-        {
-            DemoChallengeServer.cancel(challenge, onCancelFailed.bind(challenge));
-            return;
-        }
-
         Rest.client().execute(
             RestOperationRegistry.CANCEL_CHALLENGE,
             _ -> {},

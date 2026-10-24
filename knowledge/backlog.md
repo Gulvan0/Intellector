@@ -81,3 +81,9 @@ Allow to leave annotations and textual comments to the specific variation nodes.
 ## Update nickname
 
 ## Avatars
+
+## Live boards on home page ongoing cards
+
+A lightweight ply event (game id, latest SIP, `last_ply_at`) either on
+`CurrentGameList` or on a per-game summary channel subscribed for the visible cards only; apply it
+with `GameRecordMapper.applyUpdate`-style copying, without reordering the page.
