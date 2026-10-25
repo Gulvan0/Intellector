@@ -2,17 +2,27 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=overlays-content">
     <title>Intellector</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8a5a1f">
+    <script>
+        window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); window.deferredInstallPrompt = e; window.dispatchEvent(new Event("installpromptchange")); });
+        window.addEventListener("appinstalled", () => { window.deferredInstallPrompt = null; window.dispatchEvent(new Event("installpromptchange")); });
+    </script>
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: #e9e3d9; }
-        #haxeui-root { width: 100vw; height: 100vh; }
+        #haxeui-root { width: 100%; height: 100svh; }
     </style>
 </head>
 <body>
     <script src="bin/app.js"></script>
     <!-- gifenc 1.0.3 (MIT), used only once the page is up, for GIF exports -->
     <script type="module">import * as gifenc from "./assets/vendor/gifenc/gifenc.esm.js"; window.gifenc = gifenc;</script>
+    <script>
+        if ("serviceWorker" in navigator)
+            window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch((e) => console.warn("Service worker registration failed", e)));
+    </script>
 </body>
 </html>

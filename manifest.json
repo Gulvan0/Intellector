@@ -1,0 +1,15 @@
+{
+  "name": "Intellector",
+  "short_name": "Intellector",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#e9e3d9",
+  "theme_color": "#8a5a1f",
+  "icons": [
+    { "src": "assets/favicons/pwa-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "assets/favicons/pwa-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "assets/favicons/pwa-maskable-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}
