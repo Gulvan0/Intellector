@@ -4,7 +4,7 @@ import client.ServerTime;
 import client.datatypes.game.OngoingGame;
 import client.logic.game.OngoingGameOrdering;
 import haxe.ui.containers.VBox;
-import haxefolio.ByWidth;
+import haxefolio.ByMenuLayout;
 import haxefolio.ResponsivityController;
 
 /** The ongoing games widget's dropdown content: the games in two sections **/
@@ -28,7 +28,7 @@ class OngoingGameList extends VBox
         this.onPreviewToggled = onPreviewToggled;
 
         // entries are laid out for one breakpoint, so they're rebuilt for the other
-        var breakpoint:ByWidth<Bool> = {expanded: false, collapsed: true};
+        var breakpoint:ByMenuLayout<Bool> = {expanded: false, collapsed: true};
         ResponsivityController.bind(breakpoint, _ -> rebuild());
     }
 

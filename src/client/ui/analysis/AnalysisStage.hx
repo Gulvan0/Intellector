@@ -1,6 +1,7 @@
 package client.ui.analysis;
 
 import client.ui.analysis.editor.EditorToolCard;
+import client.ui.common.board.BoardControlRow;
 import client.ui.common.board.BoardSurface;
 import client.ui.common.board.InteractiveBoard;
 import haxe.ui.containers.Box;
@@ -33,6 +34,7 @@ class AnalysisStage extends Box
     private var fitsHeight:Bool = true;
     private var editing:Bool = false;
     private var toolCardReserved:Bool = true;
+    private var toolCardHosted:Bool = true;
     private var maxHeight:Null<Float> = null;
     private var strip:Null<Component> = null;
 
@@ -113,10 +115,40 @@ class AnalysisStage extends Box
         fit();
     }
 
+    /** Whether the tool card sits under the board; otherwise another card hosts it and the board keeps the room **/
+    public function setToolCardHosted(hosted:Bool):Void
+    {
+        if (toolCardHosted == hosted)
+            return;
+
+        toolCardHosted = hosted;
+        if (hosted)
+            column.addComponent(toolCard);
+        else if (toolCard.parentComponent == column)
+            column.removeComponent(toolCard, false);
+        refreshTools();
+        fit();
+    }
+
     public function setEditing(editing:Bool):Void
     {
         this.editing = editing;
         refreshTools();
+        fit();
+    }
+
+    /** See `InteractiveBoard.claimControls` **/
+    public function claimControls():BoardControlRow
+    {
+        var controls:BoardControlRow = board.claimControls();
+        fit();
+        return controls;
+    }
+
+    /** See `InteractiveBoard.releaseControls` **/
+    public function releaseControls():Void
+    {
+        board.releaseControls();
         fit();
     }
 
@@ -129,7 +161,7 @@ class AnalysisStage extends Box
     private function refreshTools():Void
     {
         toolCard.hidden = !editing;
-        var reservedSpace:Float = editing || !fitsHeight || !toolCardReserved ? 0 : TOOL_CARD_SPACE / 2;
+        var reservedSpace:Float = editing || !fitsHeight || !toolCardReserved || !toolCardHosted ? 0 : TOOL_CARD_SPACE / 2;
         column.paddingTop = reservedSpace;
         column.paddingBottom = reservedSpace;
     }
@@ -141,13 +173,14 @@ class AnalysisStage extends Box
         if (availableWidth <= 0)
             return;
 
-        toolCard.setNarrow(availableWidth < EditorToolCard.LABELLED_WIDTH);
+        if (toolCardHosted)
+            toolCard.setNarrow(availableWidth < EditorToolCard.LABELLED_WIDTH);
 
         var columnWidth:Float = availableWidth;
         var boardMaxWidth:Null<Float> = null;
         if (fitsHeight)
         {
-            var reservedHeight:Float = editing || toolCardReserved ? TOOL_CARD_SPACE : 0;
+            var reservedHeight:Float = toolCardHosted && (editing || toolCardReserved) ? TOOL_CARD_SPACE : 0;
             reservedHeight += board.controlsHeight();
             if (strip != null)
                 reservedHeight += strip.element.offsetHeight + COLUMN_SPACING;
@@ -160,12 +193,12 @@ class AnalysisStage extends Box
                     boardMaxWidth = boardWidth;
             }
             else
-                columnWidth = Math.min(availableWidth, boardWidth);
+                columnWidth = Math.min(availableWidth, boardWidth + board.controlsWidth());
         }
         else if (maxHeight != null) // only the board narrows: the control row keeps the full width
         {
             var aspectRatio:Float = BoardSurface.aspectRatioOf(Preferences.boardCoordinates.get());
-            var boardWidth:Float = Math.max(0, Math.floor((maxHeight - board.controlsHeight()) * aspectRatio));
+            var boardWidth:Float = Math.max(Math.min(availableWidth, BoardLayoutTier.MIN_COMPACT_BOARD_WIDTH), Math.floor((maxHeight - board.controlsHeight()) * aspectRatio));
             if (boardWidth < availableWidth)
                 boardMaxWidth = boardWidth;
         }

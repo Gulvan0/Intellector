@@ -91,7 +91,7 @@ class OpponentSection extends VBox
         botNote.text = phrase("bot_note");
         botNote.addClass(StyleClass.CHALLENGE_SLOT_NOTE);
 
-        slot = new SwapSlot([DIRECT => directBox, OPEN => visibilityRow, BOT => botNote], draft.type, StyleVars.CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHT.resolve(false));
+        slot = new SwapSlot([DIRECT => directBox, OPEN => visibilityRow, BOT => botNote], draft.type, StyleVars.CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHT.resolve(Expanded));
         slot.addClass(StyleClass.CHALLENGE_TYPE_SLOT);
         this.addComponent(slot);
 

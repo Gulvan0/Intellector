@@ -5,7 +5,9 @@ import client.ui.Assets;
 import client.ui.common.challenges.PositionPreviewPopover;
 import haxefolio.AnchorPlacement;
 import haxefolio.Anchoring;
-import haxefolio.ByWidth;
+import haxe.ui.core.Component;
+import haxefolio.ByMenuLayout;
+import haxefolio.ResponsivityController;
 import haxefolio.notification.NotificationCard;
 import intellectorboard.primitives.piece.PieceColor;
 import morestd.Detachable;
@@ -15,8 +17,11 @@ class ChallengeCard extends NotificationCard
 {
     public final challenge:IncomingChallenge;
 
+    private static final FACT_LABELS_SHOWN:ByMenuLayout<Bool> = {expanded: true, collapsed: true, rail: false};
+
     private var preview:Null<PositionPreviewPopover> = null;
     private var previewAnchoring:Null<Detachable> = null;
+    private final factBindings:Array<Detachable>;
 
     public function new(challenge:IncomingChallenge, onClose:Void->Void, onDecline:Void->Void, onAccept:Void->Void, onPreviewOpened:Void->Void)
     {
@@ -26,6 +31,19 @@ class ChallengeCard extends NotificationCard
 
         // clips the cells' square corners to the grid's rounded ones, which HaxeUI's clip: true doesn't
         facts.element.style.overflow = "hidden";
+
+        var cells:Array<Component> = facts.findComponents(StyleClass.CHALLENGE_FACT, Component);
+        var labels:Array<Component> = facts.findComponents(StyleClass.CHALLENGE_FACT_LABEL, Component);
+        factBindings = [
+            ResponsivityController.bind(StyleVars.CHALLENGE_FACT_HEIGHT, height -> {
+                for (cell in cells)
+                    cell.height = height;
+            }),
+            ResponsivityController.bind(FACT_LABELS_SHOWN, shown -> {
+                for (label in labels)
+                    label.hidden = !shown;
+            })
+        ];
 
         title = challenge.callerNickname;
         this.onClose = onClose;
@@ -70,6 +88,8 @@ class ChallengeCard extends NotificationCard
     {
         if (previewAnchoring != null)
             previewAnchoring.detach();
+        for (binding in factBindings)
+            binding.detach();
         super.onDestroy();
     }
 
@@ -86,7 +106,7 @@ class ChallengeCard extends NotificationCard
 
             var expanded:AnchorPlacement = {side: Left, align: End};
             var collapsed:AnchorPlacement = {side: Above, align: Start, stretch: true};
-            var placement:ByWidth<AnchorPlacement> = {expanded: expanded, collapsed: collapsed};
+            var placement:ByMenuLayout<AnchorPlacement> = {expanded: expanded, collapsed: collapsed, rail: expanded}; // the rail's card is narrow, with room to its left but little above
             previewAnchoring = Anchoring.attach(preview, this, placement);
         }
 

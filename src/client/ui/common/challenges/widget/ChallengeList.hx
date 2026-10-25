@@ -3,7 +3,7 @@ package client.ui.common.challenges.widget;
 import client.datatypes.challenge.IncomingChallenge;
 import client.datatypes.challenge.OutgoingChallenge;
 import haxe.ui.containers.VBox;
-import haxefolio.ByWidth;
+import haxefolio.ByMenuLayout;
 import haxefolio.ResponsivityController;
 
 /** The challenges widget's dropdown content: the pending challenges in two sections **/
@@ -31,7 +31,7 @@ class ChallengeList extends VBox
             HaxeUI doesn't unset a percent width a stylesheet rule stops giving, so entries laid out
             for one breakpoint are rebuilt for the other
         */
-        var breakpoint:ByWidth<Bool> = {expanded: false, collapsed: true};
+        var breakpoint:ByMenuLayout<Bool> = {expanded: false, collapsed: true};
         ResponsivityController.bind(breakpoint, _ -> rebuild());
     }
 

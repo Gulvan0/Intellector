@@ -7,6 +7,7 @@ import haxe.Timer;
 import haxefolio.AnchorPlacement;
 import haxefolio.Anchoring;
 import haxefolio.LocaleUtils;
+import haxefolio.MenuLayout;
 import haxefolio.ResponsivityController;
 import haxefolio.menu.DropdownWidget;
 import morestd.Detachable;
@@ -168,7 +169,7 @@ class OngoingGamesWidget
         var game:OngoingGame = entry.game;
         var title:String = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.games_widget.game_with"), game.opponentNickname);
 
-        if (ResponsivityController.isCollapsed)
+        if (ResponsivityController.menuLayout != Expanded)
         {
             preview = new PositionPreviewPopover(game.position, game.ownColor, title, closePreview);
             preview.addClass(StyleClass.CHALLENGE_PREVIEW_COVER);

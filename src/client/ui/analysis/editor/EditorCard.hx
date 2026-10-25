@@ -48,6 +48,7 @@ class EditorCard extends VBox
     private var moveCount:Int = 0;
     private var valid:Bool = true;
     private var compact:Bool = false;
+    private var tools:Null<EditorToolCard> = null;
 
     public function new(handlers:EditorCardHandlers)
     {
@@ -153,6 +154,19 @@ class EditorCard extends VBox
         startingButton.disabled = draft.isStarting();
         applyButton.disabled = !valid;
         LocaleManager.instance.refreshFor(footerHint); // assigning the text would drop its locale binding
+    }
+
+    /** Places the editor's tools right under the heading, or takes them away again if null **/
+    public function setTools(tools:Null<EditorToolCard>):Void
+    {
+        if (this.tools == tools)
+            return;
+
+        if (this.tools != null)
+            removeComponent(this.tools, false);
+        this.tools = tools;
+        if (tools != null)
+            addComponentAt(tools, 1);
     }
 
     /** Compact: side to move on one row, the actions in a 2×2 grid, Apply on the right **/

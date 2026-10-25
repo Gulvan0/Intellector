@@ -10,7 +10,7 @@ import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
-import haxefolio.ByWidth;
+import haxefolio.ByMenuLayout;
 import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.appearance.PartialGeometryTokens;
@@ -182,7 +182,7 @@ class StudyFormOverlay
             StyleVars.STUDY_FORM_FOOTER_COLLAPSED_DELETABLE_HEIGHT
         else
             StyleVars.STUDY_FORM_FOOTER_COLLAPSED_HEIGHT;
-        var footerRegionHeight:ByWidth<Int> = {expanded: footerHeight, collapsed: footerHeight};
+        var footerRegionHeight:ByMenuLayout<Int> = {expanded: footerHeight, collapsed: footerHeight};
 
         return {
             regions: [

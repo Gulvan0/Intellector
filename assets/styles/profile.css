@@ -373,6 +373,7 @@
 }
 
 .intellector-study-token-remove {
+    margin-top: 3px;
     width: 26px;
     height: 26px;
     border-radius: 4px;
@@ -421,7 +422,31 @@
     vertical-spacing: 0;
 }
 
+.haxefolio-tier-profile-narrow .intellector-profile-section-tabs {
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 12px;
+}
+
+.haxefolio-tier-profile-narrow .intellector-profile-section-tabs .intellector-underline-tab {
+    horizontal-spacing: 4px;
+}
+
+.haxefolio-tier-profile-narrow .intellector-profile-section-tabs .intellector-underline-tab-caption {
+    font-size: 15px;
+}
+
 /* connections */
+.intellector-profile-aside-tabs {
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 10px;
+}
+
+.intellector-profile-aside-tabs .intellector-underline-tab {
+    horizontal-spacing: 4px;
+}
+
 .intellector-profile-connections-frame {
     height: 264px;
 }
@@ -536,6 +561,7 @@
 
 .intellector-profile-stats-name-cell {
     horizontal-spacing: 8px;
+    clip: true;
 }
 
 .intellector-profile-stats-name {
@@ -604,6 +630,10 @@
 .intellector-profile-stats-chart-head {
     height: 18px;
     horizontal-spacing: 6px;
+}
+
+.intellector-profile-stats-chart-head .intellector-profile-small-text {
+    clip: true;
 }
 
 .intellector-profile-stats-chart-status {

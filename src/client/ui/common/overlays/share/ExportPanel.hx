@@ -157,7 +157,7 @@ class ExportPanel extends Box
                 transparentToggle.height = height;
         }));
 
-        var previewHeight:Int = collapsed ? StyleVars.SHARE_NARROW_PREVIEW_HEIGHT : ShareLayout.settingsHeight(settings.kind, AppearanceContext.current.geometry.fieldHeight.resolve(false));
+        var previewHeight:Int = collapsed ? StyleVars.SHARE_NARROW_PREVIEW_HEIGHT : ShareLayout.settingsHeight(settings.kind, AppearanceContext.current.geometry.fieldHeight.resolve(Expanded));
         preview = new ExportPreview(previewHeight);
 
         var layout:Box = collapsed ? new VBox() : new HBox();

@@ -10,6 +10,7 @@ import client.utils.PagePaths;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;
 import haxefolio.PageLink;
+import haxefolio.MenuLayout;
 import haxefolio.ResponsivityController;
 import intellectorboard.primitives.piece.PieceColor;
 
@@ -35,7 +36,7 @@ class OngoingGameEntry extends VBox
     {
         super();
 
-        footer.layoutName = ResponsivityController.isCollapsed ? "vertical" : "horizontal";
+        footer.layoutName = ResponsivityController.menuLayout != Expanded ? "vertical" : "horizontal";
         turnMarker.element.setAttribute("role", "img");
 
         previewToggle.onChange = _ -> onPreviewToggled(previewToggle.selected);

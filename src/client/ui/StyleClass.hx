@@ -82,6 +82,8 @@ enum abstract StyleClass(String) from String to String
     var CHALLENGE_ENTRY_FACT_EMPHASISED = "intellector-challenge-entry-fact-emphasised";
     var CHALLENGE_ENTRY_FIRST = "intellector-challenge-entry-first";
     var CHALLENGE_ENTRY_OPPONENT_OPEN = "intellector-challenge-entry-opponent-open";
+    var CHALLENGE_FACT = "intellector-challenge-fact";
+    var CHALLENGE_FACT_LABEL = "intellector-challenge-fact-label";
     var CHALLENGE_FACT_VALUE_EMPHASISED = "intellector-challenge-fact-value-emphasised";
     var CHALLENGE_PREVIEW_COVER = "intellector-challenge-preview-cover";
     var CHALLENGE_ROW_ARRIVED = "intellector-challenge-row-arrived";
@@ -158,6 +160,7 @@ enum abstract StyleClass(String) from String to String
     var GAME_CLOCK_LOW = "intellector-game-clock-low";
     var GAME_CLOCK_RUNNING = "intellector-game-clock-running";
     var GAME_COMPACT_COLUMN = "intellector-game-compact-column";
+    var GAME_FORCED_RAIL = "intellector-game-forced-rail";
     var GAME_HEAD = "intellector-game-head";
     var GAME_HEAD_DETAILS = "intellector-game-head-details";
     var GAME_HINT = "intellector-game-hint";
@@ -181,6 +184,7 @@ enum abstract StyleClass(String) from String to String
     var GAME_OFFER_TEXT = "intellector-game-offer-text";
     var GAME_OPENING = "intellector-game-opening";
     var GAME_PAGE = "intellector-game-page";
+    var GAME_PAGE_FORCED_RAIL = "intellector-game-page-forced-rail";
     var GAME_PEEK = "intellector-game-peek";
     var GAME_PEEK_TEXT = "intellector-game-peek-text";
     var GAME_PLAYERS_BOX = "intellector-game-players-box";
@@ -214,6 +218,7 @@ enum abstract StyleClass(String) from String to String
     var ANALYSIS_LAYOUT = "intellector-analysis-layout";
     var ANALYSIS_LOCKED = "intellector-analysis-locked";
     var ANALYSIS_PANEL_TABS = "intellector-analysis-panel-tabs";
+    var ANALYSIS_PANEL_TABS_ALONE = "intellector-analysis-panel-tabs-alone";
     var ANALYSIS_STAGE = "intellector-analysis-stage";
     var ANALYSIS_STAGE_COLUMN = "intellector-analysis-stage-column";
     var ANALYSIS_TABBED = "intellector-analysis-tabbed";
@@ -231,6 +236,7 @@ enum abstract StyleClass(String) from String to String
     var EDITOR_TOOL = "intellector-editor-tool";
     var EDITOR_TOOL_CARD = "intellector-editor-tool-card";
     var EDITOR_TOOL_CARD_COMPACT = "intellector-editor-tool-card-compact";
+    var EDITOR_TOOL_CARD_EMBEDDED = "intellector-editor-tool-card-embedded";
     var EDITOR_TOOL_CARD_NARROW = "intellector-editor-tool-card-narrow";
     var EDITOR_TOOL_CONTENT = "intellector-editor-tool-content";
     var EDITOR_TOOL_ON = "intellector-editor-tool-on";
@@ -532,4 +538,12 @@ enum abstract StyleClass(String) from String to String
     var UNDERLINE_TAB_CAPTION = "intellector-underline-tab-caption";
     var UNDERLINE_TAB_COUNT = "intellector-underline-tab-count";
     var UNDERLINE_TAB_SELECTED = "intellector-underline-tab-selected";
+
+    var ACCOUNT_HEADER = "intellector-account-header";
+    var ACCOUNT_HEADER_GUEST = "intellector-account-header-guest";
+    var ACCOUNT_ICON_CAPTION = "intellector-account-icon-caption";
+    var ACCOUNT_ICON_CAPTION_GUEST = "intellector-account-icon-caption-guest";
+    var ACCOUNT_ICON_CAPTION_SMALL = "intellector-account-icon-caption-small";
+    var ACCOUNT_ICON_DISC = "intellector-account-icon-disc";
+    var ACCOUNT_ICON_DISC_GUEST = "intellector-account-icon-disc-guest";
 }

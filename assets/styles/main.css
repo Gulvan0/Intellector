@@ -38,7 +38,7 @@
 }
 
 /*
-    Menu bar, site name, hamburger, menu triggers and their dropdown.
+    Menu bar and rail, site name, hamburger and home buttons, menu triggers and their dropdown.
 */
 
 .haxefolio-menubar {
@@ -46,12 +46,33 @@
     border-bottom: 1px solid #ded5c6;
 }
 
-.haxefolio-hamburger-button {
+/*
+    40px rail targets fit two top items and four widgets into the 280px minimum design height. The
+    6px padding keeps the hamburger's centre where the side bar's cross is.
+*/
+.haxefolio-menu-rail {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 6px;
+    background-color: #f2eee6;
+    border-right: 1px solid #ded5c6;
+}
+
+.haxefolio-menu-rail .haxefolio-hamburger-button,
+.haxefolio-menu-rail .haxefolio-home-button,
+.haxefolio-menu-rail .haxefolio-dropdown-widget {
+    width: 40px;
+    height: 40px;
+}
+
+.haxefolio-hamburger-button,
+.haxefolio-home-button {
     border-radius: 5px;
     color: #6d6152;
 }
 
-.haxefolio-hamburger-button:down {
+.haxefolio-hamburger-button:down,
+.haxefolio-home-button:down {
     background-color: #f0ebe2;
 }
 
@@ -894,6 +915,12 @@
     padding-right: 12px;
 }
 
+/* the rail's cells, without their labels (see StyleVars.CHALLENGE_FACT_HEIGHT) */
+.haxefolio-rail .intellector-challenge-fact {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
 .intellector-challenge-fact-label {
     font-name: $ui-family-medium;
     font-size: 11px;
@@ -968,8 +995,14 @@
     margin-right: 10px;
 }
 
-.haxefolio-collapsed .intellector-challenge-preview {
+.haxefolio-compact .intellector-challenge-preview {
     margin-bottom: 8px;
+}
+
+/* beside the notification card, as while expanded */
+.haxefolio-rail .intellector-challenge-preview {
+    margin-bottom: 0px;
+    margin-right: 10px;
 }
 
 .intellector-challenge-preview-turn {
@@ -992,7 +1025,7 @@
     height: 40px;
 }
 
-.haxefolio-collapsed .intellector-challenge-row {
+.haxefolio-compact .intellector-challenge-row {
     height: 44px;
 }
 
@@ -1053,7 +1086,7 @@
     height: 38px;
 }
 
-.haxefolio-collapsed .intellector-challenge-bar {
+.haxefolio-compact .intellector-challenge-bar {
     height: 44px;
 }
 
@@ -1083,7 +1116,7 @@
 }
 
 /* collapsed, Hide all's hit area fills the bar's height */
-.haxefolio-collapsed .intellector-challenge-bar-hide-all {
+.haxefolio-compact .intellector-challenge-bar-hide-all {
     height: 44px;
 }
 
@@ -1138,6 +1171,63 @@
     border-radius: 9px;
 }
 
+/*
+    Account widget: the identity icon (an ink disc for a player, a muted one with ink text for a
+    guest) and the menu, headed by the identity's name.
+*/
+
+.haxefolio-dropdown-menu-divider {
+    background-color: #d8cfc0;
+}
+
+.haxefolio-dropdown-menu-item {
+    color: #2a211a;
+}
+
+.haxefolio-dropdown-menu-item:hover,
+.haxefolio-dropdown-menu-item:down {
+    background-color: #f0ebe2;
+    color: #2a211a;
+}
+
+.intellector-account-icon-disc {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: #2a211a;
+}
+
+.intellector-account-icon-disc-guest {
+    background-color: #bdb2a0;
+}
+
+.intellector-account-icon-caption {
+    font-name: $ui-family-semibold;
+    font-size: 12px;
+    color: #f2eee6;
+}
+
+.intellector-account-icon-caption-guest {
+    font-size: 10px;
+    color: #2a211a;
+}
+
+.intellector-account-icon-caption-small {
+    font-size: 8px;
+}
+
+.intellector-account-header {
+    font-name: $ui-family-semibold;
+}
+
+.intellector-account-header-guest,
+.intellector-account-header-guest:hover,
+.intellector-account-header-guest:down {
+    background-color: transparent;
+    color: #6d6152;
+    cursor: default;
+}
+
 .intellector-challenge-list {
     vertical-spacing: 0;
     padding-bottom: 4px;
@@ -1176,7 +1266,7 @@
     color: #a79b8a;
 }
 
-.haxefolio-collapsed .intellector-challenge-list-empty {
+.haxefolio-compact .intellector-challenge-list-empty {
     height: 44px;
     padding-top: 14px;
 }
@@ -1241,11 +1331,11 @@
     horizontal-spacing: 6px;
 }
 
-.haxefolio-collapsed .intellector-challenge-entry-fact-group {
+.haxefolio-compact .intellector-challenge-entry-fact-group {
     height: 28px;
 }
 
-.haxefolio-collapsed .intellector-challenge-entry-facts .intellector-challenge-preview-toggle {
+.haxefolio-compact .intellector-challenge-entry-facts .intellector-challenge-preview-toggle {
     height: 28px;
 }
 
@@ -1270,7 +1360,7 @@
     horizontal-spacing: 6px;
 }
 
-.haxefolio-collapsed .intellector-challenge-entry-actions {
+.haxefolio-compact .intellector-challenge-entry-actions {
     width: 100%;
     horizontal-spacing: 8px;
 }
@@ -1288,13 +1378,13 @@
     color: #6d6152;
 }
 
-.haxefolio-collapsed .intellector-challenge-entry-action {
+.haxefolio-compact .intellector-challenge-entry-action {
     width: 50%;
     height: 44px;
     font-size: 13px;
 }
 
-.haxefolio-collapsed .intellector-challenge-entry-cancel {
+.haxefolio-compact .intellector-challenge-entry-cancel {
     width: 100%;
 }
 
@@ -1356,6 +1446,7 @@
 .intellector-challenge-preview-cover {
     border-radius: 9px;
     margin-bottom: 0px;
+    margin-right: 0px;
 }
 
 /*
@@ -1410,7 +1501,7 @@
     horizontal-spacing: 6px;
 }
 
-.haxefolio-collapsed .intellector-game-entry-fact-group {
+.haxefolio-compact .intellector-game-entry-fact-group {
     height: 28px;
 }
 
@@ -1432,7 +1523,7 @@
     border: 1px solid #faf7f2;
 }
 
-.haxefolio-collapsed .intellector-challenge-entry-facts .intellector-game-entry-preview {
+.haxefolio-compact .intellector-challenge-entry-facts .intellector-game-entry-preview {
     height: 28px;
     padding-left: 10px;
     padding-right: 10px;
@@ -1474,7 +1565,7 @@
     font-size: 13px;
 }
 
-.haxefolio-collapsed .intellector-game-entry-open {
+.haxefolio-compact .intellector-game-entry-open {
     width: 100%;
 }
 
@@ -1557,7 +1648,7 @@
     margin-top: 28px;
 }
 
-.haxefolio-collapsed .intellector-challenge-kind-icon {
+.haxefolio-compact .intellector-challenge-kind-icon {
     vertical-align: center;
     margin-top: 0;
 }
@@ -1704,7 +1795,7 @@
     vertical-spacing: 4px;
 }
 
-.haxefolio-collapsed .intellector-player-search-legend {
+.haxefolio-compact .intellector-player-search-legend {
     horizontal-spacing: 12px;
 }
 
@@ -1727,7 +1818,7 @@
     padding-right: 16px;
 }
 
-.haxefolio-collapsed .intellector-player-search-cancel {
+.haxefolio-compact .intellector-player-search-cancel {
     height: 44px;
     padding-left: 20px;
     padding-right: 20px;
@@ -1736,14 +1827,21 @@
 /*
     Live game page. Wide: three columns (info and chat | board | moves and actions) on the page
     background, cards on surface. Medium: two columns (header and board | moves, chat and actions).
-    Compact: one column; the open tab's card replaces the chat peek.
+    Compact: one column; the open tab's card replaces the chat peek. Rail: the board | a narrow
+    column of small parts; the open tab's card covers the board.
 */
 
 .intellector-game-page {
     padding: 14px;
 }
 
-.haxefolio-tier-board-compact .intellector-game-page {
+.haxefolio-tier-board-compact .intellector-game-page,
+.haxefolio-tier-board-rail .intellector-game-page {
+    padding: 8px;
+}
+
+/* the game page falls back to the rail layout on a short viewport that has a menu bar on top */
+.intellector-game-page-forced-rail {
     padding: 8px;
 }
 
@@ -1775,6 +1873,21 @@
 
 .intellector-game-compact-column {
     vertical-spacing: 8px;
+}
+
+.haxefolio-tier-board-rail .intellector-game-wide-row,
+.intellector-game-forced-rail .intellector-game-wide-row {
+    horizontal-spacing: 8px;
+}
+
+.haxefolio-tier-board-rail .intellector-game-side-column,
+.intellector-game-forced-rail .intellector-game-side-column {
+    vertical-spacing: 6px;
+}
+
+.haxefolio-tier-board-rail .intellector-board-controls,
+.intellector-game-forced-rail .intellector-board-controls {
+    padding: 4px;
 }
 
 .intellector-game-card {
@@ -1886,6 +1999,11 @@
 
 .haxefolio-tier-board-compact .intellector-game-button {
     height: 44px;
+}
+
+.haxefolio-tier-board-rail .intellector-game-button,
+.intellector-game-forced-rail .intellector-game-button {
+    height: 32px;
 }
 
 /* info card */
@@ -2154,27 +2272,37 @@
     horizontal-spacing: 10px;
 }
 
-.haxefolio-tier-board-compact .intellector-game-actions-card {
+.haxefolio-tier-board-compact .intellector-game-actions-card,
+.haxefolio-tier-board-rail .intellector-game-actions-card,
+.intellector-game-forced-rail .intellector-game-actions-card {
     padding: 0;
     background-color: transparent;
     border: 0px solid #faf7f2;
 }
 
-.haxefolio-tier-board-compact .intellector-game-actions-row {
+.haxefolio-tier-board-compact .intellector-game-actions-row,
+.haxefolio-tier-board-rail .intellector-game-actions-row,
+.intellector-game-forced-rail .intellector-game-actions-row {
     horizontal-spacing: 6px;
 }
 
-.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button {
+.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button,
+.haxefolio-tier-board-rail .intellector-game-actions-card .intellector-game-button,
+.intellector-game-forced-rail .intellector-game-actions-card .intellector-game-button {
     background-color: #faf7f2;
     padding-left: 0;
     padding-right: 0;
 }
 
-.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button-on {
+.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button-on,
+.haxefolio-tier-board-rail .intellector-game-actions-card .intellector-game-button-on,
+.intellector-game-forced-rail .intellector-game-actions-card .intellector-game-button-on {
     background-color: #f6e6c6;
 }
 
-.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button:disabled {
+.haxefolio-tier-board-compact .intellector-game-actions-card .intellector-game-button:disabled,
+.haxefolio-tier-board-rail .intellector-game-actions-card .intellector-game-button:disabled,
+.intellector-game-forced-rail .intellector-game-actions-card .intellector-game-button:disabled {
     background-color: #f0ebe2;
 }
 
@@ -2220,6 +2348,22 @@
 
 .haxefolio-tier-board-compact .intellector-game-clock {
     width: 80px;
+}
+
+.haxefolio-tier-board-rail .intellector-game-player-bar,
+.intellector-game-forced-rail .intellector-game-player-bar {
+    height: 36px;
+    padding-left: 10px;
+    padding-right: 3px;
+    horizontal-spacing: 8px;
+}
+
+.haxefolio-tier-board-rail .intellector-game-clock,
+.intellector-game-forced-rail .intellector-game-clock {
+    height: 28px;
+    width: 64px;
+    padding-top: 1px;
+    font-size: 16px;
 }
 
 .intellector-game-clock-running {
@@ -2288,6 +2432,17 @@
     color: #2a211a;
 }
 
+/* rail: the narrow column leaves the shown move about 88px, enough for a three-digit move number and a long notation */
+.haxefolio-tier-board-rail .intellector-game-move-strip,
+.intellector-game-forced-rail .intellector-game-move-strip {
+    horizontal-spacing: 4px;
+}
+
+.haxefolio-tier-board-rail .intellector-game-move-strip .intellector-game-strip-move,
+.intellector-game-forced-rail .intellector-game-move-strip .intellector-game-strip-move {
+    font-size: 12px;
+}
+
 .intellector-game-peek {
     height: 44px;
     padding-left: 12px;
@@ -2353,6 +2508,10 @@
     padding-top: 12px;
     padding-left: 14px;
     padding-right: 14px;
+}
+
+.intellector-analysis-panel-tabs-alone {
+    padding-bottom: 12px;
 }
 
 .intellector-analysis-tabbed .intellector-variations-header,
@@ -2804,6 +2963,22 @@
 .intellector-editor-tool-card-compact .intellector-editor-tool {
     width: 44px;
     height: 44px;
+}
+
+/* inside the editor card: no frame of its own, a row of six pieces per side, then Free move and Delete piece */
+.intellector-editor-tool-card-embedded {
+    padding: 0;
+    background-color: transparent;
+    border: 0px solid #faf7f2;
+}
+
+.intellector-editor-tool-card-embedded .intellector-editor-tool {
+    width: 40px;
+    height: 40px;
+}
+
+.intellector-editor-tool-card-embedded .intellector-editor-tool-wide {
+    width: 135px;
 }
 
 /* the editor card */

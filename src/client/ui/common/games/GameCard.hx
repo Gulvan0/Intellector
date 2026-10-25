@@ -62,6 +62,8 @@ class GameCard extends HBox
         addComponent(column);
 
         var headRow:HBox = new HBox();
+        headRow.percentWidth = 100;
+        headRow.clip = true;
         headRow.addClass(StyleClass.GAME_RECORD_LINE);
         column.addComponent(headRow);
 

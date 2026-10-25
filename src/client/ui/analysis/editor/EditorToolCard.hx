@@ -15,7 +15,8 @@ using client.ui.ComponentExtension;
 
 /**
     The position editor's tools, under the board: a row of the far side's pieces then Free move,
-    a row of the near side's pieces then Delete piece. Exactly one tool is selected.
+    a row of the near side's pieces then Delete piece. Exactly one tool is selected. Embedded in the
+    editor card, the pieces take a row per side and Free move and Delete piece share a third.
 **/
 class EditorToolCard extends VBox
 {
@@ -30,6 +31,7 @@ class EditorToolCard extends VBox
     private final onToolChosen:EditorTool->Void;
     private final topRow:HBox;
     private final bottomRow:HBox;
+    private final wideRow:HBox;
     private final pieceTools:Map<PieceColor, Array<Box>> = [];
     private final freeMoveTool:Box;
     private final deletePieceTool:Box;
@@ -40,6 +42,7 @@ class EditorToolCard extends VBox
     private var nearColor:PieceColor = White;
     private var compact:Bool = false;
     private var narrow:Bool = false;
+    private var embedded:Bool = false;
 
     public function new(onToolChosen:EditorTool->Void)
     {
@@ -51,8 +54,12 @@ class EditorToolCard extends VBox
         topRow.addClass(StyleClass.EDITOR_TOOL_ROW);
         bottomRow = new HBox();
         bottomRow.addClass(StyleClass.EDITOR_TOOL_ROW);
+        wideRow = new HBox();
+        wideRow.addClass(StyleClass.EDITOR_TOOL_ROW);
+        wideRow.hidden = true;
         addComponent(topRow);
         addComponent(bottomRow);
+        addComponent(wideRow);
 
         for (color in [White, Black])
             pieceTools.set(color, [for (kind in PIECE_ORDER) createPieceTool(new PieceData(kind, color))]);
@@ -86,10 +93,28 @@ class EditorToolCard extends VBox
     public function setCompact(compact:Bool):Void
     {
         this.compact = compact;
-        for (art in pieceArts)
-            sizePieceArt(art.image, art.kind, compact ? COMPACT_PIECE_ART_HEIGHT : PIECE_ART_HEIGHT);
         this.setClass(StyleClass.EDITOR_TOOL_CARD_COMPACT, compact);
+        refreshArt();
         refreshLabels();
+    }
+
+    /** Placed inside the editor card rather than under the board: smaller pieces, the words kept **/
+    public function setEmbedded(embedded:Bool):Void
+    {
+        if (this.embedded == embedded)
+            return;
+        this.embedded = embedded;
+        this.setClass(StyleClass.EDITOR_TOOL_CARD_EMBEDDED, embedded);
+        wideRow.hidden = !embedded;
+        arrangeRows();
+        refreshArt();
+        refreshLabels();
+    }
+
+    private function refreshArt():Void
+    {
+        for (art in pieceArts)
+            sizePieceArt(art.image, art.kind, compact || embedded ? COMPACT_PIECE_ART_HEIGHT : PIECE_ART_HEIGHT);
     }
 
     /** Narrower than `LABELLED_WIDTH` allows: Free move and Delete piece drop their words, so every tool fits **/
@@ -105,21 +130,29 @@ class EditorToolCard extends VBox
     private function refreshLabels():Void
     {
         for (label in wideLabels)
-            label.hidden = compact || narrow;
+            label.hidden = !embedded && (compact || narrow);
     }
 
     private function arrangeRows():Void
     {
-        for (row in [topRow, bottomRow])
+        for (row in [topRow, bottomRow, wideRow])
             for (child in row.childComponents.copy())
                 row.removeComponent(child, false);
 
         for (tool in pieceTools.get(nearColor.opposite()))
             topRow.addComponent(tool);
-        topRow.addComponent(freeMoveTool);
         for (tool in pieceTools.get(nearColor))
             bottomRow.addComponent(tool);
-        bottomRow.addComponent(deletePieceTool);
+        if (embedded)
+        {
+            wideRow.addComponent(freeMoveTool);
+            wideRow.addComponent(deletePieceTool);
+        }
+        else
+        {
+            topRow.addComponent(freeMoveTool);
+            bottomRow.addComponent(deletePieceTool);
+        }
     }
 
     private function choose(tool:EditorTool):Void

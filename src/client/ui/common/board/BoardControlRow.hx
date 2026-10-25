@@ -1,6 +1,7 @@
 package client.ui.common.board;
 
 import client.ui.Assets;
+import client.ui.common.WidthObserver;
 import haxe.Resource;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
@@ -24,9 +25,13 @@ class BoardControlRow extends Box
     /** Called with the new annotation color (`null` for the normal mode) after the user picks one **/
     public var onAnnotationModeChanged:Null<AnnotationColor>->Void = _ -> {};
 
+    // below this row width the buttons get too narrow to afford the separators between them
+    private static inline final SEPARATORS_MIN_WIDTH:Float = 300;
+
     private final options:BoardInputOptions;
 
     private final defaultPage:Box;
+    private final separators:Array<Box> = [];
     private final annotateButton:Box;
     private final autoPromoteButton:Box;
     private final chameleonModeSegments:Box;
@@ -37,6 +42,8 @@ class BoardControlRow extends Box
     private final normalModeButton:Box;
     private final colorButtons:Array<Box> = [];
 
+    private var separatorsShown:Bool = true;
+    private var vertical:Bool = false;
     private var lastAnnotationColor:AnnotationColor = Red;
     private var pageTransition:Null<Animation> = null;
 
@@ -50,14 +57,14 @@ class BoardControlRow extends Box
 
         annotateButton = createButton(controlIcon("annotate"), "annotate", () -> selectAnnotationMode(lastAnnotationColor));
         defaultPage.addComponent(annotateButton);
-        defaultPage.addComponent(createSeparator());
+        addSeparator();
 
         autoPromoteButton = createButton(controlIcon("auto_promotion"), "auto_promote", () -> {
             options.autoPromoteToggle = !options.autoPromoteToggle;
             syncSelection();
         });
         defaultPage.addComponent(autoPromoteButton);
-        defaultPage.addComponent(createSeparator());
+        addSeparator();
 
         chameleonModeSegments = new Box();
         chameleonModeSegments.addClass(StyleClass.BOARD_CONTROL_SEGMENTS);
@@ -75,7 +82,7 @@ class BoardControlRow extends Box
             chameleonModeSegments.addComponent(button);
         }
         defaultPage.addComponent(chameleonModeSegments);
-        defaultPage.addComponent(createSeparator());
+        addSeparator();
 
         premoveChameleonButton = createButton(controlIcon("ask_premove_aura"), "premove_aura", () -> {
             options.askPremoveChameleonToggle = !options.askPremoveChameleonToggle;
@@ -109,12 +116,19 @@ class BoardControlRow extends Box
         addComponent(annotationPage);
         setVertical(false);
         refresh();
+
+        WidthObserver.observe(this, width -> {
+            separatorsShown = width >= SEPARATORS_MIN_WIDTH;
+            refreshSeparators();
+        });
     }
 
-    /** A column of fixed-size buttons if `vertical`, otherwise a row as wide as the board, its buttons sharing the width **/
+    /** A column of fixed-size buttons if `vertical`, otherwise a row as wide as its container, its buttons sharing the width **/
     public function setVertical(vertical:Bool):Void
     {
+        this.vertical = vertical;
         layoutName = vertical ? "vertical" : "horizontal";
+        refreshSeparators();
 
         // centered along the board's side it sits on
         horizontalAlign = vertical ? null : "center";
@@ -321,6 +335,20 @@ class BoardControlRow extends Box
 
         button.registerEvent(MouseEvent.CLICK, _ -> onSelect());
         return button;
+    }
+
+    private function refreshSeparators():Void
+    {
+        var shown:Bool = vertical || separatorsShown;
+        for (separator in separators)
+            separator.hidden = !shown;
+    }
+
+    private function addSeparator():Void
+    {
+        var separator:Box = createSeparator();
+        separators.push(separator);
+        defaultPage.addComponent(separator);
     }
 
     // between the default page's sections

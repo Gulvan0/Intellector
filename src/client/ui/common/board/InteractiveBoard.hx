@@ -18,7 +18,6 @@ import intellectorboard.primitives.piece.PieceColor;
 import intellectorboard.primitives.hex.HexCoords;
 import intellectorboard.primitives.ply.RawPly;
 import morestd.Detachable;
-import js.Browser;
 import morestd.Signal;
 
 /**
@@ -57,7 +56,9 @@ class InteractiveBoard extends Box
     private var pointerIsCoarse:Bool = false;
     private var layoutTier:BoardLayoutTier = Wide;
     private var controlsBeside:Null<Bool> = null;
-    private var windowResizeListener:Null<js.html.Event->Void> = null;
+    private var controlsBesideAllowed:Bool = true;
+    private var besideControlsHeight:Float = 0;
+    private var controlsClaimed:Bool = false;
 
     private var premoves:Null<Premoves> = null;
     private var premoveEnabledHandle:Null<Detachable> = null;
@@ -119,8 +120,6 @@ class InteractiveBoard extends Box
             layoutTier = tier;
             refreshControlsPlacement();
         }));
-        windowResizeListener = _ -> refreshControlsPlacement();
-        Browser.window.addEventListener("resize", windowResizeListener);
     }
 
     private function updateControlsVisibility():Void
@@ -163,23 +162,76 @@ class InteractiveBoard extends Box
         }
     }
 
-    /** What the control row adds to the board's height: nothing while it's hidden or beside the board **/
+    /**
+        Hands the control row to the caller to place, as a row; the board stops laying it out, and
+        keeps no room for it, until `releaseControls`. Showing it and its state stay the board's.
+    **/
+    public function claimControls():BoardControlRow
+    {
+        controlsClaimed = true;
+        removeComponent(controlRow, false);
+        controlsBeside = null;
+        layoutName = "vertical";
+        controlRow.setVertical(false);
+        invalidateComponentLayout();
+        return controlRow;
+    }
+
+    /** Takes the claimed control row back; its holder must have detached it first **/
+    public function releaseControls():Void
+    {
+        controlsClaimed = false;
+        addComponentAt(controlRow, 0);
+        refreshControlsPlacement();
+    }
+
+    /** What the control row adds to the board's width: nothing while it's hidden, claimed or above the board **/
+    public function controlsWidth():Float
+    {
+        if (controlRow.hidden || controlsClaimed || layoutName != "horizontal")
+            return 0;
+        var spacing:Float = style.horizontalSpacing ?? 0.0;
+        return controlRow.element.offsetWidth + spacing;
+    }
+
+    /** What the control row adds to the board's height: nothing while it's hidden, claimed or beside the board **/
     public function controlsHeight():Float
     {
-        if (controlRow.hidden || layoutName == "horizontal")
+        if (controlRow.hidden || controlsClaimed || layoutName == "horizontal")
             return 0;
         var spacing:Float = style.verticalSpacing ?? 0.0;
         return controlRow.element.offsetHeight + spacing;
     }
 
-    // a column left of the board in the medium and wide layouts unless the viewport is too short for it, a row above it otherwise
-    private function refreshControlsPlacement():Void
+    /** How tall the control row is as a column beside the board, as last measured while it was one; 0 before that, or while it's hidden **/
+    public function controlsColumnHeight():Float
     {
-        setControlsBeside(layoutTier != Compact && Browser.window.innerHeight >= BoardLayoutTier.SHORT_HEIGHT);
+        if (controlRow.hidden)
+            return 0;
+        if (layoutName == "horizontal" && !controlsClaimed)
+            besideControlsHeight = controlRow.element.offsetHeight;
+        return besideControlsHeight;
     }
 
-    private function setControlsBeside(beside:Bool):Void
+    /** Whether the medium and wide layouts may put the control row beside the board; if not, it stays above it. Returns whether the placement changed **/
+    public function setControlsBesideAllowed(allowed:Bool):Bool
     {
+        if (controlsBesideAllowed == allowed)
+            return false;
+
+        controlsBesideAllowed = allowed;
+        var placementBefore:Null<Bool> = controlsBeside;
+        refreshControlsPlacement();
+        return controlsBeside != placementBefore;
+    }
+
+    // a column left of the board in the medium and wide layouts where it fits, a row above it otherwise
+    private function refreshControlsPlacement():Void
+    {
+        if (controlsClaimed)
+            return;
+
+        var beside:Bool = (layoutTier == Medium || layoutTier == Wide) && controlsBesideAllowed;
         if (controlsBeside == beside)
             return;
         controlsBeside = beside;
@@ -240,7 +292,6 @@ class InteractiveBoard extends Box
 
         disablePremoves();
 
-        Browser.window.removeEventListener("resize", windowResizeListener);
         for (handle in preferenceHandles)
             handle.detach();
         preferenceHandles = [];

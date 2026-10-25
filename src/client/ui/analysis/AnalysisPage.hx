@@ -149,7 +149,7 @@ class AnalysisPage extends PageBase
             onChanged: onStudyChanged
         });
 
-        analysisLayout = new AnalysisLayout(variationsCard, stage, moveStrip, movesCard, actionsCard, editorCard, toolCard, studyMode.card, studyMode.bar);
+        analysisLayout = new AnalysisLayout(variationsCard, stage, moveStrip, movesCard, actionsCard, editorCard, toolCard, studyMode.card, studyMode.bar, toggleExpanded);
         addComponent(analysisLayout);
         handles.push(BoardLayoutTier.bind(tier -> {
             analysisLayout.setTier(tier);
@@ -239,6 +239,8 @@ class AnalysisPage extends PageBase
             var height:Float = Math.max(minHeight, availableHeight);
             if (analysisLayout.height != height)
                 analysisLayout.height = height;
+            analysisLayout.setLayoutHeight(height);
+            analysisLayout.setRailLayoutHeight(height);
         });
     }
 

@@ -11,7 +11,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.AnchorPlacement;
 import haxefolio.Anchoring;
-import haxefolio.ByWidth;
+import haxefolio.ByMenuLayout;
 import haxefolio.ElementShadow;
 import haxefolio.LocaleUtils;
 import js.Browser;
@@ -172,7 +172,7 @@ class FilterDropdown extends Box
         popup.hidden = false;
         button.setClass(StyleClass.FILTER_BUTTON_OPEN, true);
         var placement:AnchorPlacement = {side: Below, align: Start};
-        anchoring = Anchoring.attach(popup, this, ByWidth.fromValue(placement));
+        anchoring = Anchoring.attach(popup, this, ByMenuLayout.fromValue(placement));
         Browser.document.addEventListener("pointerdown", onDocumentPointerDown, true);
     }
 

@@ -31,7 +31,7 @@ import client.ui.common.board.tools.LiveGameMovePolicy;
 import client.ui.common.notifications.GameEndedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.share.ShareOverlay;
-import client.ui.game.GameLayout.CompactTab;
+import client.ui.game.GameLayout.SheetTab;
 import client.utils.PagePaths;
 import easypubsub.Subscription;
 import haxe.Timer;
@@ -74,6 +74,8 @@ import net.ws.events.SubscriberLeft as SubscriberLeftEvent;
 import net.ws.events.SubscriberListRefresh as SubscriberListRefreshEvent;
 import net.ws.events.TimeAdded as TimeAddedEvent;
 
+using client.ui.ComponentExtension;
+
 /**
     A game by id: one the user plays, one they watch, or a finished one. Loads the game, then follows
     it live over the game channel; a game that ends while open turns into a finished one in place.
@@ -87,6 +89,8 @@ class LiveGamePage extends PageBase
     private static inline final LOW_TIME_WARNING_MIN_START_SECONDS:Int = 90;
     // below it, the wide layout stops shrinking and the page scrolls instead
     private static inline final MIN_WIDE_HEIGHT:Float = 240;
+    // below this viewport height, a landscape viewport lays the page out as a rail instead of the medium layout, whose cards and board come out too small
+    private static inline final RAIL_FALLBACK_MAX_HEIGHT:Int = 600;
 
     /** The id of the game the open live game page shows, null while none is open **/
     public static var openGameId(default, null):Null<Int> = null;
@@ -117,6 +121,7 @@ class LiveGamePage extends PageBase
     private var premoves:Null<Premoves> = null;
     private var stage:Null<BoardStage> = null;
     private var gameLayout:Null<GameLayout> = null;
+    private var boardTier:Null<BoardLayoutTier> = null;
     private var infoCard:Null<GameInfoCard> = null;
     private var chatCard:Null<ChatCard> = null;
     private var movesCard:Null<MovesCard> = null;
@@ -332,14 +337,14 @@ class LiveGamePage extends PageBase
             onPlayFromHere: playFromHere,
             onRematch: rematch
         });
-        moveStrip = new MoveStrip(navigate, () -> gameLayout.setOpenTab(Moves));
+        moveStrip = new MoveStrip(navigate, () -> gameLayout.toggleTab(Moves));
 
         gameLayout = new GameLayout(infoCard, chatCard, movesCard, actionsCard, stage, moveStrip);
         refreshHeadTexts();
         addComponent(gameLayout);
         handles.push(BoardLayoutTier.bind(tier -> {
-            gameLayout.setTier(tier);
-            fitLayoutHeight();
+            boardTier = tier;
+            applyTier();
         }));
 
         infoCard.setInfo(info);
@@ -359,6 +364,19 @@ class LiveGamePage extends PageBase
 
     private override function onResize(width:Float, height:Float):Void
     {
+        applyTier();
+    }
+
+    // the medium tier is swapped for the rail on a short viewport, which the tier scale, shared with the analysis page, doesn't do
+    private function applyTier():Void
+    {
+        if (gameLayout == null || boardTier == null)
+            return;
+
+        var railForced:Bool = boardTier == Medium && js.Browser.window.innerHeight < RAIL_FALLBACK_MAX_HEIGHT && js.Browser.window.innerWidth > js.Browser.window.innerHeight;
+        this.setClass(StyleClass.GAME_PAGE_FORCED_RAIL, railForced);
+        gameLayout.setClass(StyleClass.GAME_FORCED_RAIL, railForced);
+        gameLayout.setTier(railForced ? Rail : boardTier);
         fitLayoutHeight();
     }
 
@@ -386,6 +404,7 @@ class LiveGamePage extends PageBase
                 stage.setMaxHeight(null);
                 gameLayout.height = Math.max(MIN_WIDE_HEIGHT, availableHeight);
             }
+            gameLayout.fitHeadDetails();
         });
     }
 
@@ -719,6 +738,7 @@ class LiveGamePage extends PageBase
             () -> GameFormatters.ratedAndStart(info.rated, info.startedAtMs),
             () -> GameFormatters.resolution(state.getEnding())
         );
+        fitLayoutHeight(); // the texts' widths decide whether the head's details fit
     }
 
     private function refreshChat():Void

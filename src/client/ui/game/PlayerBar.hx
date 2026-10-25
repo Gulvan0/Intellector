@@ -23,6 +23,8 @@ class PlayerBar extends HBox
     private final nicknameLink:PageLink;
     private final ratingLabel:Label;
     private final clockLabel:Label;
+    private var ratingShown:Bool = true;
+    private var hasRating:Bool = false;
 
     public function new()
     {
@@ -76,7 +78,15 @@ class PlayerBar extends HBox
         nicknameLabel.setClass(StyleClass.GAME_NICKNAME_LINK, isPlayer(participant));
         nicknameLink.setPath(PagePaths.playerProfile(participant.ref));
         ratingLabel.text = GameFormatters.rating(participant.rating);
-        ratingLabel.hidden = participant.rating == null;
+        hasRating = participant.rating != null;
+        ratingLabel.hidden = !ratingShown || !hasRating;
+    }
+
+    /** Whether the rating is shown next to the nickname, where there's a rating at all **/
+    public function setRatingShown(shown:Bool):Void
+    {
+        ratingShown = shown;
+        ratingLabel.hidden = !ratingShown || !hasRating;
     }
 
     public function setPresent(present:Bool):Void

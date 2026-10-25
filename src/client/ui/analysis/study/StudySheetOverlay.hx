@@ -4,7 +4,7 @@ import client.datatypes.study.Study;
 import client.ui.analysis.study.StudyFooter.StudyActions;
 import haxe.ui.containers.ContinuousHBox;
 import haxe.ui.containers.VBox;
-import haxefolio.ByWidth;
+import haxefolio.ByMenuLayout;
 import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.overlay.OverlayContent;
@@ -80,7 +80,7 @@ class StudySheetOverlay
         content.addComponent(tags);
 
         var title:String = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.overlay.study.title.sheet"), study.id);
-        var footerRegionHeight:ByWidth<Int> = {expanded: footerHeight, collapsed: footerHeight};
+        var footerRegionHeight:ByMenuLayout<Int> = {expanded: footerHeight, collapsed: footerHeight};
 
         return {
             regions: [

@@ -1,7 +1,9 @@
 package client.ui.game;
 
+import client.ui.common.board.BoardControlRow;
 import client.ui.common.board.BoardSurface;
 import client.ui.common.board.InteractiveBoard;
+import haxe.ui.Toolkit;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
@@ -10,7 +12,8 @@ import morestd.Detachable;
 /**
     The board between its two player bars, under an optional header, as wide as the area allows -
     and, while it fits the height too, no taller than it; otherwise no taller than an optional
-    maximum. Requests (offers, confirmations) sit over the board's top edge.
+    maximum. The layout may take the bars and the board's control row elsewhere. Requests (offers,
+    confirmations) sit over the board's top edge.
 **/
 class BoardStage extends Box
 {
@@ -34,6 +37,7 @@ class BoardStage extends Box
     private final observer:Dynamic;
     private final coordinatesHandle:Detachable;
     private var fitsHeight:Bool = true;
+    private var barsHosted:Bool = true;
     private var header:Null<Component> = null;
     private var maxHeight:Null<Float> = null;
 
@@ -118,10 +122,57 @@ class BoardStage extends Box
         fit();
     }
 
+    /** Whether the player bars sit above and below the board; otherwise the layout places them and the board keeps the room **/
+    public function setBarsHosted(hosted:Bool):Void
+    {
+        if (barsHosted == hosted)
+            return;
+
+        barsHosted = hosted;
+        if (hosted)
+        {
+            column.addComponentAt(topBar, header != null ? 1 : 0);
+            column.addComponent(bottomBar);
+        }
+        else
+            for (bar in [topBar, bottomBar])
+                if (bar.parentComponent == column)
+                    column.removeComponent(bar, false);
+        fit();
+    }
+
+    /** See `InteractiveBoard.claimControls` **/
+    public function claimControls():BoardControlRow
+    {
+        var controls:BoardControlRow = board.claimControls();
+        fit();
+        return controls;
+    }
+
+    /** See `InteractiveBoard.releaseControls` **/
+    public function releaseControls():Void
+    {
+        board.releaseControls();
+        fit();
+    }
+
     public function dispose():Void
     {
         observer.disconnect();
         coordinatesHandle.detach();
+    }
+
+    // the control row stands beside the board only while its column is no taller than the board; whether it is decided from the height beside, so the choice can't flip back and forth
+    private function refreshControlsPlacement(heightLimit:Float):Bool
+    {
+        var columnHeight:Float = board.controlsColumnHeight();
+        if (columnHeight <= 0)
+            return false;
+
+        var boardHeight:Float = heightLimit - (barsHosted ? 2 * (BAR_HEIGHT + COLUMN_SPACING) : 0);
+        if (header != null)
+            boardHeight -= header.element.offsetHeight + COLUMN_SPACING;
+        return board.setControlsBesideAllowed(columnHeight <= boardHeight);
     }
 
     // measured from the DOM, which is what the observer reports on: HaxeUI's own size may lag behind it
@@ -134,21 +185,30 @@ class BoardStage extends Box
         var columnWidth:Float = availableWidth;
         var boardMaxWidth:Null<Float> = null;
         var heightLimit:Null<Float> = fitsHeight ? this.element.clientHeight : maxHeight;
+        if (fitsHeight && heightLimit != null && refreshControlsPlacement(heightLimit))
+        {
+            Toolkit.callLater(fit); // the new placement isn't laid out yet, so its size can't be measured now
+            return;
+        }
         if (heightLimit != null)
         {
             var aspectRatio:Float = BoardSurface.aspectRatioOf(Preferences.boardCoordinates.get());
-            var reservedHeight:Float = 2 * (BAR_HEIGHT + COLUMN_SPACING) + board.controlsHeight();
+            var reservedHeight:Float = (barsHosted ? 2 * (BAR_HEIGHT + COLUMN_SPACING) : 0) + board.controlsHeight();
             if (header != null)
                 reservedHeight += header.element.offsetHeight + COLUMN_SPACING;
             var boardWidth:Float = Math.max(0, Math.floor((heightLimit - reservedHeight) * aspectRatio));
             if (fitsHeight)
             {
-                columnWidth = Math.min(availableWidth, board.controlsHeight() > 0 ? Math.max(boardWidth, BoardLayoutTier.MIN_CONTROL_ROW_WIDTH) : boardWidth);
-                if (boardWidth < columnWidth) // the control row above the board keeps its width while the board narrows
+                columnWidth = Math.min(availableWidth, board.controlsHeight() > 0 ? Math.max(boardWidth, BoardLayoutTier.MIN_CONTROL_ROW_WIDTH) : boardWidth + board.controlsWidth());
+                if (boardWidth < columnWidth - board.controlsWidth()) // the control row above the board keeps its width while the board narrows
                     boardMaxWidth = boardWidth;
             }
-            else if (boardWidth < availableWidth) // only the board narrows: the bars and the control row keep the full width
-                boardMaxWidth = boardWidth;
+            else
+            {
+                boardWidth = Math.max(boardWidth, Math.min(availableWidth, BoardLayoutTier.MIN_COMPACT_BOARD_WIDTH));
+                if (boardWidth < availableWidth) // only the board narrows: the bars and the control row keep the full width
+                    boardMaxWidth = boardWidth;
+            }
         }
         column.width = Math.max(0, Math.floor(columnWidth));
         board.setBoardMaxWidth(boardMaxWidth);

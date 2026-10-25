@@ -1,6 +1,7 @@
 package client.ui.game;
 
 import client.datatypes.game.PlyNavigationType;
+import client.ui.BoardLayoutTier;
 import haxe.ui.components.Button;
 import haxe.ui.containers.HBox;
 import haxefolio.LocaleUtils;
@@ -10,6 +11,7 @@ class MoveStrip extends HBox
 {
     private static inline final NAVIGATION_BUTTON_SIZE:Float = 37;
     private static inline final COMPACT_NAVIGATION_BUTTON_SIZE:Float = 44;
+    private static inline final RAIL_NAVIGATION_BUTTON_SIZE:Float = 28; // leaves the shown move room in the rail's narrow column
 
     private final startButton:Button;
     private final previousButton:Button;
@@ -42,14 +44,19 @@ class MoveStrip extends HBox
 
         for (button in [startButton, previousButton, currentButton, nextButton, endButton])
             addComponent(button);
-        setCompact(true);
+        setTier(Compact);
     }
 
-    /** Compact: 44px wide navigation buttons, 37px otherwise **/
-    public function setCompact(compact:Bool):Void
+    /** Sizes the navigation buttons for the tier's layout **/
+    public function setTier(tier:BoardLayoutTier):Void
     {
+        var size:Float = switch tier {
+            case Compact: COMPACT_NAVIGATION_BUTTON_SIZE;
+            case Rail: RAIL_NAVIGATION_BUTTON_SIZE;
+            default: NAVIGATION_BUTTON_SIZE;
+        }
         for (button in [startButton, previousButton, nextButton, endButton])
-            button.width = compact ? COMPACT_NAVIGATION_BUTTON_SIZE : NAVIGATION_BUTTON_SIZE;
+            button.width = size;
     }
 
     /** `shownNotation`: the shown ply's, null at the starting position **/

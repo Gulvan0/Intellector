@@ -1,8 +1,9 @@
 package client.ui.common.notifications.challenges;
 
 import client.datatypes.challenge.IncomingChallenge;
+import client.ui.common.notifications.challenges.ChallengeStackLayout.ChallengeStackRowPolicy;
 import haxe.ui.containers.VBox;
-import haxefolio.ByWidth;
+import haxefolio.ByMenuLayout;
 import haxefolio.HaxeFolioApp;
 import haxefolio.ResponsivityController;
 import haxefolio.notification.Notification;
@@ -21,7 +22,7 @@ class ChallengeNotificationStack extends VBox
     private var waiting:Array<IncomingChallenge> = [];
     private var accepting:Bool = false;
 
-    private var collapsed:Bool = false;
+    private var rowPolicy:ChallengeStackRowPolicy = ChallengeStackLayout.EXPANDED_POLICY;
     private var notification:Null<Notification> = null;
     private var bar:ChallengeStackBar;
     private var rows:Map<Int, ChallengeCompactRow> = [];
@@ -38,8 +39,12 @@ class ChallengeNotificationStack extends VBox
         bar.hidden = true;
         addComponentAt(bar, 0);
 
-        var breakpoint:ByWidth<Bool> = {expanded: false, collapsed: true};
-        ResponsivityController.bind(breakpoint, onBreakpointChanged);
+        var rowPolicies:ByMenuLayout<ChallengeStackRowPolicy> = {
+            expanded: ChallengeStackLayout.EXPANDED_POLICY,
+            collapsed: ChallengeStackLayout.COLLAPSED_POLICY,
+            rail: ChallengeStackLayout.RAIL_POLICY
+        };
+        ResponsivityController.bind(rowPolicies, onRowPolicyChanged);
     }
 
     /**
@@ -54,16 +59,16 @@ class ChallengeNotificationStack extends VBox
         update();
     }
 
-    // the row limit is the only thing that changes with the breakpoint; the rest is styled per breakpoint
     public function closePreview():Void
     {
         if (card != null)
             card.closePreview();
     }
 
-    private function onBreakpointChanged(collapsed:Bool):Void
+    // the row policy is the only thing that changes with the layout; the rest is styled per layout
+    private function onRowPolicyChanged(rowPolicy:ChallengeStackRowPolicy):Void
     {
-        this.collapsed = collapsed;
+        this.rowPolicy = rowPolicy;
         update();
     }
 
@@ -84,7 +89,7 @@ class ChallengeNotificationStack extends VBox
             return;
         }
 
-        var layout:ChallengeStackLayout = new ChallengeStackLayout(waiting, collapsed);
+        var layout:ChallengeStackLayout = new ChallengeStackLayout(waiting, rowPolicy);
 
         updateCard();
         updateRows(layout.rows);

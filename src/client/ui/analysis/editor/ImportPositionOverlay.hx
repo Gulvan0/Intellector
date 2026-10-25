@@ -75,8 +75,8 @@ class ImportPositionOverlay
     private static function dialogHeight():Int
     {
         var geometry:GeometryTokens =AppearanceContext.current.geometry;
-        var body:Int = ImportPositionForm.bodyHeight(geometry.messageLine, geometry.fieldHeight.resolve(false));
+        var body:Int = ImportPositionForm.bodyHeight(geometry.messageLine, geometry.fieldHeight.resolve(Expanded));
 
-        return StyleVars.IMPORT_POSITION_OVERLAY_HEADER_HEIGHT + body + StyleVars.IMPORT_POSITION_OVERLAY_FOOTER_HEIGHT.resolve(false);
+        return StyleVars.IMPORT_POSITION_OVERLAY_HEADER_HEIGHT + body + StyleVars.IMPORT_POSITION_OVERLAY_FOOTER_HEIGHT.resolve(Expanded);
     }
 }

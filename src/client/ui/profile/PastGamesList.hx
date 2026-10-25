@@ -243,7 +243,17 @@ class PastGamesList extends VBox
         nicknameLabel.addClass(narrow ? StyleClass.PAST_GAMES_NARROW_NICKNAME : StyleClass.PAST_GAMES_WIDE_NICKNAME);
         nicknameLabel.setClass(StyleClass.PAST_GAMES_WINNER, winner);
         nicknameLabel.verticalAlign = "center";
-        line.addComponent(nicknameLabel);
+        if (narrow)
+        {
+            var nicknameFrame:Box = new Box();
+            nicknameFrame.percentWidth = 100;
+            nicknameFrame.percentHeight = 100;
+            nicknameFrame.clip = true;
+            nicknameFrame.addComponent(nicknameLabel);
+            line.addComponent(nicknameFrame);
+        }
+        else
+            line.addComponent(nicknameLabel);
 
         if (rated && participant.rating != null)
         {

@@ -117,6 +117,7 @@ class HomeLayout extends VBox
         if (fits == topSideBySide)
             return;
         topSideBySide = fits;
+        playCard.horizontalAlign = fits ? "left" : "center";
 
         for (card in [playCard, challengesCard])
             if (card.parentComponent != null)

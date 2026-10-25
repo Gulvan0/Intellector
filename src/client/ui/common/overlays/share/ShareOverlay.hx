@@ -77,12 +77,12 @@ class ShareOverlay
 
     private static function dialogHeight(groups:Array<ShareGroup>):Int
     {
-        var fieldHeight:Int = AppearanceContext.current.geometry.fieldHeight.resolve(false);
+        var fieldHeight:Int = AppearanceContext.current.geometry.fieldHeight.resolve(Expanded);
         var tallestPage:Int = 0;
         for (group in groups)
             tallestPage = Std.int(Math.max(tallestPage, group.pageHeight(fieldHeight)));
 
-        var tabStrip:Int = groups.length > 1 ? AppearanceContext.current.geometry.tabStripHeight.resolve(false) : 0;
+        var tabStrip:Int = groups.length > 1 ? AppearanceContext.current.geometry.tabStripHeight.resolve(Expanded) : 0;
 
         return StyleVars.SHARE_OVERLAY_HEADER_HEIGHT + tabStrip + tallestPage;
     }

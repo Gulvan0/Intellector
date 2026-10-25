@@ -1,6 +1,6 @@
 package client.ui;
 
-import haxefolio.ByWidth;
+import haxefolio.ByMenuLayout;
 import haxefolio.Shadow;
 import haxefolio.appearance.PartialShadowTokens;
 
@@ -18,6 +18,7 @@ class StyleVars
     };
 
     public static inline final CHALLENGE_STACK_EXPANDED_WIDTH:Int = 340;
+    public static final CHALLENGE_FACT_HEIGHT:ByMenuLayout<Int> = {expanded: 56, collapsed: 56, rail: 32}; // the rail's cells drop their labels, to fit a short viewport
     public static inline final REQUEST_FAILURE_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final GAME_STARTED_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final CALLEE_OFFLINE_NOTICE_EXPANDED_WIDTH:Int = 340;
@@ -38,6 +39,8 @@ class StyleVars
     public static inline final GAMES_ICON_PIECE_MUTED:String = "#6d6152";
     public static inline final GAMES_ICON_HALO:String = "#f2eee6"; // the menu bar
     public static inline final GAMES_ICON_HALO_OPEN:String = "#f0ebe2"; // the open target
+
+    public static inline final ACCOUNT_DROPDOWN_WIDTH:Int = 240;
 
     public static inline final BOARD_DEFAULT_BASE_FILL_LIGHT:String = "#ffcf9f";
     public static inline final BOARD_DEFAULT_BASE_FILL_DARK:String = "#d18b47";
@@ -102,9 +105,9 @@ class StyleVars
     public static inline final CHALLENGE_OVERLAY_WIDTH:Int = 620;
     public static inline final CHALLENGE_OVERLAY_HEIGHT:Int = 720;
     public static inline final CHALLENGE_OVERLAY_HEADER_HEIGHT:Int = 65;
-    public static final CHALLENGE_OVERLAY_FOOTER_HEIGHT:ByWidth<Int> = {expanded: 66, collapsed: 74};
+    public static final CHALLENGE_OVERLAY_FOOTER_HEIGHT:ByMenuLayout<Int> = {expanded: 66, collapsed: 74};
     public static inline final CHALLENGE_OVERLAY_CANCEL_WIDTH_PERCENT:Float = 36;
-    public static final CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHT:ByWidth<Int> = {expanded: 150, collapsed: 164}; // fits the tallest variant, Direct with the Player / Guest switch
+    public static final CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHT:ByMenuLayout<Int> = {expanded: 150, collapsed: 164}; // fits the tallest variant, Direct with the Player / Guest switch
     public static inline final CHALLENGE_OVERLAY_GUEST_NUMBER_INPUT_PADDING_LEFT:Int = 58; // keeps the typed number clear of the "Guest #" prefix inside the input, in any locale
     public static inline final CHALLENGE_OVERLAY_PAIR_FIELD_WIDTH_PERCENT:Float = 50; // each of two fields sharing a row
     public static inline final CHALLENGE_OVERLAY_GAME_COLOUR_GAP:Int = 14;
@@ -119,8 +122,8 @@ class StyleVars
     public static inline final PLAYER_SEARCH_OVERLAY_WIDTH:Int = 520;
     public static inline final PLAYER_SEARCH_OVERLAY_HEIGHT:Int = 560;
     public static inline final PLAYER_SEARCH_OVERLAY_HEADER_HEIGHT:Int = 56;
-    public static final PLAYER_SEARCH_OVERLAY_SEARCH_HEIGHT:ByWidth<Int> = {expanded: 86, collapsed: 93}; // 18 above the field, 5 above the count line (16), 10 below it
-    public static final PLAYER_SEARCH_OVERLAY_FOOTER_HEIGHT:ByWidth<Int> = {expanded: 56, collapsed: 76}; // collapsed, the legend takes two lines
+    public static final PLAYER_SEARCH_OVERLAY_SEARCH_HEIGHT:ByMenuLayout<Int> = {expanded: 86, collapsed: 93}; // 18 above the field, 5 above the count line (16), 10 below it
+    public static final PLAYER_SEARCH_OVERLAY_FOOTER_HEIGHT:ByMenuLayout<Int> = {expanded: 56, collapsed: 76}; // collapsed, the legend takes two lines
     public static inline final PLAYER_SEARCH_MATCH_HIGHLIGHT:String = "#f6e6c6";
 
     public static inline final SHARE_OVERLAY_WIDTH:Int = 760;
@@ -133,7 +136,7 @@ class StyleVars
     public static inline final SHARE_PANEL_PADDING:Int = 14;
     public static inline final SHARE_PANEL_GAP:Int = 14; // between the preview and the settings, and between settings
     public static inline final SHARE_SETTINGS_WIDTH:Int = 304; // each size field fits "Height" beside "must be 64–4096"
-    public static final SHARE_LINK_TOGGLE_WIDTH:ByWidth<Int> = {expanded: 28, collapsed: 44};
+    public static final SHARE_LINK_TOGGLE_WIDTH:ByMenuLayout<Int> = {expanded: 28, collapsed: 44};
     public static inline final SHARE_TRANSPARENT_WIDTH:Int = 116; // fits "Прозрачный" in semibold
     public static inline final SHARE_UNIT_LANE_WIDTH:Int = 34; // the input's right padding, room for "px"/"ms"/"мс"
     public static inline final SHARE_NARROW_PREVIEW_HEIGHT:Int = 220;
@@ -147,7 +150,7 @@ class StyleVars
 
     public static inline final IMPORT_POSITION_OVERLAY_WIDTH:Int = 480;
     public static inline final IMPORT_POSITION_OVERLAY_HEADER_HEIGHT:Int = 56;
-    public static final IMPORT_POSITION_OVERLAY_FOOTER_HEIGHT:ByWidth<Int> = {expanded: 66, collapsed: 74};
+    public static final IMPORT_POSITION_OVERLAY_FOOTER_HEIGHT:ByMenuLayout<Int> = {expanded: 66, collapsed: 74};
     public static inline final IMPORT_POSITION_BODY_PADDING_VERTICAL:Int = 18;
     public static inline final IMPORT_POSITION_SECTION_GAP:Int = 18;
     public static inline final IMPORT_POSITION_INSET_PADDING:Int = 14;

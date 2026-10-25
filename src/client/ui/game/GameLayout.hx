@@ -1,6 +1,7 @@
 package client.ui.game;
 
 import client.datatypes.game.GameChatMessage;
+import client.ui.common.board.BoardControlRow;
 import haxe.ui.components.Button;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
@@ -14,7 +15,7 @@ import haxefolio.structure.ScrollArea;
 
 using client.ui.ComponentExtension;
 
-enum CompactTab
+enum SheetTab
 {
     Chat;
     Moves;
@@ -26,7 +27,10 @@ enum CompactTab
     line over the board | moves, chat and actions; the info card's facts move to the header and the
     moves card. Compact: a header line, the move strip, the board, the actions, then a chat peek (the
     only way to open the chat) with the Moves / Info tabs under it; an open tab shows its card on a sheet floating just above
-    the tabs, over the peek and whatever else it reaches, so the page never grows.
+    the tabs, over the peek and whatever else it reaches, so the page never grows. Rail: the board
+    alone, filling the height | a narrow column of the top player, the move strip, the board's
+    control row, the actions as icons, the Chat / Moves / Info tabs and the bottom player, centered
+    vertically; an open tab shows its card over the board.
 **/
 class GameLayout extends Box
 {
@@ -36,6 +40,8 @@ class GameLayout extends Box
     // medium: the moves and the chat share the column's height 3:2
     private static inline final MEDIUM_MOVES_SHARE:Float = 60;
     private static inline final MEDIUM_CHAT_SHARE:Float = 40;
+    private static inline final RAIL_COLUMN_WIDTH:Float = 216;
+    private static inline final MEDIUM_HEAD_SPACING:Float = 12; // between the head's labels; keep in step with the stylesheet
 
     private final infoCard:GameInfoCard;
     private final chatCard:ChatCard;
@@ -62,10 +68,19 @@ class GameLayout extends Box
     // compact: the sheet is shorter than the info card, so the card scrolls inside a frame of its own
     private final infoFrame:VBox;
     private final infoScrollArea:ScrollArea;
-    private final tabButtons:Map<CompactTab, Button> = [];
+    private final tabButtons:Map<SheetTab, Button> = [];
+
+    private final railRow:HBox;
+    private final boardArea:Box;
+    private final railColumn:VBox;
+    private final railTabRow:HBox;
+    private final railSheet:Box;
+    private final railUnreadBadge:Label;
+    private final railTabButtons:Map<SheetTab, Button> = [];
+    private var controls:Null<BoardControlRow> = null;
 
     private var tier:Null<BoardLayoutTier> = null;
-    private var openTab:Null<CompactTab> = null;
+    private var openTab:Null<SheetTab> = null;
     private var unreadCount:Int = 0;
 
     public function new(infoCard:GameInfoCard, chatCard:ChatCard, movesCard:MovesCard, actionsCard:ActionsCard, stage:BoardStage, moveStrip:MoveStrip)
@@ -103,7 +118,7 @@ class GameLayout extends Box
         headDetailsLabel = new Label();
         headDetailsLabel.percentWidth = 100;
         headDetailsLabel.addClass(StyleClass.GAME_HINT);
-        headDetailsLabel.wordWrap = true; // it wraps before the resolution would have to
+        headDetailsLabel.wordWrap = false; // a wrapping head would make the head's height, and so the board's width, depend on each other
         headDetailsLabel.verticalAlign = "center";
         headRow.addComponent(headDetailsLabel);
         headSpacer = new Box();
@@ -165,6 +180,49 @@ class GameLayout extends Box
             tabButtons.set(tab, button);
             tabRow.addComponent(button);
         }
+
+        railRow = new HBox();
+        railRow.percentWidth = 100;
+        railRow.percentHeight = 100;
+        railRow.addClass(StyleClass.GAME_WIDE_ROW);
+
+        // the open tab's card covers the board, leaving the column and its tabs in reach
+        boardArea = new Box();
+        boardArea.percentWidth = 100;
+        boardArea.percentHeight = 100;
+        railRow.addComponent(boardArea);
+
+        railSheet = new Box();
+        railSheet.percentWidth = 100;
+        railSheet.percentHeight = 100;
+
+        railColumn = createSideColumn();
+        railColumn.width = RAIL_COLUMN_WIDTH;
+        railColumn.percentHeight = null; // as tall as its parts, centered, rather than leaving a gap above the bottom player
+        railColumn.verticalAlign = "center";
+        railRow.addComponent(railColumn);
+
+        railUnreadBadge = new Label();
+        railUnreadBadge.addClass(StyleClass.GAME_BADGE);
+        railUnreadBadge.verticalAlign = "center";
+        railUnreadBadge.hidden = true;
+
+        railTabRow = new HBox();
+        railTabRow.percentWidth = 100;
+        railTabRow.addClass(StyleClass.GAME_TABS);
+        for (tab in [Chat, Moves, Info])
+        {
+            var button:Button = new Button();
+            button.percentWidth = 100 / 3;
+            button.text = LocaleUtils.localeBinding('intellector.live_game.tab.${tab.getName().toLowerCase()}');
+            button.addClass(StyleClass.GAME_BUTTON);
+            button.addClass(StyleClass.GAME_TAB);
+            button.onClick = _ -> toggleTab(tab);
+            railTabButtons.set(tab, button);
+            railTabRow.addComponent(button);
+            if (tab == Chat)
+                railTabRow.addComponent(railUnreadBadge);
+        }
     }
 
     public function setTier(tier:BoardLayoutTier):Void
@@ -178,15 +236,39 @@ class GameLayout extends Box
         removeAllComponents(false);
 
         var compact:Bool = tier == Compact;
-        infoCard.setClass(StyleClass.GAME_CARD, !compact); // compact: its frame draws the card
-        actionsCard.setCompact(compact);
-        movesCard.setNavigationShown(!compact);
-        movesCard.setOpeningShown(tier == Medium);
+        var rail:Bool = tier == Rail;
+        openTab = null;
+        infoCard.setClass(StyleClass.GAME_CARD, !hasSheet()); // on a sheet, its frame draws the card
+        actionsCard.setCompact(compact || rail);
+        movesCard.setNavigationShown(!hasSheet());
+        movesCard.setOpeningShown(tier == Medium || rail);
+        moveStrip.setTier(tier);
         stage.setFitsHeight(!compact);
+        stage.setBarsHosted(!rail);
+        for (bar in [stage.topBar, stage.bottomBar])
+            bar.setRatingShown(!rail);
         headDetailsLabel.hidden = tier != Medium;
         headSpacer.hidden = tier == Medium;
+        fitHeadDetails();
 
-        if (compact)
+        if (rail)
+        {
+            if (height == null)
+                height = PROVISIONAL_WIDE_HEIGHT;
+            infoCard.percentHeight = null;
+            chatCard.percentHeight = 100;
+            movesCard.percentHeight = 100;
+            infoScrollArea.addComponent(infoCard);
+
+            controls = stage.claimControls();
+            boardArea.addComponent(stage);
+            boardArea.addComponent(railSheet);
+            for (part in ([stage.topBar, moveStrip, controls, actionsCard, railTabRow, stage.bottomBar] : Array<Component>))
+                railColumn.addComponent(part);
+            addComponent(railRow);
+            refreshTab();
+        }
+        else if (compact)
         {
             height = null;
             invalidateComponentLayout();
@@ -239,7 +321,7 @@ class GameLayout extends Box
         }
     }
 
-    /** Whether the board, columns and cards fit a height of their own (wide, medium) or flow (compact) **/
+    /** Whether the board, columns and cards fit a height of their own (wide, medium, rail) or flow (compact) **/
     public function isCompact():Bool
     {
         return tier == Compact;
@@ -270,7 +352,31 @@ class GameLayout extends Box
         LocaleManager.instance.registerComponent(headResolutionLabel, "text", resolutionText);
     }
 
-    public function setOpenTab(tab:Null<CompactTab>):Void
+    /** Medium: shows the head's details only while they fit on one line between the time control and the resolution. Measured, so call it after a layout **/
+    public function fitHeadDetails():Void
+    {
+        if (tier != Medium)
+            return;
+
+        var rowWidth:Float = headRow.element.clientWidth;
+        if (rowWidth <= 0)
+            return;
+
+        var label:js.html.Element = headDetailsLabel.element;
+        var meter:js.html.Element = js.Browser.document.createElement("span");
+        meter.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font:" + js.Browser.window.getComputedStyle(label).font;
+        meter.textContent = headDetailsLabel.text;
+        js.Browser.document.body.appendChild(meter);
+        var detailsWidth:Float = meter.getBoundingClientRect().width;
+        meter.remove();
+
+        var availableWidth:Float = rowWidth - headTimeControlLabel.element.getBoundingClientRect().width - headResolutionLabel.element.getBoundingClientRect().width - 2 * MEDIUM_HEAD_SPACING;
+        var fits:Bool = detailsWidth <= availableWidth;
+        headDetailsLabel.hidden = !fits;
+        headSpacer.hidden = fits; // otherwise nothing keeps the resolution at the right
+    }
+
+    public function setOpenTab(tab:Null<SheetTab>):Void
     {
         openTab = tab;
         if (tab == Chat)
@@ -278,48 +384,75 @@ class GameLayout extends Box
         refreshTab();
     }
 
+    /** Opens `tab`, or closes it if it's the open one **/
+    public function toggleTab(tab:SheetTab):Void
+    {
+        setOpenTab(openTab == tab ? null : tab);
+    }
+
     /** The latest message, for the peek; `unseen`: it counts as unread unless the chat is in view **/
     public function setLatestMessage(message:Null<GameChatMessage>, unseen:Bool):Void
     {
         peekLabel.text = message != null ? '${message.authorNickname}: ${message.text}' : LocaleUtils.localeBinding("intellector.live_game.chat.empty_peek");
-        if (unseen && tier == Compact && openTab != Chat)
+        if (unseen && hasSheet() && openTab != Chat)
             setUnreadCount(unreadCount + 1);
     }
 
     private function setUnreadCount(count:Int):Void
     {
         unreadCount = count;
-        unreadBadge.hidden = count == 0;
-        unreadBadge.text = Std.string(count);
+        for (badge in [unreadBadge, railUnreadBadge])
+        {
+            badge.hidden = count == 0;
+            badge.text = Std.string(count);
+        }
+    }
+
+    // compact and rail show the open tab's card on a sheet; the other tiers show every card
+    private function hasSheet():Bool
+    {
+        return tier == Compact || tier == Rail;
     }
 
     private function refreshTab():Void
     {
-        for (tab => button in tabButtons)
-            button.setClass(StyleClass.GAME_TAB_ON, tab == openTab);
+        for (buttons in [tabButtons, railTabButtons])
+            for (tab => button in buttons)
+                button.setClass(StyleClass.GAME_TAB_ON, tab == openTab);
 
-        if (tier != Compact)
+        if (!hasSheet())
             return;
 
+        var shownSheet:Box = tier == Rail ? railSheet : sheet;
         for (part in ([infoFrame, chatCard, movesCard] : Array<Component>))
-            if (part.parentComponent == sheet)
-                sheet.removeComponent(part, false);
+            if (part.parentComponent == shownSheet)
+                shownSheet.removeComponent(part, false);
 
-        sheet.hidden = openTab == null;
+        shownSheet.hidden = openTab == null;
         if (openTab != null)
-            sheet.addComponent(switch openTab {
+            shownSheet.addComponent(switch openTab {
                 case Chat: chatCard;
                 case Moves: movesCard;
                 case Info: infoFrame;
             });
     }
 
+    // the bars go back to the stage, and the control row to the board, only once they've left the rail column
     private function detachParts():Void
     {
-        for (part in ([infoCard, infoFrame, chatCard, movesCard, actionsCard, stage, moveStrip, peekButton, sheet, headRow, tabRow] : Array<Component>))
+        for (part in ([infoCard, infoFrame, chatCard, movesCard, actionsCard, stage, moveStrip, peekButton, sheet, railSheet, headRow, tabRow, railTabRow] : Array<Component>))
             if (part.parentComponent != null)
                 part.parentComponent.removeComponent(part, false);
-        for (container in [leftColumn, rightColumn, wideRow, compactColumn])
+        for (bar in [stage.topBar, stage.bottomBar])
+            if (bar.parentComponent == railColumn)
+                railColumn.removeComponent(bar, false);
+        if (controls != null)
+        {
+            railColumn.removeComponent(controls, false);
+            controls = null;
+            stage.releaseControls();
+        }
+        for (container in [leftColumn, rightColumn, wideRow, compactColumn, railRow])
             if (container.parentComponent != null)
                 container.parentComponent.removeComponent(container, false);
     }

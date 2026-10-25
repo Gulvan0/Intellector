@@ -5,6 +5,7 @@ import client.datatypes.challenge.OutgoingChallenge;
 import haxefolio.AnchorPlacement;
 import haxefolio.Anchoring;
 import haxefolio.LocaleUtils;
+import haxefolio.MenuLayout;
 import haxefolio.ResponsivityController;
 import haxefolio.menu.DropdownWidget;
 import intellectorboard.primitives.piece.PieceColor;
@@ -104,7 +105,7 @@ class ChallengesWidget
         closePreview();
         previewEntry = entry;
 
-        if (ResponsivityController.isCollapsed)
+        if (ResponsivityController.menuLayout != Expanded)
         {
             preview = new PositionPreviewPopover(entry.customStartingPosition, entry.ownColor.getColor() ?? White, entry.previewTitle(), closePreview);
             preview.addClass(StyleClass.CHALLENGE_PREVIEW_COVER);
