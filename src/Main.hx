@@ -2,7 +2,6 @@ import client.ServerTime;
 import client.auth.AuthBootstrap;
 import client.ui.Assets;
 import client.ui.BoardLayoutTier;
-import client.formatters.IdentityFormatters;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
 import client.storage.LocalStorageKey;
@@ -20,7 +19,6 @@ import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.HaxeFolioConfig;
 import haxefolio.HaxeFolioConfigBuilder;
-import haxefolio.menu.MenuFacade;
 import client.ui.home.HomeLayoutTier;
 import client.ui.home.HomePage;
 import client.ui.analysis.AnalysisPage;
@@ -39,6 +37,7 @@ import client.datatypes.challenge.IncomingChallenge;
 import client.datatypes.challenge.OutgoingChallenge;
 import client.datatypes.game.StartedGame;
 import client.ui.StyleVars;
+import client.ui.common.account.AccountWidget;
 import client.ui.common.challenges.ChallengesController;
 import client.ui.common.challenges.widget.ChallengesWidget;
 import client.ui.common.games.OngoingGamesController;
@@ -92,6 +91,7 @@ class Main
     private static var outgoingChallengesSubscription:Null<Subscription<OutgoingChallenges>> = null;
     private static var challengesUserRef:Null<String> = null;
     private static var ongoingGamesWidget:OngoingGamesWidget;
+    private static var accountWidget:AccountWidget;
     private static var ongoingGames:OngoingGamesController;
     private static var ongoingGamesSubscription:Null<Subscription<PlayerOngoingGames>> = null;
 
@@ -102,7 +102,9 @@ class Main
             .setSiteName("Intellector")
             .setLeaveConfirmText("{{intellector.common.leave_confirm}}")
             .setDebounceMs(100)
+            .setMenuRailHeight(BoardLayoutTier.RAIL_MAX_HEIGHT)
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Compact, 0)
+            .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Rail, BoardLayoutTier.RAIL_MIN_WIDTH, BoardLayoutTier.fitsRailTier)
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Medium, BoardLayoutTier.MEDIUM_MIN_WIDTH, BoardLayoutTier.fitsMedium)
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Wide, BoardLayoutTier.WIDE_MIN_WIDTH, BoardLayoutTier.fitsWide)
             .addWidthTier(ProfileLayoutTier.SCALE, ProfileLayoutTier.Narrow, 0)
@@ -138,11 +140,7 @@ class Main
             .addNormalMenuItem("social", "iteration", Link("https://t.me/iteracia_club", true), Assets.menuItemIcon("iteration"))
             .addRightMenubarItem(Widget(createOngoingGamesWidget, true))
             .addRightMenubarItem(Widget(createChallengesWidget, true))
-            .addRightMenubarItem(NormalMenu("account", []))
-            .addNormalMenuItem("account", "my_profile", NavigateTo(getMyProfilePath), Assets.menuItemIcon("my_profile"), null, true)
-            .addNormalMenuItem("account", "preferences", Execute(HaxeFolioApp.showPreferences), Assets.menuItemIcon("settings"))
-            .addNormalMenuItem("account", "log_in", Execute(LoginOverlay.present), Assets.menuItemIcon("log_in"))
-            .addNormalMenuItem("account", "log_out", Execute(AuthBootstrap.logOut), Assets.menuItemIcon("log_out"), null, true)
+            .addRightMenubarItem(Widget(createAccountWidget, true))
             .setLanguagePreference(Preferences.language)
             .buildConfig();
 
@@ -164,6 +162,8 @@ class Main
         GameRedirect.init(openStartedGame);
         ChallengeCreationLauncher.launch = presentChallengeCreation;
         IdentityKeeper.init([_ -> PubSub.reauth(), refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);
+        js.Browser.window.addEventListener("installpromptchange", refreshInstallItem);
+        refreshInstallItem();
         AuthBootstrap.run();
     }
 
@@ -190,24 +190,44 @@ class Main
         PlayerSearchOverlay.present(LocaleUtils.localeBinding("intellector.overlay.player_search.title.find_player"), false, player -> HaxeFolioApp.navigateTo('player/${player.login}'));
     }
 
-    private static function getMyProfilePath():String
+    private static function refreshInstallItem():Void
     {
-        var login:Null<String> = IdentityKeeper.currentIdentity.getLogin();
-        return login != null? 'player/$login' : 'home';
+        accountWidget.dropdown.setItemHidden("fullscreen_app", Reflect.field(js.Browser.window, "deferredInstallPrompt") == null);
+    }
+
+    private static function onFullscreenAppPressed():Void
+    {
+        var installPrompt:Null<Dynamic> = Reflect.field(js.Browser.window, "deferredInstallPrompt");
+        if (installPrompt == null)
+            return;
+
+        Reflect.setField(js.Browser.window, "deferredInstallPrompt", null);
+        installPrompt.prompt();
+        refreshInstallItem();
     }
 
     private static function refreshAccountMenu(newIdentity:Identity):Void
     {
-        MenuFacade.updateMenuLabelText("account", IdentityFormatters.formatRaw(newIdentity));
-        MenuFacade.setMenuItemHidden("account", "my_profile", newIdentity.isGuest());
-        MenuFacade.setMenuItemHidden("account", "log_in", !newIdentity.isGuest());
-        MenuFacade.setMenuItemHidden("account", "log_out", newIdentity.isGuest());
+        accountWidget.render(newIdentity);
+        accountWidget.dropdown.setItemHidden("log_in", !newIdentity.isGuest());
+        accountWidget.dropdown.setItemHidden("log_out", newIdentity.isGuest());
     }
 
     private static function createOngoingGamesWidget():Component
     {
         ongoingGamesWidget = new OngoingGamesWidget();
         return ongoingGamesWidget.dropdown;
+    }
+
+    private static function createAccountWidget():Component
+    {
+        accountWidget = new AccountWidget([
+            {slug: "preferences", action: Execute(HaxeFolioApp.showPreferences), icon: Assets.menuItemIcon("settings")},
+            {slug: "log_in", action: Execute(LoginOverlay.present), icon: Assets.menuItemIcon("log_in")},
+            {slug: "fullscreen_app", action: Execute(onFullscreenAppPressed), icon: Assets.menuItemIcon("fullscreen_app"), hiddenByDefault: true},
+            {slug: "log_out", action: Execute(AuthBootstrap.logOut), icon: Assets.menuItemIcon("log_out"), hiddenByDefault: true}
+        ]);
+        return accountWidget.dropdown;
     }
 
     private static function createChallengesWidget():Component
