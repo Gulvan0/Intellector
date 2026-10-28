@@ -19,6 +19,7 @@ import client.datatypes.game.PlyHistory;
 import client.datatypes.game.PlyHistory.ShownPly;
 import client.datatypes.game.PlyNavigationType;
 import client.datatypes.request.FailedAction;
+import client.datatypes.watch.WatchedPlayer;
 import client.formatters.GameFormatters;
 import client.logic.game.OpeningLookup;
 import client.openings.OpeningEntry;
@@ -33,6 +34,7 @@ import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.share.ShareOverlay;
 import client.ui.game.GameLayout.SheetTab;
 import client.utils.PagePaths;
+import client.watch.WatchKeeper;
 import easypubsub.Subscription;
 import haxe.Timer;
 import haxe.ui.Toolkit;
@@ -144,6 +146,18 @@ class LiveGamePage extends PageBase
         return openPage != null && openPage.userColor != null && openPage.state != null && !openPage.state.isOver();
     }
 
+    /** Whether a timed game the user plays, and which hasn't ended, is open **/
+    public static function isShowingOwnOngoingTimedGame():Bool
+    {
+        return isShowingOwnOngoingGame() && openPage.state.info.isTimed();
+    }
+
+    /** Whether a timed game the user doesn't play, and which hasn't ended, is open **/
+    public static function isShowingOthersOngoingTimedGame():Bool
+    {
+        return openPage != null && openPage.userColor == null && openPage.state != null && !openPage.state.isOver() && openPage.state.info.isTimed();
+    }
+
     private override function init():Void
     {
         openGameId = gameId;
@@ -153,6 +167,7 @@ class LiveGamePage extends PageBase
 
         subscribe();
         IdentityKeeper.addChangeListener(onIdentityChanged);
+        WatchKeeper.addChangeListener(onWatchedChanged);
         load();
     }
 
@@ -164,6 +179,7 @@ class LiveGamePage extends PageBase
             openPage = null;
 
         IdentityKeeper.removeChangeListener(onIdentityChanged);
+        WatchKeeper.removeChangeListener(onWatchedChanged);
         stopLoadTimer();
         if (clockTimer != null)
             clockTimer.stop();
@@ -325,7 +341,9 @@ class LiveGamePage extends PageBase
         stage = new BoardStage(board);
         stage.onFitted = fitLayoutHeight; // compact: the parts around the board can change height after it's fitted
         infoCard = new GameInfoCard();
+        infoCard.setWatchedLogin(watchedLogin());
         chatCard = new ChatCard(sendChatMessage);
+        chatCard.setWatchedLogin(watchedLogin());
         movesCard = new MovesCard(navigate);
         actionsCard = new ActionsCard({
             onFlip: flip,
@@ -533,6 +551,22 @@ class LiveGamePage extends PageBase
         }
     }
 
+    private function onWatchedChanged(_:Null<WatchedPlayer>):Void
+    {
+        if (stage == null)
+            return;
+
+        stage.topBar.setWatchedLogin(watchedLogin());
+        stage.bottomBar.setWatchedLogin(watchedLogin());
+        infoCard.setWatchedLogin(watchedLogin());
+        chatCard.setWatchedLogin(watchedLogin());
+    }
+
+    private static function watchedLogin():Null<String>
+    {
+        return WatchKeeper.watched?.login;
+    }
+
     private function onIdentityChanged(_:Identity):Void
     {
         if (state == null)
@@ -592,8 +626,8 @@ class LiveGamePage extends PageBase
     private function refreshPlayerBars():Void
     {
         var top:PieceColor = orientation.opposite();
-        stage.topBar.setParticipant(state.info.participant(top));
-        stage.bottomBar.setParticipant(state.info.participant(orientation));
+        stage.topBar.setParticipant(state.info.participant(top), watchedLogin());
+        stage.bottomBar.setParticipant(state.info.participant(orientation), watchedLogin());
         refreshPresence();
         refreshClocks();
     }

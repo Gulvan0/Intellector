@@ -1,6 +1,7 @@
 package client.formatters;
 
 import client.datatypes.player.PlayerRelation;
+import client.datatypes.player.PlayerStatus;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
 
@@ -27,5 +28,11 @@ class PlayerSearchFormatters
             case YouFollow(_): LocaleUtils.localeBinding("intellector.overlay.player_search.relation.you_follow");
             case Friends(_): LocaleUtils.localeBinding("intellector.overlay.player_search.relation.friends");
         }
+    }
+
+    /** `Online`, as a locale binding **/
+    public static function status(status:PlayerStatus):String
+    {
+        return LocaleUtils.localeBinding('intellector.overlay.player_search.legend.${status.getName().toLowerCase()}');
     }
 }

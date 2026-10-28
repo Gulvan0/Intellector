@@ -3,6 +3,7 @@ package client.ui.game;
 import client.datatypes.game.GameParticipant;
 import client.formatters.ClockFormatters;
 import client.formatters.GameFormatters;
+import client.ui.common.WatchEye;
 import client.utils.PagePaths;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
@@ -13,7 +14,7 @@ import haxefolio.PageLink;
 
 using client.ui.ComponentExtension;
 
-/** A player above or below the board: presence, nickname, rating and clock **/
+/** A player above or below the board: presence, nickname (with the eye while watched), rating and clock **/
 class PlayerBar extends HBox
 {
     private static inline final LOW_TIME_MS:Float = 60 * 1000;
@@ -21,6 +22,7 @@ class PlayerBar extends HBox
     private final presenceDot:Box;
     private final nicknameLabel:Label;
     private final nicknameLink:PageLink;
+    private final watchEye:WatchEye;
     private final ratingLabel:Label;
     private final clockLabel:Label;
     private var ratingShown:Bool = true;
@@ -39,7 +41,8 @@ class PlayerBar extends HBox
         nicknameLabel.addClass(StyleClass.GAME_NICKNAME);
         nicknameLabel.verticalAlign = "center";
         nicknameLink = PageLink.attach(nicknameLabel, null);
-        addComponent(nicknameLabel);
+        watchEye = new WatchEye();
+        addComponent(nicknameGroup(nicknameLabel, watchEye));
 
         ratingLabel = new Label();
         ratingLabel.addClass(StyleClass.GAME_RATING);
@@ -72,14 +75,32 @@ class PlayerBar extends HBox
         dot.tooltip = LocaleUtils.localeBinding(present ? "intellector.live_game.presence.online" : "intellector.live_game.presence.offline");
     }
 
-    public function setParticipant(participant:GameParticipant):Void
+    /** The nickname and the eye beside it, kept together **/
+    public static function nicknameGroup(nicknameLabel:Label, watchEye:WatchEye):HBox
+    {
+        var group:HBox = new HBox();
+        group.verticalAlign = "center";
+        group.addClass(StyleClass.GAME_NICKNAME_GROUP);
+        group.addComponent(nicknameLabel);
+        group.addComponent(watchEye);
+        return group;
+    }
+
+    /** `watchedLogin`: the watched player's, null while watching no one **/
+    public function setParticipant(participant:GameParticipant, watchedLogin:Null<String>):Void
     {
         nicknameLabel.text = participant.nickname;
         nicknameLabel.setClass(StyleClass.GAME_NICKNAME_LINK, isPlayer(participant));
         nicknameLink.setPath(PagePaths.playerProfile(participant.ref));
+        watchEye.setUser(participant.ref, participant.nickname, watchedLogin);
         ratingLabel.text = GameFormatters.rating(participant.rating);
         hasRating = participant.rating != null;
         ratingLabel.hidden = !ratingShown || !hasRating;
+    }
+
+    public function setWatchedLogin(watchedLogin:Null<String>):Void
+    {
+        watchEye.setWatchedLogin(watchedLogin);
     }
 
     /** Whether the rating is shown next to the nickname, where there's a rating at all **/

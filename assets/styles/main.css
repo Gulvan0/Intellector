@@ -1618,6 +1618,98 @@
     width: 100%;
 }
 
+/* a watched player's game: "vs" in place of the turn marker */
+.intellector-game-entry-versus {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+/*
+    Watch widget: the form picking a player, or the watched player over their games, which use the
+    ongoing games widget's entries.
+*/
+
+.intellector-watch-form {
+    padding: 14px;
+    vertical-spacing: 10px;
+}
+
+.intellector-watch-field-group {
+    vertical-spacing: 5px;
+}
+
+.intellector-watch-hint {
+    height: 16px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+    clip: true;
+}
+
+.intellector-watch-hint-error {
+    color: #9e2f1c;
+}
+
+.intellector-watch-panel {
+    vertical-spacing: 0;
+    padding-bottom: 4px;
+}
+
+.intellector-watch-summary {
+    padding-top: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 14px;
+    vertical-spacing: 8px;
+}
+
+.intellector-watch-heading {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+}
+
+.intellector-watch-player-row {
+    height: 44px;
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 10px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.intellector-watch-player-row:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-watch-player-nickname {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-watch-player-status {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-watch-stop {
+    font-size: 13px;
+}
+
+.haxefolio-compact .intellector-watch-stop {
+    width: 100%;
+}
+
 /*
     Challenge creation overlay: sections under a
     titled divider, the type's variants in an inset slot, numeric values in mono.
@@ -2103,6 +2195,11 @@
 
 .intellector-game-nickname-link {
     cursor: pointer;
+}
+
+/* a nickname with the eye of the watched player beside it */
+.intellector-game-nickname-group {
+    horizontal-spacing: 5px;
 }
 
 .intellector-game-nickname-link:hover {

@@ -7,6 +7,7 @@ class Preferences extends PreferenceRegistry
     public static final premoveEnabled = PreferenceRegistry.toggle("general", "premoves", false);
     public static final variationView = PreferenceRegistry.option("general", "branching_type", ["tree", "plain_text"], "tree");
     public static final silentChallenges = PreferenceRegistry.toggle("general", "silent_challenges", false);
+    public static final watchedGameOpening = PreferenceRegistry.option("general", "watched_game_opening", ["always", "unless_spectating", "never"], "unless_spectating");
     public static final followLatestMove = PreferenceRegistry.option("general", "follow_latest_move", ["always", "own_game_only", "never"], "own_game_only");
     public static final autoPromote = PreferenceRegistry.option("general", "auto_promote", ["never", "shift", "always"], "shift");
     public static final annotationHexStyle = PreferenceRegistry.option("general", "annotation_hex_style", ["circle", "tint"], "circle");

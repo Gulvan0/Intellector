@@ -78,6 +78,7 @@ enum abstract StyleClass(String) from String to String
     var CHANGELOG_TITLE_COMPACT = "intellector-changelog-title-compact";
     var CHANGELOG_TITLE_DESCRIBED = "intellector-changelog-title-described";
 
+    var CHALLENGE_ENTRY_ACTION = "intellector-challenge-entry-action";
     var CHALLENGE_ENTRY_ARRIVED = "intellector-challenge-entry-arrived";
     var CHALLENGE_ENTRY_FACT_EMPHASISED = "intellector-challenge-entry-fact-emphasised";
     var CHALLENGE_ENTRY_FIRST = "intellector-challenge-entry-first";
@@ -85,6 +86,11 @@ enum abstract StyleClass(String) from String to String
     var CHALLENGE_FACT = "intellector-challenge-fact";
     var CHALLENGE_FACT_LABEL = "intellector-challenge-fact-label";
     var CHALLENGE_FACT_VALUE_EMPHASISED = "intellector-challenge-fact-value-emphasised";
+    var CHALLENGE_LIST_EMPTY = "intellector-challenge-list-empty";
+    var CHALLENGE_LIST_ENTRIES = "intellector-challenge-list-entries";
+    var CHALLENGE_LIST_HEADER = "intellector-challenge-list-header";
+    var CHALLENGE_LIST_HEADER_COUNT = "intellector-challenge-list-header-count";
+    var CHALLENGE_LIST_HEADER_NAME = "intellector-challenge-list-header-name";
     var CHALLENGE_PREVIEW_COVER = "intellector-challenge-preview-cover";
     var CHALLENGE_ROW_ARRIVED = "intellector-challenge-row-arrived";
     var CHALLENGE_TIME_VALUE = "intellector-challenge-time-value";
@@ -96,6 +102,19 @@ enum abstract StyleClass(String) from String to String
     var GAME_ENTRY_GROUP_BOUNDARY = "intellector-game-entry-group-boundary";
     var GAME_ENTRY_TURN_OWN_TIMED = "intellector-game-entry-turn-own-timed";
     var GAME_ENTRY_TURN_OWN_CORRESPONDENCE = "intellector-game-entry-turn-own-correspondence";
+    var GAME_LIST_HEADER_DIVIDED = "intellector-game-list-header-divided";
+
+    var WATCH_FIELD_GROUP = "intellector-watch-field-group";
+    var WATCH_FORM = "intellector-watch-form";
+    var WATCH_HEADING = "intellector-watch-heading";
+    var WATCH_HINT = "intellector-watch-hint";
+    var WATCH_HINT_ERROR = "intellector-watch-hint-error";
+    var WATCH_PANEL = "intellector-watch-panel";
+    var WATCH_PLAYER_NICKNAME = "intellector-watch-player-nickname";
+    var WATCH_PLAYER_ROW = "intellector-watch-player-row";
+    var WATCH_PLAYER_STATUS = "intellector-watch-player-status";
+    var WATCH_STOP = "intellector-watch-stop";
+    var WATCH_SUMMARY = "intellector-watch-summary";
 
     var CHALLENGE_FORM = "intellector-challenge-form";
     var CHALLENGE_FORM_SECTION = "intellector-challenge-form-section";
@@ -185,6 +204,7 @@ enum abstract StyleClass(String) from String to String
     var GAME_MOVE_STRIP = "intellector-game-move-strip";
     var GAME_NAVIGATION_ROW = "intellector-game-navigation-row";
     var GAME_NICKNAME = "intellector-game-nickname";
+    var GAME_NICKNAME_GROUP = "intellector-game-nickname-group";
     var GAME_NICKNAME_LINK = "intellector-game-nickname-link";
     var GAME_OFFER_BAR = "intellector-game-offer-bar";
     var GAME_OFFER_TEXT = "intellector-game-offer-text";

@@ -16,7 +16,7 @@ import intellectorboard.primitives.piece.PieceColor;
 
 using client.ui.ComponentExtension;
 
-/** An ongoing game in the ongoing games widget's list **/
+/** An ongoing game in the ongoing games widget's list, or a watched player's one in the watch widget's **/
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/games/widget/ongoing_game_entry.xml"))
 class OngoingGameEntry extends VBox
 {
@@ -30,12 +30,15 @@ class OngoingGameEntry extends VBox
 
     /**
         Laid out for the current breakpoint: rebuild it after a flip.
-        `onFollowed` runs when the Open button is used to navigate in the app.
+        `onFollowed` runs when the Open button is used to navigate in the app. `watched`: the game is
+        the watched player's, seen from their side, with "vs" in place of the turn marker.
     **/
-    public function new(game:OngoingGame, onFollowed:Void->Void)
+    public function new(game:OngoingGame, onFollowed:Void->Void, watched:Bool = false)
     {
         super();
 
+        turnMarker.hidden = watched;
+        versusLabel.hidden = !watched;
         footer.layoutName = ResponsivityController.menuLayout != Expanded ? "vertical" : "horizontal";
         turnMarker.element.setAttribute("role", "img");
 

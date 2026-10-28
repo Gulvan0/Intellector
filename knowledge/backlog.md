@@ -83,3 +83,8 @@ Allow to leave annotations and textual comments to the specific variation nodes.
 A lightweight ply event (game id, latest SIP, `last_ply_at`) either on
 `CurrentGameList` or on a per-game summary channel subscribed for the visible cards only; apply it
 with `GameRecordMapper.applyUpdate`-style copying, without reordering the page.
+
+## Watching guests
+
+The search currently finds registered players only, and the field takes nicknames.
+

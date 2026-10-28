@@ -4,7 +4,7 @@ import client.datatypes.timecontrol.TimeControl;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
 
-/** An ongoing game of the current user, seen from their side **/
+/** An ongoing game, seen from one of its players' side: the current user's, or the watched player's **/
 class OngoingGame
 {
     public final id:Int;

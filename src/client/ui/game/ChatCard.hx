@@ -4,6 +4,7 @@ import client.datatypes.game.GameChatEntry;
 import client.datatypes.game.GameChatMessage;
 import client.formatters.GameFormatters;
 import client.utils.PagePaths;
+import client.ui.common.WatchEye;
 import haxe.ui.Toolkit;
 import haxe.ui.components.Button;
 import haxe.ui.components.Label;
@@ -33,6 +34,8 @@ class ChatCard extends VBox
     private final input:TextField;
     private final sendButton:Button;
     private final onSend:String->Void;
+    private var watchEyes:Array<WatchEye> = [];
+    private var watchedLogin:Null<String> = null;
 
     /** `onSend`: called with a trimmed, non-empty message; the draft is cleared with `clearDraft` **/
     public function new(onSend:String->Void)
@@ -87,9 +90,18 @@ class ChatCard extends VBox
             spectatorStrip.setSpectators(spectators, guestCount);
     }
 
+    /** `watchedLogin`: the watched player's, null while watching no one **/
+    public function setWatchedLogin(watchedLogin:Null<String>):Void
+    {
+        this.watchedLogin = watchedLogin;
+        for (watchEye in watchEyes)
+            watchEye.setWatchedLogin(watchedLogin);
+    }
+
     public function setEntries(entries:Array<GameChatEntry>):Void
     {
         messageList.removeAllComponents();
+        watchEyes = [];
         for (entry in entries)
             messageList.addComponent(createEntry(entry));
         scrollToBottom();
@@ -144,7 +156,10 @@ class ChatCard extends VBox
         authorLabel.addClass(StyleClass.GAME_NICKNAME);
         authorLabel.setClass(StyleClass.GAME_NICKNAME_LINK, !StringTools.startsWith(message.authorRef, "_"));
         PageLink.attach(authorLabel, PagePaths.playerProfile(message.authorRef));
-        authorRow.addComponent(authorLabel);
+        var watchEye:WatchEye = new WatchEye();
+        watchEye.setUser(message.authorRef, message.authorNickname, watchedLogin);
+        watchEyes.push(watchEye);
+        authorRow.addComponent(PlayerBar.nicknameGroup(authorLabel, watchEye));
 
         if (message.spectator)
         {

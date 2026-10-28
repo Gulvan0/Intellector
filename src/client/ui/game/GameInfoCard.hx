@@ -8,6 +8,7 @@ import client.formatters.GameFormatters;
 import client.openings.OpeningEntry;
 import client.ui.Assets;
 import client.utils.PagePaths;
+import client.ui.common.WatchEye;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Box;
@@ -34,10 +35,12 @@ class GameInfoCard extends VBox
     private final blackDot:Box;
     private final openingLabel:Label;
     private final nicknameLinks:Map<PieceColor, PageLink> = [];
+    private final watchEyes:Map<PieceColor, WatchEye> = [];
 
     private var info:Null<LiveGameInfo> = null;
     private var ending:Null<GameEnding> = null;
     private var opening:Null<OpeningEntry> = null;
+    private var watchedLogin:Null<String> = null;
 
     public function new()
     {
@@ -118,6 +121,14 @@ class GameInfoCard extends VBox
         refreshResolution();
     }
 
+    /** `watchedLogin`: the watched player's, null while watching no one **/
+    public function setWatchedLogin(watchedLogin:Null<String>):Void
+    {
+        this.watchedLogin = watchedLogin;
+        for (watchEye in watchEyes)
+            watchEye.setWatchedLogin(watchedLogin);
+    }
+
     public function setEnding(ending:Null<GameEnding>):Void
     {
         this.ending = ending;
@@ -162,7 +173,9 @@ class GameInfoCard extends VBox
         nicknameLabel.verticalAlign = "center";
         nicknameLinks.set(color, PageLink.attach(nicknameLabel, null));
         nicknameLabel.trackHover();
-        row.addComponent(nicknameLabel);
+        var watchEye:WatchEye = new WatchEye();
+        watchEyes.set(color, watchEye);
+        row.addComponent(PlayerBar.nicknameGroup(nicknameLabel, watchEye));
 
         var ratingLabel:Label = new Label();
         ratingLabel.id = "rating";
@@ -190,6 +203,7 @@ class GameInfoCard extends VBox
         if (PlayerBar.isPlayer(participant))
             nicknameLabel.addClass(StyleClass.GAME_NICKNAME_LINK);
         nicknameLinks.get(color).setPath(PagePaths.playerProfile(participant.ref));
+        watchEyes.get(color).setUser(participant.ref, participant.nickname, watchedLogin);
 
         var ratingLabel:Label = row.findComponent("rating", Label);
         ratingLabel.text = GameFormatters.rating(participant.rating);

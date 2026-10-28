@@ -8,22 +8,27 @@ class OngoingGameFormatters
     private static inline final HOUR_MS:Float = 60 * MINUTE_MS;
     private static inline final DAY_MS:Float = 24 * HOUR_MS;
 
-    /** A locale binding telling how long ago the last move was made, in its largest whole unit; `elapsedMs` is null when not recorded **/
+    /** A locale binding telling how long ago the last move was made, in its largest whole unit; empty when `elapsedMs` is null (not recorded) **/
     public static function lastMoveAgo(elapsedMs:Null<Float>):String
     {
         var unitMs:Null<Float> = lastMoveUnitMs(elapsedMs);
-        if (elapsedMs == null || unitMs == null)
-            return LocaleUtils.localeBinding(lastMoveKey(elapsedMs, unitMs));
+        if (elapsedMs == null)
+            return "";
+        else if (unitMs == null)
+            return LocaleUtils.localeBinding(lastMoveKey(unitMs));
         else
-            return LocaleUtils.localeBinding(lastMoveKey(elapsedMs, unitMs), Std.string(Std.int(elapsedMs / unitMs)));
+            return LocaleUtils.localeBinding(lastMoveKey(unitMs), Std.string(Std.int(elapsedMs / unitMs)));
     }
 
     /** `lastMoveAgo`, resolved in the current language **/
     public static function lastMoveAgoText(elapsedMs:Null<Float>):String
     {
+        if (elapsedMs == null)
+            return "";
+
         var unitMs:Null<Float> = lastMoveUnitMs(elapsedMs);
-        var binding:String = LocaleUtils.localeBinding(lastMoveKey(elapsedMs, unitMs));
-        if (elapsedMs == null || unitMs == null)
+        var binding:String = LocaleUtils.localeBinding(lastMoveKey(unitMs));
+        if (unitMs == null)
             return LocaleUtils.resolveText(binding);
         else
             return LocaleUtils.resolveText(binding, Std.int(elapsedMs / unitMs));
@@ -50,11 +55,9 @@ class OngoingGameFormatters
             return null;
     }
 
-    private static function lastMoveKey(elapsedMs:Null<Float>, unitMs:Null<Float>):String
+    private static function lastMoveKey(unitMs:Null<Float>):String
     {
-        if (elapsedMs == null)
-            return "intellector.games_widget.last_move.unknown";
-        else if (unitMs == DAY_MS)
+        if (unitMs == DAY_MS)
             return "intellector.games_widget.last_move.days";
         else if (unitMs == HOUR_MS)
             return "intellector.games_widget.last_move.hours";

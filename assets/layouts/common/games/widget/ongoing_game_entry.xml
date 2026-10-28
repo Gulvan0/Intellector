@@ -1,11 +1,12 @@
 <!--
-    An ongoing game in the ongoing games widget: the
-    turn marker, opponent and time control; the facts with the Preview button; the clocks (or the
+    An ongoing game in the ongoing games or watch widget: the
+    turn marker (or "vs" for a watched player's game), opponent and time control; the facts with the Preview button; the clocks (or the
     time of the last move) with Open game, stacked on a narrow screen.
 -->
 <vbox styleName="intellector-game-entry" width="100%">
     <hbox width="100%" styleName="intellector-game-entry-head">
         <box id="turnMarker" styleName="intellector-game-entry-turn" verticalAlign="center" />
+        <label id="versusLabel" text="{{intellector.watch_widget.versus}}" styleName="intellector-game-entry-versus" verticalAlign="center" hidden="true" />
         <label id="opponentLabel" styleName="intellector-challenge-entry-opponent" width="100%" verticalAlign="center" />
         <time-control-tag id="timeControlTag" styleName="intellector-challenge-time-compact" hidden="true" />
     </hbox>

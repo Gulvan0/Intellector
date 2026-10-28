@@ -11,7 +11,7 @@ import net.models.common.mappers.TimeControlMapper;
 
 class OngoingGameMapper
 {
-    /** `ownRef` is the current user's, who plays the game **/
+    /** `ownRef`: the player whose side it's seen from **/
     public static function dtoToDatatype(dto:OngoingGamePublic, ownRef:String):OngoingGame
     {
         var lastPlyAtMs:Null<Float> = dto.last_ply_at != null ? dto.last_ply_at.getUnixMs() : null;

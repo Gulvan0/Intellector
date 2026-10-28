@@ -29,13 +29,22 @@ import client.ui.profile.ProfilePage;
 import client.ui.challenge.ChallengeJoiningPage;
 import client.storage.ChallengeMarksStorage;
 import client.tabs.GameRedirect;
+import client.tabs.WatchedGameClaim;
 import client.datatypes.challenge.creation.ChallengeCreationOutcome;
 import client.datatypes.challenge.ChallengeMarks;
 import client.datatypes.challenge.creation.ChallengeParams;
 import client.datatypes.request.FailedAction;
 import client.datatypes.challenge.IncomingChallenge;
 import client.datatypes.challenge.OutgoingChallenge;
+import client.datatypes.game.OngoingGame;
 import client.datatypes.game.StartedGame;
+import client.datatypes.player.FoundPlayer;
+import client.datatypes.watch.WatchedGameReactionKind;
+import client.datatypes.watch.WatchedPlayer;
+import client.logic.watch.WatchedGameReaction;
+import client.utils.PagePaths;
+import client.utils.PlayerStatusFeed;
+import client.watch.WatchKeeper;
 import client.ui.StyleVars;
 import client.ui.common.account.AccountWidget;
 import client.ui.common.challenges.ChallengesController;
@@ -46,6 +55,9 @@ import client.ui.common.notifications.CalleeOfflineNotice;
 import client.ui.common.notifications.ConnectionNotice;
 import client.ui.common.notifications.GameStartedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
+import client.ui.common.notifications.WatchedGameNotice;
+import client.ui.common.watch.WatchController;
+import client.ui.common.watch.widget.WatchWidget;
 import easypubsub.Subscription;
 import haxe.ui.core.Component;
 import http.HttpError;
@@ -56,6 +68,7 @@ import net.models.challenge.mappers.OutgoingChallengeMapper;
 import net.models.challenge.mappers.StartedGameMapper;
 import net.models.common.RestErrorCode;
 import net.models.common.UserRefWithNickname;
+import net.models.game.OngoingGamePublic;
 import net.models.game.mappers.OngoingGameMapper;
 import net.rest.Rest;
 import net.rest.RestErrors;
@@ -95,6 +108,10 @@ class Main
     private static var accountWidget:AccountWidget;
     private static var ongoingGames:OngoingGamesController;
     private static var ongoingGamesSubscription:Null<Subscription<PlayerOngoingGames>> = null;
+    private static var watchWidget:WatchWidget;
+    private static var watch:WatchController;
+    private static var watchedGamesSubscription:Null<Subscription<PlayerOngoingGames>> = null;
+    private static var watchedStatusFeed:Null<PlayerStatusFeed> = null;
 
     public static function main():Void
     {
@@ -139,6 +156,7 @@ class Main
             .addNormalMenuItem("social", "vk", Link("https://vk.com/intellectorgroup", true), Assets.menuItemIcon("vk"))
             .addNormalMenuItem("social", "discord", Link("https://discord.gg/f8chehcnV5", true), Assets.menuItemIcon("discord"))
             .addNormalMenuItem("social", "iteration", Link("https://t.me/iteracia_club", true), Assets.menuItemIcon("iteration"))
+            .addRightMenubarItem(Widget(createWatchWidget, true))
             .addRightMenubarItem(Widget(createOngoingGamesWidget, true))
             .addRightMenubarItem(Widget(createChallengesWidget, true))
             .addRightMenubarItem(Widget(createAccountWidget, true))
@@ -164,8 +182,12 @@ class Main
         ongoingGames = new OngoingGamesController(ongoingGamesWidget);
         ongoingGamesWidget.currentGameId = () -> LiveGamePage.openGameId;
         GameRedirect.init(openStartedGame);
+        watch = new WatchController(watchWidget);
+        watchWidget.currentGameId = () -> LiveGamePage.openGameId;
+        WatchedGameClaim.init(openWatchedGame, announceWatchedGame);
         ChallengeCreationLauncher.launch = presentChallengeCreation;
         IdentityKeeper.init([_ -> PubSub.reauth(), refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);
+        WatchKeeper.init([subscribeToWatchedPlayer]);
         js.Browser.window.addEventListener("installpromptchange", refreshInstallItem);
         refreshInstallItem();
         AuthBootstrap.run();
@@ -187,7 +209,15 @@ class Main
         ChallengeCreationOverlay.present(identity.isGuest(), identity.getUserRef(), createChallenge, prefill);
     }
 
-    private static function onWatchPlayerPressed():Void {} // no watching yet
+    private static function onWatchPlayerPressed():Void
+    {
+        PlayerSearchOverlay.present(LocaleUtils.localeBinding("intellector.overlay.player_search.title.watch_player"), true, watchFoundPlayer);
+    }
+
+    private static function watchFoundPlayer(player:FoundPlayer):Void
+    {
+        WatchKeeper.watch(new WatchedPlayer(player.login, player.nickname));
+    }
 
     private static function onPlayerProfilePressed():Void
     {
@@ -232,6 +262,12 @@ class Main
             {slug: "log_out", action: Execute(AuthBootstrap.logOut), icon: Assets.menuItemIcon("log_out"), hiddenByDefault: true}
         ]);
         return accountWidget.dropdown;
+    }
+
+    private static function createWatchWidget():Component
+    {
+        watchWidget = new WatchWidget(WatchKeeper.watch, WatchKeeper.stop);
+        return watchWidget.dropdown;
     }
 
     private static function createChallengesWidget():Component
@@ -306,6 +342,92 @@ class Main
             .onEventLight(OngoingGameStarted, game -> ongoingGames.add(OngoingGameMapper.startedToDatatype(game, userRef)))
             .onEventLight(OngoingGameUpdated, update -> ongoingGames.update(update.game_id, game -> OngoingGameMapper.applyUpdate(game, update)))
             .onEventLight(OngoingGameEnded, ended -> ongoingGames.remove(ended.id));
+    }
+
+    private static function subscribeToWatchedPlayer(player:Null<WatchedPlayer>):Void
+    {
+        if (watchedGamesSubscription != null)
+        {
+            watchedGamesSubscription.detach();
+            watchedGamesSubscription = null;
+        }
+
+        if (watchedStatusFeed != null)
+        {
+            watchedStatusFeed.detach();
+            watchedStatusFeed = null;
+        }
+
+        watch.setPlayer(player);
+
+        if (player == null)
+            return;
+
+        var login:String = player.login;
+        watchedGamesSubscription = PubSub.sub(new PlayerOngoingGames(login))
+            .onEventLight(PlayerOngoingGamesRefresh, refresh -> onWatchedGamesRefresh(refresh.current_games, login))
+            .onEventLight(OngoingGameStarted, started -> {
+                var game:OngoingGame = OngoingGameMapper.startedToDatatype(started, login);
+                watch.add(game);
+                if (!involvesUser(started.white_player.user_ref, started.black_player.user_ref))
+                    onWatchedGameStarted(game);
+            })
+            .onEventLight(OngoingGameUpdated, update -> watch.update(update.game_id, game -> OngoingGameMapper.applyUpdate(game, update)))
+            .onEventLight(OngoingGameEnded, ended -> {
+                watch.remove(ended.id);
+                WatchedGameClaim.cancel(ended.id);
+            });
+        watchedStatusFeed = new PlayerStatusFeed([login], (_, status, _) -> watch.setStatus(status));
+    }
+
+    // a game listed anew after a reconnect may have started meanwhile
+    private static function onWatchedGamesRefresh(dtos:Array<OngoingGamePublic>, login:String):Void
+    {
+        var games:Array<OngoingGame> = [for (dto in dtos) OngoingGameMapper.dtoToDatatype(dto, login)];
+        var newIds:Array<Int> = watch.sync(games);
+
+        for (i in 0...dtos.length)
+            if (newIds.contains(dtos[i].id) && !involvesUser(dtos[i].white_player.user_ref, dtos[i].black_player.user_ref))
+                onWatchedGameStarted(games[i]);
+    }
+
+    // the user's own games open through GameRedirect
+    private static function involvesUser(whiteRef:String, blackRef:String):Bool
+    {
+        var userRef:Null<String> = IdentityKeeper.currentIdentity.getUserRef();
+        return userRef != null && (whiteRef == userRef || blackRef == userRef);
+    }
+
+    private static function onWatchedGameStarted(game:OngoingGame):Void
+    {
+        if (game.id != LiveGamePage.openGameId)
+            WatchedGameClaim.request(game);
+    }
+
+    private static function openWatchedGame(game:OngoingGame):Void
+    {
+        var reaction:WatchedGameReactionKind = WatchedGameReaction.decide(
+            Preferences.watchedGameOpening.get(),
+            HaxeFolioApp.currentPageMayBeLeft(),
+            LiveGamePage.isShowingOwnOngoingTimedGame(),
+            LiveGamePage.isShowingOthersOngoingTimedGame()
+        );
+
+        switch reaction
+        {
+            case Navigate:
+                WatchedGameNotice.dismissFor(game.id);
+                HaxeFolioApp.navigateTo(PagePaths.liveGame(game.id));
+            case Announce:
+                announceWatchedGame(game);
+        }
+    }
+
+    private static function announceWatchedGame(game:OngoingGame):Void
+    {
+        var player:Null<WatchedPlayer> = WatchKeeper.watched;
+        if (player != null)
+            WatchedGameNotice.show(player.nickname, game);
     }
 
     private static function saveChallengeMarks(marks:ChallengeMarks):Void

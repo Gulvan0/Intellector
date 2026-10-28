@@ -8,12 +8,14 @@ import client.datatypes.player.Connections;
 import client.datatypes.player.GameStats;
 import client.datatypes.player.PlayerRelation;
 import client.datatypes.timecontrol.TimeControlKind;
+import client.datatypes.watch.WatchedPlayer;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.login.LoginOverlay;
 import client.ui.profile.ProfileState.ArchiveState;
 import client.ui.profile.ProfileState.OngoingGamesState;
 import client.utils.PlayerStatusFeed;
 import client.utils.TimedLoad;
+import client.watch.WatchKeeper;
 import easypubsub.Subscription;
 import haxe.Timer;
 import haxe.ui.components.Button;
@@ -76,6 +78,7 @@ class ProfilePage extends PageBase
     private var timeRefreshTimer:Null<Timer> = null;
     private var tierHandle:Null<Detachable> = null;
     private var friendRequestPending:Bool = false;
+    private var nickname:Null<String> = null;
     private var restoredState:ProfileState = {};
 
     public function new(login:String)
@@ -90,7 +93,8 @@ class ProfilePage extends PageBase
 
         restoredState = ProfileStateReader.read(HaxeFolioApp.navigationState);
 
-        header = new ProfileHeaderCard(onFriendPressed, () -> {});
+        header = new ProfileHeaderCard(onFriendPressed, onWatchPressed);
+        header.setWatching(WatchKeeper.isWatching(login));
         ongoingCard = new OngoingGamesCard(login, restoredState.ongoing, onOngoingStateChanged);
         archiveCard = new ArchiveCard(login, {
             onPastGamesQuery: loadPastGames,
@@ -110,6 +114,7 @@ class ProfilePage extends PageBase
         });
 
         IdentityKeeper.addChangeListener(onIdentityChanged);
+        WatchKeeper.addChangeListener(onWatchedChanged);
         timeRefreshTimer = new Timer(TIME_REFRESH_MS);
         timeRefreshTimer.run = () -> {
             ongoingCard.refreshTimes();
@@ -141,6 +146,7 @@ class ProfilePage extends PageBase
     private function stopUpdates():Void
     {
         IdentityKeeper.removeChangeListener(onIdentityChanged);
+        WatchKeeper.removeChangeListener(onWatchedChanged);
         for (load in [profileLoad, statsLoad, relationLoad, connectionsLoad, pastGamesLoad, studiesLoad, historyLoad])
             load.cancel();
         if (ongoingSubscription != null)
@@ -186,7 +192,10 @@ class ProfilePage extends PageBase
         header.showLoading();
         profileLoad.start(
             (onResponse, onError) -> Rest.client().execute(RestOperationRegistry.GET_PLAYER, onResponse, onError, ["login" => login]),
-            response -> header.setProfile(PlayerMapper.profileToDatatype(response)),
+            response -> {
+                nickname = response.nickname;
+                header.setProfile(PlayerMapper.profileToDatatype(response));
+            },
             error -> {
                 if (error != null && error.httpStatus == 404)
                     showNotFound();
@@ -360,6 +369,19 @@ class ProfilePage extends PageBase
         if (ongoingTimer != null)
             ongoingTimer.stop();
         ongoingTimer = null;
+    }
+
+    private function onWatchPressed():Void
+    {
+        if (WatchKeeper.isWatching(login))
+            WatchKeeper.stop();
+        else
+            WatchKeeper.watch(new WatchedPlayer(login, nickname ?? login));
+    }
+
+    private function onWatchedChanged(_:Null<WatchedPlayer>):Void
+    {
+        header.setWatching(WatchKeeper.isWatching(login));
     }
 
     private function onFriendPressed(relation:PlayerRelation):Void

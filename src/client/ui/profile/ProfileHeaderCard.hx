@@ -54,6 +54,7 @@ class ProfileHeaderCard extends Box
     private final hintLabel:Label;
 
     private var relation:PlayerRelation = Unrelated;
+    private var watching:Bool = false;
     private var lastActiveMs:Float = 0;
     private var joinedAtMs:Float = 0;
     private var tier:ProfileLayoutTier = Wide;
@@ -285,6 +286,13 @@ class ProfileHeaderCard extends Box
         renderButtons();
     }
 
+    /** Whether the user watches the player: the Watch button stops watching then **/
+    public function setWatching(watching:Bool):Void
+    {
+        this.watching = watching;
+        renderButtons();
+    }
+
     /** While a follow or unfollow is under way **/
     public function setFriendBusy(busy:Bool):Void
     {
@@ -321,7 +329,9 @@ class ProfileHeaderCard extends Box
         };
         friendButton.text = LocaleUtils.localeBinding('intellector.profile.action.$friendKey');
         friendButton.icon = Assets.profileIcon(relation.match(Unrelated | FollowsYou) ? "add_friend" : "remove_friend");
-        watchButton.text = LocaleUtils.localeBinding(short ? "intellector.profile.action.watch_short" : "intellector.profile.action.watch");
+        var watchKey:String = watching ? "stop_watching" : "watch";
+        watchButton.text = LocaleUtils.localeBinding('intellector.profile.action.$watchKey${short ? "_short" : ""}');
+        watchButton.setClass(StyleClass.GAME_BUTTON_ON, watching);
     }
 
     private static function createSeparator():Label

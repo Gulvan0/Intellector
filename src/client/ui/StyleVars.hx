@@ -48,6 +48,16 @@ class StyleVars
     public static inline final GAMES_ICON_HALO:String = "#f2eee6"; // the menu bar
     public static inline final GAMES_ICON_HALO_OPEN:String = "#f0ebe2"; // the open target
 
+    public static inline final WATCH_DROPDOWN_WIDTH:Int = 372;
+    public static inline final WATCH_ICON_INK:String = "#2a211a";
+    public static inline final WATCH_ICON_PLAYING:String = "#c2412d"; // the status dots'
+    public static inline final WATCH_ICON_ONLINE:String = "#3f7d4e";
+    public static inline final WATCH_ICON_AWAY:String = "#c4930a";
+    public static inline final WATCH_ICON_OFFLINE_RING:String = "#a79b8a";
+    public static inline final WATCH_PLAYER_CHEVRON:String = "#6d6152";
+    public static inline final WATCHED_PLAYER_EYE:String = "#8a5a1f"; // accent
+    public static inline final WATCHED_GAME_NOTICE_EXPANDED_WIDTH:Int = 340;
+
     public static inline final ACCOUNT_DROPDOWN_WIDTH:Int = 240;
 
     public static inline final BOARD_DEFAULT_BASE_FILL_LIGHT:String = "#ffcf9f";

@@ -21,4 +21,5 @@ enum abstract FailedAction(String) from String to String
     var SEND_CHAT_MESSAGE = "send_chat_message";
     var FOLLOW_PLAYER = "follow_player";
     var UNFOLLOW_PLAYER = "unfollow_player";
+    var WATCH_PLAYER = "watch_player";
 }
