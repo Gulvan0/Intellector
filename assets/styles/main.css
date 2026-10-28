@@ -884,6 +884,21 @@
     color: #2a211a;
 }
 
+/* an error notice: the card faintly tinted towards danger, after the base rules it overrides */
+.intellector-error-notice {
+    background-color: #fbefea;
+    border: 1px solid #e3b9ab;
+}
+
+.intellector-error-notice .haxefolio-notification-card-title {
+    color: #9e2f1c;
+}
+
+.intellector-error-notice .haxefolio-notification-card-close:hover,
+.intellector-error-notice .haxefolio-notification-card-close:down {
+    background-color: #f5ddd4;
+}
+
 /* tooltips: ink with accentInk text */
 .tooltip {
     background-color: #2a211a;

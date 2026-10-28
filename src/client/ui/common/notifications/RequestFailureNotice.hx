@@ -83,6 +83,7 @@ class RequestFailureNotice
         reasonLabel.addClass(StyleClass.NOTICE_TEXT);
 
         card = new NotificationCard();
+        card.addClass(StyleClass.ERROR_NOTICE);
         card.title = GroupedLocaleResolvers.requestFailureTitle(action);
         card.onClose = dismiss;
         card.addComponent(reasonLabel);

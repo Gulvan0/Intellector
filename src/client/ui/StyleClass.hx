@@ -138,6 +138,7 @@ enum abstract StyleClass(String) from String to String
     var PROMPT_TITLE = "intellector-prompt-title";
 
     var NOTICE_TEXT = "intellector-notice-text";
+    var ERROR_NOTICE = "intellector-error-notice";
 
     var HAXEFOLIO_CLOSE_BUTTON = "haxefolio-close-button";
 

@@ -20,10 +20,6 @@ Haxefolio implementation + Rename labels more fittingly
 
 ## Challenge notification: make the whole position grid clickable, not just "Preview" button
 
-## Red error notifcations
-
-Error notifications might benefit from the red-ish tint, but this needs Claude Design planning first
-
 ## Auto-expiring notifications bottom trail
 
 Make auto-expiring notifications show a thin left-aligned bottom strip with width starting from 100% of notification's width and ending with 0px, animated over the course of expiration interval. This should be an opt-out flag.
