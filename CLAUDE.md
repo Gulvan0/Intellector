@@ -4,7 +4,7 @@ ANY AMBIGUITY OR DESIGN DOC GAP SURFACING DURING THE IMPLEMENTATION SHOULD NOT B
 
 If told to take a dubious or possibly suboptimal approach (whether from the UI/UX or technical standpoint), also ask a question, providing details on why you're uncertain about this and what are the better practices or better ways to solve the problem.
 
-`haxe build.hxml --debug` builds the project. To test in a browser, first try `127.0.0.1:5500` instead of running your own webserver - most of the times the live server serving `index.html` has already been open.
+`haxe build.hxml --debug` builds the project: first the engine web worker (`hxconda.hxml`, into `bin/hxconda.js`, never in debug mode), then the app (`bin/app.js`). `haxe hxconda.hxml` builds the worker alone. To test in a browser, first try `127.0.0.1:5500` instead of running your own webserver - most of the times the live server serving `index.html` has already been open.
 
 # Tech stack
 
@@ -43,6 +43,12 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
     - `net.models` - DTOs, divided into subpackages by domain. Domain packages may have `mappers` subpackage containing converters between types in `client.datatypes`/`lib.intellectorboard` and DTOs in that domain
     - `net.rest` - REST endpoint definitions and REST client
     - `net.ws` - Websocket channel and event type definitions and PubSub client
+- `engine` - game engines. Each one is self-contained (no `client`/`net` dependencies, no HaxeUI) and runs in a web worker compiled as its own JS target
+    - `engine.hxconda` - Hxconda, the Haxe port of the previous iteration's Anaconda bot engine. The client starts searches through `HxcondaEngine`, which spawns the `bin/hxconda.js` worker (main class `HxcondaWorker`) and exchanges `engine.hxconda.protocol` messages with it. Inside the search everything is plain integers and flat arrays: `intellectorboard` types are too slow there, so conversion to them belongs to the client side
+        - `board` - position state, piece and move encodings, movement tables, move generation
+        - `evaluation` - static evaluation terms
+        - `search` - the alpha-beta search and its tables; `search.budget` - what stops a search (node count or time) and how it reports progress
+        - `protocol` - worker messages and their encoding/decoding
 
 ## Assets folder (`assets`)
 
@@ -58,7 +64,16 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
 
 ## Scripts folder (`scripts`)
 
-Developer tooling, not part of the build: `sync_haxeui_core.sh` rebuilds the haxeui-core fork's `intellector` branch.
+Developer tooling, not part of the build:
+
+- `sync_haxeui_core.sh` rebuilds the haxeui-core fork's `intellector` branch.
+- `hxconda/` - Node tooling for the Hxconda engine, run on `bin/hxconda.js`; `hxconda/reference/position.js` is the frozen original Anaconda:
+    - `compare.js` checks that Hxconda posts exactly the same messages as the reference under the same seeded randomness and mocked clock. A change meant to keep the engine's behavior (a pure speedup or refactoring) must pass it.
+    - `compare.js --baseline` compares against `hxconda/baseline/hxconda.js`, the last accepted build, instead.
+    - `bench.js` measures the speed of node-limited searches against the reference; `bench.js --record "<label>"` appends the result to `hxconda/benchmark_results.md`.
+    - `match.js` plays the build against the baseline from the openings in `hxconda/openings.json` until an SPRT decides whether it is stronger; `--record "<label>"` appends the result to `hxconda/match_results.md`.
+
+    How engine changes are measured and accepted: @knowledge/plans/hxconda_improvement_plan.md.
 
 ## Knowledge base (`knowledge`)
 
