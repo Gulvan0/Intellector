@@ -88,3 +88,4 @@ with `GameRecordMapper.applyUpdate`-style copying, without reordering the page.
 
 The search currently finds registered players only, and the field takes nicknames.
 
+## Study drafts in localstorage
