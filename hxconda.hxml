@@ -1,0 +1,5 @@
+-cp src
+-main engine.hxconda.HxcondaWorker
+-dce full
+-D analyzer-optimize
+-js bin/hxconda.js

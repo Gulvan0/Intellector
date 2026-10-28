@@ -2,7 +2,7 @@
 // The cache only answers when the network fails, which keeps offline-capable pages (analysis
 // board, preferences) usable. Only same-origin GETs are cached; REST/WS live on another origin.
 const CACHE_NAME = "intellector-shell-v1";
-const PRECACHE = ["./", "index.html", "bin/app.js", "manifest.json", "assets/favicons/pwa-192.png", "assets/favicons/pwa-512.png"];
+const PRECACHE = ["./", "index.html", "bin/app.js", "bin/hxconda.js", "manifest.json", "assets/favicons/pwa-192.png", "assets/favicons/pwa-512.png"];
 
 self.addEventListener("install", (event) => {
     event.waitUntil(

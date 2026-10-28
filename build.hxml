@@ -1,3 +1,7 @@
+hxconda.hxml
+
+--next
+
 -cp src
 -main Main
 

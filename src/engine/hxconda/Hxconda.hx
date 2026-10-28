@@ -1,0 +1,37 @@
+package engine.hxconda;
+
+import engine.hxconda.board.Board;
+import engine.hxconda.search.AlphaBetaSearch;
+import engine.hxconda.search.BestMoveReport;
+import engine.hxconda.search.budget.NodeBudget;
+import engine.hxconda.search.budget.TimeBudget;
+
+/**
+    Runs searches on the calling thread, blocking it; the main thread should go through `HxcondaEngine` instead.
+    Positions are given in the Anaconda notation (see `Board`); malformed ones are replaced by the default starting position.
+**/
+class Hxconda
+{
+    /** Searches within the node budget of a difficulty `level` (0 to 10), reporting the percentage of the budget used up **/
+    public static function bestMoveByLevel(notation:Null<String>, level:Int, onProgress:(percent:Int)->Void):BestMoveReport
+    {
+        var board:Board = new Board(notation);
+        var budget:NodeBudget = NodeBudget.forLevel(level, onProgress);
+        return new AlphaBetaSearch<NodeBudget>(board, budget, budget.noiseAmplitude).run();
+    }
+
+    /** Searches within `nodeLimit` nodes, adding evaluation noise of up to `noiseAmplitude`, see `NodeBudget` **/
+    public static function bestMoveByNodes(notation:Null<String>, nodeLimit:Int, noiseAmplitude:Float, onProgress:(percent:Int)->Void):BestMoveReport
+    {
+        var board:Board = new Board(notation);
+        var budget:NodeBudget = new NodeBudget(nodeLimit, noiseAmplitude, onProgress);
+        return new AlphaBetaSearch<NodeBudget>(board, budget, budget.noiseAmplitude).run();
+    }
+
+    /** Searches for `durationMs` milliseconds, reporting the best move after every iteration **/
+    public static function bestMoveByTime(notation:Null<String>, durationMs:Float, onIteration:BestMoveReport->Void):BestMoveReport
+    {
+        var board:Board = new Board(notation);
+        return new AlphaBetaSearch<TimeBudget>(board, new TimeBudget(durationMs, onIteration), 0).run();
+    }
+}
