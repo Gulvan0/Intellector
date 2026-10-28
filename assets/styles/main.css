@@ -909,6 +909,40 @@
     color: #fffefb;
 }
 
+/* the connection loss notice: a strip along the viewport's top, a pill centred at its bottom */
+.intellector-connection-notice-layer {
+    padding-bottom: 12px;
+}
+
+.intellector-connection-notice-pill {
+    height: 37px;
+    padding-left: 14px;
+    padding-right: 14px;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+    clip: true;
+}
+
+.intellector-connection-notice-content {
+    horizontal-spacing: 8px;
+}
+
+.intellector-connection-notice-label {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-connection-notice-elapsed {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
 /* a notice's text line, under the card's title */
 .intellector-notice-text {
     font-name: $ui-family-medium;

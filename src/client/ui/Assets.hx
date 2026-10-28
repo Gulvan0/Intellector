@@ -29,6 +29,11 @@ class Assets
         return 'assets/images/common/controls/$name.svg';
     }
 
+    public static function connectionIcon(name:String):String
+    {
+        return 'assets/images/common/connection/$name.svg';
+    }
+
     public static function homeIcon(name:String):String
     {
         return 'assets/images/home/$name.svg';

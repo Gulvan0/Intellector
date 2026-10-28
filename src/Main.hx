@@ -43,6 +43,7 @@ import client.ui.common.challenges.widget.ChallengesWidget;
 import client.ui.common.games.OngoingGamesController;
 import client.ui.common.games.widget.OngoingGamesWidget;
 import client.ui.common.notifications.CalleeOfflineNotice;
+import client.ui.common.notifications.ConnectionNotice;
 import client.ui.common.notifications.GameStartedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import easypubsub.Subscription;
@@ -151,6 +152,9 @@ class Main
         PubSub.start(tokenRetriever, () -> ActivityTracker.getLastActivityTs(), null, AuthBootstrap.run); // the token was rejected: revalidate it, falling back to the guest
 
         HaxeFolioApp.init(config);
+        ConnectionNotice.init();
+        PubSub.watchConnection(ConnectionNotice.onConnected, ConnectionNotice.onDisconnected);
+        js.Browser.window.addEventListener("online", PubSub.reconnectNow);
         PreferenceMigration.run();
         ChallengeDraftMigration.run();
         CredentialsMigration.run();

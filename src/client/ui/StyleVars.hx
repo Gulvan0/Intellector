@@ -23,6 +23,14 @@ class StyleVars
     public static inline final GAME_STARTED_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final CALLEE_OFFLINE_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final GAME_ENDED_NOTICE_EXPANDED_WIDTH:Int = 340;
+    public static inline final CONNECTION_NOTICE_NOTIFICATION_INSET:Int = 47; // the pill's height, plus the gap between notifications
+    public static inline final CONNECTION_NOTICE_STRIP_HEIGHT:Int = 3;
+    public static inline final CONNECTION_NOTICE_STRIP_DASHES:String = "repeating-linear-gradient(90deg, #2a211a 0 10px, transparent 10px 16px)";
+    public static inline final CONNECTION_NOTICE_STRIP_PERIOD:Int = 16; // a dash and the gap after it
+    public static inline final CONNECTION_NOTICE_STRIP_PERIOD_MS:Int = 500;
+    public static inline final CONNECTION_NOTICE_FADE_MS:Int = 120;
+    public static inline final CONNECTION_NOTICE_ENTER_EXIT_MS:Int = 200;
+    public static inline final CONNECTION_NOTICE_ENTER_EXIT_SLIDE:Int = 6;
     public static inline final CHALLENGES_DROPDOWN_WIDTH:Int = 372;
     public static inline final CHALLENGES_ICON_INK:String = "#2a211a";
     public static inline final CHALLENGES_ICON_ACCENT:String = "#8a5a1f";

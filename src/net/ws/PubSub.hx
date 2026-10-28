@@ -38,6 +38,19 @@ class PubSub
         return _engine.connected;
     }
 
+    /** `onDisconnected` is also called after each failed attempt to connect **/
+    public static function watchConnection(onConnected:()->Void, onDisconnected:()->Void):Void
+    {
+        _engine.onConnected = onConnected;
+        _engine.onDisconnected = onDisconnected;
+    }
+
+    /** Attempts to connect right away instead of waiting out the reconnection delay **/
+    public static function reconnectNow():Void
+    {
+        _engine.reconnectNow();
+    }
+
     /** Tells the server about the latest user activity without waiting for the next scheduled heartbeat **/
     public static function sendHeartbeat():Void
     {
