@@ -2,7 +2,7 @@
 
 Source design: the "Share menu" canvas (https://claude.ai/artifact/TvrhphJZoaR4pjZfjeXDU1), the
 `Main.dc.html` reference component and its four mounts; handoff note
-https://claude.ai/artifact/DXZabSzRkFUdAmvsc2Lw6H. Deferred: `[[share_overlay_deferred]]`.
+https://claude.ai/artifact/DXZabSzRkFUdAmvsc2Lw6H.
 
 One overlay, opened by the Share action of the live game page and of the analysis page. Its groups
 are tabs built from descriptors: Share position (both pages), Share game (live only). With one
@@ -52,44 +52,3 @@ group the tab strip is left out.
   "must be 64–4096".
 - Exported labels use the bold `sans-serif` the board on the page inherits, not Onest, so a picture
   looks like the board.
-
-## Library changes (universal, not app-specific)
-
-- haxefolio `HaxeFolioApp.pageUrl(path, ?fragment)`: the absolute URL `navigateTo` would show.
-- haxefolio `form.TextInputField.setSuffix(text, laneWidth)`: the mirror of `setPrefix`, for units.
-- haxefolio `form.CopyField`: a FieldHeader, a read-only value (single line, or a fixed-height
-  multiline box) selected whole on focus, and a fixed-width Copy button that reads Copied for
-  1.6 s; falls back to `execCommand("copy")` when the Clipboard API refuses.
-- haxefolio `form.ColorField`: a FieldHeader over one input-like box holding a native colour swatch
-  and the hex text; disabling it dims the swatch and shows a placeholder instead of the hex, the
-  stored colour kept.
-- haxefolio `browser.FileDownload.save(blob, fileName)`.
-
-## App
-
-- `client.datatypes.share`: `ExportKind` (Image/Animation), `ExportSettings` (the texts as typed,
-  the ratio, colours, flags), `ShareSnapshot` (position, orientation, last ply; for a game the
-  info, plies and ending).
-- `client.logic.share.ExportSettingsRules`: parsing and ranges (size 64-4096, interval 50-5000,
-  `#RRGGBB`), proportional propagation, the last valid size for the preview, validity.
-- `client.formatters.PinFormatters`: the PIN (via `intellectorboard`'s `GamePinFormatter`) and its
-  outcome token.
-- `client.ui.common.board.export.BoardRaster`: renders a board picture of any size onto a canvas,
-  asynchronously, latest-request-wins; `BoardAnimation`: the GIF, one frame per tick.
-- `client.ui.common.overlays.share`: `ShareOverlay` (present, groups), `ShareGroup` descriptors,
-  `SharePositionPage`, `ShareGamePage`, `ExportPanel` (both kinds), `SizeRow` (two fields and the
-  proportions link), `ExportPreview` (canvas, checkerboard under a transparent export, 1 px outline).
-- Both pages' `onShare` open it.
-
-## Heights
-
-Declared, never measured, in `StyleVars`: the frame is header + tab strip + body padding + the
-tallest page (Share game), the analysis frame without the strip and with Share position. Body:
-18 top/bottom, 22 sides, sections 18 apart, label 16 + 5 above each control.
-
-## Verification
-
-Build; then in the browser at 1:1 per component: both tabs, both pages, wide and narrow, every
-state (invalid size/hex/interval, link on/off, transparent, labels and highlight off, Copied, GIF
-in progress), Russian. Compare against the design. Download a PNG and a GIF and open them. DOM audit
-for unstyled labels and clipped text.
