@@ -6,7 +6,6 @@ import engine.hxconda.board.BoardGeometry.SQUARE_COUNT;
 import engine.hxconda.evaluation.Evaluation;
 import js.lib.Int32Array;
 import js.lib.Int8Array;
-import js.lib.Map;
 
 /**
     Mutable position the search runs on, with the stack of moves to undo and the visit counts of the positions on the current line.
@@ -29,7 +28,7 @@ class Board
     /** Bit `square & 31` of entry `color * 2 + (square >> 5)` is set while a piece of `color` stands on `square` **/
     private final occupancyMasks:Int32Array = new Int32Array(4);
     private final undoStack:Array<Int> = [];
-    private final visitCounts:Map<Int, Int> = new Map();
+    private final visitCounts:VisitCounts = new VisitCounts();
 
     public inline function intellectorSquare(color:PlayerColor):Int
     {
@@ -171,25 +170,19 @@ class Board
     public inline function enterPosition(hash:Int):Void
     {
         if (hash != 0)
-            visitCounts.set(hash, visitCount(hash) + 1);
+            visitCounts.increment(hash);
     }
 
     /** Reverts `enterPosition` **/
     public inline function leavePosition(hash:Int):Void
     {
         if (hash != 0)
-        {
-            var count:Int = visitCount(hash);
-            if (count == 1)
-                visitCounts.delete(hash);
-            else
-                visitCounts.set(hash, count - 1);
-        }
+            visitCounts.decrement(hash);
     }
 
     public inline function visitCount(hash:Int):Int
     {
-        return visitCounts.get(hash) ?? 0;
+        return visitCounts.count(hash);
     }
 
     /** Whether `move` takes a piece; intellector-defensor castling does not **/
@@ -435,6 +428,6 @@ class Board
             trySetFromNotation(DEFAULT_STARTING_NOTATION);
 
         materialScore = computeMaterialScore();
-        visitCounts.set(hash(), 1);
+        visitCounts.increment(hash());
     }
 }

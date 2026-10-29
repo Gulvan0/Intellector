@@ -2,7 +2,7 @@ package engine.hxconda.search;
 
 import engine.hxconda.board.Move;
 import engine.hxconda.evaluation.Evaluation;
-import js.lib.Map;
+import js.lib.Int32Array;
 
 /**
     Search results keyed by position hash. A position keeps several entries of different depths and bound kinds.
@@ -10,24 +10,31 @@ import js.lib.Map;
 class TranspositionTable
 {
     private static inline final WINDOW_MARGIN:Float = 1;
+    private static inline final INITIAL_CAPACITY:Int = 4096;
 
     public var cutoffScore(default, null):Float = 0;
     public var cutoffMove(default, null):Move = Move.NONE;
     public var narrowedAlpha(default, null):Float = 0;
     public var narrowedBeta(default, null):Float = 0;
 
-    private final entries:Map<Int, Array<TranspositionEntry>> = new Map();
+    /*
+        Open addressing with linear probing on the exact hash, growing as needed. Positions are never removed.
+        A null bucket marks an empty slot.
+    */
+    private var hashes:Int32Array = new Int32Array(INITIAL_CAPACITY);
+    private var buckets:Array<Null<Array<TranspositionEntry>>> = [for (_ in 0...INITIAL_CAPACITY) null];
+    private var positionCount:Int = 0;
 
     public inline function entriesAt(hash:Int):Null<Array<TranspositionEntry>>
     {
-        return entries.get(hash);
+        return buckets[slotOf(hash)];
     }
 
     /** Maximum depth stored for `hash`, 0 if there's none **/
     public function deepestDepth(hash:Int):Int
     {
         var depth:Int = 0;
-        var positionEntries:Null<Array<TranspositionEntry>> = entries.get(hash);
+        var positionEntries:Null<Array<TranspositionEntry>> = entriesAt(hash);
         if (positionEntries != null)
             for (entry in positionEntries)
                 if (entry.depth > depth)
@@ -38,7 +45,7 @@ class TranspositionTable
     /** Looks for entries searched at least as deep as `depth` **/
     public function probe(hash:Int, alpha:Float, beta:Float, depth:Int):ProbeOutcome
     {
-        var positionEntries:Null<Array<TranspositionEntry>> = entries.get(hash);
+        var positionEntries:Null<Array<TranspositionEntry>> = entriesAt(hash);
         if (positionEntries == null)
             return Miss;
 
@@ -100,12 +107,7 @@ class TranspositionTable
         if (isBound && Math.abs(score) > Evaluation.DECISIVE_THRESHOLD)
             return;
 
-        var positionEntries:Null<Array<TranspositionEntry>> = entries.get(hash);
-        if (positionEntries == null)
-        {
-            positionEntries = [];
-            entries.set(hash, positionEntries);
-        }
+        var positionEntries:Array<TranspositionEntry> = entriesOrNew(hash);
 
         var i:Int = positionEntries.length - 1;
         while (i >= 0)
@@ -117,6 +119,50 @@ class TranspositionTable
         }
 
         positionEntries.push(new TranspositionEntry(move, depth, score, trustedAlpha, trustedBeta));
+    }
+
+    /** The slot holding `hash`, or the empty slot where it would go **/
+    private inline function slotOf(hash:Int):Int
+    {
+        var mask:Int = buckets.length - 1;
+        var slot:Int = hash & mask;
+        while (buckets[slot] != null && hashes[slot] != hash)
+            slot = (slot + 1) & mask;
+        return slot;
+    }
+
+    private function entriesOrNew(hash:Int):Array<TranspositionEntry>
+    {
+        var slot:Int = slotOf(hash);
+        var positionEntries:Null<Array<TranspositionEntry>> = buckets[slot];
+        if (positionEntries != null)
+            return positionEntries;
+
+        var newEntries:Array<TranspositionEntry> = [];
+        hashes[slot] = hash;
+        buckets[slot] = newEntries;
+        positionCount++;
+        if (positionCount * 2 > buckets.length)
+            grow();
+        return newEntries;
+    }
+
+    private function grow():Void
+    {
+        var oldHashes:Int32Array = hashes;
+        var oldBuckets:Array<Null<Array<TranspositionEntry>>> = buckets;
+        hashes = new Int32Array(oldBuckets.length * 2);
+        buckets = [for (_ in 0...oldBuckets.length * 2) null];
+
+        for (i in 0...oldBuckets.length)
+        {
+            if (oldBuckets[i] != null)
+            {
+                var slot:Int = slotOf(oldHashes[i]);
+                hashes[slot] = oldHashes[i];
+                buckets[slot] = oldBuckets[i];
+            }
+        }
     }
 
     private inline function cutoff(score:Float, move:Move):ProbeOutcome

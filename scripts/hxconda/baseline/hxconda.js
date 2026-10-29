@@ -56,7 +56,7 @@ engine_hxconda_HxcondaWorker.post = function(response) {
 	engine_hxconda_HxcondaWorker.scope.postMessage(response);
 };
 var engine_hxconda_board_Board = function(notation) {
-	this.visitCounts = new Map();
+	this.visitCounts = new engine_hxconda_board_VisitCounts();
 	this.undoStack = [];
 	this.occupancyMasks = new Int32Array(4);
 	this.materialScore = 0;
@@ -75,7 +75,7 @@ var engine_hxconda_board_Board = function(notation) {
 		this.trySetFromNotation("mpeeePMleeeeLapeeePAdeeeeDipeeePIdeeeeDapeeePAleeeeLmpeeePMw");
 	}
 	this.materialScore = this.computeMaterialScore();
-	this.visitCounts.set(this.hash(),1);
+	this.visitCounts.increment(this.hash());
 };
 engine_hxconda_board_Board.prototype = {
 	hash: function() {
@@ -1182,6 +1182,94 @@ engine_hxconda_board_Piece.fromLetter = function(letter) {
 		return null;
 	}
 };
+var engine_hxconda_board_VisitCounts = function() {
+	this.zeroHashCount = 0;
+	this.occupiedCount = 0;
+	this.counts = new Int32Array(256);
+	this.hashes = new Int32Array(256);
+};
+engine_hxconda_board_VisitCounts.prototype = {
+	count: function(hash) {
+		if(hash == 0) {
+			return this.zeroHashCount;
+		}
+		var mask = this.counts.length - 1;
+		var slot = hash & mask;
+		while(this.counts[slot] > 0 && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		return this.counts[slot];
+	}
+	,increment: function(hash) {
+		if(hash == 0) {
+			this.zeroHashCount++;
+			return;
+		}
+		var mask = this.counts.length - 1;
+		var slot = hash & mask;
+		while(this.counts[slot] > 0 && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		var slot1 = slot;
+		if(this.counts[slot1] > 0) {
+			this.counts[slot1]++;
+			return;
+		}
+		this.hashes[slot1] = hash;
+		this.counts[slot1] = 1;
+		this.occupiedCount++;
+		if(this.occupiedCount * 2 > this.counts.length) {
+			this.grow();
+		}
+	}
+	,decrement: function(hash) {
+		if(hash == 0) {
+			this.zeroHashCount--;
+			return;
+		}
+		var mask = this.counts.length - 1;
+		var slot = hash & mask;
+		while(this.counts[slot] > 0 && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		var slot1 = slot;
+		if(this.counts[slot1] > 1) {
+			this.counts[slot1]--;
+		} else {
+			this.vacate(slot1);
+		}
+	}
+	,vacate: function(slot) {
+		var mask = this.counts.length - 1;
+		var gap = slot;
+		var next = slot + 1 & mask;
+		while(this.counts[next] > 0) {
+			var home = this.hashes[next] & mask;
+			if(!(gap <= next ? home > gap && home <= next : home > gap || home <= next)) {
+				this.hashes[gap] = this.hashes[next];
+				this.counts[gap] = this.counts[next];
+				gap = next;
+			}
+			next = next + 1 & mask;
+		}
+		this.counts[gap] = 0;
+		this.occupiedCount--;
+	}
+	,grow: function() {
+		var oldHashes = this.hashes;
+		var oldCounts = this.counts;
+		this.hashes = new Int32Array(oldCounts.length * 2);
+		this.counts = new Int32Array(oldCounts.length * 2);
+		var _g = 0;
+		var _g1 = oldCounts.length;
+		while(_g < _g1) {
+			var i = _g++;
+			if(oldCounts[i] > 0) {
+				var hash = oldHashes[i];
+				var mask = this.counts.length - 1;
+				var slot = hash & mask;
+				while(this.counts[slot] > 0 && this.hashes[slot] != hash) slot = slot + 1 & mask;
+				var slot1 = slot;
+				this.hashes[slot1] = oldHashes[i];
+				this.counts[slot1] = oldCounts[i];
+			}
+		}
+	}
+};
 var engine_hxconda_board_ZobristKeys = function() {
 	this.pieceKeys = [];
 	var _g = 0;
@@ -1369,14 +1457,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 			++extension;
 		}
-		var tmp;
-		if(depth >= 2 && depth != maxDepth) {
-			var tmp1 = this.board.visitCounts.get(hash);
-			tmp = (tmp1 != null ? tmp1 : 0) >= 2;
-		} else {
-			tmp = false;
-		}
-		if(tmp) {
+		if(depth >= 2 && depth != maxDepth && this.board.visitCounts.count(hash) >= 2) {
 			this.resultMove = -1;
 			this.resultLine = null;
 			return -0.1;
@@ -1471,16 +1552,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
 			if(tracksRepetition) {
-				var _this1 = this.board;
 				if(childHash != 0) {
-					var tmp = _this1.visitCounts.get(childHash);
-					_this1.visitCounts.set(childHash,(tmp != null ? tmp : 0) + 1);
+					this.board.visitCounts.increment(childHash);
 				}
 			}
 			var isCheck;
 			if(attacksIntellector) {
-				var _this2 = this.board;
-				isCheck = _this2.attacksIntellector(_this2.turn ^ 1);
+				var _this1 = this.board;
+				isCheck = _this1.attacksIntellector(_this1.turn ^ 1);
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
@@ -1501,15 +1580,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 			this.board.unmakeMove();
 			if(tracksRepetition) {
-				var _this3 = this.board;
 				if(childHash != 0) {
-					var tmp1 = _this3.visitCounts.get(childHash);
-					var count = tmp1 != null ? tmp1 : 0;
-					if(count == 1) {
-						_this3.visitCounts.delete(childHash);
-					} else {
-						_this3.visitCounts.set(childHash,count - 1);
-					}
+					this.board.visitCounts.decrement(childHash);
 				}
 			}
 			value = Math.max(value,score);
@@ -1528,14 +1600,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				}
 				break;
 			}
-			var tmp2;
+			var tmp;
 			if(bestMove != -1) {
-				var _this4 = this.budget;
-				tmp2 = isRoot && (_this4.nodeLimit - _this4.nodeCount > 0 || maxDepth <= 1);
+				var _this2 = this.budget;
+				tmp = isRoot && (_this2.nodeLimit - _this2.nodeCount > 0 || maxDepth <= 1);
 			} else {
-				tmp2 = false;
+				tmp = false;
 			}
-			if(tmp2) {
+			if(tmp) {
 				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
 			}
 		}
@@ -1571,16 +1643,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
 			if(tracksRepetition) {
-				var _this1 = this.board;
 				if(childHash != 0) {
-					var tmp = _this1.visitCounts.get(childHash);
-					_this1.visitCounts.set(childHash,(tmp != null ? tmp : 0) + 1);
+					this.board.visitCounts.increment(childHash);
 				}
 			}
 			var isCheck;
 			if(attacksIntellector) {
-				var _this2 = this.board;
-				isCheck = _this2.attacksIntellector(_this2.turn ^ 1);
+				var _this1 = this.board;
+				isCheck = _this1.attacksIntellector(_this1.turn ^ 1);
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
@@ -1601,15 +1671,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 			this.board.unmakeMove();
 			if(tracksRepetition) {
-				var _this3 = this.board;
 				if(childHash != 0) {
-					var tmp1 = _this3.visitCounts.get(childHash);
-					var count = tmp1 != null ? tmp1 : 0;
-					if(count == 1) {
-						_this3.visitCounts.delete(childHash);
-					} else {
-						_this3.visitCounts.set(childHash,count - 1);
-					}
+					this.board.visitCounts.decrement(childHash);
 				}
 			}
 			value = Math.min(value,score);
@@ -1779,7 +1842,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				key = decisiveScore;
 				hasKey = true;
 			} else {
-				var entries = this.table.entries.get(childHash);
+				var _this = this.table;
+				var _this1 = _this.buckets;
+				var mask = _this.buckets.length - 1;
+				var slot = childHash & mask;
+				while(_this.buckets[slot] != null && _this.hashes[slot] != childHash) slot = slot + 1 & mask;
+				var entries = _this1[slot];
 				if(entries != null) {
 					var deepestDepth = -1;
 					var _g1 = 0;
@@ -1916,14 +1984,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 			++extension;
 		}
-		var tmp;
-		if(depth >= 2 && depth != maxDepth) {
-			var tmp1 = this.board.visitCounts.get(hash);
-			tmp = (tmp1 != null ? tmp1 : 0) >= 2;
-		} else {
-			tmp = false;
-		}
-		if(tmp) {
+		if(depth >= 2 && depth != maxDepth && this.board.visitCounts.count(hash) >= 2) {
 			this.resultMove = -1;
 			this.resultLine = null;
 			return -0.1;
@@ -2016,16 +2077,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
 			if(tracksRepetition) {
-				var _this1 = this.board;
 				if(childHash != 0) {
-					var tmp = _this1.visitCounts.get(childHash);
-					_this1.visitCounts.set(childHash,(tmp != null ? tmp : 0) + 1);
+					this.board.visitCounts.increment(childHash);
 				}
 			}
 			var isCheck;
 			if(attacksIntellector) {
-				var _this2 = this.board;
-				isCheck = _this2.attacksIntellector(_this2.turn ^ 1);
+				var _this1 = this.board;
+				isCheck = _this1.attacksIntellector(_this1.turn ^ 1);
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
@@ -2050,15 +2109,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 			this.board.unmakeMove();
 			if(tracksRepetition) {
-				var _this3 = this.board;
 				if(childHash != 0) {
-					var tmp1 = _this3.visitCounts.get(childHash);
-					var count = tmp1 != null ? tmp1 : 0;
-					if(count == 1) {
-						_this3.visitCounts.delete(childHash);
-					} else {
-						_this3.visitCounts.set(childHash,count - 1);
-					}
+					this.board.visitCounts.decrement(childHash);
 				}
 			}
 			if(score > value) {
@@ -2116,16 +2168,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
 			if(tracksRepetition) {
-				var _this1 = this.board;
 				if(childHash != 0) {
-					var tmp = _this1.visitCounts.get(childHash);
-					_this1.visitCounts.set(childHash,(tmp != null ? tmp : 0) + 1);
+					this.board.visitCounts.increment(childHash);
 				}
 			}
 			var isCheck;
 			if(attacksIntellector) {
-				var _this2 = this.board;
-				isCheck = _this2.attacksIntellector(_this2.turn ^ 1);
+				var _this1 = this.board;
+				isCheck = _this1.attacksIntellector(_this1.turn ^ 1);
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
@@ -2150,15 +2200,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 			this.board.unmakeMove();
 			if(tracksRepetition) {
-				var _this3 = this.board;
 				if(childHash != 0) {
-					var tmp1 = _this3.visitCounts.get(childHash);
-					var count = tmp1 != null ? tmp1 : 0;
-					if(count == 1) {
-						_this3.visitCounts.delete(childHash);
-					} else {
-						_this3.visitCounts.set(childHash,count - 1);
-					}
+					this.board.visitCounts.decrement(childHash);
 				}
 			}
 			if(score < value) {
@@ -2331,7 +2374,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				key = decisiveScore;
 				hasKey = true;
 			} else {
-				var entries = this.table.entries.get(childHash);
+				var _this = this.table;
+				var _this1 = _this.buckets;
+				var mask = _this.buckets.length - 1;
+				var slot = childHash & mask;
+				while(_this.buckets[slot] != null && _this.hashes[slot] != childHash) slot = slot + 1 & mask;
+				var entries = _this1[slot];
 				if(entries != null) {
 					var deepestDepth = -1;
 					var _g1 = 0;
@@ -2453,7 +2501,15 @@ var engine_hxconda_search_TranspositionEntry = function(move,depth,score,alpha,b
 	this.beta = beta;
 };
 var engine_hxconda_search_TranspositionTable = function() {
-	this.entries = new Map();
+	this.positionCount = 0;
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 4096) {
+		++_g1;
+		_g.push(null);
+	}
+	this.buckets = _g;
+	this.hashes = new Int32Array(4096);
 	this.narrowedBeta = 0;
 	this.narrowedAlpha = 0;
 	this.cutoffMove = -1;
@@ -2462,11 +2518,15 @@ var engine_hxconda_search_TranspositionTable = function() {
 engine_hxconda_search_TranspositionTable.prototype = {
 	deepestDepth: function(hash) {
 		var depth = 0;
-		var positionEntries = this.entries.get(hash);
-		if(positionEntries != null) {
+		var positionEntries = this.buckets;
+		var mask = this.buckets.length - 1;
+		var slot = hash & mask;
+		while(this.buckets[slot] != null && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		var positionEntries1 = positionEntries[slot];
+		if(positionEntries1 != null) {
 			var _g = 0;
-			while(_g < positionEntries.length) {
-				var entry = positionEntries[_g];
+			while(_g < positionEntries1.length) {
+				var entry = positionEntries1[_g];
 				++_g;
 				if(entry.depth > depth) {
 					depth = entry.depth;
@@ -2476,15 +2536,19 @@ engine_hxconda_search_TranspositionTable.prototype = {
 		return depth;
 	}
 	,probe: function(hash,alpha,beta,depth) {
-		var positionEntries = this.entries.get(hash);
-		if(positionEntries == null) {
+		var positionEntries = this.buckets;
+		var mask = this.buckets.length - 1;
+		var slot = hash & mask;
+		while(this.buckets[slot] != null && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		var positionEntries1 = positionEntries[slot];
+		if(positionEntries1 == null) {
 			return 0;
 		}
 		var lowerBound = -Infinity;
 		var upperBound = Infinity;
 		var _g = 0;
-		while(_g < positionEntries.length) {
-			var entry = positionEntries[_g];
+		while(_g < positionEntries1.length) {
+			var entry = positionEntries1[_g];
 			++_g;
 			if(entry.depth < depth) {
 				continue;
@@ -2535,11 +2599,7 @@ engine_hxconda_search_TranspositionTable.prototype = {
 		if((trustedAlpha > -100000 || trustedBeta < 100000) && Math.abs(score) > 90000) {
 			return;
 		}
-		var positionEntries = this.entries.get(hash);
-		if(positionEntries == null) {
-			positionEntries = [];
-			this.entries.set(hash,positionEntries);
-		}
+		var positionEntries = this.entriesOrNew(hash);
 		var i = positionEntries.length - 1;
 		while(i >= 0) {
 			var entry = positionEntries[i];
@@ -2549,6 +2609,51 @@ engine_hxconda_search_TranspositionTable.prototype = {
 			--i;
 		}
 		positionEntries.push(new engine_hxconda_search_TranspositionEntry(move,depth,score,trustedAlpha,trustedBeta));
+	}
+	,entriesOrNew: function(hash) {
+		var mask = this.buckets.length - 1;
+		var slot = hash & mask;
+		while(this.buckets[slot] != null && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		var slot1 = slot;
+		var positionEntries = this.buckets[slot1];
+		if(positionEntries != null) {
+			return positionEntries;
+		}
+		var newEntries = [];
+		this.hashes[slot1] = hash;
+		this.buckets[slot1] = newEntries;
+		this.positionCount++;
+		if(this.positionCount * 2 > this.buckets.length) {
+			this.grow();
+		}
+		return newEntries;
+	}
+	,grow: function() {
+		var oldHashes = this.hashes;
+		var oldBuckets = this.buckets;
+		this.hashes = new Int32Array(oldBuckets.length * 2);
+		var _g = [];
+		var _g1 = 0;
+		var _g2 = oldBuckets.length * 2;
+		while(_g1 < _g2) {
+			++_g1;
+			_g.push(null);
+		}
+		this.buckets = _g;
+		var _g = 0;
+		var _g1 = oldBuckets.length;
+		while(_g < _g1) {
+			var i = _g++;
+			if(oldBuckets[i] != null) {
+				var hash = oldHashes[i];
+				var mask = this.buckets.length - 1;
+				var slot = hash & mask;
+				while(this.buckets[slot] != null && this.hashes[slot] != hash) slot = slot + 1 & mask;
+				var slot1 = slot;
+				this.hashes[slot1] = oldHashes[i];
+				this.buckets[slot1] = oldBuckets[i];
+			}
+		}
 	}
 };
 var engine_hxconda_search_budget_NodeBudget = function(nodeLimit,noiseAmplitude,onProgress) {

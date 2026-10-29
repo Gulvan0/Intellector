@@ -48,9 +48,8 @@ The output must stay identical, so each change only alters how a result is compu
 
 ### Planned
 
-1. **A9. Transposition table and repetition counts on typed arrays.** An open-addressing table keyed by the exact hash, with per-position entry chains in parallel typed arrays, replaces `js.lib.Map` and the entry objects. It must stay unbounded, growing by rehashing, and keep the entry order, so its semantics don't change. The table's functions don't show up among the top entries of the profile, so the expected gain is small.
-2. **A10. Lookup tables in typed arrays.** `Board.pieces`, `SquareLists.squares` and the score tables become `Int8Array`/`Int32Array`/`Float64Array`. Small gain.
-3. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
+1. **A10. Lookup tables in typed arrays.** `Board.pieces`, `SquareLists.squares` and the score tables become `Int8Array`/`Int32Array`/`Float64Array`. Small gain.
+2. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
 
 ### Tried
 
@@ -62,6 +61,7 @@ The output must stay identical, so each change only alters how a result is compu
 - **A6. Piece lists.** **Accepted:** x1.10-1.15 against the baseline. `Board` keeps two 32-bit occupancy masks per color up to date in make/unmake, and both generators visit the side's own pieces through them in square order instead of scanning all 59 squares. The masks live in an `Int32Array`: in a plain array, a mask with bit 30 or 31 set is no small integer to V8 and turns the array into doubles, which cost most of the gain. Measured with 20 warm-up searches per process; with a single one, level 4 showed only x1.005-1.038, the candidate losing its first search to JIT tiering.
 - **A7. Incremental check detection.** **Accepted:** x1.04-1.07 against the baseline. A move loop tries 10.8 moves on average, each followed by a check detection. Now each loop asks once whether the side to move already attacks the opponent's Intellector; it rarely does, and then every move gets the full detection. Otherwise only the moved piece and the dominator and aggressor lines from the Intellector through the vacated square can attack after a move, and castling only puts the defensor on the origin square. The precondition is needed: a moved piece can also block an attack of its own side's slider.
 - **A8. Capture ordering keys during generation.** **Rejected:** x0.95-0.98 against the baseline. Computing the keys is about a third of `orderedCaptures` (3.5% of the time), mostly filling the array of keys, which generation still has to do. Pushing each key along with its capture slowed down the generator's inner loop by more than the second pass cost. Integer keys, all piece values being integers, gave x1.00 in a quick check: comparing the keys was never the cost.
+- **A9. Transposition table and repetition counts on typed arrays.** **Accepted:** x1.03-1.05 against the baseline. The table's functions are inlined into `search` and `sortMoves`, which hid them from the profile: a level 5 benchmark run makes 7.7M `js.lib.Map` operations, about 12% of the time in a tight loop. Both maps became open-addressing tables with linear probing, keyed by the exact hash and growing by rehashing: `TranspositionTable` indexes its per-position entry arrays, and `VisitCounts` deletes with backward shifting and counts hash 0 apart. The entries are still objects; moving them into parallel typed arrays is left untried.
 
 ## B. Changes that alter the behaviour
 
