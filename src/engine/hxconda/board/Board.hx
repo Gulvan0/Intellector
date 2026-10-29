@@ -185,6 +185,17 @@ class Board
         return visitCounts.count(hash);
     }
 
+    /** Counts a visit of each position of `notations`, in the Anaconda notation; malformed ones are skipped **/
+    public function enterPastPositions(notations:Array<String>):Void
+    {
+        for (notation in notations)
+        {
+            var pastHash:Null<Int> = notationHash(notation);
+            if (pastHash != null)
+                enterPosition(pastHash);
+        }
+    }
+
     /** Whether `move` takes a piece; intellector-defensor castling does not **/
     public inline function isCapture(move:Move):Bool
     {
@@ -361,6 +372,34 @@ class Board
             }
         }
         return false;
+    }
+
+    /** Hash of the position `notation` describes, null if it is malformed **/
+    private function notationHash(notation:String):Null<Int>
+    {
+        if (notation.length != SQUARE_COUNT + 1)
+            return null;
+
+        var hash:Int;
+        switch notation.charAt(SQUARE_COUNT)
+        {
+            case "w":
+                hash = 0;
+            case "b":
+                hash = zobristKeys.blackToMove;
+            default:
+                return null;
+        }
+
+        for (square in 0...SQUARE_COUNT)
+        {
+            var piece:Null<Piece> = Piece.fromLetter(notation.charAt(square));
+            if (piece == null)
+                return null;
+            hash ^= zobristKeys.of(square, piece);
+        }
+
+        return hash;
     }
 
     /** Fills the board from the Anaconda notation; returns false if `notation` is malformed **/

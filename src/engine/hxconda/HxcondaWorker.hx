@@ -27,9 +27,9 @@ class HxcondaWorker
         try
         {
             var report:BestMoveReport = switch request.kind {
-                case SearchByLevel: Hxconda.bestMoveByLevel(request.position, request.level, postProgress);
-                case SearchByTime: Hxconda.bestMoveByTime(request.position, request.durationMs, postIteration);
-                case SearchByNodes: Hxconda.bestMoveByNodes(request.position, request.nodeLimit, request.noiseAmplitude ?? 0.0, postProgress);
+                case SearchByLevel: Hxconda.bestMoveByLevel(request.position, request.history, request.level, postProgress);
+                case SearchByTime: Hxconda.bestMoveByTime(request.position, request.history, request.durationMs, postIteration);
+                case SearchByNodes: Hxconda.bestMoveByNodes(request.position, request.history, request.nodeLimit, request.noiseAmplitude ?? 0.0, postProgress);
             }
             post({kind: Completed, report: HxcondaProtocol.reportMessage(report)});
         }

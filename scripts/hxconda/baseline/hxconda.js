@@ -7,18 +7,25 @@ function $extend(from, fields) {
 	return proto;
 }
 var engine_hxconda_Hxconda = function() { };
-engine_hxconda_Hxconda.bestMoveByLevel = function(notation,level,onProgress) {
-	var board = new engine_hxconda_board_Board(notation);
+engine_hxconda_Hxconda.bestMoveByLevel = function(notation,history,level,onProgress) {
+	var board = engine_hxconda_Hxconda.createBoard(notation,history);
 	var budget = engine_hxconda_search_budget_NodeBudget.forLevel(level,onProgress);
 	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget(board,budget,budget.noiseAmplitude).run();
 };
-engine_hxconda_Hxconda.bestMoveByNodes = function(notation,nodeLimit,noiseAmplitude,onProgress) {
-	var board = new engine_hxconda_board_Board(notation);
+engine_hxconda_Hxconda.bestMoveByNodes = function(notation,history,nodeLimit,noiseAmplitude,onProgress) {
+	var board = engine_hxconda_Hxconda.createBoard(notation,history);
 	var budget = new engine_hxconda_search_budget_NodeBudget(nodeLimit,noiseAmplitude,onProgress);
 	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget(board,budget,budget.noiseAmplitude).run();
 };
-engine_hxconda_Hxconda.bestMoveByTime = function(notation,durationMs,onIteration) {
-	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget(new engine_hxconda_board_Board(notation),new engine_hxconda_search_budget_TimeBudget(durationMs,onIteration),0).run();
+engine_hxconda_Hxconda.bestMoveByTime = function(notation,history,durationMs,onIteration) {
+	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget(engine_hxconda_Hxconda.createBoard(notation,history),new engine_hxconda_search_budget_TimeBudget(durationMs,onIteration),0).run();
+};
+engine_hxconda_Hxconda.createBoard = function(notation,history) {
+	var board = new engine_hxconda_board_Board(notation);
+	if(history != null) {
+		board.enterPastPositions(history);
+	}
+	return board;
 };
 var engine_hxconda_HxcondaWorker = function() { };
 engine_hxconda_HxcondaWorker.main = function() {
@@ -31,14 +38,14 @@ engine_hxconda_HxcondaWorker.onMessage = function(event) {
 		var report;
 		switch(request.kind) {
 		case "searchByLevel":
-			report = engine_hxconda_Hxconda.bestMoveByLevel(request.position,request.level,engine_hxconda_HxcondaWorker.postProgress);
+			report = engine_hxconda_Hxconda.bestMoveByLevel(request.position,request.history,request.level,engine_hxconda_HxcondaWorker.postProgress);
 			break;
 		case "searchByNodes":
 			var tmp = request.noiseAmplitude;
-			report = engine_hxconda_Hxconda.bestMoveByNodes(request.position,request.nodeLimit,tmp != null ? tmp : 0.0,engine_hxconda_HxcondaWorker.postProgress);
+			report = engine_hxconda_Hxconda.bestMoveByNodes(request.position,request.history,request.nodeLimit,tmp != null ? tmp : 0.0,engine_hxconda_HxcondaWorker.postProgress);
 			break;
 		case "searchByTime":
-			report = engine_hxconda_Hxconda.bestMoveByTime(request.position,request.durationMs,engine_hxconda_HxcondaWorker.postIteration);
+			report = engine_hxconda_Hxconda.bestMoveByTime(request.position,request.history,request.durationMs,engine_hxconda_HxcondaWorker.postIteration);
 			break;
 		}
 		engine_hxconda_HxcondaWorker.post({ kind : "completed", report : engine_hxconda_protocol_HxcondaProtocol.reportMessage(report)});
@@ -208,6 +215,17 @@ engine_hxconda_board_Board.prototype = {
 		}
 		this.turn = this.turn ^ 1;
 	}
+	,enterPastPositions: function(notations) {
+		var _g = 0;
+		while(_g < notations.length) {
+			var pastHash = this.notationHash(notations[_g++]);
+			if(pastHash != null) {
+				if(pastHash != 0) {
+					this.visitCounts.increment(pastHash);
+				}
+			}
+		}
+	}
 	,attacksIntellector: function(attacker) {
 		if(this.whiteIntellectorSquare == -1 || this.blackIntellectorSquare == -1) {
 			return false;
@@ -361,6 +379,32 @@ engine_hxconda_board_Board.prototype = {
 			}
 		}
 		return false;
+	}
+	,notationHash: function(notation) {
+		if(notation.length != 60) {
+			return null;
+		}
+		var hash;
+		switch(notation.charAt(59)) {
+		case "b":
+			hash = this.zobristKeys.blackToMove;
+			break;
+		case "w":
+			hash = 0;
+			break;
+		default:
+			return null;
+		}
+		var _g = 0;
+		while(_g < 59) {
+			var square = _g++;
+			var piece = engine_hxconda_board_Piece.fromLetter(notation.charAt(square));
+			if(piece == null) {
+				return null;
+			}
+			hash ^= this.zobristKeys.pieceKeys[square * 13 + piece];
+		}
+		return hash;
 	}
 	,trySetFromNotation: function(notation) {
 		if(notation.length != 60) {

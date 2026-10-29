@@ -79,7 +79,8 @@ function engine(enginePath, settings) {
     return { path: enginePath, isReference, settings };
 }
 
-function bestMove(player, position, seed) {
+// `history`: the game's positions before `position`, oldest first
+function bestMove(player, position, seed, history) {
     const { mode, nodes, noise, level, time } = player.settings;
     if (player.isReference) {
         const request = mode === 'level' ? { command: 'bestMoveByLevel', position, level } : { command: 'bestMoveByTime', position, time };
@@ -90,9 +91,9 @@ function bestMove(player, position, seed) {
         return { from: result.move.from, to: result.move.to, resultingPiece: result.move.figure };
     }
 
-    const request = mode === 'nodes' ? { kind: 'searchByNodes', position, nodeLimit: nodes, noiseAmplitude: noise }
-        : mode === 'level' ? { kind: 'searchByLevel', position, level }
-        : { kind: 'searchByTime', position, durationMs: time };
+    const request = mode === 'nodes' ? { kind: 'searchByNodes', position, history, nodeLimit: nodes, noiseAmplitude: noise }
+        : mode === 'level' ? { kind: 'searchByLevel', position, history, level }
+        : { kind: 'searchByTime', position, history, durationMs: time };
     const final = runInRealm(player.path, request, seed).posted.find(response => response.kind === 'completed' || response.kind === 'failed');
     return final != null && final.kind === 'completed' && final.report != null ? final.report.move : null;
 }
@@ -101,6 +102,7 @@ function bestMove(player, position, seed) {
 function playGame(opening, white, black, seed) {
     let position = opening;
     const visits = new Map([[position, 1]]);
+    const history = [];
 
     for (let ply = 0; ; ply++) {
         const decided = winner(position);
@@ -109,10 +111,11 @@ function playGame(opening, white, black, seed) {
         if (ply >= MAX_PLIES)
             return { whitePoints: 0.5, plies: ply, reason: 'length' };
 
-        const move = bestMove(position[59] === 'w' ? white : black, position, seed + ply);
+        const move = bestMove(position[59] === 'w' ? white : black, position, seed + ply, history);
         if (move == null)
             return { whitePoints: 0.5, plies: ply, reason: 'no move' };
 
+        history.push(position);
         position = applyMove(position, move);
         const count = (visits.get(position) ?? 0) + 1;
         visits.set(position, count);
@@ -192,7 +195,7 @@ function candidateOpening(enginePath, seed) {
     let position = STARTING_POSITION;
     const plies = 4 + seed % 5;
     for (let ply = 0; ply < plies; ply++) {
-        const move = bestMove(player, position, seed * 16 + ply);
+        const move = bestMove(player, position, seed * 16 + ply, []);
         if (move == null)
             return null;
         position = applyMove(position, move);
