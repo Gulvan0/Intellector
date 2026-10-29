@@ -2,7 +2,7 @@ package engine.hxconda.board;
 
 import engine.hxconda.board.BoardGeometry.DIRECTION_COUNT;
 import engine.hxconda.board.BoardGeometry.NO_SQUARE;
-import engine.hxconda.board.BoardGeometry.SQUARE_COUNT;
+import js.lib.Math;
 
 /**
     Pseudo-legal move generation for the side to move, in the order the original engine produced the moves.
@@ -13,30 +13,33 @@ class MoveGenerator
     {
         var moves:Array<Move> = [];
         var pieces:Array<Piece> = board.pieces;
-        var turn:PlayerColor = board.turn;
 
-        for (square in 0...SQUARE_COUNT)
+        for (half in 0...2)
         {
-            var piece:Piece = pieces[square];
-            if (piece == Empty || piece.color() != turn)
-                continue;
-
-            switch piece
+            var mask:Int = board.occupancyMask(board.turn, half);
+            while (mask != 0)
             {
-                case WhiteProgressor | BlackProgressor:
-                    addProgressorMoves(moves, board, square, piece, true);
-                case WhiteDominator | BlackDominator:
-                    addSlides(moves, board, square, piece, BoardGeometry.DOMINATOR_RAYS, true);
-                case WhiteAggressor | BlackAggressor:
-                    addSlides(moves, board, square, piece, BoardGeometry.AGGRESSOR_RAYS, true);
-                case WhiteDefensor | BlackDefensor:
-                    addSteps(moves, board, square, piece, BoardGeometry.NEIGHBOURS, true);
-                case WhiteLiberator | BlackLiberator:
-                    addSteps(moves, board, square, piece, BoardGeometry.LIBERATOR_JUMPS, true);
-                    addQuietSteps(moves, board, square, piece, BoardGeometry.NEIGHBOURS);
-                case WhiteIntellector | BlackIntellector:
-                    addIntellectorMoves(moves, board, square, piece);
-                default:
+                var square:Int = lowestSquare(mask, half);
+                mask &= mask - 1;
+                var piece:Piece = pieces[square];
+
+                switch piece
+                {
+                    case WhiteProgressor | BlackProgressor:
+                        addProgressorMoves(moves, board, square, piece, true);
+                    case WhiteDominator | BlackDominator:
+                        addSlides(moves, board, square, piece, BoardGeometry.DOMINATOR_RAYS, true);
+                    case WhiteAggressor | BlackAggressor:
+                        addSlides(moves, board, square, piece, BoardGeometry.AGGRESSOR_RAYS, true);
+                    case WhiteDefensor | BlackDefensor:
+                        addSteps(moves, board, square, piece, BoardGeometry.NEIGHBOURS, true);
+                    case WhiteLiberator | BlackLiberator:
+                        addSteps(moves, board, square, piece, BoardGeometry.LIBERATOR_JUMPS, true);
+                        addQuietSteps(moves, board, square, piece, BoardGeometry.NEIGHBOURS);
+                    case WhiteIntellector | BlackIntellector:
+                        addIntellectorMoves(moves, board, square, piece);
+                    default:
+                }
             }
         }
 
@@ -48,31 +51,40 @@ class MoveGenerator
     {
         var moves:Array<Move> = [];
         var pieces:Array<Piece> = board.pieces;
-        var turn:PlayerColor = board.turn;
 
-        for (square in 0...SQUARE_COUNT)
+        for (half in 0...2)
         {
-            var piece:Piece = pieces[square];
-            if (piece == Empty || piece.color() != turn)
-                continue;
-
-            switch piece
+            var mask:Int = board.occupancyMask(board.turn, half);
+            while (mask != 0)
             {
-                case WhiteProgressor | BlackProgressor:
-                    addProgressorMoves(moves, board, square, piece, false);
-                case WhiteDominator | BlackDominator:
-                    addSlides(moves, board, square, piece, BoardGeometry.DOMINATOR_RAYS, false);
-                case WhiteAggressor | BlackAggressor:
-                    addSlides(moves, board, square, piece, BoardGeometry.AGGRESSOR_RAYS, false);
-                case WhiteDefensor | BlackDefensor:
-                    addSteps(moves, board, square, piece, BoardGeometry.NEIGHBOURS, false);
-                case WhiteLiberator | BlackLiberator:
-                    addSteps(moves, board, square, piece, BoardGeometry.LIBERATOR_JUMPS, false);
-                default:
+                var square:Int = lowestSquare(mask, half);
+                mask &= mask - 1;
+                var piece:Piece = pieces[square];
+
+                switch piece
+                {
+                    case WhiteProgressor | BlackProgressor:
+                        addProgressorMoves(moves, board, square, piece, false);
+                    case WhiteDominator | BlackDominator:
+                        addSlides(moves, board, square, piece, BoardGeometry.DOMINATOR_RAYS, false);
+                    case WhiteAggressor | BlackAggressor:
+                        addSlides(moves, board, square, piece, BoardGeometry.AGGRESSOR_RAYS, false);
+                    case WhiteDefensor | BlackDefensor:
+                        addSteps(moves, board, square, piece, BoardGeometry.NEIGHBOURS, false);
+                    case WhiteLiberator | BlackLiberator:
+                        addSteps(moves, board, square, piece, BoardGeometry.LIBERATOR_JUMPS, false);
+                    default:
+                }
             }
         }
 
         return moves;
+    }
+
+    /** The lowest square in a nonzero `Board.occupancyMask` of `half` **/
+    private static inline function lowestSquare(mask:Int, half:Int):Int
+    {
+        return (half << 5) | (31 - Math.clz32(mask & -mask));
     }
 
     private static inline function addSlides(moves:Array<Move>, board:Board, square:Int, piece:Piece, rays:SquareLists, includeQuiet:Bool):Void

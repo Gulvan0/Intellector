@@ -3,6 +3,7 @@ package engine.hxconda.board;
 import engine.hxconda.board.BoardGeometry.NO_SQUARE;
 import engine.hxconda.board.BoardGeometry.SQUARE_COUNT;
 import engine.hxconda.evaluation.Evaluation;
+import js.lib.Int32Array;
 import js.lib.Map;
 
 /**
@@ -23,12 +24,20 @@ class Board
     **/
     public var materialScore(default, null):Float = 0;
 
+    /** Bit `square & 31` of entry `color * 2 + (square >> 5)` is set while a piece of `color` stands on `square` **/
+    private final occupancyMasks:Int32Array = new Int32Array(4);
     private final undoStack:Array<Int> = [];
     private final visitCounts:Map<Int, Int> = new Map();
 
     public inline function intellectorSquare(color:PlayerColor):Int
     {
         return color == White ? whiteIntellectorSquare : blackIntellectorSquare;
+    }
+
+    /** The squares of `color`'s pieces among 0-31 (`half` 0) or 32-58 (`half` 1), as bits `square & 31` **/
+    public inline function occupancyMask(color:PlayerColor, half:Int):Int
+    {
+        return occupancyMasks[color * 2 + half];
     }
 
     public function hash():Int
@@ -112,6 +121,7 @@ class Board
         {
             pieces[from] = Empty;
             pieces[to] = resultingPiece;
+            toggleMoveOccupancy(from, to, movingPiece, targetPiece);
         }
 
         if (updatesScore)
@@ -130,6 +140,9 @@ class Board
 
         if (updatesScore)
             materialScore += squarePairScore(from, movedPiece, to, targetPiece) - squarePairScore(from, pieces[from], to, pieces[to]);
+
+        if (!isCastling(movedPiece, targetPiece))
+            toggleMoveOccupancy(from, to, movedPiece, targetPiece);
 
         pieces[from] = movedPiece;
         pieces[to] = targetPiece;
@@ -242,6 +255,20 @@ class Board
         return Evaluation.clampDecisive(score);
     }
 
+    /** Updates `occupancyMasks` for a non-castling move, or reverts that update **/
+    private inline function toggleMoveOccupancy(from:Int, to:Int, movingPiece:Piece, targetPiece:Piece):Void
+    {
+        toggleOccupancy(from, movingPiece.color());
+        toggleOccupancy(to, movingPiece.color());
+        if (targetPiece != Empty)
+            toggleOccupancy(to, targetPiece.color());
+    }
+
+    private inline function toggleOccupancy(square:Int, color:PlayerColor):Void
+    {
+        occupancyMasks[color * 2 + (square >> 5)] ^= 1 << (square & 31);
+    }
+
     private static inline function isCastling(movingPiece:Piece, targetPiece:Piece):Bool
     {
         return movingPiece == WhiteIntellector && targetPiece == WhiteDefensor || movingPiece == BlackIntellector && targetPiece == BlackDefensor;
@@ -280,6 +307,9 @@ class Board
         if (notation.length != SQUARE_COUNT + 1)
             return false;
 
+        for (i in 0...occupancyMasks.length)
+            occupancyMasks[i] = 0;
+
         var whiteIntellectorCount:Int = 0;
         var blackIntellectorCount:Int = 0;
         whiteIntellectorSquare = NO_SQUARE;
@@ -292,6 +322,9 @@ class Board
                 return false;
 
             pieces[square] = piece;
+            if (piece != Empty)
+                toggleOccupancy(square, piece.color());
+
             if (piece == WhiteIntellector)
             {
                 whiteIntellectorSquare = square;

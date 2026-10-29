@@ -3,7 +3,8 @@
     (baseline/hxconda.js) and the reference Anaconda engine. Builds with the same behaviour visit the same nodes, so wall
     time compares the implementations directly; otherwise it compares the speed per node.
     Every engine/level pair runs in fresh processes, interleaving the engines so machine drift hits all of them alike;
-    the median of the repetitions counts.
+    the median of the repetitions counts. Each process first warms the engine up with level-2 searches, so that the measured
+    searches run optimized code rather than the JIT tiering of the first ones.
     Engines run in the process's own global scope rather than in a `vm` context, whose global lookups are slow.
 
     node scripts/hxconda/bench.js                  prints the results
@@ -19,6 +20,7 @@ const LEVELS = [4, 5, 6];
 const POSITION_COUNT = 10;
 const POSITION_SEED = 42;
 const REPETITIONS = 5;
+const WARMUP_SEARCHES = 20;
 
 if (process.argv[2] === '--single') {
     const { runInRealm, playoutPositions } = require('./harness.js');
@@ -27,7 +29,8 @@ if (process.argv[2] === '--single') {
         ? { command: 'bestMoveByLevel', position, level: searchLevel }
         : { kind: 'searchByLevel', position, level: searchLevel };
     const positions = playoutPositions(REFERENCE, POSITION_COUNT, POSITION_SEED);
-    runInRealm(engine, request(positions[0], 2), 1);
+    for (let i = 0; i < WARMUP_SEARCHES; i++)
+        runInRealm(engine, request(positions[i % positions.length], 2), 1);
     let totalMs = 0;
     for (const [i, position] of positions.entries())
         totalMs += runInRealm(engine, request(position, +level), 500 + i).ms;

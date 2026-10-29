@@ -58,6 +58,7 @@ engine_hxconda_HxcondaWorker.post = function(response) {
 var engine_hxconda_board_Board = function(notation) {
 	this.visitCounts = new Map();
 	this.undoStack = [];
+	this.occupancyMasks = new Int32Array(4);
 	this.materialScore = 0;
 	this.blackIntellectorSquare = -1;
 	this.whiteIntellectorSquare = -1;
@@ -116,6 +117,11 @@ engine_hxconda_board_Board.prototype = {
 		} else {
 			this.pieces[from] = 12;
 			this.pieces[to] = resultingPiece;
+			this.occupancyMasks[(movingPiece & 1) * 2 + (from >> 5)] ^= 1 << (from & 31);
+			this.occupancyMasks[(movingPiece & 1) * 2 + (to >> 5)] ^= 1 << (to & 31);
+			if(targetPiece != 12) {
+				this.occupancyMasks[(targetPiece & 1) * 2 + (to >> 5)] ^= 1 << (to & 31);
+			}
 		}
 		this.materialScore += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[this.pieces[from] * 59 + from] + engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[this.pieces[to] * 59 + to] - (engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[movingPiece * 59 + from] + engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[targetPiece * 59 + to]);
 		this.turn = this.turn ^ 1;
@@ -143,6 +149,11 @@ engine_hxconda_board_Board.prototype = {
 		} else {
 			this.pieces[from] = 12;
 			this.pieces[to] = resultingPiece;
+			this.occupancyMasks[(movingPiece & 1) * 2 + (from >> 5)] ^= 1 << (from & 31);
+			this.occupancyMasks[(movingPiece & 1) * 2 + (to >> 5)] ^= 1 << (to & 31);
+			if(targetPiece != 12) {
+				this.occupancyMasks[(targetPiece & 1) * 2 + (to >> 5)] ^= 1 << (to & 31);
+			}
 		}
 		this.turn = this.turn ^ 1;
 	}
@@ -153,6 +164,13 @@ engine_hxconda_board_Board.prototype = {
 		var movedPiece = record >> 12 & 15;
 		var targetPiece = record >> 16;
 		this.materialScore += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[movedPiece * 59 + from] + engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[targetPiece * 59 + to] - (engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[this.pieces[from] * 59 + from] + engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[this.pieces[to] * 59 + to]);
+		if(!(movedPiece == 10 && targetPiece == 8 || movedPiece == 11 && targetPiece == 9)) {
+			this.occupancyMasks[(movedPiece & 1) * 2 + (from >> 5)] ^= 1 << (from & 31);
+			this.occupancyMasks[(movedPiece & 1) * 2 + (to >> 5)] ^= 1 << (to & 31);
+			if(targetPiece != 12) {
+				this.occupancyMasks[(targetPiece & 1) * 2 + (to >> 5)] ^= 1 << (to & 31);
+			}
+		}
 		this.pieces[from] = movedPiece;
 		this.pieces[to] = targetPiece;
 		if(movedPiece == 10) {
@@ -173,6 +191,13 @@ engine_hxconda_board_Board.prototype = {
 		var to = record >> 6 & 63;
 		var movedPiece = record >> 12 & 15;
 		var targetPiece = record >> 16;
+		if(!(movedPiece == 10 && targetPiece == 8 || movedPiece == 11 && targetPiece == 9)) {
+			this.occupancyMasks[(movedPiece & 1) * 2 + (from >> 5)] ^= 1 << (from & 31);
+			this.occupancyMasks[(movedPiece & 1) * 2 + (to >> 5)] ^= 1 << (to & 31);
+			if(targetPiece != 12) {
+				this.occupancyMasks[(targetPiece & 1) * 2 + (to >> 5)] ^= 1 << (to & 31);
+			}
+		}
 		this.pieces[from] = movedPiece;
 		this.pieces[to] = targetPiece;
 		if(movedPiece == 10) {
@@ -258,6 +283,9 @@ engine_hxconda_board_Board.prototype = {
 		if(notation.length != 60) {
 			return false;
 		}
+		var _g = 0;
+		var _g1 = this.occupancyMasks.length;
+		while(_g < _g1) this.occupancyMasks[_g++] = 0;
 		var whiteIntellectorCount = 0;
 		var blackIntellectorCount = 0;
 		this.whiteIntellectorSquare = -1;
@@ -270,6 +298,9 @@ engine_hxconda_board_Board.prototype = {
 				return false;
 			}
 			this.pieces[square] = piece;
+			if(piece != 12) {
+				this.occupancyMasks[(piece & 1) * 2 + (square >> 5)] ^= 1 << (square & 31);
+			}
 			if(piece == 10) {
 				this.whiteIntellectorSquare = square;
 				++whiteIntellectorCount;
@@ -369,24 +400,21 @@ var engine_hxconda_board_MoveGenerator = function() { };
 engine_hxconda_board_MoveGenerator.generateMoves = function(board) {
 	var moves = [];
 	var pieces = board.pieces;
-	var turn = board.turn;
-	var _g = 0;
-	while(_g < 59) {
-		var square = _g++;
+	var mask = board.occupancyMasks[board.turn * 2];
+	while(mask != 0) {
+		var square = 0 | 31 - Math.clz32(mask & -mask);
+		mask &= mask - 1;
 		var piece = pieces[square];
-		if(piece == 12 || (piece & 1) != turn) {
-			continue;
-		}
 		switch(piece) {
 		case 0:case 1:
 			var pieces1 = board.pieces;
 			var color = piece & 1;
 			var steps = color == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS;
 			var squares = steps.squares;
-			var _g1 = steps.offsets[square];
-			var _g2 = steps.offsets[square + 1];
-			while(_g1 < _g2) {
-				var target = squares[_g1++];
+			var _g = steps.offsets[square];
+			var _g1 = steps.offsets[square + 1];
+			while(_g < _g1) {
+				var target = squares[_g++];
 				var targetPiece = pieces1[target];
 				if(!(targetPiece == 12 ? true : (targetPiece & 1) != color)) {
 					continue;
@@ -405,9 +433,9 @@ engine_hxconda_board_MoveGenerator.generateMoves = function(board) {
 			var rays = engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS;
 			var pieces2 = board.pieces;
 			var squares1 = rays.squares;
-			var _g3 = 0;
-			while(_g3 < 6) {
-				var ray = square * 6 + _g3++;
+			var _g2 = 0;
+			while(_g2 < 6) {
+				var ray = square * 6 + _g2++;
 				var k = rays.offsets[ray];
 				var end = rays.offsets[ray + 1];
 				while(k < end && pieces2[squares1[k]] == 12) {
@@ -435,10 +463,10 @@ engine_hxconda_board_MoveGenerator.generateMoves = function(board) {
 			var steps1 = engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS;
 			var pieces3 = board.pieces;
 			var squares2 = steps1.squares;
-			var _g4 = steps1.offsets[square];
-			var _g5 = steps1.offsets[square + 1];
-			while(_g4 < _g5) {
-				var target2 = squares2[_g4++];
+			var _g3 = steps1.offsets[square];
+			var _g4 = steps1.offsets[square + 1];
+			while(_g3 < _g4) {
+				var target2 = squares2[_g3++];
 				var targetPiece2 = pieces3[target2];
 				if(targetPiece2 == 12) {
 					moves.push(square | target2 << 6 | piece << 12);
@@ -460,10 +488,10 @@ engine_hxconda_board_MoveGenerator.generateMoves = function(board) {
 			var steps2 = engine_hxconda_board_BoardGeometry.NEIGHBOURS;
 			var pieces4 = board.pieces;
 			var squares3 = steps2.squares;
-			var _g6 = steps2.offsets[square];
-			var _g7 = steps2.offsets[square + 1];
-			while(_g6 < _g7) {
-				var k1 = _g6++;
+			var _g5 = steps2.offsets[square];
+			var _g6 = steps2.offsets[square + 1];
+			while(_g5 < _g6) {
+				var k1 = _g5++;
 				if(pieces4[squares3[k1]] == 12) {
 					moves.push(square | squares3[k1] << 6 | piece << 12);
 				}
@@ -473,9 +501,9 @@ engine_hxconda_board_MoveGenerator.generateMoves = function(board) {
 			var rays1 = engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS;
 			var pieces5 = board.pieces;
 			var squares4 = rays1.squares;
-			var _g8 = 0;
-			while(_g8 < 6) {
-				var ray1 = square * 6 + _g8++;
+			var _g7 = 0;
+			while(_g7 < 6) {
+				var ray1 = square * 6 + _g7++;
 				var k2 = rays1.offsets[ray1];
 				var end1 = rays1.offsets[ray1 + 1];
 				while(k2 < end1 && pieces5[squares4[k2]] == 12) {
@@ -503,10 +531,10 @@ engine_hxconda_board_MoveGenerator.generateMoves = function(board) {
 			var steps3 = engine_hxconda_board_BoardGeometry.NEIGHBOURS;
 			var pieces6 = board.pieces;
 			var squares5 = steps3.squares;
-			var _g9 = steps3.offsets[square];
-			var _g10 = steps3.offsets[square + 1];
-			while(_g9 < _g10) {
-				var target4 = squares5[_g9++];
+			var _g8 = steps3.offsets[square];
+			var _g9 = steps3.offsets[square + 1];
+			while(_g8 < _g9) {
+				var target4 = squares5[_g8++];
 				var targetPiece5 = pieces6[target4];
 				if(targetPiece5 == 12) {
 					moves.push(square | target4 << 6 | piece << 12);
@@ -530,10 +558,181 @@ engine_hxconda_board_MoveGenerator.generateMoves = function(board) {
 			var pieces7 = board.pieces;
 			var squares6 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.squares;
 			var ownDefensor = 8 | piece & 1;
-			var _g11 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.offsets[square];
-			var _g12 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.offsets[square + 1];
-			while(_g11 < _g12) {
-				var k3 = _g11++;
+			var _g10 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.offsets[square];
+			var _g11 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.offsets[square + 1];
+			while(_g10 < _g11) {
+				var k3 = _g10++;
+				var targetPiece7 = pieces7[squares6[k3]];
+				if(targetPiece7 == 12 || targetPiece7 == ownDefensor) {
+					moves.push(square | squares6[k3] << 6 | piece << 12);
+				}
+			}
+			break;
+		default:
+		}
+	}
+	var mask = board.occupancyMasks[board.turn * 2 + 1];
+	while(mask != 0) {
+		var square = 32 | 31 - Math.clz32(mask & -mask);
+		mask &= mask - 1;
+		var piece = pieces[square];
+		switch(piece) {
+		case 0:case 1:
+			var pieces1 = board.pieces;
+			var color = piece & 1;
+			var steps = color == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS;
+			var squares = steps.squares;
+			var _g = steps.offsets[square];
+			var _g1 = steps.offsets[square + 1];
+			while(_g < _g1) {
+				var target = squares[_g++];
+				var targetPiece = pieces1[target];
+				if(!(targetPiece == 12 ? true : (targetPiece & 1) != color)) {
+					continue;
+				}
+				if(engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS[color * 59 + target]) {
+					moves.push(square | target << 6 | (2 | color) << 12);
+					moves.push(square | target << 6 | (4 | color) << 12);
+					moves.push(square | target << 6 | (6 | color) << 12);
+					moves.push(square | target << 6 | (8 | color) << 12);
+				} else {
+					moves.push(square | target << 6 | piece << 12);
+				}
+			}
+			break;
+		case 2:case 3:
+			var rays = engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS;
+			var pieces2 = board.pieces;
+			var squares1 = rays.squares;
+			var _g2 = 0;
+			while(_g2 < 6) {
+				var ray = square * 6 + _g2++;
+				var k = rays.offsets[ray];
+				var end = rays.offsets[ray + 1];
+				while(k < end && pieces2[squares1[k]] == 12) {
+					moves.push(square | squares1[k] << 6 | piece << 12);
+					++k;
+				}
+				if(k < end && (pieces2[squares1[k]] & 1) != (piece & 1)) {
+					var target1 = squares1[k];
+					var targetPiece1 = board.pieces[target1];
+					moves.push(square | target1 << 6 | piece << 12);
+					var tmp;
+					if(targetPiece1 != (piece ^ 1) && !(targetPiece1 == 10 || targetPiece1 == 11)) {
+						var intellectorSquare = (piece & 1) == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+						tmp = intellectorSquare != -1 && engine_hxconda_board_BoardGeometry.ADJACENCY[square * 59 + intellectorSquare];
+					} else {
+						tmp = false;
+					}
+					if(tmp) {
+						moves.push(square | target1 << 6 | (targetPiece1 ^ 1) << 12);
+					}
+				}
+			}
+			break;
+		case 4:case 5:
+			var steps1 = engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS;
+			var pieces3 = board.pieces;
+			var squares2 = steps1.squares;
+			var _g3 = steps1.offsets[square];
+			var _g4 = steps1.offsets[square + 1];
+			while(_g3 < _g4) {
+				var target2 = squares2[_g3++];
+				var targetPiece2 = pieces3[target2];
+				if(targetPiece2 == 12) {
+					moves.push(square | target2 << 6 | piece << 12);
+				} else if((targetPiece2 & 1) != (piece & 1)) {
+					var targetPiece3 = board.pieces[target2];
+					moves.push(square | target2 << 6 | piece << 12);
+					var tmp1;
+					if(targetPiece3 != (piece ^ 1) && !(targetPiece3 == 10 || targetPiece3 == 11)) {
+						var intellectorSquare1 = (piece & 1) == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+						tmp1 = intellectorSquare1 != -1 && engine_hxconda_board_BoardGeometry.ADJACENCY[square * 59 + intellectorSquare1];
+					} else {
+						tmp1 = false;
+					}
+					if(tmp1) {
+						moves.push(square | target2 << 6 | (targetPiece3 ^ 1) << 12);
+					}
+				}
+			}
+			var steps2 = engine_hxconda_board_BoardGeometry.NEIGHBOURS;
+			var pieces4 = board.pieces;
+			var squares3 = steps2.squares;
+			var _g5 = steps2.offsets[square];
+			var _g6 = steps2.offsets[square + 1];
+			while(_g5 < _g6) {
+				var k1 = _g5++;
+				if(pieces4[squares3[k1]] == 12) {
+					moves.push(square | squares3[k1] << 6 | piece << 12);
+				}
+			}
+			break;
+		case 6:case 7:
+			var rays1 = engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS;
+			var pieces5 = board.pieces;
+			var squares4 = rays1.squares;
+			var _g7 = 0;
+			while(_g7 < 6) {
+				var ray1 = square * 6 + _g7++;
+				var k2 = rays1.offsets[ray1];
+				var end1 = rays1.offsets[ray1 + 1];
+				while(k2 < end1 && pieces5[squares4[k2]] == 12) {
+					moves.push(square | squares4[k2] << 6 | piece << 12);
+					++k2;
+				}
+				if(k2 < end1 && (pieces5[squares4[k2]] & 1) != (piece & 1)) {
+					var target3 = squares4[k2];
+					var targetPiece4 = board.pieces[target3];
+					moves.push(square | target3 << 6 | piece << 12);
+					var tmp2;
+					if(targetPiece4 != (piece ^ 1) && !(targetPiece4 == 10 || targetPiece4 == 11)) {
+						var intellectorSquare2 = (piece & 1) == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+						tmp2 = intellectorSquare2 != -1 && engine_hxconda_board_BoardGeometry.ADJACENCY[square * 59 + intellectorSquare2];
+					} else {
+						tmp2 = false;
+					}
+					if(tmp2) {
+						moves.push(square | target3 << 6 | (targetPiece4 ^ 1) << 12);
+					}
+				}
+			}
+			break;
+		case 8:case 9:
+			var steps3 = engine_hxconda_board_BoardGeometry.NEIGHBOURS;
+			var pieces6 = board.pieces;
+			var squares5 = steps3.squares;
+			var _g8 = steps3.offsets[square];
+			var _g9 = steps3.offsets[square + 1];
+			while(_g8 < _g9) {
+				var target4 = squares5[_g8++];
+				var targetPiece5 = pieces6[target4];
+				if(targetPiece5 == 12) {
+					moves.push(square | target4 << 6 | piece << 12);
+				} else if((targetPiece5 & 1) != (piece & 1)) {
+					var targetPiece6 = board.pieces[target4];
+					moves.push(square | target4 << 6 | piece << 12);
+					var tmp3;
+					if(targetPiece6 != (piece ^ 1) && !(targetPiece6 == 10 || targetPiece6 == 11)) {
+						var intellectorSquare3 = (piece & 1) == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+						tmp3 = intellectorSquare3 != -1 && engine_hxconda_board_BoardGeometry.ADJACENCY[square * 59 + intellectorSquare3];
+					} else {
+						tmp3 = false;
+					}
+					if(tmp3) {
+						moves.push(square | target4 << 6 | (targetPiece6 ^ 1) << 12);
+					}
+				}
+			}
+			break;
+		case 10:case 11:
+			var pieces7 = board.pieces;
+			var squares6 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.squares;
+			var ownDefensor = 8 | piece & 1;
+			var _g10 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.offsets[square];
+			var _g11 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.offsets[square + 1];
+			while(_g10 < _g11) {
+				var k3 = _g10++;
 				var targetPiece7 = pieces7[squares6[k3]];
 				if(targetPiece7 == 12 || targetPiece7 == ownDefensor) {
 					moves.push(square | squares6[k3] << 6 | piece << 12);
@@ -548,24 +747,21 @@ engine_hxconda_board_MoveGenerator.generateMoves = function(board) {
 engine_hxconda_board_MoveGenerator.generateCaptures = function(board) {
 	var moves = [];
 	var pieces = board.pieces;
-	var turn = board.turn;
-	var _g = 0;
-	while(_g < 59) {
-		var square = _g++;
+	var mask = board.occupancyMasks[board.turn * 2];
+	while(mask != 0) {
+		var square = 0 | 31 - Math.clz32(mask & -mask);
+		mask &= mask - 1;
 		var piece = pieces[square];
-		if(piece == 12 || (piece & 1) != turn) {
-			continue;
-		}
 		switch(piece) {
 		case 0:case 1:
 			var pieces1 = board.pieces;
 			var color = piece & 1;
 			var steps = color == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS;
 			var squares = steps.squares;
-			var _g1 = steps.offsets[square];
-			var _g2 = steps.offsets[square + 1];
-			while(_g1 < _g2) {
-				var target = squares[_g1++];
+			var _g = steps.offsets[square];
+			var _g1 = steps.offsets[square + 1];
+			while(_g < _g1) {
+				var target = squares[_g++];
 				var targetPiece = pieces1[target];
 				if(!(targetPiece == 12 ? false : (targetPiece & 1) != color)) {
 					continue;
@@ -584,9 +780,9 @@ engine_hxconda_board_MoveGenerator.generateCaptures = function(board) {
 			var rays = engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS;
 			var pieces2 = board.pieces;
 			var squares1 = rays.squares;
-			var _g3 = 0;
-			while(_g3 < 6) {
-				var ray = square * 6 + _g3++;
+			var _g2 = 0;
+			while(_g2 < 6) {
+				var ray = square * 6 + _g2++;
 				var k = rays.offsets[ray];
 				var end = rays.offsets[ray + 1];
 				while(k < end && pieces2[squares1[k]] == 12) ++k;
@@ -611,10 +807,10 @@ engine_hxconda_board_MoveGenerator.generateCaptures = function(board) {
 			var steps1 = engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS;
 			var pieces3 = board.pieces;
 			var squares2 = steps1.squares;
-			var _g4 = steps1.offsets[square];
-			var _g5 = steps1.offsets[square + 1];
-			while(_g4 < _g5) {
-				var target2 = squares2[_g4++];
+			var _g3 = steps1.offsets[square];
+			var _g4 = steps1.offsets[square + 1];
+			while(_g3 < _g4) {
+				var target2 = squares2[_g3++];
 				var targetPiece2 = pieces3[target2];
 				if(targetPiece2 != 12) {
 					if((targetPiece2 & 1) != (piece & 1)) {
@@ -638,9 +834,9 @@ engine_hxconda_board_MoveGenerator.generateCaptures = function(board) {
 			var rays1 = engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS;
 			var pieces4 = board.pieces;
 			var squares3 = rays1.squares;
-			var _g6 = 0;
-			while(_g6 < 6) {
-				var ray1 = square * 6 + _g6++;
+			var _g5 = 0;
+			while(_g5 < 6) {
+				var ray1 = square * 6 + _g5++;
 				var k1 = rays1.offsets[ray1];
 				var end1 = rays1.offsets[ray1 + 1];
 				while(k1 < end1 && pieces4[squares3[k1]] == 12) ++k1;
@@ -665,10 +861,150 @@ engine_hxconda_board_MoveGenerator.generateCaptures = function(board) {
 			var steps2 = engine_hxconda_board_BoardGeometry.NEIGHBOURS;
 			var pieces5 = board.pieces;
 			var squares4 = steps2.squares;
-			var _g7 = steps2.offsets[square];
-			var _g8 = steps2.offsets[square + 1];
-			while(_g7 < _g8) {
-				var target4 = squares4[_g7++];
+			var _g6 = steps2.offsets[square];
+			var _g7 = steps2.offsets[square + 1];
+			while(_g6 < _g7) {
+				var target4 = squares4[_g6++];
+				var targetPiece5 = pieces5[target4];
+				if(targetPiece5 != 12) {
+					if((targetPiece5 & 1) != (piece & 1)) {
+						var targetPiece6 = board.pieces[target4];
+						moves.push(square | target4 << 6 | piece << 12);
+						var tmp3;
+						if(targetPiece6 != (piece ^ 1) && !(targetPiece6 == 10 || targetPiece6 == 11)) {
+							var intellectorSquare3 = (piece & 1) == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+							tmp3 = intellectorSquare3 != -1 && engine_hxconda_board_BoardGeometry.ADJACENCY[square * 59 + intellectorSquare3];
+						} else {
+							tmp3 = false;
+						}
+						if(tmp3) {
+							moves.push(square | target4 << 6 | (targetPiece6 ^ 1) << 12);
+						}
+					}
+				}
+			}
+			break;
+		default:
+		}
+	}
+	var mask = board.occupancyMasks[board.turn * 2 + 1];
+	while(mask != 0) {
+		var square = 32 | 31 - Math.clz32(mask & -mask);
+		mask &= mask - 1;
+		var piece = pieces[square];
+		switch(piece) {
+		case 0:case 1:
+			var pieces1 = board.pieces;
+			var color = piece & 1;
+			var steps = color == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS;
+			var squares = steps.squares;
+			var _g = steps.offsets[square];
+			var _g1 = steps.offsets[square + 1];
+			while(_g < _g1) {
+				var target = squares[_g++];
+				var targetPiece = pieces1[target];
+				if(!(targetPiece == 12 ? false : (targetPiece & 1) != color)) {
+					continue;
+				}
+				if(engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS[color * 59 + target]) {
+					moves.push(square | target << 6 | (2 | color) << 12);
+					moves.push(square | target << 6 | (4 | color) << 12);
+					moves.push(square | target << 6 | (6 | color) << 12);
+					moves.push(square | target << 6 | (8 | color) << 12);
+				} else {
+					moves.push(square | target << 6 | piece << 12);
+				}
+			}
+			break;
+		case 2:case 3:
+			var rays = engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS;
+			var pieces2 = board.pieces;
+			var squares1 = rays.squares;
+			var _g2 = 0;
+			while(_g2 < 6) {
+				var ray = square * 6 + _g2++;
+				var k = rays.offsets[ray];
+				var end = rays.offsets[ray + 1];
+				while(k < end && pieces2[squares1[k]] == 12) ++k;
+				if(k < end && (pieces2[squares1[k]] & 1) != (piece & 1)) {
+					var target1 = squares1[k];
+					var targetPiece1 = board.pieces[target1];
+					moves.push(square | target1 << 6 | piece << 12);
+					var tmp;
+					if(targetPiece1 != (piece ^ 1) && !(targetPiece1 == 10 || targetPiece1 == 11)) {
+						var intellectorSquare = (piece & 1) == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+						tmp = intellectorSquare != -1 && engine_hxconda_board_BoardGeometry.ADJACENCY[square * 59 + intellectorSquare];
+					} else {
+						tmp = false;
+					}
+					if(tmp) {
+						moves.push(square | target1 << 6 | (targetPiece1 ^ 1) << 12);
+					}
+				}
+			}
+			break;
+		case 4:case 5:
+			var steps1 = engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS;
+			var pieces3 = board.pieces;
+			var squares2 = steps1.squares;
+			var _g3 = steps1.offsets[square];
+			var _g4 = steps1.offsets[square + 1];
+			while(_g3 < _g4) {
+				var target2 = squares2[_g3++];
+				var targetPiece2 = pieces3[target2];
+				if(targetPiece2 != 12) {
+					if((targetPiece2 & 1) != (piece & 1)) {
+						var targetPiece3 = board.pieces[target2];
+						moves.push(square | target2 << 6 | piece << 12);
+						var tmp1;
+						if(targetPiece3 != (piece ^ 1) && !(targetPiece3 == 10 || targetPiece3 == 11)) {
+							var intellectorSquare1 = (piece & 1) == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+							tmp1 = intellectorSquare1 != -1 && engine_hxconda_board_BoardGeometry.ADJACENCY[square * 59 + intellectorSquare1];
+						} else {
+							tmp1 = false;
+						}
+						if(tmp1) {
+							moves.push(square | target2 << 6 | (targetPiece3 ^ 1) << 12);
+						}
+					}
+				}
+			}
+			break;
+		case 6:case 7:
+			var rays1 = engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS;
+			var pieces4 = board.pieces;
+			var squares3 = rays1.squares;
+			var _g5 = 0;
+			while(_g5 < 6) {
+				var ray1 = square * 6 + _g5++;
+				var k1 = rays1.offsets[ray1];
+				var end1 = rays1.offsets[ray1 + 1];
+				while(k1 < end1 && pieces4[squares3[k1]] == 12) ++k1;
+				if(k1 < end1 && (pieces4[squares3[k1]] & 1) != (piece & 1)) {
+					var target3 = squares3[k1];
+					var targetPiece4 = board.pieces[target3];
+					moves.push(square | target3 << 6 | piece << 12);
+					var tmp2;
+					if(targetPiece4 != (piece ^ 1) && !(targetPiece4 == 10 || targetPiece4 == 11)) {
+						var intellectorSquare2 = (piece & 1) == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+						tmp2 = intellectorSquare2 != -1 && engine_hxconda_board_BoardGeometry.ADJACENCY[square * 59 + intellectorSquare2];
+					} else {
+						tmp2 = false;
+					}
+					if(tmp2) {
+						moves.push(square | target3 << 6 | (targetPiece4 ^ 1) << 12);
+					}
+				}
+			}
+			break;
+		case 8:case 9:
+			var steps2 = engine_hxconda_board_BoardGeometry.NEIGHBOURS;
+			var pieces5 = board.pieces;
+			var squares4 = steps2.squares;
+			var _g6 = steps2.offsets[square];
+			var _g7 = steps2.offsets[square + 1];
+			while(_g6 < _g7) {
+				var target4 = squares4[_g6++];
 				var targetPiece5 = pieces5[target4];
 				if(targetPiece5 != 12) {
 					if((targetPiece5 & 1) != (piece & 1)) {

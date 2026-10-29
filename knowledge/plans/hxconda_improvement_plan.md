@@ -23,20 +23,20 @@ Calibration (`match_results.md`): doubling the nodes is worth about +140 Elo, de
 
 ## Where the time goes
 
-CPU profile of the accepted baseline (A2) on the 10 benchmark positions at level 5, self time per function:
+CPU profile of the accepted baseline (A6) on the 10 benchmark positions at level 5, self time per function:
 
 | Share | Function | What it does |
 |---|---|---|
-| 37.1% | `MoveGenerator.generateCaptures` | every quiescence node generates all its captures |
-| 8.5% | `Board.isIntellectorAttacked` | runs after every move of the main search |
-| 7.4% | `MoveGenerator.generateMoves` | main search nodes |
-| 7.4% | `orderedCaptures` | ordering keys of the quiescence captures |
-| 6.0% | `quiesce` | |
-| 14.3% | `search` and the two move loops | |
-| 3.7% | `sortMoves` | ordering keys of main search moves, depth ≥ 2 |
-| 1.7% | `SearchTuning.sortByKeys` | all sorting |
-| 2.2% | garbage collection | |
-| 1.3% | `Board.hashAfter` | |
+| 29.6% | `MoveGenerator.generateCaptures` | every quiescence node generates all its captures |
+| 9.8% | `orderedCaptures` | ordering keys of the quiescence captures |
+| 7.6% | `Board.isIntellectorAttacked` | runs after every move of the main search |
+| 7.5% | `sortMoves` | ordering keys of main search moves, depth ≥ 2 |
+| 6.5% | `MoveGenerator.generateMoves` | main search nodes |
+| 6.1% | `quiesce` | |
+| 15.1% | `search` and the two move loops | |
+| 4.5% | `Board.makeMove`, `makeUnscoredMove` | |
+| 2.7% | garbage collection | |
+| 1.9% | `SearchTuning.sortByKeys` | all sorting |
 
 Quiescence and move generation dominate; sorting, allocation and the depth ≥ 2 nodes are a few percent each. Re-profile after every accepted change, since the shares shift.
 
@@ -48,20 +48,20 @@ The output must stay identical, so each change only alters how a result is compu
 
 ### Planned
 
-1. **A5. Targeted captures in deep quiescence.** From quiescence depth 2 on, only recaptures and Intellector captures are searched, yet all captures get generated and then filtered out. Instead, look up the attackers of those few target squares, as `isIntellectorAttacked` does. Order them as the generator would: by origin square, then direction or step index, then promotion variant. That keeps the order exact. Counting first how many quiescence nodes are that deep tells how much of the 37% this can reach.
-2. **A6. Piece lists.** Both generators, together 44% of the time, scan all 59 squares for the side's pieces. Iterate its own pieces in square order instead, for example through two 32-bit occupancy masks per color kept up to date in make/unmake.
-3. **A7. Incremental check detection** (8.5%). After a move, only the moved piece and the lines through the vacated square can start attacking an Intellector; every other attack stays as it was before the move. Exact but intricate.
-4. **A8. Capture ordering keys during generation.** `orderedCaptures` makes a second pass over the captures to compute their keys (7.4%). Compute each key when the capture is pushed instead.
-5. **A9. Transposition table and repetition counts on typed arrays.** An open-addressing table keyed by the exact hash, with per-position entry chains in parallel typed arrays, replaces `js.lib.Map` and the entry objects. It must stay unbounded, growing by rehashing, and keep the entry order, so its semantics don't change. The table's functions don't show up among the top entries of the profile, so the expected gain is small.
-6. **A10. Lookup tables in typed arrays.** `Board.pieces`, `SquareLists.squares` and the score tables become `Int8Array`/`Int32Array`/`Float64Array`. Small gain.
-7. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
+1. **A7. Incremental check detection** (7.6%). After a move, only the moved piece and the lines through the vacated square can start attacking an Intellector; every other attack stays as it was before the move. Exact but intricate.
+2. **A8. Capture ordering keys during generation.** `orderedCaptures` makes a second pass over the captures to compute their keys (9.8%). Compute each key when the capture is pushed instead.
+3. **A9. Transposition table and repetition counts on typed arrays.** An open-addressing table keyed by the exact hash, with per-position entry chains in parallel typed arrays, replaces `js.lib.Map` and the entry objects. It must stay unbounded, growing by rehashing, and keep the entry order, so its semantics don't change. The table's functions don't show up among the top entries of the profile, so the expected gain is small.
+4. **A10. Lookup tables in typed arrays.** `Board.pieces`, `SquareLists.squares` and the score tables become `Int8Array`/`Int32Array`/`Float64Array`. Small gain.
+5. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
 
 ### Tried
 
 - **A1. Win check without making the move in move ordering.** **Rejected:** x1.004-1.007 against the baseline. `sortMoves` makes and unmakes every move at nodes of depth ≥ 2 only to ask whether the move wins at once, but those nodes are too few for this to matter.
 - **A2. Incremental material score.** **Accepted:** x1.12-1.19 against the baseline. `Board` keeps the sum of piece-square values up to date in make/unmake, instead of `evaluate()` summing 59 squares at every quiescence root. Quiescence moves skip the update (`makeUnscoredMove`), since quiescence tracks its own score. Exact, because every value is a multiple of 0.5.
 - **A3. Pick-next-best instead of sorting.** **Rejected:** x0.96-0.99 against the baseline. Selecting the earliest best remaining move reproduces the stable sort exactly, but every pick rescans the rest of the list, and most quiescence nodes search all their captures: the insertion sort of a short list is cheaper.
-- **A4. Allocation-free move lists.** **Rejected:** x1.006-1.025 against the baseline, within or barely beyond the noise, so not worth the stack bookkeeping in every move loop. Moves and sort keys lived in one reusable stack of arrays rather than new arrays per node. Worth retrying after A5 and A6, once allocation is a larger share of the time.
+- **A4. Allocation-free move lists.** **Rejected:** x1.006-1.025 against the baseline, within or barely beyond the noise, so not worth the stack bookkeeping in every move loop. Moves and sort keys lived in one reusable stack of arrays rather than new arrays per node. Worth retrying after A6, once allocation is a larger share of the time.
+- **A5. Targeted captures in deep quiescence.** **Rejected:** x0.97-0.98 against the baseline. From quiescence depth 2 on, only recaptures and Intellector captures are searched. Those nodes make 29% of the capture generations but, with fewer pieces left, only about 6% of the time. Looking up the attackers of the target squares scans 12 rays from each and cost as much per call as a full generation (x0.82-0.87). Generating only for the own pieces that could reach a target on an empty board still pays for the 59-square scan. Worth retrying after A6 removes that scan. Reversed progressor steps need inverted step tables: the opposite color's table is empty on the final rows.
+- **A6. Piece lists.** **Accepted:** x1.10-1.15 against the baseline. `Board` keeps two 32-bit occupancy masks per color up to date in make/unmake, and both generators visit the side's own pieces through them in square order instead of scanning all 59 squares. The masks live in an `Int32Array`: in a plain array, a mask with bit 30 or 31 set is no small integer to V8 and turns the array into doubles, which cost most of the gain. Measured with 20 warm-up searches per process; with a single one, level 4 showed only x1.005-1.038, the candidate losing its first search to JIT tiering.
 
 ## B. Changes that alter the behaviour
 
