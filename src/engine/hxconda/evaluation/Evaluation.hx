@@ -3,6 +3,7 @@ package engine.hxconda.evaluation;
 import engine.hxconda.board.BoardGeometry.SQUARE_COUNT;
 import engine.hxconda.board.BoardGeometry;
 import engine.hxconda.board.Piece;
+import js.lib.Float64Array;
 
 /**
     Static evaluation terms. Scores are from white's perspective: positive favours white.
@@ -19,7 +20,7 @@ class Evaluation
     private static inline final CENTRALITY_WEIGHT:Float = 5;
 
     /** Material value of each piece code **/
-    public static final PIECE_VALUES:Array<Float> = [100, -100, 600, -600, 170, -170, 200, -200, 150, -150, WHITE_WIN_SCORE, BLACK_WIN_SCORE, 0];
+    public static final PIECE_VALUES:Float64Array = Float64Array.from([100, -100, 600, -600, 170, -170, 200, -200, 150, -150, WHITE_WIN_SCORE, BLACK_WIN_SCORE, 0]);
 
     private static final DISTANCE_TO_CENTER:Array<Int> = [
         5, 4, 4, 4, 4, 4, 5, // a
@@ -81,7 +82,7 @@ class Evaluation
         -100000, -100, -50, -20, -10, -5, 0 // i
     ];
 
-    private static final PIECE_SQUARE_SCORES:Array<Float> = [for (piece in 0...Piece.COUNT) for (square in 0...SQUARE_COUNT) computePieceSquareScore(cast piece, square)];
+    private static final PIECE_SQUARE_SCORES:Float64Array = Float64Array.from([for (piece in 0...Piece.COUNT) for (square in 0...SQUARE_COUNT) computePieceSquareScore(cast piece, square)]);
 
     /** Value of `piece` standing on `square`: its material value plus the positional bonuses **/
     public static inline function pieceSquareScore(piece:Piece, square:Int):Float

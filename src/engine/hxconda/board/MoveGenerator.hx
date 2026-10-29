@@ -2,6 +2,7 @@ package engine.hxconda.board;
 
 import engine.hxconda.board.BoardGeometry.DIRECTION_COUNT;
 import engine.hxconda.board.BoardGeometry.NO_SQUARE;
+import js.lib.Int8Array;
 import js.lib.Math;
 
 /**
@@ -12,7 +13,7 @@ class MoveGenerator
     public static function generateMoves(board:Board):Array<Move>
     {
         var moves:Array<Move> = [];
-        var pieces:Array<Piece> = board.pieces;
+        var pieces:PieceArray = board.pieces;
 
         for (half in 0...2)
         {
@@ -50,7 +51,7 @@ class MoveGenerator
     public static function generateCaptures(board:Board):Array<Move>
     {
         var moves:Array<Move> = [];
-        var pieces:Array<Piece> = board.pieces;
+        var pieces:PieceArray = board.pieces;
 
         for (half in 0...2)
         {
@@ -89,8 +90,8 @@ class MoveGenerator
 
     private static inline function addSlides(moves:Array<Move>, board:Board, square:Int, piece:Piece, rays:SquareLists, includeQuiet:Bool):Void
     {
-        var pieces:Array<Piece> = board.pieces;
-        var squares:Array<Int> = rays.squares;
+        var pieces:PieceArray = board.pieces;
+        var squares:Int8Array = rays.squares;
 
         for (direction in 0...DIRECTION_COUNT)
         {
@@ -112,8 +113,8 @@ class MoveGenerator
 
     private static inline function addSteps(moves:Array<Move>, board:Board, square:Int, piece:Piece, steps:SquareLists, includeQuiet:Bool):Void
     {
-        var pieces:Array<Piece> = board.pieces;
-        var squares:Array<Int> = steps.squares;
+        var pieces:PieceArray = board.pieces;
+        var squares:Int8Array = steps.squares;
 
         for (k in steps.start(square)...steps.end(square))
         {
@@ -131,8 +132,8 @@ class MoveGenerator
 
     private static inline function addQuietSteps(moves:Array<Move>, board:Board, square:Int, piece:Piece, steps:SquareLists):Void
     {
-        var pieces:Array<Piece> = board.pieces;
-        var squares:Array<Int> = steps.squares;
+        var pieces:PieceArray = board.pieces;
+        var squares:Int8Array = steps.squares;
 
         for (k in steps.start(square)...steps.end(square))
             if (pieces[squares[k]] == Empty)
@@ -157,10 +158,10 @@ class MoveGenerator
 
     private static inline function addProgressorMoves(moves:Array<Move>, board:Board, square:Int, piece:Piece, includeQuiet:Bool):Void
     {
-        var pieces:Array<Piece> = board.pieces;
+        var pieces:PieceArray = board.pieces;
         var color:PlayerColor = piece.color();
         var steps:SquareLists = color == White ? BoardGeometry.WHITE_PROGRESSOR_STEPS : BoardGeometry.BLACK_PROGRESSOR_STEPS;
-        var squares:Array<Int> = steps.squares;
+        var squares:Int8Array = steps.squares;
 
         for (k in steps.start(square)...steps.end(square))
         {
@@ -184,8 +185,8 @@ class MoveGenerator
 
     private static inline function addIntellectorMoves(moves:Array<Move>, board:Board, square:Int, piece:Piece):Void
     {
-        var pieces:Array<Piece> = board.pieces;
-        var squares:Array<Int> = BoardGeometry.NEIGHBOURS.squares;
+        var pieces:PieceArray = board.pieces;
+        var squares:Int8Array = BoardGeometry.NEIGHBOURS.squares;
         var ownDefensor:Piece = WhiteDefensor.ofColor(piece.color());
 
         for (k in BoardGeometry.NEIGHBOURS.start(square)...BoardGeometry.NEIGHBOURS.end(square))

@@ -23,20 +23,20 @@ Calibration (`match_results.md`): doubling the nodes is worth about +140 Elo, de
 
 ## Where the time goes
 
-CPU profile of the accepted baseline (A6) on the 10 benchmark positions at level 5, self time per function:
+CPU profile of the accepted baseline (A10) on the 10 benchmark positions at level 5, self time per function:
 
 | Share | Function | What it does |
 |---|---|---|
-| 29.6% | `MoveGenerator.generateCaptures` | every quiescence node generates all its captures |
-| 9.8% | `orderedCaptures` | ordering keys of the quiescence captures |
-| 7.6% | `Board.isIntellectorAttacked` | runs after every move of the main search |
-| 7.5% | `sortMoves` | ordering keys of main search moves, depth ≥ 2 |
-| 6.5% | `MoveGenerator.generateMoves` | main search nodes |
-| 6.1% | `quiesce` | |
-| 15.1% | `search` and the two move loops | |
-| 4.5% | `Board.makeMove`, `makeUnscoredMove` | |
-| 2.7% | garbage collection | |
-| 1.9% | `SearchTuning.sortByKeys` | all sorting |
+| 30.2% | `MoveGenerator.generateCaptures` | every quiescence node generates all its captures |
+| 9.5% | `orderedCaptures` | ordering keys of the quiescence captures, and their sorting |
+| 7.2% | `sortMoves` | ordering keys of main search moves, depth ≥ 2 |
+| 6.6% | `quiesce` | |
+| 6.3% | `MoveGenerator.generateMoves` | main search nodes |
+| 15.1% | `search` and the two move loops | including the inlined transposition table |
+| 5.6% | `Board.attacksIntellector`, `isIntellectorAttackedAfter` | check detection, once per move loop and after every move |
+| 3.2% | `Board.makeMove` | |
+| 2.6% | garbage collection | |
+| 1.9% | `SearchTuning.sortByKeys` | sorting of main search moves |
 
 Quiescence and move generation dominate; sorting, allocation and the depth ≥ 2 nodes are a few percent each. Re-profile after every accepted change, since the shares shift.
 
@@ -48,8 +48,7 @@ The output must stay identical, so each change only alters how a result is compu
 
 ### Planned
 
-1. **A10. Lookup tables in typed arrays.** `Board.pieces`, `SquareLists.squares` and the score tables become `Int8Array`/`Int32Array`/`Float64Array`. Small gain.
-2. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
+1. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
 
 ### Tried
 
@@ -62,6 +61,7 @@ The output must stay identical, so each change only alters how a result is compu
 - **A7. Incremental check detection.** **Accepted:** x1.04-1.07 against the baseline. A move loop tries 10.8 moves on average, each followed by a check detection. Now each loop asks once whether the side to move already attacks the opponent's Intellector; it rarely does, and then every move gets the full detection. Otherwise only the moved piece and the dominator and aggressor lines from the Intellector through the vacated square can attack after a move, and castling only puts the defensor on the origin square. The precondition is needed: a moved piece can also block an attack of its own side's slider.
 - **A8. Capture ordering keys during generation.** **Rejected:** x0.95-0.98 against the baseline. Computing the keys is about a third of `orderedCaptures` (3.5% of the time), mostly filling the array of keys, which generation still has to do. Pushing each key along with its capture slowed down the generator's inner loop by more than the second pass cost. Integer keys, all piece values being integers, gave x1.00 in a quick check: comparing the keys was never the cost.
 - **A9. Transposition table and repetition counts on typed arrays.** **Accepted:** x1.03-1.05 against the baseline. The table's functions are inlined into `search` and `sortMoves`, which hid them from the profile: a level 5 benchmark run makes 7.7M `js.lib.Map` operations, about 12% of the time in a tight loop. Both maps became open-addressing tables with linear probing, keyed by the exact hash and growing by rehashing: `TranspositionTable` indexes its per-position entry arrays, and `VisitCounts` deletes with backward shifting and counts hash 0 apart. The entries are still objects; moving them into parallel typed arrays is left untried.
+- **A10. Lookup tables in typed arrays.** **Accepted:** x1.06-1.07 against the baseline. `Board.pieces` is a `PieceArray`, an abstract over an `Int8Array` that reads and writes `Piece` values. `SquareLists` packs its squares into an `Int8Array` and its offsets into an `Int16Array`, and the piece values and piece-square scores live in `Float64Array`s.
 
 ## B. Changes that alter the behaviour
 

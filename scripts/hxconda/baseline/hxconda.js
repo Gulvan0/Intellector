@@ -64,13 +64,9 @@ var engine_hxconda_board_Board = function(notation) {
 	this.whiteIntellectorSquare = -1;
 	this.turn = 0;
 	this.zobristKeys = new engine_hxconda_board_ZobristKeys();
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < 59) {
-		++_g1;
-		_g.push(12);
-	}
-	this.pieces = _g;
+	var this1 = new Int8Array(59);
+	this1.fill(12);
+	this.pieces = this1;
 	if(notation == null || !this.trySetFromNotation(notation)) {
 		this.trySetFromNotation("mpeeePMleeeeLapeeePAdeeeeDipeeePIdeeeeDapeeePAleeeeLmpeeePMw");
 	}
@@ -413,15 +409,20 @@ engine_hxconda_board_Board.prototype = {
 	}
 };
 var engine_hxconda_board_SquareLists = function(lists) {
-	this.squares = [];
-	this.offsets = [0];
+	var squareCount = 0;
 	var _g = 0;
-	while(_g < lists.length) {
-		var list = lists[_g];
-		++_g;
-		var _g1 = 0;
-		while(_g1 < list.length) this.squares.push(list[_g1++]);
-		this.offsets.push(this.squares.length);
+	while(_g < lists.length) squareCount += lists[_g++].length;
+	this.squares = new Int8Array(squareCount);
+	this.offsets = new Int16Array(lists.length + 1);
+	var offset = 0;
+	var _g = 0;
+	var _g1 = lists.length;
+	while(_g < _g1) {
+		var i = _g++;
+		var _g2 = 0;
+		var _g3 = lists[i];
+		while(_g2 < _g3.length) this.squares[offset++] = _g3[_g2++];
+		this.offsets[i + 1] = offset;
 	}
 };
 engine_hxconda_board_SquareLists.ofRays = function(rays) {
@@ -2745,7 +2746,7 @@ engine_hxconda_board_BoardGeometry.DOMINATOR_DIRECTIONS = engine_hxconda_board_B
 engine_hxconda_board_BoardGeometry.AGGRESSOR_DIRECTIONS = engine_hxconda_board_BoardGeometry.computeRayDirections(engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS);
 engine_hxconda_board_BoardGeometry.ADJACENCY = engine_hxconda_board_BoardGeometry.computeAdjacency();
 engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS = engine_hxconda_board_BoardGeometry.computeFinalSquareFlags();
-engine_hxconda_evaluation_Evaluation.PIECE_VALUES = [100,-100,600,-600,170,-170,200,-200,150,-150,100000,-100000,0];
+engine_hxconda_evaluation_Evaluation.PIECE_VALUES = Float64Array.from([100,-100,600,-600,170,-170,200,-200,150,-150,100000,-100000,0]);
 engine_hxconda_evaluation_Evaluation.DISTANCE_TO_CENTER = [5,4,4,4,4,4,5,4,3,3,3,3,4,4,3,2,2,2,3,4,3,2,1,1,2,3,3,2,1,0,1,2,3,3,2,1,1,2,3,4,3,2,2,2,3,4,4,3,3,3,3,4,5,4,4,4,4,4,5];
 engine_hxconda_evaluation_Evaluation.WHITE_PROGRESSOR_ADVANCEMENT = [0,0,20,50,100,150,0,0,0,20,50,100,150,0,0,20,50,100,150,0,0,0,20,50,100,150,0,0,20,50,100,150,0,0,0,20,50,100,150,0,0,20,50,100,150,0,0,0,20,50,100,150,0,0,20,50,100,150,0];
 engine_hxconda_evaluation_Evaluation.BLACK_PROGRESSOR_ADVANCEMENT = [0,-150,-100,-50,-20,0,0,-150,-100,-50,-20,0,0,0,-150,-100,-50,-20,0,0,-150,-100,-50,-20,0,0,0,-150,-100,-50,-20,0,0,-150,-100,-50,-20,0,0,0,-150,-100,-50,-20,0,0,-150,-100,-50,-20,0,0,0,-150,-100,-50,-20,0,0];
@@ -2782,7 +2783,7 @@ engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES = (function($this) {
 		var _g1 = 0;
 		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(12,_g1++));
 	}
-	$r = _g;
+	$r = Float64Array.from(_g);
 	return $r;
 }(this));
 engine_hxconda_search_budget_NodeBudget.LEVEL_NODE_LIMITS = [3000,10000,30000,100000,300000,1000000,3000000,10000000,30000000,70000000,150000000];

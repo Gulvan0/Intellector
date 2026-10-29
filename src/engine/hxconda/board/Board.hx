@@ -14,7 +14,7 @@ class Board
 {
     private static inline final DEFAULT_STARTING_NOTATION:String = "mpeeePMleeeeLapeeePAdeeeeDipeeePIdeeeeDapeeePAleeeeLmpeeePMw";
 
-    public final pieces:Array<Piece>;
+    public final pieces:PieceArray;
     public final zobristKeys:ZobristKeys;
     public var turn(default, null):PlayerColor = White;
     public var whiteIntellectorSquare(default, null):Int = NO_SQUARE;
@@ -120,7 +120,7 @@ class Board
         }
         else
         {
-            pieces[from] = Empty;
+            pieces[from] = Piece.Empty;
             pieces[to] = resultingPiece;
             toggleMoveOccupancy(from, to, movingPiece, targetPiece);
         }
@@ -306,7 +306,7 @@ class Board
 
     private function isReachedByStep(square:Int, steps:SquareLists, attackingPiece:Piece):Bool
     {
-        var squares:Array<Int> = steps.squares;
+        var squares:Int8Array = steps.squares;
         for (k in steps.start(square)...steps.end(square))
             if (pieces[squares[k]] == attackingPiece)
                 return true;
@@ -319,7 +319,7 @@ class Board
         var isReached:Bool = false;
         if (pieces[origin] == attackingPiece)
         {
-            var squares:Array<Int> = steps.squares;
+            var squares:Int8Array = steps.squares;
             for (k in steps.start(square)...steps.end(square))
                 if (squares[k] == origin)
                     isReached = true;
@@ -334,7 +334,7 @@ class Board
         if (direction == NO_DIRECTION)
             return false;
 
-        var squares:Array<Int> = rays.squares;
+        var squares:Int8Array = rays.squares;
         var ray:Int = square * BoardGeometry.DIRECTION_COUNT + direction;
         for (k in rays.start(ray)...rays.end(ray))
         {
@@ -347,7 +347,7 @@ class Board
 
     private function isReachedBySlide(square:Int, rays:SquareLists, attackingPiece:Piece):Bool
     {
-        var squares:Array<Int> = rays.squares;
+        var squares:Int8Array = rays.squares;
         for (direction in 0...BoardGeometry.DIRECTION_COUNT)
         {
             var ray:Int = square * BoardGeometry.DIRECTION_COUNT + direction;
@@ -422,7 +422,7 @@ class Board
     public function new(notation:Null<String>)
     {
         zobristKeys = new ZobristKeys();
-        pieces = [for (_ in 0...SQUARE_COUNT) Empty];
+        pieces = new PieceArray(SQUARE_COUNT);
 
         if (notation == null || !trySetFromNotation(notation))
             trySetFromNotation(DEFAULT_STARTING_NOTATION);

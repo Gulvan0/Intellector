@@ -5,6 +5,7 @@ import engine.hxconda.board.BoardGeometry;
 import engine.hxconda.board.Move;
 import engine.hxconda.board.MoveGenerator;
 import engine.hxconda.board.Piece;
+import engine.hxconda.board.PieceArray;
 import engine.hxconda.board.PlayerColor;
 import engine.hxconda.evaluation.Evaluation.BLACK_WIN_SCORE;
 import engine.hxconda.evaluation.Evaluation.DECISIVE_THRESHOLD;
@@ -456,7 +457,7 @@ class AlphaBetaSearch<B:SearchBudget>
     private function sortMoves(moves:Array<Move>, hash:Int):Void
     {
         var isWhite:Bool = board.turn == White;
-        var pieces:Array<Piece> = board.pieces;
+        var pieces:PieceArray = board.pieces;
         var worstScore:Float = isWhite ? BLACK_WIN_SCORE : WHITE_WIN_SCORE;
         var depthWeight:Float = isWhite ? SearchTuning.DEPTH_ORDERING_WEIGHT : -SearchTuning.DEPTH_ORDERING_WEIGHT;
         var keys:Array<Float> = [];
@@ -527,7 +528,7 @@ class AlphaBetaSearch<B:SearchBudget>
     private function orderedCaptures():Array<Move>
     {
         var captures:Array<Move> = MoveGenerator.generateCaptures(board);
-        var pieces:Array<Piece> = board.pieces;
+        var pieces:PieceArray = board.pieces;
         var keys:Array<Float> = [for (move in captures) -Evaluation.PIECE_VALUES[pieces[move.to]] - Evaluation.PIECE_VALUES[pieces[move.from]]];
         SearchTuning.sortByKeys(captures, keys, board.turn == White);
         return captures;
