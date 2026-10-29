@@ -3,6 +3,7 @@
     Every opening from openings.json is played twice, the candidate taking each color once. A game ends when an Intellector
     is captured or reaches its final row, on threefold repetition, or as a draw after MAX_PLIES plies.
     Searches are seeded, so a match is reproducible; with no noise, the variety comes from the openings alone.
+    A --time match runs on dedicated cores with a fixed heap schedule, see isolation.js; any other match yields to the user's programs.
 
     node scripts/hxconda/match.js [options]
         --candidate <path>    default bin/hxconda.js
@@ -15,16 +16,18 @@
         --elo0 <e> --elo1 <e> SPRT hypotheses: the candidate is <elo0> vs <elo1> Elo stronger (default 0 and 10)
         --alpha <a> --beta <b> SPRT error rates (default 0.05 each)
         --pairs <n>           stop after this many opening pairs (default: all openings)
-        --threads <n>         parallel games (default: all cores but one)
+        --threads <n>         parallel games (default: with --time, one per performance core but the first;
+                              otherwise one per logical processor outside bench.js's cores)
         --record "<label>"    append the result to match_results.md
 
     node scripts/hxconda/match.js --generate-openings <count>
         Regenerates openings.json from bin/hxconda.js: 4-8 plies of a weak noisy search from the start,
         kept if a deeper search scores them within ±60.
 */
-const path = require('path'), fs = require('fs'), os = require('os'), { execFileSync } = require('child_process');
+const path = require('path'), fs = require('fs'), { execFileSync, spawnSync } = require('child_process');
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const { runInRealm } = require('./harness.js');
+const { TIMING_V8_FLAGS, dedicateTimingCores, yieldToTimingRuns } = require('./isolation.js');
 
 const REFERENCE = path.join(__dirname, 'reference', 'position.js');
 const OPENINGS = path.join(__dirname, 'openings.json');
@@ -157,7 +160,7 @@ function parseOptions(argv) {
         baseline: path.join(__dirname, 'baseline', 'hxconda.js'),
         mode: 'nodes', nodes: 30000, noise: 0, baselineNodes: null, level: null, time: null,
         elo0: 0, elo1: 10, alpha: 0.05, beta: 0.05,
-        pairs: Infinity, threads: Math.max(1, os.availableParallelism() - 1), record: null
+        pairs: Infinity, threads: null, record: null
     };
     for (let i = 0; i < argv.length; i += 2) {
         const [name, value] = [argv[i].replace(/^--/, '').replace(/-(\w)/g, (_, letter) => letter.toUpperCase()), argv[i + 1]];
@@ -227,6 +230,10 @@ function generateOpenings(count, threads) {
 }
 
 function runMatch(options) {
+    if (options.mode === 'time' && !TIMING_V8_FLAGS.every(flag => process.execArgv.includes(flag)))
+        process.exit(spawnSync(process.execPath, [...TIMING_V8_FLAGS, __filename, ...process.argv.slice(2)], { stdio: 'inherit' }).status);
+    options.threads = options.mode === 'time' ? dedicateTimingCores(options.threads) : Math.min(options.threads ?? Infinity, yieldToTimingRuns());
+
     const openings = JSON.parse(fs.readFileSync(OPENINGS, 'utf8'));
     const pairLimit = Math.min(options.pairs, openings.length);
     engine(options.candidate, options);
@@ -322,6 +329,6 @@ else if (!isMainThread) {
     const candidate = engine(options.candidate, options), baseline = engine(options.baseline, baselineSettings(options));
     parentPort.on('message', pairIndex => parentPort.postMessage(playPair(pairIndex, openings[pairIndex], candidate, baseline)));
 } else if (process.argv[2] === '--generate-openings')
-    generateOpenings(+process.argv[3], Math.max(1, os.availableParallelism() - 1));
+    generateOpenings(+process.argv[3], yieldToTimingRuns());
 else
     runMatch(parseOptions(process.argv.slice(2)));

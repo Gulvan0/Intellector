@@ -2,7 +2,7 @@
 
 Produced by `node scripts/hxconda/bench.js --record "<label>"` after building the worker with `haxe hxconda.hxml`.
 
-Each level cell holds the median total wall time in milliseconds, over 5 interleaved runs after 20 warm-up searches (1 in the rows up to the first A6 one), of node-limited searches on 10 fixed playout positions: reference Anaconda (`reference/position.js`) / baseline (`baseline/hxconda.js`, the last accepted build) / candidate (`bin/hxconda.js`). The speedup columns give the candidate's speedup at levels 4 / 5 / 6. Head-to-head noise against the baseline is about ±1%. Compare rows recorded on the same machine only.
+Each level cell holds the median total wall time in milliseconds, over 9 repetitions after 20 warm-up searches, of node-limited searches on 10 fixed playout positions: reference Anaconda (`reference/position.js`) / baseline (`baseline/hxconda.js`, the last accepted build) / candidate (`bin/hxconda.js`). Each repetition runs the baseline and the candidate back to back, in alternating order; the speedup vs baseline is the median of these pairs' time ratios, and the range column gives the lowest and highest pair ratio, the noise of that row, and how many pairs were faster than the baseline. All columns list levels 4 / 5 / 6. The runs are pinned to dedicated performance cores at high priority with a fixed V8 heap schedule (`isolation.js`), but other load on the machine still slows them through the shared cache and the power budget: bench on an otherwise idle machine. Compare rows recorded on the same machine only.
 
 Before recording a speedup, check with `scripts/hxconda/compare.js --baseline` that a change meant to keep the behaviour does keep it.
 
@@ -17,7 +17,9 @@ Reference / candidate, fastest of 3 runs. Rows labelled "(vm harness)" ran the e
 | 2026-10-28 | 354670a | Baseline, in-realm harness | 2270 / 1400 (x1.62) | 6710 / 4272 (x1.57) | 18797 / 12168 (x1.54) | 12th Gen Intel(R) Core(TM) i7-12800HX, Node v22.12.0 |
 | 2026-10-28 | 354670a | A1: win check without making the move (rejected: x1.004-1.007 vs baseline head-to-head) | 2121 / 1351 (x1.57) | 6905 / 4149 (x1.66) | 19445 / 12464 (x1.56) | 12th Gen Intel(R) Core(TM) i7-12800HX, Node v22.12.0 |
 
-## Results
+## Interleaved medians
+
+5 repetitions, each running reference, baseline and candidate in that order, unpinned; the speedup is the ratio of the medians. Head-to-head noise against the baseline was about ±1% on an idle machine, ±2% under load.
 
 | Date | Commit | Label | Level 4 (300k nodes) | Level 5 (1M nodes) | Level 6 (3M nodes) | Speedup vs baseline | Speedup vs reference | Machine |
 |---|---|---|---|---|---|---|---|---|
@@ -33,3 +35,8 @@ Reference / candidate, fastest of 3 runs. Rows labelled "(vm harness)" ran the e
 | 2026-10-29 | 36d38a2 | A9: open-addressing transposition table and visit counts | 1709 / 821 / 800 | 5739 / 2838 / 2707 | 17627 / 8334 / 8025 | 1.026 / 1.048 / 1.039 | 2.14 / 2.12 / 2.20 | 12th Gen Intel(R) Core(TM) i7-12800HX, Node v22.12.0 |
 | 2026-10-29 | 019fdb0 | A10: lookup tables in typed arrays | 1773 / 822 / 770 | 5800 / 2806 / 2649 | 17877 / 7937 / 7416 | 1.068 / 1.059 / 1.070 | 2.30 / 2.19 / 2.41 | 12th Gen Intel(R) Core(TM) i7-12800HX, Node v22.12.0 |
 | 2026-10-29 | 1689ac5 | A11: single side-relative move loop (rejected) | 1953 / 871 / 827 | 6312 / 2633 / 2635 | 18242 / 7819 / 7985 | 1.053 / 0.999 / 0.979 | 2.36 / 2.40 / 2.28 | 12th Gen Intel(R) Core(TM) i7-12800HX, Node v22.12.0 |
+
+## Results
+
+| Date | Commit | Label | Level 4 (300k nodes) | Level 5 (1M nodes) | Level 6 (3M nodes) | Speedup vs baseline | Pair ratio range (pairs faster) | Speedup vs reference | Machine |
+|---|---|---|---|---|---|---|---|---|---|

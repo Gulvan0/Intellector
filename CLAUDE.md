@@ -72,6 +72,7 @@ Developer tooling, not part of the build:
     - `compare.js --baseline` compares against `hxconda/baseline/hxconda.js`, the last accepted build, instead.
     - `bench.js` measures the speed of node-limited searches against the reference; `bench.js --record "<label>"` appends the result to `hxconda/benchmark_results.md`.
     - `match.js` plays the build against the baseline from the openings in `hxconda/openings.json` until an SPRT decides whether it is stronger; `--record "<label>"` appends the result to `hxconda/match_results.md`.
+    - `isolation.js` (Windows) pins timing runs (`bench.js`, `match.js --time`) to dedicated performance cores at high priority, and moves node-limited runs off `bench.js`'s cores at below-normal priority.
 
     How engine changes are measured and accepted: @knowledge/plans/hxconda_improvement_plan.md.
 

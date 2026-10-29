@@ -9,12 +9,12 @@ Every change gets its own round: implement it, measure it, then accept or revert
 **A change meant to keep the behaviour** (list A):
 
 1. `node scripts/hxconda/compare.js level 120 11 0,1,2,3 --baseline`, plus `level 15 23 4,5` and `time 60 37 50,200,600`, all with `--baseline`. Any mismatch means the change altered behaviour: fix it, or move the item to list B.
-2. `node scripts/hxconda/bench.js --record "<label>"`. Accept only a speedup against the baseline clearly beyond the ±1% head-to-head noise, at all three levels. Run-to-run drift is ±3-4%, so only the speedup against the baseline, measured in the same interleaved run, counts.
+2. `node scripts/hxconda/bench.js --record "<label>"`, on an otherwise idle machine: other load slows the dedicated cores through the shared cache and power budget, ±1.5-2.5% for the same build. Single pairs still swing by ±4-8% on an idle machine, so accept only a speedup with at least 8 of the 9 pairs faster at each of the three levels: a sign test, which a change without effect passes with p ≈ 0.02. Run-to-run drift is ±3-4%, so only the paired ratios of the same run count.
 
 **A change meant to alter the behaviour** (list B):
 
 1. `node scripts/hxconda/match.js --record "<label>"`: 30000 nodes per move, SPRT [0, 10]. A change aimed at speed rather than search quality is tested with `--time <ms>` instead, since node-limited games don't reward speed.
-2. A change accepted at 30000 nodes is confirmed at a larger budget (`--nodes 200000`), since some techniques only pay off in deeper searches.
+2. A change accepted at 30000 nodes is confirmed at a larger budget, since some techniques only pay off in deeper searches, or only hurt there. The confirmation is a non-regression test, `--nodes 200000 --elo0 -10 --elo1 0`, passing unless the change is worse by 10 Elo. Engines without noise play the same game whenever a change doesn't trigger, so a change that alters few games leaves most pairs identical; a second [0, 10] test then rejects on a handful of differing pairs, which only says "not +10 Elo".
 3. `bench.js` is still run. Node-limited wall time stays meaningful as speed per node, even though the trees differ.
 
 Calibration (`match_results.md`): doubling the nodes is worth about +140 Elo, detected after 92 pairs. Typical single improvements are worth 5-30 Elo, which takes hundreds to thousands of pairs; 2000 openings allow 4000 games. If a match ends "inconclusive" at the opening limit, generate more openings with `match.js --generate-openings <count>`.
