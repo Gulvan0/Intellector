@@ -177,6 +177,7 @@ class AlphaBetaSearch<B:SearchBudget>
         var bestLine:Null<Array<Move>> = budget.tracksLines() ? [] : null;
         var moves:Array<Move> = orderedMoves(depth, hash);
         var moveCount:Int = moves.length;
+        var attacksIntellector:Bool = board.attacksIntellector(board.turn);
 
         for (i in 0...moveCount)
         {
@@ -188,7 +189,7 @@ class AlphaBetaSearch<B:SearchBudget>
             var childHash:Int = board.hashAfter(hash, move);
             var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
             makeSearchedMove(move, childHash, tracksRepetition);
-            var isCheck:Bool = board.isIntellectorAttacked();
+            var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
             var childExtension:Float = extension + moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash);
 
             var score:Float;
@@ -253,6 +254,7 @@ class AlphaBetaSearch<B:SearchBudget>
         var bestLine:Null<Array<Move>> = budget.tracksLines() ? [] : null;
         var moves:Array<Move> = orderedMoves(depth, hash);
         var moveCount:Int = moves.length;
+        var attacksIntellector:Bool = board.attacksIntellector(board.turn);
 
         for (i in 0...moveCount)
         {
@@ -264,7 +266,7 @@ class AlphaBetaSearch<B:SearchBudget>
             var childHash:Int = board.hashAfter(hash, move);
             var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
             makeSearchedMove(move, childHash, tracksRepetition);
-            var isCheck:Bool = board.isIntellectorAttacked();
+            var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
             var childExtension:Float = extension + moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash);
 
             var score:Float;

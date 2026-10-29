@@ -48,11 +48,10 @@ The output must stay identical, so each change only alters how a result is compu
 
 ### Planned
 
-1. **A7. Incremental check detection** (7.6%). After a move, only the moved piece and the lines through the vacated square can start attacking an Intellector; every other attack stays as it was before the move. Exact but intricate.
-2. **A8. Capture ordering keys during generation.** `orderedCaptures` makes a second pass over the captures to compute their keys (9.8%). Compute each key when the capture is pushed instead.
-3. **A9. Transposition table and repetition counts on typed arrays.** An open-addressing table keyed by the exact hash, with per-position entry chains in parallel typed arrays, replaces `js.lib.Map` and the entry objects. It must stay unbounded, growing by rehashing, and keep the entry order, so its semantics don't change. The table's functions don't show up among the top entries of the profile, so the expected gain is small.
-4. **A10. Lookup tables in typed arrays.** `Board.pieces`, `SquareLists.squares` and the score tables become `Int8Array`/`Int32Array`/`Float64Array`. Small gain.
-5. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
+1. **A8. Capture ordering keys during generation.** `orderedCaptures` makes a second pass over the captures to compute their keys (9.8%). Compute each key when the capture is pushed instead.
+2. **A9. Transposition table and repetition counts on typed arrays.** An open-addressing table keyed by the exact hash, with per-position entry chains in parallel typed arrays, replaces `js.lib.Map` and the entry objects. It must stay unbounded, growing by rehashing, and keep the entry order, so its semantics don't change. The table's functions don't show up among the top entries of the profile, so the expected gain is small.
+3. **A10. Lookup tables in typed arrays.** `Board.pieces`, `SquareLists.squares` and the score tables become `Int8Array`/`Int32Array`/`Float64Array`. Small gain.
+4. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
 
 ### Tried
 
@@ -62,6 +61,7 @@ The output must stay identical, so each change only alters how a result is compu
 - **A4. Allocation-free move lists.** **Rejected:** x1.006-1.025 against the baseline, within or barely beyond the noise, so not worth the stack bookkeeping in every move loop. Moves and sort keys lived in one reusable stack of arrays rather than new arrays per node. Worth retrying after A6, once allocation is a larger share of the time.
 - **A5. Targeted captures in deep quiescence.** **Rejected:** x0.97-0.98 against the A2 baseline, x1.000-1.039 after A6. From quiescence depth 2 on, only recaptures and Intellector captures are searched. Those nodes make 29% of the capture generations but, with fewer pieces left, only about 6-8% of the time, so little is there to win. Looking up the attackers of the target squares scans 12 rays from each and cost as much per call as a full generation (x0.82-0.87). Generating only for the own pieces that could reach a target on an empty board, through the occupancy masks and a reach bit mask per piece and square, about breaks even. Reversed progressor steps need inverted step tables: the opposite color's table is empty on the final rows.
 - **A6. Piece lists.** **Accepted:** x1.10-1.15 against the baseline. `Board` keeps two 32-bit occupancy masks per color up to date in make/unmake, and both generators visit the side's own pieces through them in square order instead of scanning all 59 squares. The masks live in an `Int32Array`: in a plain array, a mask with bit 30 or 31 set is no small integer to V8 and turns the array into doubles, which cost most of the gain. Measured with 20 warm-up searches per process; with a single one, level 4 showed only x1.005-1.038, the candidate losing its first search to JIT tiering.
+- **A7. Incremental check detection.** **Accepted:** x1.04-1.07 against the baseline. A move loop tries 10.8 moves on average, each followed by a check detection. Now each loop asks once whether the side to move already attacks the opponent's Intellector; it rarely does, and then every move gets the full detection. Otherwise only the moved piece and the dominator and aggressor lines from the Intellector through the vacated square can attack after a move, and castling only puts the defensor on the origin square. The precondition is needed: a moved piece can also block an attack of its own side's slider.
 
 ## B. Changes that alter the behaviour
 
@@ -72,31 +72,32 @@ The output must stay identical, so each change only alters how a result is compu
 3. **Game history for repetitions** (7.4). The request carries the position hashes since the start (or since the last capture), so the engine sees real threefold repetitions. Protocol extension; `match.js` already knows the history and would pass it.
 4. **Transposition table soundness** (9). Add a second 32-bit verification key, store against the effective window instead of the pre-narrowing one, and skip stores after an aborted search.
 5. **Level-mode root reports for black** (15.4). A minimizing root only reports mid-iteration progress at depth 1, so black falls back to the last completed iteration.
+6. **Progressor checks on the home row.** Check detection finds progressor attackers through the opposite color's step table from the Intellector's square, which is empty on the final rows. A progressor attacking an Intellector on its own back row therefore gives no check extension. Use inverted step tables instead.
 
 ### Search
 
-6. **Re-search reduced moves that beat α** (11.2). History reductions of up to 2 plies currently stay final, hiding quiet defensive moves. Expected to be the largest strength gain.
-7. **Order depth-1 nodes** (10.4): captures first, by MVV-LVA. Depth-1 nodes are the most numerous non-quiescence nodes and search in board order today; better cutoffs there shrink the quiescence work they spawn.
-8. **Quiescence pruning** (8): delta pruning first, then static exchange evaluation (SEE). Quiescence is where most of the time goes, so cutting its nodes is the largest speed lever among the behaviour-altering items. Tested with `--time`.
-9. **Hash move and killer moves** (10). Store the best move per position and try it first, then two killer moves per ply. Once these work, the make-every-child ordering of `sortMoves` can go.
-10. **Intellector threats in quiescence** (8). No stand pat while the own Intellector is attacked. Also add Intellector steps onto a final square, and promotions, to the quiescence moves. This adds quiescence nodes, so test it after the quiescence pruning.
-11. **Real null-move pruning** (11.4): reduction R = 2-3 at depth ≥ 3, skipped while the own Intellector is attacked.
-12. **Stronger extension for Intellector attacks** (11.1): a full ply instead of half, with a per-line extension budget.
-13. **Reduction exemptions** (11.2): no reductions at the root, for the first moves of a node, or while the own Intellector is attacked.
-14. **Aspiration windows** (13.4): start wider, around ±50, and widen gradually on failure instead of jumping to ±∞. Repeat the re-search if it fails again.
-15. **Integer scores** (12): round the piece-square values and drop the 0.5 steps, so a null window is a true null window.
+7. **Re-search reduced moves that beat α** (11.2). History reductions of up to 2 plies currently stay final, hiding quiet defensive moves. Expected to be the largest strength gain.
+8. **Order depth-1 nodes** (10.4): captures first, by MVV-LVA. Depth-1 nodes are the most numerous non-quiescence nodes and search in board order today; better cutoffs there shrink the quiescence work they spawn.
+9. **Quiescence pruning** (8): delta pruning first, then static exchange evaluation (SEE). Quiescence is where most of the time goes, so cutting its nodes is the largest speed lever among the behaviour-altering items. Tested with `--time`.
+10. **Hash move and killer moves** (10). Store the best move per position and try it first, then two killer moves per ply. Once these work, the make-every-child ordering of `sortMoves` can go.
+11. **Intellector threats in quiescence** (8). No stand pat while the own Intellector is attacked. Also add Intellector steps onto a final square, and promotions, to the quiescence moves. This adds quiescence nodes, so test it after the quiescence pruning.
+12. **Real null-move pruning** (11.4): reduction R = 2-3 at depth ≥ 3, skipped while the own Intellector is attacked.
+13. **Stronger extension for Intellector attacks** (11.1): a full ply instead of half, with a per-line extension budget.
+14. **Reduction exemptions** (11.2): no reductions at the root, for the first moves of a node, or while the own Intellector is attacked.
+15. **Aspiration windows** (13.4): start wider, around ±50, and widen gradually on failure instead of jumping to ±∞. Repeat the re-search if it fails again.
+16. **Integer scores** (12): round the piece-square values and drop the 0.5 steps, so a null window is a true null window.
 
 ### Evaluation
 
-16. **Intellector safety** (6): attackers near the Intellector, defensors next to it, escape squares.
-17. **Free path of the Intellector** (6): a bonus for an uncontested route to the final row.
-18. **Real mobility approximation** (6): count the free first steps of each ray instead of the empty-board mobility.
-19. **Texel tuning** (6): tune material and piece-square values on positions from self-play games.
+17. **Intellector safety** (6): attackers near the Intellector, defensors next to it, escape squares.
+18. **Free path of the Intellector** (6): a bonus for an uncontested route to the final row.
+19. **Real mobility approximation** (6): count the free first steps of each ray instead of the empty-board mobility.
+20. **Texel tuning** (6): tune material and piece-square values on positions from self-play games.
 
 ### Infrastructure and protocol
 
-20. **Count quiescence nodes in the node budget** (15.4). Makes the levels' wait times more even, but changes what each level means: the level table needs recalibrating, using `match.js` against the old levels.
-21. **Time management** (13.2): a soft limit (don't start an iteration after about half the budget), a hard limit, and a clock check every 1024 nodes. Affects timing only, so it is tested with `--time`.
-22. **Bounded transposition table** (9): fixed size with a depth-preferred plus always-replace scheme. Bounded memory for long searches; the replacement changes results.
-23. **One worker per game, keeping the table between moves** (1.1). Needs seeded Zobrist keys, item 4 and item 22.
-24. **Personalities**: per-personality evaluation tables and candidate-move biases, on top of items 16-17.
+21. **Count quiescence nodes in the node budget** (15.4). Makes the levels' wait times more even, but changes what each level means: the level table needs recalibrating, using `match.js` against the old levels.
+22. **Time management** (13.2): a soft limit (don't start an iteration after about half the budget), a hard limit, and a clock check every 1024 nodes. Affects timing only, so it is tested with `--time`.
+23. **Bounded transposition table** (9): fixed size with a depth-preferred plus always-replace scheme. Bounded memory for long searches; the replacement changes results.
+24. **One worker per game, keeping the table between moves** (1.1). Needs seeded Zobrist keys, item 4 and item 23.
+25. **Personalities**: per-personality evaluation tables and candidate-move biases, on top of items 17-18.

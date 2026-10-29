@@ -212,14 +212,84 @@ engine_hxconda_board_Board.prototype = {
 		}
 		this.turn = this.turn ^ 1;
 	}
-	,isIntellectorAttacked: function() {
+	,attacksIntellector: function(attacker) {
+		if(this.whiteIntellectorSquare == -1 || this.blackIntellectorSquare == -1) {
+			return false;
+		}
+		var square = (attacker ^ 1) == 0 ? this.whiteIntellectorSquare : this.blackIntellectorSquare;
+		if(!(this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | attacker) || this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | attacker) || this.isReachedByStep(square,attacker == 0 ? engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS,0 | attacker) || this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | attacker))) {
+			return this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,2 | attacker);
+		} else {
+			return true;
+		}
+	}
+	,isIntellectorAttackedAfter: function(move) {
 		if(this.whiteIntellectorSquare == -1 || this.blackIntellectorSquare == -1) {
 			return false;
 		}
 		var square = this.turn == 0 ? this.whiteIntellectorSquare : this.blackIntellectorSquare;
 		var attacker = this.turn ^ 1;
-		if(!(this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | attacker) || this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | attacker) || this.isReachedByStep(square,attacker == 0 ? engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS,0 | attacker) || this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | attacker))) {
-			return this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,2 | attacker);
+		var from = move & 63;
+		var to = move >> 6 & 63;
+		if(this.pieces[from] != 12) {
+			var steps = engine_hxconda_board_BoardGeometry.NEIGHBOURS;
+			var isReached = false;
+			if(this.pieces[from] == (8 | attacker)) {
+				var squares = steps.squares;
+				var _g = steps.offsets[square];
+				var _g1 = steps.offsets[square + 1];
+				while(_g < _g1) if(squares[_g++] == from) {
+					isReached = true;
+				}
+			}
+			return isReached;
+		}
+		var progressorSteps = attacker == 0 ? engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS;
+		var dominator = 2 | attacker;
+		var aggressor = 6 | attacker;
+		var tmp;
+		var tmp1;
+		var steps = engine_hxconda_board_BoardGeometry.NEIGHBOURS;
+		var isReached = false;
+		if(this.pieces[to] == (8 | attacker)) {
+			var squares = steps.squares;
+			var _g = steps.offsets[square];
+			var _g1 = steps.offsets[square + 1];
+			while(_g < _g1) if(squares[_g++] == to) {
+				isReached = true;
+			}
+		}
+		if(!isReached) {
+			var steps = engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS;
+			var isReached = false;
+			if(this.pieces[to] == (4 | attacker)) {
+				var squares = steps.squares;
+				var _g = steps.offsets[square];
+				var _g1 = steps.offsets[square + 1];
+				while(_g < _g1) if(squares[_g++] == to) {
+					isReached = true;
+				}
+			}
+			tmp1 = isReached;
+		} else {
+			tmp1 = true;
+		}
+		if(!tmp1) {
+			var isReached = false;
+			if(this.pieces[to] == (0 | attacker)) {
+				var squares = progressorSteps.squares;
+				var _g = progressorSteps.offsets[square];
+				var _g1 = progressorSteps.offsets[square + 1];
+				while(_g < _g1) if(squares[_g++] == to) {
+					isReached = true;
+				}
+			}
+			tmp = isReached;
+		} else {
+			tmp = true;
+		}
+		if(!(tmp || this.isReachedBySlideThrough(square,to,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,engine_hxconda_board_BoardGeometry.DOMINATOR_DIRECTIONS,dominator) || this.isReachedBySlideThrough(square,to,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,engine_hxconda_board_BoardGeometry.AGGRESSOR_DIRECTIONS,aggressor) || this.isReachedBySlideThrough(square,from,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,engine_hxconda_board_BoardGeometry.DOMINATOR_DIRECTIONS,dominator))) {
+			return this.isReachedBySlideThrough(square,from,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,engine_hxconda_board_BoardGeometry.AGGRESSOR_DIRECTIONS,aggressor);
 		} else {
 			return true;
 		}
@@ -257,6 +327,23 @@ engine_hxconda_board_Board.prototype = {
 		var _g1 = steps.offsets[square + 1];
 		while(_g < _g1) if(this.pieces[squares[_g++]] == attackingPiece) {
 			return true;
+		}
+		return false;
+	}
+	,isReachedBySlideThrough: function(square,throughSquare,rays,directions,attackingPiece) {
+		var direction = directions[square * 59 + throughSquare];
+		if(direction == -1) {
+			return false;
+		}
+		var squares = rays.squares;
+		var ray = square * 6 + direction;
+		var _g = rays.offsets[ray];
+		var _g1 = rays.offsets[ray + 1];
+		while(_g < _g1) {
+			var piece = this.pieces[squares[_g++]];
+			if(piece != 12) {
+				return piece == attackingPiece;
+			}
 		}
 		return false;
 	}
@@ -364,6 +451,39 @@ engine_hxconda_board_BoardGeometry.rayLength = function(rays,square) {
 	var list = square * 6 + 5;
 	length += rays.offsets[list + 1] - rays.offsets[list];
 	return length;
+};
+engine_hxconda_board_BoardGeometry.computeRayDirections = function(rays) {
+	var directions = new Int8Array(3481);
+	directions.fill(-1);
+	var _g = 0;
+	while(_g < 59) {
+		var square = _g++;
+		var ray = square * 6;
+		var _g1 = rays.offsets[ray];
+		var _g2 = rays.offsets[ray + 1];
+		while(_g1 < _g2) directions[square * 59 + rays.squares[_g1++]] = 0;
+		var ray1 = square * 6 + 1;
+		var _g3 = rays.offsets[ray1];
+		var _g4 = rays.offsets[ray1 + 1];
+		while(_g3 < _g4) directions[square * 59 + rays.squares[_g3++]] = 1;
+		var ray2 = square * 6 + 2;
+		var _g5 = rays.offsets[ray2];
+		var _g6 = rays.offsets[ray2 + 1];
+		while(_g5 < _g6) directions[square * 59 + rays.squares[_g5++]] = 2;
+		var ray3 = square * 6 + 3;
+		var _g7 = rays.offsets[ray3];
+		var _g8 = rays.offsets[ray3 + 1];
+		while(_g7 < _g8) directions[square * 59 + rays.squares[_g7++]] = 3;
+		var ray4 = square * 6 + 4;
+		var _g9 = rays.offsets[ray4];
+		var _g10 = rays.offsets[ray4 + 1];
+		while(_g9 < _g10) directions[square * 59 + rays.squares[_g9++]] = 4;
+		var ray5 = square * 6 + 5;
+		var _g11 = rays.offsets[ray5];
+		var _g12 = rays.offsets[ray5 + 1];
+		while(_g11 < _g12) directions[square * 59 + rays.squares[_g11++]] = 5;
+	}
+	return directions;
 };
 engine_hxconda_board_BoardGeometry.computeAdjacency = function() {
 	var _g = [];
@@ -1331,6 +1451,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		var bestLine = null;
 		var moves = this.orderedMoves(depth,hash);
 		var moveCount = moves.length;
+		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
 		while(_g < moveCount) {
 			var i = _g++;
@@ -1356,7 +1477,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 					_this1.visitCounts.set(childHash,(tmp != null ? tmp : 0) + 1);
 				}
 			}
-			var isCheck = this.board.isIntellectorAttacked();
+			var isCheck;
+			if(attacksIntellector) {
+				var _this2 = this.board;
+				isCheck = _this2.attacksIntellector(_this2.turn ^ 1);
+			} else {
+				isCheck = this.board.isIntellectorAttackedAfter(move);
+			}
 			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash);
 			var score;
 			if(i >= 1 && beta - alpha > 1) {
@@ -1374,14 +1501,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 			this.board.unmakeMove();
 			if(tracksRepetition) {
-				var _this2 = this.board;
+				var _this3 = this.board;
 				if(childHash != 0) {
-					var tmp1 = _this2.visitCounts.get(childHash);
+					var tmp1 = _this3.visitCounts.get(childHash);
 					var count = tmp1 != null ? tmp1 : 0;
 					if(count == 1) {
-						_this2.visitCounts.delete(childHash);
+						_this3.visitCounts.delete(childHash);
 					} else {
-						_this2.visitCounts.set(childHash,count - 1);
+						_this3.visitCounts.set(childHash,count - 1);
 					}
 				}
 			}
@@ -1403,8 +1530,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 			var tmp2;
 			if(bestMove != -1) {
-				var _this3 = this.budget;
-				tmp2 = isRoot && (_this3.nodeLimit - _this3.nodeCount > 0 || maxDepth <= 1);
+				var _this4 = this.budget;
+				tmp2 = isRoot && (_this4.nodeLimit - _this4.nodeCount > 0 || maxDepth <= 1);
 			} else {
 				tmp2 = false;
 			}
@@ -1424,6 +1551,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		var bestLine = null;
 		var moves = this.orderedMoves(depth,hash);
 		var moveCount = moves.length;
+		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
 		while(_g < moveCount) {
 			var i = _g++;
@@ -1449,7 +1577,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 					_this1.visitCounts.set(childHash,(tmp != null ? tmp : 0) + 1);
 				}
 			}
-			var isCheck = this.board.isIntellectorAttacked();
+			var isCheck;
+			if(attacksIntellector) {
+				var _this2 = this.board;
+				isCheck = _this2.attacksIntellector(_this2.turn ^ 1);
+			} else {
+				isCheck = this.board.isIntellectorAttackedAfter(move);
+			}
 			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash);
 			var score;
 			if(i >= 1 && beta - alpha > 1) {
@@ -1467,14 +1601,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 			this.board.unmakeMove();
 			if(tracksRepetition) {
-				var _this2 = this.board;
+				var _this3 = this.board;
 				if(childHash != 0) {
-					var tmp1 = _this2.visitCounts.get(childHash);
+					var tmp1 = _this3.visitCounts.get(childHash);
 					var count = tmp1 != null ? tmp1 : 0;
 					if(count == 1) {
-						_this2.visitCounts.delete(childHash);
+						_this3.visitCounts.delete(childHash);
 					} else {
-						_this2.visitCounts.set(childHash,count - 1);
+						_this3.visitCounts.set(childHash,count - 1);
 					}
 				}
 			}
@@ -1862,6 +1996,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		var bestLine = [];
 		var moves = this.orderedMoves(depth,hash);
 		var moveCount = moves.length;
+		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
 		while(_g < moveCount) {
 			var i = _g++;
@@ -1887,7 +2022,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 					_this1.visitCounts.set(childHash,(tmp != null ? tmp : 0) + 1);
 				}
 			}
-			var isCheck = this.board.isIntellectorAttacked();
+			var isCheck;
+			if(attacksIntellector) {
+				var _this2 = this.board;
+				isCheck = _this2.attacksIntellector(_this2.turn ^ 1);
+			} else {
+				isCheck = this.board.isIntellectorAttackedAfter(move);
+			}
 			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash);
 			var score;
 			var line;
@@ -1909,14 +2050,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 			this.board.unmakeMove();
 			if(tracksRepetition) {
-				var _this2 = this.board;
+				var _this3 = this.board;
 				if(childHash != 0) {
-					var tmp1 = _this2.visitCounts.get(childHash);
+					var tmp1 = _this3.visitCounts.get(childHash);
 					var count = tmp1 != null ? tmp1 : 0;
 					if(count == 1) {
-						_this2.visitCounts.delete(childHash);
+						_this3.visitCounts.delete(childHash);
 					} else {
-						_this2.visitCounts.set(childHash,count - 1);
+						_this3.visitCounts.set(childHash,count - 1);
 					}
 				}
 			}
@@ -1955,6 +2096,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		var bestLine = [];
 		var moves = this.orderedMoves(depth,hash);
 		var moveCount = moves.length;
+		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
 		while(_g < moveCount) {
 			var i = _g++;
@@ -1980,7 +2122,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 					_this1.visitCounts.set(childHash,(tmp != null ? tmp : 0) + 1);
 				}
 			}
-			var isCheck = this.board.isIntellectorAttacked();
+			var isCheck;
+			if(attacksIntellector) {
+				var _this2 = this.board;
+				isCheck = _this2.attacksIntellector(_this2.turn ^ 1);
+			} else {
+				isCheck = this.board.isIntellectorAttackedAfter(move);
+			}
 			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash);
 			var score;
 			var line;
@@ -2002,14 +2150,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 			this.board.unmakeMove();
 			if(tracksRepetition) {
-				var _this2 = this.board;
+				var _this3 = this.board;
 				if(childHash != 0) {
-					var tmp1 = _this2.visitCounts.get(childHash);
+					var tmp1 = _this3.visitCounts.get(childHash);
 					var count = tmp1 != null ? tmp1 : 0;
 					if(count == 1) {
-						_this2.visitCounts.delete(childHash);
+						_this3.visitCounts.delete(childHash);
 					} else {
-						_this2.visitCounts.set(childHash,count - 1);
+						_this3.visitCounts.set(childHash,count - 1);
 					}
 				}
 			}
@@ -2488,6 +2636,8 @@ engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS = new engine_hxconda_board_Sq
 engine_hxconda_board_BoardGeometry.NEIGHBOURS = new engine_hxconda_board_SquareLists(engine_hxconda_board_BoardGeometry.NEIGHBOUR_SOURCE);
 engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS = new engine_hxconda_board_SquareLists(engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEP_SOURCE);
 engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS = new engine_hxconda_board_SquareLists(engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEP_SOURCE);
+engine_hxconda_board_BoardGeometry.DOMINATOR_DIRECTIONS = engine_hxconda_board_BoardGeometry.computeRayDirections(engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS);
+engine_hxconda_board_BoardGeometry.AGGRESSOR_DIRECTIONS = engine_hxconda_board_BoardGeometry.computeRayDirections(engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS);
 engine_hxconda_board_BoardGeometry.ADJACENCY = engine_hxconda_board_BoardGeometry.computeAdjacency();
 engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS = engine_hxconda_board_BoardGeometry.computeFinalSquareFlags();
 engine_hxconda_evaluation_Evaluation.PIECE_VALUES = [100,-100,600,-600,170,-170,200,-200,150,-150,100000,-100000,0];

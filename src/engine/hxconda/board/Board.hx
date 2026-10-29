@@ -1,9 +1,11 @@
 package engine.hxconda.board;
 
+import engine.hxconda.board.BoardGeometry.NO_DIRECTION;
 import engine.hxconda.board.BoardGeometry.NO_SQUARE;
 import engine.hxconda.board.BoardGeometry.SQUARE_COUNT;
 import engine.hxconda.evaluation.Evaluation;
 import js.lib.Int32Array;
+import js.lib.Int8Array;
 import js.lib.Map;
 
 /**
@@ -197,13 +199,18 @@ class Board
     }
 
     /** Whether the intellector of the side to move is under attack **/
-    public function isIntellectorAttacked():Bool
+    public inline function isIntellectorAttacked():Bool
+    {
+        return attacksIntellector(turn.opponent());
+    }
+
+    /** Whether `attacker` attacks the intellector of its opponent **/
+    public function attacksIntellector(attacker:PlayerColor):Bool
     {
         if (whiteIntellectorSquare == NO_SQUARE || blackIntellectorSquare == NO_SQUARE)
             return false;
 
-        var square:Int = intellectorSquare(turn);
-        var attacker:PlayerColor = turn.opponent();
+        var square:Int = intellectorSquare(attacker.opponent());
         var progressorSteps:SquareLists = attacker == White ? BoardGeometry.BLACK_PROGRESSOR_STEPS : BoardGeometry.WHITE_PROGRESSOR_STEPS;
 
         return isReachedByStep(square, BoardGeometry.NEIGHBOURS, WhiteDefensor.ofColor(attacker))
@@ -211,6 +218,36 @@ class Board
             || isReachedByStep(square, progressorSteps, WhiteProgressor.ofColor(attacker))
             || isReachedBySlide(square, BoardGeometry.AGGRESSOR_RAYS, WhiteAggressor.ofColor(attacker))
             || isReachedBySlide(square, BoardGeometry.DOMINATOR_RAYS, WhiteDominator.ofColor(attacker));
+    }
+
+    /**
+        `isIntellectorAttacked` right after making `move`, provided that the side that made it attacked no intellector before.
+        Then only the moved piece and the lines through its vacated square can attack.
+    **/
+    public function isIntellectorAttackedAfter(move:Move):Bool
+    {
+        if (whiteIntellectorSquare == NO_SQUARE || blackIntellectorSquare == NO_SQUARE)
+            return false;
+
+        var square:Int = intellectorSquare(turn);
+        var attacker:PlayerColor = turn.opponent();
+        var from:Int = move.from;
+        var to:Int = move.to;
+
+        if (pieces[from] != Empty) // castling, which leaves the defensor on `from` and no square vacated
+            return isReachedByStepFrom(square, BoardGeometry.NEIGHBOURS, WhiteDefensor.ofColor(attacker), from);
+
+        var progressorSteps:SquareLists = attacker == White ? BoardGeometry.BLACK_PROGRESSOR_STEPS : BoardGeometry.WHITE_PROGRESSOR_STEPS;
+        var dominator:Piece = WhiteDominator.ofColor(attacker);
+        var aggressor:Piece = WhiteAggressor.ofColor(attacker);
+
+        return isReachedByStepFrom(square, BoardGeometry.NEIGHBOURS, WhiteDefensor.ofColor(attacker), to)
+            || isReachedByStepFrom(square, BoardGeometry.LIBERATOR_JUMPS, WhiteLiberator.ofColor(attacker), to)
+            || isReachedByStepFrom(square, progressorSteps, WhiteProgressor.ofColor(attacker), to)
+            || isReachedBySlideThrough(square, to, BoardGeometry.DOMINATOR_RAYS, BoardGeometry.DOMINATOR_DIRECTIONS, dominator)
+            || isReachedBySlideThrough(square, to, BoardGeometry.AGGRESSOR_RAYS, BoardGeometry.AGGRESSOR_DIRECTIONS, aggressor)
+            || isReachedBySlideThrough(square, from, BoardGeometry.DOMINATOR_RAYS, BoardGeometry.DOMINATOR_DIRECTIONS, dominator)
+            || isReachedBySlideThrough(square, from, BoardGeometry.AGGRESSOR_RAYS, BoardGeometry.AGGRESSOR_DIRECTIONS, aggressor);
     }
 
     /** Score of a won position, null while the game goes on **/
@@ -280,6 +317,38 @@ class Board
         for (k in steps.start(square)...steps.end(square))
             if (pieces[squares[k]] == attackingPiece)
                 return true;
+        return false;
+    }
+
+    /** Whether `attackingPiece` stands on `origin`, one of `square`'s list in `steps` **/
+    private inline function isReachedByStepFrom(square:Int, steps:SquareLists, attackingPiece:Piece, origin:Int):Bool
+    {
+        var isReached:Bool = false;
+        if (pieces[origin] == attackingPiece)
+        {
+            var squares:Array<Int> = steps.squares;
+            for (k in steps.start(square)...steps.end(square))
+                if (squares[k] == origin)
+                    isReached = true;
+        }
+        return isReached;
+    }
+
+    /** Whether `attackingPiece` is the first piece on the ray in `rays` from `square` through `throughSquare` **/
+    private function isReachedBySlideThrough(square:Int, throughSquare:Int, rays:SquareLists, directions:Int8Array, attackingPiece:Piece):Bool
+    {
+        var direction:Int = BoardGeometry.rayDirection(directions, square, throughSquare);
+        if (direction == NO_DIRECTION)
+            return false;
+
+        var squares:Array<Int> = rays.squares;
+        var ray:Int = square * BoardGeometry.DIRECTION_COUNT + direction;
+        for (k in rays.start(ray)...rays.end(ray))
+        {
+            var piece:Piece = pieces[squares[k]];
+            if (piece != Empty)
+                return piece == attackingPiece;
+        }
         return false;
     }
 

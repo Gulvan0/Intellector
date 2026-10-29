@@ -1,5 +1,7 @@
 package engine.hxconda.board;
 
+import js.lib.Int8Array;
+
 /**
     Movement lookups of the Anaconda board. Squares are numbered column by column: a1 is 0, a7 is 6, b1 is 7 and so on up to i7 (58).
     List orders matter, since the move generation order shapes the search.
@@ -9,6 +11,7 @@ class BoardGeometry
     public static inline final SQUARE_COUNT:Int = 59;
     public static inline final DIRECTION_COUNT:Int = 6;
     public static inline final NO_SQUARE:Int = -1;
+    public static inline final NO_DIRECTION:Int = -1;
 
     private static final DOMINATOR_RAY_SOURCE:Array<Array<Array<Int>>> = [
         [[1, 2, 3, 4, 5, 6], [7, 14, 21, 28, 35, 42, 49, 56], [], [], [], []], // a1
@@ -395,6 +398,10 @@ class BoardGeometry
     public static final NEIGHBOURS:SquareLists = new SquareLists(NEIGHBOUR_SOURCE);
     public static final WHITE_PROGRESSOR_STEPS:SquareLists = new SquareLists(WHITE_PROGRESSOR_STEP_SOURCE);
     public static final BLACK_PROGRESSOR_STEPS:SquareLists = new SquareLists(BLACK_PROGRESSOR_STEP_SOURCE);
+    /** See `rayDirection` **/
+    public static final DOMINATOR_DIRECTIONS:Int8Array = computeRayDirections(DOMINATOR_RAYS);
+    /** See `rayDirection` **/
+    public static final AGGRESSOR_DIRECTIONS:Int8Array = computeRayDirections(AGGRESSOR_RAYS);
 
     private static final ADJACENCY:Array<Bool> = computeAdjacency();
     private static final FINAL_SQUARE_FLAGS:Array<Bool> = computeFinalSquareFlags();
@@ -410,6 +417,12 @@ class BoardGeometry
         return FINAL_SQUARE_FLAGS[color * SQUARE_COUNT + square];
     }
 
+    /** The direction of the ray from `square` through `otherSquare` among the rays `directions` was computed for, `NO_DIRECTION` if none **/
+    public static inline function rayDirection(directions:Int8Array, square:Int, otherSquare:Int):Int
+    {
+        return directions[square * SQUARE_COUNT + otherSquare];
+    }
+
     /** Total length of the rays going from `square` **/
     public static function rayLength(rays:SquareLists, square:Int):Int
     {
@@ -417,6 +430,22 @@ class BoardGeometry
         for (direction in 0...DIRECTION_COUNT)
             length += rays.size(square * DIRECTION_COUNT + direction);
         return length;
+    }
+
+    private static function computeRayDirections(rays:SquareLists):Int8Array
+    {
+        var directions:Int8Array = new Int8Array(SQUARE_COUNT * SQUARE_COUNT);
+        directions.fill(NO_DIRECTION);
+        for (square in 0...SQUARE_COUNT)
+        {
+            for (direction in 0...DIRECTION_COUNT)
+            {
+                var ray:Int = square * DIRECTION_COUNT + direction;
+                for (k in rays.start(ray)...rays.end(ray))
+                    directions[square * SQUARE_COUNT + rays.squares[k]] = direction;
+            }
+        }
+        return directions;
     }
 
     private static function computeAdjacency():Array<Bool>
