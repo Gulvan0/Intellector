@@ -48,7 +48,7 @@ The output must stay identical, so each change only alters how a result is compu
 
 ### Planned
 
-1. **A11. Negamax rewrite.** One move loop instead of a maximizer/minimizer pair. Negation of these scores is exact, but `Math.max`/`Math.min` and the asymmetric PVS windows must be mirrored precisely. Pure code-size win: attempt it only as an exact refactoring, verified by `compare.js`.
+None left.
 
 ### Tried
 
@@ -62,6 +62,7 @@ The output must stay identical, so each change only alters how a result is compu
 - **A8. Capture ordering keys during generation.** **Rejected:** x0.95-0.98 against the baseline. Computing the keys is about a third of `orderedCaptures` (3.5% of the time), mostly filling the array of keys, which generation still has to do. Pushing each key along with its capture slowed down the generator's inner loop by more than the second pass cost. Integer keys, all piece values being integers, gave x1.00 in a quick check: comparing the keys was never the cost.
 - **A9. Transposition table and repetition counts on typed arrays.** **Accepted:** x1.03-1.05 against the baseline. The table's functions are inlined into `search` and `sortMoves`, which hid them from the profile: a level 5 benchmark run makes 7.7M `js.lib.Map` operations, about 12% of the time in a tight loop. Both maps became open-addressing tables with linear probing, keyed by the exact hash and growing by rehashing: `TranspositionTable` indexes its per-position entry arrays, and `VisitCounts` deletes with backward shifting and counts hash 0 apart. The entries are still objects; moving them into parallel typed arrays is left untried.
 - **A10. Lookup tables in typed arrays.** **Accepted:** x1.06-1.07 against the baseline. `Board.pieces` is a `PieceArray`, an abstract over an `Int8Array` that reads and writes `Piece` values. `SquareLists` packs its squares into an `Int8Array` and its offsets into an `Int16Array`, and the piece values and piece-square scores live in `Float64Array`s.
+- **A11. Negamax rewrite.** **Rejected:** x1.05 / x1.00 / x0.98 against the baseline, exact. One move loop ran on side-relative scores, `sign` times the white-relative ones that `search()` keeps returning, which removed 63 lines. Level 6 stayed slower over 15 interleaved pairs (x0.986). The cause wasn't found: the loop's own time dropped by 11%, and the inlining decisions and deoptimizations matched the baseline's. Worth reconsidering if the list B work on the move loop makes the two copies a burden.
 
 ## B. Changes that alter the behaviour
 
