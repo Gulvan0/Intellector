@@ -1403,6 +1403,7 @@ engine_hxconda_protocol_HxcondaProtocol.moveMessage = function(move) {
 	return { from : move & 63, to : move >> 6 & 63, resultingPiece : move >> 12};
 };
 var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget = function(board,budget,noiseAmplitude) {
+	this.resultIsDraw = false;
 	this.resultLine = null;
 	this.resultMoveIsQuiet = false;
 	this.resultMove = -1;
@@ -1481,6 +1482,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var score = this.board.turn == 0 ? Infinity : -Infinity;
 			this.resultMove = -1;
 			this.resultLine = null;
+			this.resultIsDraw = false;
 			return score;
 		}
 		var _this = this.budget;
@@ -1505,13 +1507,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		if(depth >= 2 && depth != maxDepth && this.board.visitCounts.count(hash) >= 2) {
 			this.resultMove = -1;
 			this.resultLine = null;
-			return -0.1;
+			this.resultIsDraw = true;
+			return 0;
 		}
 		if(depth >= 2) {
 			switch(this.table.probe(hash,alpha,beta,depth)) {
 			case 1:
 				this.resultMove = this.table.cutoffMove;
 				this.resultLine = null;
+				this.resultIsDraw = false;
 				return this.table.cutoffScore;
 			case 2:
 				if(!isRoot) {
@@ -1534,18 +1538,26 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var passedHash = hash ^ this.board.zobristKeys.blackToMove;
 			var isPruned = false;
 			var nullMoveScore = 0;
+			var nullMoveScoreIsDraw = false;
 			if(this.board.turn == 1 && beta < Infinity) {
 				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,false);
 				isPruned = nullMoveScore >= beta;
+				nullMoveScoreIsDraw = this.resultIsDraw;
 			} else if(this.board.turn == 0 && alpha > -Infinity) {
 				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,false);
 				isPruned = nullMoveScore <= alpha;
+				nullMoveScoreIsDraw = this.resultIsDraw;
 			}
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
 			if(isPruned) {
+				var isDraw = nullMoveScoreIsDraw;
+				if(isDraw == null) {
+					isDraw = false;
+				}
 				this.resultMove = -1;
 				this.resultLine = null;
+				this.resultIsDraw = isDraw;
 				return nullMoveScore;
 			}
 		}
@@ -1553,25 +1565,28 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		if(decisiveScore != null) {
 			this.resultMove = -1;
 			this.resultLine = null;
+			this.resultIsDraw = false;
 			return decisiveScore;
 		}
 		if(depth < 1) {
 			var score = this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
 			this.resultLine = null;
+			this.resultIsDraw = false;
 			return score;
 		}
 		var score = this.board.turn == 0 ? this.searchMovesAsMaximizer(alpha,beta,depth,extension,maxDepth,hash,isRoot) : this.searchMovesAsMinimizer(alpha,beta,depth,extension,maxDepth,hash,isRoot);
 		if(this.resultMove != -1 && this.resultMoveIsQuiet) {
 			this.history.quietBestCounts[this.resultMove] += 1;
 		}
-		if(depth >= 2 && score != -0.1) {
+		if(depth >= 2 && !this.resultIsDraw) {
 			this.table.store(hash,initialAlpha,initialBeta,this.resultMove,score,depth);
 		}
 		return score;
 	}
 	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
 		var value = -100000;
+		var valueIsDraw = false;
 		var bestMove = -1;
 		var bestMoveIsQuiet = false;
 		var bestLine = null;
@@ -1618,6 +1633,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			} else {
 				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,false);
 			}
+			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
 				--score;
 			} else if(score < -90000.) {
@@ -1629,7 +1645,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 					this.board.visitCounts.decrement(childHash);
 				}
 			}
-			value = Math.max(value,score);
+			if(score > value) {
+				value = score;
+				valueIsDraw = scoreIsDraw;
+			}
 			var isQuiet = !isCapture && !isCheck;
 			if(isQuiet) {
 				this.history.quietVisitCounts[move] += 1;
@@ -1657,12 +1676,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
+		var isDraw = valueIsDraw;
+		if(isDraw == null) {
+			isDraw = false;
+		}
 		this.resultMove = bestMove;
 		this.resultLine = bestLine;
+		this.resultIsDraw = isDraw;
 		return value;
 	}
 	,searchMovesAsMinimizer: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
 		var value = 100000;
+		var valueIsDraw = false;
 		var bestMove = -1;
 		var bestMoveIsQuiet = false;
 		var bestLine = null;
@@ -1709,6 +1734,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			} else {
 				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,false);
 			}
+			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
 				--score;
 			} else if(score < -90000.) {
@@ -1720,7 +1746,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 					this.board.visitCounts.decrement(childHash);
 				}
 			}
-			value = Math.min(value,score);
+			if(score < value) {
+				value = score;
+				valueIsDraw = scoreIsDraw;
+			}
 			var isQuiet = !isCapture && !isCheck;
 			if(isQuiet) {
 				this.history.quietVisitCounts[move] += 1;
@@ -1741,8 +1770,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
+		var isDraw = valueIsDraw;
+		if(isDraw == null) {
+			isDraw = false;
+		}
 		this.resultMove = bestMove;
 		this.resultLine = bestLine;
+		this.resultIsDraw = isDraw;
 		return value;
 	}
 	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash) {
@@ -1944,6 +1978,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 	}
 };
 var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget = function(board,budget,noiseAmplitude) {
+	this.resultIsDraw = false;
 	this.resultLine = null;
 	this.resultMoveIsQuiet = false;
 	this.resultMove = -1;
@@ -2013,6 +2048,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var score = this.board.turn == 0 ? Infinity : -Infinity;
 			this.resultMove = -1;
 			this.resultLine = null;
+			this.resultIsDraw = false;
 			return score;
 		}
 		var initialAlpha = alpha;
@@ -2032,13 +2068,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		if(depth >= 2 && depth != maxDepth && this.board.visitCounts.count(hash) >= 2) {
 			this.resultMove = -1;
 			this.resultLine = null;
-			return -0.1;
+			this.resultIsDraw = true;
+			return 0;
 		}
 		if(depth >= 2) {
 			switch(this.table.probe(hash,alpha,beta,depth)) {
 			case 1:
 				this.resultMove = this.table.cutoffMove;
 				this.resultLine = null;
+				this.resultIsDraw = false;
 				return this.table.cutoffScore;
 			case 2:
 				alpha = this.table.narrowedAlpha;
@@ -2059,18 +2097,26 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var passedHash = hash ^ this.board.zobristKeys.blackToMove;
 			var isPruned = false;
 			var nullMoveScore = 0;
+			var nullMoveScoreIsDraw = false;
 			if(this.board.turn == 1 && beta < Infinity) {
 				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,false);
 				isPruned = nullMoveScore >= beta;
+				nullMoveScoreIsDraw = this.resultIsDraw;
 			} else if(this.board.turn == 0 && alpha > -Infinity) {
 				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,false);
 				isPruned = nullMoveScore <= alpha;
+				nullMoveScoreIsDraw = this.resultIsDraw;
 			}
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
 			if(isPruned) {
+				var isDraw = nullMoveScoreIsDraw;
+				if(isDraw == null) {
+					isDraw = false;
+				}
 				this.resultMove = -1;
 				this.resultLine = null;
+				this.resultIsDraw = isDraw;
 				return nullMoveScore;
 			}
 		}
@@ -2078,25 +2124,28 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		if(decisiveScore != null) {
 			this.resultMove = -1;
 			this.resultLine = null;
+			this.resultIsDraw = false;
 			return decisiveScore;
 		}
 		if(depth < 1) {
 			var score = this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
 			this.resultLine = null;
+			this.resultIsDraw = false;
 			return score;
 		}
 		var score = this.board.turn == 0 ? this.searchMovesAsMaximizer(alpha,beta,depth,extension,maxDepth,hash,isRoot) : this.searchMovesAsMinimizer(alpha,beta,depth,extension,maxDepth,hash,isRoot);
 		if(this.resultMove != -1 && this.resultMoveIsQuiet) {
 			this.history.quietBestCounts[this.resultMove] += 1;
 		}
-		if(depth >= 2 && score != -0.1) {
+		if(depth >= 2 && !this.resultIsDraw) {
 			this.table.store(hash,initialAlpha,initialBeta,this.resultMove,score,depth);
 		}
 		return score;
 	}
 	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
 		var value = -100000;
+		var valueIsDraw = false;
 		var bestMove = -1;
 		var bestMoveIsQuiet = false;
 		var bestLine = [];
@@ -2147,6 +2196,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 			}
+			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
 				--score;
 			} else if(score < -90000.) {
@@ -2160,6 +2210,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 			if(score > value) {
 				value = score;
+				valueIsDraw = scoreIsDraw;
 				bestLine = line.slice();
 			}
 			var isQuiet = !isCapture && !isCheck;
@@ -2182,12 +2233,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
+		var isDraw = valueIsDraw;
+		if(isDraw == null) {
+			isDraw = false;
+		}
 		this.resultMove = bestMove;
 		this.resultLine = bestLine;
+		this.resultIsDraw = isDraw;
 		return value;
 	}
 	,searchMovesAsMinimizer: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
 		var value = 100000;
+		var valueIsDraw = false;
 		var bestMove = -1;
 		var bestMoveIsQuiet = false;
 		var bestLine = [];
@@ -2238,6 +2295,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 			}
+			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
 				--score;
 			} else if(score < -90000.) {
@@ -2251,6 +2309,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 			if(score < value) {
 				value = score;
+				valueIsDraw = scoreIsDraw;
 				bestLine = line.slice();
 			}
 			var isQuiet = !isCapture && !isCheck;
@@ -2273,8 +2332,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
+		var isDraw = valueIsDraw;
+		if(isDraw == null) {
+			isDraw = false;
+		}
 		this.resultMove = bestMove;
 		this.resultLine = bestLine;
+		this.resultIsDraw = isDraw;
 		return value;
 	}
 	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash) {

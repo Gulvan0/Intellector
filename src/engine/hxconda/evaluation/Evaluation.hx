@@ -14,7 +14,7 @@ class Evaluation
     public static inline final BLACK_WIN_SCORE:Float = -100000;
     /** Scores beyond `±DECISIVE_THRESHOLD` mean that one of the sides wins **/
     public static inline final DECISIVE_THRESHOLD:Float = 90000;
-    public static inline final DRAW_SCORE:Float = -0.1;
+    public static inline final DRAW_SCORE:Float = 0;
 
     private static inline final MOBILITY_WEIGHT:Float = 5;
     private static inline final CENTRALITY_WEIGHT:Float = 5;

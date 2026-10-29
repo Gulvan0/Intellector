@@ -39,6 +39,8 @@ class AlphaBetaSearch<B:SearchBudget>
     private var resultMove:Move = Move.NONE;
     private var resultMoveIsQuiet:Bool = false;
     private var resultLine:Null<Array<Move>> = null;
+    /** Whether the score comes from a repetition draw, which depends on the line and is kept out of the table **/
+    private var resultIsDraw:Bool = false;
 
     public function run():BestMoveReport
     {
@@ -110,7 +112,7 @@ class AlphaBetaSearch<B:SearchBudget>
         }
 
         if (depth >= SearchTuning.REPETITION_DEPTH && depth != maxDepth && board.visitCount(hash) >= SearchTuning.REPETITIONS_TO_DRAW)
-            return conclude(DRAW_SCORE, Move.NONE, null);
+            return conclude(DRAW_SCORE, Move.NONE, null, true);
 
         if (depth >= SearchTuning.HASHING_DEPTH)
             switch table.probe(hash, alpha, beta, depth)
@@ -134,20 +136,23 @@ class AlphaBetaSearch<B:SearchBudget>
             var passedHash:Int = board.hashAfterPass(hash);
             var isPruned:Bool = false;
             var nullMoveScore:Float = 0;
+            var nullMoveScoreIsDraw:Bool = false;
             if (board.turn == Black && beta < Math.POSITIVE_INFINITY)
             {
                 nullMoveScore = search(beta - 1, beta, depth - 1, extension, maxDepth, passedHash, false);
                 isPruned = nullMoveScore >= beta;
+                nullMoveScoreIsDraw = resultIsDraw;
             }
             else if (board.turn == White && alpha > Math.NEGATIVE_INFINITY)
             {
                 nullMoveScore = search(alpha, alpha + 1, depth - 1, extension, maxDepth, passedHash, false);
                 isPruned = nullMoveScore <= alpha;
+                nullMoveScoreIsDraw = resultIsDraw;
             }
             board.passTurn();
 
             if (isPruned)
-                return conclude(nullMoveScore, Move.NONE, null);
+                return conclude(nullMoveScore, Move.NONE, null, nullMoveScoreIsDraw);
         }
 
         var decisiveScore:Null<Float> = board.decisiveScore();
@@ -164,7 +169,7 @@ class AlphaBetaSearch<B:SearchBudget>
         if (resultMove != Move.NONE && resultMoveIsQuiet)
             history.recordQuietBest(resultMove);
 
-        if (depth >= SearchTuning.HASHING_DEPTH && score != DRAW_SCORE)
+        if (depth >= SearchTuning.HASHING_DEPTH && !resultIsDraw)
             table.store(hash, initialAlpha, initialBeta, resultMove, score, depth);
 
         return score;
@@ -173,6 +178,7 @@ class AlphaBetaSearch<B:SearchBudget>
     private function searchMovesAsMaximizer(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, isRoot:Bool):Float
     {
         var value:Float = BLACK_WIN_SCORE;
+        var valueIsDraw:Bool = false;
         var bestMove:Move = Move.NONE;
         var bestMoveIsQuiet:Bool = false;
         var bestLine:Null<Array<Move>> = budget.tracksLines() ? [] : null;
@@ -210,15 +216,16 @@ class AlphaBetaSearch<B:SearchBudget>
                 score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, false);
                 line = lineThrough(move);
             }
+            var scoreIsDraw:Bool = resultIsDraw;
             score = SearchTuning.decayDecisiveScore(score);
             unmakeSearchedMove(childHash, tracksRepetition);
 
-            if (!budget.tracksLines())
-                value = Math.max(value, score);
-            else if (score > value)
+            if (score > value)
             {
                 value = score;
-                bestLine = line.copy();
+                valueIsDraw = scoreIsDraw;
+                if (budget.tracksLines())
+                    bestLine = line.copy();
             }
 
             var isQuiet:Bool = !isCapture && !isCheck;
@@ -244,12 +251,13 @@ class AlphaBetaSearch<B:SearchBudget>
         }
 
         resultMoveIsQuiet = bestMoveIsQuiet;
-        return conclude(value, bestMove, bestLine);
+        return conclude(value, bestMove, bestLine, valueIsDraw);
     }
 
     private function searchMovesAsMinimizer(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, isRoot:Bool):Float
     {
         var value:Float = WHITE_WIN_SCORE;
+        var valueIsDraw:Bool = false;
         var bestMove:Move = Move.NONE;
         var bestMoveIsQuiet:Bool = false;
         var bestLine:Null<Array<Move>> = budget.tracksLines() ? [] : null;
@@ -287,15 +295,16 @@ class AlphaBetaSearch<B:SearchBudget>
                 score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, false);
                 line = lineThrough(move);
             }
+            var scoreIsDraw:Bool = resultIsDraw;
             score = SearchTuning.decayDecisiveScore(score);
             unmakeSearchedMove(childHash, tracksRepetition);
 
-            if (!budget.tracksLines())
-                value = Math.min(value, score);
-            else if (score < value)
+            if (score < value)
             {
                 value = score;
-                bestLine = line.copy();
+                valueIsDraw = scoreIsDraw;
+                if (budget.tracksLines())
+                    bestLine = line.copy();
             }
 
             var isQuiet:Bool = !isCapture && !isCheck;
@@ -321,7 +330,7 @@ class AlphaBetaSearch<B:SearchBudget>
         }
 
         resultMoveIsQuiet = bestMoveIsQuiet;
-        return conclude(value, bestMove, bestLine);
+        return conclude(value, bestMove, bestLine, valueIsDraw);
     }
 
     private inline function makeSearchedMove(move:Move, childHash:Int, tracksRepetition:Bool):Void
@@ -358,10 +367,11 @@ class AlphaBetaSearch<B:SearchBudget>
         return budget.tracksLines() ? SearchTuning.extendLine(resultLine, move) : null;
     }
 
-    private inline function conclude(score:Float, move:Move, line:Null<Array<Move>>):Float
+    private inline function conclude(score:Float, move:Move, line:Null<Array<Move>>, isDraw:Bool = false):Float
     {
         resultMove = move;
         resultLine = line;
+        resultIsDraw = isDraw;
         return score;
     }
 

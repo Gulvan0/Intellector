@@ -41,3 +41,4 @@ Reference / candidate, fastest of 3 runs. Rows labelled "(vm harness)" ran the e
 | Date | Commit | Label | Level 4 (300k nodes) | Level 5 (1M nodes) | Level 6 (3M nodes) | Speedup vs baseline | Pair ratio range (pairs faster) | Speedup vs reference | Machine |
 |---|---|---|---|---|---|---|---|---|---|
 | 2026-10-29 | 902c040 | B3: game history for repetitions | 1948 / 886 / 847 | 6779 / 2842 / 2855 | 19297 / 8193 / 8249 | 1.008 / 1.001 / 0.993 | 0.967-1.087 / 0.963-1.047 / 0.966-1.024 | 2.34 / 2.34 / 2.35 | 12th Gen Intel(R) Core(TM) i7-12800HX, Node v22.12.0 |
+| 2026-10-29 | f16ddf5 | B1: draw score 0, store guard by draw flag | 2213 / 922 / 937 | 7113 / 3001 / 2979 | 21188 / 9037 / 8930 | 1.008 / 1.005 / 1.008 | 0.956-1.068 (6/9 faster) / 0.972-1.054 (7/9 faster) / 0.979-1.039 (6/9 faster) | 2.41 / 2.36 / 2.38 | 12th Gen Intel(R) Core(TM) i7-12800HX, Node v22.12.0 |
