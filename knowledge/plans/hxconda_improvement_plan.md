@@ -77,7 +77,7 @@ None left.
 
 ### Search
 
-7. **Re-search reduced moves that beat α** (11.2). History reductions of up to 2 plies currently stay final, hiding quiet defensive moves. Expected to be the largest strength gain.
+7. **Re-search reduced moves that beat α** (11.2). **Accepted:** +79.6 Elo [47.7, 113.0] at 30000 nodes, +114.0 [72.7, 158.7] at 200000. History reductions of up to 2 plies and the table-gated late-move reductions stayed final, hiding quiet defensive moves. A reduced move scoring better than the best move so far is now searched again without its reduction: a null-window move first at a null window, then through the usual full-window re-search; the first move at the full window. Node-limited wall time dropped by 10-12% at levels 5-6, the trees differing.
 8. **Order depth-1 nodes** (10.4): captures first, by MVV-LVA. Depth-1 nodes are the most numerous non-quiescence nodes and search in board order today; better cutoffs there shrink the quiescence work they spawn.
 9. **Quiescence pruning** (8): delta pruning first, then static exchange evaluation (SEE). Quiescence is where most of the time goes, so cutting its nodes is the largest speed lever among the behaviour-altering items. Tested with `--time`.
 10. **Hash move and killer moves** (10). Store the best move per position and try it first, then two killer moves per ply. Once these work, the make-every-child ordering of `sortMoves` can go.

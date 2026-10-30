@@ -203,7 +203,10 @@ class AlphaBetaSearch<B:SearchBudget>
             var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
             makeSearchedMove(move, childHash, tracksRepetition);
             var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
-            var childExtension:Float = extension + moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash, childVerificationKey);
+            var adjustment:Float = moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash, childVerificationKey);
+            var isReduced:Bool = adjustment < 0;
+            var childExtension:Float = extension + adjustment;
+            var unreducedExtension:Float = isReduced ? extension : childExtension;
 
             var score:Float;
             var line:Null<Array<Move>>;
@@ -211,9 +214,14 @@ class AlphaBetaSearch<B:SearchBudget>
             {
                 score = search(alpha, alpha + 1, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                 line = lineThrough(move);
+                if (score > alpha && isReduced)
+                {
+                    score = search(alpha, alpha + 1, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    line = lineThrough(move);
+                }
                 if (score >= alpha + 1 && score < beta)
                 {
-                    score = search(score - 1, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
+                    score = search(score - 1, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
                     line = lineThrough(move);
                 }
             }
@@ -221,6 +229,11 @@ class AlphaBetaSearch<B:SearchBudget>
             {
                 score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                 line = lineThrough(move);
+                if (score > alpha && isReduced)
+                {
+                    score = search(alpha, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    line = lineThrough(move);
+                }
             }
             var scoreIsDraw:Bool = resultIsDraw;
             score = SearchTuning.decayDecisiveScore(score);
@@ -283,7 +296,10 @@ class AlphaBetaSearch<B:SearchBudget>
             var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
             makeSearchedMove(move, childHash, tracksRepetition);
             var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
-            var childExtension:Float = extension + moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash, childVerificationKey);
+            var adjustment:Float = moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash, childVerificationKey);
+            var isReduced:Bool = adjustment < 0;
+            var childExtension:Float = extension + adjustment;
+            var unreducedExtension:Float = isReduced ? extension : childExtension;
 
             var score:Float;
             var line:Null<Array<Move>>;
@@ -291,9 +307,14 @@ class AlphaBetaSearch<B:SearchBudget>
             {
                 score = search(beta - 1, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                 line = lineThrough(move);
+                if (score < beta && isReduced)
+                {
+                    score = search(beta - 1, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    line = lineThrough(move);
+                }
                 if (score > alpha && score <= beta - 1)
                 {
-                    score = search(alpha, score + 1, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
+                    score = search(alpha, score + 1, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
                     line = lineThrough(move);
                 }
             }
@@ -301,6 +322,11 @@ class AlphaBetaSearch<B:SearchBudget>
             {
                 score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                 line = lineThrough(move);
+                if (score < beta && isReduced)
+                {
+                    score = search(alpha, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    line = lineThrough(move);
+                }
             }
             var scoreIsDraw:Bool = resultIsDraw;
             score = SearchTuning.decayDecisiveScore(score);
@@ -354,7 +380,10 @@ class AlphaBetaSearch<B:SearchBudget>
             board.leavePosition(childHash);
     }
 
-    /** Depth adjustment of the child node `move` leads to, `move` being the `index`-th of `moveCount` and already made **/
+    /**
+        Depth adjustment of the child node `move` leads to, `move` being the `index`-th of `moveCount` and already made.
+        A negative one is a reduction, which a move improving on the best one so far gets re-searched without.
+    **/
     private function moveExtension(move:Move, isTactical:Bool, index:Int, moveCount:Int, depth:Int, maxDepth:Int, childHash:Int, childVerificationKey:Int):Float
     {
         if (isTactical)

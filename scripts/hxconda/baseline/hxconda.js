@@ -1670,15 +1670,24 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var isReduced = adjustment < 0;
+			var childExtension = extension + adjustment;
+			var unreducedExtension = isReduced ? extension : childExtension;
 			var score;
 			if(i >= 1 && beta - alpha > 1) {
 				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				if(score > alpha && isReduced) {
+					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+				}
 				if(score >= alpha + 1 && score < beta) {
-					score = this.search(score - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
 				}
 			} else {
 				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				if(score > alpha && isReduced) {
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+				}
 			}
 			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
@@ -1772,15 +1781,24 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var isReduced = adjustment < 0;
+			var childExtension = extension + adjustment;
+			var unreducedExtension = isReduced ? extension : childExtension;
 			var score;
 			if(i >= 1 && beta - alpha > 1) {
 				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				if(score < beta && isReduced) {
+					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+				}
 				if(score > alpha && score <= beta - 1) {
-					score = this.search(alpha,score + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
 				}
 			} else {
 				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				if(score < beta && isReduced) {
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+				}
 			}
 			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
@@ -2241,19 +2259,30 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var isReduced = adjustment < 0;
+			var childExtension = extension + adjustment;
+			var unreducedExtension = isReduced ? extension : childExtension;
 			var score;
 			var line;
 			if(i >= 1 && beta - alpha > 1) {
 				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				if(score > alpha && isReduced) {
+					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
 				if(score >= alpha + 1 && score < beta) {
-					score = this.search(score - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			} else {
 				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				if(score > alpha && isReduced) {
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
 			}
 			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
@@ -2341,19 +2370,30 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var isReduced = adjustment < 0;
+			var childExtension = extension + adjustment;
+			var unreducedExtension = isReduced ? extension : childExtension;
 			var score;
 			var line;
 			if(i >= 1 && beta - alpha > 1) {
 				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				if(score < beta && isReduced) {
+					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
 				if(score > alpha && score <= beta - 1) {
-					score = this.search(alpha,score + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			} else {
 				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				if(score < beta && isReduced) {
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
 			}
 			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
