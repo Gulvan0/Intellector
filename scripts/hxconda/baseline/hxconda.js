@@ -1452,6 +1452,14 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Node
 	this.resultLine = null;
 	this.resultMoveIsQuiet = false;
 	this.resultMove = -1;
+	this.ply = 0;
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 256) {
+		++_g1;
+		_g.push(-1);
+	}
+	this.killers = _g;
 	this.currentRootMoveIndex = 0;
 	var _g = [];
 	var _g1 = 0;
@@ -1658,6 +1666,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
+			this.ply++;
 			if(tracksRepetition) {
 				if(childHash != 0) {
 					this.board.visitCounts.increment(childHash);
@@ -1696,6 +1705,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				++score;
 			}
 			this.board.unmakeMove();
+			this.ply--;
 			if(tracksRepetition) {
 				if(childHash != 0) {
 					this.board.visitCounts.decrement(childHash);
@@ -1717,6 +1727,11 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			if(value >= beta) {
 				if(!isCapture) {
 					this.history.cutoffWeights[move] += depth * depth;
+					var killerSlot = 2 * this.ply;
+					if(this.ply < 128 && this.killers[killerSlot] != move) {
+						this.killers[killerSlot + 1] = this.killers[killerSlot];
+						this.killers[killerSlot] = move;
+					}
 				}
 				break;
 			}
@@ -1769,6 +1784,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
+			this.ply++;
 			if(tracksRepetition) {
 				if(childHash != 0) {
 					this.board.visitCounts.increment(childHash);
@@ -1807,6 +1823,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				++score;
 			}
 			this.board.unmakeMove();
+			this.ply--;
 			if(tracksRepetition) {
 				if(childHash != 0) {
 					this.board.visitCounts.decrement(childHash);
@@ -1828,6 +1845,11 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			if(value <= alpha) {
 				if(!isCapture) {
 					this.history.cutoffWeights[move] += depth * depth;
+					var killerSlot = 2 * this.ply;
+					if(this.ply < 128 && this.killers[killerSlot] != move) {
+						this.killers[killerSlot + 1] = this.killers[killerSlot];
+						this.killers[killerSlot] = move;
+					}
 				}
 				break;
 			}
@@ -1974,13 +1996,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			this.sortMoves(moves,hash,verificationKey);
 			engine_hxconda_search_SearchTuning.putFirst(moves,this.table.bestMove(hash,verificationKey));
 		} else {
-			this.putCapturesFirst(moves);
+			this.orderShallowMoves(moves);
 		}
 		return moves;
 	}
-	,putCapturesFirst: function(moves) {
+	,orderShallowMoves: function(moves) {
 		var isWhite = this.board.turn == 0;
-		var quietKey = isWhite ? -Infinity : Infinity;
 		var _g = [];
 		var _g1 = 0;
 		while(_g1 < moves.length) {
@@ -1999,7 +2020,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				var pieces = this.board.pieces;
 				tmp = -engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]];
 			} else {
-				tmp = quietKey;
+				var killerSlot = 2 * this.ply;
+				var rank = 3;
+				if(this.ply < 128) {
+					rank = move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 3;
+				}
+				tmp = isWhite ? -rank * 1000000 : rank * 1000000;
 			}
 			_g.push(tmp);
 		}
@@ -2087,6 +2113,14 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Time
 	this.resultLine = null;
 	this.resultMoveIsQuiet = false;
 	this.resultMove = -1;
+	this.ply = 0;
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 256) {
+		++_g1;
+		_g.push(-1);
+	}
+	this.killers = _g;
 	this.currentRootMoveIndex = 0;
 	var _g = [];
 	var _g1 = 0;
@@ -2277,6 +2311,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
+			this.ply++;
 			if(tracksRepetition) {
 				if(childHash != 0) {
 					this.board.visitCounts.increment(childHash);
@@ -2321,6 +2356,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				++score;
 			}
 			this.board.unmakeMove();
+			this.ply--;
 			if(tracksRepetition) {
 				if(childHash != 0) {
 					this.board.visitCounts.decrement(childHash);
@@ -2343,6 +2379,11 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			if(value >= beta) {
 				if(!isCapture) {
 					this.history.cutoffWeights[move] += depth * depth;
+					var killerSlot = 2 * this.ply;
+					if(this.ply < 128 && this.killers[killerSlot] != move) {
+						this.killers[killerSlot + 1] = this.killers[killerSlot];
+						this.killers[killerSlot] = move;
+					}
 				}
 				break;
 			}
@@ -2388,6 +2429,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
+			this.ply++;
 			if(tracksRepetition) {
 				if(childHash != 0) {
 					this.board.visitCounts.increment(childHash);
@@ -2432,6 +2474,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				++score;
 			}
 			this.board.unmakeMove();
+			this.ply--;
 			if(tracksRepetition) {
 				if(childHash != 0) {
 					this.board.visitCounts.decrement(childHash);
@@ -2454,6 +2497,11 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			if(value <= alpha) {
 				if(!isCapture) {
 					this.history.cutoffWeights[move] += depth * depth;
+					var killerSlot = 2 * this.ply;
+					if(this.ply < 128 && this.killers[killerSlot] != move) {
+						this.killers[killerSlot + 1] = this.killers[killerSlot];
+						this.killers[killerSlot] = move;
+					}
 				}
 				break;
 			}
@@ -2593,13 +2641,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			this.sortMoves(moves,hash,verificationKey);
 			engine_hxconda_search_SearchTuning.putFirst(moves,this.table.bestMove(hash,verificationKey));
 		} else {
-			this.putCapturesFirst(moves);
+			this.orderShallowMoves(moves);
 		}
 		return moves;
 	}
-	,putCapturesFirst: function(moves) {
+	,orderShallowMoves: function(moves) {
 		var isWhite = this.board.turn == 0;
-		var quietKey = isWhite ? -Infinity : Infinity;
 		var _g = [];
 		var _g1 = 0;
 		while(_g1 < moves.length) {
@@ -2618,7 +2665,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				var pieces = this.board.pieces;
 				tmp = -engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]];
 			} else {
-				tmp = quietKey;
+				var killerSlot = 2 * this.ply;
+				var rank = 3;
+				if(this.ply < 128) {
+					rank = move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 3;
+				}
+				tmp = isWhite ? -rank * 1000000 : rank * 1000000;
 			}
 			_g.push(tmp);
 		}

@@ -34,6 +34,10 @@ class AlphaBetaSearch<B:SearchBudget>
     /** How many captures on each square the current quiescence line has made **/
     private final quiescenceCaptureCounts:Array<Int> = [for (_ in 0...BoardGeometry.SQUARE_COUNT) 0];
     private var currentRootMoveIndex:Int = 0;
+    /** Per ply from the root, the two latest distinct quiet moves that caused a cutoff there, the latest first **/
+    private final killers:Array<Move> = [for (_ in 0...2 * SearchTuning.KILLER_PLY_COUNT) Move.NONE];
+    /** Distance of the current node from the root, in moves made by the main search **/
+    private var ply:Int = 0;
 
     // Outcome of the latest completed `search()` call, besides its returned score
     private var resultMove:Move = Move.NONE;
@@ -261,7 +265,10 @@ class AlphaBetaSearch<B:SearchBudget>
             if (value >= beta)
             {
                 if (!isCapture)
+                {
                     history.recordCutoff(move, depth);
+                    recordKiller(move);
+                }
                 break;
             }
 
@@ -354,7 +361,10 @@ class AlphaBetaSearch<B:SearchBudget>
             if (value <= alpha)
             {
                 if (!isCapture)
+                {
                     history.recordCutoff(move, depth);
+                    recordKiller(move);
+                }
                 break;
             }
 
@@ -369,6 +379,7 @@ class AlphaBetaSearch<B:SearchBudget>
     private inline function makeSearchedMove(move:Move, childHash:Int, tracksRepetition:Bool):Void
     {
         board.makeMove(move);
+        ply++;
         if (tracksRepetition)
             board.enterPosition(childHash);
     }
@@ -376,6 +387,7 @@ class AlphaBetaSearch<B:SearchBudget>
     private inline function unmakeSearchedMove(childHash:Int, tracksRepetition:Bool):Void
     {
         board.unmakeMove();
+        ply--;
         if (tracksRepetition)
             board.leavePosition(childHash);
     }
@@ -497,17 +509,35 @@ class AlphaBetaSearch<B:SearchBudget>
             SearchTuning.putFirst(moves, table.bestMove(hash, verificationKey));
         }
         else
-            putCapturesFirst(moves);
+            orderShallowMoves(moves);
         return moves;
     }
 
-    /** Captures ordered as by `orderedCaptures`, then the quiet moves in generation order **/
-    private function putCapturesFirst(moves:Array<Move>):Void
+    /** Captures ordered as by `orderedCaptures`, then the killer moves, then the other quiet moves in generation order **/
+    private function orderShallowMoves(moves:Array<Move>):Void
     {
         var isWhite:Bool = board.turn == White;
-        var quietKey:Float = isWhite ? Math.NEGATIVE_INFINITY : Math.POSITIVE_INFINITY;
-        var keys:Array<Float> = [for (move in moves) board.isCapture(move) ? captureKey(move) : quietKey];
+        var keys:Array<Float> = [for (move in moves) board.isCapture(move) ? captureKey(move) : quietKey(move, isWhite)];
         SearchTuning.sortByKeys(moves, keys, isWhite);
+    }
+
+    private inline function quietKey(move:Move, isWhite:Bool):Float
+    {
+        var killerSlot:Int = 2 * ply;
+        var rank:Int = 3;
+        if (ply < SearchTuning.KILLER_PLY_COUNT)
+            rank = move == killers[killerSlot] ? 1 : move == killers[killerSlot + 1] ? 2 : 3;
+        return isWhite ? -rank * SearchTuning.KILLER_ORDERING_STEP : rank * SearchTuning.KILLER_ORDERING_STEP;
+    }
+
+    private inline function recordKiller(move:Move):Void
+    {
+        var killerSlot:Int = 2 * ply;
+        if (ply < SearchTuning.KILLER_PLY_COUNT && killers[killerSlot] != move)
+        {
+            killers[killerSlot + 1] = killers[killerSlot];
+            killers[killerSlot] = move;
+        }
     }
 
     /**

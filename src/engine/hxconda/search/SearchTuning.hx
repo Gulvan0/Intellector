@@ -22,6 +22,10 @@ class SearchTuning
     public static inline final ASPIRATION_FAR_MARGIN:Float = 20;
     public static inline final DEPTH_ORDERING_WEIGHT:Float = 100;
     public static inline final HISTORY_ORDERING_DIVISOR:Float = 1000000;
+    /** Plies from the root that keep killer moves; deeper nodes go without **/
+    public static inline final KILLER_PLY_COUNT:Int = 128;
+    /** Ordering key distance between the killer moves and the other quiet moves, beyond any capture's key **/
+    public static inline final KILLER_ORDERING_STEP:Float = 1000000;
 
     /** Moves a decisive score one point towards zero, so that faster wins and slower losses are preferred **/
     public static inline function decayDecisiveScore(score:Float):Float
