@@ -493,7 +493,18 @@ class AlphaBetaSearch<B:SearchBudget>
         var moves:Array<Move> = MoveGenerator.generateMoves(board);
         if (depth >= SearchTuning.SORTING_DEPTH)
             sortMoves(moves, hash, verificationKey);
+        else
+            putCapturesFirst(moves);
         return moves;
+    }
+
+    /** Captures ordered as by `orderedCaptures`, then the quiet moves in generation order **/
+    private function putCapturesFirst(moves:Array<Move>):Void
+    {
+        var isWhite:Bool = board.turn == White;
+        var quietKey:Float = isWhite ? Math.NEGATIVE_INFINITY : Math.POSITIVE_INFINITY;
+        var keys:Array<Float> = [for (move in moves) board.isCapture(move) ? captureKey(move) : quietKey];
+        SearchTuning.sortByKeys(moves, keys, isWhite);
     }
 
     /**
@@ -575,10 +586,16 @@ class AlphaBetaSearch<B:SearchBudget>
     private function orderedCaptures():Array<Move>
     {
         var captures:Array<Move> = MoveGenerator.generateCaptures(board);
-        var pieces:PieceArray = board.pieces;
-        var keys:Array<Float> = [for (move in captures) -Evaluation.PIECE_VALUES[pieces[move.to]] - Evaluation.PIECE_VALUES[pieces[move.from]]];
+        var keys:Array<Float> = [for (move in captures) captureKey(move)];
         SearchTuning.sortByKeys(captures, keys, board.turn == White);
         return captures;
+    }
+
+    /** Higher for white, lower for black, the more valuable the captured piece and then the cheaper the capturing one **/
+    private inline function captureKey(move:Move):Float
+    {
+        var pieces:PieceArray = board.pieces;
+        return -Evaluation.PIECE_VALUES[pieces[move.to]] - Evaluation.PIECE_VALUES[pieces[move.from]];
     }
 
     /** `noiseAmplitude` bounds the random offset each root move's line gets added to its evaluation **/

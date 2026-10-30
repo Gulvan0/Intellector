@@ -1972,8 +1972,37 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
 		if(depth >= 2) {
 			this.sortMoves(moves,hash,verificationKey);
+		} else {
+			this.putCapturesFirst(moves);
 		}
 		return moves;
+	}
+	,putCapturesFirst: function(moves) {
+		var isWhite = this.board.turn == 0;
+		var quietKey = isWhite ? -Infinity : Infinity;
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < moves.length) {
+			var move = moves[_g1];
+			++_g1;
+			var tmp;
+			var _this = this.board;
+			var tmp1;
+			if(_this.pieces[move >> 6 & 63] != 12) {
+				var this1 = _this.pieces[move & 63];
+				tmp1 = !(this1 == 10 || this1 == 11);
+			} else {
+				tmp1 = false;
+			}
+			if(tmp1) {
+				var pieces = this.board.pieces;
+				tmp = -engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]];
+			} else {
+				tmp = quietKey;
+			}
+			_g.push(tmp);
+		}
+		engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,isWhite);
 	}
 	,sortMoves: function(moves,hash,verificationKey) {
 		var isWhite = this.board.turn == 0;
@@ -2039,12 +2068,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 	}
 	,orderedCaptures: function() {
 		var captures = engine_hxconda_board_MoveGenerator.generateCaptures(this.board);
-		var pieces = this.board.pieces;
 		var _g = [];
 		var _g1 = 0;
 		while(_g1 < captures.length) {
 			var move = captures[_g1];
 			++_g1;
+			var pieces = this.board.pieces;
 			_g.push(-engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]]);
 		}
 		engine_hxconda_search_SearchTuning.sortByKeys(captures,_g,this.board.turn == 0);
@@ -2561,8 +2590,37 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
 		if(depth >= 2) {
 			this.sortMoves(moves,hash,verificationKey);
+		} else {
+			this.putCapturesFirst(moves);
 		}
 		return moves;
+	}
+	,putCapturesFirst: function(moves) {
+		var isWhite = this.board.turn == 0;
+		var quietKey = isWhite ? -Infinity : Infinity;
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < moves.length) {
+			var move = moves[_g1];
+			++_g1;
+			var tmp;
+			var _this = this.board;
+			var tmp1;
+			if(_this.pieces[move >> 6 & 63] != 12) {
+				var this1 = _this.pieces[move & 63];
+				tmp1 = !(this1 == 10 || this1 == 11);
+			} else {
+				tmp1 = false;
+			}
+			if(tmp1) {
+				var pieces = this.board.pieces;
+				tmp = -engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]];
+			} else {
+				tmp = quietKey;
+			}
+			_g.push(tmp);
+		}
+		engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,isWhite);
 	}
 	,sortMoves: function(moves,hash,verificationKey) {
 		var isWhite = this.board.turn == 0;
@@ -2628,12 +2686,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 	}
 	,orderedCaptures: function() {
 		var captures = engine_hxconda_board_MoveGenerator.generateCaptures(this.board);
-		var pieces = this.board.pieces;
 		var _g = [];
 		var _g1 = 0;
 		while(_g1 < captures.length) {
 			var move = captures[_g1];
 			++_g1;
+			var pieces = this.board.pieces;
 			_g.push(-engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]]);
 		}
 		engine_hxconda_search_SearchTuning.sortByKeys(captures,_g,this.board.turn == 0);
