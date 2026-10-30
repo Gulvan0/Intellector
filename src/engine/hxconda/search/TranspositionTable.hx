@@ -44,6 +44,22 @@ class TranspositionTable
         return depth;
     }
 
+    /** Best move of the deepest entry for the position that has one, `Move.NONE` if there's none **/
+    public function bestMove(hash:Int, verificationKey:Int):Move
+    {
+        var move:Move = Move.NONE;
+        var depth:Int = -1;
+        var positionEntries:Null<Array<TranspositionEntry>> = entriesAt(hash, verificationKey);
+        if (positionEntries != null)
+            for (entry in positionEntries)
+                if (entry.move != Move.NONE && entry.depth > depth)
+                {
+                    move = entry.move;
+                    depth = entry.depth;
+                }
+        return move;
+    }
+
     /** Looks for entries searched at least as deep as `depth` **/
     public function probe(hash:Int, verificationKey:Int, alpha:Float, beta:Float, depth:Int):ProbeOutcome
     {

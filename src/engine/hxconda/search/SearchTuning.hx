@@ -36,6 +36,19 @@ class SearchTuning
         return extendedLine;
     }
 
+    /** Moves `move` to the front of `moves`, keeping the order of the others; nothing happens if it's not there **/
+    public static function putFirst(moves:Array<Move>, move:Move):Void
+    {
+        var i:Int = moves.indexOf(move);
+        while (i > 0)
+        {
+            moves[i] = moves[i - 1];
+            i--;
+        }
+        if (i == 0)
+            moves[0] = move;
+    }
+
     /** Stable insertion sort of `moves` by `keys` **/
     public static function sortByKeys(moves:Array<Move>, keys:Array<Float>, isDescending:Bool):Void
     {

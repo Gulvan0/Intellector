@@ -492,7 +492,10 @@ class AlphaBetaSearch<B:SearchBudget>
     {
         var moves:Array<Move> = MoveGenerator.generateMoves(board);
         if (depth >= SearchTuning.SORTING_DEPTH)
+        {
             sortMoves(moves, hash, verificationKey);
+            SearchTuning.putFirst(moves, table.bestMove(hash, verificationKey));
+        }
         else
             putCapturesFirst(moves);
         return moves;

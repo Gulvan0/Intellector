@@ -1972,6 +1972,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
 		if(depth >= 2) {
 			this.sortMoves(moves,hash,verificationKey);
+			engine_hxconda_search_SearchTuning.putFirst(moves,this.table.bestMove(hash,verificationKey));
 		} else {
 			this.putCapturesFirst(moves);
 		}
@@ -2590,6 +2591,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
 		if(depth >= 2) {
 			this.sortMoves(moves,hash,verificationKey);
+			engine_hxconda_search_SearchTuning.putFirst(moves,this.table.bestMove(hash,verificationKey));
 		} else {
 			this.putCapturesFirst(moves);
 		}
@@ -2736,6 +2738,16 @@ engine_hxconda_search_SearchTuning.extendLine = function(line,move) {
 	extendedLine.push(move);
 	return extendedLine;
 };
+engine_hxconda_search_SearchTuning.putFirst = function(moves,move) {
+	var i = moves.indexOf(move);
+	while(i > 0) {
+		moves[i] = moves[i - 1];
+		--i;
+	}
+	if(i == 0) {
+		moves[0] = move;
+	}
+};
 engine_hxconda_search_SearchTuning.sortByKeys = function(moves,keys,isDescending) {
 	var _g = 1;
 	var _g1 = moves.length;
@@ -2803,6 +2815,27 @@ engine_hxconda_search_TranspositionTable.prototype = {
 			}
 		}
 		return depth;
+	}
+	,bestMove: function(hash,verificationKey) {
+		var move = -1;
+		var depth = -1;
+		var positionEntries = this.buckets;
+		var mask = this.buckets.length - 1;
+		var slot = hash & mask;
+		while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != verificationKey)) slot = slot + 1 & mask;
+		var positionEntries1 = positionEntries[slot];
+		if(positionEntries1 != null) {
+			var _g = 0;
+			while(_g < positionEntries1.length) {
+				var entry = positionEntries1[_g];
+				++_g;
+				if(entry.move != -1 && entry.depth > depth) {
+					move = entry.move;
+					depth = entry.depth;
+				}
+			}
+		}
+		return move;
 	}
 	,probe: function(hash,verificationKey,alpha,beta,depth) {
 		var positionEntries = this.buckets;
