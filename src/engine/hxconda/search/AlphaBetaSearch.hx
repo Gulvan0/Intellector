@@ -41,10 +41,13 @@ class AlphaBetaSearch<B:SearchBudget>
     private var resultLine:Null<Array<Move>> = null;
     /** Whether the score comes from a repetition draw, which depends on the line and is kept out of the table **/
     private var resultIsDraw:Bool = false;
+    /** Whether a node ran out of budget, which leaves the scores of all unfinished nodes meaningless **/
+    private var isAborted:Bool = false;
 
     public function run():BestMoveReport
     {
         var rootHash:Int = board.hash();
+        var rootVerificationKey:Int = board.verificationKey();
         var expectedScore:Float = 0;
         var iteration:Int = 1;
 
@@ -66,15 +69,15 @@ class AlphaBetaSearch<B:SearchBudget>
                 beta = expectedScore + SearchTuning.ASPIRATION_NEAR_MARGIN;
             }
 
-            var score:Float = search(alpha, beta, iteration, 0, iteration, rootHash, true);
+            var score:Float = search(alpha, beta, iteration, 0, iteration, rootHash, rootVerificationKey, true);
             if (score <= alpha)
-                score = search(Math.NEGATIVE_INFINITY, alpha + 1, iteration, 0, iteration, rootHash, true);
+                score = search(Math.NEGATIVE_INFINITY, alpha + 1, iteration, 0, iteration, rootHash, rootVerificationKey, true);
             else if (score >= beta)
-                score = search(beta - 1, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, true);
+                score = search(beta - 1, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true);
 
             expectedScore = score;
             if (resultMove == Move.NONE)
-                score = search(Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, true);
+                score = search(Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true);
 
             if (budget.hasRemaining() || iteration == 1)
                 report.record(resultMove, score, iteration, rootMoves.length);
@@ -90,15 +93,16 @@ class AlphaBetaSearch<B:SearchBudget>
         return report;
     }
 
-    private function search(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, isRoot:Bool):Float
+    /** `verificationKey` is the position's `Board.verificationKey()`, needed only at depths that reach the table **/
+    private function search(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, verificationKey:Int, isRoot:Bool):Float
     {
         if (depth > 0 && maxDepth > 1 && budget.isExhausted())
+        {
+            isAborted = true;
             return conclude(board.turn == White ? Math.POSITIVE_INFINITY : Math.NEGATIVE_INFINITY, Move.NONE, null);
+        }
 
         budget.onNodeEntered();
-
-        var initialAlpha:Float = alpha;
-        var initialBeta:Float = beta;
 
         while (extension >= 1)
         {
@@ -115,7 +119,7 @@ class AlphaBetaSearch<B:SearchBudget>
             return conclude(DRAW_SCORE, Move.NONE, null, true);
 
         if (depth >= SearchTuning.HASHING_DEPTH)
-            switch table.probe(hash, alpha, beta, depth)
+            switch table.probe(hash, verificationKey, alpha, beta, depth)
             {
                 case Cutoff:
                     return conclude(table.cutoffScore, table.cutoffMove, null);
@@ -134,18 +138,19 @@ class AlphaBetaSearch<B:SearchBudget>
         {
             board.passTurn();
             var passedHash:Int = board.hashAfterPass(hash);
+            var passedVerificationKey:Int = board.verificationKeyAfterPass(verificationKey);
             var isPruned:Bool = false;
             var nullMoveScore:Float = 0;
             var nullMoveScoreIsDraw:Bool = false;
             if (board.turn == Black && beta < Math.POSITIVE_INFINITY)
             {
-                nullMoveScore = search(beta - 1, beta, depth - 1, extension, maxDepth, passedHash, false);
+                nullMoveScore = search(beta - 1, beta, depth - 1, extension, maxDepth, passedHash, passedVerificationKey, false);
                 isPruned = nullMoveScore >= beta;
                 nullMoveScoreIsDraw = resultIsDraw;
             }
             else if (board.turn == White && alpha > Math.NEGATIVE_INFINITY)
             {
-                nullMoveScore = search(alpha, alpha + 1, depth - 1, extension, maxDepth, passedHash, false);
+                nullMoveScore = search(alpha, alpha + 1, depth - 1, extension, maxDepth, passedHash, passedVerificationKey, false);
                 isPruned = nullMoveScore <= alpha;
                 nullMoveScoreIsDraw = resultIsDraw;
             }
@@ -163,26 +168,26 @@ class AlphaBetaSearch<B:SearchBudget>
             return conclude(quiesce(0, alpha, beta, evaluate()), Move.NONE, null);
 
         var score:Float = board.turn == White
-            ? searchMovesAsMaximizer(alpha, beta, depth, extension, maxDepth, hash, isRoot)
-            : searchMovesAsMinimizer(alpha, beta, depth, extension, maxDepth, hash, isRoot);
+            ? searchMovesAsMaximizer(alpha, beta, depth, extension, maxDepth, hash, verificationKey, isRoot)
+            : searchMovesAsMinimizer(alpha, beta, depth, extension, maxDepth, hash, verificationKey, isRoot);
 
         if (resultMove != Move.NONE && resultMoveIsQuiet)
             history.recordQuietBest(resultMove);
 
-        if (depth >= SearchTuning.HASHING_DEPTH && !resultIsDraw)
-            table.store(hash, initialAlpha, initialBeta, resultMove, score, depth);
+        if (depth >= SearchTuning.HASHING_DEPTH && !resultIsDraw && !isAborted)
+            table.store(hash, verificationKey, alpha, beta, resultMove, score, depth);
 
         return score;
     }
 
-    private function searchMovesAsMaximizer(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, isRoot:Bool):Float
+    private function searchMovesAsMaximizer(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, verificationKey:Int, isRoot:Bool):Float
     {
         var value:Float = BLACK_WIN_SCORE;
         var valueIsDraw:Bool = false;
         var bestMove:Move = Move.NONE;
         var bestMoveIsQuiet:Bool = false;
         var bestLine:Null<Array<Move>> = budget.tracksLines() ? [] : null;
-        var moves:Array<Move> = orderedMoves(depth, hash);
+        var moves:Array<Move> = orderedMoves(depth, hash, verificationKey);
         var moveCount:Int = moves.length;
         var attacksIntellector:Bool = board.attacksIntellector(board.turn);
 
@@ -194,26 +199,27 @@ class AlphaBetaSearch<B:SearchBudget>
 
             var isCapture:Bool = board.isCapture(move);
             var childHash:Int = board.hashAfter(hash, move);
+            var childVerificationKey:Int = depth >= SearchTuning.HASHING_DEPTH ? board.verificationKeyAfter(verificationKey, move) : 0; // children of shallower nodes never reach the table
             var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
             makeSearchedMove(move, childHash, tracksRepetition);
             var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
-            var childExtension:Float = extension + moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash);
+            var childExtension:Float = extension + moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash, childVerificationKey);
 
             var score:Float;
             var line:Null<Array<Move>>;
             if (i >= 1 && beta - alpha > 1)
             {
-                score = search(alpha, alpha + 1, depth - 1, childExtension, maxDepth, childHash, false);
+                score = search(alpha, alpha + 1, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                 line = lineThrough(move);
                 if (score >= alpha + 1 && score < beta)
                 {
-                    score = search(score - 1, beta, depth - 1, childExtension, maxDepth, childHash, false);
+                    score = search(score - 1, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                     line = lineThrough(move);
                 }
             }
             else
             {
-                score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, false);
+                score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                 line = lineThrough(move);
             }
             var scoreIsDraw:Bool = resultIsDraw;
@@ -254,14 +260,14 @@ class AlphaBetaSearch<B:SearchBudget>
         return conclude(value, bestMove, bestLine, valueIsDraw);
     }
 
-    private function searchMovesAsMinimizer(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, isRoot:Bool):Float
+    private function searchMovesAsMinimizer(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, verificationKey:Int, isRoot:Bool):Float
     {
         var value:Float = WHITE_WIN_SCORE;
         var valueIsDraw:Bool = false;
         var bestMove:Move = Move.NONE;
         var bestMoveIsQuiet:Bool = false;
         var bestLine:Null<Array<Move>> = budget.tracksLines() ? [] : null;
-        var moves:Array<Move> = orderedMoves(depth, hash);
+        var moves:Array<Move> = orderedMoves(depth, hash, verificationKey);
         var moveCount:Int = moves.length;
         var attacksIntellector:Bool = board.attacksIntellector(board.turn);
 
@@ -273,26 +279,27 @@ class AlphaBetaSearch<B:SearchBudget>
 
             var isCapture:Bool = board.isCapture(move);
             var childHash:Int = board.hashAfter(hash, move);
+            var childVerificationKey:Int = depth >= SearchTuning.HASHING_DEPTH ? board.verificationKeyAfter(verificationKey, move) : 0; // children of shallower nodes never reach the table
             var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
             makeSearchedMove(move, childHash, tracksRepetition);
             var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
-            var childExtension:Float = extension + moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash);
+            var childExtension:Float = extension + moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash, childVerificationKey);
 
             var score:Float;
             var line:Null<Array<Move>>;
             if (i >= 1 && beta - alpha > 1)
             {
-                score = search(beta - 1, beta, depth - 1, childExtension, maxDepth, childHash, false);
+                score = search(beta - 1, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                 line = lineThrough(move);
                 if (score > alpha && score <= beta - 1)
                 {
-                    score = search(alpha, score + 1, depth - 1, childExtension, maxDepth, childHash, false);
+                    score = search(alpha, score + 1, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                     line = lineThrough(move);
                 }
             }
             else
             {
-                score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, false);
+                score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
                 line = lineThrough(move);
             }
             var scoreIsDraw:Bool = resultIsDraw;
@@ -348,7 +355,7 @@ class AlphaBetaSearch<B:SearchBudget>
     }
 
     /** Depth adjustment of the child node `move` leads to, `move` being the `index`-th of `moveCount` and already made **/
-    private function moveExtension(move:Move, isTactical:Bool, index:Int, moveCount:Int, depth:Int, maxDepth:Int, childHash:Int):Float
+    private function moveExtension(move:Move, isTactical:Bool, index:Int, moveCount:Int, depth:Int, maxDepth:Int, childHash:Int, childVerificationKey:Int):Float
     {
         if (isTactical)
             return SearchTuning.TACTICAL_EXTENSION;
@@ -356,7 +363,7 @@ class AlphaBetaSearch<B:SearchBudget>
         var extension:Float = 0;
         if (history.quietVisitCount(move) >= maxDepth * maxDepth * 2)
             extension = -1 / (100 * history.quietBestRate(move) + 0.5);
-        if (depth >= SearchTuning.SORTING_DEPTH && table.deepestDepth(childHash) >= SearchTuning.LATE_MOVE_REDUCTION_HASH_DEPTH)
+        if (depth >= SearchTuning.SORTING_DEPTH && table.deepestDepth(childHash, childVerificationKey) >= SearchTuning.LATE_MOVE_REDUCTION_HASH_DEPTH)
             extension -= index / moveCount;
         return extension;
     }
@@ -452,11 +459,11 @@ class AlphaBetaSearch<B:SearchBudget>
         return score;
     }
 
-    private function orderedMoves(depth:Int, hash:Int):Array<Move>
+    private function orderedMoves(depth:Int, hash:Int, verificationKey:Int):Array<Move>
     {
         var moves:Array<Move> = MoveGenerator.generateMoves(board);
         if (depth >= SearchTuning.SORTING_DEPTH)
-            sortMoves(moves, hash);
+            sortMoves(moves, hash, verificationKey);
         return moves;
     }
 
@@ -464,7 +471,7 @@ class AlphaBetaSearch<B:SearchBudget>
         Puts the most promising moves for the side to move first: immediate wins and losses,
         then moves leading to positions known from the table, then quiet moves by history, then captures.
     **/
-    private function sortMoves(moves:Array<Move>, hash:Int):Void
+    private function sortMoves(moves:Array<Move>, hash:Int, verificationKey:Int):Void
     {
         var isWhite:Bool = board.turn == White;
         var pieces:PieceArray = board.pieces;
@@ -477,6 +484,7 @@ class AlphaBetaSearch<B:SearchBudget>
             var key:Float = 0;
             var hasKey:Bool = false;
             var childHash:Int = board.hashAfter(hash, move);
+            var childVerificationKey:Int = board.verificationKeyAfter(verificationKey, move);
 
             board.makeMove(move);
             var decisiveScore:Null<Float> = board.decisiveScore();
@@ -487,7 +495,7 @@ class AlphaBetaSearch<B:SearchBudget>
             }
             else
             {
-                var entries:Null<Array<TranspositionEntry>> = table.entriesAt(childHash);
+                var entries:Null<Array<TranspositionEntry>> = table.entriesAt(childHash, childVerificationKey);
                 if (entries != null)
                 {
                     var deepestDepth:Int = -1;

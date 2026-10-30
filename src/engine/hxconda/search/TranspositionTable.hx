@@ -5,7 +5,8 @@ import engine.hxconda.evaluation.Evaluation;
 import js.lib.Int32Array;
 
 /**
-    Search results keyed by position hash. A position keeps several entries of different depths and bound kinds.
+    Search results keyed by the position hash together with its verification key (see `Board.verificationKey`).
+    A position keeps several entries of different depths and bound kinds.
 **/
 class TranspositionTable
 {
@@ -18,23 +19,24 @@ class TranspositionTable
     public var narrowedBeta(default, null):Float = 0;
 
     /*
-        Open addressing with linear probing on the exact hash, growing as needed. Positions are never removed.
+        Open addressing with linear probing on the exact hash and verification key, growing as needed. Positions are never removed.
         A null bucket marks an empty slot.
     */
     private var hashes:Int32Array = new Int32Array(INITIAL_CAPACITY);
+    private var verificationKeys:Int32Array = new Int32Array(INITIAL_CAPACITY);
     private var buckets:Array<Null<Array<TranspositionEntry>>> = [for (_ in 0...INITIAL_CAPACITY) null];
     private var positionCount:Int = 0;
 
-    public inline function entriesAt(hash:Int):Null<Array<TranspositionEntry>>
+    public inline function entriesAt(hash:Int, verificationKey:Int):Null<Array<TranspositionEntry>>
     {
-        return buckets[slotOf(hash)];
+        return buckets[slotOf(hash, verificationKey)];
     }
 
-    /** Maximum depth stored for `hash`, 0 if there's none **/
-    public function deepestDepth(hash:Int):Int
+    /** Maximum depth stored for the position, 0 if there's none **/
+    public function deepestDepth(hash:Int, verificationKey:Int):Int
     {
         var depth:Int = 0;
-        var positionEntries:Null<Array<TranspositionEntry>> = entriesAt(hash);
+        var positionEntries:Null<Array<TranspositionEntry>> = entriesAt(hash, verificationKey);
         if (positionEntries != null)
             for (entry in positionEntries)
                 if (entry.depth > depth)
@@ -43,9 +45,9 @@ class TranspositionTable
     }
 
     /** Looks for entries searched at least as deep as `depth` **/
-    public function probe(hash:Int, alpha:Float, beta:Float, depth:Int):ProbeOutcome
+    public function probe(hash:Int, verificationKey:Int, alpha:Float, beta:Float, depth:Int):ProbeOutcome
     {
-        var positionEntries:Null<Array<TranspositionEntry>> = entriesAt(hash);
+        var positionEntries:Null<Array<TranspositionEntry>> = entriesAt(hash, verificationKey);
         if (positionEntries == null)
             return Miss;
 
@@ -82,7 +84,7 @@ class TranspositionTable
     }
 
     /** Stores `score` found within the window (`alpha`, `beta`), replacing the entries it supersedes **/
-    public function store(hash:Int, alpha:Float, beta:Float, move:Move, score:Float, depth:Int):Void
+    public function store(hash:Int, verificationKey:Int, alpha:Float, beta:Float, move:Move, score:Float, depth:Int):Void
     {
         var trustedAlpha:Float = Math.NaN;
         var trustedBeta:Float = Math.NaN;
@@ -107,7 +109,7 @@ class TranspositionTable
         if (isBound && Math.abs(score) > Evaluation.DECISIVE_THRESHOLD)
             return;
 
-        var positionEntries:Array<TranspositionEntry> = entriesOrNew(hash);
+        var positionEntries:Array<TranspositionEntry> = entriesOrNew(hash, verificationKey);
 
         var i:Int = positionEntries.length - 1;
         while (i >= 0)
@@ -121,25 +123,26 @@ class TranspositionTable
         positionEntries.push(new TranspositionEntry(move, depth, score, trustedAlpha, trustedBeta));
     }
 
-    /** The slot holding `hash`, or the empty slot where it would go **/
-    private inline function slotOf(hash:Int):Int
+    /** The slot holding the position, or the empty slot where it would go **/
+    private inline function slotOf(hash:Int, verificationKey:Int):Int
     {
         var mask:Int = buckets.length - 1;
         var slot:Int = hash & mask;
-        while (buckets[slot] != null && hashes[slot] != hash)
+        while (buckets[slot] != null && (hashes[slot] != hash || verificationKeys[slot] != verificationKey))
             slot = (slot + 1) & mask;
         return slot;
     }
 
-    private function entriesOrNew(hash:Int):Array<TranspositionEntry>
+    private function entriesOrNew(hash:Int, verificationKey:Int):Array<TranspositionEntry>
     {
-        var slot:Int = slotOf(hash);
+        var slot:Int = slotOf(hash, verificationKey);
         var positionEntries:Null<Array<TranspositionEntry>> = buckets[slot];
         if (positionEntries != null)
             return positionEntries;
 
         var newEntries:Array<TranspositionEntry> = [];
         hashes[slot] = hash;
+        verificationKeys[slot] = verificationKey;
         buckets[slot] = newEntries;
         positionCount++;
         if (positionCount * 2 > buckets.length)
@@ -150,16 +153,19 @@ class TranspositionTable
     private function grow():Void
     {
         var oldHashes:Int32Array = hashes;
+        var oldVerificationKeys:Int32Array = verificationKeys;
         var oldBuckets:Array<Null<Array<TranspositionEntry>>> = buckets;
         hashes = new Int32Array(oldBuckets.length * 2);
+        verificationKeys = new Int32Array(oldBuckets.length * 2);
         buckets = [for (_ in 0...oldBuckets.length * 2) null];
 
         for (i in 0...oldBuckets.length)
         {
             if (oldBuckets[i] != null)
             {
-                var slot:Int = slotOf(oldHashes[i]);
+                var slot:Int = slotOf(oldHashes[i], oldVerificationKeys[i]);
                 hashes[slot] = oldHashes[i];
+                verificationKeys[slot] = oldVerificationKeys[i];
                 buckets[slot] = oldBuckets[i];
             }
         }

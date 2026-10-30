@@ -13,6 +13,7 @@ import js.lib.Int8Array;
 class Board
 {
     private static inline final DEFAULT_STARTING_NOTATION:String = "mpeeePMleeeeLapeeePAdeeeeDipeeePIdeeeeDapeeePAleeeeLmpeeePMw";
+    private static inline final VERIFICATION_KEY_SEED:Int = 0x2545F491;
 
     public final pieces:PieceArray;
     public final zobristKeys:ZobristKeys;
@@ -27,6 +28,7 @@ class Board
 
     /** Bit `square & 31` of entry `color * 2 + (square >> 5)` is set while a piece of `color` stands on `square` **/
     private final occupancyMasks:Int32Array = new Int32Array(4);
+    private final verificationKeys:ZobristKeys = ZobristKeys.seeded(VERIFICATION_KEY_SEED);
     private final undoStack:Array<Int> = [];
     private final visitCounts:VisitCounts = new VisitCounts();
 
@@ -43,32 +45,35 @@ class Board
 
     public function hash():Int
     {
-        var hash:Int = turn == Black ? zobristKeys.blackToMove : 0;
-        for (square in 0...SQUARE_COUNT)
-            hash ^= zobristKeys.of(square, pieces[square]);
-        return hash;
+        return hashUnder(zobristKeys);
     }
 
     /** Hash of the position `move` leads to, given `hash` of the current one **/
     public function hashAfter(hash:Int, move:Move):Int
     {
-        var from:Int = move.from;
-        var to:Int = move.to;
-        var movingPiece:Piece = pieces[from];
-        var targetPiece:Piece = pieces[to];
-        var pieceLeftBehind:Piece = isCastling(movingPiece, targetPiece) ? targetPiece : Empty;
-
-        return hash
-            ^ zobristKeys.blackToMove
-            ^ zobristKeys.of(from, movingPiece)
-            ^ zobristKeys.of(to, targetPiece)
-            ^ zobristKeys.of(from, pieceLeftBehind)
-            ^ zobristKeys.of(to, move.resultingPiece);
+        return hashAfterUnder(zobristKeys, hash, move);
     }
 
     public inline function hashAfterPass(hash:Int):Int
     {
         return hash ^ zobristKeys.blackToMove;
+    }
+
+    /** Hash of the position under independent keys, telling apart positions of equal `hash()` **/
+    public function verificationKey():Int
+    {
+        return hashUnder(verificationKeys);
+    }
+
+    /** `verificationKey()` of the position `move` leads to, given `key` of the current one **/
+    public function verificationKeyAfter(key:Int, move:Move):Int
+    {
+        return hashAfterUnder(verificationKeys, key, move);
+    }
+
+    public inline function verificationKeyAfterPass(key:Int):Int
+    {
+        return key ^ verificationKeys.blackToMove;
     }
 
     public function makeMove(move:Move):Void
@@ -273,6 +278,30 @@ class Board
         return Evaluation.pieceSquareScore(piece, square) + Evaluation.pieceSquareScore(otherPiece, otherSquare);
     }
 
+    private function hashUnder(keys:ZobristKeys):Int
+    {
+        var hash:Int = turn == Black ? keys.blackToMove : 0;
+        for (square in 0...SQUARE_COUNT)
+            hash ^= keys.of(square, pieces[square]);
+        return hash;
+    }
+
+    private inline function hashAfterUnder(keys:ZobristKeys, hash:Int, move:Move):Int
+    {
+        var from:Int = move.from;
+        var to:Int = move.to;
+        var movingPiece:Piece = pieces[from];
+        var targetPiece:Piece = pieces[to];
+        var pieceLeftBehind:Piece = isCastling(movingPiece, targetPiece) ? targetPiece : Empty;
+
+        return hash
+            ^ keys.blackToMove
+            ^ keys.of(from, movingPiece)
+            ^ keys.of(to, targetPiece)
+            ^ keys.of(from, pieceLeftBehind)
+            ^ keys.of(to, move.resultingPiece);
+    }
+
     private function computeMaterialScore():Float
     {
         var score:Float = 0;
@@ -460,7 +489,7 @@ class Board
     **/
     public function new(notation:Null<String>)
     {
-        zobristKeys = new ZobristKeys();
+        zobristKeys = ZobristKeys.random();
         pieces = new PieceArray(SQUARE_COUNT);
 
         if (notation == null || !trySetFromNotation(notation))

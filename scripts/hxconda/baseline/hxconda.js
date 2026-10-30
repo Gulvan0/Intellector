@@ -65,12 +65,13 @@ engine_hxconda_HxcondaWorker.post = function(response) {
 var engine_hxconda_board_Board = function(notation) {
 	this.visitCounts = new engine_hxconda_board_VisitCounts();
 	this.undoStack = [];
+	this.verificationKeys = engine_hxconda_board_ZobristKeys.seeded(625341585);
 	this.occupancyMasks = new Int32Array(4);
 	this.materialScore = 0;
 	this.blackIntellectorSquare = -1;
 	this.whiteIntellectorSquare = -1;
 	this.turn = 0;
-	this.zobristKeys = new engine_hxconda_board_ZobristKeys();
+	this.zobristKeys = engine_hxconda_board_ZobristKeys.random();
 	var this1 = new Int8Array(59);
 	this1.fill(12);
 	this.pieces = this1;
@@ -82,20 +83,26 @@ var engine_hxconda_board_Board = function(notation) {
 };
 engine_hxconda_board_Board.prototype = {
 	hash: function() {
-		var hash = this.turn == 1 ? this.zobristKeys.blackToMove : 0;
-		var _g = 0;
-		while(_g < 59) {
-			var square = _g++;
-			hash ^= this.zobristKeys.pieceKeys[square * 13 + this.pieces[square]];
-		}
-		return hash;
+		return this.hashUnder(this.zobristKeys);
 	}
 	,hashAfter: function(hash,move) {
+		var keys = this.zobristKeys;
 		var from = move & 63;
 		var to = move >> 6 & 63;
 		var movingPiece = this.pieces[from];
 		var targetPiece = this.pieces[to];
-		return hash ^ this.zobristKeys.blackToMove ^ this.zobristKeys.pieceKeys[from * 13 + movingPiece] ^ this.zobristKeys.pieceKeys[to * 13 + targetPiece] ^ this.zobristKeys.pieceKeys[from * 13 + (movingPiece == 10 && targetPiece == 8 || movingPiece == 11 && targetPiece == 9 ? targetPiece : 12)] ^ this.zobristKeys.pieceKeys[to * 13 + (move >> 12)];
+		return hash ^ keys.blackToMove ^ keys.pieceKeys[from * 13 + movingPiece] ^ keys.pieceKeys[to * 13 + targetPiece] ^ keys.pieceKeys[from * 13 + (movingPiece == 10 && targetPiece == 8 || movingPiece == 11 && targetPiece == 9 ? targetPiece : 12)] ^ keys.pieceKeys[to * 13 + (move >> 12)];
+	}
+	,verificationKey: function() {
+		return this.hashUnder(this.verificationKeys);
+	}
+	,verificationKeyAfter: function(key,move) {
+		var keys = this.verificationKeys;
+		var from = move & 63;
+		var to = move >> 6 & 63;
+		var movingPiece = this.pieces[from];
+		var targetPiece = this.pieces[to];
+		return key ^ keys.blackToMove ^ keys.pieceKeys[from * 13 + movingPiece] ^ keys.pieceKeys[to * 13 + targetPiece] ^ keys.pieceKeys[from * 13 + (movingPiece == 10 && targetPiece == 8 || movingPiece == 11 && targetPiece == 9 ? targetPiece : 12)] ^ keys.pieceKeys[to * 13 + (move >> 12)];
 	}
 	,makeMove: function(move) {
 		var from = move & 63;
@@ -322,6 +329,15 @@ engine_hxconda_board_Board.prototype = {
 			return -100000;
 		}
 		return null;
+	}
+	,hashUnder: function(keys) {
+		var hash = this.turn == 1 ? keys.blackToMove : 0;
+		var _g = 0;
+		while(_g < 59) {
+			var square = _g++;
+			hash ^= keys.pieceKeys[square * 13 + this.pieces[square]];
+		}
+		return hash;
 	}
 	,computeMaterialScore: function() {
 		var score = 0;
@@ -1315,7 +1331,7 @@ engine_hxconda_board_VisitCounts.prototype = {
 		}
 	}
 };
-var engine_hxconda_board_ZobristKeys = function() {
+var engine_hxconda_board_ZobristKeys = function(nextKey) {
 	this.pieceKeys = [];
 	var _g = 0;
 	while(_g < 59) {
@@ -1323,11 +1339,22 @@ var engine_hxconda_board_ZobristKeys = function() {
 		var _g1 = 0;
 		while(_g1 < 12) {
 			++_g1;
-			this.pieceKeys.push(engine_hxconda_board_ZobristKeys.randomKey());
+			this.pieceKeys.push(nextKey());
 		}
 		this.pieceKeys.push(0);
 	}
-	this.blackToMove = engine_hxconda_board_ZobristKeys.randomKey();
+	this.blackToMove = nextKey();
+};
+engine_hxconda_board_ZobristKeys.random = function() {
+	return new engine_hxconda_board_ZobristKeys(engine_hxconda_board_ZobristKeys.randomKey);
+};
+engine_hxconda_board_ZobristKeys.seeded = function(seed) {
+	var state = seed;
+	return new engine_hxconda_board_ZobristKeys(function() {
+		state = (state ^= state << 13) ^ state >>> 17;
+		state ^= state << 5;
+		return state;
+	});
 };
 engine_hxconda_board_ZobristKeys.randomKey = function() {
 	var key = 0;
@@ -1403,6 +1430,7 @@ engine_hxconda_protocol_HxcondaProtocol.moveMessage = function(move) {
 	return { from : move & 63, to : move >> 6 & 63, resultingPiece : move >> 12};
 };
 var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget = function(board,budget,noiseAmplitude) {
+	this.isAborted = false;
 	this.resultIsDraw = false;
 	this.resultLine = null;
 	this.resultMoveIsQuiet = false;
@@ -1433,6 +1461,7 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Node
 engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget.prototype = {
 	run: function() {
 		var rootHash = this.board.hash();
+		var rootVerificationKey = this.board.verificationKey();
 		var expectedScore = 0;
 		var iteration = 1;
 		while(true) {
@@ -1449,15 +1478,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				alpha = expectedScore - 20;
 				beta = expectedScore + 10;
 			}
-			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,true);
+			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true);
 			if(score <= alpha) {
-				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,true);
+				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true);
 			} else if(score >= beta) {
-				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,true);
+				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
 			}
 			expectedScore = score;
 			if(this.resultMove == -1) {
-				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,true);
+				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
 			}
 			var _this1 = this.budget;
 			if(_this1.nodeLimit - _this1.nodeCount > 0 || iteration == 1) {
@@ -1470,7 +1499,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		}
 		return this.report;
 	}
-	,search: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
+	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		var tmp;
 		if(depth > 0 && maxDepth > 1) {
 			var _this = this.budget;
@@ -1479,6 +1508,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			tmp = false;
 		}
 		if(tmp) {
+			this.isAborted = true;
 			var score = this.board.turn == 0 ? Infinity : -Infinity;
 			this.resultMove = -1;
 			this.resultLine = null;
@@ -1490,8 +1520,6 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			_this.onProgress(Math.floor(_this.nodeCount * 100.0 / _this.nodeLimit));
 		}
 		_this.nodeCount++;
-		var initialAlpha = alpha;
-		var initialBeta = beta;
 		while(extension >= 1) {
 			++depth;
 			--extension;
@@ -1511,7 +1539,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			return 0;
 		}
 		if(depth >= 2) {
-			switch(this.table.probe(hash,alpha,beta,depth)) {
+			switch(this.table.probe(hash,verificationKey,alpha,beta,depth)) {
 			case 1:
 				this.resultMove = this.table.cutoffMove;
 				this.resultLine = null;
@@ -1536,15 +1564,16 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
 			var passedHash = hash ^ this.board.zobristKeys.blackToMove;
+			var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
 			var isPruned = false;
 			var nullMoveScore = 0;
 			var nullMoveScoreIsDraw = false;
 			if(this.board.turn == 1 && beta < Infinity) {
-				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,false);
+				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
 				isPruned = nullMoveScore >= beta;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			} else if(this.board.turn == 0 && alpha > -Infinity) {
-				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,false);
+				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
 				isPruned = nullMoveScore <= alpha;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			}
@@ -1575,22 +1604,22 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			this.resultIsDraw = false;
 			return score;
 		}
-		var score = this.board.turn == 0 ? this.searchMovesAsMaximizer(alpha,beta,depth,extension,maxDepth,hash,isRoot) : this.searchMovesAsMinimizer(alpha,beta,depth,extension,maxDepth,hash,isRoot);
+		var score = this.board.turn == 0 ? this.searchMovesAsMaximizer(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) : this.searchMovesAsMinimizer(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot);
 		if(this.resultMove != -1 && this.resultMoveIsQuiet) {
 			this.history.quietBestCounts[this.resultMove] += 1;
 		}
-		if(depth >= 2 && !this.resultIsDraw) {
-			this.table.store(hash,initialAlpha,initialBeta,this.resultMove,score,depth);
+		if(depth >= 2 && !this.resultIsDraw && !this.isAborted) {
+			this.table.store(hash,verificationKey,alpha,beta,this.resultMove,score,depth);
 		}
 		return score;
 	}
-	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
+	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		var value = -100000;
 		var valueIsDraw = false;
 		var bestMove = -1;
 		var bestMoveIsQuiet = false;
 		var bestLine = null;
-		var moves = this.orderedMoves(depth,hash);
+		var moves = this.orderedMoves(depth,hash,verificationKey);
 		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
@@ -1609,6 +1638,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				isCapture = false;
 			}
 			var childHash = this.board.hashAfter(hash,move);
+			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
 			if(tracksRepetition) {
@@ -1623,15 +1653,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash);
+			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
 			var score;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,false);
+				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				if(score >= alpha + 1 && score < beta) {
-					score = this.search(score - 1,beta,depth - 1,childExtension,maxDepth,childHash,false);
+					score = this.search(score - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 			}
 			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
@@ -1685,13 +1715,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		this.resultIsDraw = isDraw;
 		return value;
 	}
-	,searchMovesAsMinimizer: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
+	,searchMovesAsMinimizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		var value = 100000;
 		var valueIsDraw = false;
 		var bestMove = -1;
 		var bestMoveIsQuiet = false;
 		var bestLine = null;
-		var moves = this.orderedMoves(depth,hash);
+		var moves = this.orderedMoves(depth,hash,verificationKey);
 		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
@@ -1710,6 +1740,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				isCapture = false;
 			}
 			var childHash = this.board.hashAfter(hash,move);
+			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
 			if(tracksRepetition) {
@@ -1724,15 +1755,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash);
+			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
 			var score;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,false);
+				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				if(score > alpha && score <= beta - 1) {
-					score = this.search(alpha,score + 1,depth - 1,childExtension,maxDepth,childHash,false);
+					score = this.search(alpha,score + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 			}
 			var scoreIsDraw = this.resultIsDraw;
 			if(score > 90000) {
@@ -1779,7 +1810,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		this.resultIsDraw = isDraw;
 		return value;
 	}
-	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash) {
+	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash,childVerificationKey) {
 		if(isTactical) {
 			return 0.5;
 		}
@@ -1788,7 +1819,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var _this = this.history;
 			extension = -1 / (100 * (_this.quietBestCounts[move] / _this.quietVisitCounts[move]) + 0.5);
 		}
-		if(depth >= 2 && this.table.deepestDepth(childHash) >= 3) {
+		if(depth >= 2 && this.table.deepestDepth(childHash,childVerificationKey) >= 3) {
 			extension -= index / moveCount;
 		}
 		return extension;
@@ -1895,14 +1926,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		}
 		return score1;
 	}
-	,orderedMoves: function(depth,hash) {
+	,orderedMoves: function(depth,hash,verificationKey) {
 		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
 		if(depth >= 2) {
-			this.sortMoves(moves,hash);
+			this.sortMoves(moves,hash,verificationKey);
 		}
 		return moves;
 	}
-	,sortMoves: function(moves,hash) {
+	,sortMoves: function(moves,hash,verificationKey) {
 		var isWhite = this.board.turn == 0;
 		var pieces = this.board.pieces;
 		var worstScore = isWhite ? -100000 : 100000;
@@ -1915,6 +1946,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var key = 0;
 			var hasKey = false;
 			var childHash = this.board.hashAfter(hash,move);
+			var childVerificationKey = this.board.verificationKeyAfter(verificationKey,move);
 			this.board.makeMove(move);
 			var decisiveScore = this.board.decisiveScore();
 			if(decisiveScore != null) {
@@ -1925,7 +1957,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				var _this1 = _this.buckets;
 				var mask = _this.buckets.length - 1;
 				var slot = childHash & mask;
-				while(_this.buckets[slot] != null && _this.hashes[slot] != childHash) slot = slot + 1 & mask;
+				while(_this.buckets[slot] != null && (_this.hashes[slot] != childHash || _this.verificationKeys[slot] != childVerificationKey)) slot = slot + 1 & mask;
 				var entries = _this1[slot];
 				if(entries != null) {
 					var deepestDepth = -1;
@@ -1978,6 +2010,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 	}
 };
 var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget = function(board,budget,noiseAmplitude) {
+	this.isAborted = false;
 	this.resultIsDraw = false;
 	this.resultLine = null;
 	this.resultMoveIsQuiet = false;
@@ -2008,6 +2041,7 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Time
 engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget.prototype = {
 	run: function() {
 		var rootHash = this.board.hash();
+		var rootVerificationKey = this.board.verificationKey();
 		var expectedScore = 0;
 		var iteration = 1;
 		var _this = this.budget;
@@ -2022,15 +2056,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				alpha = expectedScore - 20;
 				beta = expectedScore + 10;
 			}
-			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,true);
+			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true);
 			if(score <= alpha) {
-				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,true);
+				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true);
 			} else if(score >= beta) {
-				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,true);
+				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
 			}
 			expectedScore = score;
 			if(this.resultMove == -1) {
-				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,true);
+				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
 			}
 			if(this.budget.deadline - performance.now() > 0 || iteration == 1) {
 				this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
@@ -2043,16 +2077,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		}
 		return this.report;
 	}
-	,search: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
+	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		if(depth > 0 && maxDepth > 1 && this.budget.deadline - performance.now() < 0) {
+			this.isAborted = true;
 			var score = this.board.turn == 0 ? Infinity : -Infinity;
 			this.resultMove = -1;
 			this.resultLine = null;
 			this.resultIsDraw = false;
 			return score;
 		}
-		var initialAlpha = alpha;
-		var initialBeta = beta;
 		while(extension >= 1) {
 			++depth;
 			--extension;
@@ -2072,7 +2105,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			return 0;
 		}
 		if(depth >= 2) {
-			switch(this.table.probe(hash,alpha,beta,depth)) {
+			switch(this.table.probe(hash,verificationKey,alpha,beta,depth)) {
 			case 1:
 				this.resultMove = this.table.cutoffMove;
 				this.resultLine = null;
@@ -2095,15 +2128,16 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
 			var passedHash = hash ^ this.board.zobristKeys.blackToMove;
+			var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
 			var isPruned = false;
 			var nullMoveScore = 0;
 			var nullMoveScoreIsDraw = false;
 			if(this.board.turn == 1 && beta < Infinity) {
-				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,false);
+				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
 				isPruned = nullMoveScore >= beta;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			} else if(this.board.turn == 0 && alpha > -Infinity) {
-				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,false);
+				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
 				isPruned = nullMoveScore <= alpha;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			}
@@ -2134,22 +2168,22 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			this.resultIsDraw = false;
 			return score;
 		}
-		var score = this.board.turn == 0 ? this.searchMovesAsMaximizer(alpha,beta,depth,extension,maxDepth,hash,isRoot) : this.searchMovesAsMinimizer(alpha,beta,depth,extension,maxDepth,hash,isRoot);
+		var score = this.board.turn == 0 ? this.searchMovesAsMaximizer(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) : this.searchMovesAsMinimizer(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot);
 		if(this.resultMove != -1 && this.resultMoveIsQuiet) {
 			this.history.quietBestCounts[this.resultMove] += 1;
 		}
-		if(depth >= 2 && !this.resultIsDraw) {
-			this.table.store(hash,initialAlpha,initialBeta,this.resultMove,score,depth);
+		if(depth >= 2 && !this.resultIsDraw && !this.isAborted) {
+			this.table.store(hash,verificationKey,alpha,beta,this.resultMove,score,depth);
 		}
 		return score;
 	}
-	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
+	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		var value = -100000;
 		var valueIsDraw = false;
 		var bestMove = -1;
 		var bestMoveIsQuiet = false;
 		var bestLine = [];
-		var moves = this.orderedMoves(depth,hash);
+		var moves = this.orderedMoves(depth,hash,verificationKey);
 		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
@@ -2168,6 +2202,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				isCapture = false;
 			}
 			var childHash = this.board.hashAfter(hash,move);
+			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
 			if(tracksRepetition) {
@@ -2182,18 +2217,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash);
+			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
 			var score;
 			var line;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,false);
+				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score >= alpha + 1 && score < beta) {
-					score = this.search(score - 1,beta,depth - 1,childExtension,maxDepth,childHash,false);
+					score = this.search(score - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 			}
 			var scoreIsDraw = this.resultIsDraw;
@@ -2242,13 +2277,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		this.resultIsDraw = isDraw;
 		return value;
 	}
-	,searchMovesAsMinimizer: function(alpha,beta,depth,extension,maxDepth,hash,isRoot) {
+	,searchMovesAsMinimizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		var value = 100000;
 		var valueIsDraw = false;
 		var bestMove = -1;
 		var bestMoveIsQuiet = false;
 		var bestLine = [];
-		var moves = this.orderedMoves(depth,hash);
+		var moves = this.orderedMoves(depth,hash,verificationKey);
 		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
@@ -2267,6 +2302,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				isCapture = false;
 			}
 			var childHash = this.board.hashAfter(hash,move);
+			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
 			var tracksRepetition = depth >= 2;
 			this.board.makeMove(move);
 			if(tracksRepetition) {
@@ -2281,18 +2317,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash);
+			var childExtension = extension + this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
 			var score;
 			var line;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,false);
+				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score > alpha && score <= beta - 1) {
-					score = this.search(alpha,score + 1,depth - 1,childExtension,maxDepth,childHash,false);
+					score = this.search(alpha,score + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 			}
 			var scoreIsDraw = this.resultIsDraw;
@@ -2341,7 +2377,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		this.resultIsDraw = isDraw;
 		return value;
 	}
-	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash) {
+	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash,childVerificationKey) {
 		if(isTactical) {
 			return 0.5;
 		}
@@ -2350,7 +2386,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var _this = this.history;
 			extension = -1 / (100 * (_this.quietBestCounts[move] / _this.quietVisitCounts[move]) + 0.5);
 		}
-		if(depth >= 2 && this.table.deepestDepth(childHash) >= 3) {
+		if(depth >= 2 && this.table.deepestDepth(childHash,childVerificationKey) >= 3) {
 			extension -= index / moveCount;
 		}
 		return extension;
@@ -2457,14 +2493,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		}
 		return score1;
 	}
-	,orderedMoves: function(depth,hash) {
+	,orderedMoves: function(depth,hash,verificationKey) {
 		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
 		if(depth >= 2) {
-			this.sortMoves(moves,hash);
+			this.sortMoves(moves,hash,verificationKey);
 		}
 		return moves;
 	}
-	,sortMoves: function(moves,hash) {
+	,sortMoves: function(moves,hash,verificationKey) {
 		var isWhite = this.board.turn == 0;
 		var pieces = this.board.pieces;
 		var worstScore = isWhite ? -100000 : 100000;
@@ -2477,6 +2513,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var key = 0;
 			var hasKey = false;
 			var childHash = this.board.hashAfter(hash,move);
+			var childVerificationKey = this.board.verificationKeyAfter(verificationKey,move);
 			this.board.makeMove(move);
 			var decisiveScore = this.board.decisiveScore();
 			if(decisiveScore != null) {
@@ -2487,7 +2524,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				var _this1 = _this.buckets;
 				var mask = _this.buckets.length - 1;
 				var slot = childHash & mask;
-				while(_this.buckets[slot] != null && _this.hashes[slot] != childHash) slot = slot + 1 & mask;
+				while(_this.buckets[slot] != null && (_this.hashes[slot] != childHash || _this.verificationKeys[slot] != childVerificationKey)) slot = slot + 1 & mask;
 				var entries = _this1[slot];
 				if(entries != null) {
 					var deepestDepth = -1;
@@ -2618,6 +2655,7 @@ var engine_hxconda_search_TranspositionTable = function() {
 		_g.push(null);
 	}
 	this.buckets = _g;
+	this.verificationKeys = new Int32Array(4096);
 	this.hashes = new Int32Array(4096);
 	this.narrowedBeta = 0;
 	this.narrowedAlpha = 0;
@@ -2625,12 +2663,12 @@ var engine_hxconda_search_TranspositionTable = function() {
 	this.cutoffScore = 0;
 };
 engine_hxconda_search_TranspositionTable.prototype = {
-	deepestDepth: function(hash) {
+	deepestDepth: function(hash,verificationKey) {
 		var depth = 0;
 		var positionEntries = this.buckets;
 		var mask = this.buckets.length - 1;
 		var slot = hash & mask;
-		while(this.buckets[slot] != null && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != verificationKey)) slot = slot + 1 & mask;
 		var positionEntries1 = positionEntries[slot];
 		if(positionEntries1 != null) {
 			var _g = 0;
@@ -2644,11 +2682,11 @@ engine_hxconda_search_TranspositionTable.prototype = {
 		}
 		return depth;
 	}
-	,probe: function(hash,alpha,beta,depth) {
+	,probe: function(hash,verificationKey,alpha,beta,depth) {
 		var positionEntries = this.buckets;
 		var mask = this.buckets.length - 1;
 		var slot = hash & mask;
-		while(this.buckets[slot] != null && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != verificationKey)) slot = slot + 1 & mask;
 		var positionEntries1 = positionEntries[slot];
 		if(positionEntries1 == null) {
 			return 0;
@@ -2692,7 +2730,7 @@ engine_hxconda_search_TranspositionTable.prototype = {
 		this.narrowedBeta = beta;
 		return 2;
 	}
-	,store: function(hash,alpha,beta,move,score,depth) {
+	,store: function(hash,verificationKey,alpha,beta,move,score,depth) {
 		var trustedAlpha = NaN;
 		var trustedBeta = NaN;
 		if(score <= alpha) {
@@ -2708,7 +2746,7 @@ engine_hxconda_search_TranspositionTable.prototype = {
 		if((trustedAlpha > -100000 || trustedBeta < 100000) && Math.abs(score) > 90000) {
 			return;
 		}
-		var positionEntries = this.entriesOrNew(hash);
+		var positionEntries = this.entriesOrNew(hash,verificationKey);
 		var i = positionEntries.length - 1;
 		while(i >= 0) {
 			var entry = positionEntries[i];
@@ -2719,10 +2757,10 @@ engine_hxconda_search_TranspositionTable.prototype = {
 		}
 		positionEntries.push(new engine_hxconda_search_TranspositionEntry(move,depth,score,trustedAlpha,trustedBeta));
 	}
-	,entriesOrNew: function(hash) {
+	,entriesOrNew: function(hash,verificationKey) {
 		var mask = this.buckets.length - 1;
 		var slot = hash & mask;
-		while(this.buckets[slot] != null && this.hashes[slot] != hash) slot = slot + 1 & mask;
+		while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != verificationKey)) slot = slot + 1 & mask;
 		var slot1 = slot;
 		var positionEntries = this.buckets[slot1];
 		if(positionEntries != null) {
@@ -2730,6 +2768,7 @@ engine_hxconda_search_TranspositionTable.prototype = {
 		}
 		var newEntries = [];
 		this.hashes[slot1] = hash;
+		this.verificationKeys[slot1] = verificationKey;
 		this.buckets[slot1] = newEntries;
 		this.positionCount++;
 		if(this.positionCount * 2 > this.buckets.length) {
@@ -2739,8 +2778,10 @@ engine_hxconda_search_TranspositionTable.prototype = {
 	}
 	,grow: function() {
 		var oldHashes = this.hashes;
+		var oldVerificationKeys = this.verificationKeys;
 		var oldBuckets = this.buckets;
 		this.hashes = new Int32Array(oldBuckets.length * 2);
+		this.verificationKeys = new Int32Array(oldBuckets.length * 2);
 		var _g = [];
 		var _g1 = 0;
 		var _g2 = oldBuckets.length * 2;
@@ -2757,9 +2798,10 @@ engine_hxconda_search_TranspositionTable.prototype = {
 				var hash = oldHashes[i];
 				var mask = this.buckets.length - 1;
 				var slot = hash & mask;
-				while(this.buckets[slot] != null && this.hashes[slot] != hash) slot = slot + 1 & mask;
+				while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != oldVerificationKeys[i])) slot = slot + 1 & mask;
 				var slot1 = slot;
 				this.hashes[slot1] = oldHashes[i];
+				this.verificationKeys[slot1] = oldVerificationKeys[i];
 				this.buckets[slot1] = oldBuckets[i];
 			}
 		}
