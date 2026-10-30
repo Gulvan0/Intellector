@@ -27,7 +27,7 @@ class TranspositionTable
     private var buckets:Array<Null<Array<TranspositionEntry>>> = [for (_ in 0...INITIAL_CAPACITY) null];
     private var positionCount:Int = 0;
 
-    public inline function entriesAt(hash:Int, verificationKey:Int):Null<Array<TranspositionEntry>>
+    private inline function entriesAt(hash:Int, verificationKey:Int):Null<Array<TranspositionEntry>>
     {
         return buckets[slotOf(hash, verificationKey)];
     }

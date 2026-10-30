@@ -1993,7 +1993,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 	,orderedMoves: function(depth,hash,verificationKey) {
 		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
 		if(depth >= 2) {
-			this.sortMoves(moves,hash,verificationKey);
+			this.sortMoves(moves);
 			engine_hxconda_search_SearchTuning.putFirst(moves,this.table.bestMove(hash,verificationKey));
 		} else {
 			this.orderShallowMoves(moves);
@@ -2021,9 +2021,9 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				tmp = -engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]];
 			} else {
 				var killerSlot = 2 * this.ply;
-				var rank = 3;
-				if(this.ply < 128) {
-					rank = move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 3;
+				var rank = this.ply >= 128 ? 0 : move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 0;
+				if(rank == 0) {
+					rank = 3;
 				}
 				tmp = isWhite ? -rank * 1000000 : rank * 1000000;
 			}
@@ -2031,67 +2031,40 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		}
 		engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,isWhite);
 	}
-	,sortMoves: function(moves,hash,verificationKey) {
-		var isWhite = this.board.turn == 0;
+	,sortMoves: function(moves) {
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < moves.length) _g.push(this.orderingKey(moves[_g1++]));
+		engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,true);
+	}
+	,orderingKey: function(move) {
 		var pieces = this.board.pieces;
-		var worstScore = isWhite ? -100000 : 100000;
-		var depthWeight = isWhite ? 100 : -100.;
-		var keys = [];
-		var _g = 0;
-		while(_g < moves.length) {
-			var move = moves[_g];
-			++_g;
-			var key = 0;
-			var hasKey = false;
-			var childHash = this.board.hashAfter(hash,move);
-			var childVerificationKey = this.board.verificationKeyAfter(verificationKey,move);
-			this.board.makeMove(move);
-			var decisiveScore = this.board.decisiveScore();
-			if(decisiveScore != null) {
-				key = decisiveScore;
-				hasKey = true;
-			} else {
-				var _this = this.table;
-				var _this1 = _this.buckets;
-				var mask = _this.buckets.length - 1;
-				var slot = childHash & mask;
-				while(_this.buckets[slot] != null && (_this.hashes[slot] != childHash || _this.verificationKeys[slot] != childVerificationKey)) slot = slot + 1 & mask;
-				var entries = _this1[slot];
-				if(entries != null) {
-					var deepestDepth = -1;
-					var _g1 = 0;
-					while(_g1 < entries.length) {
-						var entry = entries[_g1];
-						++_g1;
-						if(entry.depth <= deepestDepth) {
-							continue;
-						}
-						if(entry.score > entry.alpha && entry.score < entry.beta) {
-							key = entry.score + entry.depth * depthWeight;
-							hasKey = true;
-						} else if(isWhite && entry.score >= entry.beta) {
-							key = entry.beta + entry.depth * depthWeight;
-							hasKey = true;
-						} else if(!isWhite && entry.score <= entry.alpha) {
-							key = entry.alpha + entry.depth * depthWeight;
-							hasKey = true;
-						}
-						deepestDepth = entry.depth;
-					}
-				}
-			}
-			this.board.unmakeMove();
-			if(!hasKey) {
-				if(pieces[move >> 6 & 63] == 12) {
-					var historyBonus = this.history.cutoffWeights[move] / 1000000;
-					key = isWhite ? worstScore + historyBonus : worstScore - historyBonus;
-				} else {
-					key = worstScore + (-engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]]);
-				}
-			}
-			keys.push(key);
+		var movingPiece = pieces[move & 63];
+		if((movingPiece == 10 || movingPiece == 11) && engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS[this.board.turn * 59 + (move >> 6 & 63)]) {
+			return 1000000000;
 		}
-		engine_hxconda_search_SearchTuning.sortByKeys(moves,keys,isWhite);
+		var _this = this.board;
+		var tmp;
+		if(_this.pieces[move >> 6 & 63] != 12) {
+			var this1 = _this.pieces[move & 63];
+			tmp = !(this1 == 10 || this1 == 11);
+		} else {
+			tmp = false;
+		}
+		if(tmp) {
+			var gain = Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]]) - Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[movingPiece]);
+			if(gain >= 0) {
+				return 100000000 + gain;
+			} else {
+				return -100000000. + gain;
+			}
+		}
+		var killerSlot = 2 * this.ply;
+		var killerRank = this.ply >= 128 ? 0 : move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 0;
+		if(killerRank > 0) {
+			return 1000000 * (3 - killerRank);
+		}
+		return this.history.cutoffWeights[move] / 1000000;
 	}
 	,orderedCaptures: function() {
 		var captures = engine_hxconda_board_MoveGenerator.generateCaptures(this.board);
@@ -2638,7 +2611,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 	,orderedMoves: function(depth,hash,verificationKey) {
 		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
 		if(depth >= 2) {
-			this.sortMoves(moves,hash,verificationKey);
+			this.sortMoves(moves);
 			engine_hxconda_search_SearchTuning.putFirst(moves,this.table.bestMove(hash,verificationKey));
 		} else {
 			this.orderShallowMoves(moves);
@@ -2666,9 +2639,9 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				tmp = -engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]];
 			} else {
 				var killerSlot = 2 * this.ply;
-				var rank = 3;
-				if(this.ply < 128) {
-					rank = move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 3;
+				var rank = this.ply >= 128 ? 0 : move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 0;
+				if(rank == 0) {
+					rank = 3;
 				}
 				tmp = isWhite ? -rank * 1000000 : rank * 1000000;
 			}
@@ -2676,67 +2649,40 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		}
 		engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,isWhite);
 	}
-	,sortMoves: function(moves,hash,verificationKey) {
-		var isWhite = this.board.turn == 0;
+	,sortMoves: function(moves) {
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < moves.length) _g.push(this.orderingKey(moves[_g1++]));
+		engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,true);
+	}
+	,orderingKey: function(move) {
 		var pieces = this.board.pieces;
-		var worstScore = isWhite ? -100000 : 100000;
-		var depthWeight = isWhite ? 100 : -100.;
-		var keys = [];
-		var _g = 0;
-		while(_g < moves.length) {
-			var move = moves[_g];
-			++_g;
-			var key = 0;
-			var hasKey = false;
-			var childHash = this.board.hashAfter(hash,move);
-			var childVerificationKey = this.board.verificationKeyAfter(verificationKey,move);
-			this.board.makeMove(move);
-			var decisiveScore = this.board.decisiveScore();
-			if(decisiveScore != null) {
-				key = decisiveScore;
-				hasKey = true;
-			} else {
-				var _this = this.table;
-				var _this1 = _this.buckets;
-				var mask = _this.buckets.length - 1;
-				var slot = childHash & mask;
-				while(_this.buckets[slot] != null && (_this.hashes[slot] != childHash || _this.verificationKeys[slot] != childVerificationKey)) slot = slot + 1 & mask;
-				var entries = _this1[slot];
-				if(entries != null) {
-					var deepestDepth = -1;
-					var _g1 = 0;
-					while(_g1 < entries.length) {
-						var entry = entries[_g1];
-						++_g1;
-						if(entry.depth <= deepestDepth) {
-							continue;
-						}
-						if(entry.score > entry.alpha && entry.score < entry.beta) {
-							key = entry.score + entry.depth * depthWeight;
-							hasKey = true;
-						} else if(isWhite && entry.score >= entry.beta) {
-							key = entry.beta + entry.depth * depthWeight;
-							hasKey = true;
-						} else if(!isWhite && entry.score <= entry.alpha) {
-							key = entry.alpha + entry.depth * depthWeight;
-							hasKey = true;
-						}
-						deepestDepth = entry.depth;
-					}
-				}
-			}
-			this.board.unmakeMove();
-			if(!hasKey) {
-				if(pieces[move >> 6 & 63] == 12) {
-					var historyBonus = this.history.cutoffWeights[move] / 1000000;
-					key = isWhite ? worstScore + historyBonus : worstScore - historyBonus;
-				} else {
-					key = worstScore + (-engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]]);
-				}
-			}
-			keys.push(key);
+		var movingPiece = pieces[move & 63];
+		if((movingPiece == 10 || movingPiece == 11) && engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS[this.board.turn * 59 + (move >> 6 & 63)]) {
+			return 1000000000;
 		}
-		engine_hxconda_search_SearchTuning.sortByKeys(moves,keys,isWhite);
+		var _this = this.board;
+		var tmp;
+		if(_this.pieces[move >> 6 & 63] != 12) {
+			var this1 = _this.pieces[move & 63];
+			tmp = !(this1 == 10 || this1 == 11);
+		} else {
+			tmp = false;
+		}
+		if(tmp) {
+			var gain = Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]]) - Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[movingPiece]);
+			if(gain >= 0) {
+				return 100000000 + gain;
+			} else {
+				return -100000000. + gain;
+			}
+		}
+		var killerSlot = 2 * this.ply;
+		var killerRank = this.ply >= 128 ? 0 : move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 0;
+		if(killerRank > 0) {
+			return 1000000 * (3 - killerRank);
+		}
+		return this.history.cutoffWeights[move] / 1000000;
 	}
 	,orderedCaptures: function() {
 		var captures = engine_hxconda_board_MoveGenerator.generateCaptures(this.board);

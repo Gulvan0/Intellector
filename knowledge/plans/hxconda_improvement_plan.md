@@ -29,7 +29,7 @@ CPU profile of the accepted baseline (A10) on the 10 benchmark positions at leve
 |---|---|---|
 | 30.2% | `MoveGenerator.generateCaptures` | every quiescence node generates all its captures |
 | 9.5% | `orderedCaptures` | ordering keys of the quiescence captures, and their sorting |
-| 7.2% | `sortMoves` | ordering keys of main search moves, depth ≥ 2 |
+| 7.2% | `sortMoves` | ordering keys of main search moves, depth ≥ 2 (no longer makes the children since B10) |
 | 6.6% | `quiesce` | |
 | 6.3% | `MoveGenerator.generateMoves` | main search nodes |
 | 15.1% | `search` and the two move loops | including the inlined transposition table |
@@ -84,6 +84,7 @@ None left.
 10. **Hash move and killer moves** (10). Store the best move per position and try it first, then two killer moves per ply. Once these work, the make-every-child ordering of `sortMoves` can go.
     - **Hash move: accepted.** +20.7 Elo [6.5, 35.1] at 30000 nodes on the 6000 openings, after +8.6 [-1.2, 18.4] ended inconclusive on the old 2000; the stop overshoots, so about +10 is likelier. +11.0 [-3.4, 25.4] at 200000, and x1.03-1.05 faster per node. At nodes of depth ≥ 2, the move of the position's deepest table entry that has one goes first, ahead of the `sortMoves` order.
     - **Killer moves at depth-1 nodes: accepted.** +17.0 Elo [4.5, 29.5] at 30000 nodes, +9.6 [-4.2, 23.5] at 200000, but x0.96-1.00 per node: about 6 of those Elo go back when playing on time. Each ply from the root keeps the two latest distinct quiet moves that caused a cutoff there; depth-1 nodes search them right after the captures. Deeper nodes don't use them yet: their `sortMoves` keys mix table scores, an unbounded history bonus and capture gains, which leave killers no clean place.
+    - **Ordering without the children's table entries: accepted.** +9.6 Elo [1.9, 17.2] at 30000 nodes, +12.0 [-2.7, 26.8] at 200000, and x1.33-1.41 faster per node. `sortMoves` made every child and read its table entries for an ordering key; now the keys come from the move alone: immediate wins (an Intellector step onto a final square; Intellector captures rank highest among captures), captures not losing material by their gain, the killer moves, the other quiet moves by history, then the losing captures. The hash move still goes first.
 11. **Intellector threats in quiescence** (8). No stand pat while the own Intellector is attacked. Also add Intellector steps onto a final square, and promotions, to the quiescence moves. This adds quiescence nodes, so test it after the quiescence pruning.
 12. **Real null-move pruning** (11.4): reduction R = 2-3 at depth ≥ 3, skipped while the own Intellector is attacked.
 13. **Stronger extension for Intellector attacks** (11.1): a full ply instead of half, with a per-line extension budget.

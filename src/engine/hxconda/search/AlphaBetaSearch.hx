@@ -505,7 +505,7 @@ class AlphaBetaSearch<B:SearchBudget>
         var moves:Array<Move> = MoveGenerator.generateMoves(board);
         if (depth >= SearchTuning.SORTING_DEPTH)
         {
-            sortMoves(moves, hash, verificationKey);
+            sortMoves(moves);
             SearchTuning.putFirst(moves, table.bestMove(hash, verificationKey));
         }
         else
@@ -523,11 +523,17 @@ class AlphaBetaSearch<B:SearchBudget>
 
     private inline function quietKey(move:Move, isWhite:Bool):Float
     {
-        var killerSlot:Int = 2 * ply;
-        var rank:Int = 3;
-        if (ply < SearchTuning.KILLER_PLY_COUNT)
-            rank = move == killers[killerSlot] ? 1 : move == killers[killerSlot + 1] ? 2 : 3;
+        var rank:Int = killerRank(move);
+        if (rank == 0)
+            rank = 3;
         return isWhite ? -rank * SearchTuning.KILLER_ORDERING_STEP : rank * SearchTuning.KILLER_ORDERING_STEP;
+    }
+
+    /** 1 for the latest killer move of the current ply, 2 for the other one, 0 for any other move **/
+    private inline function killerRank(move:Move):Int
+    {
+        var killerSlot:Int = 2 * ply;
+        return ply >= SearchTuning.KILLER_PLY_COUNT ? 0 : move == killers[killerSlot] ? 1 : move == killers[killerSlot + 1] ? 2 : 0;
     }
 
     private inline function recordKiller(move:Move):Void
@@ -541,78 +547,34 @@ class AlphaBetaSearch<B:SearchBudget>
     }
 
     /**
-        Puts the most promising moves for the side to move first: immediate wins and losses,
-        then moves leading to positions known from the table, then quiet moves by history, then captures.
+        Puts the most promising moves for the side to move first: immediate wins, captures that don't lose material by their gain,
+        killer moves, the other quiet moves by history, then the other captures.
     **/
-    private function sortMoves(moves:Array<Move>, hash:Int, verificationKey:Int):Void
+    private function sortMoves(moves:Array<Move>):Void
     {
-        var isWhite:Bool = board.turn == White;
+        var keys:Array<Float> = [for (move in moves) orderingKey(move)];
+        SearchTuning.sortByKeys(moves, keys, true);
+    }
+
+    /** Ordering key of `move` for the side to move, higher first **/
+    private function orderingKey(move:Move):Float
+    {
         var pieces:PieceArray = board.pieces;
-        var worstScore:Float = isWhite ? BLACK_WIN_SCORE : WHITE_WIN_SCORE;
-        var depthWeight:Float = isWhite ? SearchTuning.DEPTH_ORDERING_WEIGHT : -SearchTuning.DEPTH_ORDERING_WEIGHT;
-        var keys:Array<Float> = [];
+        var movingPiece:Piece = pieces[move.from];
+        if (movingPiece.isIntellector() && BoardGeometry.isFinalSquare(move.to, board.turn))
+            return SearchTuning.WINNING_MOVE_ORDERING_KEY;
 
-        for (move in moves)
+        if (board.isCapture(move))
         {
-            var key:Float = 0;
-            var hasKey:Bool = false;
-            var childHash:Int = board.hashAfter(hash, move);
-            var childVerificationKey:Int = board.verificationKeyAfter(verificationKey, move);
-
-            board.makeMove(move);
-            var decisiveScore:Null<Float> = board.decisiveScore();
-            if (decisiveScore != null)
-            {
-                key = decisiveScore;
-                hasKey = true;
-            }
-            else
-            {
-                var entries:Null<Array<TranspositionEntry>> = table.entriesAt(childHash, childVerificationKey);
-                if (entries != null)
-                {
-                    var deepestDepth:Int = -1;
-                    for (entry in entries)
-                    {
-                        if (entry.depth <= deepestDepth)
-                            continue;
-
-                        if (entry.score > entry.alpha && entry.score < entry.beta)
-                        {
-                            key = entry.score + entry.depth * depthWeight;
-                            hasKey = true;
-                        }
-                        else if (isWhite && entry.score >= entry.beta)
-                        {
-                            key = entry.beta + entry.depth * depthWeight;
-                            hasKey = true;
-                        }
-                        else if (!isWhite && entry.score <= entry.alpha)
-                        {
-                            key = entry.alpha + entry.depth * depthWeight;
-                            hasKey = true;
-                        }
-                        deepestDepth = entry.depth;
-                    }
-                }
-            }
-            board.unmakeMove();
-
-            if (!hasKey)
-            {
-                if (pieces[move.to] == Empty)
-                {
-                    var historyBonus:Float = history.cutoffWeight(move) / SearchTuning.HISTORY_ORDERING_DIVISOR;
-                    key = isWhite ? worstScore + historyBonus : worstScore - historyBonus;
-                }
-                else
-                    key = worstScore + (-Evaluation.PIECE_VALUES[pieces[move.to]] - Evaluation.PIECE_VALUES[pieces[move.from]]);
-            }
-
-            keys.push(key);
+            var gain:Float = Math.abs(Evaluation.PIECE_VALUES[pieces[move.to]]) - Math.abs(Evaluation.PIECE_VALUES[movingPiece]);
+            return gain >= 0 ? SearchTuning.CAPTURE_ORDERING_KEY + gain : -SearchTuning.CAPTURE_ORDERING_KEY + gain;
         }
 
-        SearchTuning.sortByKeys(moves, keys, isWhite);
+        var killerRank:Int = killerRank(move);
+        if (killerRank > 0)
+            return SearchTuning.KILLER_ORDERING_STEP * (3 - killerRank);
+
+        return history.cutoffWeight(move) / SearchTuning.HISTORY_ORDERING_DIVISOR;
     }
 
     /** Captures sorted by the value of the captured piece, then by the cheapness of the capturing one **/
