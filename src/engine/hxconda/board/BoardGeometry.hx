@@ -398,6 +398,10 @@ class BoardGeometry
     public static final NEIGHBOURS:SquareLists = new SquareLists(NEIGHBOUR_SOURCE);
     public static final WHITE_PROGRESSOR_STEPS:SquareLists = new SquareLists(WHITE_PROGRESSOR_STEP_SOURCE);
     public static final BLACK_PROGRESSOR_STEPS:SquareLists = new SquareLists(BLACK_PROGRESSOR_STEP_SOURCE);
+    /** The squares a white progressor steps onto each square from **/
+    public static final WHITE_PROGRESSOR_ORIGINS:SquareLists = new SquareLists(invertSteps(WHITE_PROGRESSOR_STEP_SOURCE));
+    /** The squares a black progressor steps onto each square from **/
+    public static final BLACK_PROGRESSOR_ORIGINS:SquareLists = new SquareLists(invertSteps(BLACK_PROGRESSOR_STEP_SOURCE));
     /** See `rayDirection` **/
     public static final DOMINATOR_DIRECTIONS:Int8Array = computeRayDirections(DOMINATOR_RAYS);
     /** See `rayDirection` **/
@@ -430,6 +434,11 @@ class BoardGeometry
         for (direction in 0...DIRECTION_COUNT)
             length += rays.size(square * DIRECTION_COUNT + direction);
         return length;
+    }
+
+    private static function invertSteps(steps:Array<Array<Int>>):Array<Array<Int>>
+    {
+        return [for (square in 0...SQUARE_COUNT) [for (origin in 0...SQUARE_COUNT) if (steps[origin].contains(square)) origin]];
     }
 
     private static function computeRayDirections(rays:SquareLists):Int8Array

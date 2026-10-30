@@ -238,7 +238,7 @@ engine_hxconda_board_Board.prototype = {
 			return false;
 		}
 		var square = (attacker ^ 1) == 0 ? this.whiteIntellectorSquare : this.blackIntellectorSquare;
-		if(!(this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | attacker) || this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | attacker) || this.isReachedByStep(square,attacker == 0 ? engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS,0 | attacker) || this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | attacker))) {
+		if(!(this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | attacker) || this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | attacker) || this.isReachedByStep(square,attacker == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_ORIGINS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_ORIGINS,0 | attacker) || this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | attacker))) {
 			return this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,2 | attacker);
 		} else {
 			return true;
@@ -265,7 +265,7 @@ engine_hxconda_board_Board.prototype = {
 			}
 			return isReached;
 		}
-		var progressorSteps = attacker == 0 ? engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS : engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS;
+		var progressorOrigins = attacker == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_ORIGINS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_ORIGINS;
 		var dominator = 2 | attacker;
 		var aggressor = 6 | attacker;
 		var tmp;
@@ -298,9 +298,9 @@ engine_hxconda_board_Board.prototype = {
 		if(!tmp1) {
 			var isReached = false;
 			if(this.pieces[to] == (0 | attacker)) {
-				var squares = progressorSteps.squares;
-				var _g = progressorSteps.offsets[square];
-				var _g1 = progressorSteps.offsets[square + 1];
+				var squares = progressorOrigins.squares;
+				var _g = progressorOrigins.offsets[square];
+				var _g1 = progressorOrigins.offsets[square + 1];
 				while(_g < _g1) if(squares[_g++] == to) {
 					isReached = true;
 				}
@@ -512,6 +512,23 @@ engine_hxconda_board_BoardGeometry.rayLength = function(rays,square) {
 	var list = square * 6 + 5;
 	length += rays.offsets[list + 1] - rays.offsets[list];
 	return length;
+};
+engine_hxconda_board_BoardGeometry.invertSteps = function(steps) {
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 59) {
+		var square = _g1++;
+		var _g2 = [];
+		var _g3 = 0;
+		while(_g3 < 59) {
+			var origin = _g3++;
+			if(steps[origin].indexOf(square) != -1) {
+				_g2.push(origin);
+			}
+		}
+		_g.push(_g2);
+	}
+	return _g;
 };
 engine_hxconda_board_BoardGeometry.computeRayDirections = function(rays) {
 	var directions = new Int8Array(3481);
@@ -2899,6 +2916,8 @@ engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS = new engine_hxconda_board_Sq
 engine_hxconda_board_BoardGeometry.NEIGHBOURS = new engine_hxconda_board_SquareLists(engine_hxconda_board_BoardGeometry.NEIGHBOUR_SOURCE);
 engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS = new engine_hxconda_board_SquareLists(engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEP_SOURCE);
 engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS = new engine_hxconda_board_SquareLists(engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEP_SOURCE);
+engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_ORIGINS = new engine_hxconda_board_SquareLists(engine_hxconda_board_BoardGeometry.invertSteps(engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEP_SOURCE));
+engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_ORIGINS = new engine_hxconda_board_SquareLists(engine_hxconda_board_BoardGeometry.invertSteps(engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEP_SOURCE));
 engine_hxconda_board_BoardGeometry.DOMINATOR_DIRECTIONS = engine_hxconda_board_BoardGeometry.computeRayDirections(engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS);
 engine_hxconda_board_BoardGeometry.AGGRESSOR_DIRECTIONS = engine_hxconda_board_BoardGeometry.computeRayDirections(engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS);
 engine_hxconda_board_BoardGeometry.ADJACENCY = engine_hxconda_board_BoardGeometry.computeAdjacency();

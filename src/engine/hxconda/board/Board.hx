@@ -220,11 +220,11 @@ class Board
             return false;
 
         var square:Int = intellectorSquare(attacker.opponent());
-        var progressorSteps:SquareLists = attacker == White ? BoardGeometry.BLACK_PROGRESSOR_STEPS : BoardGeometry.WHITE_PROGRESSOR_STEPS;
+        var progressorOrigins:SquareLists = attacker == White ? BoardGeometry.WHITE_PROGRESSOR_ORIGINS : BoardGeometry.BLACK_PROGRESSOR_ORIGINS;
 
         return isReachedByStep(square, BoardGeometry.NEIGHBOURS, WhiteDefensor.ofColor(attacker))
             || isReachedByStep(square, BoardGeometry.LIBERATOR_JUMPS, WhiteLiberator.ofColor(attacker))
-            || isReachedByStep(square, progressorSteps, WhiteProgressor.ofColor(attacker))
+            || isReachedByStep(square, progressorOrigins, WhiteProgressor.ofColor(attacker))
             || isReachedBySlide(square, BoardGeometry.AGGRESSOR_RAYS, WhiteAggressor.ofColor(attacker))
             || isReachedBySlide(square, BoardGeometry.DOMINATOR_RAYS, WhiteDominator.ofColor(attacker));
     }
@@ -246,13 +246,13 @@ class Board
         if (pieces[from] != Empty) // castling, which leaves the defensor on `from` and no square vacated
             return isReachedByStepFrom(square, BoardGeometry.NEIGHBOURS, WhiteDefensor.ofColor(attacker), from);
 
-        var progressorSteps:SquareLists = attacker == White ? BoardGeometry.BLACK_PROGRESSOR_STEPS : BoardGeometry.WHITE_PROGRESSOR_STEPS;
+        var progressorOrigins:SquareLists = attacker == White ? BoardGeometry.WHITE_PROGRESSOR_ORIGINS : BoardGeometry.BLACK_PROGRESSOR_ORIGINS;
         var dominator:Piece = WhiteDominator.ofColor(attacker);
         var aggressor:Piece = WhiteAggressor.ofColor(attacker);
 
         return isReachedByStepFrom(square, BoardGeometry.NEIGHBOURS, WhiteDefensor.ofColor(attacker), to)
             || isReachedByStepFrom(square, BoardGeometry.LIBERATOR_JUMPS, WhiteLiberator.ofColor(attacker), to)
-            || isReachedByStepFrom(square, progressorSteps, WhiteProgressor.ofColor(attacker), to)
+            || isReachedByStepFrom(square, progressorOrigins, WhiteProgressor.ofColor(attacker), to)
             || isReachedBySlideThrough(square, to, BoardGeometry.DOMINATOR_RAYS, BoardGeometry.DOMINATOR_DIRECTIONS, dominator)
             || isReachedBySlideThrough(square, to, BoardGeometry.AGGRESSOR_RAYS, BoardGeometry.AGGRESSOR_DIRECTIONS, aggressor)
             || isReachedBySlideThrough(square, from, BoardGeometry.DOMINATOR_RAYS, BoardGeometry.DOMINATOR_DIRECTIONS, dominator)
