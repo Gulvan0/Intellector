@@ -1356,21 +1356,21 @@ engine_hxconda_evaluation_Evaluation.computePieceSquareScore = function(piece,sq
 		var _this = engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS;
 		return value - (_this.offsets[square + 1] - _this.offsets[square]) * 5 + engine_hxconda_evaluation_Evaluation.BLACK_PROGRESSOR_ADVANCEMENT[square];
 	case 2:
-		return value + engine_hxconda_board_BoardGeometry.rayLength(engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,square) * 5 + distanceToCenter * 5;
+		return value + engine_hxconda_board_BoardGeometry.rayLength(engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,square) * 5 - distanceToCenter * 5;
 	case 3:
-		return value - engine_hxconda_board_BoardGeometry.rayLength(engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,square) * 5 - distanceToCenter * 5;
+		return value - engine_hxconda_board_BoardGeometry.rayLength(engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,square) * 5 + distanceToCenter * 5;
 	case 4:
-		return value + liberatorMobility * 5 + distanceToCenter * 5;
+		return value + liberatorMobility * 5 - distanceToCenter * 5;
 	case 5:
-		return value - liberatorMobility * 5 - distanceToCenter * 5;
+		return value - liberatorMobility * 5 + distanceToCenter * 5;
 	case 6:
 		return value + engine_hxconda_board_BoardGeometry.rayLength(engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,square) * 5;
 	case 7:
 		return value - engine_hxconda_board_BoardGeometry.rayLength(engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,square) * 5;
 	case 8:
-		return value + neighbourCount * 5 + distanceToCenter * 5;
+		return value + neighbourCount * 5 - distanceToCenter * 5;
 	case 9:
-		return value - neighbourCount * 5 - distanceToCenter * 5;
+		return value - neighbourCount * 5 + distanceToCenter * 5;
 	case 10:
 		return value + neighbourCount * 5 + engine_hxconda_evaluation_Evaluation.WHITE_INTELLECTOR_ADVANCEMENT[square];
 	case 11:

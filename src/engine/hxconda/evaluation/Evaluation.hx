@@ -106,14 +106,14 @@ class Evaluation
         return switch piece {
             case WhiteProgressor: value + BoardGeometry.WHITE_PROGRESSOR_STEPS.size(square) * MOBILITY_WEIGHT + WHITE_PROGRESSOR_ADVANCEMENT[square];
             case BlackProgressor: value - BoardGeometry.BLACK_PROGRESSOR_STEPS.size(square) * MOBILITY_WEIGHT + BLACK_PROGRESSOR_ADVANCEMENT[square];
-            case WhiteDominator: value + BoardGeometry.rayLength(BoardGeometry.DOMINATOR_RAYS, square) * MOBILITY_WEIGHT + distanceToCenter * CENTRALITY_WEIGHT;
-            case BlackDominator: value - BoardGeometry.rayLength(BoardGeometry.DOMINATOR_RAYS, square) * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
-            case WhiteLiberator: value + liberatorMobility * MOBILITY_WEIGHT + distanceToCenter * CENTRALITY_WEIGHT;
-            case BlackLiberator: value - liberatorMobility * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
+            case WhiteDominator: value + BoardGeometry.rayLength(BoardGeometry.DOMINATOR_RAYS, square) * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
+            case BlackDominator: value - BoardGeometry.rayLength(BoardGeometry.DOMINATOR_RAYS, square) * MOBILITY_WEIGHT + distanceToCenter * CENTRALITY_WEIGHT;
+            case WhiteLiberator: value + liberatorMobility * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
+            case BlackLiberator: value - liberatorMobility * MOBILITY_WEIGHT + distanceToCenter * CENTRALITY_WEIGHT;
             case WhiteAggressor: value + BoardGeometry.rayLength(BoardGeometry.AGGRESSOR_RAYS, square) * MOBILITY_WEIGHT;
             case BlackAggressor: value - BoardGeometry.rayLength(BoardGeometry.AGGRESSOR_RAYS, square) * MOBILITY_WEIGHT;
-            case WhiteDefensor: value + neighbourCount * MOBILITY_WEIGHT + distanceToCenter * CENTRALITY_WEIGHT;
-            case BlackDefensor: value - neighbourCount * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
+            case WhiteDefensor: value + neighbourCount * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
+            case BlackDefensor: value - neighbourCount * MOBILITY_WEIGHT + distanceToCenter * CENTRALITY_WEIGHT;
             case WhiteIntellector: value + neighbourCount * MOBILITY_WEIGHT + WHITE_INTELLECTOR_ADVANCEMENT[square];
             case BlackIntellector: value - neighbourCount * MOBILITY_WEIGHT + BLACK_INTELLECTOR_ADVANCEMENT[square];
             case Empty: 0;
