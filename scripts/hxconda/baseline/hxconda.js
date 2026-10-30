@@ -1796,7 +1796,14 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				}
 				break;
 			}
-			if(bestMove != -1 && (isRoot && maxDepth <= 1)) {
+			var tmp;
+			if(bestMove != -1) {
+				var _this2 = this.budget;
+				tmp = isRoot && (_this2.nodeLimit - _this2.nodeCount > 0 || maxDepth <= 1);
+			} else {
+				tmp = false;
+			}
+			if(tmp) {
 				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
 			}
 		}

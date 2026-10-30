@@ -23,7 +23,7 @@ interface SearchBudget
     public function allowsWindowNarrowing(isRoot:Bool):Bool;
 
     /** Whether a node may report its best move found so far as the best root move **/
-    public function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int, isMaximizing:Bool):Bool;
+    public function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int):Bool;
 
     /** Whether the search collects the principal line **/
     public function tracksLines():Bool;

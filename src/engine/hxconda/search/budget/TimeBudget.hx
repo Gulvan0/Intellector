@@ -33,7 +33,7 @@ final class TimeBudget implements SearchBudget
         return true;
     }
 
-    public inline function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int, isMaximizing:Bool):Bool
+    public inline function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int):Bool
     {
         return depth == maxDepth && (hasRemaining() || maxDepth <= 1);
     }

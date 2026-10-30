@@ -53,10 +53,10 @@ final class NodeBudget implements SearchBudget
         return !isRoot;
     }
 
-    /** A minimizing root reports only during the first iteration **/
-    public inline function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int, isMaximizing:Bool):Bool
+    /** The root reports while the budget lasts, and throughout the first iteration **/
+    public inline function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int):Bool
     {
-        return isRoot && (isMaximizing && hasRemaining() || maxDepth <= 1);
+        return isRoot && (hasRemaining() || maxDepth <= 1);
     }
 
     public inline function tracksLines():Bool

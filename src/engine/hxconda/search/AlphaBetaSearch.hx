@@ -252,7 +252,7 @@ class AlphaBetaSearch<B:SearchBudget>
                 break;
             }
 
-            if (bestMove != Move.NONE && budget.allowsRootProgress(isRoot, depth, maxDepth, true))
+            if (bestMove != Move.NONE && budget.allowsRootProgress(isRoot, depth, maxDepth))
                 report.recordRootProgress(moves, i + 1, bestMove, value, maxDepth, bestLine);
         }
 
@@ -332,7 +332,7 @@ class AlphaBetaSearch<B:SearchBudget>
                 break;
             }
 
-            if (bestMove != Move.NONE && budget.allowsRootProgress(isRoot, depth, maxDepth, false))
+            if (bestMove != Move.NONE && budget.allowsRootProgress(isRoot, depth, maxDepth))
                 report.recordRootProgress(moves, i + 1, bestMove, value, maxDepth, bestLine);
         }
 
