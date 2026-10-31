@@ -1,7 +1,9 @@
 package engine.hxconda;
 
 import engine.hxconda.protocol.HxcondaEvent;
+import engine.hxconda.protocol.HxcondaMoveMessage;
 import engine.hxconda.protocol.HxcondaProtocol;
+import engine.hxconda.protocol.HxcondaReportMessage;
 import engine.hxconda.protocol.HxcondaRequest;
 import js.html.MessageEvent;
 import js.html.Worker;
@@ -36,6 +38,44 @@ class HxcondaEngine
         start({kind: SearchByTime, position: notation, history: history, durationMs: durationMs}, onEvent);
     }
 
+    /**
+        Searches `halfDepth` full moves deep or, with a `timeCapMs`, until the cap runs out.
+        `weakness` (in centiprogressors) and `style` are accepted, not applied yet.
+        `onDepthReached` gets every newly completed depth, in plies, the deepest one right before `onCompleted`.
+        `onCompleted` gets the score (positive favours white) and the expected line, starting with the chosen move.
+    **/
+    public function searchByDepth(notation:String, history:Array<String>, halfDepth:Int, timeCapMs:Null<Float>, weakness:Float = 0.0, ?style:HxcondaStyle, onCompleted:(score:Float, mainLine:Array<HxcondaMoveMessage>)->Void, ?onDepthReached:Int->Void, ?onFailed:String->Void):Void
+    {
+        var request:HxcondaRequest = {
+            kind: SearchByDepth,
+            position: notation,
+            history: history,
+            maxDepth: halfDepth * 2,
+            weakness: weakness,
+            style: style ?? Standard
+        };
+        if (timeCapMs != null)
+            request.timeCapMs = timeCapMs;
+
+        start(request, event -> {
+            switch event
+            {
+                case Iteration(report):
+                    if (onDepthReached != null)
+                        onDepthReached(report.depth);
+                case Completed(report) if (report != null && report.move != null):
+                    onCompleted(report.score, mainLine(report));
+                case Completed(_):
+                    if (onFailed != null)
+                        onFailed("The engine found no move");
+                case Failed(error):
+                    if (onFailed != null)
+                        onFailed(error);
+                case Progress(_):
+            }
+        });
+    }
+
     public function stop():Void
     {
         if (worker == null)
@@ -67,6 +107,21 @@ class HxcondaEngine
         searchWorker.postMessage(request);
 
         worker = searchWorker;
+    }
+
+    /** The principal line if it starts with the chosen move, which an aspiration re-search can break; the move alone otherwise **/
+    private static function mainLine(report:HxcondaReportMessage):Array<HxcondaMoveMessage>
+    {
+        var line:Null<Array<HxcondaMoveMessage>> = report.principalLine;
+        if (line != null && line.length > 0 && isSameMove(line[0], report.move))
+            return line;
+        else
+            return [report.move];
+    }
+
+    private static function isSameMove(a:HxcondaMoveMessage, b:HxcondaMoveMessage):Bool
+    {
+        return a.from == b.from && a.to == b.to && a.resultingPiece == b.resultingPiece;
     }
 
     public function new() {}

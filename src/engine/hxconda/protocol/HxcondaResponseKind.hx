@@ -4,7 +4,7 @@ enum abstract HxcondaResponseKind(String)
 {
     /** `SearchByLevel` and `SearchByNodes` only: carries `percent` **/
     var Progress = "progress";
-    /** `SearchByTime` only, posted after every iteration: carries `report` **/
+    /** `SearchByTime` and `SearchByDepth` only, posted after every completed iteration: carries `report` **/
     var Iteration = "iteration";
     /** Ends the search: carries `report` unless nothing was found **/
     var Completed = "completed";

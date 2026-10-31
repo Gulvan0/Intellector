@@ -9,6 +9,6 @@ typedef HxcondaReportMessage = {
     var depth:Int;
     /** How many root moves had been searched when `move` was found **/
     var searchedRootMoveCount:Int;
-    /** Expected continuation, starting with a root move. `SearchByTime` only; can disagree with `move` **/
+    /** Expected continuation, starting with a root move. `SearchByTime` and `SearchByDepth` only; can disagree with `move` **/
     var ?principalLine:Array<HxcondaMoveMessage>;
 }

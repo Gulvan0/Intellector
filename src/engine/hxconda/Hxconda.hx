@@ -3,6 +3,7 @@ package engine.hxconda;
 import engine.hxconda.board.Board;
 import engine.hxconda.search.AlphaBetaSearch;
 import engine.hxconda.search.BestMoveReport;
+import engine.hxconda.search.budget.DepthBudget;
 import engine.hxconda.search.budget.NodeBudget;
 import engine.hxconda.search.budget.TimeBudget;
 
@@ -34,6 +35,16 @@ class Hxconda
     {
         var board:Board = createBoard(notation, history);
         return new AlphaBetaSearch<TimeBudget>(board, new TimeBudget(durationMs, onIteration), 0).run();
+    }
+
+    /**
+        Searches until the iteration of depth `maxDepth` (in plies) completes or, with a `timeCapMs`, until the cap runs out,
+        abandoning the running iteration then. Reports the best move after every completed iteration.
+    **/
+    public static function bestMoveByDepth(notation:Null<String>, history:Null<Array<String>>, maxDepth:Int, timeCapMs:Null<Float>, onIteration:BestMoveReport->Void):BestMoveReport
+    {
+        var board:Board = createBoard(notation, history);
+        return new AlphaBetaSearch<DepthBudget>(board, new DepthBudget(maxDepth, timeCapMs, onIteration), 0).run();
     }
 
     private static function createBoard(notation:Null<String>, history:Null<Array<String>>):Board

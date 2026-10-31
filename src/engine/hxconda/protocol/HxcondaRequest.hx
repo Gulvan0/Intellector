@@ -1,5 +1,7 @@
 package engine.hxconda.protocol;
 
+import engine.hxconda.HxcondaStyle;
+
 /**
     Message posted to the engine worker.
 **/
@@ -17,4 +19,12 @@ typedef HxcondaRequest = {
     var ?nodeLimit:Int;
     /** `SearchByNodes` evaluation noise, see `NodeBudget.noiseAmplitude`; 0 if absent **/
     var ?noiseAmplitude:Float;
+    /** `SearchByDepth` depth, in plies **/
+    var ?maxDepth:Int;
+    /** `SearchByDepth` thinking time cap; none if absent **/
+    var ?timeCapMs:Float;
+    /** `SearchByDepth` handicap, in centiprogressors; accepted, not applied yet **/
+    var ?weakness:Float;
+    /** `SearchByDepth` playing style, see `HxcondaStyle`; `Standard` if absent **/
+    var ?style:HxcondaStyle;
 }
