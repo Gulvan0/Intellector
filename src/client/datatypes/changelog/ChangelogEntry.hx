@@ -34,7 +34,7 @@ class ChangelogEntry
         return titles.exists(language) ? titles[language] : titles["en"];
     }
 
-    /** Falls back to English when `language` has no translation; every language has as many paragraphs as English **/
+    /** Falls back to English when `language` has no translation; languages may differ in the paragraph count **/
     public function paragraphs(language:String):Array<String>
     {
         return descriptions.exists(language) ? descriptions[language] : descriptions["en"];

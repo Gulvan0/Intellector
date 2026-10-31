@@ -7,6 +7,7 @@ import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.core.Component;
 import haxe.ui.containers.VBox;
+import haxe.ui.locale.LocaleEvent;
 import haxe.ui.locale.LocaleManager;
 
 /**
@@ -74,15 +75,9 @@ class ChangelogRow extends VBox
         paragraphs.addClass(StyleClass.CHANGELOG_PARAGRAPHS);
         if (entry.hasDescription())
         {
-            for (i in 0...entry.paragraphs("en").length)
-            {
-                var paragraphLabel:Label = new Label();
-                paragraphLabel.percentWidth = 100;
-                paragraphLabel.addClass(StyleClass.CHANGELOG_PARAGRAPH);
-                paragraphs.addComponent(paragraphLabel);
-                LocaleManager.instance.registerComponent(paragraphLabel, "text", () -> entry.paragraphs(LocaleManager.instance.language)[i]);
-            }
+            fillParagraphs();
             textColumn.addComponent(paragraphs);
+            LocaleManager.instance.registerEvent(LocaleEvent.LOCALE_CHANGED, onLocaleChanged);
         }
 
         sideBySide = new HBox();
@@ -132,6 +127,30 @@ class ChangelogRow extends VBox
             sideBySide.addComponent(dateColumn);
             sideBySide.addComponent(textColumn);
             addComponent(sideBySide);
+        }
+    }
+
+    public function dispose():Void
+    {
+        LocaleManager.instance.unregisterEvent(LocaleEvent.LOCALE_CHANGED, onLocaleChanged);
+    }
+
+    // a translation may have a different number of paragraphs, so they are recreated rather than retexted
+    private function onLocaleChanged(_:LocaleEvent):Void
+    {
+        paragraphs.removeAllComponents();
+        fillParagraphs();
+    }
+
+    private function fillParagraphs():Void
+    {
+        for (text in entry.paragraphs(LocaleManager.instance.language))
+        {
+            var paragraphLabel:Label = new Label();
+            paragraphLabel.percentWidth = 100;
+            paragraphLabel.text = text;
+            paragraphLabel.addClass(StyleClass.CHANGELOG_PARAGRAPH);
+            paragraphs.addComponent(paragraphLabel);
         }
     }
 

@@ -71,5 +71,7 @@ class ChangelogPage extends PageBase
     {
         if (widthHandle != null)
             widthHandle.detach();
+        for (row in rows)
+            row.dispose();
     }
 }

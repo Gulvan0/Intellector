@@ -37,11 +37,7 @@ class ChangelogEntryMapper
         {
             descriptions["en"] = record.description.en;
             if (record.description.ru != null)
-            {
-                if (record.description.ru.length != record.description.en.length)
-                    throw 'Changelog entry ${record.date}: the "ru" description must have as many paragraphs as the "en" one';
                 descriptions["ru"] = record.description.ru;
-            }
         }
 
         return new ChangelogEntry(dateParts[0], dateParts[1], dateParts[2], sameDayNumber, titles, descriptions);
