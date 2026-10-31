@@ -1,27 +1,710 @@
 [
-    {"date": "2023-02-13", "title": {"en": "Play vs Computer", "ru": "Игра против компьютера"}},
-    {"date": "2023-01-17", "title": {"en": "New Milestone Update", "ru": "Обновление «Новая веха»"}},
-    {"date": "2021-11-04", "title": {"en": "Low-on-time alerts", "ru": "Предупреждение при цейтноте"}},
-    {"date": "2021-10-29", "title": {"en": "Some QoL additions", "ru": "QoL-нововведения"}},
-    {"date": "2021-10-25", "title": {"en": "Analysis board 2.0, Studies, Explore position", "ru": "Доска анализа 2.0, Студии, Анализ в наблюдении"}},
-    {"date": "2021-08-11", "title": {"en": "Player profile page", "ru": "Профиль игрока"}},
-    {"date": "2021-08-08", "title": {"en": "Revisiting games, Spectation enhancements, Chat history", "ru": "Просмотр прошедших игр, история чата, улучшения наблюдения"}},
-    {"date": "2021-08-05", "title": {"en": "Color selection", "ru": "Выбор цвета"}},
-    {"date": "2021-07-27", "title": {"en": "Disabled auto-exit on game over", "ru": "Просмотр партии после окончания"}},
-    {"date": "2021-07-25", "title": {"en": "Sodium α", "ru": "Sodium α"}},
-    {"date": "2021-07-16", "title": {"en": "Extended side box functionality", "ru": "Новые функции боковой панели"}},
-    {"date": "2021-06-19", "title": {"en": "Updated notation", "ru": "Обновление нотации"}},
-    {"date": "2021-05-19", "title": {"en": "Language select and Russian translation", "ru": "Выбор языка и русский перевод"}},
-    {"date": "2021-05-19", "title": {"en": "Secure websocket connection", "ru": "Соединение по протоколу wss://"}},
-    {"date": "2021-04-04", "title": {"en": "Reconnect to a game, Spectate by link, Disconnection handling", "ru": "Переподключение к игре, наблюдение по ссылке, обработка ошибок соединения"}},
-    {"date": "2021-04-04", "title": {"en": "RMB actions (hex selection & arrow drawing)", "ru": "Выделение гексов и стрелочки"}},
-    {"date": "2021-03-27", "title": {"en": "Settings menu & Marking", "ru": "Метки и меню настроек"}},
-    {"date": "2021-03-25", "title": {"en": "Spectation", "ru": "Наблюдение"}},
-    {"date": "2021-03-23", "title": {"en": "Threefold repetition & 60 move rule", "ru": "Троекратное повторение и правило 60 ходов"}},
-    {"date": "2021-03-22", "title": {"en": "Additional functionality for analysis board. New openings", "ru": "Новые фичи для доски анализа. Новые дебюты"}},
-    {"date": "2021-03-21", "title": {"en": "Simple analysis board", "ru": "Упрощенная доска анализа"}},
-    {"date": "2021-03-21", "title": {"en": "'Remember me' option and logout button", "ru": "Опция 'Запомнить меня' и выход из аккаунта"}},
-    {"date": "2021-03-20", "title": {"en": "Game info and opening database", "ru": "Сводка об игре и база дебютов"}},
-    {"date": "2021-03-19", "title": {"en": "In-game chat, open challenges and arbitrary time control", "ru": "Внутриигровой чат, открытые вызовы и произвольный контроль времени"}},
-    {"date": "2021-03-17", "title": {"en": "Added changelog", "ru": "Добавлен список изменений"}}
+    {
+        "date": "2026-11-07",
+        "title": {
+            "en": "Intellector 3.0",
+            "ru": "Intellector 3.0"
+        },
+        "description": {
+            "en": [
+                "Hey there! Today's long-awaited update brings quite a lot of new features, improvements and fixes. Among them, however, these particularly stand out:",
+                "- Improved server stability, fixed crashes and inconsistencies",
+                "- Reworked the site's design: eliminated the glaring defects, unified the theme, added smoothness and convenience",
+                "- Greatly improved the mobile version: it is now convenient to use, on par with the large-screen version in features, and adapted to a wider range of resolutions",
+                "- Significant improvements to playing against the bot: Anaconda is replaced with Haxaconda, a stronger and faster port, the bot's difficulty and time per move can be chosen, and besides the base version, several additional AIs are now available, each with its own playing style and quirks",
+                "- Studies got their own analysis board mode, and the branches panel became much easier to use",
+                "- The player profile became more informative",
+                "- Added notifications about started games to the VK chat"
+            ],
+            "ru": [
+                "Привет! Сегодняшнее долгожданное обновление приносит довольно много новых возможностей, улучшений и исправлений. Среди них, впрочем, особо выделяются вот эти:",
+                "- Улучшена стабильность сервера, исправлены падения и несогласованность",
+                "- Переработан дизайн сайта: устранены дефекты, бросавшиеся в глаза, унифицирована тема, добавлены плавность и удобство",
+                "- Сильно улучшена мобильная версия: теперь она удобна в использовании, не отстает по возможностям от версии для больших экранов и адаптирована под большее количество разрешений",
+                "- Теперь можно без проблем пользоваться сайтом, открытым на нескольких вкладках, вести параллельные партии, а полномочия гостей расширены",
+                "- Значимые нововведения в игре против бота: Anaconda заменена более сильным и быстрым портом Haxaconda, сложность бота и время на ход можно выбирать, а помимо базовой версии теперь доступны несколько дополнительных ИИ, каждый из которых обладает своим стилем игры и особенностями",
+                "- Студии обзавелись собственным режимом доски анализа, а панель ветвей стала гораздо проще в использовании",
+                "- Профиль игрока стал более информативным",
+                "- Добавлены оповещения о начавшихся партиях в чат VK"
+            ]
+        }
+    },
+    {
+        "date": "2023-02-13",
+        "title": {
+            "en": "Bot Opponent",
+            "ru": "Игра против компьютера"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- You can now play against Anaconda",
+                "- Games against bots are saved in the player's profile and can be spectated just like games between regular players",
+                "- Offering a draw is not possible in games against a bot",
+                "- Takeback requests in games against a bot are approved automatically",
+                "- If a game against a bot is not a correspondence game, the bot will try to stay within the given time control",
+                "- In games against a bot with no time control, Anaconda spends 2 minutes on each move",
+                "Bug fixes:",
+                "- Fixed a rare bug that allowed moving in a game that had ended on time"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Добавлена возможность играть против Анаконды",
+                "- Партии против ботов сохраняются в профиле игрока и за ними можно следить точно так же, как и за партиями обычных игроков",
+                "- Предложить ничью в играх против бота невозможно",
+                "- Возвраты хода в играх против бота автоматически одобряются",
+                "- Если игра против бота ведется не по переписке, бот попытается уложиться в заданный контроль",
+                "- В играх против бота без контроля времени, Анаконда тратит на каждый ход 2 минуты",
+                "Исправления ошибок:",
+                "- Исправлен редкий баг, из-за которого в партии, окончившейся по времени, еще можно было походить"
+            ]
+        }
+    },
+    {
+        "date": "2023-01-17",
+        "title": {
+            "en": "Intellector 2.0: New Milestone Update",
+            "ru": "Intellector 2.0: Обновление «Новая веха»"
+        },
+        "description": {
+            "en": [
+                "Interface and navigation:",
+                "- Completely new design, responsive layout and a beta version for mobile devices",
+                "- A separate URL for almost every page, working browser Back and Forward buttons, a top bar with the challenges menu and the player menu",
+                "- Reconnecting after a connection loss without reloading the page",
+                "- Guest mode: most features are available without logging in",
+                "Gameplay:",
+                "- New time controls (from 1 second to 6 hours per game), correspondence games, classification of time controls by type",
+                "- Premoves, as well as Shift and Ctrl for automatic promotion and controlling the chameleon",
+                "- ELO ratings for each time control type with calibration, rated and casual games",
+                "- The 100-move rule is replaced with the 60-move rule, and a takeback restores the time as well",
+                "Challenges:",
+                "- Public and link-only challenges, several simultaneous challenges, challenges to offline players",
+                "- Automatic matching of compatible public challenges, notifications about them in the VK chat and on Discord",
+                "Spectating and profiles:",
+                "- Following a player, mini-profile, friends system",
+                "- Reworked profile with \"Games\", \"Studies\" and \"Current games\" tabs",
+                "- New home page: open challenges, current and recent games",
+                "- Game logs now record the date, starting position, ratings and the time after each move",
+                "Analysis and export:",
+                "- Analysis board: branches as a tree, list and text, studies with a description, tags and access settings, improved position editor",
+                "- \"Share\" button: export of SIP, PNG, PIN and GIF, game link",
+                "Server:",
+                "- Move validation, resilience to most errors, soft restart, developer alerts in Telegram, improved logging",
+                "- Client and server distributions on GitHub for self-hosting",
+                "Bug fixes:",
+                "- Fixed server crashes, log corruption, the ability to move for the opponent, false draws caused by takebacks and numerous spectating and branch bugs"
+            ],
+            "ru": [
+                "Интерфейс и навигация:",
+                "- Полностью новый дизайн, отзывчивая верстка и бета-версия для мобильных устройств",
+                "- Собственный URL почти у каждой страницы, работа кнопок браузера «Назад» и «Вперед», верхняя панель с меню вызовов и меню игрока",
+                "- Переподключение при разрыве соединения без перезагрузки страницы",
+                "- Режим гостя: большинство возможностей доступно без входа в аккаунт",
+                "Игровой процесс:",
+                "- Новые контроли времени (от 1 секунды до 6 часов на партию), игры по переписке, классификация контролей по типам",
+                "- Предходы, а также Shift и Ctrl для автоматического превращения и управления хамелеоном",
+                "- Рейтинги ELO для каждого типа контроля с калибровкой, рейтинговые и товарищеские партии",
+                "- Правило 100 ходов заменено правилом 60 ходов, при возврате хода восстанавливается и время",
+                "Вызовы:",
+                "- Публичные вызовы и вызовы только по ссылке, несколько одновременных вызовов, вызовы игроков не в сети",
+                "- Автоматическое сопоставление совместимых публичных вызовов, уведомления о них в чате ВК и в Discord",
+                "Наблюдение и профили:",
+                "- Слежение за игроком, мини-профиль, система друзей",
+                "- Переработанный профиль с вкладками «Игры», «Студии» и «Текущие партии»",
+                "- Новая главная страница: открытые вызовы, текущие и недавние партии",
+                "- В логи партий записываются дата, стартовая позиция, рейтинги и время после каждого хода",
+                "Анализ и экспорт:",
+                "- Доска анализа: ветви в виде дерева, списка и текста, студии с описанием, тегами и настройкой доступа, улучшенный редактор позиций",
+                "- Кнопка «Поделиться»: экспорт SIP, PNG, PIN и GIF, ссылка на партию",
+                "Сервер:",
+                "- Проверка ходов, устойчивость к большинству ошибок, мягкая перезагрузка, оповещения разработчику в Телеграм, улучшенное логирование",
+                "- Дистрибутивы клиента и сервера на GitHub для самостоятельного размещения",
+                "Исправления ошибок:",
+                "- Исправлены падения сервера, повреждение логов, возможность ходить за противника, ложные ничьи из-за возвратов хода и множество ошибок наблюдения и ветвей"
+            ]
+        }
+    },
+    {
+        "date": "2021-11-04",
+        "title": {
+            "en": "Low-on-time alerts",
+            "ru": "Предупреждение при цейтноте"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- When a player has less than a minute left, a sound alert is played and the timer turns red. Not present in games with a time control under 90 seconds per game. The alert is played only once per game",
+                "- The remaining time is now stored and transmitted with millisecond precision",
+                "- If the player or their opponent has less than 10 seconds left, the timer starts displaying hundredths of a second",
+                "Bug fixes:",
+                "- The last move in a game is no longer counted if it was made after a timeout"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Теперь, когда у игрока остается меньше минуты, проигрывается звуковое оповещение, а цвет таймера становится красным. Отсутствует в играх с контролем меньше 90 секунд на партию. Оповещение проигрывается только 1 раз за игру",
+                "- Данные об оставшемся времени теперь хранятся и передаются с точностью до миллисекунды",
+                "- Если у игрока или его оппонента остается меньше 10 секунд, таймер начинает отображать сотые доли секунд",
+                "Исправления ошибок:",
+                "- Теперь последний ход в партии не засчитывается, если он был сделан после таймаута"
+            ]
+        }
+    },
+    {
+        "date": "2021-10-29",
+        "title": {
+            "en": "Some QoL additions",
+            "ru": "QoL-нововведения"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- Added the \"Add time\" button. It gives the opponent 15 seconds",
+                "- When visiting a finished game, the game info panel now shows the time control",
+                "- Added the \"Rematch\" button. The color is chosen randomly",
+                "- If the server crashes, the log of current games is now saved. After the restart they can be visited as finished games",
+                "Improvements:",
+                "- When a game ends, unneeded buttons are now hidden (previously they just became inactive)",
+                "- The amount of data transmitted over the network when a player reconnects to a game or connects as a spectator is slightly reduced"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Добавлена кнопка \"Добавить время\". Добавляет 15 секунд оппоненту",
+                "- Теперь при посещении оконченной игры в окошке с информацией об игре отображается контроль времени",
+                "- Добавлена кнопка \"Реванш\". Цвет выбирается случайным образом",
+                "- Теперь при падении сервера лог текущих игр сохраняется. После перезапуска их можно будет посетить как оконченные",
+                "Улучшения:",
+                "- Теперь по окончании игры ненужные кнопки скрываются (раньше просто становились неактивными)",
+                "- Объем передаваемых по сети данных при переподключении игрока к игре или при подключении в качестве наблюдателя немного уменьшен"
+            ]
+        }
+    },
+    {
+        "date": "2021-10-25",
+        "title": {
+            "en": "Analysis board 2.0",
+            "ru": "Доска анализа 2.0"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- The analysis board now works like a regular game board (pieces move by the rules, the side to move changes)",
+                "- The analysis board now displays a move list; the list can be navigated",
+                "- Added a position editor to the analysis board",
+                "- Added variation branching to the analysis board",
+                "- The page cache is now invalidated (no need to press Ctrl+F5 when updates are released. This shortcut still helps with the rare black screen problem)",
+                "- While spectating a game or viewing a past game, you can now export the SIP (Serialized Intellector Position, an analog of FEN)",
+                "- Added a button to spectating and past game viewing modes that lets you examine the position on the analysis board.",
+                "- Added studies. A variation on the analysis board can be exported as a whole as a study, after which it becomes available in the author's profile. When editing an existing study, the modified version can be saved as a separate study or can overwrite the one being edited",
+                "- The player profile has been reworked (fixed the layout, added pagination, replaced buttons with links)",
+                "- Sped up the loading of the player profile",
+                "- When leaving the past game viewing screen, the user now returns to the player profile instead of the main screen",
+                "Bug fixes:",
+                "- Fixed a server crash that occurred under some circumstances when opening a player profile",
+                "- Fixed a bug with progressor promotion without a capture",
+                "- Fixed the behavior of scrollable components",
+                "- Trying to view the profile of a nonexistent player now shows an error message",
+                "- Fixed the look of icons and the size of buttons in the piece selection window during progressor promotion",
+                "- Removed the pinkish outline around pieces (and icons in the promotion window)"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Теперь доска анализа имеет механику обычной игровой доски (фигуры ходят по правилам, смена цвета хода)",
+                "- Теперь на доске анализа отображается список ходов; этот список возможно листать",
+                "- Добавлен редактор позиции на доску анализа",
+                "- Добавлено ветвление варианта на доску анализа",
+                "- Теперь кэш страницы инвалидируется (Не требуется нажимать Ctrl+F5 при выходе обновлений. Это сочетание клавиш по-прежнему помогает решить редкую проблему черного экрана)",
+                "- Теперь во время наблюдения за игрой и при просмотре прошедшей партии можно экспортировать SIP (Serialized Intellector Position, аналог FEN)",
+                "- В режимы наблюдения и просмотра прошедшей партии добавлена кнопка, позволяющая рассмотреть позицию на доске анализа.",
+                "- Добавлены студии. Вариант на доске анализа может быть экспортирован в виде студии целиком, после чего он будет доступен в профиле автора. При редактировании существующей студии модифицированную версию можно сохранить как отдельную студию, а можно перезаписать редактируемую",
+                "- Профиль игрока переработан (исправлен макет, добавлена пагинация, кнопки заменены на ссылки)",
+                "- Ускорена загрузка профиля игрока",
+                "- Теперь при выходе из экрана просмотра прошедшей игры пользователь попадает обратно в профиль игрока, а не на главный экран",
+                "Исправления багов:",
+                "- Пофикшено падение сервера, происходившее при переходе в профиль игрока при некоторых обстоятельствах",
+                "- Исправлен баг с превращением прогрессора без взятия",
+                "- Исправлена работа прокручиваемых компонентов",
+                "- Теперь при попытке просмотра профиля несуществующего игрока выводится сообщение об ошибке",
+                "- Исправлен внешний вид иконок и размер кнопок в окне выбора фигуры при превращении прогрессора",
+                "- Удален розоватый контур у фигур (и иконок в окне превращения)"
+            ]
+        }
+    },
+    {
+        "date": "2021-08-11",
+        "title": {
+            "en": "Player profile page",
+            "ru": "Профиль игрока"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- You can now get a list of games involving any given player",
+                "There are two ways to do this:",
+                "> Use the button in the main menu",
+                "> Follow the link intellector.info/game/?p=[player login] (without the square brackets)",
+                "Note that loading the page with a player's games may take some time",
+                "- Sodium now uses Shallow Evaluation to presort moves",
+                "Bug fixes:",
+                "- Fixed a bug that made piece dragging work only for the first selected piece",
+                "- Fixed a bug that made the text (pop-ups and chat messages) always mention a White victory, even if Black won the game",
+                "- Fixed a bug that prevented pages of games against guests from opening"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Теперь для каждого игрока можно получить список игр с его участием",
+                "Сделать это можно двумя способами:",
+                "> Воспользоваться кнопкой в главном меню",
+                "> Перейти по ссылке intellector.info/game/?p=[логин игрока] (без квадратных скобок)",
+                "Обратите внимание, что для подгрузки страницы с партиями игрока может потребоваться некоторое время",
+                "- Sodium теперь использует Shallow Evaluation для предварительной сортировки ходов",
+                "Исправления багов:",
+                "- Исправлена ошибка, из-за которой перетаскивание фигур работало только для первой выделенной фигуры",
+                "- Исправлен баг, из-за которого в тексте (поп-апы и сообщения в чате) всегда упоминалась победа белых, даже если в партии выиграли черные",
+                "- Исправлена ошибка, из-за которой не открывались страницы партий против гостей"
+            ]
+        }
+    },
+    {
+        "date": "2021-08-08",
+        "title": {
+            "en": "Many improvements",
+            "ru": "Множество нововведений"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- Spectators can now see the game chat",
+                "- Spectators can write in the game chat, but their messages are visible only to other spectators",
+                "- Spectators now see the game info panel",
+                "- The chat history is now saved. For example, when a player reconnects to a game, the chat history is restored.",
+                "- The game log format has been updated to include more important information about the game",
+                "- Aborting a game is now handled separately from resigning (affects some captions and how the result is saved in the logs). Aborted games count as draws",
+                "- Chat messages are now truncated to a maximum of 500 characters. Whitespace at the beginning and end of a message is removed. Forbidden characters are removed as well: #, ;, /, \\, |, and special ones.",
+                "- The server now restarts automatically after a crash",
+                "- Past games can now be rewatched by following the corresponding link",
+                "- The chat box now becomes inactive when the game ends",
+                "Bug fixes:",
+                "- Fixed a bug that crashed the server when sending a challenge with the challenger's piece color specified",
+                "- Fixed a bug that made players' moves not appear for spectators (the game info was not updated)",
+                "- Fixed a bug that kept the move timer running for spectators when the game ended",
+                "- Fixed a bug that made takebacks display incorrectly for spectators",
+                "- Fixed a bug that left the last move unhighlighted for spectators until they joined",
+                "- Fixed an error that crashed the server when a guest followed the link of an open challenge already accepted by someone else",
+                "- Fixed a bug that prevented a challenge from reaching a player who is viewing their own game after it has ended",
+                "- Fixed an error that caused a challenge to a player currently spectating a game to be processed incorrectly"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Теперь наблюдатели видят чат партии",
+                "- Наблюдатели могут писать в чат партии, но их сообщения будут видеть только другие наблюдатели",
+                "- Теперь у наблюдателей отображается панель с информацией об игре",
+                "- Теперь история чата сохраняется. Например, при переподключении игрока к партии, история чата будет восстановлена.",
+                "- Формат логов партий был обновлен, чтобы включать больше важной информации об игре",
+                "- Теперь прерывание партии обрабатывается отдельно от сдачи (касается некоторых надписей + сохранения результата игры в логах). Прерванные партии считаются ничейными",
+                "- Теперь сообщения в чате урезаются до длины в макс. 500 символов. Пробельные символы в начале и конце сообщения исключаются из него. Также исключаются запрещенные символы: #, ;, /, \\, |, а также специальные.",
+                "- Теперь сервер автоматически перезапускается при падении",
+                "- Теперь прошедшие игры можно пересмотреть, перейдя по соответствующей ссылке",
+                "- Теперь окошко чата становится неактивным при завершении игры",
+                "Исправления багов:",
+                "- Исправлен баг, из-за которого падал сервер при отправке вызова с указанным цветом фигур вызывающего",
+                "- Исправлен баг, из-за которого у наблюдателей не отображались ходы игроков (не обновлялась информация о партии)",
+                "- Исправлен баг, из-за которого при окончании партии у наблюдателей не останавливался таймер времени на ход",
+                "- Исправлен баг, из-за которого у наблюдателей некорректно отображалось взятие назад (тейкбек)",
+                "- Исправлен баг, из-за которого у наблюдателей не подсвечивался последний ход до момента их захода",
+                "- Исправлена ошибка, из-за которой падал сервер, когда гость переходил по ссылке открытого вызова, уже принятого кем-то другим",
+                "- Исправлен баг, из-за которого вызов на бой не приходил игроку, просматривающему свою партию после ее завершения",
+                "- Исправлена ошибка, из-за которой вызов на бой игрока, в данный момент наблюдающего за игрой, обрабатывался некорректно"
+            ]
+        }
+    },
+    {
+        "date": "2021-08-05",
+        "title": {
+            "en": "Color selection",
+            "ru": "Выбор цвета"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- You can now choose the color in personal and open challenges",
+                "- An open challenge can now be canceled to return to the main menu",
+                "- Users who followed a link to an open challenge screen can now also return to the main menu",
+                "- The notification about an incoming personal challenge now shows the time control and the challenger's piece color",
+                "Bug fixes:",
+                "- Fixed errors that made it impossible to start spectating a game",
+                "- The Russian text for invited players on the open challenge screen is now a bit clearer"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Теперь можно выбрать цвет в личном и открытом вызовах",
+                "- Теперь открытый вызов можно отменить и вернуться в главное меню",
+                "- Пользователи, перешедшие по ссылке, ведущей на экран открытого вызова теперь тоже могут вернуться в главное меню",
+                "- Теперь в оповещении о входящем личном вызове указывается контроль времени и цвет фигур вызывающего игрока",
+                "Исправления багов:",
+                "- Исправлены ошибки, из-за которых было невозможно начать наблюдать за игрой",
+                "- Русский вариант текста для приглашенных игроков на экране открытого вызова теперь стал немного понятнее"
+            ]
+        }
+    },
+    {
+        "date": "2021-08-03",
+        "title": {
+            "en": "Draw offer and takeback improvements",
+            "ru": "Улучшения предложений ничьи и тейкбеков"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- If a player offers a draw or a takeback while the opponent is disconnected, the offer now reaches the opponent when they rejoin the game",
+                "- The draw offer button is disabled for the first 2 moves",
+                "- The takeback offer button is disabled until the player makes a move",
+                "- In the first two moves, a player now aborts the game instead of resigning",
+                "Bug fixes:",
+                "- Fixed (?) an error that made pieces get dragged only on the second attempt",
+                "- Fixed a bug that left the takeback confirmation window active even after the takeback was accepted (via a counter-offer)",
+                "- Prevented server crashes in some cases",
+                "- Fixed other minor server errors that did not cause crashes",
+                "- Fixed a bug that made a spectator's disconnection from a game be handled improperly",
+                "- Fixed a bug that caused a number of problems when reconnecting to a game and spectating a game (inability to navigate the game and incorrect takeback behavior)"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Теперь, если игрок предложит ничью или тейкбек, пока противник отключен, данное предложение поступит противнику, когда он вновь зайдет в игру",
+                "- Кнопка предложения ничьи отключена первые 2 хода",
+                "- Кнопка предложения тейкбека отключена, пока игрок не сделает ход",
+                "- Теперь в первые два хода игрок не сдается, а прерывает партию",
+                "Исправления багов:",
+                "- Исправлена (?) ошибка, из-за которой фигуры перетаскивались не с первого раза",
+                "- Исправлен баг, при котором окошко подтверждения тейкбека оставалось активным даже после его принятия (путем встречного предложения)",
+                "- Предотвращены падения сервера в некоторых случаях",
+                "- Исправлены прочие мелкие ошибки сервера, не приводившие к падениям",
+                "- Исправлен баг, из-за которого отключение наблюдателя от партии не обрабатывалось должным образом",
+                "- Исправлен баг, приводивший к ряду проблем при переподключении к игре и наблюдении за игрой (невозможность листать партию и неправильная работа тейкбеков)"
+            ]
+        }
+    },
+    {
+        "date": "2021-07-27",
+        "title": {
+            "en": "Disabled auto-exit on game over",
+            "ru": "Просмотр партии после окончания"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- Players now stay in the game after it ends",
+                "- Guests can now also reconnect to a game after a connection loss",
+                "- If a game involving a user who has come online is still in progress, they will be returned to the game",
+                "- From now on, when someone tries to log into an account that is already online, the old connection is dropped (for example, when the game is already open in another tab)",
+                "Bug fixes:",
+                "- Fixed an error that prevented guests from accepting an open challenge",
+                "- Neutralized the effect of a bug that caused a player to \"hang\" in the server's list of logged-in players if their connection was dropped (and for other unidentified reasons)",
+                "- Fixed a bug that prevented users who had previously chosen the \"Remember me\" option from logging out",
+                "- Fixed an error that made games end prematurely due to game time expiration if a player reconnected after the first move but before the second",
+                "- Fixed a server crash in cases when a player made a move while the opponent was disconnected",
+                "- Fixed the broken interpretation of the list of moves made, which caused a number of errors on reconnection",
+                "- The side (White/Black) is now also translated into Russian",
+                "- Fixed an error that left the phrase \"Starting position\" untranslated into Russian",
+                "- Fixed the display of the game info panel",
+                "- Fixed an error related to inappropriate sound effects"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Теперь игроки остаются в партии после ее окончания",
+                "- Теперь гости также могут переподключаться к партии после разрыва соединения",
+                "- Если игра с участием вошедшего в сеть пользователя все еще в процессе, он будет возвращен в игру",
+                "- Отныне при попытке входа в аккаунт, уже находящийся в сети, старое соединение будет разорвано (например, когда игра уже открыта в другой вкладке)",
+                "Исправления ошибок:",
+                "- Исправлена ошибка, из-за которой гости не могли принять открытый вызов",
+                "- Нивелирован эффект бага, приводившего к \"подвисанию\" в списке залогиненных игроков на сервере игрока, если его соединение было разорвано (а также по другим невыявленным причинам)",
+                "- Исправлен баг, из-за которого пользователи, ранее выбравшие опцию \"Запомнить меня\", не могли выйти из аккаунта",
+                "- Исправлена ошибка, из-за которой игры досрочно оканчивались по причине истечения времени на партию, если игрок переподключался после первого, но до второго хода",
+                "- Пофикшено падение сервера в случаях, когда игрок делал ход при отключившемся оппоненте",
+                "- Исправлена сломанная интерпретация списка сделанных ходов, приводившая к ряду ошибок при переподключении",
+                "- Теперь сторона (белые/черные) также переводится на русский",
+                "- Исправлена ошибка, из-за которой фраза \"Starting position\" не переводилась на русский",
+                "- Исправлено отображение панели с информацией об игре",
+                "- Исправлена ошибка, связанная с неуместными звуковыми эффектами"
+            ]
+        }
+    },
+    {
+        "date": "2021-07-25",
+        "title": {
+            "en": "Sodium α",
+            "ru": "Sodium α"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- An alpha version of Sodium is available for testing on the analysis board",
+                "- Player disconnections and reconnections are now logged into the game chat"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Альфа-версия Sodium доступна для тестов на доске анализа",
+                "- Отключение и переподключение игроков теперь логируются в чат игры"
+            ]
+        }
+    },
+    {
+        "date": "2021-07-16",
+        "title": {
+            "en": "Extended side box functionality",
+            "ru": "Новые функции боковой панели"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- Added game navigation for players and spectators",
+                "- Added the ability to resign",
+                "- Added draw offers",
+                "- You can now ask your opponent to let you take a move back",
+                "- The side panel interface has been changed to accommodate all the new features",
+                "- The notation has been simplified (its current form is the result of a discussion in the game chat)",
+                "Fixes:",
+                "- Improved connection loss handling",
+                "- Fixed a bug that duplicated interface elements when logging out",
+                "- Fixed a bug that kept guests in the online players list even after they left the game",
+                "- Fixed the side panel position",
+                "- Fixed a bug that made the move list use the outdated notation when reconnecting to a game",
+                "- Refactored a significant part of the codebase",
+                "- Many other minor fixes"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Для игроков и наблюдателей добавлено пролистывание партии",
+                "- Добавлена возможность сдаться",
+                "- Добавлено предложение ничьи",
+                "- Теперь можно попросить противника дать вам переходить",
+                "- Интерфейс боковой панели изменен, чтобы вместить все нововведения",
+                "- Нотация упрощена (ее текущий вид - результат обсуждения в беседе игры)",
+                "Исправления:",
+                "- Улучшена обработка разрыва соединения",
+                "- Исправлен баг с дублированием элементов интерфейса при выходе из аккаунта",
+                "- Исправлен баг, из-за которого гости оставались в списке игроков онлайн даже после выхода из игры",
+                "- Поправлено расположение боковой панели",
+                "- Исправлен баг, из-за которого при переподключении к партии в списке ходов использовалась устаревшая нотация",
+                "- Проведен рефакторинг значительной части кодовой базы",
+                "- Множество более мелких фиксов"
+            ]
+        }
+    },
+    {
+        "date": "2021-06-19",
+        "title": {
+            "en": "Updated notation",
+            "ru": "Обновление нотации"
+        },
+        "description": {
+            "en": [
+                "The notation has been updated to match community suggestions. Now a game can be unambiguously restored from the move list. In addition, a number of bugs were fixed: the disappearance of the last line of texts and the mismatch between the labels under the board and the files they denote"
+            ],
+            "ru": [
+                "Нотация обновлена, чтобы соответствовать предложениям сообщества. Теперь по списку ходов можно однозначно восстановить партию. Кроме того исправлен ряд багов: исчезновение последней строки текстов и несоответствие меток под доской вертикалям, ими обозначаемым"
+            ]
+        }
+    },
+    {
+        "date": "2021-05-19",
+        "title": {
+            "en": "Language select",
+            "ru": "Выбор языка"
+        },
+        "description": {
+            "en": [
+                "You can now select Russian in the settings"
+            ],
+            "ru": [
+                "Теперь в настройках можно выбрать русский язык"
+            ]
+        }
+    },
+    {
+        "date": "2021-05-19",
+        "title": {
+            "en": "Intellector 1.0",
+            "ru": "Intellector 1.0"
+        },
+        "description": {
+            "en": [
+                "Today the first version of the website for playing Intellector online was officially released. The game is moving to the main domain: intellector.info/game"
+            ],
+            "ru": [
+                "Сегодня состоялся официальный релиз первой версии сайта для онлайн-игры в Intellector. Игра переезжает на основной домен: intellector.info/game"
+            ]
+        }
+    },
+    {
+        "date": "2021-04-04",
+        "title": {
+            "en": "Spectating by link and stability",
+            "ru": "Наблюдение по ссылке и стабильность"
+        },
+        "description": {
+            "en": [
+                "Added a number of new features:",
+                "- Reconnecting to a game after a connection loss",
+                "- Spectating a game by link",
+                "- Correct handling of connection errors"
+            ],
+            "ru": [
+                "Добавлен ряд новых возможностей:",
+                "- Переподключение к игре после разрыва соединения",
+                "- Наблюдение за игрой по ссылке",
+                "- Корректная обработка ошибок соединения"
+            ]
+        }
+    },
+    {
+        "date": "2021-04-04",
+        "title": {
+            "en": "Board annotations",
+            "ru": "Аннотации на доске"
+        },
+        "description": {
+            "en": [
+                "Added the ability to draw arrows over the board (hold the right mouse button and move the cursor) and to highlight hexes on it (by clicking the right mouse button)."
+            ],
+            "ru": [
+                "Добавлена возможность рисовать стрелочки поверх доски (зажать правую кнопку мыши и переместить курсор) и выделять гексы на ней (нажатием правой кнопки мыши)."
+            ]
+        }
+    },
+    {
+        "date": "2021-03-27",
+        "title": {
+            "en": "Preferences",
+            "ru": "Настройки"
+        },
+        "description": {
+            "en": [
+                "Added the preferences menu and the ability to enable the display of coordinates"
+            ],
+            "ru": [
+                "Добавлено меню настроек и возможность включить отображение координат"
+            ]
+        }
+    },
+    {
+        "date": "2021-03-25",
+        "title": {
+            "en": "Spectation",
+            "ru": "Наблюдение"
+        },
+        "description": {
+            "en": [
+                "Games can now be spectated in real time"
+            ],
+            "ru": [
+                "Теперь за партией возможно наблюдать в реальном времени"
+            ]
+        }
+    },
+    {
+        "date": "2021-03-23",
+        "title": {
+            "en": "Threefold repetition & 60 move rule",
+            "ru": "Троекратное повторение и правило 60 ходов"
+        }
+    },
+    {
+        "date": "2021-03-22",
+        "title": {
+            "en": "Analysis board fixes and features & new openings",
+            "ru": "Улучшения и фиксы для доски анализа; новые дебюты"
+        },
+        "description": {
+            "en": [
+                "Today's update adds sounds to the analysis board, as well as the ability to use progressor promotion and the aura. Several new openings have been added as well",
+                "Canal Opening, the exchange variation is extended to the case of an exchange of two dominators:",
+                "White can open the channel for the remaining dominator by transposing into the Venetian Game.",
+                "In this case Black can continue their original plans, again inviting White to trade (and then, after the trade is accepted - here White aims to temporarily deactivate Black's aggressors - they arrive at a 'game without dominators')",
+                "Or Black can play differently, not wishing to dry up the game; this is considered the main line of the Venetian Game. In it White prepares an early dominator exit (similar to the Canal Opening)",
+                "Also added a symmetrical reply to B00. Jump Opening (Black similarly to White simply develops the liberator to the central horizontal)"
+            ],
+            "ru": [
+                "В сегодняшнем обновлении добавлены звуки на доску анализа, а также возможность использовать превращение прогрессора и ауру. Также добавлено несколько новых дебютов",
+                "Дебют Канала, разменный вариант продлен до случая размена двух доминаторов:",
+                "Белые могут открыть канал для оставшегося доминатора, перейдя в Венецианскую партию.",
+                "В этом случае черные могут продолжить свои изначальные планы, снова приглашая черных разменяться (и тогда после принятия размена - здесь белые ставят целью временную деактивацию агрессоров черных - приходят к 'игре без доминаторов')",
+                "Либо черные могут сходить иначе, не желая сушить игру, это считается за основную линию Венецианской партии. В ней белые готовят скорый выход доминатора (аналогично Дебюту Канала)",
+                "Также добавлен симметричный ответ на B00. Jump Opening (черные аналогично белым просто развивают либератора к центральной горизонтали)"
+            ]
+        }
+    },
+    {
+        "date": "2021-03-21",
+        "title": {
+            "en": "Simple analysis board",
+            "ru": "Упрощенная доска анализа"
+        },
+        "description": {
+            "en": [
+                "This update adds an analysis board that lets you move pieces arbitrarily. The position editor and compliance with the rules of movement are planned"
+            ],
+            "ru": [
+                "В этом обновлении добавлена доска анализа, позволяющая перемещать фигуры произвольным образом. Редактор позиции и соответствие правилам хода - в планах"
+            ]
+        }
+    },
+    {
+        "date": "2021-03-21",
+        "title": {
+            "en": "Improved authentication UI",
+            "ru": "Доработан UI аутентификации"
+        },
+        "description": {
+            "en": [
+                "You can now save your credentials while logging into your account. Apart from that, when logged, you may log out to sign in as another user"
+            ],
+            "ru": [
+                "При входе в аккаунт теперь можно сохранить свои данные. Кроме того, после входа можно выйти из аккаунта, чтобы зайти под другим пользователем"
+            ]
+        }
+    },
+    {
+        "date": "2021-03-20",
+        "title": {
+            "en": "Game info and opening database",
+            "ru": "Сводка об игре и база дебютов"
+        },
+        "description": {
+            "en": [
+                "The game screen now shows brief information about the game: the time control, player nicknames and openings. Openings are assigned according to the classification introduced in this update"
+            ],
+            "ru": [
+                "Теперь на экране партии доступна краткая информация об игре: контроль времени, ники игроков и дебюты. Дебюты назначаются согласно введенной в этом обновлении классификации"
+            ]
+        }
+    },
+    {
+        "date": "2021-03-19",
+        "title": {
+            "en": "Various additions",
+            "ru": "Различные дополнения"
+        },
+        "description": {
+            "en": [
+                "New features added to the game:",
+                "- In-game chat",
+                "- Open challenges",
+                "- Arbitrary time control selection"
+            ],
+            "ru": [
+                "Добавлены новые возможности:",
+                "- Внутриигровой чат",
+                "- Открытые вызовы",
+                "- Выбор контроля времени"
+            ]
+        }
+    },
+    {
+        "date": "2021-03-17",
+        "title": {
+            "en": "Added changelog",
+            "ru": "Добавлен список изменений"
+        }
+    }
 ]

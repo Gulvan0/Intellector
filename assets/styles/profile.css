@@ -43,6 +43,10 @@
     word-wrap: false;
 }
 
+.intellector-profile-wrapping {
+    word-wrap: true;
+}
+
 .intellector-profile-small-text {
     font-name: $ui-family-medium;
     font-size: 12px;
@@ -89,6 +93,7 @@
     horizontal-spacing: 6px;
 }
 
+
 /* wraps when the status, last seen and joined parts don't fit on one line */
 .intellector-profile-status-row {
     vertical-spacing: 4px;
@@ -116,6 +121,7 @@
 
 .intellector-profile-header-buttons {
     horizontal-spacing: 10px;
+    vertical-spacing: 10px;
 }
 
 .intellector-profile-action-button,
@@ -129,6 +135,10 @@
 .haxefolio-tier-profile-narrow .intellector-profile-action-button {
     padding-left: 10px;
     padding-right: 10px;
+}
+
+.intellector-profile-challenge-button {
+    height: 44px;
 }
 
 .intellector-profile-header-hint {

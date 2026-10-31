@@ -4,6 +4,7 @@ enum abstract OutcomeKind(String) from String to String
 {
 	var FATUM = "fatum";
 	var BREAKTHROUGH = "breakthrough";
+	var STALEMATE = "stalemate";
 	var TIMEOUT = "timeout";
 	var RESIGN = "resign";
 	var ABANDON = "abandon";

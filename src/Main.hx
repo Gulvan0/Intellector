@@ -5,9 +5,10 @@ import client.ui.BoardLayoutTier;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
 import client.storage.LocalStorageKey;
-import client.storage.ChallengeDraftMigration;
-import client.storage.CredentialsMigration;
-import client.storage.PreferenceMigration;
+import client.migration.ChallengeDraftMigration;
+import client.migration.CredentialsMigration;
+import client.migration.LegacyUrlMigration;
+import client.migration.PreferenceMigration;
 import client.datatypes.challenge.creation.ChallengeDraft;
 import client.logic.challenge.creation.ChallengePrefills;
 import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
@@ -54,6 +55,7 @@ import client.ui.common.games.widget.OngoingGamesWidget;
 import client.ui.common.notifications.CalleeOfflineNotice;
 import client.ui.common.notifications.ConnectionNotice;
 import client.ui.common.notifications.GameStartedNotice;
+import client.ui.common.notifications.InfoNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.notifications.WatchedGameNotice;
 import client.ui.common.watch.WatchController;
@@ -74,6 +76,7 @@ import net.rest.Rest;
 import net.rest.RestErrors;
 import net.rest.RestOperationRegistry;
 import net.ws.PubSub;
+import net.ws.channels.Everyone;
 import net.ws.channels.IncomingChallenges;
 import net.ws.channels.OutgoingChallenges;
 import net.ws.channels.PlayerOngoingGames;
@@ -93,6 +96,7 @@ import net.ws.events.OngoingGameEnded;
 import net.ws.events.OngoingGameStarted;
 import net.ws.events.OngoingGameUpdated;
 import net.ws.events.PlayerOngoingGamesRefresh;
+import net.ws.events.ServerShutdown;
 
 class Main
 {
@@ -115,6 +119,8 @@ class Main
 
     public static function main():Void
     {
+        LegacyUrlMigration.run();
+
         var config:HaxeFolioConfig = HaxeFolioConfigBuilder.init("intellector", Preferences)
             .setAppIcon("assets/favicons/normal.png")
             .setSiteName("Intellector")
@@ -173,6 +179,7 @@ class Main
         ConnectionNotice.init();
         PubSub.watchConnection(ConnectionNotice.onConnected, ConnectionNotice.onDisconnected);
         js.Browser.window.addEventListener("online", PubSub.reconnectNow);
+        PubSub.listen(new Everyone()).onEventLight(ServerShutdown, _ -> InfoNotice.show("intellector.server_shutdown_notice.title", "intellector.server_shutdown_notice.text"));
         PreferenceMigration.run();
         ChallengeDraftMigration.run();
         CredentialsMigration.run();
@@ -376,6 +383,7 @@ class Main
             .onEventLight(OngoingGameEnded, ended -> {
                 watch.remove(ended.id);
                 WatchedGameClaim.cancel(ended.id);
+                WatchedGameNotice.dismissFor(ended.id);
             });
         watchedStatusFeed = new PlayerStatusFeed([login], (_, status, _) -> watch.setStatus(status));
     }

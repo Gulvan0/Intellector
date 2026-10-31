@@ -23,6 +23,7 @@ class StyleVars
     public static inline final GAME_STARTED_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final CALLEE_OFFLINE_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final GAME_ENDED_NOTICE_EXPANDED_WIDTH:Int = 340;
+    public static inline final INFO_NOTICE_EXPANDED_WIDTH:Int = 340;
     public static inline final CONNECTION_NOTICE_NOTIFICATION_INSET:Int = 47; // the pill's height, plus the gap between notifications
     public static inline final CONNECTION_NOTICE_STRIP_HEIGHT:Int = 3;
     public static inline final CONNECTION_NOTICE_STRIP_DASHES:String = "repeating-linear-gradient(90deg, #2a211a 0 10px, transparent 10px 16px)";

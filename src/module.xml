@@ -30,6 +30,7 @@
             <style resource="intellector/styles/changelog.css" priority="10" />
             <style resource="intellector/styles/home.css" priority="10" />
             <style resource="intellector/styles/study.css" priority="10" />
+            <style resource="intellector/styles/challenge.css" priority="10" />
         </default>
     </themes>
 </module>

@@ -32,7 +32,8 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
     - `client.botengine` - wrappers around engines for playing against the computer
     - `client.datatypes` - types commonly used in a client-only code, divided into subpackages by domain (`challenge`, `game`, `timecontrol`, `board`, ...). Holds classes centered around instances: data, plus instance-bearing state like `ChallengeInbox`
     - `client.logic` - classes centered around static members (rules, parsing, ordering) operating on `client.datatypes`, mirroring its domain subpackages
-    - `client.storage` - local storage keys, typed readers/writers of persisted client state, migrations
+    - `client.storage` - local storage keys, typed readers/writers of persisted client state
+    - `client.migration` - one-time carry-overs from the previous iteration: its cookies into localStorage, its URL forms into the current ones
     - `client.tabs` - browser tab coordination: blinking, cross-tab hand-offs via focus and storage events
     - `client.openings` - opening database
     - `client.ui` - everything UI-related

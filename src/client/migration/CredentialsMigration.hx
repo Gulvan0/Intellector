@@ -1,4 +1,4 @@
-package client.storage;
+package client.migration;
 
 import client.auth.SavedCredentials;
 import js.Cookie;

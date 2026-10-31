@@ -176,6 +176,7 @@ class LiveGameMapper
             var decisiveKind:DecisiveOutcomeKind = switch kind {
                 case FATUM: Mate;
                 case BREAKTHROUGH: Breakthrough;
+                case STALEMATE: Stalemate;
                 case TIMEOUT: Timeout;
                 case RESIGN: Resign;
                 case CHEATING_ABORT: CheatingAbort;

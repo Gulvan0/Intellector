@@ -9,6 +9,7 @@ enum abstract FailedAction(String) from String to String
     var OPEN_STARTED_GAME = "open_started_game";
     var CREATE_CHALLENGE = "create_challenge";
     var LOAD_GAME = "load_game";
+    var SYNC_GAME = "sync_game";
     var MAKE_MOVE = "make_move";
     var OFFER_DRAW = "offer_draw";
     var CANCEL_DRAW = "cancel_draw";

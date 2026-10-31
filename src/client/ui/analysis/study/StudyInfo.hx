@@ -2,6 +2,7 @@ package client.ui.analysis.study;
 
 import client.datatypes.study.Study;
 import client.formatters.StudyFormatters;
+import client.ui.common.FoldingText;
 import client.utils.PagePaths;
 import haxe.ui.components.Label;
 import haxe.ui.containers.HBox;
@@ -59,7 +60,7 @@ class StudyInfo extends VBox
         datesLabel.percentWidth = 100;
         datesLabel.addClass(StyleClass.GAME_HINT);
         addComponent(datesLabel);
-        LocaleManager.instance.registerComponent(datesLabel, "text", () -> study != null ? StudyFormatters.dates(study, ServerTime.now()) : "");
+        FoldingText.attach(datesLabel, () -> study != null ? StudyFormatters.dates(study, ServerTime.now()) : "");
 
         descriptionLabel = new Label();
         descriptionLabel.percentWidth = 100;

@@ -1433,10 +1433,6 @@
     font-size: 13px;
 }
 
-.haxefolio-compact .intellector-challenge-entry-cancel {
-    width: 100%;
-}
-
 .intellector-challenge-entry-action:hover {
     border-color: #bdb2a0;
     color: #2a211a;
@@ -1454,6 +1450,21 @@
 .intellector-challenge-entry-accept:hover {
     border-color: #8a5a1f;
     color: #8a5a1f;
+}
+
+/* the danger tint of the owner's Cancel on the challenge page */
+.intellector-challenge-entry-cancel {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    background-color: #9e2f1c;
+    border: 1px solid #9e2f1c;
+    color: #fffefb;
+}
+
+.intellector-challenge-entry-cancel:hover {
+    background-color: #b8462c;
+    border-color: #b8462c;
+    color: #fffefb;
 }
 
 .intellector-challenge-entry-action:disabled {

@@ -1,4 +1,4 @@
-package client.storage;
+package client.migration;
 
 import client.datatypes.challenge.creation.CalleeKind;
 import client.datatypes.challenge.creation.CallerColorChoice;
@@ -6,6 +6,8 @@ import client.datatypes.challenge.creation.ChallengeDraft;
 import client.datatypes.challenge.creation.ChallengeType;
 import client.datatypes.challenge.creation.OpenChallengeVisibility;
 import client.datatypes.challenge.creation.StartingPositionMode;
+import client.storage.ChallengeDraftStorage;
+import client.storage.LocalStorageKey;
 import haxefolio.HaxeFolioApp;
 import intellectorboard.mappers.Sip;
 import js.Cookie;

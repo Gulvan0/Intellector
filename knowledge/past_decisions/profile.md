@@ -48,5 +48,9 @@ canvas. Deferred: `[[profile_deferred]]`.
 15. **Ratings** show a `?` while provisional, as elsewhere on the site.
 16. **Loading**: every card loads independently (loading → content, or error with Retry; a 10 s
     timeout counts as an error). An unknown login shows a not-found screen instead of the cards.
+18. **Challenge** is the header's primary button, first in the row, on another player's profile
+    only (guests included; the overlay handles them). It opens the challenge creation overlay with
+    a Direct challenge to that player's login; the other values are the remembered ones. Narrow:
+    its own full-width 44 px row above Add friend / Watch.
 17. **Rating chart**: one point per local day (the rating that day ended at), placed by date, so the
     date labels match the line. Peak counts every game. Fewer than two days: no chart.

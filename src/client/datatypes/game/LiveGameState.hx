@@ -17,6 +17,9 @@ typedef ActiveOffer =
 **/
 class LiveGameState
 {
+    /** How long the side to move has for each of the first two plies before the server aborts the game **/
+    public static inline final FIRST_MOVE_DEADLINE_SECONDS:Int = 30;
+
     public final info:LiveGameInfo;
     /** The plies; reports the shown position's changes itself **/
     public final history:PlyHistory;
@@ -26,6 +29,8 @@ class LiveGameState
     // clocksAfterPly[k]: both clocks right after k plies; [0] is the initial one
     private var clocksAfterPly:Array<Null<GameClock>>;
     private var latestClock:Null<GameClock>;
+    // when the first-move deadline began: the game start, the latest ply or rollback; added time doesn't restart it
+    private var deadlineStartMs:Null<Float>;
     private var chat:Array<GameChatEntry> = [];
     private var offers:Array<ActiveOffer> = [];
     private var ending:Null<GameEnding> = null;
@@ -38,6 +43,7 @@ class LiveGameState
         history = new PlyHistory(info.startingPosition);
         clocksAfterPly = [info.initialClock()];
         this.latestClock = info.initialClock();
+        deadlineStartMs = info.startedAtMs;
 
         for (event in events)
             apply(event, true);
@@ -86,6 +92,17 @@ class LiveGameState
     }
 
     /**
+        Unix time, in milliseconds, from which the side to move has `FIRST_MOVE_DEADLINE_SECONDS` to play before the
+        server aborts the game. Null unless a timed game is going on with fewer than two plies made.
+    **/
+    public function firstMoveDeadlineStartMs():Null<Float>
+    {
+        if (isOver() || !info.isTimed() || history.plyCount() >= 2)
+            return null;
+        return deadlineStartMs;
+    }
+
+    /**
         Applies a server event, unless applied already. `followLatestMove`: whether a new ply brings
         the view back from an older position. Returns false if the event can't be placed (a ply
         beyond the next one): the state is then missing events and needs `resync`.
@@ -118,6 +135,7 @@ class LiveGameState
                 history.truncate(plyCountAfter);
                 clocksAfterPly.splice(plyCountAfter + 1, clocksAfterPly.length);
                 latestClock = clock ?? clocksAfterPly[clocksAfterPly.length - 1];
+                deadlineStartMs = latestClock?.updatedAtMs;
                 onChanged.dispatch(Clock);
         }
 
@@ -135,6 +153,7 @@ class LiveGameState
         var clock:Null<GameClock> = latestClock?.afterPly(mover, nowMs, incrementMs(), newPlyIndex >= 1);
         clocksAfterPly.push(clock);
         latestClock = clock;
+        deadlineStartMs = nowMs;
         onChanged.dispatch(Clock);
     }
 
@@ -163,6 +182,7 @@ class LiveGameState
 
         clocksAfterPly = snapshot.clocksAfterPly;
         this.latestClock = snapshot.latestClock;
+        deadlineStartMs = snapshot.deadlineStartMs;
         chat = snapshot.chat;
         offers = snapshot.offers;
         lastEventIndex = snapshot.lastEventIndex;
@@ -195,7 +215,10 @@ class LiveGameState
 
         clocksAfterPly[plyIndex + 1] = clock ?? clocksAfterPly[plyIndex];
         if (plyIndex + 1 == history.plyCount())
+        {
             latestClock = clocksAfterPly[plyIndex + 1];
+            deadlineStartMs = latestClock?.updatedAtMs;
+        }
         onChanged.dispatch(Clock);
     }
 

@@ -1,4 +1,4 @@
-package client.storage;
+package client.migration;
 
 import js.Cookie;
 import haxefolio.preferences.Preference;

@@ -8,8 +8,10 @@ import client.datatypes.player.PlayerStatus;
 import client.formatters.GameFormatters;
 import client.formatters.ProfileFormatters;
 import client.ui.common.LoadStatus;
+import client.ui.common.SeparatedFlow;
 import client.ui.common.StatusDot;
 import client.ui.common.TimeControlKindIcon;
+import client.ui.common.WidthObserver;
 import haxe.ui.components.Button;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
@@ -19,6 +21,7 @@ import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
+import morestd.Detachable;
 
 using client.ui.ComponentExtension;
 
@@ -28,6 +31,12 @@ using client.ui.ComponentExtension;
 **/
 class ProfileHeaderCard extends Box
 {
+    private static inline final IDENTITY_MIN_WIDTH:Float = 340;
+    private static inline final ACTIONS_MAX_WIDTH:Float = 580; // the widest label combination, in Russian
+    private static inline final SECONDARY_BUTTONS_MIN_WIDTH:Float = 360; // Add friend and Watch, side by side
+    private static inline final CONTENT_SPACING:Float = 22;
+    private static inline final CARD_HORIZONTAL_INSETS:Float = 46; // padding and borders
+
     private final loadStatus:LoadStatus;
     private final content:Box;
 
@@ -39,9 +48,9 @@ class ProfileHeaderCard extends Box
     private final unratedLabel:Label;
     private final titleRow:HBox;
     private final titleLabel:Label;
+    private final statusFlow:SeparatedFlow;
     private final statusDot:StatusDot;
     private final statusLabel:Label;
-    private final lastSeenSeparator:Label;
     private final lastSeenLabel:Label;
     private final joinedLabel:Label;
     private final relationRow:HBox;
@@ -49,6 +58,7 @@ class ProfileHeaderCard extends Box
 
     private final actions:VBox;
     private final buttonRow:HBox;
+    private final challengeButton:Button;
     private final friendButton:Button;
     private final watchButton:Button;
     private final hintLabel:Label;
@@ -58,8 +68,13 @@ class ProfileHeaderCard extends Box
     private var lastActiveMs:Float = 0;
     private var joinedAtMs:Float = 0;
     private var tier:ProfileLayoutTier = Wide;
+    private var cardWidth:Float = 0;
+    private var stacked:Bool = false;
+    private var rowPerButton:Bool = false;
+    private var firstArrangement:Bool = true;
+    private final cardWidthHandle:Detachable;
 
-    public function new(onFriendPressed:PlayerRelation->Void, onWatchPressed:Void->Void)
+    public function new(onChallengePressed:Void->Void, onFriendPressed:PlayerRelation->Void, onWatchPressed:Void->Void)
     {
         super();
         percentWidth = 100;
@@ -136,28 +151,29 @@ class ProfileHeaderCard extends Box
         statusRow.addClass(StyleClass.PROFILE_STATUS_ROW);
         identity.addComponent(statusRow);
 
+        var statusPart:HBox = new HBox();
+        statusPart.addClass(StyleClass.PROFILE_HEADER_ROW);
+        statusRow.addComponent(statusPart);
+
         statusDot = new StatusDot(Offline);
-        statusRow.addComponent(statusDot);
+        statusPart.addComponent(statusDot);
 
         statusLabel = new Label();
         statusLabel.addClass(StyleClass.PROFILE_MUTED);
         statusLabel.verticalAlign = "center";
-        statusRow.addComponent(statusLabel);
-
-        lastSeenSeparator = createSeparator();
-        statusRow.addComponent(lastSeenSeparator);
+        statusPart.addComponent(statusLabel);
 
         lastSeenLabel = new Label();
         lastSeenLabel.addClass(StyleClass.PROFILE_MUTED);
         lastSeenLabel.verticalAlign = "center";
         statusRow.addComponent(lastSeenLabel);
 
-        statusRow.addComponent(createSeparator());
-
         joinedLabel = new Label();
         joinedLabel.addClass(StyleClass.PROFILE_MUTED);
         joinedLabel.verticalAlign = "center";
         statusRow.addComponent(joinedLabel);
+
+        statusFlow = new SeparatedFlow(statusRow, [statusPart, lastSeenLabel, joinedLabel], StyleClass.PROFILE_HEADER_ROW, StyleClass.PROFILE_MUTED);
 
         relationRow = new HBox();
         relationRow.addClass(StyleClass.PROFILE_HEADER_ROW);
@@ -186,6 +202,15 @@ class ProfileHeaderCard extends Box
         buttonRow.horizontalAlign = "right";
         actions.addComponent(buttonRow);
 
+        challengeButton = new Button();
+        challengeButton.text = LocaleUtils.localeBinding("intellector.profile.action.challenge");
+        challengeButton.icon = Assets.profileIcon("challenge");
+        challengeButton.addClass(StyleClass.GAME_BUTTON);
+        challengeButton.addClass(StyleClass.GAME_BUTTON_PRIMARY);
+        challengeButton.addClass(StyleClass.PROFILE_ACTION_BUTTON);
+        challengeButton.onClick = _ -> onChallengePressed();
+        buttonRow.addComponent(challengeButton);
+
         friendButton = new Button();
         friendButton.addClass(StyleClass.GAME_BUTTON);
         friendButton.addClass(StyleClass.PROFILE_ACTION_BUTTON);
@@ -207,6 +232,7 @@ class ProfileHeaderCard extends Box
 
         renderButtons();
         setTier(tier);
+        cardWidthHandle = WidthObserver.observe(this, onCardWidth);
     }
 
     public function showLoading():Void
@@ -244,9 +270,7 @@ class ProfileHeaderCard extends Box
 
         statusDot.setStatus(status);
         statusLabel.text = ProfileFormatters.status(status);
-        var offline:Bool = status == Offline;
-        lastSeenSeparator.hidden = !offline;
-        lastSeenLabel.hidden = !offline;
+        statusFlow.setPartHidden(lastSeenLabel, status != Offline);
         refreshTimes();
     }
 
@@ -302,12 +326,62 @@ class ProfileHeaderCard extends Box
     public function setTier(tier:ProfileLayoutTier):Void
     {
         this.tier = tier;
-        var stacked:Bool = tier == Narrow;
+        arrange();
+    }
+
+    public function dispose():Void
+    {
+        cardWidthHandle.detach();
+    }
+
+    private function onCardWidth(width:Float):Void
+    {
+        cardWidth = width;
+        arrange();
+    }
+
+    /**
+        The buttons go under the identity when the tier is narrow or they don't fit beside it, and
+        one per row when even the two smaller ones don't fit side by side
+    **/
+    private function arrange():Void
+    {
+        var innerWidth:Float = cardWidth - CARD_HORIZONTAL_INSETS;
+        var doesNotFit:Bool = cardWidth > 0 && innerWidth < IDENTITY_MIN_WIDTH + CONTENT_SPACING + ACTIONS_MAX_WIDTH;
+        var shouldStack:Bool = tier == Narrow || doesNotFit;
+        var shouldFillRows:Bool = shouldStack && cardWidth > 0 && innerWidth < SECONDARY_BUTTONS_MIN_WIDTH;
+        var changed:Bool = shouldStack != stacked || shouldFillRows != rowPerButton;
+        stacked = shouldStack;
+        rowPerButton = shouldFillRows;
+        renderButtons();
+        if (!changed && !firstArrangement)
+            return;
+
+        firstArrangement = false;
+        challengeButton.setClass(StyleClass.PROFILE_CHALLENGE_BUTTON, stacked);
+        buttonRow.layoutName = rowPerButton ? "vertical" : "horizontal";
+        joinedLabel.setClass(StyleClass.PROFILE_WRAPPING, rowPerButton);
+        joinedLabel.percentWidth = rowPerButton ? 100 : null;
+        statusFlow.groupOf(joinedLabel).percentWidth = rowPerButton ? 100 : null;
+        if (!rowPerButton)
+        {
+            joinedLabel.width = null;
+            joinedLabel.invalidateComponentLayout();
+            statusFlow.groupOf(joinedLabel).width = null;
+            statusFlow.groupOf(joinedLabel).invalidateComponentLayout();
+        }
         content.layoutName = stacked ? "vertical" : "horizontal";
-        var parts:Array<Component> = [actions, buttonRow, friendButton, watchButton];
+        var challengeParent:Component = stacked ? actions : buttonRow;
+        if (challengeButton.parentComponent != challengeParent)
+        {
+            challengeButton.parentComponent.removeComponent(challengeButton, false);
+            challengeParent.addComponentAt(challengeButton, 0);
+        }
+
+        var parts:Array<Component> = [actions, buttonRow, challengeButton, friendButton, watchButton];
         for (part in parts)
         {
-            var share:Float = part == friendButton || part == watchButton ? 50 : 100;
+            var share:Float = !rowPerButton && (part == friendButton || part == watchButton) ? 50 : 100;
             part.percentWidth = stacked ? share : null;
             if (!stacked)
             {
@@ -316,7 +390,6 @@ class ProfileHeaderCard extends Box
             }
         }
         invalidateComponentLayout();
-        renderButtons();
     }
 
     private function renderButtons():Void
@@ -332,14 +405,5 @@ class ProfileHeaderCard extends Box
         var watchKey:String = watching ? "stop_watching" : "watch";
         watchButton.text = LocaleUtils.localeBinding('intellector.profile.action.$watchKey${short ? "_short" : ""}');
         watchButton.setClass(StyleClass.GAME_BUTTON_ON, watching);
-    }
-
-    private static function createSeparator():Label
-    {
-        var separator:Label = new Label();
-        separator.text = "·";
-        separator.addClass(StyleClass.PROFILE_MUTED);
-        separator.verticalAlign = "center";
-        return separator;
     }
 }

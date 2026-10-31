@@ -12,6 +12,11 @@ enum abstract StyleClass(String) from String to String
     var BOARD_CONTROLS_SEPARATOR = "intellector-board-controls-separator";
     var INTERACTIVE_BOARD = "intellector-interactive-board";
 
+    var JOIN_ACTION_CANCEL = "intellector-join-action-cancel";
+    var JOIN_CARD = "intellector-join-card";
+    var JOIN_FRAME = "intellector-join-frame";
+    var JOIN_STATUS_CARD = "intellector-join-status-card";
+
     var HOME_CARD = "intellector-home-card";
     var HOME_CARD_TITLE = "intellector-home-card-title";
     var HOME_CHALLENGE_ACTION = "intellector-home-challenge-action";
@@ -81,6 +86,8 @@ enum abstract StyleClass(String) from String to String
     var CHALLENGE_ENTRY_ACTION = "intellector-challenge-entry-action";
     var CHALLENGE_ENTRY_ARRIVED = "intellector-challenge-entry-arrived";
     var CHALLENGE_ENTRY_FACT_EMPHASISED = "intellector-challenge-entry-fact-emphasised";
+    var CHALLENGE_ENTRY_FACT_GROUP = "intellector-challenge-entry-fact-group";
+    var CHALLENGE_ENTRY_SEPARATOR = "intellector-challenge-entry-separator";
     var CHALLENGE_ENTRY_FIRST = "intellector-challenge-entry-first";
     var CHALLENGE_ENTRY_OPPONENT_OPEN = "intellector-challenge-entry-opponent-open";
     var CHALLENGE_FACT = "intellector-challenge-fact";
@@ -98,6 +105,7 @@ enum abstract StyleClass(String) from String to String
 
     var GAME_ENTRY_CLOCK_RUNNING = "intellector-game-entry-clock-running";
     var GAME_ENTRY_FACT_EMPHASISED = "intellector-game-entry-fact-emphasised";
+    var GAME_ENTRY_FACT_GROUP = "intellector-game-entry-fact-group";
     var GAME_ENTRY_FIRST = "intellector-game-entry-first";
     var GAME_ENTRY_GROUP_BOUNDARY = "intellector-game-entry-group-boundary";
     var GAME_ENTRY_TURN_OWN_TIMED = "intellector-game-entry-turn-own-timed";
@@ -418,7 +426,10 @@ enum abstract StyleClass(String) from String to String
 
     var PROFILE_ACTION_BUTTON = "intellector-profile-action-button";
     var PROFILE_ARCHIVE_STATUS = "intellector-profile-archive-status";
-    var PROFILE_ASIDE_BODY = "intellector-profile-aside-body";
+    var PROFILE_WRAPPING = "intellector-profile-wrapping";
+    var PROFILE_STATUS_ROW = "intellector-profile-status-row";
+    var PROFILE_CHALLENGE_BUTTON ="intellector-profile-challenge-button";
+    var PROFILE_ASIDE_BODY ="intellector-profile-aside-body";
     var PROFILE_ASIDE_CARD = "intellector-profile-aside-card";
     var PROFILE_ASIDE_TABS = "intellector-profile-aside-tabs";
     var PROFILE_ASIDE_TOGGLE = "intellector-profile-aside-toggle";
@@ -444,7 +455,6 @@ enum abstract StyleClass(String) from String to String
     var PROFILE_HEADER_IDENTITY = "intellector-profile-header-identity";
     var PROFILE_HEADER_NAME_ROW = "intellector-profile-header-name-row";
     var PROFILE_HEADER_ROW = "intellector-profile-header-row";
-    var PROFILE_STATUS_ROW = "intellector-profile-status-row";
     var PROFILE_MONO = "intellector-profile-mono";
     var PROFILE_MUTED = "intellector-profile-muted";
     var PROFILE_NICKNAME = "intellector-profile-nickname";

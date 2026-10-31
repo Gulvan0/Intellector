@@ -46,6 +46,7 @@ class PinFormatters
         return switch kind {
             case Mate: "Fatum";
             case Breakthrough: "Breakthrough";
+            case Stalemate: "Stalemate";
             case Timeout: "Timeout";
             case Resign: "Resignation";
             case Abandon: "Abandonment";

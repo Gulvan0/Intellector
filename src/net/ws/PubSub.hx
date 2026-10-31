@@ -62,6 +62,12 @@ class PubSub
         return _engine.sub(channel);
     }
 
+    /** Handlers for a channel the server delivers to every connection unasked (`Everyone`); nothing is sent to it **/
+    public static function listen<T:IChannel>(channel:T):Subscription<T>
+    {
+        return _engine.listen(channel);
+    }
+
     /** Subscribes to every channel in a single message **/
     public static function subMany<T:IChannel>(channels:Array<T>):Array<Subscription<T>>
     {

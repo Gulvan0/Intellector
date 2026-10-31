@@ -1,6 +1,7 @@
 package client.ui.common.challenges;
 
 import client.tabs.IncomingChallengeBlink;
+import client.tabs.IncomingChallengeSound;
 import client.datatypes.challenge.ChallengeInbox;
 import client.datatypes.challenge.ChallengeMarks;
 import client.datatypes.challenge.IncomingChallenge;
@@ -62,8 +63,8 @@ class ChallengesController
     }
 
     /**
-        A new incoming challenge: notified, unless the widget's dropdown is open or incoming
-        challenges are ignored (then it's only listed, already seen)
+        A new incoming challenge: notified with a sound, unless incoming challenges are ignored (then
+        it's only listed, already seen); the dropdown, if open, lists it instead of a notification
     **/
     public function receiveIncoming(challenge:IncomingChallenge):Void
     {
@@ -71,6 +72,8 @@ class ChallengesController
         render();
         highlightInDropdown(newIds);
         blink.arrive(newIds);
+        if (newIds.length > 0 && !Preferences.silentChallenges.get())
+            IncomingChallengeSound.play(newIds);
     }
 
     /** See `ChallengeInbox.syncIncoming` **/

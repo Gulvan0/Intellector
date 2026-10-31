@@ -1,9 +1,9 @@
 package net.ws.events;
 
-import morestd.Never;
+import jsonmodel.UnserializableNull;
 import net.ws.channels.Everyone;
 import easypubsub.IEvent;
 
-class ServerShutdown implements IEvent<Never, Everyone>
+class ServerShutdown implements IEvent<UnserializableNull, Everyone>
 {
 }

@@ -20,4 +20,14 @@ class ChallengeAcceptorColorExtension
             case Random: null;
         }
     }
+
+    /** The other side's colour **/
+    public static function opposite(acceptorColor:ChallengeAcceptorColor):ChallengeAcceptorColor
+    {
+        return switch acceptorColor {
+            case White: Black;
+            case Black: White;
+            case Random: Random;
+        }
+    }
 }

@@ -1,0 +1,152 @@
+/* the challenge joining page: one card, centred near the top */
+.intellector-join-frame {
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.haxefolio-compact .intellector-join-frame {
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.intellector-join-card {
+    vertical-spacing: 0;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-join-status-card {
+    padding-left: 22px;
+    padding-right: 22px;
+}
+
+.intellector-join-body {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    vertical-spacing: 18px;
+}
+
+.haxefolio-compact .intellector-join-body {
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+.intellector-join-heading {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+}
+
+.intellector-join-players {
+    vertical-spacing: 4px;
+}
+
+.intellector-join-owner-row {
+    horizontal-spacing: 6px;
+}
+
+.intellector-join-owner {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-join-rating {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-join-callee {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+}
+
+.intellector-join-facts {
+    padding: 12px;
+    vertical-spacing: 10px;
+    background-color: #f0ebe2;
+    border-radius: 5px;
+}
+
+.intellector-join-fact {
+    height: 28px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-join-fact-label {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-join-fact-value {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-join-fact-muted {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-join-preview {
+    padding: 12px;
+    background-color: #f0ebe2;
+    border-radius: 5px;
+}
+
+.intellector-join-footer {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 22px;
+}
+
+.haxefolio-compact .intellector-join-footer {
+    padding-left: 18px;
+    padding-right: 18px;
+    padding-bottom: 18px;
+}
+
+.haxefolio-compact .intellector-join-action {
+    height: 44px;
+}
+
+/* the owner's Cancel: the filled primary in the theme's danger */
+.intellector-join-action-cancel {
+    background-color: #9e2f1c;
+    border: 1px solid #9e2f1c;
+    color: #fffefb;
+}
+
+.intellector-join-action-cancel:hover {
+    background-color: #b8462c;
+    border-color: #b8462c;
+    color: #fffefb;
+}
+
+.intellector-join-action-cancel:down {
+    background-color: #b8462c;
+    border-color: #b8462c;
+    color: #fffefb;
+}
+
+/* after the rules above, which it overrides while the cancel is in flight */
+.intellector-join-action-cancel:disabled {
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    color: #a79b8a;
+}

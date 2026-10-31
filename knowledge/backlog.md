@@ -89,3 +89,15 @@ with `GameRecordMapper.applyUpdate`-style copying, without reordering the page.
 The search currently finds registered players only, and the field takes nicknames.
 
 ## Study drafts in localstorage
+
+## No abandonment claim
+
+Once both sides have moved, a disconnected player's game goes on
+until their clock runs out; nothing shortens that, and correspondence games never end this way.
+
+**How to apply:** server-side, after the opponent has been disconnected for some time, let the other
+player claim the win (`OutcomeKind.ABANDON`), plus the page's prompt to do so.
+
+## Game archive
+
+Note: tables will probably not update their locale strings inside

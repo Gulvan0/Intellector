@@ -6,8 +6,14 @@ import client.datatypes.challenge.OutgoingChallenge;
 import client.datatypes.timecontrol.TimeControl;
 import client.datatypes.timecontrol.TimeControlKind;
 import client.ui.Assets;
+import client.ui.common.SeparatedFlow;
+import client.ui.common.notifications.InfoNotice;
+import client.utils.PagePaths;
+import haxe.Timer;
 import haxe.ui.containers.VBox;
+import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
+import haxefolio.browser.Clipboard;
 import intellectorboard.position.Position;
 
 using client.ui.ComponentExtension;
@@ -16,6 +22,9 @@ using client.ui.ComponentExtension;
 @:build(haxe.ui.ComponentBuilder.build("assets/layouts/common/challenges/widget/challenge_entry.xml"))
 class ChallengeEntry extends VBox
 {
+    private static inline final COPIED_MS:Int = 1600;
+    private static inline final COPY_FAILED_NOTICE_MS:Int = 6000;
+
     public final challengeId:Int;
     /** The colour the user plays **/
     public final ownColor:ChallengeAcceptorColor;
@@ -25,6 +34,8 @@ class ChallengeEntry extends VBox
 
     /** Called with whether the Preview button became selected **/
     public var onPreviewToggled:Bool->Void = _ -> {};
+
+    private var copiedResetTimer:Null<Timer> = null;
 
     public static function incoming(challenge:IncomingChallenge, onDecline:Void->Void, onAccept:Void->Void):ChallengeEntry
     {
@@ -55,6 +66,8 @@ class ChallengeEntry extends VBox
         entry.opponentLabel.setClass(StyleClass.CHALLENGE_ENTRY_OPPONENT_OPEN, isOpen);
         entry.fillFacts(challenge.timeControl, challenge.timeControlKind, challenge.rated);
 
+        entry.copyLinkButton.hidden = false;
+        entry.copyLinkButton.onClick = _ -> entry.copyLink();
         entry.cancelButton.hidden = false;
         entry.cancelButton.onClick = _ -> onCancel();
         return entry;
@@ -70,6 +83,7 @@ class ChallengeEntry extends VBox
         this.previewTitle = previewTitle;
 
         previewToggle.onChange = _ -> onPreviewToggled(previewToggle.selected);
+        new SeparatedFlow(factFlow, [colorPart, ratedLabel, positionLabel], StyleClass.CHALLENGE_ENTRY_FACT_GROUP, StyleClass.CHALLENGE_ENTRY_SEPARATOR);
     }
 
     public function setRepliesEnabled(enabled:Bool):Void
@@ -94,6 +108,55 @@ class ChallengeEntry extends VBox
     {
         addClass(StyleClass.CHALLENGE_ENTRY_ARRIVED);
         onAnimationEnd = _ -> removeClass(StyleClass.CHALLENGE_ENTRY_ARRIVED);
+    }
+
+    private override function onDestroy():Void
+    {
+        stopCopiedResetTimer();
+        super.onDestroy();
+    }
+
+    private function copyLink():Void
+    {
+        var url:String = HaxeFolioApp.pageUrl(PagePaths.challenge(challengeId));
+
+        // without a secure origin there is no `navigator.clipboard` at all
+        try
+        {
+            Clipboard.copy(url, onLinkCopied, _ -> onCopyFailed());
+        }
+        catch (_)
+        {
+            onCopyFailed();
+        }
+    }
+
+    // the button keeps its width while it reads "Copied", so the row doesn't shift
+    private function onLinkCopied():Void
+    {
+        if (copiedResetTimer == null)
+            copyLinkButton.width = copyLinkButton.componentWidth;
+        stopCopiedResetTimer();
+
+        copyLinkButton.text = LocaleUtils.localeBinding("intellector.challenges_widget.copied");
+        copiedResetTimer = Timer.delay(() -> {
+            copiedResetTimer = null;
+            copyLinkButton.text = LocaleUtils.localeBinding("intellector.challenges_widget.copy_link");
+            copyLinkButton.width = null;
+            copyLinkButton.invalidateComponentLayout();
+        }, COPIED_MS);
+    }
+
+    private function onCopyFailed():Void
+    {
+        InfoNotice.show("intellector.common.copy.error_title", "intellector.challenges_widget.copy_failed", COPY_FAILED_NOTICE_MS);
+    }
+
+    private function stopCopiedResetTimer():Void
+    {
+        if (copiedResetTimer != null)
+            copiedResetTimer.stop();
+        copiedResetTimer = null;
     }
 
     private function fillFacts(timeControl:TimeControl, timeControlKind:TimeControlKind, rated:Bool):Void

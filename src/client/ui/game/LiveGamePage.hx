@@ -181,6 +181,7 @@ class LiveGamePage extends PageBase
         IdentityKeeper.removeChangeListener(onIdentityChanged);
         WatchKeeper.removeChangeListener(onWatchedChanged);
         stopLoadTimer();
+        RequestFailureNotice.dismissAll(SYNC_GAME);
         if (clockTimer != null)
             clockTimer.stop();
         if (gameSubscription != null)
@@ -218,7 +219,9 @@ class LiveGamePage extends PageBase
             error -> {
                 if (attempt == loadAttempt)
                 {
-                    if (error.httpStatus == 404)
+                    if (state != null)
+                        onResyncFailed(error);
+                    else if (error.httpStatus == 404)
                         onGameNotFound();
                     else
                         onLoadFailed("intellector.live_game.status.failed");
@@ -241,6 +244,16 @@ class LiveGamePage extends PageBase
         loadAttempt++;
         if (state == null)
             showStatus(LocaleUtils.localeBinding(textKey), null, "intellector.live_game.status.retry", load);
+        else
+            RequestFailureNotice.show(SYNC_GAME, NoConnection, load);
+    }
+
+    // the board stays shown, so the failure is a notice rather than the status screen
+    private function onResyncFailed(error:HttpError):Void
+    {
+        stopLoadTimer();
+        loadAttempt++;
+        RequestFailureNotice.showHttpError(SYNC_GAME, error, load);
     }
 
     // nothing to retry: the user goes looking for another game
@@ -298,6 +311,8 @@ class LiveGamePage extends PageBase
     {
         stopLoadTimer();
         loadAttempt++;
+
+        RequestFailureNotice.dismissAll(SYNC_GAME);
 
         var events:Array<LiveGameEvent> = LiveGameMapper.eventsToDatatype(game.events);
         var latestClock:Null<GameClock> = GameClockMapper.dtoToDatatype(game.latest_time_update);
@@ -669,12 +684,24 @@ class LiveGamePage extends PageBase
         {
             var bar:PlayerBar = color == orientation ? stage.bottomBar : stage.topBar;
             var remainingMs:Null<Float> = clock != null ? clock.remainingMs(color, nowMs) : null;
+            if (color == userColor)
+                remainingMs = firstMoveRemainingMs(nowMs) ?? remainingMs;
             bar.setClock(remainingMs, clock != null && clock.tickingSide == color);
         }
 
         var latestClock:Null<GameClock> = state.clockAt(state.history.plyCount());
         checkTimeout(latestClock, nowMs);
         checkLowTime(latestClock, nowMs);
+    }
+
+    // what's left of the user's first-move deadline, if it's their turn within the first two plies; shown in place of their clock
+    private function firstMoveRemainingMs(nowMs:Float):Null<Float>
+    {
+        var deadlineStartMs:Null<Float> = state.firstMoveDeadlineStartMs();
+        if (deadlineStartMs == null || !isPlaying() || !state.history.isShowingLatest() || state.history.latestPosition().turnColor != userColor)
+            return null;
+
+        return Math.max(0, deadlineStartMs + LiveGameState.FIRST_MOVE_DEADLINE_SECONDS * 1000 - nowMs);
     }
 
     // once a game, when the user's own running clock drops below a minute

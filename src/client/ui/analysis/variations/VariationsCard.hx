@@ -5,7 +5,7 @@ import client.datatypes.variations.PlyTreeNode;
 import client.datatypes.variations.VariationViewMode;
 import client.formatters.Plurals;
 import client.formatters.VariationFormatters;
-import client.ui.common.WidthObserver;
+import client.ui.common.FoldingText;
 import client.ui.game.GameButtons;
 import haxe.ui.components.Button;
 import haxe.ui.components.Image;
@@ -15,9 +15,6 @@ import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
-import js.Browser;
-import js.html.CSSStyleDeclaration;
-import js.html.CanvasRenderingContext2D;
 
 using client.ui.ComponentExtension;
 
@@ -37,8 +34,6 @@ typedef VariationsCardHandlers =
 **/
 class VariationsCard extends VBox
 {
-    private static var measuringContext:Null<CanvasRenderingContext2D> = null;
-
     private final handlers:VariationsCardHandlers;
     private final header:HBox;
     private final titleLabel:Label;
@@ -65,7 +60,6 @@ class VariationsCard extends VBox
     private var locked:Bool = false;
     private var previewNode:Null<PlyTreeNode> = null;
     private var previewAuto:Bool = false;
-    private var hintWidth:Float = 0;
 
     public function new(handlers:VariationsCardHandlers)
     {
@@ -96,11 +90,7 @@ class VariationsCard extends VBox
         hintLabel.addClass(StyleClass.GAME_HINT);
         hintLabel.addClass(StyleClass.VARIATIONS_HINT);
         titles.addComponent(hintLabel);
-        LocaleManager.instance.registerComponent(hintLabel, "text", hintText);
-        WidthObserver.observe(hintLabel, width -> {
-            hintWidth = width;
-            LocaleManager.instance.refreshFor(hintLabel);
-        });
+        FoldingText.attach(hintLabel, hintText);
 
         previewButton = GameButtons.actionWithIcon(Assets.analysisIcon("card_preview"), "intellector.analysis.variations.preview_mark", handlers.onPreviewToggled, false);
         previewButton.addClass(StyleClass.VARIATIONS_PREVIEW_BUTTON);
@@ -362,18 +352,7 @@ class VariationsCard extends VBox
         var lineCount:Int = tree.lineCount();
         var moves:String = LocaleUtils.resolveText(LocaleUtils.localeBinding(Plurals.key("intellector.analysis.variations.move_count", moveCount, language)), moveCount);
         var lines:String = LocaleUtils.resolveText(LocaleUtils.localeBinding(Plurals.key("intellector.analysis.variations.line_count", lineCount, language)), lineCount);
-        var oneLine:String = '$moves · $lines';
-        return hintWidth > 0 && singleLineWidth(oneLine) > hintWidth ? '$moves\n$lines' : oneLine;
-    }
-
-    private function singleLineWidth(text:String):Float
-    {
-        if (measuringContext == null)
-            measuringContext = Browser.document.createCanvasElement().getContext2d();
-
-        var style:CSSStyleDeclaration = Browser.window.getComputedStyle(hintLabel.getTextDisplay().element);
-        measuringContext.font = '${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}';
-        return Math.ceil(measuringContext.measureText(text).width);
+        return '$moves · $lines';
     }
 
     private function refreshZoom():Void

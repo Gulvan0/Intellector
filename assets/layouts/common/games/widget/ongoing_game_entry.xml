@@ -11,19 +11,13 @@
         <time-control-tag id="timeControlTag" styleName="intellector-challenge-time-compact" hidden="true" />
     </hbox>
     <hbox styleName="intellector-challenge-entry-facts" width="100%">
-        <hbox styleName="intellector-challenge-entry-fact-flow" width="100%" continuous="true">
-            <hbox styleName="intellector-game-entry-fact-group">
+        <hbox id="factFlow" styleName="intellector-challenge-entry-fact-flow" width="100%" continuous="true">
+            <hbox id="colorPart" styleName="intellector-game-entry-fact-group">
                 <image id="colorIcon" width="11" height="11" scaleMode="fitinside" verticalAlign="center" />
                 <label id="colorLabel" styleName="intellector-game-entry-fact" verticalAlign="center" />
             </hbox>
-            <hbox styleName="intellector-game-entry-fact-group">
-                <label text="·" styleName="intellector-challenge-entry-separator" verticalAlign="center" />
-                <label id="ratedLabel" styleName="intellector-game-entry-fact" verticalAlign="center" />
-            </hbox>
-            <hbox styleName="intellector-game-entry-fact-group">
-                <label text="·" styleName="intellector-challenge-entry-separator" verticalAlign="center" />
-                <label id="moveLabel" styleName="intellector-game-entry-fact" verticalAlign="center" />
-            </hbox>
+            <label id="ratedLabel" styleName="intellector-game-entry-fact" verticalAlign="center" />
+            <label id="moveLabel" styleName="intellector-game-entry-fact" verticalAlign="center" />
         </hbox>
         <button id="previewToggle" text="{{intellector.games_widget.preview}}" styleName="intellector-challenge-preview-toggle intellector-game-entry-preview" toggle="true" verticalAlign="top" />
     </hbox>

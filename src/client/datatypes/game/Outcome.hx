@@ -6,6 +6,8 @@ enum DecisiveOutcomeKind
 {
     Mate;
     Breakthrough;
+    /** The side to move has no plys left and loses **/
+    Stalemate;
     Timeout;
     Resign;
     Abandon;

@@ -51,6 +51,14 @@ class ChallengePrefills
             draft.positionMode = DEFAULT;
     }
 
+    /** A direct challenge to the registered player `login`, the other values as remembered **/
+    public static function player(draft:ChallengeDraft, login:String):Void
+    {
+        draft.type = DIRECT;
+        draft.calleeKind = PLAYER;
+        draft.calleeLogin = login;
+    }
+
     /** A new game starting from `position`; unrated unless it is the default one **/
     public static function playFrom(draft:ChallengeDraft, position:Position):Void
     {

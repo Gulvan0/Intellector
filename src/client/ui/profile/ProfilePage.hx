@@ -9,7 +9,9 @@ import client.datatypes.player.GameStats;
 import client.datatypes.player.PlayerRelation;
 import client.datatypes.timecontrol.TimeControlKind;
 import client.datatypes.watch.WatchedPlayer;
+import client.logic.challenge.creation.ChallengePrefills;
 import client.ui.common.notifications.RequestFailureNotice;
+import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
 import client.ui.common.overlays.login.LoginOverlay;
 import client.ui.profile.ProfileState.ArchiveState;
 import client.ui.profile.ProfileState.OngoingGamesState;
@@ -93,7 +95,7 @@ class ProfilePage extends PageBase
 
         restoredState = ProfileStateReader.read(HaxeFolioApp.navigationState);
 
-        header = new ProfileHeaderCard(onFriendPressed, onWatchPressed);
+        header = new ProfileHeaderCard(onChallengePressed, onFriendPressed, onWatchPressed);
         header.setWatching(WatchKeeper.isWatching(login));
         ongoingCard = new OngoingGamesCard(login, restoredState.ongoing, onOngoingStateChanged);
         archiveCard = new ArchiveCard(login, {
@@ -135,6 +137,8 @@ class ProfilePage extends PageBase
         stopUpdates();
         if (profileLayout != null)
             profileLayout.dispose();
+        if (header != null)
+            header.dispose();
         if (ongoingCard != null)
             ongoingCard.dispose();
         if (archiveCard != null)
@@ -382,6 +386,11 @@ class ProfilePage extends PageBase
     private function onWatchedChanged(_:Null<WatchedPlayer>):Void
     {
         header.setWatching(WatchKeeper.isWatching(login));
+    }
+
+    private function onChallengePressed():Void
+    {
+        ChallengeCreationLauncher.launch(draft -> ChallengePrefills.player(draft, login));
     }
 
     private function onFriendPressed(relation:PlayerRelation):Void

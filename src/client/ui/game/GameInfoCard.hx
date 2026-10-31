@@ -8,6 +8,7 @@ import client.formatters.GameFormatters;
 import client.openings.OpeningEntry;
 import client.ui.Assets;
 import client.utils.PagePaths;
+import client.ui.common.FoldingText;
 import client.ui.common.WatchEye;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
@@ -71,6 +72,7 @@ class GameInfoCard extends VBox
         timeControlLabel.percentWidth = 100;
         timeControlLabel.wordWrap = true; // a long one ("15s+0 · Hyperbullet") would run under the start date
         timeControlColumn.addComponent(timeControlLabel);
+        FoldingText.attach(timeControlLabel, () -> info != null ? GameFormatters.timeControl(info.timeControl) : "");
 
         ratedLabel = new Label();
         ratedLabel.addClass(StyleClass.GAME_HINT);
@@ -111,7 +113,7 @@ class GameInfoCard extends VBox
 
         var kindIconPath:String = Assets.timeControlKindIcon(info.timeControl.getKind());
         timeControlIcon.resource = kindIconPath;
-        LocaleManager.instance.registerComponent(timeControlLabel, "text", () -> GameFormatters.timeControl(info.timeControl));
+        LocaleManager.instance.refreshFor(timeControlLabel);
         ratedLabel.text = GroupedLocaleResolvers.challengeRated(info.rated);
         startedAtLabel.text = GameFormatters.optionalDateTime(info.startedAtMs);
 

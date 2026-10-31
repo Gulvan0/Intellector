@@ -12,6 +12,7 @@ enum abstract Sound(String) to String
     var CAPTURE = "capture";
     var NOTIFY = "notify";
     var LOW_TIME = "lowtime";
+    var SOCIAL = "social";
 }
 
 class Sounds

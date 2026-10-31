@@ -27,4 +27,10 @@ class PagePaths
     {
         return 'study/$studyId';
     }
+
+    /** The page to accept, or as its owner to cancel, challenge `challengeId` **/
+    public static function challenge(challengeId:Int):String
+    {
+        return 'join/$challengeId';
+    }
 }

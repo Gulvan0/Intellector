@@ -6,6 +6,7 @@ import client.datatypes.game.OngoingGame;
 import client.formatters.ClockFormatters;
 import client.formatters.OngoingGameFormatters;
 import client.ui.Assets;
+import client.ui.common.SeparatedFlow;
 import client.utils.PagePaths;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;
@@ -44,6 +45,7 @@ class OngoingGameEntry extends VBox
 
         previewToggle.onChange = _ -> onPreviewToggled(previewToggle.selected);
         openLink = PageLink.attach(openButton, null, null, null, onFollowed);
+        new SeparatedFlow(factFlow, [colorPart, ratedLabel, moveLabel], StyleClass.GAME_ENTRY_FACT_GROUP, StyleClass.CHALLENGE_ENTRY_SEPARATOR);
 
         setGame(game);
         setCurrent(false);

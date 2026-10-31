@@ -1,0 +1,43 @@
+<!--
+    A pending challenge on its own page: who made it (and, for a direct one, for whom), its facts,
+    the custom starting position if any, and the viewer's action - Accept (plus Decline for the callee of a direct challenge) or, for its owner, Cancel.
+-->
+<vbox styleName="intellector-join-card">
+    <vbox styleName="intellector-join-body" width="100%">
+        <label id="headingLabel" styleName="intellector-join-heading" width="100%" />
+        <vbox styleName="intellector-join-players" width="100%">
+            <hbox styleName="intellector-join-owner-row">
+                <label id="ownerLabel" styleName="intellector-join-owner" verticalAlign="center" />
+                <label id="ratingLabel" styleName="intellector-join-rating" verticalAlign="center" hidden="true" />
+            </hbox>
+            <label id="calleeLabel" styleName="intellector-join-callee" width="100%" hidden="true" />
+        </vbox>
+        <vbox styleName="intellector-join-facts" width="100%">
+            <hbox styleName="intellector-join-fact" width="100%">
+                <label text="{{intellector.challenge_joining.time_control}}" styleName="intellector-join-fact-label" width="100%" verticalAlign="center" />
+                <time-control-tag id="timeControlTag" verticalAlign="center" />
+                <label id="kindLabel" styleName="intellector-join-fact-muted" verticalAlign="center" />
+            </hbox>
+            <hbox styleName="intellector-join-fact" width="100%">
+                <label text="{{intellector.challenge_joining.game}}" styleName="intellector-join-fact-label" width="100%" verticalAlign="center" />
+                <label id="ratedLabel" styleName="intellector-join-fact-value" verticalAlign="center" />
+            </hbox>
+            <hbox styleName="intellector-join-fact" width="100%">
+                <label text="{{intellector.challenge_joining.you_play}}" styleName="intellector-join-fact-label" width="100%" verticalAlign="center" />
+                <image id="colorIcon" width="13" height="13" scaleMode="fitinside" verticalAlign="center" />
+                <label id="colorLabel" styleName="intellector-join-fact-value" verticalAlign="center" />
+            </hbox>
+            <hbox styleName="intellector-join-fact" width="100%">
+                <label text="{{intellector.challenge_joining.start_position}}" styleName="intellector-join-fact-label" width="100%" verticalAlign="center" />
+                <label id="positionLabel" styleName="intellector-join-fact-value" verticalAlign="center" />
+            </hbox>
+        </vbox>
+        <box id="previewFrame" styleName="intellector-join-preview" width="100%" hidden="true" />
+    </vbox>
+    <box styleName="intellector-join-footer" width="100%">
+        <vbox width="100%" style="spacing: 8px;">
+            <button id="actionButton" styleName="intellector-game-button intellector-game-button-primary intellector-join-action" width="100%" />
+            <button id="declineButton" text="{{intellector.challenge_joining.decline}}" styleName="intellector-game-button intellector-join-action" width="100%" hidden="true" />
+        </vbox>
+    </box>
+</vbox>
