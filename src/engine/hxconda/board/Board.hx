@@ -325,6 +325,15 @@ class Board
         return Evaluation.clampDecisive(score);
     }
 
+    /** `scoreAfterCapture` for any move, castling included **/
+    public inline function scoreAfterMove(score:Float, move:Move):Float
+    {
+        var targetPiece:Piece = pieces[move.to];
+        if (isCastling(pieces[move.from], targetPiece))
+            score += Evaluation.pieceSquareScore(targetPiece, move.from);
+        return scoreAfterCapture(score, move);
+    }
+
     /** Updates `occupancyMasks` for a non-castling move, or reverts that update **/
     private inline function toggleMoveOccupancy(from:Int, to:Int, movingPiece:Piece, targetPiece:Piece):Void
     {

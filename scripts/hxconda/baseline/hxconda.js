@@ -1233,6 +1233,24 @@ engine_hxconda_board_MoveGenerator.generateCaptures = function(board) {
 	}
 	return moves;
 };
+engine_hxconda_board_MoveGenerator.addIntellectorMovesOfSideToMove = function(moves,board) {
+	var square = board.turn == 0 ? board.whiteIntellectorSquare : board.blackIntellectorSquare;
+	if(square != -1) {
+		var piece = board.pieces[square];
+		var pieces = board.pieces;
+		var squares = engine_hxconda_board_BoardGeometry.NEIGHBOURS.squares;
+		var ownDefensor = 8 | piece & 1;
+		var _g = engine_hxconda_board_BoardGeometry.NEIGHBOURS.offsets[square];
+		var _g1 = engine_hxconda_board_BoardGeometry.NEIGHBOURS.offsets[square + 1];
+		while(_g < _g1) {
+			var k = _g++;
+			var targetPiece = pieces[squares[k]];
+			if(targetPiece == 12 || targetPiece == ownDefensor) {
+				moves.push(square | squares[k] << 6 | piece << 12);
+			}
+		}
+	}
+};
 var engine_hxconda_board_Piece = {};
 engine_hxconda_board_Piece.fromLetter = function(letter) {
 	switch(letter) {
@@ -1497,6 +1515,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		}
 		var rootHash = this.board.hash();
 		var rootVerificationKey = this.board.verificationKey();
+		var _this = this.board;
+		var rootIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
 		var expectedScore = 0;
 		var iteration = 1;
 		var _this = this.budget;
@@ -1526,15 +1546,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 				alpha = expectedScore - 20;
 				beta = expectedScore + 10;
 			}
-			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true);
+			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			if(score <= alpha) {
-				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			} else if(score >= beta) {
-				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			}
 			expectedScore = score;
 			if(this.resultMove == -1) {
-				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			}
 			var _this1 = this.budget;
 			var tmp1;
@@ -1561,7 +1581,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		}
 		return this.report;
 	}
-	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
+	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
 		var tmp;
 		if(depth > 0 && maxDepth > 1) {
 			var _this = this.budget;
@@ -1618,20 +1638,22 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		if(beta > 90000) {
 			beta = 100000;
 		}
-		if(depth == 1) {
+		if(depth == 1 && !isRoot && !isInCheck) {
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
+			var _this = this.board;
+			var passedIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
 			var passedHash = hash ^ this.board.zobristKeys.blackToMove;
 			var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
 			var isPruned = false;
 			var nullMoveScore = 0;
 			var nullMoveScoreIsDraw = false;
 			if(this.board.turn == 1 && beta < Infinity) {
-				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
+				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
 				isPruned = nullMoveScore >= beta;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			} else if(this.board.turn == 0 && alpha > -Infinity) {
-				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
+				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
 				isPruned = nullMoveScore <= alpha;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			}
@@ -1656,7 +1678,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			return decisiveScore;
 		}
 		if(depth < 1) {
-			var score = this.quiesce(0,alpha,beta,this.evaluate());
+			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
 			this.resultLine = null;
 			this.resultIsDraw = false;
@@ -1719,21 +1741,21 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			var score;
 			var line;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score > alpha && isReduced) {
-					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 				if(score >= alpha + 1 && score < beta) {
-					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score > alpha && isReduced) {
-					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			}
@@ -1857,21 +1879,21 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			var score;
 			var line;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score < beta && isReduced) {
-					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 				if(score > alpha && score <= beta - 1) {
-					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score < beta && isReduced) {
-					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			}
@@ -1961,6 +1983,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		}
 		return extension;
 	}
+	,quiesceInCheck: function(alpha,beta,standPatScore) {
+		if(Math.abs(standPatScore) > 90000) {
+			return standPatScore;
+		}
+		var tmp = this.quiesceEvasions(alpha,beta,standPatScore);
+		if(tmp != null) {
+			return tmp;
+		} else {
+			return this.quiesce(0,alpha,beta,standPatScore);
+		}
+	}
 	,quiesce: function(depth,alpha,beta,standPatScore) {
 		if(Math.abs(standPatScore) > 90000) {
 			return standPatScore;
@@ -1988,18 +2021,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 				if(!tmp) {
 					continue;
 				}
-				var to1 = move >> 6 & 63;
 				var _this = this.board;
 				var score = standPatScore;
 				var from = move & 63;
-				var to2 = move >> 6 & 63;
+				var to1 = move >> 6 & 63;
 				score = standPatScore - engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
-				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to2] * 59 + to2];
-				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to2];
+				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to1] * 59 + to1];
+				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to1];
+				var to2 = move >> 6 & 63;
 				this.board.makeUnscoredMove(move);
-				this.quiescenceCaptureCounts[to1]++;
+				this.quiescenceCaptureCounts[to2]++;
 				var score1 = this.quiesce(depth + 1,alpha,beta,score > 90000 ? 100000 : score < -90000. ? -100000 : score);
-				this.quiescenceCaptureCounts[to1]--;
+				this.quiescenceCaptureCounts[to2]--;
 				this.board.unmakeUnscoredMove();
 				if(score1 >= beta) {
 					return score1;
@@ -2032,18 +2065,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 				if(!tmp) {
 					continue;
 				}
-				var to1 = move >> 6 & 63;
 				var _this = this.board;
 				var score = standPatScore;
 				var from = move & 63;
-				var to2 = move >> 6 & 63;
+				var to1 = move >> 6 & 63;
 				score = standPatScore - engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
-				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to2] * 59 + to2];
-				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to2];
+				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to1] * 59 + to1];
+				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to1];
+				var to2 = move >> 6 & 63;
 				this.board.makeUnscoredMove(move);
-				this.quiescenceCaptureCounts[to1]++;
+				this.quiescenceCaptureCounts[to2]++;
 				var score1 = this.quiesce(depth + 1,alpha,beta,score > 90000 ? 100000 : score < -90000. ? -100000 : score);
-				this.quiescenceCaptureCounts[to1]--;
+				this.quiescenceCaptureCounts[to2]--;
 				this.board.unmakeUnscoredMove();
 				if(score1 <= alpha) {
 					return score1;
@@ -2054,6 +2087,70 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			}
 			return beta;
 		}
+	}
+	,quiesceEvasions: function(alpha,beta,standPatScore) {
+		var isWhite = this.board.turn == 0;
+		var winScore = isWhite ? 100000 : -100000;
+		var _this = this.board;
+		var intellectorSquare = this.board.turn == 0 ? _this.whiteIntellectorSquare : _this.blackIntellectorSquare;
+		var moves = this.orderedCaptures();
+		engine_hxconda_board_MoveGenerator.addIntellectorMovesOfSideToMove(moves,this.board);
+		var value = null;
+		var _g = 0;
+		while(_g < moves.length) {
+			var move = moves[_g];
+			++_g;
+			if((move & 63) == intellectorSquare && engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS[this.board.turn * 59 + (move >> 6 & 63)]) {
+				return winScore;
+			}
+			this.board.makeUnscoredMove(move);
+			var isLegal = !this.board.attacksIntellector(this.board.turn);
+			this.board.unmakeUnscoredMove();
+			if(!isLegal) {
+				continue;
+			}
+			var _this = this.board;
+			var score = standPatScore;
+			var targetPiece = _this.pieces[move >> 6 & 63];
+			var movingPiece = _this.pieces[move & 63];
+			if(movingPiece == 10 && targetPiece == 8 || movingPiece == 11 && targetPiece == 9) {
+				score = standPatScore + engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[targetPiece * 59 + (move & 63)];
+			}
+			var score1 = score;
+			var from = move & 63;
+			var to = move >> 6 & 63;
+			score1 -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
+			score1 -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to] * 59 + to];
+			score1 += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to];
+			var to1 = move >> 6 & 63;
+			this.board.makeUnscoredMove(move);
+			this.quiescenceCaptureCounts[to1]++;
+			var score2 = this.quiesce(1,alpha,beta,score1 > 90000 ? 100000 : score1 < -90000. ? -100000 : score1);
+			this.quiescenceCaptureCounts[to1]--;
+			this.board.unmakeUnscoredMove();
+			if(isWhite) {
+				if(value == null || score2 > value) {
+					value = score2;
+				}
+				if(score2 >= beta) {
+					return score2;
+				}
+				if(score2 > alpha) {
+					alpha = score2;
+				}
+			} else {
+				if(value == null || score2 < value) {
+					value = score2;
+				}
+				if(score2 <= alpha) {
+					return score2;
+				}
+				if(score2 < beta) {
+					beta = score2;
+				}
+			}
+		}
+		return value;
 	}
 	,evaluate: function() {
 		var score = this.board.materialScore;
@@ -2198,6 +2295,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		}
 		var rootHash = this.board.hash();
 		var rootVerificationKey = this.board.verificationKey();
+		var _this = this.board;
+		var rootIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
 		var expectedScore = 0;
 		var iteration = 1;
 		while(true) {
@@ -2214,15 +2313,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				alpha = expectedScore - 20;
 				beta = expectedScore + 10;
 			}
-			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true);
+			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			if(score <= alpha) {
-				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			} else if(score >= beta) {
-				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			}
 			expectedScore = score;
 			if(this.resultMove == -1) {
-				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			}
 			var _this1 = this.budget;
 			if(_this1.nodeLimit - _this1.nodeCount > 0 || iteration == 1) {
@@ -2235,7 +2334,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		}
 		return this.report;
 	}
-	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
+	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
 		var tmp;
 		if(depth > 0 && maxDepth > 1) {
 			var _this = this.budget;
@@ -2296,20 +2395,22 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		if(beta > 90000) {
 			beta = 100000;
 		}
-		if(depth == 1) {
+		if(depth == 1 && !isRoot && !isInCheck) {
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
+			var _this = this.board;
+			var passedIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
 			var passedHash = hash ^ this.board.zobristKeys.blackToMove;
 			var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
 			var isPruned = false;
 			var nullMoveScore = 0;
 			var nullMoveScoreIsDraw = false;
 			if(this.board.turn == 1 && beta < Infinity) {
-				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
+				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
 				isPruned = nullMoveScore >= beta;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			} else if(this.board.turn == 0 && alpha > -Infinity) {
-				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
+				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
 				isPruned = nullMoveScore <= alpha;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			}
@@ -2334,7 +2435,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			return decisiveScore;
 		}
 		if(depth < 1) {
-			var score = this.quiesce(0,alpha,beta,this.evaluate());
+			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
 			this.resultLine = null;
 			this.resultIsDraw = false;
@@ -2396,17 +2497,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var unreducedExtension = isReduced ? extension : childExtension;
 			var score;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				if(score > alpha && isReduced) {
-					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				}
 				if(score >= alpha + 1 && score < beta) {
-					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				if(score > alpha && isReduced) {
-					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				}
 			}
 			var scoreIsDraw = this.resultIsDraw;
@@ -2514,17 +2615,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			var unreducedExtension = isReduced ? extension : childExtension;
 			var score;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				if(score < beta && isReduced) {
-					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				}
 				if(score > alpha && score <= beta - 1) {
-					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				if(score < beta && isReduced) {
-					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				}
 			}
 			var scoreIsDraw = this.resultIsDraw;
@@ -2599,6 +2700,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		}
 		return extension;
 	}
+	,quiesceInCheck: function(alpha,beta,standPatScore) {
+		if(Math.abs(standPatScore) > 90000) {
+			return standPatScore;
+		}
+		var tmp = this.quiesceEvasions(alpha,beta,standPatScore);
+		if(tmp != null) {
+			return tmp;
+		} else {
+			return this.quiesce(0,alpha,beta,standPatScore);
+		}
+	}
 	,quiesce: function(depth,alpha,beta,standPatScore) {
 		if(Math.abs(standPatScore) > 90000) {
 			return standPatScore;
@@ -2626,18 +2738,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				if(!tmp) {
 					continue;
 				}
-				var to1 = move >> 6 & 63;
 				var _this = this.board;
 				var score = standPatScore;
 				var from = move & 63;
-				var to2 = move >> 6 & 63;
+				var to1 = move >> 6 & 63;
 				score = standPatScore - engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
-				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to2] * 59 + to2];
-				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to2];
+				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to1] * 59 + to1];
+				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to1];
+				var to2 = move >> 6 & 63;
 				this.board.makeUnscoredMove(move);
-				this.quiescenceCaptureCounts[to1]++;
+				this.quiescenceCaptureCounts[to2]++;
 				var score1 = this.quiesce(depth + 1,alpha,beta,score > 90000 ? 100000 : score < -90000. ? -100000 : score);
-				this.quiescenceCaptureCounts[to1]--;
+				this.quiescenceCaptureCounts[to2]--;
 				this.board.unmakeUnscoredMove();
 				if(score1 >= beta) {
 					return score1;
@@ -2670,18 +2782,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				if(!tmp) {
 					continue;
 				}
-				var to1 = move >> 6 & 63;
 				var _this = this.board;
 				var score = standPatScore;
 				var from = move & 63;
-				var to2 = move >> 6 & 63;
+				var to1 = move >> 6 & 63;
 				score = standPatScore - engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
-				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to2] * 59 + to2];
-				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to2];
+				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to1] * 59 + to1];
+				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to1];
+				var to2 = move >> 6 & 63;
 				this.board.makeUnscoredMove(move);
-				this.quiescenceCaptureCounts[to1]++;
+				this.quiescenceCaptureCounts[to2]++;
 				var score1 = this.quiesce(depth + 1,alpha,beta,score > 90000 ? 100000 : score < -90000. ? -100000 : score);
-				this.quiescenceCaptureCounts[to1]--;
+				this.quiescenceCaptureCounts[to2]--;
 				this.board.unmakeUnscoredMove();
 				if(score1 <= alpha) {
 					return score1;
@@ -2692,6 +2804,70 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			}
 			return beta;
 		}
+	}
+	,quiesceEvasions: function(alpha,beta,standPatScore) {
+		var isWhite = this.board.turn == 0;
+		var winScore = isWhite ? 100000 : -100000;
+		var _this = this.board;
+		var intellectorSquare = this.board.turn == 0 ? _this.whiteIntellectorSquare : _this.blackIntellectorSquare;
+		var moves = this.orderedCaptures();
+		engine_hxconda_board_MoveGenerator.addIntellectorMovesOfSideToMove(moves,this.board);
+		var value = null;
+		var _g = 0;
+		while(_g < moves.length) {
+			var move = moves[_g];
+			++_g;
+			if((move & 63) == intellectorSquare && engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS[this.board.turn * 59 + (move >> 6 & 63)]) {
+				return winScore;
+			}
+			this.board.makeUnscoredMove(move);
+			var isLegal = !this.board.attacksIntellector(this.board.turn);
+			this.board.unmakeUnscoredMove();
+			if(!isLegal) {
+				continue;
+			}
+			var _this = this.board;
+			var score = standPatScore;
+			var targetPiece = _this.pieces[move >> 6 & 63];
+			var movingPiece = _this.pieces[move & 63];
+			if(movingPiece == 10 && targetPiece == 8 || movingPiece == 11 && targetPiece == 9) {
+				score = standPatScore + engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[targetPiece * 59 + (move & 63)];
+			}
+			var score1 = score;
+			var from = move & 63;
+			var to = move >> 6 & 63;
+			score1 -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
+			score1 -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to] * 59 + to];
+			score1 += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to];
+			var to1 = move >> 6 & 63;
+			this.board.makeUnscoredMove(move);
+			this.quiescenceCaptureCounts[to1]++;
+			var score2 = this.quiesce(1,alpha,beta,score1 > 90000 ? 100000 : score1 < -90000. ? -100000 : score1);
+			this.quiescenceCaptureCounts[to1]--;
+			this.board.unmakeUnscoredMove();
+			if(isWhite) {
+				if(value == null || score2 > value) {
+					value = score2;
+				}
+				if(score2 >= beta) {
+					return score2;
+				}
+				if(score2 > alpha) {
+					alpha = score2;
+				}
+			} else {
+				if(value == null || score2 < value) {
+					value = score2;
+				}
+				if(score2 <= alpha) {
+					return score2;
+				}
+				if(score2 < beta) {
+					beta = score2;
+				}
+			}
+		}
+		return value;
 	}
 	,evaluate: function() {
 		var score = this.board.materialScore;
@@ -2836,6 +3012,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		}
 		var rootHash = this.board.hash();
 		var rootVerificationKey = this.board.verificationKey();
+		var _this = this.board;
+		var rootIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
 		var expectedScore = 0;
 		var iteration = 1;
 		var _this = this.budget;
@@ -2850,15 +3028,15 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				alpha = expectedScore - 20;
 				beta = expectedScore + 10;
 			}
-			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true);
+			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			if(score <= alpha) {
-				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			} else if(score >= beta) {
-				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			}
 			expectedScore = score;
 			if(this.resultMove == -1) {
-				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
+				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
 			}
 			if(this.budget.deadline - performance.now() > 0 || iteration == 1) {
 				this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
@@ -2871,7 +3049,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		}
 		return this.report;
 	}
-	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
+	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
 		if(depth > 0 && maxDepth > 1 && this.budget.deadline - performance.now() < 0) {
 			this.isAborted = true;
 			var score = this.board.turn == 0 ? Infinity : -Infinity;
@@ -2918,20 +3096,22 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		if(beta > 90000) {
 			beta = 100000;
 		}
-		if(depth == 1) {
+		if(depth == 1 && !isRoot && !isInCheck) {
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
+			var _this = this.board;
+			var passedIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
 			var passedHash = hash ^ this.board.zobristKeys.blackToMove;
 			var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
 			var isPruned = false;
 			var nullMoveScore = 0;
 			var nullMoveScoreIsDraw = false;
 			if(this.board.turn == 1 && beta < Infinity) {
-				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
+				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
 				isPruned = nullMoveScore >= beta;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			} else if(this.board.turn == 0 && alpha > -Infinity) {
-				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
+				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
 				isPruned = nullMoveScore <= alpha;
 				nullMoveScoreIsDraw = this.resultIsDraw;
 			}
@@ -2956,7 +3136,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			return decisiveScore;
 		}
 		if(depth < 1) {
-			var score = this.quiesce(0,alpha,beta,this.evaluate());
+			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
 			this.resultLine = null;
 			this.resultIsDraw = false;
@@ -3019,21 +3199,21 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var score;
 			var line;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score > alpha && isReduced) {
-					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 				if(score >= alpha + 1 && score < beta) {
-					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score > alpha && isReduced) {
-					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			}
@@ -3137,21 +3317,21 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			var score;
 			var line;
 			if(i >= 1 && beta - alpha > 1) {
-				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score < beta && isReduced) {
-					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 				if(score > alpha && score <= beta - 1) {
-					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			} else {
-				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				if(score < beta && isReduced) {
-					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false,isCheck);
 					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
 				}
 			}
@@ -3221,6 +3401,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		}
 		return extension;
 	}
+	,quiesceInCheck: function(alpha,beta,standPatScore) {
+		if(Math.abs(standPatScore) > 90000) {
+			return standPatScore;
+		}
+		var tmp = this.quiesceEvasions(alpha,beta,standPatScore);
+		if(tmp != null) {
+			return tmp;
+		} else {
+			return this.quiesce(0,alpha,beta,standPatScore);
+		}
+	}
 	,quiesce: function(depth,alpha,beta,standPatScore) {
 		if(Math.abs(standPatScore) > 90000) {
 			return standPatScore;
@@ -3248,18 +3439,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				if(!tmp) {
 					continue;
 				}
-				var to1 = move >> 6 & 63;
 				var _this = this.board;
 				var score = standPatScore;
 				var from = move & 63;
-				var to2 = move >> 6 & 63;
+				var to1 = move >> 6 & 63;
 				score = standPatScore - engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
-				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to2] * 59 + to2];
-				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to2];
+				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to1] * 59 + to1];
+				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to1];
+				var to2 = move >> 6 & 63;
 				this.board.makeUnscoredMove(move);
-				this.quiescenceCaptureCounts[to1]++;
+				this.quiescenceCaptureCounts[to2]++;
 				var score1 = this.quiesce(depth + 1,alpha,beta,score > 90000 ? 100000 : score < -90000. ? -100000 : score);
-				this.quiescenceCaptureCounts[to1]--;
+				this.quiescenceCaptureCounts[to2]--;
 				this.board.unmakeUnscoredMove();
 				if(score1 >= beta) {
 					return score1;
@@ -3292,18 +3483,18 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				if(!tmp) {
 					continue;
 				}
-				var to1 = move >> 6 & 63;
 				var _this = this.board;
 				var score = standPatScore;
 				var from = move & 63;
-				var to2 = move >> 6 & 63;
+				var to1 = move >> 6 & 63;
 				score = standPatScore - engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
-				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to2] * 59 + to2];
-				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to2];
+				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to1] * 59 + to1];
+				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to1];
+				var to2 = move >> 6 & 63;
 				this.board.makeUnscoredMove(move);
-				this.quiescenceCaptureCounts[to1]++;
+				this.quiescenceCaptureCounts[to2]++;
 				var score1 = this.quiesce(depth + 1,alpha,beta,score > 90000 ? 100000 : score < -90000. ? -100000 : score);
-				this.quiescenceCaptureCounts[to1]--;
+				this.quiescenceCaptureCounts[to2]--;
 				this.board.unmakeUnscoredMove();
 				if(score1 <= alpha) {
 					return score1;
@@ -3314,6 +3505,70 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			}
 			return beta;
 		}
+	}
+	,quiesceEvasions: function(alpha,beta,standPatScore) {
+		var isWhite = this.board.turn == 0;
+		var winScore = isWhite ? 100000 : -100000;
+		var _this = this.board;
+		var intellectorSquare = this.board.turn == 0 ? _this.whiteIntellectorSquare : _this.blackIntellectorSquare;
+		var moves = this.orderedCaptures();
+		engine_hxconda_board_MoveGenerator.addIntellectorMovesOfSideToMove(moves,this.board);
+		var value = null;
+		var _g = 0;
+		while(_g < moves.length) {
+			var move = moves[_g];
+			++_g;
+			if((move & 63) == intellectorSquare && engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS[this.board.turn * 59 + (move >> 6 & 63)]) {
+				return winScore;
+			}
+			this.board.makeUnscoredMove(move);
+			var isLegal = !this.board.attacksIntellector(this.board.turn);
+			this.board.unmakeUnscoredMove();
+			if(!isLegal) {
+				continue;
+			}
+			var _this = this.board;
+			var score = standPatScore;
+			var targetPiece = _this.pieces[move >> 6 & 63];
+			var movingPiece = _this.pieces[move & 63];
+			if(movingPiece == 10 && targetPiece == 8 || movingPiece == 11 && targetPiece == 9) {
+				score = standPatScore + engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[targetPiece * 59 + (move & 63)];
+			}
+			var score1 = score;
+			var from = move & 63;
+			var to = move >> 6 & 63;
+			score1 -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
+			score1 -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to] * 59 + to];
+			score1 += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to];
+			var to1 = move >> 6 & 63;
+			this.board.makeUnscoredMove(move);
+			this.quiescenceCaptureCounts[to1]++;
+			var score2 = this.quiesce(1,alpha,beta,score1 > 90000 ? 100000 : score1 < -90000. ? -100000 : score1);
+			this.quiescenceCaptureCounts[to1]--;
+			this.board.unmakeUnscoredMove();
+			if(isWhite) {
+				if(value == null || score2 > value) {
+					value = score2;
+				}
+				if(score2 >= beta) {
+					return score2;
+				}
+				if(score2 > alpha) {
+					alpha = score2;
+				}
+			} else {
+				if(value == null || score2 < value) {
+					value = score2;
+				}
+				if(score2 <= alpha) {
+					return score2;
+				}
+				if(score2 < beta) {
+					beta = score2;
+				}
+			}
+		}
+		return value;
 	}
 	,evaluate: function() {
 		var score = this.board.materialScore;

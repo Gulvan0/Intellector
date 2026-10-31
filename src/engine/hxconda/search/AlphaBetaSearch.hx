@@ -16,7 +16,7 @@ import engine.hxconda.search.budget.SearchBudget;
 
 /**
     Iterative deepening principal variation search with aspiration windows, a transposition table, null move pruning,
-    extensions for captures and checks, history-based reductions and a capture-only quiescence search.
+    extensions for captures and checks, history-based reductions and a quiescence search of captures, and of evasions at leaves in check.
     Specialized per budget class `B`, which keeps the budget checks inlined.
 **/
 @:generic
@@ -59,6 +59,7 @@ class AlphaBetaSearch<B:SearchBudget>
 
         var rootHash:Int = board.hash();
         var rootVerificationKey:Int = board.verificationKey();
+        var rootIsInCheck:Bool = board.isIntellectorAttacked();
         var expectedScore:Float = 0;
         var iteration:Int = 1;
 
@@ -80,15 +81,15 @@ class AlphaBetaSearch<B:SearchBudget>
                 beta = expectedScore + SearchTuning.ASPIRATION_NEAR_MARGIN;
             }
 
-            var score:Float = search(alpha, beta, iteration, 0, iteration, rootHash, rootVerificationKey, true);
+            var score:Float = search(alpha, beta, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
             if (score <= alpha)
-                score = search(Math.NEGATIVE_INFINITY, alpha + 1, iteration, 0, iteration, rootHash, rootVerificationKey, true);
+                score = search(Math.NEGATIVE_INFINITY, alpha + 1, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
             else if (score >= beta)
-                score = search(beta - 1, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true);
+                score = search(beta - 1, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
 
             expectedScore = score;
             if (resultMove == Move.NONE)
-                score = search(Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true);
+                score = search(Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
 
             if (budget.hasRemaining() || iteration == 1)
                 report.record(resultMove, score, iteration, rootMoves.length);
@@ -104,8 +105,11 @@ class AlphaBetaSearch<B:SearchBudget>
         return report;
     }
 
-    /** `verificationKey` is the position's `Board.verificationKey()`, needed only at depths that reach the table **/
-    private function search(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, verificationKey:Int, isRoot:Bool):Float
+    /**
+        `verificationKey` is the position's `Board.verificationKey()`, needed only at depths that reach the table.
+        `isInCheck` tells whether the side to move's intellector is attacked.
+    **/
+    private function search(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, verificationKey:Int, isRoot:Bool, isInCheck:Bool):Float
     {
         if (depth > 0 && maxDepth > 1 && budget.isExhausted())
         {
@@ -145,9 +149,10 @@ class AlphaBetaSearch<B:SearchBudget>
         if (beta > DECISIVE_THRESHOLD)
             beta = WHITE_WIN_SCORE;
 
-        if (depth == SearchTuning.NULL_MOVE_DEPTH)
+        if (depth == SearchTuning.NULL_MOVE_DEPTH && !isRoot && !isInCheck) // a pruned root has no move; passing in check loses at once
         {
             board.passTurn();
+            var passedIsInCheck:Bool = board.isIntellectorAttacked();
             var passedHash:Int = board.hashAfterPass(hash);
             var passedVerificationKey:Int = board.verificationKeyAfterPass(verificationKey);
             var isPruned:Bool = false;
@@ -155,13 +160,13 @@ class AlphaBetaSearch<B:SearchBudget>
             var nullMoveScoreIsDraw:Bool = false;
             if (board.turn == Black && beta < Math.POSITIVE_INFINITY)
             {
-                nullMoveScore = search(beta - 1, beta, depth - 1, extension, maxDepth, passedHash, passedVerificationKey, false);
+                nullMoveScore = search(beta - 1, beta, depth - 1, extension, maxDepth, passedHash, passedVerificationKey, false, passedIsInCheck);
                 isPruned = nullMoveScore >= beta;
                 nullMoveScoreIsDraw = resultIsDraw;
             }
             else if (board.turn == White && alpha > Math.NEGATIVE_INFINITY)
             {
-                nullMoveScore = search(alpha, alpha + 1, depth - 1, extension, maxDepth, passedHash, passedVerificationKey, false);
+                nullMoveScore = search(alpha, alpha + 1, depth - 1, extension, maxDepth, passedHash, passedVerificationKey, false, passedIsInCheck);
                 isPruned = nullMoveScore <= alpha;
                 nullMoveScoreIsDraw = resultIsDraw;
             }
@@ -176,7 +181,7 @@ class AlphaBetaSearch<B:SearchBudget>
             return conclude(decisiveScore, Move.NONE, null);
 
         if (depth < 1)
-            return conclude(quiesce(0, alpha, beta, evaluate()), Move.NONE, null);
+            return conclude(isInCheck ? quiesceInCheck(alpha, beta, evaluate()) : quiesce(0, alpha, beta, evaluate()), Move.NONE, null);
 
         var score:Float = board.turn == White
             ? searchMovesAsMaximizer(alpha, beta, depth, extension, maxDepth, hash, verificationKey, isRoot)
@@ -223,26 +228,26 @@ class AlphaBetaSearch<B:SearchBudget>
             var line:Null<Array<Move>>;
             if (i >= 1 && beta - alpha > 1)
             {
-                score = search(alpha, alpha + 1, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
+                score = search(alpha, alpha + 1, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                 line = lineThrough(move);
                 if (score > alpha && isReduced)
                 {
-                    score = search(alpha, alpha + 1, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    score = search(alpha, alpha + 1, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                     line = lineThrough(move);
                 }
                 if (score >= alpha + 1 && score < beta)
                 {
-                    score = search(score - 1, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    score = search(score - 1, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                     line = lineThrough(move);
                 }
             }
             else
             {
-                score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
+                score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                 line = lineThrough(move);
                 if (score > alpha && isReduced)
                 {
-                    score = search(alpha, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    score = search(alpha, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                     line = lineThrough(move);
                 }
             }
@@ -319,26 +324,26 @@ class AlphaBetaSearch<B:SearchBudget>
             var line:Null<Array<Move>>;
             if (i >= 1 && beta - alpha > 1)
             {
-                score = search(beta - 1, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
+                score = search(beta - 1, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                 line = lineThrough(move);
                 if (score < beta && isReduced)
                 {
-                    score = search(beta - 1, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    score = search(beta - 1, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                     line = lineThrough(move);
                 }
                 if (score > alpha && score <= beta - 1)
                 {
-                    score = search(alpha, score + 1, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    score = search(alpha, score + 1, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                     line = lineThrough(move);
                 }
             }
             else
             {
-                score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false);
+                score = search(alpha, beta, depth - 1, childExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                 line = lineThrough(move);
                 if (score < beta && isReduced)
                 {
-                    score = search(alpha, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false);
+                    score = search(alpha, beta, depth - 1, unreducedExtension, maxDepth, childHash, childVerificationKey, false, isCheck);
                     line = lineThrough(move);
                 }
             }
@@ -430,6 +435,18 @@ class AlphaBetaSearch<B:SearchBudget>
         return score;
     }
 
+    /**
+        Quiescence search of a main search leaf whose side to move has its intellector attacked: no standing pat while an evasion exists.
+        Deeper quiescence plies stand pat in check, since searching their evasions costs more than it gains.
+    **/
+    private function quiesceInCheck(alpha:Float, beta:Float, standPatScore:Float):Float
+    {
+        if (Math.abs(standPatScore) > DECISIVE_THRESHOLD)
+            return standPatScore;
+
+        return quiesceEvasions(alpha, beta, standPatScore) ?? quiesce(0, alpha, beta, standPatScore);
+    }
+
     private function quiesce(depth:Int, alpha:Float, beta:Float, standPatScore:Float):Float
     {
         if (Math.abs(standPatScore) > DECISIVE_THRESHOLD)
@@ -447,7 +464,7 @@ class AlphaBetaSearch<B:SearchBudget>
                 if (!isQuiescenceCandidate(move, depth))
                     continue;
 
-                var score:Float = quiesceAfter(move, depth, alpha, beta, standPatScore);
+                var score:Float = quiesceAfter(move, depth, alpha, beta, board.scoreAfterCapture(standPatScore, move));
                 if (score >= beta)
                     return score;
                 if (score > alpha)
@@ -468,7 +485,7 @@ class AlphaBetaSearch<B:SearchBudget>
                 if (!isQuiescenceCandidate(move, depth))
                     continue;
 
-                var score:Float = quiesceAfter(move, depth, alpha, beta, standPatScore);
+                var score:Float = quiesceAfter(move, depth, alpha, beta, board.scoreAfterCapture(standPatScore, move));
                 if (score <= alpha)
                     return score;
                 if (score < beta)
@@ -479,20 +496,68 @@ class AlphaBetaSearch<B:SearchBudget>
         }
     }
 
+    /**
+        Best score over the captures and intellector moves that leave the own intellector unattacked,
+        or null if there are none: quiet blocks aren't generated, so the node can't be proven lost then.
+    **/
+    private function quiesceEvasions(alpha:Float, beta:Float, standPatScore:Float):Null<Float>
+    {
+        var isWhite:Bool = board.turn == White;
+        var winScore:Float = isWhite ? WHITE_WIN_SCORE : BLACK_WIN_SCORE;
+        var intellectorSquare:Int = board.intellectorSquare(board.turn);
+        var moves:Array<Move> = orderedCaptures();
+        MoveGenerator.addIntellectorMovesOfSideToMove(moves, board);
+
+        var value:Null<Float> = null;
+        for (move in moves)
+        {
+            if (move.from == intellectorSquare && BoardGeometry.isFinalSquare(move.to, board.turn))
+                return winScore;
+
+            board.makeUnscoredMove(move);
+            var isLegal:Bool = !board.attacksIntellector(board.turn);
+            board.unmakeUnscoredMove();
+            if (!isLegal)
+                continue;
+
+            var score:Float = quiesceAfter(move, 0, alpha, beta, board.scoreAfterMove(standPatScore, move));
+            if (isWhite)
+            {
+                if (value == null || score > value)
+                    value = score;
+                if (score >= beta)
+                    return score;
+                if (score > alpha)
+                    alpha = score;
+            }
+            else
+            {
+                if (value == null || score < value)
+                    value = score;
+                if (score <= alpha)
+                    return score;
+                if (score < beta)
+                    beta = score;
+            }
+        }
+
+        return value;
+    }
+
     private inline function isQuiescenceCandidate(move:Move, depth:Int):Bool
     {
         var to:Int = move.to;
         return depth < SearchTuning.UNRESTRICTED_QUIESCENCE_DEPTH || quiescenceCaptureCounts[to] > 0 || board.pieces[to].isIntellector();
     }
 
-    private inline function quiesceAfter(move:Move, depth:Int, alpha:Float, beta:Float, standPatScore:Float):Float
+    /** Quiescence score after `move`, `scoreAfterMove` being the score it leads to **/
+    private inline function quiesceAfter(move:Move, depth:Int, alpha:Float, beta:Float, scoreAfterMove:Float):Float
     {
         var to:Int = move.to;
-        var scoreAfterCapture:Float = board.scoreAfterCapture(standPatScore, move);
 
         board.makeUnscoredMove(move);
         quiescenceCaptureCounts[to]++;
-        var score:Float = quiesce(depth + 1, alpha, beta, scoreAfterCapture);
+        var score:Float = quiesce(depth + 1, alpha, beta, scoreAfterMove);
         quiescenceCaptureCounts[to]--;
         board.unmakeUnscoredMove();
 

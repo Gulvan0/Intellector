@@ -82,6 +82,14 @@ class MoveGenerator
         return moves;
     }
 
+    /** Appends the moves of the side to move's intellector, castling included **/
+    public static function addIntellectorMovesOfSideToMove(moves:Array<Move>, board:Board):Void
+    {
+        var square:Int = board.intellectorSquare(board.turn);
+        if (square != NO_SQUARE)
+            addIntellectorMoves(moves, board, square, board.pieces[square]);
+    }
+
     /** The lowest square in a nonzero `Board.occupancyMask` of `half` **/
     private static inline function lowestSquare(mask:Int, half:Int):Int
     {
