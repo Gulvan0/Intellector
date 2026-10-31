@@ -58,11 +58,11 @@ class ActionsCard extends VBox
         rematchButton = GameButtons.action("rematch", "intellector.live_game.action.rematch", handlers.onRematch);
     }
 
-    /** The set of a player of an ongoing game; Add time only in a timed one **/
-    public function showPlayerActions(timed:Bool):Void
+    /** The set of a player of an ongoing game; Add time only in a timed one, neither it nor Draw against a bot **/
+    public function showPlayerActions(timed:Bool, againstBot:Bool):Void
     {
-        var buttons:Array<Button> = [flipButton, drawButton, takebackButton, resignButton];
-        if (timed)
+        var buttons:Array<Button> = againstBot ? [flipButton, takebackButton, resignButton] : [flipButton, drawButton, takebackButton, resignButton];
+        if (timed && !againstBot)
             buttons.push(addTimeButton);
         showButtons(buttons);
     }

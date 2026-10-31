@@ -1,5 +1,6 @@
 package client.datatypes.game;
 
+import client.datatypes.bot.BotSettings;
 import client.datatypes.timecontrol.TimeControl;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
@@ -16,10 +17,12 @@ class LiveGameInfo
     public final startedAtMs:Null<Float>;
     public final startingPosition:Position;
     public final customStartingPosition:Bool;
-    /** Uploaded by an external client rather than played on the site **/
-    public final external:Bool;
+    /** The user ref of whoever uploads the plies of a game played off the site; null for one played on it **/
+    public final externalUploaderRef:Null<String>;
+    /** The bot an external game is played against, or null **/
+    public final bot:Null<BotSettings>;
 
-    public function new(id:Int, white:GameParticipant, black:GameParticipant, timeControl:TimeControl, rated:Bool, startedAtMs:Null<Float>, startingPosition:Position, customStartingPosition:Bool, external:Bool)
+    public function new(id:Int, white:GameParticipant, black:GameParticipant, timeControl:TimeControl, rated:Bool, startedAtMs:Null<Float>, startingPosition:Position, customStartingPosition:Bool, externalUploaderRef:Null<String>, bot:Null<BotSettings>)
     {
         this.id = id;
         this.white = white;
@@ -29,7 +32,21 @@ class LiveGameInfo
         this.startedAtMs = startedAtMs;
         this.startingPosition = startingPosition;
         this.customStartingPosition = customStartingPosition;
-        this.external = external;
+        this.externalUploaderRef = externalUploaderRef;
+        this.bot = bot;
+    }
+
+    public function isExternal():Bool
+    {
+        return externalUploaderRef != null;
+    }
+
+    /** The colour of the bot an external game is played against, or null **/
+    public function botColor():Null<PieceColor>
+    {
+        if (bot == null)
+            return null;
+        return white.ref == externalUploaderRef ? Black : White;
     }
 
     public function participant(color:PieceColor):GameParticipant

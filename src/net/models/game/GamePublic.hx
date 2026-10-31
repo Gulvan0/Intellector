@@ -26,6 +26,7 @@ class GamePublic implements IJsonUnserializableMacro
 	@:default(null) @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var last_ply_at:Null<DateTime>;
 	@:default(null) public var white_rating:Null<PlayerRatingPublic>;
 	@:default(null) public var black_rating:Null<PlayerRatingPublic>;
+	@:default(null) public var bot_think_cap_secs:Null<Int>;
 	@:jcustomparse(net.models.game.SpecialParsers.parseGenericEventList) public var events:Array<GameEvent>;
 	@:default(null) public var latest_time_update:Null<GameTimeUpdatePublic>;
 }

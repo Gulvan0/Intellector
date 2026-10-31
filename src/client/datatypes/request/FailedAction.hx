@@ -18,6 +18,9 @@ enum abstract FailedAction(String) from String to String
     var CANCEL_TAKEBACK = "cancel_takeback";
     var ANSWER_TAKEBACK = "answer_takeback";
     var RESIGN = "resign";
+    var TAKE_BACK = "take_back";
+    var BOT_MOVE = "bot_move";
+    var START_BOT_GAME = "start_bot_game";
     var ADD_TIME = "add_time";
     var SEND_CHAT_MESSAGE = "send_chat_message";
     var FOLLOW_PLAYER = "follow_player";

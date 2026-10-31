@@ -1,5 +1,6 @@
 package net.models.game.mappers;
 
+import client.datatypes.bot.BotSettings;
 import client.datatypes.game.GameChatMessage;
 import client.datatypes.game.GameEnding;
 import client.datatypes.game.GameParticipant;
@@ -7,6 +8,7 @@ import client.datatypes.game.LiveGameEvent;
 import client.datatypes.game.LiveGameInfo;
 import client.datatypes.game.Outcome;
 import client.datatypes.game.PlayerRating;
+import client.logic.bot.BotRefs;
 import intellectorboard.mappers.Sip;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.ply.RawPly;
@@ -15,6 +17,7 @@ import net.models.common.mappers.HexCoordsMapper;
 import net.models.common.mappers.PieceColorMapper;
 import net.models.common.mappers.PieceKindMapper;
 import net.models.common.mappers.TimeControlMapper;
+import net.models.game.external.ExternalGameAppendPlyPayload;
 import net.models.game.internal.InternalGameAppendPlyPayload;
 import net.models.game.internal.InternalGamePerformOfferActionPayload;
 import net.models.common.mappers.UserRefMapper;
@@ -34,8 +37,25 @@ class LiveGameMapper
             dto.started_at != null ? dto.started_at.getUnixMs() : null,
             startingPosition,
             startingSip != null,
-            dto.external_uploader_ref != null
+            dto.external_uploader_ref,
+            botToDatatype(dto.white_player.user_ref, dto.black_player.user_ref, dto.external_uploader_ref, dto.bot_think_cap_secs)
         );
+    }
+
+    /** The Haxaconda bot an external game is played against, or null **/
+    public static function botToDatatype(whiteRef:String, blackRef:String, uploaderRef:Null<String>, thinkCapSeconds:Null<Int>):Null<BotSettings>
+    {
+        if (uploaderRef == null)
+            return null;
+
+        var botRef:String = whiteRef == uploaderRef ? blackRef : whiteRef;
+        if (!BotRefs.isBot(botRef))
+            return null;
+
+        return switch BotRefs.parse(botRef) {
+            case Haxaconda(kind, strength): new BotSettings(kind, strength, thinkCapSeconds);
+            default: null;
+        }
     }
 
     public static function eventsToDatatype(dtos:Array<GameEvent>):Array<LiveGameEvent>
@@ -106,6 +126,20 @@ class LiveGameMapper
             to_i: ply.to.i,
             to_j: ply.to.j,
             morph_into: ply.morphInto != null ? PieceKindMapper.datatypeToDto(ply.morphInto) : null
+        };
+    }
+
+    /** `originalSip`: the position the ply is made in, which the server checks it is still in **/
+    public static function externalPlyToDto(gameId:Int, ply:RawPly, originalSip:String):ExternalGameAppendPlyPayload
+    {
+        return {
+            game_id: gameId,
+            from_i: ply.from.i,
+            from_j: ply.from.j,
+            to_i: ply.to.i,
+            to_j: ply.to.j,
+            morph_into: ply.morphInto != null ? PieceKindMapper.datatypeToDto(ply.morphInto) : null,
+            original_sip: originalSip
         };
     }
 

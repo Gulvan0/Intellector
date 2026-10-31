@@ -23,6 +23,12 @@ enum abstract LocalStorageKey(String) from String to String
     var CHALLENGE_DRAFT_CALLER_COLOR:String = "challenge_draft.caller_color";
     var CHALLENGE_DRAFT_POSITION_MODE:String = "challenge_draft.position_mode";
     var CHALLENGE_DRAFT_CUSTOM_SIP:String = "challenge_draft.custom_sip";
+    var CHALLENGE_DRAFT_BOT:String = "challenge_draft.bot";
+    var CHALLENGE_DRAFT_BOT_STRENGTH:String = "challenge_draft.bot_strength";
+    var CHALLENGE_DRAFT_BOT_CAP_ENABLED:String = "challenge_draft.bot_cap_enabled";
+    var CHALLENGE_DRAFT_BOT_CAP_SECONDS:String = "challenge_draft.bot_cap_seconds";
     var WATCHED_PLAYER:String = "watch.player";
     var CLAIMED_WATCHED_GAME_ID:String = "watch.claimed_game_id";
+    /** Followed by `.<game id>` **/
+    var BOT_GAME_LEASE_PREFIX:String = "bot_games.lease";
 }

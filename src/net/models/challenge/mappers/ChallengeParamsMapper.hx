@@ -4,6 +4,7 @@ import client.datatypes.challenge.creation.ChallengeParams;
 import intellectorboard.mappers.Sip;
 import intellectorboard.primitives.piece.PieceColor;
 import net.models.common.mappers.TimeControlMapper;
+import net.models.game.external.ExternalGameCreatePayload;
 
 class ChallengeParamsMapper
 {
@@ -26,6 +27,18 @@ class ChallengeParamsMapper
             custom_starting_sip: customStartingSip(params),
             fischer_time_control: TimeControlMapper.datatypeToDto(params.timeControl),
             link_only: linkOnly
+        };
+    }
+
+    /** A game of the user `ownUserRef`, playing `userColor`, against the bot `botRef` **/
+    public static function datatypeToExternalGameDto(params:ChallengeParams, ownUserRef:String, userColor:PieceColor, botRef:String, botThinkCapSeconds:Null<Int>):ExternalGameCreatePayload
+    {
+        return {
+            white_player_ref: userColor == White ? ownUserRef : botRef,
+            black_player_ref: userColor == White ? botRef : ownUserRef,
+            custom_starting_sip: customStartingSip(params),
+            time_control: TimeControlMapper.datatypeToDto(params.timeControl),
+            bot_think_cap_secs: botThinkCapSeconds
         };
     }
 

@@ -1,16 +1,19 @@
 package client.storage;
 
+import client.datatypes.bot.BotKind;
 import client.datatypes.challenge.creation.CalleeKind;
 import client.datatypes.challenge.creation.CallerColorChoice;
 import client.datatypes.challenge.creation.ChallengeDraft;
 import client.datatypes.challenge.creation.ChallengeType;
 import client.datatypes.challenge.creation.OpenChallengeVisibility;
 import client.datatypes.challenge.creation.StartingPositionMode;
+import client.logic.bot.BotKinds;
 import haxefolio.HaxeFolioApp;
 
 /**
     The challenge creation form's last submitted values in localStorage, one key per value. A missing
-    or unreadable value reads as the form's default.
+    or unreadable value reads as the form's default. The bot's values change only with a bot game
+    actually started.
 **/
 class ChallengeDraftStorage
 {
@@ -30,6 +33,10 @@ class ChallengeDraftStorage
         draft.callerColor = readChoice(LocalStorageKey.CHALLENGE_DRAFT_CALLER_COLOR, [CallerColorChoice.WHITE, CallerColorChoice.RANDOM, CallerColorChoice.BLACK], draft.callerColor);
         draft.positionMode = readChoice(LocalStorageKey.CHALLENGE_DRAFT_POSITION_MODE, [StartingPositionMode.DEFAULT, StartingPositionMode.CUSTOM], draft.positionMode);
         draft.customSip = HaxeFolioApp.valueStorage.read(LocalStorageKey.CHALLENGE_DRAFT_CUSTOM_SIP);
+        draft.bot = readOptionalChoice(LocalStorageKey.CHALLENGE_DRAFT_BOT, BotKinds.ALL);
+        draft.botStrength = readInt(LocalStorageKey.CHALLENGE_DRAFT_BOT_STRENGTH, draft.botStrength);
+        draft.botCapEnabled = readBool(LocalStorageKey.CHALLENGE_DRAFT_BOT_CAP_ENABLED, draft.botCapEnabled);
+        draft.botCapSeconds = readInt(LocalStorageKey.CHALLENGE_DRAFT_BOT_CAP_SECONDS, draft.botCapSeconds);
 
         return draft;
     }
@@ -52,9 +59,22 @@ class ChallengeDraftStorage
             HaxeFolioApp.valueStorage.write(LocalStorageKey.CHALLENGE_DRAFT_CUSTOM_SIP, draft.customSip);
         else
             HaxeFolioApp.valueStorage.remove(LocalStorageKey.CHALLENGE_DRAFT_CUSTOM_SIP);
+
+        if (draft.type == BOT && draft.bot != null)
+        {
+            HaxeFolioApp.valueStorage.write(LocalStorageKey.CHALLENGE_DRAFT_BOT, draft.bot);
+            HaxeFolioApp.valueStorage.write(LocalStorageKey.CHALLENGE_DRAFT_BOT_STRENGTH, Std.string(draft.botStrength));
+            HaxeFolioApp.valueStorage.write(LocalStorageKey.CHALLENGE_DRAFT_BOT_CAP_ENABLED, Std.string(draft.botCapEnabled));
+            HaxeFolioApp.valueStorage.write(LocalStorageKey.CHALLENGE_DRAFT_BOT_CAP_SECONDS, Std.string(draft.botCapSeconds));
+        }
     }
 
     private static function readChoice<T:String>(key:LocalStorageKey, allowed:Array<T>, fallback:T):T
+    {
+        return readOptionalChoice(key, allowed) ?? fallback;
+    }
+
+    private static function readOptionalChoice<T:String>(key:LocalStorageKey, allowed:Array<T>):Null<T>
     {
         var stored:Null<String> = HaxeFolioApp.valueStorage.read(key);
 
@@ -62,7 +82,7 @@ class ChallengeDraftStorage
             if (value == stored)
                 return value;
 
-        return fallback;
+        return null;
     }
 
     private static function readBool(key:LocalStorageKey, fallback:Bool):Bool

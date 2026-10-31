@@ -4,6 +4,7 @@ import net.models.common.PieceKind;
 import net.models.game.TimeRemainders;
 import jsonmodel.IJsonSerializableMacro;
 
+@:structInit
 class ExternalGameAppendPlyPayload implements IJsonSerializableMacro
 {
 	public var game_id:Int;

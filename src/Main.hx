@@ -1,5 +1,6 @@
 import client.ServerTime;
 import client.auth.AuthBootstrap;
+import client.botengine.BotGameRunner;
 import client.ui.Assets;
 import client.ui.BoardLayoutTier;
 import client.auth.Identity;
@@ -9,7 +10,9 @@ import client.migration.ChallengeDraftMigration;
 import client.migration.CredentialsMigration;
 import client.migration.LegacyUrlMigration;
 import client.migration.PreferenceMigration;
+import client.datatypes.bot.BotSettings;
 import client.datatypes.challenge.creation.ChallengeDraft;
+import client.logic.bot.BotRefs;
 import client.logic.challenge.creation.ChallengePrefills;
 import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
 import client.ui.common.overlays.challenge.ChallengeCreationOverlay;
@@ -20,6 +23,8 @@ import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.HaxeFolioConfig;
 import haxefolio.HaxeFolioConfigBuilder;
+import intellectorboard.primitives.piece.PieceColor;
+import intellectorboard.primitives.ply.RawPly;
 import client.ui.home.HomeLayoutTier;
 import client.ui.home.HomePage;
 import client.ui.analysis.AnalysisPage;
@@ -72,6 +77,7 @@ import net.models.common.RestErrorCode;
 import net.models.common.UserRefWithNickname;
 import net.models.common.mappers.UserRefMapper;
 import net.models.game.OngoingGamePublic;
+import net.models.game.mappers.LiveGameMapper;
 import net.models.game.mappers.OngoingGameMapper;
 import net.rest.Rest;
 import net.rest.RestErrors;
@@ -193,6 +199,7 @@ class Main
         watch = new WatchController(watchWidget);
         watchWidget.currentGameId = () -> LiveGamePage.openGameId;
         WatchedGameClaim.init(openWatchedGame, announceWatchedGame);
+        BotGameRunner.init(submitBotPly, onBotSearchFailed);
         ChallengeCreationLauncher.launch = presentChallengeCreation;
         IdentityKeeper.init([_ -> PubSub.reauth(), refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);
         WatchKeeper.init([subscribeToWatchedPlayer]);
@@ -481,6 +488,28 @@ class Main
     }
 
 
+    private static function submitBotPly(gameId:Int, ply:RawPly, searchedSip:String, onSettled:Void->Void):Void
+    {
+        Rest.client().execute(
+            RestOperationRegistry.APPEND_PLY_TO_EXTERNAL_GAME,
+            _ -> onSettled(),
+            error -> {
+                onSettled();
+                var status:Null<Int> = error.httpStatus;
+                if (status == null || status >= 500) // otherwise the game has moved on without this ply
+                    RequestFailureNotice.showHttpError(BOT_MOVE, error, submitBotPly.bind(gameId, ply, searchedSip, () -> {}));
+            },
+            null,
+            null,
+            LiveGameMapper.externalPlyToDto(gameId, ply, searchedSip)
+        );
+    }
+
+    private static function onBotSearchFailed(gameId:Int, retry:Void->Void):Void
+    {
+        RequestFailureNotice.show(BOT_MOVE, Unexpected, retry);
+    }
+
     private static function createChallenge(params:ChallengeParams, onOutcome:ChallengeCreationOutcome->Void):Void
     {
         var calleeRef:Null<String> = params.target.calleeRef();
@@ -493,9 +522,35 @@ class Main
                 Rest.client().execute(RestOperationRegistry.CREATE_DIRECT_CHALLENGE, onCreated, onFailed, null, null, ChallengeParamsMapper.datatypeToDirectDto(params, calleeRef));
             case Public | LinkOnly:
                 Rest.client().execute(RestOperationRegistry.CREATE_OPEN_CHALLENGE, onCreated, onFailed, null, null, ChallengeParamsMapper.datatypeToOpenDto(params, params.target == LinkOnly));
-            case Bot:
-                onOutcome(Failed); // no bot to play yet
+            case Bot(settings):
+                startBotGame(params, settings, onOutcome);
         }
+    }
+
+    private static function startBotGame(params:ChallengeParams, settings:BotSettings, onOutcome:ChallengeCreationOutcome->Void):Void
+    {
+        var ownUserRef:Null<String> = IdentityKeeper.currentIdentity.getUserRef();
+        if (ownUserRef == null)
+        {
+            onOutcome(Failed);
+            return;
+        }
+
+        var userColor:PieceColor = params.callerColor ?? (Std.random(2) == 0 ? White : Black);
+        Rest.client().execute(
+            RestOperationRegistry.CREATE_EXTERNAL_GAME,
+            game -> {
+                GameRedirect.request(StartedGameMapper.summaryToDatatype(game, ownUserRef));
+                onOutcome(GameStarted);
+            },
+            error -> {
+                RequestFailureNotice.showHttpError(START_BOT_GAME, error);
+                onOutcome(Failed);
+            },
+            null,
+            null,
+            ChallengeParamsMapper.datatypeToExternalGameDto(params, ownUserRef, userColor, BotRefs.build(settings.kind, settings.strength), settings.thinkCapSeconds)
+        );
     }
 
     private static function onChallengeCreated(response:ChallengeCreateResponse, onOutcome:ChallengeCreationOutcome->Void):Void

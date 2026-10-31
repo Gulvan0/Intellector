@@ -4,6 +4,7 @@ import net.models.common.PieceColor;
 import net.models.game.OutcomeKind;
 import jsonmodel.IJsonSerializableMacro;
 
+@:structInit
 class ExternalGameEndPayload implements IJsonSerializableMacro
 {
 	public var game_id:Int;

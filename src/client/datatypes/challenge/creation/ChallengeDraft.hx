@@ -1,5 +1,7 @@
 package client.datatypes.challenge.creation;
 
+import client.datatypes.bot.BotKind;
+
 /**
     The challenge creation form's raw values, valid or not: what the form opens with and what is
     remembered between visits. Values a variant doesn't use (e.g. the login while Open is selected)
@@ -21,6 +23,13 @@ class ChallengeDraft
 
     /** The last applied custom position, as SIP **/
     public var customSip:Null<String> = null;
+
+    /** Null until a bot is chosen **/
+    public var bot:Null<BotKind> = null;
+    /** Shared by all the bots **/
+    public var botStrength:Int = 5;
+    public var botCapEnabled:Bool = false;
+    public var botCapSeconds:Int = 10;
 
     public function new() {}
 }

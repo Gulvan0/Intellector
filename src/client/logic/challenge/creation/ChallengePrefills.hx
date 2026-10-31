@@ -4,6 +4,7 @@ import client.datatypes.challenge.creation.ChallengeDraft;
 import client.datatypes.challenge.creation.ChallengeType;
 import client.datatypes.game.LiveGameInfo;
 import client.datatypes.timecontrol.FischerTimeControl;
+import client.logic.bot.BotRefs;
 import intellectorboard.mappers.Sip;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
@@ -19,17 +20,30 @@ class ChallengePrefills
     {
         var opponentRef:String = game.participant(userColor.opposite()).ref;
 
-        draft.type = DIRECT;
-
-        if (StringTools.startsWith(opponentRef, "_"))
+        if (game.bot != null)
         {
-            draft.calleeKind = GUEST;
-            draft.calleeGuestNumber = opponentRef.substr(1);
+            draft.type = BOT;
+            ChallengeDraftRules.selectBot(draft, game.bot.kind);
+            draft.botStrength = game.bot.strength;
+            draft.botCapEnabled = game.bot.thinkCapSeconds != null;
+            if (game.bot.thinkCapSeconds != null)
+                draft.botCapSeconds = game.bot.thinkCapSeconds;
         }
+        else if (BotRefs.isBot(opponentRef))
+            draft.type = BOT; // a bot no longer offered: the remembered one instead
         else
         {
-            draft.calleeKind = PLAYER;
-            draft.calleeLogin = opponentRef;
+            draft.type = DIRECT;
+            if (StringTools.startsWith(opponentRef, "_"))
+            {
+                draft.calleeKind = GUEST;
+                draft.calleeGuestNumber = opponentRef.substr(1);
+            }
+            else
+            {
+                draft.calleeKind = PLAYER;
+                draft.calleeLogin = opponentRef;
+            }
         }
 
         switch game.timeControl
@@ -42,7 +56,8 @@ class ChallengePrefills
                 draft.incrementSeconds = instance.incrementSeconds;
         }
 
-        draft.rated = game.rated;
+        if (draft.type != BOT)
+            draft.rated = game.rated;
         draft.callerColor = userColor == White ? BLACK : WHITE;
 
         if (game.customStartingPosition)

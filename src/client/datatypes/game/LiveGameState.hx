@@ -18,7 +18,9 @@ typedef ActiveOffer =
 class LiveGameState
 {
     /** How long the side to move has for each of the first two plies before the server aborts the game **/
-    public static inline final FIRST_MOVE_DEADLINE_SECONDS:Int = 30;
+    private static inline final FIRST_MOVE_DEADLINE_SECONDS:Int = 30;
+    /** The same for an external game **/
+    private static inline final EXTERNAL_FIRST_MOVE_DEADLINE_SECONDS:Int = 300;
 
     public final info:LiveGameInfo;
     /** The plies; reports the shown position's changes itself **/
@@ -92,9 +94,14 @@ class LiveGameState
     }
 
     /**
-        Unix time, in milliseconds, from which the side to move has `FIRST_MOVE_DEADLINE_SECONDS` to play before the
+        Unix time, in milliseconds, from which the side to move has `firstMoveDeadlineSeconds()` to play before the
         server aborts the game. Null unless a timed game is going on with fewer than two plies made.
     **/
+    public function firstMoveDeadlineSeconds():Int
+    {
+        return info.isExternal() ? EXTERNAL_FIRST_MOVE_DEADLINE_SECONDS : FIRST_MOVE_DEADLINE_SECONDS;
+    }
+
     public function firstMoveDeadlineStartMs():Null<Float>
     {
         if (isOver() || !info.isTimed() || history.plyCount() >= 2)

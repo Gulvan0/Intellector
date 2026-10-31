@@ -3,6 +3,9 @@ package client.ui.game;
 import client.logic.challenge.creation.ChallengePrefills;
 import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
 import client.ServerTime;
+import client.botengine.BotGameRunner;
+import client.botengine.BotMoveRequest;
+import client.botengine.BotTimeAllocation;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
 import client.datatypes.game.GameChatEntry;
@@ -33,6 +36,9 @@ import client.ui.common.notifications.GameEndedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.share.ShareOverlay;
 import client.ui.game.GameLayout.SheetTab;
+import client.ui.game.commands.ExternalGameCommands;
+import client.ui.game.commands.InternalGameCommands;
+import client.ui.game.commands.LiveGameCommands;
 import client.utils.PagePaths;
 import client.watch.WatchKeeper;
 import easypubsub.Subscription;
@@ -56,7 +62,6 @@ import net.models.game.GamePublic;
 import net.models.game.GameSendChatMessagePayload;
 import net.models.game.GameStateRefresh;
 import net.models.game.mappers.GameClockMapper;
-import net.models.game.internal.InternalGameResignPayload;
 import net.models.game.mappers.LiveGameMapper;
 import net.models.common.UserRefWithNickname;
 import net.models.other.SubscriberListChannelStateRefresh;
@@ -341,6 +346,7 @@ class LiveGamePage extends PageBase
         for (applyPending in pendingEvents)
             applyPending();
         pendingEvents = [];
+        refreshBotTurn();
 
         if (!state.isOver())
             Sounds.play(NOTIFY);
@@ -363,7 +369,7 @@ class LiveGamePage extends PageBase
         actionsCard = new ActionsCard({
             onFlip: flip,
             onDraw: () -> toggleOffer(Draw),
-            onTakeback: () -> toggleOffer(Takeback),
+            onTakeback: takeback,
             onResign: askResign,
             onAddTime: addTime,
             onShare: share,
@@ -497,6 +503,7 @@ class LiveGamePage extends PageBase
 
         var wasPlaying:Bool = isPlaying();
         state.end(ending);
+        refreshBotTurn();
         refreshPresence();
         Sounds.play(NOTIFY);
         GameEndedNotice.show(state.info, ending, userColor);
@@ -594,6 +601,7 @@ class LiveGamePage extends PageBase
         userColor = newColor;
         refreshRole();
         refreshChat();
+        refreshBotTurn();
     }
 
     private function refreshRole():Void
@@ -610,7 +618,7 @@ class LiveGamePage extends PageBase
         board.setUserMovesEnabled(playing);
 
         if (playing)
-            actionsCard.showPlayerActions(state.info.isTimed());
+            actionsCard.showPlayerActions(state.info.isTimed(), state.info.bot != null);
         else
             actionsCard.showViewerActions(userColor != null);
 
@@ -701,7 +709,7 @@ class LiveGamePage extends PageBase
         if (deadlineStartMs == null || !isPlaying() || !state.history.isShowingLatest() || state.history.latestPosition().turnColor != userColor)
             return null;
 
-        return Math.max(0, deadlineStartMs + LiveGameState.FIRST_MOVE_DEADLINE_SECONDS * 1000 - nowMs);
+        return Math.max(0, deadlineStartMs + state.firstMoveDeadlineSeconds() * 1000 - nowMs);
     }
 
     // once a game, when the user's own running clock drops below a minute
@@ -756,6 +764,41 @@ class LiveGamePage extends PageBase
         refreshMoves();
         refreshShown();
         refreshOffers();
+        refreshBotTurn();
+    }
+
+    // in a game the user plays against a bot, has this tab search for the bot's move while it's the bot's turn
+    private function refreshBotTurn():Void
+    {
+        var botColor:Null<PieceColor> = state.info.botColor();
+        if (botColor == null || userColor == null)
+            return;
+
+        if (state.isOver() || state.history.latestPosition().turnColor != botColor)
+        {
+            BotGameRunner.stop(gameId);
+            return;
+        }
+
+        var plyCount:Int = state.history.plyCount();
+        var positions:Array<Position> = [for (i in 0...plyCount + 1) state.history.positionAt(i)];
+        BotGameRunner.requestMove(gameId, new BotMoveRequest(positions, state.info.bot, botAllocationSeconds(botColor)));
+    }
+
+    // what the bot's clock allows for its move; null in a correspondence game
+    private function botAllocationSeconds(botColor:PieceColor):Null<Float>
+    {
+        var clock:Null<GameClock> = state.clockAt(state.history.plyCount());
+        return switch state.info.timeControl {
+            case Fischer(instance) if (clock != null):
+                BotTimeAllocation.secondsToMove(
+                    clock.remainingMs(botColor, ServerTime.now()) / 1000,
+                    instance.incrementSeconds,
+                    state.history.plyCount() + 1,
+                    state.history.latestPosition().countPieces()
+                );
+            default: null;
+        }
     }
 
     private function refreshShown():Void
@@ -857,9 +900,12 @@ class LiveGamePage extends PageBase
         if (resignAsked)
             stage.requests.addComponent(createResignBar(plyCount < 2));
 
-        var takebackThreshold:Int = state.info.startingPosition.turnColor == userColor ? 1 : 2;
+        var takebackThreshold:Int = state.info.startingPosition.turnColor == userColor ? 1 : 2; // the user's first move made
         actionsCard.setDrawState(state.hasOffer(Draw, userColor), !state.hasOffer(Draw, opponentColor) && plyCount >= 2);
-        actionsCard.setTakebackState(state.hasOffer(Takeback, userColor), !state.hasOffer(Takeback, opponentColor) && plyCount >= takebackThreshold);
+        if (state.info.bot != null)
+            actionsCard.setTakebackState(false, plyCount >= takebackThreshold);
+        else
+            actionsCard.setTakebackState(state.hasOffer(Takeback, userColor), !state.hasOffer(Takeback, opponentColor) && plyCount >= takebackThreshold);
         actionsCard.setResignIsAbort(plyCount < 2);
     }
 
@@ -916,20 +962,37 @@ class LiveGamePage extends PageBase
 
     private function onOwnMove(ply:RawPly):Void
     {
+        var position:Position = state.history.latestPosition();
         state.playOwn(ply, ServerTime.now());
         playLatestPlySound();
         refreshPlies();
-        Rest.client().execute(
-            RestOperationRegistry.APPEND_PLY_TO_INTERNAL_GAME,
-            _ -> {},
-            error -> {
+        commands().move(ply, position, error -> {
+            if (!state.info.isExternal() || error.httpStatus != 422) // an external game moved on elsewhere: nothing to tell
                 RequestFailureNotice.showHttpError(MAKE_MOVE, error);
-                load(); // the move didn't happen: back to the server's version
-            },
-            null,
-            null,
-            LiveGameMapper.plyToDto(gameId, ply)
-        );
+            load(); // the move didn't happen: back to the server's version
+        });
+    }
+
+    private function commands():LiveGameCommands
+    {
+        return state.info.isExternal() ? new ExternalGameCommands(gameId, userColor) : new InternalGameCommands(gameId);
+    }
+
+    private function takeback():Void
+    {
+        if (state.info.bot == null)
+        {
+            toggleOffer(Takeback);
+            return;
+        }
+
+        // back to before the user's last move, at once
+        var userToMove:Bool = state.history.latestPosition().turnColor == userColor;
+        BotGameRunner.stop(gameId);
+        new ExternalGameCommands(gameId, userColor).rollback(state.history.plyCount() - (userToMove ? 2 : 1), error -> {
+            RequestFailureNotice.showHttpError(TAKE_BACK, error);
+            refreshBotTurn();
+        });
     }
 
     private function toggleOffer(kind:OfferKind):Void
@@ -967,14 +1030,7 @@ class LiveGamePage extends PageBase
     {
         resignAsked = false;
         refreshOffers();
-        Rest.client().execute(
-            RestOperationRegistry.RESIGN_INTERNAL_GAME,
-            _ -> {},
-            RequestFailureNotice.showHttpError.bind(RESIGN),
-            null,
-            null,
-            ({game_id: gameId} : InternalGameResignPayload)
-        );
+        commands().resign(state.history.plyCount() < 2, RequestFailureNotice.showHttpError.bind(RESIGN));
     }
 
     private function addTime():Void
@@ -1003,7 +1059,7 @@ class LiveGamePage extends PageBase
 
     private function isPlaying():Bool
     {
-        return userColor != null && state != null && !state.isOver() && !state.info.external;
+        return userColor != null && state != null && !state.isOver() && (!state.info.isExternal() || state.info.bot != null);
     }
 
     private function followsLatestMove():Bool

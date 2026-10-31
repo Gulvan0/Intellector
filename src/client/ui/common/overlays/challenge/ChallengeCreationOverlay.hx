@@ -77,9 +77,6 @@ class ChallengeCreationOverlay
             if (busy || params == null)
                 return;
 
-            if (params.target.match(Bot)) // no bot to play yet
-                return;
-
             busy = true;
             refresh();
             create(params, onOutcome);

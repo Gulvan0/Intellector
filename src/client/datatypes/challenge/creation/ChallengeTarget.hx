@@ -1,5 +1,7 @@
 package client.datatypes.challenge.creation;
 
+import client.datatypes.bot.BotSettings;
+
 /** Who a challenge being created is meant for **/
 @:using(client.datatypes.challenge.creation.ChallengeTarget.ChallengeTargetExtension)
 enum ChallengeTarget
@@ -8,7 +10,7 @@ enum ChallengeTarget
     Guest(guestId:Int);
     Public;
     LinkOnly;
-    Bot;
+    Bot(settings:BotSettings);
 }
 
 class ChallengeTargetExtension
@@ -19,7 +21,7 @@ class ChallengeTargetExtension
         return switch target {
             case Player(login): login;
             case Guest(guestId): '_$guestId';
-            case Public | LinkOnly | Bot: null;
+            case Public | LinkOnly | Bot(_): null;
         }
     }
 }

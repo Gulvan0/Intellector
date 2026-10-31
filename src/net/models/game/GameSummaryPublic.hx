@@ -23,5 +23,6 @@ class GameSummaryPublic implements IJsonUnserializableMacro
 	@:default(null) public var outcome:Null<GameOutcomePublic>;
 	@:default(null) public var white_rating:Null<PlayerRatingPublic>;
 	@:default(null) public var black_rating:Null<PlayerRatingPublic>;
+	@:default(null) public var bot_think_cap_secs:Null<Int>;
 	@:default(null) @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var last_ply_at:Null<DateTime>;
 }

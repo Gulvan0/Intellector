@@ -2,6 +2,7 @@ package net.models.game.external;
 
 import jsonmodel.IJsonSerializableMacro;
 
+@:structInit
 class ExternalGameRollbackPayload implements IJsonSerializableMacro
 {
 	public var game_id:Int;
