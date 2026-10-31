@@ -47,6 +47,8 @@ class AlphaBetaSearch<B:SearchBudget>
     private var resultIsDraw:Bool = false;
     /** Whether a node ran out of budget, which leaves the scores of all unfinished nodes meaningless **/
     private var isAborted:Bool = false;
+    /** Set right before searching the child of a null move, and consumed by that search **/
+    private var isNullMoveChild:Bool = false;
 
     /** In a stalemate, where the side to move has no legal moves and loses, the report has no move and that side's losing score **/
     public function run():BestMoveReport
@@ -111,6 +113,9 @@ class AlphaBetaSearch<B:SearchBudget>
     **/
     private function search(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, verificationKey:Int, isRoot:Bool, isInCheck:Bool):Float
     {
+        var followsNullMove:Bool = isNullMoveChild;
+        isNullMoveChild = false;
+
         if (depth > 0 && maxDepth > 1 && budget.isExhausted())
         {
             isAborted = true;
@@ -149,7 +154,7 @@ class AlphaBetaSearch<B:SearchBudget>
         if (beta > DECISIVE_THRESHOLD)
             beta = WHITE_WIN_SCORE;
 
-        if (depth == SearchTuning.NULL_MOVE_DEPTH && !isRoot && !isInCheck) // a pruned root has no move; passing in check loses at once
+        if (depth == SearchTuning.NULL_MOVE_DEPTH && !isRoot && !isInCheck && !followsNullMove) // a pruned root has no move; passing in check loses at once
         {
             board.passTurn();
             var passedIsInCheck:Bool = board.isIntellectorAttacked();
@@ -180,6 +185,13 @@ class AlphaBetaSearch<B:SearchBudget>
         if (decisiveScore != null)
             return conclude(decisiveScore, Move.NONE, null);
 
+        if (depth >= SearchTuning.NULL_MOVE_PRUNING_DEPTH && !isRoot && !isInCheck && !followsNullMove && board.hasPromotionKindPiece(board.turn))
+        {
+            var nullMoveScore:Null<Float> = nullMovePruningScore(alpha, beta, depth, extension, maxDepth, hash, verificationKey);
+            if (nullMoveScore != null)
+                return nullMoveScore;
+        }
+
         if (depth < 1)
             return conclude(isInCheck ? quiesceInCheck(alpha, beta, evaluate()) : quiesce(0, alpha, beta, evaluate()), Move.NONE, null);
 
@@ -194,6 +206,39 @@ class AlphaBetaSearch<B:SearchBudget>
             table.store(hash, verificationKey, alpha, beta, resultMove, score, depth);
 
         return score;
+    }
+
+    /**
+        The score to return if passing, searched at a reduced depth, still reaches the bound of the side to move; null otherwise.
+        Tried only if the static evaluation already reaches it. A decisive score after the pass is replaced by the bound,
+        since a pass is no legal move to win or lose by.
+    **/
+    private function nullMovePruningScore(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, verificationKey:Int):Null<Float>
+    {
+        var isWhite:Bool = board.turn == White;
+        var staticScore:Float = evaluate();
+        if (isWhite ? beta > DECISIVE_THRESHOLD || staticScore < beta : alpha < -DECISIVE_THRESHOLD || staticScore > alpha)
+            return null;
+
+        var reduction:Int = SearchTuning.NULL_MOVE_REDUCTION + (depth >= SearchTuning.NULL_MOVE_DEEP_DEPTH ? 1 : 0);
+        board.passTurn();
+        ply++;
+        var passedIsInCheck:Bool = board.isIntellectorAttacked();
+        var passedHash:Int = board.hashAfterPass(hash);
+        var passedVerificationKey:Int = board.verificationKeyAfterPass(verificationKey);
+        isNullMoveChild = true;
+        var score:Float = isWhite
+            ? search(beta - 1, beta, depth - 1 - reduction, extension, maxDepth, passedHash, passedVerificationKey, false, passedIsInCheck)
+            : search(alpha, alpha + 1, depth - 1 - reduction, extension, maxDepth, passedHash, passedVerificationKey, false, passedIsInCheck);
+        var scoreIsDraw:Bool = resultIsDraw;
+        ply--;
+        board.passTurn();
+
+        if (isWhite ? score < beta : score > alpha)
+            return null;
+
+        var isDecisive:Bool = Math.abs(score) > DECISIVE_THRESHOLD;
+        return conclude(isDecisive ? (isWhite ? beta : alpha) : score, Move.NONE, null, scoreIsDraw && !isDecisive);
     }
 
     private function searchMovesAsMaximizer(alpha:Float, beta:Float, depth:Int, extension:Float, maxDepth:Int, hash:Int, verificationKey:Int, isRoot:Bool):Float

@@ -321,6 +321,27 @@ engine_hxconda_board_Board.prototype = {
 			return true;
 		}
 	}
+	,hasPromotionKindPiece: function(color) {
+		var mask = this.occupancyMasks[color * 2];
+		while(mask != 0) {
+			var square = 0 | 31 - Math.clz32(mask & -mask);
+			mask &= mask - 1;
+			var this1 = this.pieces[square];
+			if(this1 >= 2 && this1 <= 9) {
+				return true;
+			}
+		}
+		var mask = this.occupancyMasks[color * 2 + 1];
+		while(mask != 0) {
+			var square = 32 | 31 - Math.clz32(mask & -mask);
+			mask &= mask - 1;
+			var this1 = this.pieces[square];
+			if(this1 >= 2 && this1 <= 9) {
+				return true;
+			}
+		}
+		return false;
+	}
 	,decisiveScore: function() {
 		if(this.whiteIntellectorSquare == -1) {
 			return -100000;
@@ -1471,6 +1492,7 @@ engine_hxconda_protocol_HxcondaProtocol.moveMessage = function(move) {
 	return { from : move & 63, to : move >> 6 & 63, resultingPiece : move >> 12};
 };
 var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBudget = function(board,budget,noiseAmplitude) {
+	this.isNullMoveChild = false;
 	this.isAborted = false;
 	this.resultIsDraw = false;
 	this.resultLine = null;
@@ -1582,6 +1604,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		return this.report;
 	}
 	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
+		var followsNullMove = this.isNullMoveChild;
+		this.isNullMoveChild = false;
 		var tmp;
 		if(depth > 0 && maxDepth > 1) {
 			var _this = this.budget;
@@ -1638,7 +1662,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		if(beta > 90000) {
 			beta = 100000;
 		}
-		if(depth == 1 && !isRoot && !isInCheck) {
+		if(depth == 1 && !isRoot && !isInCheck && !followsNullMove) {
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
 			var _this = this.board;
@@ -1677,6 +1701,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			this.resultIsDraw = false;
 			return decisiveScore;
 		}
+		if(depth >= 3 && !isRoot && !isInCheck && !followsNullMove && this.board.hasPromotionKindPiece(this.board.turn)) {
+			var nullMoveScore = this.nullMovePruningScore(alpha,beta,depth,extension,maxDepth,hash,verificationKey);
+			if(nullMoveScore != null) {
+				return nullMoveScore;
+			}
+		}
 		if(depth < 1) {
 			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
@@ -1692,6 +1722,46 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			this.table.store(hash,verificationKey,alpha,beta,this.resultMove,score,depth);
 		}
 		return score;
+	}
+	,nullMovePruningScore: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey) {
+		var isWhite = this.board.turn == 0;
+		var staticScore = this.evaluate();
+		if(isWhite ? beta > 90000 || staticScore < beta : alpha < -90000. || staticScore > alpha) {
+			return null;
+		}
+		var reduction = 2 + (depth >= 6 ? 1 : 0);
+		var _this = this.board;
+		_this.turn = _this.turn ^ 1;
+		this.ply++;
+		var _this = this.board;
+		var passedIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
+		var passedHash = hash ^ this.board.zobristKeys.blackToMove;
+		var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
+		this.isNullMoveChild = true;
+		var score = isWhite ? this.search(beta - 1,beta,depth - 1 - reduction,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck) : this.search(alpha,alpha + 1,depth - 1 - reduction,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
+		this.ply--;
+		var _this = this.board;
+		_this.turn = _this.turn ^ 1;
+		if(isWhite ? score < beta : score > alpha) {
+			return null;
+		}
+		var isDecisive = Math.abs(score) > 90000;
+		var isDraw = this.resultIsDraw && !isDecisive;
+		if(isDraw == null) {
+			isDraw = false;
+		}
+		this.resultMove = -1;
+		this.resultLine = null;
+		this.resultIsDraw = isDraw;
+		if(isDecisive) {
+			if(isWhite) {
+				return beta;
+			} else {
+				return alpha;
+			}
+		} else {
+			return score;
+		}
 	}
 	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		var value = -100000;
@@ -2251,6 +2321,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 	}
 };
 var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget = function(board,budget,noiseAmplitude) {
+	this.isNullMoveChild = false;
 	this.isAborted = false;
 	this.resultIsDraw = false;
 	this.resultLine = null;
@@ -2335,6 +2406,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		return this.report;
 	}
 	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
+		var followsNullMove = this.isNullMoveChild;
+		this.isNullMoveChild = false;
 		var tmp;
 		if(depth > 0 && maxDepth > 1) {
 			var _this = this.budget;
@@ -2395,7 +2468,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		if(beta > 90000) {
 			beta = 100000;
 		}
-		if(depth == 1 && !isRoot && !isInCheck) {
+		if(depth == 1 && !isRoot && !isInCheck && !followsNullMove) {
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
 			var _this = this.board;
@@ -2434,6 +2507,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			this.resultIsDraw = false;
 			return decisiveScore;
 		}
+		if(depth >= 3 && !isRoot && !isInCheck && !followsNullMove && this.board.hasPromotionKindPiece(this.board.turn)) {
+			var nullMoveScore = this.nullMovePruningScore(alpha,beta,depth,extension,maxDepth,hash,verificationKey);
+			if(nullMoveScore != null) {
+				return nullMoveScore;
+			}
+		}
 		if(depth < 1) {
 			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
@@ -2449,6 +2528,46 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			this.table.store(hash,verificationKey,alpha,beta,this.resultMove,score,depth);
 		}
 		return score;
+	}
+	,nullMovePruningScore: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey) {
+		var isWhite = this.board.turn == 0;
+		var staticScore = this.evaluate();
+		if(isWhite ? beta > 90000 || staticScore < beta : alpha < -90000. || staticScore > alpha) {
+			return null;
+		}
+		var reduction = 2 + (depth >= 6 ? 1 : 0);
+		var _this = this.board;
+		_this.turn = _this.turn ^ 1;
+		this.ply++;
+		var _this = this.board;
+		var passedIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
+		var passedHash = hash ^ this.board.zobristKeys.blackToMove;
+		var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
+		this.isNullMoveChild = true;
+		var score = isWhite ? this.search(beta - 1,beta,depth - 1 - reduction,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck) : this.search(alpha,alpha + 1,depth - 1 - reduction,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
+		this.ply--;
+		var _this = this.board;
+		_this.turn = _this.turn ^ 1;
+		if(isWhite ? score < beta : score > alpha) {
+			return null;
+		}
+		var isDecisive = Math.abs(score) > 90000;
+		var isDraw = this.resultIsDraw && !isDecisive;
+		if(isDraw == null) {
+			isDraw = false;
+		}
+		this.resultMove = -1;
+		this.resultLine = null;
+		this.resultIsDraw = isDraw;
+		if(isDecisive) {
+			if(isWhite) {
+				return beta;
+			} else {
+				return alpha;
+			}
+		} else {
+			return score;
+		}
 	}
 	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		var value = -100000;
@@ -2968,6 +3087,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 	}
 };
 var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget = function(board,budget,noiseAmplitude) {
+	this.isNullMoveChild = false;
 	this.isAborted = false;
 	this.resultIsDraw = false;
 	this.resultLine = null;
@@ -3050,6 +3170,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		return this.report;
 	}
 	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
+		var followsNullMove = this.isNullMoveChild;
+		this.isNullMoveChild = false;
 		if(depth > 0 && maxDepth > 1 && this.budget.deadline - performance.now() < 0) {
 			this.isAborted = true;
 			var score = this.board.turn == 0 ? Infinity : -Infinity;
@@ -3096,7 +3218,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		if(beta > 90000) {
 			beta = 100000;
 		}
-		if(depth == 1 && !isRoot && !isInCheck) {
+		if(depth == 1 && !isRoot && !isInCheck && !followsNullMove) {
 			var _this = this.board;
 			_this.turn = _this.turn ^ 1;
 			var _this = this.board;
@@ -3135,6 +3257,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			this.resultIsDraw = false;
 			return decisiveScore;
 		}
+		if(depth >= 3 && !isRoot && !isInCheck && !followsNullMove && this.board.hasPromotionKindPiece(this.board.turn)) {
+			var nullMoveScore = this.nullMovePruningScore(alpha,beta,depth,extension,maxDepth,hash,verificationKey);
+			if(nullMoveScore != null) {
+				return nullMoveScore;
+			}
+		}
 		if(depth < 1) {
 			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
@@ -3150,6 +3278,46 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			this.table.store(hash,verificationKey,alpha,beta,this.resultMove,score,depth);
 		}
 		return score;
+	}
+	,nullMovePruningScore: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey) {
+		var isWhite = this.board.turn == 0;
+		var staticScore = this.evaluate();
+		if(isWhite ? beta > 90000 || staticScore < beta : alpha < -90000. || staticScore > alpha) {
+			return null;
+		}
+		var reduction = 2 + (depth >= 6 ? 1 : 0);
+		var _this = this.board;
+		_this.turn = _this.turn ^ 1;
+		this.ply++;
+		var _this = this.board;
+		var passedIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
+		var passedHash = hash ^ this.board.zobristKeys.blackToMove;
+		var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
+		this.isNullMoveChild = true;
+		var score = isWhite ? this.search(beta - 1,beta,depth - 1 - reduction,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck) : this.search(alpha,alpha + 1,depth - 1 - reduction,extension,maxDepth,passedHash,passedVerificationKey,false,passedIsInCheck);
+		this.ply--;
+		var _this = this.board;
+		_this.turn = _this.turn ^ 1;
+		if(isWhite ? score < beta : score > alpha) {
+			return null;
+		}
+		var isDecisive = Math.abs(score) > 90000;
+		var isDraw = this.resultIsDraw && !isDecisive;
+		if(isDraw == null) {
+			isDraw = false;
+		}
+		this.resultMove = -1;
+		this.resultLine = null;
+		this.resultIsDraw = isDraw;
+		if(isDecisive) {
+			if(isWhite) {
+				return beta;
+			} else {
+				return alpha;
+			}
+		} else {
+			return score;
+		}
 	}
 	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
 		var value = -100000;

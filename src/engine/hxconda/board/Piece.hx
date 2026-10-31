@@ -64,4 +64,10 @@ enum abstract Piece(Int) to Int
     {
         return abstract == WhiteIntellector || abstract == BlackIntellector;
     }
+
+    /** Whether a progressor can promote to this kind: anything but progressors, intellectors and `Empty` **/
+    public inline function isPromotionKind():Bool
+    {
+        return this >= (WhiteDominator:Int) && this <= (BlackDefensor:Int);
+    }
 }

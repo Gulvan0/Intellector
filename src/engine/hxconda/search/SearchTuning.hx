@@ -12,6 +12,10 @@ class SearchTuning
     public static inline final HASHING_DEPTH:Int = 2;
     public static inline final REPETITION_DEPTH:Int = 2;
     public static inline final NULL_MOVE_DEPTH:Int = 1;
+    /** Nodes this deep try a null move searched `NULL_MOVE_REDUCTION` plies shallower, or one more ply shallower from `NULL_MOVE_DEEP_DEPTH` on **/
+    public static inline final NULL_MOVE_PRUNING_DEPTH:Int = 3;
+    public static inline final NULL_MOVE_REDUCTION:Int = 2;
+    public static inline final NULL_MOVE_DEEP_DEPTH:Int = 6;
     public static inline final REPETITIONS_TO_DRAW:Int = 2;
     /** Deeper quiescence plies only consider recaptures and intellector captures **/
     public static inline final UNRESTRICTED_QUIESCENCE_DEPTH:Int = 2;

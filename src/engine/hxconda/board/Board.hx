@@ -6,6 +6,7 @@ import engine.hxconda.board.BoardGeometry.SQUARE_COUNT;
 import engine.hxconda.evaluation.Evaluation;
 import js.lib.Int32Array;
 import js.lib.Int8Array;
+import js.lib.Math;
 
 /**
     Mutable position the search runs on, with the stack of moves to undo and the visit counts of the positions on the current line.
@@ -257,6 +258,23 @@ class Board
             || isReachedBySlideThrough(square, to, BoardGeometry.AGGRESSOR_RAYS, BoardGeometry.AGGRESSOR_DIRECTIONS, aggressor)
             || isReachedBySlideThrough(square, from, BoardGeometry.DOMINATOR_RAYS, BoardGeometry.DOMINATOR_DIRECTIONS, dominator)
             || isReachedBySlideThrough(square, from, BoardGeometry.AGGRESSOR_RAYS, BoardGeometry.AGGRESSOR_DIRECTIONS, aggressor);
+    }
+
+    /** Whether `color` has a piece other than its intellector and progressors **/
+    public function hasPromotionKindPiece(color:PlayerColor):Bool
+    {
+        for (half in 0...2)
+        {
+            var mask:Int = occupancyMask(color, half);
+            while (mask != 0)
+            {
+                var square:Int = (half << 5) | (31 - Math.clz32(mask & -mask));
+                mask &= mask - 1;
+                if (pieces[square].isPromotionKind())
+                    return true;
+            }
+        }
+        return false;
     }
 
     /** Score of a won position, null while the game goes on **/
