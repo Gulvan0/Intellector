@@ -1,7 +1,7 @@
 package engine.hxconda.protocol;
 
 typedef HxcondaReportMessage = {
-    /** Null if the search could not settle on a move **/
+    /** Null in a stalemate: the side to move has no legal moves, which loses **/
     var move:Null<HxcondaMoveMessage>;
     /** Positive favours white; a decisive score is within a few hundred points of ±100000 **/
     var score:Float;

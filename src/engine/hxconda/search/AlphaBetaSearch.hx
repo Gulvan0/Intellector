@@ -48,8 +48,15 @@ class AlphaBetaSearch<B:SearchBudget>
     /** Whether a node ran out of budget, which leaves the scores of all unfinished nodes meaningless **/
     private var isAborted:Bool = false;
 
+    /** In a stalemate, where the side to move has no legal moves and loses, the report has no move and that side's losing score **/
     public function run():BestMoveReport
     {
+        if (rootMoves.length == 0 && board.decisiveScore() == null)
+        {
+            report.record(Move.NONE, board.turn == White ? BLACK_WIN_SCORE : WHITE_WIN_SCORE, 0, 0);
+            return report;
+        }
+
         var rootHash:Int = board.hash();
         var rootVerificationKey:Int = board.verificationKey();
         var expectedScore:Float = 0;

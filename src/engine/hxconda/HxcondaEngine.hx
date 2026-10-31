@@ -67,7 +67,7 @@ class HxcondaEngine
                     onCompleted(report.score, mainLine(report));
                 case Completed(_):
                     if (onFailed != null)
-                        onFailed("The engine found no move");
+                        onFailed("The side to move has no legal moves");
                 case Failed(error):
                     if (onFailed != null)
                         onFailed(error);

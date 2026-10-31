@@ -20,6 +20,9 @@ engine_hxconda_Hxconda.bestMoveByNodes = function(notation,history,nodeLimit,noi
 engine_hxconda_Hxconda.bestMoveByTime = function(notation,history,durationMs,onIteration) {
 	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget(engine_hxconda_Hxconda.createBoard(notation,history),new engine_hxconda_search_budget_TimeBudget(durationMs,onIteration),0).run();
 };
+engine_hxconda_Hxconda.bestMoveByDepth = function(notation,history,maxDepth,timeCapMs,onIteration) {
+	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBudget(engine_hxconda_Hxconda.createBoard(notation,history),new engine_hxconda_search_budget_DepthBudget(maxDepth,timeCapMs,onIteration),0).run();
+};
 engine_hxconda_Hxconda.createBoard = function(notation,history) {
 	var board = new engine_hxconda_board_Board(notation);
 	if(history != null) {
@@ -37,6 +40,9 @@ engine_hxconda_HxcondaWorker.onMessage = function(event) {
 	try {
 		var report;
 		switch(request.kind) {
+		case "searchByDepth":
+			report = engine_hxconda_Hxconda.bestMoveByDepth(request.position,request.history,request.maxDepth,request.timeCapMs,engine_hxconda_HxcondaWorker.postIteration);
+			break;
 		case "searchByLevel":
 			report = engine_hxconda_Hxconda.bestMoveByLevel(request.position,request.history,request.level,engine_hxconda_HxcondaWorker.postProgress);
 			break;
@@ -1446,6 +1452,707 @@ engine_hxconda_protocol_HxcondaProtocol.reportMessage = function(report) {
 engine_hxconda_protocol_HxcondaProtocol.moveMessage = function(move) {
 	return { from : move & 63, to : move >> 6 & 63, resultingPiece : move >> 12};
 };
+var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBudget = function(board,budget,noiseAmplitude) {
+	this.isAborted = false;
+	this.resultIsDraw = false;
+	this.resultLine = null;
+	this.resultMoveIsQuiet = false;
+	this.resultMove = -1;
+	this.ply = 0;
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 256) {
+		++_g1;
+		_g.push(-1);
+	}
+	this.killers = _g;
+	this.currentRootMoveIndex = 0;
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 59) {
+		++_g1;
+		_g.push(0);
+	}
+	this.quiescenceCaptureCounts = _g;
+	this.report = new engine_hxconda_search_BestMoveReport();
+	this.history = new engine_hxconda_search_SearchHistory();
+	this.table = new engine_hxconda_search_TranspositionTable();
+	this.board = board;
+	this.budget = budget;
+	this.rootMoves = engine_hxconda_board_MoveGenerator.generateMoves(board);
+	var _g = [];
+	var _g1 = 0;
+	var _g2 = this.rootMoves;
+	while(_g1 < _g2.length) {
+		++_g1;
+		_g.push(Math.round((Math.random() - 0.5) * 2 * noiseAmplitude));
+	}
+	this.rootMoveNoise = _g;
+};
+engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBudget.prototype = {
+	run: function() {
+		if(this.rootMoves.length == 0 && this.board.decisiveScore() == null) {
+			this.report.record(-1,this.board.turn == 0 ? -100000 : 100000,0,0);
+			return this.report;
+		}
+		var rootHash = this.board.hash();
+		var rootVerificationKey = this.board.verificationKey();
+		var expectedScore = 0;
+		var iteration = 1;
+		var _this = this.budget;
+		if(_this.isCapped) {
+			_this.deadline = performance.now() + _this.timeCapMs;
+		}
+		while(true) {
+			var _this = this.budget;
+			var tmp;
+			if(_this.completedDepth < _this.maxDepth) {
+				if(_this.isCapped && !_this.isOverdue && _this.deadline - performance.now() < 0) {
+					_this.isOverdue = true;
+				}
+				tmp = !_this.isOverdue;
+			} else {
+				tmp = false;
+			}
+			if(!tmp) {
+				break;
+			}
+			var alpha;
+			var beta;
+			if((this.board.turn + iteration + 1) % 2 == 0) {
+				alpha = expectedScore - 10;
+				beta = expectedScore + 20;
+			} else {
+				alpha = expectedScore - 20;
+				beta = expectedScore + 10;
+			}
+			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true);
+			if(score <= alpha) {
+				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true);
+			} else if(score >= beta) {
+				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
+			}
+			expectedScore = score;
+			if(this.resultMove == -1) {
+				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true);
+			}
+			var _this1 = this.budget;
+			var tmp1;
+			if(_this1.completedDepth < _this1.maxDepth) {
+				if(_this1.isCapped && !_this1.isOverdue && _this1.deadline - performance.now() < 0) {
+					_this1.isOverdue = true;
+				}
+				tmp1 = !_this1.isOverdue;
+			} else {
+				tmp1 = false;
+			}
+			if(tmp1 || iteration == 1) {
+				this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
+			}
+			var _this2 = this.budget;
+			if(!_this2.isOverdue || _this2.completedDepth == 0) {
+				_this2.completedDepth++;
+				_this2.onIteration(this.report);
+			}
+			if(this.report.move == -1) {
+				throw haxe_Exception.thrown("Anaconda found no move to play");
+			}
+			++iteration;
+		}
+		return this.report;
+	}
+	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
+		var tmp;
+		if(depth > 0 && maxDepth > 1) {
+			var _this = this.budget;
+			if(_this.isCapped && !_this.isOverdue && _this.deadline - performance.now() < 0) {
+				_this.isOverdue = true;
+			}
+			tmp = _this.isOverdue;
+		} else {
+			tmp = false;
+		}
+		if(tmp) {
+			this.isAborted = true;
+			var score = this.board.turn == 0 ? Infinity : -Infinity;
+			this.resultMove = -1;
+			this.resultLine = null;
+			this.resultIsDraw = false;
+			return score;
+		}
+		while(extension >= 1) {
+			++depth;
+			--extension;
+		}
+		while(extension <= -1) {
+			if(depth > 0) {
+				--depth;
+			} else {
+				depth = 0;
+			}
+			++extension;
+		}
+		if(depth >= 2 && depth != maxDepth && this.board.visitCounts.count(hash) >= 2) {
+			this.resultMove = -1;
+			this.resultLine = null;
+			this.resultIsDraw = true;
+			return 0;
+		}
+		if(depth >= 2) {
+			switch(this.table.probe(hash,verificationKey,alpha,beta,depth)) {
+			case 1:
+				this.resultMove = this.table.cutoffMove;
+				this.resultLine = null;
+				this.resultIsDraw = false;
+				return this.table.cutoffScore;
+			case 2:
+				alpha = this.table.narrowedAlpha;
+				beta = this.table.narrowedBeta;
+				break;
+			default:
+			}
+		}
+		if(alpha < -90000.) {
+			alpha = -100000;
+		}
+		if(beta > 90000) {
+			beta = 100000;
+		}
+		if(depth == 1) {
+			var _this = this.board;
+			_this.turn = _this.turn ^ 1;
+			var passedHash = hash ^ this.board.zobristKeys.blackToMove;
+			var passedVerificationKey = verificationKey ^ this.board.verificationKeys.blackToMove;
+			var isPruned = false;
+			var nullMoveScore = 0;
+			var nullMoveScoreIsDraw = false;
+			if(this.board.turn == 1 && beta < Infinity) {
+				nullMoveScore = this.search(beta - 1,beta,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
+				isPruned = nullMoveScore >= beta;
+				nullMoveScoreIsDraw = this.resultIsDraw;
+			} else if(this.board.turn == 0 && alpha > -Infinity) {
+				nullMoveScore = this.search(alpha,alpha + 1,depth - 1,extension,maxDepth,passedHash,passedVerificationKey,false);
+				isPruned = nullMoveScore <= alpha;
+				nullMoveScoreIsDraw = this.resultIsDraw;
+			}
+			var _this = this.board;
+			_this.turn = _this.turn ^ 1;
+			if(isPruned) {
+				var isDraw = nullMoveScoreIsDraw;
+				if(isDraw == null) {
+					isDraw = false;
+				}
+				this.resultMove = -1;
+				this.resultLine = null;
+				this.resultIsDraw = isDraw;
+				return nullMoveScore;
+			}
+		}
+		var decisiveScore = this.board.decisiveScore();
+		if(decisiveScore != null) {
+			this.resultMove = -1;
+			this.resultLine = null;
+			this.resultIsDraw = false;
+			return decisiveScore;
+		}
+		if(depth < 1) {
+			var score = this.quiesce(0,alpha,beta,this.evaluate());
+			this.resultMove = -1;
+			this.resultLine = null;
+			this.resultIsDraw = false;
+			return score;
+		}
+		var score = this.board.turn == 0 ? this.searchMovesAsMaximizer(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) : this.searchMovesAsMinimizer(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot);
+		if(this.resultMove != -1 && this.resultMoveIsQuiet) {
+			this.history.quietBestCounts[this.resultMove] += 1;
+		}
+		if(depth >= 2 && !this.resultIsDraw && !this.isAborted) {
+			this.table.store(hash,verificationKey,alpha,beta,this.resultMove,score,depth);
+		}
+		return score;
+	}
+	,searchMovesAsMaximizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
+		var value = -100000;
+		var valueIsDraw = false;
+		var bestMove = -1;
+		var bestMoveIsQuiet = false;
+		var bestLine = [];
+		var moves = this.orderedMoves(depth,hash,verificationKey);
+		var moveCount = moves.length;
+		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
+		var _g = 0;
+		while(_g < moveCount) {
+			var i = _g++;
+			var move = moves[i];
+			if(isRoot) {
+				this.currentRootMoveIndex = this.rootMoves.indexOf(move);
+			}
+			var _this = this.board;
+			var isCapture;
+			if(_this.pieces[move >> 6 & 63] != 12) {
+				var this1 = _this.pieces[move & 63];
+				isCapture = !(this1 == 10 || this1 == 11);
+			} else {
+				isCapture = false;
+			}
+			var childHash = this.board.hashAfter(hash,move);
+			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
+			var tracksRepetition = depth >= 2;
+			this.board.makeMove(move);
+			this.ply++;
+			if(tracksRepetition) {
+				if(childHash != 0) {
+					this.board.visitCounts.increment(childHash);
+				}
+			}
+			var isCheck;
+			if(attacksIntellector) {
+				var _this1 = this.board;
+				isCheck = _this1.attacksIntellector(_this1.turn ^ 1);
+			} else {
+				isCheck = this.board.isIntellectorAttackedAfter(move);
+			}
+			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var isReduced = adjustment < 0;
+			var childExtension = extension + adjustment;
+			var unreducedExtension = isReduced ? extension : childExtension;
+			var score;
+			var line;
+			if(i >= 1 && beta - alpha > 1) {
+				score = this.search(alpha,alpha + 1,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				if(score > alpha && isReduced) {
+					score = this.search(alpha,alpha + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
+				if(score >= alpha + 1 && score < beta) {
+					score = this.search(score - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
+			} else {
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				if(score > alpha && isReduced) {
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
+			}
+			var scoreIsDraw = this.resultIsDraw;
+			if(score > 90000) {
+				--score;
+			} else if(score < -90000.) {
+				++score;
+			}
+			this.board.unmakeMove();
+			this.ply--;
+			if(tracksRepetition) {
+				if(childHash != 0) {
+					this.board.visitCounts.decrement(childHash);
+				}
+			}
+			if(score > value) {
+				value = score;
+				valueIsDraw = scoreIsDraw;
+				bestLine = line.slice();
+			}
+			var isQuiet = !isCapture && !isCheck;
+			if(isQuiet) {
+				this.history.quietVisitCounts[move] += 1;
+			}
+			if(value > alpha) {
+				alpha = value;
+				bestMove = move;
+				bestMoveIsQuiet = isQuiet;
+			}
+			if(value >= beta) {
+				if(!isCapture) {
+					this.history.cutoffWeights[move] += depth * depth;
+					var killerSlot = 2 * this.ply;
+					if(this.ply < 128 && this.killers[killerSlot] != move) {
+						this.killers[killerSlot + 1] = this.killers[killerSlot];
+						this.killers[killerSlot] = move;
+					}
+				}
+				break;
+			}
+			var tmp;
+			if(bestMove != -1) {
+				var _this2 = this.budget;
+				if(depth == maxDepth) {
+					var tmp1;
+					if(_this2.completedDepth < _this2.maxDepth) {
+						if(_this2.isCapped && !_this2.isOverdue && _this2.deadline - performance.now() < 0) {
+							_this2.isOverdue = true;
+						}
+						tmp1 = !_this2.isOverdue;
+					} else {
+						tmp1 = false;
+					}
+					tmp = tmp1 || maxDepth <= 1;
+				} else {
+					tmp = false;
+				}
+			} else {
+				tmp = false;
+			}
+			if(tmp) {
+				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
+			}
+		}
+		this.resultMoveIsQuiet = bestMoveIsQuiet;
+		var isDraw = valueIsDraw;
+		if(isDraw == null) {
+			isDraw = false;
+		}
+		this.resultMove = bestMove;
+		this.resultLine = bestLine;
+		this.resultIsDraw = isDraw;
+		return value;
+	}
+	,searchMovesAsMinimizer: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot) {
+		var value = 100000;
+		var valueIsDraw = false;
+		var bestMove = -1;
+		var bestMoveIsQuiet = false;
+		var bestLine = [];
+		var moves = this.orderedMoves(depth,hash,verificationKey);
+		var moveCount = moves.length;
+		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
+		var _g = 0;
+		while(_g < moveCount) {
+			var i = _g++;
+			var move = moves[i];
+			if(isRoot) {
+				this.currentRootMoveIndex = this.rootMoves.indexOf(move);
+			}
+			var _this = this.board;
+			var isCapture;
+			if(_this.pieces[move >> 6 & 63] != 12) {
+				var this1 = _this.pieces[move & 63];
+				isCapture = !(this1 == 10 || this1 == 11);
+			} else {
+				isCapture = false;
+			}
+			var childHash = this.board.hashAfter(hash,move);
+			var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
+			var tracksRepetition = depth >= 2;
+			this.board.makeMove(move);
+			this.ply++;
+			if(tracksRepetition) {
+				if(childHash != 0) {
+					this.board.visitCounts.increment(childHash);
+				}
+			}
+			var isCheck;
+			if(attacksIntellector) {
+				var _this1 = this.board;
+				isCheck = _this1.attacksIntellector(_this1.turn ^ 1);
+			} else {
+				isCheck = this.board.isIntellectorAttackedAfter(move);
+			}
+			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var isReduced = adjustment < 0;
+			var childExtension = extension + adjustment;
+			var unreducedExtension = isReduced ? extension : childExtension;
+			var score;
+			var line;
+			if(i >= 1 && beta - alpha > 1) {
+				score = this.search(beta - 1,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				if(score < beta && isReduced) {
+					score = this.search(beta - 1,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
+				if(score > alpha && score <= beta - 1) {
+					score = this.search(alpha,score + 1,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
+			} else {
+				score = this.search(alpha,beta,depth - 1,childExtension,maxDepth,childHash,childVerificationKey,false);
+				line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				if(score < beta && isReduced) {
+					score = this.search(alpha,beta,depth - 1,unreducedExtension,maxDepth,childHash,childVerificationKey,false);
+					line = engine_hxconda_search_SearchTuning.extendLine(this.resultLine,move);
+				}
+			}
+			var scoreIsDraw = this.resultIsDraw;
+			if(score > 90000) {
+				--score;
+			} else if(score < -90000.) {
+				++score;
+			}
+			this.board.unmakeMove();
+			this.ply--;
+			if(tracksRepetition) {
+				if(childHash != 0) {
+					this.board.visitCounts.decrement(childHash);
+				}
+			}
+			if(score < value) {
+				value = score;
+				valueIsDraw = scoreIsDraw;
+				bestLine = line.slice();
+			}
+			var isQuiet = !isCapture && !isCheck;
+			if(isQuiet) {
+				this.history.quietVisitCounts[move] += 1;
+			}
+			if(value < beta) {
+				beta = value;
+				bestMove = move;
+				bestMoveIsQuiet = isQuiet;
+			}
+			if(value <= alpha) {
+				if(!isCapture) {
+					this.history.cutoffWeights[move] += depth * depth;
+					var killerSlot = 2 * this.ply;
+					if(this.ply < 128 && this.killers[killerSlot] != move) {
+						this.killers[killerSlot + 1] = this.killers[killerSlot];
+						this.killers[killerSlot] = move;
+					}
+				}
+				break;
+			}
+			var tmp;
+			if(bestMove != -1) {
+				var _this2 = this.budget;
+				if(depth == maxDepth) {
+					var tmp1;
+					if(_this2.completedDepth < _this2.maxDepth) {
+						if(_this2.isCapped && !_this2.isOverdue && _this2.deadline - performance.now() < 0) {
+							_this2.isOverdue = true;
+						}
+						tmp1 = !_this2.isOverdue;
+					} else {
+						tmp1 = false;
+					}
+					tmp = tmp1 || maxDepth <= 1;
+				} else {
+					tmp = false;
+				}
+			} else {
+				tmp = false;
+			}
+			if(tmp) {
+				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
+			}
+		}
+		this.resultMoveIsQuiet = bestMoveIsQuiet;
+		var isDraw = valueIsDraw;
+		if(isDraw == null) {
+			isDraw = false;
+		}
+		this.resultMove = bestMove;
+		this.resultLine = bestLine;
+		this.resultIsDraw = isDraw;
+		return value;
+	}
+	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash,childVerificationKey) {
+		if(isTactical) {
+			return 0.5;
+		}
+		var extension = 0;
+		if(this.history.quietVisitCounts[move] >= maxDepth * maxDepth * 2) {
+			var _this = this.history;
+			extension = -1 / (100 * (_this.quietBestCounts[move] / _this.quietVisitCounts[move]) + 0.5);
+		}
+		if(depth >= 2 && this.table.deepestDepth(childHash,childVerificationKey) >= 3) {
+			extension -= index / moveCount;
+		}
+		return extension;
+	}
+	,quiesce: function(depth,alpha,beta,standPatScore) {
+		if(Math.abs(standPatScore) > 90000) {
+			return standPatScore;
+		}
+		if(this.board.turn == 0) {
+			if(standPatScore >= beta) {
+				return standPatScore;
+			}
+			if(alpha < standPatScore) {
+				alpha = standPatScore;
+			}
+			var _g = 0;
+			var _g1 = this.orderedCaptures();
+			while(_g < _g1.length) {
+				var move = _g1[_g];
+				++_g;
+				var to = move >> 6 & 63;
+				var tmp;
+				if(!(depth < 2 || this.quiescenceCaptureCounts[to] > 0)) {
+					var this1 = this.board.pieces[to];
+					tmp = this1 == 10 || this1 == 11;
+				} else {
+					tmp = true;
+				}
+				if(!tmp) {
+					continue;
+				}
+				var to1 = move >> 6 & 63;
+				var _this = this.board;
+				var score = standPatScore;
+				var from = move & 63;
+				var to2 = move >> 6 & 63;
+				score = standPatScore - engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
+				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to2] * 59 + to2];
+				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to2];
+				this.board.makeUnscoredMove(move);
+				this.quiescenceCaptureCounts[to1]++;
+				var score1 = this.quiesce(depth + 1,alpha,beta,score > 90000 ? 100000 : score < -90000. ? -100000 : score);
+				this.quiescenceCaptureCounts[to1]--;
+				this.board.unmakeUnscoredMove();
+				if(score1 >= beta) {
+					return score1;
+				}
+				if(score1 > alpha) {
+					alpha = score1;
+				}
+			}
+			return alpha;
+		} else {
+			if(standPatScore <= alpha) {
+				return standPatScore;
+			}
+			if(beta > standPatScore) {
+				beta = standPatScore;
+			}
+			var _g = 0;
+			var _g1 = this.orderedCaptures();
+			while(_g < _g1.length) {
+				var move = _g1[_g];
+				++_g;
+				var to = move >> 6 & 63;
+				var tmp;
+				if(!(depth < 2 || this.quiescenceCaptureCounts[to] > 0)) {
+					var this1 = this.board.pieces[to];
+					tmp = this1 == 10 || this1 == 11;
+				} else {
+					tmp = true;
+				}
+				if(!tmp) {
+					continue;
+				}
+				var to1 = move >> 6 & 63;
+				var _this = this.board;
+				var score = standPatScore;
+				var from = move & 63;
+				var to2 = move >> 6 & 63;
+				score = standPatScore - engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[from] * 59 + from];
+				score -= engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[_this.pieces[to2] * 59 + to2];
+				score += engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES[(move >> 12) * 59 + to2];
+				this.board.makeUnscoredMove(move);
+				this.quiescenceCaptureCounts[to1]++;
+				var score1 = this.quiesce(depth + 1,alpha,beta,score > 90000 ? 100000 : score < -90000. ? -100000 : score);
+				this.quiescenceCaptureCounts[to1]--;
+				this.board.unmakeUnscoredMove();
+				if(score1 <= alpha) {
+					return score1;
+				}
+				if(score1 < beta) {
+					beta = score1;
+				}
+			}
+			return beta;
+		}
+	}
+	,evaluate: function() {
+		var score = this.board.materialScore;
+		var score1 = score > 90000 ? 100000 : score < -90000. ? -100000 : score;
+		if(score1 < 90000 && score1 > -90000.) {
+			score1 += this.rootMoveNoise[this.currentRootMoveIndex];
+		}
+		return score1;
+	}
+	,orderedMoves: function(depth,hash,verificationKey) {
+		var moves = engine_hxconda_board_MoveGenerator.generateMoves(this.board);
+		if(depth >= 2) {
+			this.sortMoves(moves);
+			engine_hxconda_search_SearchTuning.putFirst(moves,this.table.bestMove(hash,verificationKey));
+		} else {
+			this.orderShallowMoves(moves);
+		}
+		return moves;
+	}
+	,orderShallowMoves: function(moves) {
+		var isWhite = this.board.turn == 0;
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < moves.length) {
+			var move = moves[_g1];
+			++_g1;
+			var tmp;
+			var _this = this.board;
+			var tmp1;
+			if(_this.pieces[move >> 6 & 63] != 12) {
+				var this1 = _this.pieces[move & 63];
+				tmp1 = !(this1 == 10 || this1 == 11);
+			} else {
+				tmp1 = false;
+			}
+			if(tmp1) {
+				var pieces = this.board.pieces;
+				tmp = -engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]];
+			} else {
+				var killerSlot = 2 * this.ply;
+				var rank = this.ply >= 128 ? 0 : move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 0;
+				if(rank == 0) {
+					rank = 3;
+				}
+				tmp = isWhite ? -rank * 1000000 : rank * 1000000;
+			}
+			_g.push(tmp);
+		}
+		engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,isWhite);
+	}
+	,sortMoves: function(moves) {
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < moves.length) _g.push(this.orderingKey(moves[_g1++]));
+		engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,true);
+	}
+	,orderingKey: function(move) {
+		var pieces = this.board.pieces;
+		var movingPiece = pieces[move & 63];
+		if((movingPiece == 10 || movingPiece == 11) && engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS[this.board.turn * 59 + (move >> 6 & 63)]) {
+			return 1000000000;
+		}
+		var _this = this.board;
+		var tmp;
+		if(_this.pieces[move >> 6 & 63] != 12) {
+			var this1 = _this.pieces[move & 63];
+			tmp = !(this1 == 10 || this1 == 11);
+		} else {
+			tmp = false;
+		}
+		if(tmp) {
+			var gain = Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]]) - Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[movingPiece]);
+			if(gain >= 0) {
+				return 100000000 + gain;
+			} else {
+				return -100000000. + gain;
+			}
+		}
+		var killerSlot = 2 * this.ply;
+		var killerRank = this.ply >= 128 ? 0 : move == this.killers[killerSlot] ? 1 : move == this.killers[killerSlot + 1] ? 2 : 0;
+		if(killerRank > 0) {
+			return 1000000 * (3 - killerRank);
+		}
+		return this.history.cutoffWeights[move] / 1000000;
+	}
+	,orderedCaptures: function() {
+		var captures = engine_hxconda_board_MoveGenerator.generateCaptures(this.board);
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < captures.length) {
+			var move = captures[_g1];
+			++_g1;
+			var pieces = this.board.pieces;
+			_g.push(-engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move >> 6 & 63]] - engine_hxconda_evaluation_Evaluation.PIECE_VALUES[pieces[move & 63]]);
+		}
+		engine_hxconda_search_SearchTuning.sortByKeys(captures,_g,this.board.turn == 0);
+		return captures;
+	}
+};
 var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget = function(board,budget,noiseAmplitude) {
 	this.isAborted = false;
 	this.resultIsDraw = false;
@@ -1485,6 +2192,10 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Node
 };
 engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget.prototype = {
 	run: function() {
+		if(this.rootMoves.length == 0 && this.board.decisiveScore() == null) {
+			this.report.record(-1,this.board.turn == 0 ? -100000 : 100000,0,0);
+			return this.report;
+		}
 		var rootHash = this.board.hash();
 		var rootVerificationKey = this.board.verificationKey();
 		var expectedScore = 0;
@@ -2119,6 +2830,10 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Time
 };
 engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget.prototype = {
 	run: function() {
+		if(this.rootMoves.length == 0 && this.board.decisiveScore() == null) {
+			this.report.record(-1,this.board.turn == 0 ? -100000 : 100000,0,0);
+			return this.report;
+		}
 		var rootHash = this.board.hash();
 		var rootVerificationKey = this.board.verificationKey();
 		var expectedScore = 0;
@@ -2959,6 +3674,15 @@ engine_hxconda_search_TranspositionTable.prototype = {
 			}
 		}
 	}
+};
+var engine_hxconda_search_budget_DepthBudget = function(maxDepth,timeCapMs,onIteration) {
+	this.completedDepth = 0;
+	this.isOverdue = false;
+	this.deadline = 0;
+	this.maxDepth = maxDepth;
+	this.timeCapMs = timeCapMs;
+	this.onIteration = onIteration;
+	this.isCapped = timeCapMs != null;
 };
 var engine_hxconda_search_budget_NodeBudget = function(nodeLimit,noiseAmplitude,onProgress) {
 	this.nodeCount = 0;

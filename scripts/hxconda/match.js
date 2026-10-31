@@ -1,7 +1,8 @@
 /*
     Self-play match between two engine builds, stopped by a sequential probability ratio test (SPRT).
     Every opening from openings.json is played twice, the candidate taking each color once. A game ends when an Intellector
-    is captured or reaches its final row, on threefold repetition, or as a draw after MAX_PLIES plies.
+    is captured or reaches its final row, when the side to move has no legal moves (a stalemate, lost for that side),
+    on threefold repetition, or as a draw after MAX_PLIES plies.
     Searches are seeded, so a match is reproducible; with no noise, the variety comes from the openings alone.
     A --time match runs on dedicated cores with a fixed heap schedule, see isolation.js; any other match yields to the user's programs.
 
@@ -79,7 +80,8 @@ function engine(enginePath, settings) {
     return { path: enginePath, isReference, settings };
 }
 
-// `history`: the game's positions before `position`, oldest first
+// `history`: the game's positions before `position`, oldest first. Null if the engine failed, STALEMATE if it reports one
+const STALEMATE = 'stalemate';
 function bestMove(player, position, seed, history) {
     const { mode, nodes, noise, level, time } = player.settings;
     if (player.isReference) {
@@ -95,7 +97,9 @@ function bestMove(player, position, seed, history) {
         : mode === 'level' ? { kind: 'searchByLevel', position, history, level }
         : { kind: 'searchByTime', position, history, durationMs: time };
     const final = runInRealm(player.path, request, seed).posted.find(response => response.kind === 'completed' || response.kind === 'failed');
-    return final != null && final.kind === 'completed' && final.report != null ? final.report.move : null;
+    if (final == null || final.kind !== 'completed' || final.report == null)
+        return null;
+    return final.report.move ?? STALEMATE;
 }
 
 // Plays one game; returns the points of `white`'s side
@@ -114,6 +118,8 @@ function playGame(opening, white, black, seed) {
         const move = bestMove(position[59] === 'w' ? white : black, position, seed + ply, history);
         if (move == null)
             return { whitePoints: 0.5, plies: ply, reason: 'no move' };
+        if (move === STALEMATE)
+            return { whitePoints: position[59] === 'w' ? 0 : 1, plies: ply, reason: STALEMATE };
 
         history.push(position);
         position = applyMove(position, move);
@@ -196,7 +202,7 @@ function candidateOpening(enginePath, seed) {
     const plies = 4 + seed % 5;
     for (let ply = 0; ply < plies; ply++) {
         const move = bestMove(player, position, seed * 16 + ply, []);
-        if (move == null)
+        if (move == null || move === STALEMATE)
             return null;
         position = applyMove(position, move);
         if (winner(position) != null)
