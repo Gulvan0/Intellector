@@ -2,8 +2,9 @@
 
 Source design: the "Challenge Creation Overlay" canvas (https://claude.ai/artifact/5gGkYqdbDTwBFp6Fv2JFAj)
 
-1. **Against bot** stays a selectable type as designed, but its primary action ("Play the bot") does
-   nothing yet - no bot engine exists. See `[[challenge_creation_overlay_deferred]]` item 1.
+1. ~~**Against bot** stays a selectable type as designed, but its primary action ("Play the bot") does
+   nothing yet - no bot engine exists.~~ Superseded by `[[bot_games_plan]]`: Against bot chooses and
+   sets up a Haxaconda bot and starts an external game against it.
 2. **Open visibility** is Public / Link only (the design's "Private" was a slip; the server knows
    `public` and `link_only`).
 3. **Hints sit on the label row** (haxefolio's `FieldHeader`, intellector-style.md §6.2), not under

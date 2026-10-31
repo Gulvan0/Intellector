@@ -33,3 +33,20 @@ handling), or the bot side gets a bounded clock credit on resume.
 
 **How to apply:** `BotMoveSearch` already receives `onDepthReached`; show it on the game page (e.g.
 in the bot's player bar), never as chat messages.
+
+## Long bot names in narrow places
+
+**Why deferred:** the fix is a layout choice, awaiting a decision. At Rail the game info card's
+player row pushes the colour word out of its box; at 360 px the profile game cards cut a bot's name
+to "Haxaconda U" (they clip every long text there).
+
+**How to apply:** e.g. let the nickname wrap to a second line, or give it the space before the colour
+word and cut it there; then finish the audit (notifications, share overlay text) per `[[bot_games_plan]]` §7.
+
+## Sideways bot cards and the mouse wheel
+
+**Why deferred:** not designed. On Wide the card row scrolls sideways by its scrollbar, a touchpad or
+Shift+wheel; a plain wheel over it scrolls the form instead.
+
+**How to apply:** if wanted, turn a vertical wheel over the row into sideways scrolling while the row
+can still move that way.

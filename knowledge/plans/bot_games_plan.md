@@ -135,6 +135,37 @@ Against bot follows the canvas: two phases inside the type slot.
   external API takes both refs).
 - The old `bot_note` locale entry goes.
 
+### As built
+
+`client.ui.common.overlays.challenge.bot`: `BotVariant` (the two phases), `BotPicker`, `BotCard`,
+`BotSetup`, `BotAboutButton`, `BotAboutOverlay`. Where the build departs from the canvas, or the
+canvas left a gap:
+
+- **Control heights**: the app's choice buttons and steppers are 42 px tall (the canvas drew 37, and
+  44 on Narrow), so the Wide set-up rows are 18 px apart instead of 26 to fill the 196 px portrait
+  height. Narrow keeps the app's 42 px controls; only the About button and Change bot use the
+  canvas's 44 px there (28 on Wide).
+- **Name widths** (measured at 13 px Onest): every name fits the Wide card line (166 px); on Narrow
+  (132 px) "Haxaconda Trailblazer" (136.6, selected) and "Haxaconda Unchained" (139.2) wrap to two
+  lines and their avatars shrink. The set-up name row fits on both tiers (Unchained at 17 px:
+  182 px; Narrow room 220 px).
+- **Difficulty**: haxefolio's `ChoiceRow.joinButtons` (a segmented strip), strength 9 disabled
+  through `ChoiceRow.setOptionEnabled`, the hint through `ChoiceRow.hint`.
+- **Think time cap**: a `SteppedValueField` stepping through `BotThinkCapRules.STEPS`
+  (`BotThinkCapRules.step`); typed values are `m:ss` only, like Initial time (the canvas also took
+  bare seconds). No cap is a plain `ChoiceButton` beside the stepper (`addBesideStepper`), as the
+  canvas's markup draws it, not a `ToggleButton` with a switch icon. While No cap is on, the hint
+  reads "the bot thinks as long as it likes" and an invalid value shows no error (a disabled
+  `SteppedValueField` now never shows its error).
+- **About**: the "?" names the bot in a tooltip ("About Haxaconda Standard" / "О боте …"); the
+  overlay is 520 x 300 on Wide with a 56 / 76 px footer holding Close.
+- **Slot heights**: `SwapSlot.setVariantHeights` (frame-stepped ease-out over 180 ms, none under
+  reduced motion), bound per layout to `StyleVars.CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHTS`.
+- **Unrated lock**: `GameColourSection.onTypeChange`; the Russian reason, absent from the canvas, is
+  "Игры с ботами без рейтинга". When both apply, the bot's reason shows.
+- **Phase**: "Play the bot" stays disabled while choosing even if a bot was chosen before; Change bot
+  keeps the current bot outlined.
+
 ### Draft and storage
 
 - `ChallengeDraft` gains `bot:Null<BotKind>` (null → the Choose phase), `botStrength`,
@@ -191,6 +222,24 @@ spectator strip, share overlay text, notifications. Audit each at its narrowest 
 (`[[viewport_test_sizes]]`): ellipsis where the place already ellipsizes long nicknames, otherwise
 fix the layout. Bot refs never link to a profile (`PagePaths` already excludes `+`).
 
+### Audit results ("Haxaconda Unchained 8 (Бот)", the widest real name)
+
+Trailblazer stops at strength 8, so the widest name that occurs is Unchained 8, about 3 px wider than
+the "Haxaconda Trailblazer 9 (Bot)" named above.
+
+- Fit: player bars at Rail 568 x 280, Compact 360 x 640 and the 600 x 600 rail fallback (with a few
+  pixels to spare at Rail); the ongoing games widget at 360; the home Recent games cards at a
+  1190 px window (about 6 px to spare).
+- **Info card at Rail**: the player row doesn't shrink, so the name pushes the colour word ("Чёрные")
+  out of the box. Open.
+- **Profile game cards at 360**: the card clips all long text (the date and "Товарищеская" too), and a
+  bot's name is cut to "Haxaconda U", which no longer says which bot. Open.
+- Not audited yet: notifications, the share overlay text, the moves card, the spectator strip.
+
+A one-shot resolution of a guest or bot nickname (`LocaleUtils.resolveText`) used to come out as the
+raw binding ("intellector.common.player.guest_name, 98862", e.g. in the account widget's accessible
+name); haxefolio's `resolveText` now reads a binding's own parameters.
+
 ## 8. Verification
 
 - `compare.js` and `compare.js --baseline` pass (existing searches unchanged); a scratch Node driver
@@ -204,3 +253,18 @@ fix the layout. Bot refs never link to a profile (`PagePaths` already excludes `
 - Overlay per the UI verification depth rules: both tiers, both languages, Choose/Set up/About,
   strength 9 disabled and the clamp, cap on/off/invalid, the slot animation between all type pairs,
   Rail 280 px.
+
+### Results (2026-10-31, local server)
+
+- Overlay: Wide and Narrow (390 x 844), Choose and Set up, About over the overlay, the clamp to 8 with
+  9 disabled (on picking and on a remembered strength), the cap's steps, its range error and No cap,
+  the slot animation (282 → 112 px ease-out over about 180 ms; a jump under reduced motion), the
+  Unrated lock against a bot with the colour choice coming back, the remembered bot opening set up.
+  Russian only; Rail 280 shows the form scrolling as for the other types.
+- Games: a player, timed, random colour (resolved to White); a correspondence game from a custom
+  position, user Black, Fortress 2 with a 3 s cap (the bot opened); a guest game; a bot playing White
+  from a Black-to-move position (`blimrnrorprqrrisetevowgxnygzo!@oAgBnCgDoEiFeGeHiIrJrKrLrMr`): no
+  engine worker started until the user moved, then one started within half a second.
+- Pre-v3 game 10433 shows "Anaconda (Бот)". Not checked in English.
+- Not run this time: reload during the bot's turn, navigating away and back, two tabs, takeback on
+  either turn.
