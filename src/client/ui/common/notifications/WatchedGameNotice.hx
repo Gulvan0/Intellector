@@ -71,7 +71,7 @@ class WatchedGameNotice
 
     private function resolveText():String
     {
-        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.watched_game_notice.text"), game.id, game.opponentNickname);
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.watched_game_notice.text"), game.id, LocaleUtils.resolveText(game.opponentNickname));
     }
 
     private function dismiss():Void

@@ -101,6 +101,6 @@ class OngoingGamesWidget
 
     private static function previewTitle(game:OngoingGame):String
     {
-        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.games_widget.game_with"), game.opponentNickname);
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.games_widget.game_with"), LocaleUtils.resolveText(game.opponentNickname));
     }
 }

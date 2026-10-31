@@ -5,6 +5,7 @@ import client.datatypes.game.PlayerRating;
 import intellectorboard.mappers.Sip;
 import net.models.common.mappers.TimeControlKindMapper;
 import net.models.common.mappers.TimeControlMapper;
+import net.models.common.mappers.UserRefMapper;
 
 class OpenChallengeMapper
 {
@@ -13,7 +14,7 @@ class OpenChallengeMapper
         return new OpenChallenge(
             dto.id,
             dto.caller.user_ref,
-            dto.caller.nickname,
+            UserRefMapper.displayName(dto.caller),
             dto.caller_rating != null ? new PlayerRating(dto.caller_rating.elo, dto.caller_rating.provisional) : null,
             TimeControlMapper.dtoToDatatype(dto.fischer_time_control),
             TimeControlKindMapper.dtoToDatatype(dto.time_control_kind),

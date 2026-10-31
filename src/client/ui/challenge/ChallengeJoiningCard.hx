@@ -112,6 +112,6 @@ class ChallengeJoiningCard extends VBox
 
     private function resolveCalleeText():String
     {
-        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.challenge_joining.to"), challenge.calleeNickname);
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.challenge_joining.to"), LocaleUtils.resolveText(challenge.calleeNickname));
     }
 }

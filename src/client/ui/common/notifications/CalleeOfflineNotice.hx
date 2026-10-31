@@ -48,7 +48,7 @@ class CalleeOfflineNotice
 
     private function resolveText():String
     {
-        return LocaleUtils.resolveText(LocaleUtils.localeBinding(sessionLost ? "intellector.callee_offline_notice.text_session_lost" : "intellector.callee_offline_notice.text"), calleeNickname);
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding(sessionLost ? "intellector.callee_offline_notice.text_session_lost" : "intellector.callee_offline_notice.text"), LocaleUtils.resolveText(calleeNickname));
     }
 
     private function dismiss():Void

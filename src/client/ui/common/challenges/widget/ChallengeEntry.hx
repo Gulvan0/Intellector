@@ -43,7 +43,7 @@ class ChallengeEntry extends VBox
             challenge.id,
             challenge.acceptorColor,
             challenge.customStartingPosition,
-            () -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.challenges_widget.position_from"), challenge.callerNickname)
+            () -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.challenges_widget.position_from"), LocaleUtils.resolveText(challenge.callerNickname))
         );
         entry.opponentLabel.text = challenge.callerNickname;
         entry.fillFacts(challenge.timeControl, challenge.timeControlKind, challenge.rated);
@@ -60,7 +60,7 @@ class ChallengeEntry extends VBox
         var isOpen:Bool = challenge.calleeNickname == null;
         var previewTitle:Void->String = isOpen
             ? () -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.challenges_widget.your_open_challenge"))
-            : () -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.challenges_widget.your_challenge_to"), challenge.calleeNickname);
+            : () -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.challenges_widget.your_challenge_to"), LocaleUtils.resolveText(challenge.calleeNickname));
         var entry:ChallengeEntry = new ChallengeEntry(challenge.id, challenge.ownColor, challenge.customStartingPosition, previewTitle);
         entry.opponentLabel.text = isOpen ? LocaleUtils.localeBinding("intellector.challenges_widget.open_challenge") : challenge.calleeNickname;
         entry.opponentLabel.setClass(StyleClass.CHALLENGE_ENTRY_OPPONENT_OPEN, isOpen);

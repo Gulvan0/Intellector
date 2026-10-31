@@ -866,7 +866,7 @@ class LiveGamePage extends PageBase
     private function createOfferBar(textKey:String, opponentNickname:String, kind:OfferKind):OfferBar
     {
         var bar:OfferBar = new OfferBar();
-        bar.setText(LocaleUtils.resolveText(LocaleUtils.localeBinding(textKey), opponentNickname));
+        bar.setText(LocaleUtils.resolveText(LocaleUtils.localeBinding(textKey), LocaleUtils.resolveText(opponentNickname)));
         bar.addAnswer(LocaleUtils.localeBinding("intellector.live_game.request.decline"), false, () -> performOfferAction(Decline, kind));
         bar.addAnswer(LocaleUtils.localeBinding("intellector.live_game.request.accept"), true, () -> performOfferAction(Accept, kind));
         return bar;

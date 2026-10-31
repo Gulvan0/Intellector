@@ -49,7 +49,7 @@ class GameStartedNotice
 
     private function resolveText():String
     {
-        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.game_started_notice.text"), game.id, game.opponentNickname);
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.game_started_notice.text"), game.id, LocaleUtils.resolveText(game.opponentNickname));
     }
 
     private function dismiss():Void

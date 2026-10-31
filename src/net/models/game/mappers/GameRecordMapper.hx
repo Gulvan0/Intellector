@@ -7,6 +7,7 @@ import intellectorboard.mappers.Sip;
 import intellectorboard.position.Position;
 import net.models.common.UserRefWithNickname;
 import net.models.common.mappers.TimeControlMapper;
+import net.models.common.mappers.UserRefMapper;
 
 class GameRecordMapper
 {
@@ -50,7 +51,7 @@ class GameRecordMapper
     private static function participantToDatatype(player:UserRefWithNickname, rating:Null<PlayerRatingPublic>):GameParticipant
     {
         var ratingDatatype:Null<PlayerRating> = rating != null ? new PlayerRating(rating.elo, rating.provisional) : null;
-        return new GameParticipant(player.user_ref, player.nickname, ratingDatatype);
+        return new GameParticipant(player.user_ref, UserRefMapper.displayName(player), ratingDatatype);
     }
 
     private static function sipToPosition(sip:String):Position

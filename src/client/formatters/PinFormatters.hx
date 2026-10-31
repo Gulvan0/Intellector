@@ -20,8 +20,8 @@ class PinFormatters
         return GamePinFormatter.format(
             info.startingPosition,
             plies,
-            info.white.nickname,
-            info.black.nickname,
+            UserRefFormatters.englishName(info.white.ref, info.white.nickname),
+            UserRefFormatters.englishName(info.black.ref, info.black.nickname),
             timeControl,
             startedAt,
             outcomeLine(ending)

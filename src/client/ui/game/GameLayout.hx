@@ -393,7 +393,7 @@ class GameLayout extends Box
     /** The latest message, for the peek; `unseen`: it counts as unread unless the chat is in view **/
     public function setLatestMessage(message:Null<GameChatMessage>, unseen:Bool):Void
     {
-        peekLabel.text = message != null ? '${message.authorNickname}: ${message.text}' : LocaleUtils.localeBinding("intellector.live_game.chat.empty_peek");
+        peekLabel.text = message != null ? '${LocaleUtils.resolveText(message.authorNickname)}: ${message.text}' : LocaleUtils.localeBinding("intellector.live_game.chat.empty_peek");
         if (unseen && hasSheet() && openTab != Chat)
             setUnreadCount(unreadCount + 1);
     }

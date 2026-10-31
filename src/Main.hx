@@ -70,6 +70,7 @@ import net.models.challenge.mappers.OutgoingChallengeMapper;
 import net.models.challenge.mappers.StartedGameMapper;
 import net.models.common.RestErrorCode;
 import net.models.common.UserRefWithNickname;
+import net.models.common.mappers.UserRefMapper;
 import net.models.game.OngoingGamePublic;
 import net.models.game.mappers.OngoingGameMapper;
 import net.rest.Rest;
@@ -509,7 +510,7 @@ class Main
             case CREATED:
                 var callee:Null<UserRefWithNickname> = response.challenge?.callee;
                 if (response.callee_online == false && callee != null)
-                    CalleeOfflineNotice.show(callee.nickname, response.callee_session_lost == true);
+                    CalleeOfflineNotice.show(UserRefMapper.displayName(callee), response.callee_session_lost == true);
                 onOutcome(Created);
         }
     }

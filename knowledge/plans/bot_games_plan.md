@@ -32,11 +32,14 @@ Five members of the `hxconda` family, in this UI order. Names are not localized;
 
 ### Nicknames (localized on the client)
 
-A bot's nickname is composed by the client from its ref, like "Guest 123" is: the name, the
-strength, and a localized suffix: "Haxaconda Standard 9 (Bot)" / "Haxaconda Standard 9 (Бот)".
-Legacy: "Anaconda (Bot)" / "Anaconda (Бот)". Unknown bot refs: the server's nickname. Done where the
-guest name is localized today (`IdentityFormatters` and the participant mappers that feed player
-bars, lists and cards), so every place showing a participant gets it.
+The server keeps sending English nicknames for guests and bots (a convenience for other API users);
+this client ignores them for `_`/`+` refs and builds a localized name from the ref instead. A bot's
+name: the bot name, the strength, and a localized suffix: "Haxaconda Standard 9 (Bot)" /
+"Haxaconda Standard 9 (Бот)". Legacy: "Anaconda (Bot)" / "Anaconda (Бот)". Unknown bot refs: the
+server's nickname. Guests get the same treatment ("Guest 123" / "Гость 123"), which the participant
+mappers didn't do before. The mappers produce a locale binding as the nickname, so labels follow a
+live language switch; places that pass a nickname as a template parameter or concatenate it resolve
+it first.
 
 ### Avatars
 

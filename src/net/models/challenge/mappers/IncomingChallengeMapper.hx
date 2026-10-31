@@ -5,6 +5,7 @@ import client.datatypes.challenge.IncomingChallenge;
 import intellectorboard.mappers.Sip;
 import net.models.common.mappers.TimeControlKindMapper;
 import net.models.common.mappers.TimeControlMapper;
+import net.models.common.mappers.UserRefMapper;
 
 class IncomingChallengeMapper
 {
@@ -13,7 +14,7 @@ class IncomingChallengeMapper
         return new IncomingChallenge(
             dto.id,
             dto.caller.user_ref,
-            dto.caller.nickname,
+            UserRefMapper.displayName(dto.caller),
             TimeControlMapper.dtoToDatatype(dto.fischer_time_control),
             TimeControlKindMapper.dtoToDatatype(dto.time_control_kind),
             dto.rated,

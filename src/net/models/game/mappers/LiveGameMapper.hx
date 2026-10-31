@@ -17,6 +17,7 @@ import net.models.common.mappers.PieceKindMapper;
 import net.models.common.mappers.TimeControlMapper;
 import net.models.game.internal.InternalGameAppendPlyPayload;
 import net.models.game.internal.InternalGamePerformOfferActionPayload;
+import net.models.common.mappers.UserRefMapper;
 
 class LiveGameMapper
 {
@@ -61,7 +62,7 @@ class LiveGameMapper
 
     public static function chatMessageToDatatype(dto:ChatMessageBroadcastedData):LiveGameEvent
     {
-        return LiveGameEvent.ChatMessage(dto.event_index, new GameChatMessage(dto.author.user_ref, dto.author.nickname, dto.text, dto.spectator));
+        return LiveGameEvent.ChatMessage(dto.event_index, new GameChatMessage(dto.author.user_ref, UserRefMapper.displayName(dto.author), dto.text, dto.spectator));
     }
 
     public static function offerToDatatype(dto:OfferActionBroadcastedData):LiveGameEvent
@@ -138,7 +139,7 @@ class LiveGameMapper
                     );
                     LiveGameEvent.Ply(eventIndex, plyIndex, ply, GameClockMapper.dtoToDatatype(timeUpdate));
                 }
-            case ChatMessage(_, eventIndex, text, spectator, author): LiveGameEvent.ChatMessage(eventIndex, new GameChatMessage(author.user_ref, author.nickname, text, spectator));
+            case ChatMessage(_, eventIndex, text, spectator, author): LiveGameEvent.ChatMessage(eventIndex, new GameChatMessage(author.user_ref, UserRefMapper.displayName(author), text, spectator));
             case Offer(_, eventIndex, action, kind, author): LiveGameEvent.Offer(eventIndex, offerActionToDatatype(action), offerKindToDatatype(kind), PieceColorMapper.dtoToDatatype(author));
             case TimeAdded(_, eventIndex, amountSeconds, receiver, timeUpdate): LiveGameEvent.TimeAdded(eventIndex, PieceColorMapper.dtoToDatatype(receiver), amountSeconds, GameClockMapper.dtoToDatatype(timeUpdate));
             case Rollback(_, eventIndex, _, plyCountAfter, _, timeUpdate): LiveGameEvent.Rollback(eventIndex, plyCountAfter, GameClockMapper.dtoToDatatype(timeUpdate));
@@ -148,7 +149,7 @@ class LiveGameMapper
     private static function participantToDatatype(player:UserRefWithNickname, rating:Null<PlayerRatingPublic>):GameParticipant
     {
         var ratingDatatype:Null<PlayerRating> = rating != null ? new PlayerRating(rating.elo, rating.provisional) : null;
-        return new GameParticipant(player.user_ref, player.nickname, ratingDatatype);
+        return new GameParticipant(player.user_ref, UserRefMapper.displayName(player), ratingDatatype);
     }
 
     private static function offerActionToDatatype(dto:OfferAction):client.datatypes.game.OfferAction

@@ -67,6 +67,6 @@ class WatchEye extends Box
 
     private function resolveText():String
     {
-        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.live_game.watched_player"), nickname);
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.live_game.watched_player"), LocaleUtils.resolveText(nickname));
     }
 }

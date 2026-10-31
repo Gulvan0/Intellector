@@ -8,6 +8,7 @@ import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
 import net.models.common.UserRefWithNickname;
 import net.models.common.mappers.TimeControlMapper;
+import net.models.common.mappers.UserRefMapper;
 
 class OngoingGameMapper
 {
@@ -52,7 +53,7 @@ class OngoingGameMapper
     {
         var ownColor:PieceColor = whitePlayer.user_ref == ownRef ? White : Black;
         var opponent:UserRefWithNickname = ownColor == White ? blackPlayer : whitePlayer;
-        return new OngoingGame(id, opponent.nickname, ownColor, timeControl, rated, startedAtMs, sipToPosition(sip), plyCount, lastPlyAtMs, clock);
+        return new OngoingGame(id, UserRefMapper.displayName(opponent), ownColor, timeControl, rated, startedAtMs, sipToPosition(sip), plyCount, lastPlyAtMs, clock);
     }
 
     private static function sipToPosition(sip:String):Position
