@@ -10,8 +10,8 @@ import client.datatypes.challenge.creation.ChallengeTarget;
 import client.datatypes.challenge.creation.ChallengeType;
 import client.datatypes.challenge.creation.OpenChallengeVisibility;
 import client.datatypes.player.FoundPlayer;
+import client.ui.common.overlays.challenge.bot.BotVariant;
 import client.ui.common.overlays.playersearch.PlayerSearchOverlay;
-import haxe.ui.components.Label;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;
 import haxefolio.ResponsivityController;
@@ -22,8 +22,9 @@ import morestd.Detachable;
 
 /**
     "Challenge type": the type, and below it a fixed-height slot with what that type needs - the
-    opponent (a player's login or a guest's number) for Direct, the visibility for Open, a note for
-    Against bot. Writes straight into the draft; `onEdit` follows every edit.
+    opponent (a player's login or a guest's number) for Direct, the visibility for Open, the bot and
+    its settings for Against bot. The slot's height follows the type. Writes straight into the
+    draft; `onEdit` follows every edit, `onTypeChange` every change of the type before it.
 **/
 class OpponentSection extends VBox
 {
@@ -32,18 +33,20 @@ class OpponentSection extends VBox
     private final draft:ChallengeDraft;
     private final ownUserRef:Null<String>;
     private final onEdit:Void->Void;
+    private final onTypeChange:Void->Void;
     private final typeRow:ChoiceRow<ChallengeType>;
     private final calleeKindRow:ChoiceRow<CalleeKind>;
     private final visibilityRow:ChoiceRow<OpenChallengeVisibility>;
     private final loginField:TextInputField;
     private final guestField:TextInputField;
+    private final botVariant:BotVariant;
     private final slot:SwapSlot<ChallengeType>;
     private final slotHeightBinding:Detachable;
     private var loginTouched:Bool = false;
     private var guestTouched:Bool = false;
     private var calleeNotFound:Null<String> = null; // the user ref the server didn't know
 
-    public function new(draft:ChallengeDraft, ownUserRef:Null<String>, onEdit:Void->Void)
+    public function new(draft:ChallengeDraft, ownUserRef:Null<String>, onEdit:Void->Void, onTypeChange:Void->Void)
     {
         super();
 
@@ -51,6 +54,7 @@ class OpponentSection extends VBox
         this.draft = draft;
         this.ownUserRef = ownUserRef;
         this.onEdit = onEdit;
+        this.onTypeChange = onTypeChange;
 
         this.addComponent(new SectionHeading(phrase("section.type")));
 
@@ -87,23 +91,28 @@ class OpponentSection extends VBox
             {value: LINK_ONLY, label: phrase("visibility.link_only")}
         ], draft.visibility, visibility -> draft.visibility = visibility);
 
-        var botNote:Label = new Label();
-        botNote.text = phrase("bot_note");
-        botNote.addClass(StyleClass.CHALLENGE_SLOT_NOTE);
+        botVariant = new BotVariant(draft, onEdit);
 
-        slot = new SwapSlot([DIRECT => directBox, OPEN => visibilityRow, BOT => botNote], draft.type, StyleVars.CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHT.resolve(Expanded));
+        var slotHeights:Map<ChallengeType, Int> = StyleVars.CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHTS.resolve(Expanded);
+        slot = new SwapSlot([DIRECT => directBox, OPEN => visibilityRow, BOT => botVariant], draft.type, slotHeights.get(draft.type));
         slot.addClass(StyleClass.CHALLENGE_TYPE_SLOT);
         this.addComponent(slot);
 
-        slotHeightBinding = ResponsivityController.bind(StyleVars.CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHT, height -> slot.height = height);
+        slotHeightBinding = ResponsivityController.bind(StyleVars.CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHTS, heights -> slot.setVariantHeights(heights, StyleVars.CHALLENGE_OVERLAY_TYPE_SLOT_TRANSITION_MS));
 
         showCalleeKind();
         render();
     }
 
-    /** Whether the opponent named isn't one the server reported unknown **/
+    /**
+        Whether the opponent named isn't one the server reported unknown, and a bot, against one,
+        is chosen and set up with values its fields could read
+    **/
     public function isValid():Bool
     {
+        if (draft.type == BOT)
+            return botVariant.isValid();
+
         var target:Null<ChallengeTarget> = ChallengeDraftRules.target(draft, ownUserRef);
         return calleeNotFound == null || target == null || target.calleeRef() != calleeNotFound;
     }
@@ -127,6 +136,7 @@ class OpponentSection extends VBox
         visibilityRow.dispose();
         loginField.dispose();
         guestField.dispose();
+        botVariant.dispose();
         slotHeightBinding.detach();
     }
 
@@ -134,6 +144,7 @@ class OpponentSection extends VBox
     {
         draft.type = type;
         slot.active = type;
+        onTypeChange();
         onEdit();
     }
 

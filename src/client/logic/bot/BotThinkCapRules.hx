@@ -13,4 +13,19 @@ class BotThinkCapRules
     {
         return seconds >= MIN_SECONDS && seconds <= MAX_SECONDS;
     }
+
+    /** The step next to `seconds` in `direction` (-1 or 1), or the last one in that direction **/
+    public static function step(seconds:Int, direction:Int):Int
+    {
+        if (direction > 0)
+        {
+            for (candidate in STEPS)
+                if (candidate > seconds)
+                    return candidate;
+            return STEPS[STEPS.length - 1];
+        }
+
+        var lower:Array<Int> = STEPS.filter(candidate -> candidate < seconds);
+        return lower.length > 0 ? lower[lower.length - 1] : STEPS[0];
+    }
 }

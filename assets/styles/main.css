@@ -1765,11 +1765,109 @@
     vertical-spacing: 8px;
 }
 
-.intellector-challenge-slot-note {
-    width: 100%;
+/* Against bot: square cards to choose from, then the chosen bot's portrait and settings */
+
+.intellector-challenge-bot-picker {
+    background-opacity: 0;
+    border-size: 0px;
+    padding: 0px;
+}
+
+.intellector-challenge-bot-card {
+    padding: 8px;
+    vertical-spacing: 4px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-challenge-bot-card:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-challenge-bot-card-name {
     font-name: $ui-family-medium;
     font-size: 13px;
+    text-align: center;
     color: #6d6152;
+}
+
+.intellector-challenge-bot-card:hover .intellector-challenge-bot-card-name {
+    color: #2a211a;
+}
+
+.intellector-challenge-bot-card-selected {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-challenge-bot-card-selected .intellector-challenge-bot-card-name {
+    font-name: $ui-family-semibold;
+    color: #8a5a1f;
+}
+
+.intellector-challenge-bot-portrait {
+    padding: 8px;
+    background-color: #faf7f2;
+    border: 1px solid #e6dfd3;
+    border-radius: 5px;
+}
+
+.haxefolio-compact .intellector-challenge-bot-portrait {
+    padding: 5px;
+}
+
+.intellector-challenge-bot-name {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    color: #2a211a;
+}
+
+.intellector-challenge-bot-about-button {
+    color: #6d6152;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.intellector-challenge-bot-about-button:hover {
+    color: #2a211a;
+}
+
+.intellector-challenge-bot-change {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.intellector-challenge-bot-strength .haxefolio-choice-button {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.intellector-challenge-bot-strength .haxefolio-choice-button:down {
+    font-name: $mono-family-medium;
+}
+
+.intellector-challenge-bot-no-cap {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.intellector-challenge-bot-about-text {
+    padding: 18px 22px;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-challenge-bot-about-footer {
+    padding-left: 22px;
+    padding-right: 22px;
+    border-top: 1px solid #e6dfd3;
 }
 
 .intellector-challenge-guest-number-field .haxefolio-text-input {

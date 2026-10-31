@@ -19,8 +19,9 @@ import intellectorboard.position.Position;
 
 /**
     "Starting position": Default or Custom, a custom one typed as SIP and applied explicitly, and a
-    preview of the position in effect. The switch is locked on Default while the game is rated. The
-    draft keeps the last applied custom position; `onEdit` follows every edit.
+    preview of the position in effect. The switch is locked on Default while the game is rated (see
+    `ChallengeDraftRules.effectiveRated`). The draft keeps the last applied custom position;
+    `onEdit` follows every edit.
 **/
 class PositionSection extends VBox
 {
@@ -44,7 +45,7 @@ class PositionSection extends VBox
         modeRow = new ChoiceRow<StartingPositionMode>(null, [
             {value: DEFAULT, label: phrase("position.default")},
             {value: CUSTOM, label: phrase("position.custom")}
-        ], ChallengeDraftRules.effectivePositionMode(draft), onModeSelected, null, draft.rated);
+        ], ChallengeDraftRules.effectivePositionMode(draft), onModeSelected, null, ChallengeDraftRules.effectiveRated(draft));
         modeRow.width = StyleVars.CHALLENGE_OVERLAY_POSITION_SWITCH_WIDTH;
 
         this.addComponent(new SectionHeading(phrase("section.position"), modeRow));
@@ -91,10 +92,10 @@ class PositionSection extends VBox
         render();
     }
 
-    /** Follows a change of whether the draft is rated, which forces the default position **/
+    /** Follows a change of whether the game is rated, which forces the default position **/
     public function onRatedChange():Void
     {
-        modeRow.setLocked(draft.rated);
+        modeRow.setLocked(ChallengeDraftRules.effectiveRated(draft));
         modeRow.select(ChallengeDraftRules.effectivePositionMode(draft));
         render();
     }
@@ -157,7 +158,7 @@ class PositionSection extends VBox
         var custom:Bool = ChallengeDraftRules.effectivePositionMode(draft) == CUSTOM;
 
         sipField.enabled = custom;
-        sipField.idleHint = custom ? phrase("hint.position.idle") : draft.rated ? phrase("hint.position.rated") : phrase("hint.position.default");
+        sipField.idleHint = custom ? phrase("hint.position.idle") : ChallengeDraftRules.effectiveRated(draft) ? phrase("hint.position.rated") : phrase("hint.position.default");
         sipField.currentText = custom ? draft.customSip ?? Sip.DEFAULT_STARTING_POSITION_SIP : Sip.DEFAULT_STARTING_POSITION_SIP;
 
         showPosition(ChallengeDraftRules.startingPosition(draft));

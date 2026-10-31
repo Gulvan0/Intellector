@@ -1,5 +1,6 @@
 package client.ui;
 
+import client.datatypes.challenge.creation.ChallengeType;
 import haxefolio.ByMenuLayout;
 import haxefolio.Shadow;
 import haxefolio.appearance.PartialShadowTokens;
@@ -126,7 +127,21 @@ class StyleVars
     public static inline final CHALLENGE_OVERLAY_HEADER_HEIGHT:Int = 65;
     public static final CHALLENGE_OVERLAY_FOOTER_HEIGHT:ByMenuLayout<Int> = {expanded: 66, collapsed: 74};
     public static inline final CHALLENGE_OVERLAY_CANCEL_WIDTH_PERCENT:Float = 36;
-    public static final CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHT:ByMenuLayout<Int> = {expanded: 150, collapsed: 164}; // fits the tallest variant, Direct with the Player / Guest switch
+    public static final CHALLENGE_OVERLAY_TYPE_SLOT_HEIGHTS:ByMenuLayout<Map<ChallengeType, Int>> = {
+        expanded: [DIRECT => 150, OPEN => 105, BOT => 222],
+        collapsed: [DIRECT => 164, OPEN => 112, BOT => 282]
+    };
+    public static inline final CHALLENGE_OVERLAY_TYPE_SLOT_TRANSITION_MS:Int = 180;
+    public static final CHALLENGE_OVERLAY_BOT_CARD_SIZE:ByMenuLayout<Int> = {expanded: 182, collapsed: 148};
+    public static inline final CHALLENGE_OVERLAY_BOT_CARD_GAP:Int = 8;
+    public static final CHALLENGE_OVERLAY_BOT_CARDS_SIDEWAYS:ByMenuLayout<Bool> = {expanded: true, collapsed: false}; // otherwise a grid scrolling down
+    public static inline final CHALLENGE_OVERLAY_BOT_CARDS_PER_ROW_NARROW:Int = 2;
+    public static final CHALLENGE_OVERLAY_BOT_PORTRAIT_SIZE:ByMenuLayout<Int> = {expanded: 196, collapsed: 96};
+    public static inline final CHALLENGE_OVERLAY_BOT_PORTRAIT_GAP:Int = 14;
+    public static final CHALLENGE_OVERLAY_BOT_SETUP_ROW_GAP:ByMenuLayout<Int> = {expanded: 18, collapsed: 10}; // expanded: the name row and both fields fill the portrait's height
+    public static final CHALLENGE_OVERLAY_BOT_SMALL_CONTROL_HEIGHT:ByMenuLayout<Int> = {expanded: 28, collapsed: 44}; // the About button and Change bot
+    public static final CHALLENGE_OVERLAY_BOT_NO_CAP_WIDTH:ByMenuLayout<Int> = {expanded: 112, collapsed: 128};
+    public static inline final CHALLENGE_OVERLAY_BOT_NO_CAP_GAP:Int = 6;
     public static inline final CHALLENGE_OVERLAY_GUEST_NUMBER_INPUT_PADDING_LEFT:Int = 58; // keeps the typed number clear of the "Guest #" prefix inside the input, in any locale
     public static inline final CHALLENGE_OVERLAY_PAIR_FIELD_WIDTH_PERCENT:Float = 50; // each of two fields sharing a row
     public static inline final CHALLENGE_OVERLAY_GAME_COLOUR_GAP:Int = 14;
@@ -143,6 +158,11 @@ class StyleVars
     public static inline final PLAYER_SEARCH_OVERLAY_HEADER_HEIGHT:Int = 56;
     public static final PLAYER_SEARCH_OVERLAY_SEARCH_HEIGHT:ByMenuLayout<Int> = {expanded: 86, collapsed: 93}; // 18 above the field, 5 above the count line (16), 10 below it
     public static final PLAYER_SEARCH_OVERLAY_FOOTER_HEIGHT:ByMenuLayout<Int> = {expanded: 56, collapsed: 76}; // collapsed, the legend takes two lines
+
+    public static inline final BOT_ABOUT_OVERLAY_WIDTH:Int = 520;
+    public static inline final BOT_ABOUT_OVERLAY_HEIGHT:Int = 300;
+    public static inline final BOT_ABOUT_OVERLAY_HEADER_HEIGHT:Int = 56;
+    public static final BOT_ABOUT_OVERLAY_FOOTER_HEIGHT:ByMenuLayout<Int> = {expanded: 56, collapsed: 76};
     public static inline final PLAYER_SEARCH_MATCH_HIGHLIGHT:String = "#f6e6c6";
 
     public static inline final SHARE_OVERLAY_WIDTH:Int = 760;

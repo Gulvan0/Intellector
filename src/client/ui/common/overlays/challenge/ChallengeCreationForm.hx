@@ -30,7 +30,7 @@ class ChallengeCreationForm extends VBox
         this.ownUserRef = ownUserRef;
         this.onEdit = onEdit;
 
-        opponent = new OpponentSection(draft, ownUserRef, onEdit);
+        opponent = new OpponentSection(draft, ownUserRef, onEdit, onTypeChange);
         timeControl = new TimeControlSection(draft, onEdit);
         gameColour = new GameColourSection(draft, isGuest, onRatedChange);
         position = new PositionSection(draft, onEdit);
@@ -71,5 +71,11 @@ class ChallengeCreationForm extends VBox
     {
         position.onRatedChange();
         onEdit();
+    }
+
+    private function onTypeChange():Void
+    {
+        gameColour.onTypeChange();
+        position.onRatedChange();
     }
 }

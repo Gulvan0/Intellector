@@ -133,9 +133,21 @@ enum abstract StyleClass(String) from String to String
     var CHALLENGE_KIND_ICON = "intellector-challenge-kind-icon";
     var CHALLENGE_PREVIEW_ROW = "intellector-challenge-preview-row";
     var CHALLENGE_SIP_FIELD = "intellector-challenge-sip-field";
-    var CHALLENGE_SLOT_NOTE = "intellector-challenge-slot-note";
     var CHALLENGE_TIME_PRESETS = "intellector-challenge-time-presets";
     var CHALLENGE_TYPE_SLOT = "intellector-challenge-type-slot";
+    var CHALLENGE_BOT_ABOUT_BUTTON = "intellector-challenge-bot-about-button";
+    var CHALLENGE_BOT_ABOUT_FOOTER = "intellector-challenge-bot-about-footer";
+    var CHALLENGE_BOT_ABOUT_TEXT = "intellector-challenge-bot-about-text";
+    var CHALLENGE_BOT_CARD = "intellector-challenge-bot-card";
+    var CHALLENGE_BOT_CARD_AVATAR = "intellector-challenge-bot-card-avatar";
+    var CHALLENGE_BOT_CARD_NAME = "intellector-challenge-bot-card-name";
+    var CHALLENGE_BOT_CARD_SELECTED = "intellector-challenge-bot-card-selected";
+    var CHALLENGE_BOT_CHANGE = "intellector-challenge-bot-change";
+    var CHALLENGE_BOT_NAME = "intellector-challenge-bot-name";
+    var CHALLENGE_BOT_NO_CAP = "intellector-challenge-bot-no-cap";
+    var CHALLENGE_BOT_PICKER = "intellector-challenge-bot-picker";
+    var CHALLENGE_BOT_PORTRAIT = "intellector-challenge-bot-portrait";
+    var CHALLENGE_BOT_STRENGTH = "intellector-challenge-bot-strength";
 
     var IMPORT_POSITION_BODY = "intellector-import-position-body";
     var IMPORT_POSITION_INSET = "intellector-import-position-inset";
