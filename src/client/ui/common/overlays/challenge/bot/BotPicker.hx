@@ -5,15 +5,12 @@ import client.logic.bot.BotKinds;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.ScrollView;
 import haxe.ui.layouts.HorizontalLayout;
-import haxe.ui.layouts.VerticalGridLayout;
-import haxefolio.ResponsivityController;
+import haxefolio.structure.SidewaysScroll;
 import js.Browser;
 import js.html.StyleElement;
-import morestd.Detachable;
 
 /**
-    The bots to choose from, as cards: a row scrolling sideways in the expanded layout, a grid of
-    two columns scrolling down otherwise. `current` is outlined.
+    The bots to choose from, as cards in a single row scrolling sideways in every layout.
 **/
 class BotPicker extends ScrollView
 {
@@ -24,13 +21,8 @@ class BotPicker extends ScrollView
 
     private final cards:Map<BotKind, BotCard> = [];
     private final content:Box;
-    private final layoutBinding:Detachable;
-    private var sideways:Bool = true;
 
-    /** The outlined bot, if any **/
-    public var current(default, set):Null<BotKind>;
-
-    public function new(current:Null<BotKind>, onPick:BotKind->Void)
+    public function new(onPick:BotKind->Void)
     {
         super();
 
@@ -41,10 +33,12 @@ class BotPicker extends ScrollView
         this.scrollMode = NATIVE;
         this.addClass(StyleClass.CHALLENGE_BOT_PICKER);
         this.element.classList.add(MARKER_CLASS);
+        SidewaysScroll.attach(this.element);
 
         content = new Box();
+        content.layout = new HorizontalLayout();
+        content.paddingBottom = ROW_BOTTOM_PADDING;
         content.horizontalSpacing = StyleVars.CHALLENGE_OVERLAY_BOT_CARD_GAP;
-        content.verticalSpacing = StyleVars.CHALLENGE_OVERLAY_BOT_CARD_GAP;
         this.addComponent(content);
 
         for (kind in BotKinds.ALL)
@@ -53,42 +47,12 @@ class BotPicker extends ScrollView
             cards.set(kind, card);
             content.addComponent(card);
         }
-
-        this.current = current;
-
-        layoutBinding = ResponsivityController.bind(StyleVars.CHALLENGE_OVERLAY_BOT_CARDS_SIDEWAYS, applyLayout);
     }
 
     public function dispose():Void
     {
-        layoutBinding.detach();
         for (card in cards)
             card.dispose();
-    }
-
-    private function set_current(value:Null<BotKind>):Null<BotKind>
-    {
-        current = value;
-        for (kind => card in cards)
-            card.selected = kind == value;
-        return value;
-    }
-
-    private function applyLayout(sideways:Bool):Void
-    {
-        this.sideways = sideways;
-
-        if (sideways)
-            content.layout = new HorizontalLayout();
-        else
-        {
-            var grid:VerticalGridLayout = new VerticalGridLayout();
-            grid.columns = StyleVars.CHALLENGE_OVERLAY_BOT_CARDS_PER_ROW_NARROW;
-            content.layout = grid;
-        }
-
-        content.paddingBottom = sideways ? ROW_BOTTOM_PADDING : 0;
-        applyOverflow();
     }
 
     // HaxeUI applies its own overflow to a native scroller when it becomes ready
@@ -100,8 +64,8 @@ class BotPicker extends ScrollView
 
     private function applyOverflow():Void
     {
-        this.element.style.overflowX = sideways ? "scroll" : "hidden";
-        this.element.style.overflowY = sideways ? "hidden" : "scroll";
+        this.element.style.overflowX = "scroll";
+        this.element.style.overflowY = "hidden";
         (cast this.element.style : Dynamic).overscrollBehaviorX = "contain";
     }
 
@@ -112,10 +76,10 @@ class BotPicker extends ScrollView
 
         styleInjected = true;
 
-        // the surrounding scroll area lets touch pan vertically only; cards scrolling sideways need both
+        // the surrounding scroll area lets touch pan vertically only; the row pans both ways, the page behind it needs vertical
         var style:StyleElement = Browser.document.createStyleElement();
         style.textContent = '
-            #haxeui-container .$MARKER_CLASS, #haxeui-container .$MARKER_CLASS .haxeui-component { touch-action: pan-x pan-y; }
+            #haxeui-container .haxeui-component.$MARKER_CLASS, #haxeui-container .haxeui-component.$MARKER_CLASS .haxeui-component { touch-action: pan-x pan-y; }
             @media not (pointer: coarse) {
                 .$MARKER_CLASS::-webkit-scrollbar { width: 8px; height: 8px; background: transparent; }
                 .$MARKER_CLASS::-webkit-scrollbar-track { background: transparent; }

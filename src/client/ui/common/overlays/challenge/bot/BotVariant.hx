@@ -26,7 +26,7 @@ class BotVariant extends Box
         this.draft = draft;
         this.onEdit = onEdit;
 
-        picker = new BotPicker(draft.bot, onBotPicked);
+        picker = new BotPicker(onBotPicked);
         setup = new BotSetup(draft, onChangeBot, onEdit);
         this.addComponent(picker);
         this.addComponent(setup);
@@ -49,7 +49,6 @@ class BotVariant extends Box
     private function onBotPicked(kind:BotKind):Void
     {
         ChallengeDraftRules.selectBot(draft, kind);
-        picker.current = kind;
         setup.showBot();
         showChoosing(false);
         onEdit();

@@ -53,6 +53,12 @@ class GameFormatters
         return DateTools.format(Date.fromTime(unixMs), "%d.%m.%Y %H:%M:%S");
     }
 
+    /** `Last move dd.mm.yyyy hh:mm:ss` **/
+    public static function lastMove(unixMs:Float):String
+    {
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.live_game.last_move"), dateTime(unixMs));
+    }
+
     /** `dateTime`, or a locale binding saying the date is unknown when `unixMs` is null **/
     public static function optionalDateTime(unixMs:Null<Float>):String
     {
@@ -109,6 +115,12 @@ class GameFormatters
     public static function timeAddedLogLine(receiver:PieceColor, amountSeconds:Int):String
     {
         return LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.live_game.chat.log.time_added"), colorName(receiver), amountSeconds);
+    }
+
+    /** The chat's note about the uploader of a game against a bot going away or coming back **/
+    public static function suspensionLogLine(suspended:Bool):String
+    {
+        return resolve(suspended ? "intellector.live_game.chat.log.suspended" : "intellector.live_game.chat.log.resumed");
     }
 
     /** The chat's note about how the game ended: `Black resigned` **/

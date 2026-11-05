@@ -32,9 +32,11 @@ Paths are relative to the app's folder on the static hosting (not necessarily th
 /sw.js             service worker; static, version-agnostic
 /manifest.json
 /.htaccess
-/v/41/app.js ...   client for API 41 (the running server)
-/v/42/app.js ...   client for API 42, uploaded ahead of its server
+/v/41/bin/app.js ...   client for API 41 (the running server)
+/v/42/bin/app.js ...   client for API 42, uploaded ahead of its server
 ```
+
+A client folder mirrors the repo layout (`bin/app.js`, `bin/hxconda.js`, `bin/version.json`, `assets/`); the loader makes it the document's `<base>`, so every relative URL of the app resolves inside it. The shell also holds `assets/favicons/pwa-*.png`, which `manifest.json` and `sw.js` reference.
 
 - A client lives in `/v/<api>/`. A same-API rebuild replaces its folder; a new API gets a new folder.
 - A folder must never be served half-written, and only the newest few `/v/*` folders need to exist (both handled by the deploy script).
@@ -49,14 +51,14 @@ Paths are relative to the app's folder on the static hosting (not necessarily th
 
 ## 4. API version check on every WS connection
 
-- The client sends its compiled-in `API_VERSION` when connecting the WS.
-- On mismatch, the server rejects the connection with a dedicated close code and its own API version. The client stores that version for the loader and reloads immediately, without any guards.
+- The client sends its compiled-in `API_VERSION` as the `api` query parameter of the WS URL.
+- On mismatch, the server accepts the connection and closes it with code `4409` and its own API version as the close reason (a browser can't read an HTTP-level rejection). The client stores that version for the loader and reloads immediately, without any guards.
 - WS reconnects after every server restart, so a server update moves every open tab to the right folder without extra machinery. While the server is down mid-restart, the existing reconnect backoff applies.
 - REST requests do not carry the version; the WS check is the single gate.
 
 ## 5. New build within the same API: forced reload
 
-- **Detection:** fetch `/v/<api>/version.json` (no-cache) on WS reconnect, on `visibilitychange` to visible, and every 5 minutes. A build differing from the compiled-in one marks an update as pending.
+- **Detection:** fetch `/v/<api>/bin/version.json` (no-cache) on WS reconnect, on `visibilitychange` to visible, and every 5 minutes. A build differing from the compiled-in one marks an update as pending.
 - **Tab hidden:** reload immediately.
 - **Tab visible:** reload on the next in-app navigation (performed as a full page load), or after 60 s with no input, whichever comes first.
 - **Protected states** postpone both until they end:

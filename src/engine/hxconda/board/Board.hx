@@ -14,6 +14,7 @@ import js.lib.Math;
 class Board
 {
     private static inline final DEFAULT_STARTING_NOTATION:String = "mpeeePMleeeeLapeeePAdeeeeDipeeePIdeeeeDapeeePAleeeeLmpeeePMw";
+    private static inline final HASH_KEY_SEED:Int = 0x1B873593;
     private static inline final VERIFICATION_KEY_SEED:Int = 0x2545F491;
 
     public final pieces:PieceArray;
@@ -220,7 +221,12 @@ class Board
         if (whiteIntellectorSquare == NO_SQUARE || blackIntellectorSquare == NO_SQUARE)
             return false;
 
-        var square:Int = intellectorSquare(attacker.opponent());
+        return isAttackedBy(intellectorSquare(attacker.opponent()), attacker);
+    }
+
+    /** Whether a piece of `attacker` could capture on `square` if an opponent's piece stood there, whatever stands there now **/
+    public inline function isAttackedBy(square:Int, attacker:PlayerColor):Bool
+    {
         var progressorOrigins:SquareLists = attacker == White ? BoardGeometry.WHITE_PROGRESSOR_ORIGINS : BoardGeometry.BLACK_PROGRESSOR_ORIGINS;
 
         return isReachedByStep(square, BoardGeometry.NEIGHBOURS, WhiteDefensor.ofColor(attacker))
@@ -516,7 +522,7 @@ class Board
     **/
     public function new(notation:Null<String>)
     {
-        zobristKeys = ZobristKeys.random();
+        zobristKeys = ZobristKeys.seeded(HASH_KEY_SEED);
         pieces = new PieceArray(SQUARE_COUNT);
 
         if (notation == null || !trySetFromNotation(notation))

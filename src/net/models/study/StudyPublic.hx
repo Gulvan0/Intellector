@@ -9,17 +9,17 @@ import jsonmodel.IJsonUnserializableMacro;
 
 class StudyPublic implements IJsonUnserializableMacro
 {
-	public var name:String;
-	public var description:String;
-	public var publicity:StudyPublicity;
-	public var starting_sip:String;
-	public var key_sip:String;
-	@:default(null) public var key_path:Null<String>;
-	public var id:Int;
-	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var created_at:DateTime;
-	@:jcustomparse(jsonmodel.StdParsers.parseDate) public var modified_at:DateTime;
-	public var author:UserRefWithNickname;
-	public var deleted:Bool;
-	public var tags:Array<StudyTagPublic>;
-	public var nodes:Array<StudyPlyTreeNodePublic>;
+    public var name:String;
+    public var description:String;
+    public var publicity:StudyPublicity;
+    public var starting_sip:String;
+    public var key_sip:String;
+    @:default(null) public var key_path:Null<String>;
+    public var id:Int;
+    @:jcustomparse(jsonmodel.StdParsers.parseDate) public var created_at:DateTime;
+    @:jcustomparse(jsonmodel.StdParsers.parseDate) public var modified_at:DateTime;
+    public var author:UserRefWithNickname;
+    public var deleted:Bool;
+    public var tags:Array<StudyTagPublic>;
+    public var nodes:Array<StudyPlyTreeNodePublic>;
 }

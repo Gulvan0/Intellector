@@ -27,10 +27,10 @@ class HxcondaWorker
         try
         {
             var report:BestMoveReport = switch request.kind {
-                case SearchByLevel: Hxconda.bestMoveByLevel(request.position, request.history, request.level, postProgress);
-                case SearchByTime: Hxconda.bestMoveByTime(request.position, request.history, request.durationMs, postIteration);
-                case SearchByNodes: Hxconda.bestMoveByNodes(request.position, request.history, request.nodeLimit, request.noiseAmplitude ?? 0.0, postProgress);
-                case SearchByDepth: Hxconda.bestMoveByDepth(request.position, request.history, request.maxDepth, request.timeCapMs, postIteration);
+                case SearchByLevel: Hxconda.bestMoveByLevel(request.position, request.history, request.gameId, request.level, postProgress);
+                case SearchByTime: Hxconda.bestMoveByTime(request.position, request.history, request.gameId, request.durationMs, postIteration);
+                case SearchByNodes: Hxconda.bestMoveByNodes(request.position, request.history, request.gameId, request.nodeLimit, request.noiseAmplitude ?? 0.0, postProgress);
+                case SearchByDepth: Hxconda.bestMoveByDepth(request.position, request.history, request.gameId, request.maxDepth, request.timeCapMs, request.weakening, request.style ?? Standard, postIteration);
             }
             post({kind: Completed, report: HxcondaProtocol.reportMessage(report)});
         }

@@ -7,23 +7,72 @@ function $extend(from, fields) {
 	return proto;
 }
 var engine_hxconda_Hxconda = function() { };
-engine_hxconda_Hxconda.bestMoveByLevel = function(notation,history,level,onProgress) {
-	var board = engine_hxconda_Hxconda.createBoard(notation,history);
+engine_hxconda_Hxconda.bestMoveByLevel = function(notation,history,gameId,level,onProgress) {
+	var board = engine_hxconda_Hxconda.createBoard(notation,history,"std");
 	var budget = engine_hxconda_search_budget_NodeBudget.forLevel(level,onProgress);
-	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget(board,budget,budget.noiseAmplitude).run();
+	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget(board,budget,budget.noiseAmplitude,0,engine_hxconda_Hxconda.memoryFor(gameId,"std")).run();
 };
-engine_hxconda_Hxconda.bestMoveByNodes = function(notation,history,nodeLimit,noiseAmplitude,onProgress) {
-	var board = engine_hxconda_Hxconda.createBoard(notation,history);
+engine_hxconda_Hxconda.bestMoveByNodes = function(notation,history,gameId,nodeLimit,noiseAmplitude,onProgress) {
+	var board = engine_hxconda_Hxconda.createBoard(notation,history,"std");
 	var budget = new engine_hxconda_search_budget_NodeBudget(nodeLimit,noiseAmplitude,onProgress);
-	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget(board,budget,budget.noiseAmplitude).run();
+	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget(board,budget,budget.noiseAmplitude,0,engine_hxconda_Hxconda.memoryFor(gameId,"std")).run();
 };
-engine_hxconda_Hxconda.bestMoveByTime = function(notation,history,durationMs,onIteration) {
-	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget(engine_hxconda_Hxconda.createBoard(notation,history),new engine_hxconda_search_budget_TimeBudget(durationMs,onIteration),0).run();
+engine_hxconda_Hxconda.bestMoveByTime = function(notation,history,gameId,durationMs,onIteration) {
+	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget(engine_hxconda_Hxconda.createBoard(notation,history,"std"),new engine_hxconda_search_budget_TimeBudget(durationMs,onIteration),0,0,engine_hxconda_Hxconda.memoryFor(gameId,"std")).run();
 };
-engine_hxconda_Hxconda.bestMoveByDepth = function(notation,history,maxDepth,timeCapMs,onIteration) {
-	return new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBudget(engine_hxconda_Hxconda.createBoard(notation,history),new engine_hxconda_search_budget_DepthBudget(maxDepth,timeCapMs,onIteration),0).run();
+engine_hxconda_Hxconda.bestMoveByDepth = function(notation,history,gameId,maxDepth,timeCapMs,weakening,style,onIteration) {
+	var board = engine_hxconda_Hxconda.createBoard(notation,history,style);
+	var latestEvenReport = null;
+	var latestReport = null;
+	var search = new engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBudget(board,new engine_hxconda_search_budget_DepthBudget(maxDepth,timeCapMs,function(report) {
+		latestReport = report.copy();
+		if(report.depth % 2 == 0) {
+			latestEvenReport = latestReport;
+		}
+		onIteration(report);
+	}),0,engine_hxconda_evaluation_Evaluation.drawScore(style,board.turn),engine_hxconda_Hxconda.memoryFor(gameId,style));
+	var scores = weakening != null ? search.scoreRootMoves(weakening) : null;
+	if(scores != null) {
+		if(latestReport.depth > scores.depth && engine_hxconda_Hxconda.isDecisive(latestReport)) {
+			return latestReport;
+		}
+		return engine_hxconda_Hxconda.weakenedReport(board,scores,weakening,style);
+	}
+	var report = search.run();
+	if(report.depth % 2 == 1 && latestEvenReport != null && !engine_hxconda_Hxconda.isDecisive(report)) {
+		return latestEvenReport;
+	}
+	return report;
 };
-engine_hxconda_Hxconda.createBoard = function(notation,history) {
+engine_hxconda_Hxconda.memoryFor = function(gameId,style) {
+	if(gameId == null) {
+		return new engine_hxconda_search_SearchMemory();
+	}
+	if(engine_hxconda_Hxconda.memory != null && engine_hxconda_Hxconda.memoryGameId == gameId && engine_hxconda_Hxconda.memoryStyle == style) {
+		engine_hxconda_Hxconda.memory.startNextSearch();
+	} else {
+		engine_hxconda_Hxconda.memory = new engine_hxconda_search_SearchMemory();
+		engine_hxconda_Hxconda.memoryGameId = gameId;
+		engine_hxconda_Hxconda.memoryStyle = style;
+	}
+	return engine_hxconda_Hxconda.memory;
+};
+engine_hxconda_Hxconda.isDecisive = function(report) {
+	return Math.abs(report.score) > 90000;
+};
+engine_hxconda_Hxconda.weakenedReport = function(board,scores,weakening,style) {
+	var chosen = engine_hxconda_search_weakening_WeakenedMoveChoice.choose(scores,weakening,($_=new engine_hxconda_evaluation_StyleBonuses(board,style),$bind($_,$_.bonus)));
+	var move = scores.moves[chosen];
+	var score = board.turn == 0 ? scores.values[chosen] : -scores.values[chosen];
+	var report = new engine_hxconda_search_BestMoveReport();
+	var scores1 = scores.depth;
+	var tmp = scores.exactCount();
+	var tmp1 = scores.lines[chosen];
+	report.record(move,score,scores1,tmp,tmp1 != null ? tmp1 : [move]);
+	return report;
+};
+engine_hxconda_Hxconda.createBoard = function(notation,history,style) {
+	engine_hxconda_evaluation_Evaluation.useStyle(style);
 	var board = new engine_hxconda_board_Board(notation);
 	if(history != null) {
 		board.enterPastPositions(history);
@@ -41,17 +90,18 @@ engine_hxconda_HxcondaWorker.onMessage = function(event) {
 		var report;
 		switch(request.kind) {
 		case "searchByDepth":
-			report = engine_hxconda_Hxconda.bestMoveByDepth(request.position,request.history,request.maxDepth,request.timeCapMs,engine_hxconda_HxcondaWorker.postIteration);
+			var tmp = request.style;
+			report = engine_hxconda_Hxconda.bestMoveByDepth(request.position,request.history,request.gameId,request.maxDepth,request.timeCapMs,request.weakening,tmp != null ? tmp : "std",engine_hxconda_HxcondaWorker.postIteration);
 			break;
 		case "searchByLevel":
-			report = engine_hxconda_Hxconda.bestMoveByLevel(request.position,request.history,request.level,engine_hxconda_HxcondaWorker.postProgress);
+			report = engine_hxconda_Hxconda.bestMoveByLevel(request.position,request.history,request.gameId,request.level,engine_hxconda_HxcondaWorker.postProgress);
 			break;
 		case "searchByNodes":
 			var tmp = request.noiseAmplitude;
-			report = engine_hxconda_Hxconda.bestMoveByNodes(request.position,request.history,request.nodeLimit,tmp != null ? tmp : 0.0,engine_hxconda_HxcondaWorker.postProgress);
+			report = engine_hxconda_Hxconda.bestMoveByNodes(request.position,request.history,request.gameId,request.nodeLimit,tmp != null ? tmp : 0.0,engine_hxconda_HxcondaWorker.postProgress);
 			break;
 		case "searchByTime":
-			report = engine_hxconda_Hxconda.bestMoveByTime(request.position,request.history,request.durationMs,engine_hxconda_HxcondaWorker.postIteration);
+			report = engine_hxconda_Hxconda.bestMoveByTime(request.position,request.history,request.gameId,request.durationMs,engine_hxconda_HxcondaWorker.postIteration);
 			break;
 		}
 		engine_hxconda_HxcondaWorker.post({ kind : "completed", report : engine_hxconda_protocol_HxcondaProtocol.reportMessage(report)});
@@ -77,7 +127,7 @@ var engine_hxconda_board_Board = function(notation) {
 	this.blackIntellectorSquare = -1;
 	this.whiteIntellectorSquare = -1;
 	this.turn = 0;
-	this.zobristKeys = engine_hxconda_board_ZobristKeys.random();
+	this.zobristKeys = engine_hxconda_board_ZobristKeys.seeded(461845907);
 	var this1 = new Int8Array(59);
 	this1.fill(12);
 	this.pieces = this1;
@@ -524,6 +574,22 @@ engine_hxconda_board_SquareLists.ofRays = function(rays) {
 	return new engine_hxconda_board_SquareLists(_g);
 };
 var engine_hxconda_board_BoardGeometry = function() { };
+engine_hxconda_board_BoardGeometry.rayDistance = function(rays,directions,square,otherSquare) {
+	var direction = directions[square * 59 + otherSquare];
+	if(direction == -1) {
+		return 0;
+	}
+	var ray = square * 6 + direction;
+	var _g = rays.offsets[ray];
+	var _g1 = rays.offsets[ray + 1];
+	while(_g < _g1) {
+		var k = _g++;
+		if(rays.squares[k] == otherSquare) {
+			return k - rays.offsets[ray] + 1;
+		}
+	}
+	return 0;
+};
 engine_hxconda_board_BoardGeometry.rayLength = function(rays,square) {
 	var length = 0;
 	var list = square * 6;
@@ -605,6 +671,17 @@ engine_hxconda_board_BoardGeometry.computeAdjacency = function() {
 		while(_g2 < _g3.length) _g[square * 59 + _g3[_g2++]] = true;
 	}
 	return _g;
+};
+engine_hxconda_board_BoardGeometry.computeHeights = function() {
+	var heights = [];
+	var _g = 0;
+	while(_g < 9) {
+		var isShifted = _g++ % 2 == 1;
+		var _g1 = 0;
+		var _g2 = isShifted ? 6 : 7;
+		while(_g1 < _g2) heights.push(2 * _g1++ + (isShifted ? 1 : 0));
+	}
+	return heights;
 };
 engine_hxconda_board_BoardGeometry.computeFinalSquareFlags = function() {
 	var _g = [];
@@ -1394,21 +1471,14 @@ engine_hxconda_board_VisitCounts.prototype = {
 	}
 };
 var engine_hxconda_board_ZobristKeys = function(nextKey) {
-	this.pieceKeys = [];
+	this.pieceKeys = new Int32Array(767);
 	var _g = 0;
 	while(_g < 59) {
-		++_g;
+		var square = _g++;
 		var _g1 = 0;
-		while(_g1 < 12) {
-			++_g1;
-			this.pieceKeys.push(nextKey());
-		}
-		this.pieceKeys.push(0);
+		while(_g1 < 12) this.pieceKeys[square * 13 + _g1++] = nextKey();
 	}
 	this.blackToMove = nextKey();
-};
-engine_hxconda_board_ZobristKeys.random = function() {
-	return new engine_hxconda_board_ZobristKeys(engine_hxconda_board_ZobristKeys.randomKey);
 };
 engine_hxconda_board_ZobristKeys.seeded = function(seed) {
 	var state = seed;
@@ -1418,18 +1488,58 @@ engine_hxconda_board_ZobristKeys.seeded = function(seed) {
 		return state;
 	});
 };
-engine_hxconda_board_ZobristKeys.randomKey = function() {
-	var key = 0;
-	var bitValue = 1;
-	var _g = 0;
-	while(_g < 32) {
-		++_g;
-		key += Math.round(Math.random()) * bitValue;
-		bitValue *= 2;
-	}
-	return key | 0;
-};
 var engine_hxconda_evaluation_Evaluation = function() { };
+engine_hxconda_evaluation_Evaluation.useStyle = function(style) {
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[0] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[0];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[1] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[1];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[2] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[2];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[3] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[3];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[4] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[4];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[5] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[5];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[6] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[6];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[7] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[7];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[8] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[8];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[9] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[9];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[10] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[10];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[11] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[11];
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[12] = engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES[12];
+	switch(style) {
+	case "frt":
+		engine_hxconda_evaluation_Evaluation.setPieceValue(8,170);
+		break;
+	case "std":
+		break;
+	case "trl":
+		engine_hxconda_evaluation_Evaluation.setPieceValue(0,115);
+		break;
+	case "unc":
+		engine_hxconda_evaluation_Evaluation.setPieceValue(4,195);
+		break;
+	case "vrz":
+		engine_hxconda_evaluation_Evaluation.setPieceValue(6,230);
+		break;
+	}
+	engine_hxconda_evaluation_Evaluation.advancementFactor = style == "trl" ? 1.5 : 1;
+	engine_hxconda_evaluation_Evaluation.fillPieceSquareScores(engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES);
+};
+engine_hxconda_evaluation_Evaluation.drawScore = function(style,rootColor) {
+	var contempt;
+	switch(style) {
+	case "frt":
+		contempt = 200;
+		break;
+	case "vrz":
+		contempt = -200.;
+		break;
+	default:
+		contempt = 0;
+	}
+	if(rootColor == 0) {
+		return contempt;
+	} else {
+		return -contempt;
+	}
+};
 engine_hxconda_evaluation_Evaluation.computePieceSquareScore = function(piece,square) {
 	var value = engine_hxconda_evaluation_Evaluation.PIECE_VALUES[piece];
 	var distanceToCenter = engine_hxconda_evaluation_Evaluation.DISTANCE_TO_CENTER[square];
@@ -1440,10 +1550,10 @@ engine_hxconda_evaluation_Evaluation.computePieceSquareScore = function(piece,sq
 	switch(piece) {
 	case 0:
 		var _this = engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_STEPS;
-		return value + (_this.offsets[square + 1] - _this.offsets[square]) * 5 + engine_hxconda_evaluation_Evaluation.WHITE_PROGRESSOR_ADVANCEMENT[square];
+		return value + (_this.offsets[square + 1] - _this.offsets[square]) * 5 + engine_hxconda_evaluation_Evaluation.advancement(engine_hxconda_evaluation_Evaluation.WHITE_PROGRESSOR_ADVANCEMENT[square]);
 	case 1:
 		var _this = engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_STEPS;
-		return value - (_this.offsets[square + 1] - _this.offsets[square]) * 5 + engine_hxconda_evaluation_Evaluation.BLACK_PROGRESSOR_ADVANCEMENT[square];
+		return value - (_this.offsets[square + 1] - _this.offsets[square]) * 5 + engine_hxconda_evaluation_Evaluation.advancement(engine_hxconda_evaluation_Evaluation.BLACK_PROGRESSOR_ADVANCEMENT[square]);
 	case 2:
 		return value + engine_hxconda_board_BoardGeometry.rayLength(engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,square) * 5 - distanceToCenter * 5;
 	case 3:
@@ -1461,11 +1571,194 @@ engine_hxconda_evaluation_Evaluation.computePieceSquareScore = function(piece,sq
 	case 9:
 		return value - neighbourCount * 5 + distanceToCenter * 5;
 	case 10:
-		return value + neighbourCount * 5 + engine_hxconda_evaluation_Evaluation.WHITE_INTELLECTOR_ADVANCEMENT[square];
+		return value + neighbourCount * 5 + engine_hxconda_evaluation_Evaluation.advancement(engine_hxconda_evaluation_Evaluation.WHITE_INTELLECTOR_ADVANCEMENT[square]);
 	case 11:
-		return value - neighbourCount * 5 + engine_hxconda_evaluation_Evaluation.BLACK_INTELLECTOR_ADVANCEMENT[square];
+		return value - neighbourCount * 5 + engine_hxconda_evaluation_Evaluation.advancement(engine_hxconda_evaluation_Evaluation.BLACK_INTELLECTOR_ADVANCEMENT[square]);
 	case 12:
 		return 0;
+	}
+};
+engine_hxconda_evaluation_Evaluation.setPieceValue = function(piece,value) {
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[piece] = value;
+	engine_hxconda_evaluation_Evaluation.PIECE_VALUES[piece ^ 1] = -value;
+};
+engine_hxconda_evaluation_Evaluation.fillPieceSquareScores = function(scores) {
+	var _g = 0;
+	while(_g < 13) {
+		var piece = _g++;
+		var _g1 = 0;
+		while(_g1 < 59) {
+			var square = _g1++;
+			scores[piece * 59 + square] = engine_hxconda_evaluation_Evaluation.computePieceSquareScore(piece,square);
+		}
+	}
+	return scores;
+};
+engine_hxconda_evaluation_Evaluation.advancement = function(bonus) {
+	if(Math.abs(bonus) > 90000) {
+		return bonus;
+	} else {
+		return engine_hxconda_evaluation_Evaluation.roundAwayFromZero(bonus * engine_hxconda_evaluation_Evaluation.advancementFactor);
+	}
+};
+engine_hxconda_evaluation_Evaluation.roundAwayFromZero = function(value) {
+	if(value < 0) {
+		return -Math.round(-value);
+	} else {
+		return Math.round(value);
+	}
+};
+var engine_hxconda_evaluation_StyleBonuses = function(board,style) {
+	this.board = board;
+	this.style = style;
+	this.side = board.turn;
+	this.undefendedPieceCount = style == "frt" ? this.countUndefendedPieces() : 0;
+	this.attackedOwnPieceCount = style == "frt" ? this.countAttackedPieces(this.side) : 0;
+	this.attackedOpponentPieceCount = style == "frt" ? this.countAttackedPieces(this.side ^ 1) : 0;
+	this.attackedSquareCount = style == "unc" ? this.countAttackedSquares() : 0;
+};
+engine_hxconda_evaluation_StyleBonuses.prototype = {
+	bonus: function(move) {
+		switch(this.style) {
+		case "frt":
+			return this.fortressBonus(move);
+		case "std":
+			return 0;
+		case "trl":
+			return this.trailblazerBonus(move);
+		case "unc":
+			return this.unchainedBonus(move);
+		case "vrz":
+			return this.vrezhBonus(move);
+		}
+	}
+	,vrezhBonus: function(move) {
+		var movingPiece = this.board.pieces[move & 63];
+		var _this = this.board;
+		var capturedValue;
+		if(_this.pieces[move >> 6 & 63] != 12) {
+			var this1 = _this.pieces[move & 63];
+			capturedValue = !(this1 == 10 || this1 == 11);
+		} else {
+			capturedValue = false;
+		}
+		var capturedValue1 = capturedValue ? Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[this.board.pieces[move >> 6 & 63]]) : 0;
+		this.board.makeMove(move);
+		var bonus = this.board.attacksIntellector(this.side) ? 40 : 0;
+		if(!(movingPiece == 10 || movingPiece == 11) && this.isSacrifice(move >> 6 & 63,capturedValue1)) {
+			bonus += 50;
+		}
+		this.board.unmakeMove();
+		return bonus;
+	}
+	,isSacrifice: function(square,capturedValue) {
+		var opponent = this.side ^ 1;
+		var _this = this.board;
+		if(!(_this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | opponent) || _this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | opponent) || _this.isReachedByStep(square,opponent == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_ORIGINS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_ORIGINS,0 | opponent) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | opponent) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,2 | opponent))) {
+			return false;
+		}
+		var pieceValue = Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[this.board.pieces[square]]);
+		var cheapestAttackerValue = Infinity;
+		var _g = 0;
+		var _g1 = engine_hxconda_board_MoveGenerator.generateCaptures(this.board);
+		while(_g < _g1.length) {
+			var capture = _g1[_g];
+			++_g;
+			if((capture >> 6 & 63) == square) {
+				cheapestAttackerValue = Math.min(cheapestAttackerValue,Math.abs(engine_hxconda_evaluation_Evaluation.PIECE_VALUES[this.board.pieces[capture & 63]]));
+			}
+		}
+		var _this = this.board;
+		var attacker = this.side;
+		return (_this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | attacker) || _this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | attacker) || _this.isReachedByStep(square,attacker == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_ORIGINS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_ORIGINS,0 | attacker) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | attacker) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,2 | attacker) ? pieceValue - cheapestAttackerValue : pieceValue) - capturedValue > 0;
+	}
+	,trailblazerBonus: function(move) {
+		var movingPiece = this.board.pieces[move & 63];
+		if(movingPiece == (0 | this.side)) {
+			return 30;
+		}
+		var advance = engine_hxconda_board_BoardGeometry.HEIGHTS[move >> 6 & 63] - engine_hxconda_board_BoardGeometry.HEIGHTS[move & 63];
+		if((movingPiece == 10 || movingPiece == 11) && (this.side == 0 ? advance > 0 : advance < 0)) {
+			return 30;
+		}
+		return 0;
+	}
+	,fortressBonus: function(move) {
+		this.board.makeMove(move);
+		var bonus = -20. * (this.countUndefendedPieces() - this.undefendedPieceCount);
+		if(this.attackedOwnPieceCount > 0 && this.countAttackedPieces(this.side) >= this.attackedOwnPieceCount && this.countAttackedPieces(this.side ^ 1) > this.attackedOpponentPieceCount) {
+			bonus -= 40;
+		}
+		this.board.unmakeMove();
+		return bonus;
+	}
+	,unchainedBonus: function(move) {
+		var movingPiece = this.board.pieces[move & 63];
+		var bonus = 0;
+		if(movingPiece == (4 | this.side) && !engine_hxconda_board_BoardGeometry.ADJACENCY[(move & 63) * 59 + (move >> 6 & 63)]) {
+			bonus = 25.;
+		} else if(movingPiece == (6 | this.side)) {
+			bonus += 8 * (engine_hxconda_board_BoardGeometry.rayDistance(engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,engine_hxconda_board_BoardGeometry.AGGRESSOR_DIRECTIONS,move & 63,move >> 6 & 63) - 1);
+		} else if(movingPiece == (2 | this.side)) {
+			bonus += 8 * (engine_hxconda_board_BoardGeometry.rayDistance(engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,engine_hxconda_board_BoardGeometry.DOMINATOR_DIRECTIONS,move & 63,move >> 6 & 63) - 1);
+		}
+		this.board.makeMove(move);
+		bonus += 3 * (this.countAttackedSquares() - this.attackedSquareCount);
+		this.board.unmakeMove();
+		return bonus;
+	}
+	,countUndefendedPieces: function() {
+		var count = 0;
+		var _g = 0;
+		while(_g < 59) {
+			var square = _g++;
+			var piece = this.board.pieces[square];
+			var tmp;
+			if(piece != 12 && (piece & 1) == this.side && !(piece == 10 || piece == 11)) {
+				var _this = this.board;
+				var attacker = this.side;
+				tmp = !(_this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | attacker) || _this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | attacker) || _this.isReachedByStep(square,attacker == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_ORIGINS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_ORIGINS,0 | attacker) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | attacker) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,2 | attacker));
+			} else {
+				tmp = false;
+			}
+			if(tmp) {
+				++count;
+			}
+		}
+		return count;
+	}
+	,countAttackedPieces: function(victim) {
+		var count = 0;
+		var _g = 0;
+		while(_g < 59) {
+			var square = _g++;
+			var piece = this.board.pieces[square];
+			var tmp;
+			if(piece != 12 && (piece & 1) == victim && (victim != this.side || !(piece == 10 || piece == 11))) {
+				var _this = this.board;
+				var attacker = victim ^ 1;
+				tmp = _this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | attacker) || _this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | attacker) || _this.isReachedByStep(square,attacker == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_ORIGINS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_ORIGINS,0 | attacker) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | attacker) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,2 | attacker);
+			} else {
+				tmp = false;
+			}
+			if(tmp) {
+				++count;
+			}
+		}
+		return count;
+	}
+	,countAttackedSquares: function() {
+		var count = 0;
+		var _g = 0;
+		while(_g < 59) {
+			var square = _g++;
+			var _this = this.board;
+			var attacker = this.side;
+			if(_this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.NEIGHBOURS,8 | attacker) || _this.isReachedByStep(square,engine_hxconda_board_BoardGeometry.LIBERATOR_JUMPS,4 | attacker) || _this.isReachedByStep(square,attacker == 0 ? engine_hxconda_board_BoardGeometry.WHITE_PROGRESSOR_ORIGINS : engine_hxconda_board_BoardGeometry.BLACK_PROGRESSOR_ORIGINS,0 | attacker) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS,6 | attacker) || _this.isReachedBySlide(square,engine_hxconda_board_BoardGeometry.DOMINATOR_RAYS,2 | attacker)) {
+				++count;
+			}
+		}
+		return count;
 	}
 };
 var engine_hxconda_protocol_HxcondaProtocol = function() { };
@@ -1491,7 +1784,10 @@ engine_hxconda_protocol_HxcondaProtocol.reportMessage = function(report) {
 engine_hxconda_protocol_HxcondaProtocol.moveMessage = function(move) {
 	return { from : move & 63, to : move >> 6 & 63, resultingPiece : move >> 12};
 };
-var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBudget = function(board,budget,noiseAmplitude) {
+var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBudget = function(board,budget,noiseAmplitude,drawScore,memory) {
+	if(drawScore == null) {
+		drawScore = 0;
+	}
 	this.isNullMoveChild = false;
 	this.isAborted = false;
 	this.resultIsDraw = false;
@@ -1499,13 +1795,6 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Dept
 	this.resultMoveIsQuiet = false;
 	this.resultMove = -1;
 	this.ply = 0;
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < 256) {
-		++_g1;
-		_g.push(-1);
-	}
-	this.killers = _g;
 	this.currentRootMoveIndex = 0;
 	var _g = [];
 	var _g1 = 0;
@@ -1515,10 +1804,13 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Dept
 	}
 	this.quiescenceCaptureCounts = _g;
 	this.report = new engine_hxconda_search_BestMoveReport();
-	this.history = new engine_hxconda_search_SearchHistory();
-	this.table = new engine_hxconda_search_TranspositionTable();
+	var searchMemory = memory != null ? memory : new engine_hxconda_search_SearchMemory();
+	this.table = searchMemory.table;
+	this.history = searchMemory.history;
+	this.killers = searchMemory.killers;
 	this.board = board;
 	this.budget = budget;
+	this.drawScore = drawScore;
 	this.rootMoves = engine_hxconda_board_MoveGenerator.generateMoves(board);
 	var _g = [];
 	var _g1 = 0;
@@ -1548,7 +1840,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		while(true) {
 			var _this = this.budget;
 			var tmp;
-			if(_this.completedDepth < _this.maxDepth) {
+			if(_this.completedDepth < _this.maxDepth && !_this.isDecided) {
 				if(_this.isCapped && !_this.isOverdue && _this.deadline - performance.now() < 0) {
 					_this.isOverdue = true;
 				}
@@ -1559,42 +1851,13 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			if(!tmp) {
 				break;
 			}
-			var alpha;
-			var beta;
-			if((this.board.turn + iteration + 1) % 2 == 0) {
-				alpha = expectedScore - 10;
-				beta = expectedScore + 20;
-			} else {
-				alpha = expectedScore - 20;
-				beta = expectedScore + 10;
-			}
-			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			if(score <= alpha) {
-				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			} else if(score >= beta) {
-				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			}
-			expectedScore = score;
-			if(this.resultMove == -1) {
-				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			}
+			expectedScore = this.searchIteration(iteration,expectedScore,rootHash,rootVerificationKey,rootIsInCheck);
 			var _this1 = this.budget;
-			var tmp1;
-			if(_this1.completedDepth < _this1.maxDepth) {
-				if(_this1.isCapped && !_this1.isOverdue && _this1.deadline - performance.now() < 0) {
-					_this1.isOverdue = true;
-				}
-				tmp1 = !_this1.isOverdue;
-			} else {
-				tmp1 = false;
-			}
-			if(tmp1 || iteration == 1) {
-				this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
-			}
-			var _this2 = this.budget;
-			if(!_this2.isOverdue || _this2.completedDepth == 0) {
-				_this2.completedDepth++;
-				_this2.onIteration(this.report);
+			var report = this.report;
+			if(!_this1.isOverdue || _this1.completedDepth == 0) {
+				_this1.completedDepth++;
+				_this1.isDecided = Math.abs(report.score) > 90000;
+				_this1.onIteration(report);
 			}
 			if(this.report.move == -1) {
 				throw haxe_Exception.thrown("Anaconda found no move to play");
@@ -1602,6 +1865,316 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			++iteration;
 		}
 		return this.report;
+	}
+	,searchIteration: function(iteration,expectedScore,rootHash,rootVerificationKey,rootIsInCheck) {
+		var margin = 50;
+		var alpha = expectedScore - 50;
+		var beta = expectedScore + 50;
+		var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		var hasFailedLow = false;
+		var hasFailedHigh = false;
+		while(!this.isAborted && (score <= alpha && alpha > -Infinity || score >= beta && beta < Infinity)) {
+			margin *= 4;
+			var isLastWidening = margin > 400;
+			if(score <= alpha) {
+				hasFailedLow = true;
+			} else {
+				hasFailedHigh = true;
+			}
+			if(hasFailedLow && hasFailedHigh) {
+				alpha = -Infinity;
+				beta = Infinity;
+			} else if(score <= alpha) {
+				var failedBound = alpha;
+				alpha = isLastWidening ? -Infinity : expectedScore - margin;
+				beta = failedBound + 1;
+			} else {
+				var failedBound1 = beta;
+				beta = isLastWidening ? Infinity : expectedScore + margin;
+				alpha = failedBound1 - 1;
+			}
+			score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		}
+		var nextExpectedScore = score;
+		if(this.resultMove == -1) {
+			score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		}
+		var _this = this.budget;
+		var tmp;
+		if(_this.completedDepth < _this.maxDepth && !_this.isDecided) {
+			if(_this.isCapped && !_this.isOverdue && _this.deadline - performance.now() < 0) {
+				_this.isOverdue = true;
+			}
+			tmp = !_this.isOverdue;
+		} else {
+			tmp = false;
+		}
+		if(tmp || iteration == 1) {
+			this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
+		}
+		return nextExpectedScore;
+	}
+	,scoreRootMoves: function(weakening) {
+		if(this.rootMoves.length == 0 || this.board.decisiveScore() != null) {
+			return null;
+		}
+		var sign = this.board.turn == 0 ? 1 : -1;
+		var rootHash = this.board.hash();
+		var rootVerificationKey = this.board.verificationKey();
+		var _this = this.board;
+		var rootIsInCheck = _this.attacksIntellector(_this.turn ^ 1);
+		var expectedScore = 0;
+		var completedScores = null;
+		var abandonedScores = null;
+		var iteration = 1;
+		var _this = this.budget;
+		if(_this.isCapped) {
+			_this.deadline = performance.now() + _this.timeCapMs;
+		}
+		while(true) {
+			var _this = this.budget;
+			var tmp;
+			if(_this.completedDepth < _this.maxDepth && !_this.isDecided) {
+				if(_this.isCapped && !_this.isOverdue && _this.deadline - performance.now() < 0) {
+					_this.isOverdue = true;
+				}
+				tmp = !_this.isOverdue;
+			} else {
+				tmp = false;
+			}
+			if(!tmp) {
+				break;
+			}
+			if(!(iteration <= 2 || iteration % 2 == 0 && iteration >= weakening.scoredFromDepth)) {
+				expectedScore = this.searchIteration(iteration,expectedScore,rootHash,rootVerificationKey,rootIsInCheck);
+				var _this1 = this.budget;
+				var report = this.report;
+				if(!_this1.isOverdue || _this1.completedDepth == 0) {
+					_this1.completedDepth++;
+					_this1.isDecided = Math.abs(report.score) > 90000;
+					_this1.onIteration(report);
+				}
+				++iteration;
+				continue;
+			}
+			var scores = this.scoreRootMovesAt(iteration,weakening,rootHash,rootVerificationKey,completedScores);
+			var _this2 = this.budget;
+			var isCompleted;
+			if(_this2.completedDepth < _this2.maxDepth && !_this2.isDecided) {
+				if(_this2.isCapped && !_this2.isOverdue && _this2.deadline - performance.now() < 0) {
+					_this2.isOverdue = true;
+				}
+				isCompleted = !_this2.isOverdue;
+			} else {
+				isCompleted = false;
+			}
+			if(isCompleted || iteration == 1) {
+				var best = scores.bestIndex();
+				expectedScore = sign * scores.values[best];
+				this.report.record(scores.moves[best],expectedScore,iteration,scores.exactCount(),scores.lines[best]);
+				if(iteration % 2 == 0 || completedScores == null) {
+					completedScores = scores;
+				}
+			} else if(iteration % 2 == 0) {
+				abandonedScores = scores;
+			}
+			var _this3 = this.budget;
+			var report1 = this.report;
+			if(!_this3.isOverdue || _this3.completedDepth == 0) {
+				_this3.completedDepth++;
+				_this3.isDecided = Math.abs(report1.score) > 90000;
+				_this3.onIteration(report1);
+			}
+			++iteration;
+		}
+		if(abandonedScores == null) {
+			return completedScores;
+		}
+		var abandonedBest = abandonedScores.bestIndex();
+		if(abandonedBest == -1 || abandonedScores.moves[abandonedBest] == completedScores.moves[completedScores.bestIndex()]) {
+			return completedScores;
+		}
+		return engine_hxconda_search_weakening_RootMoveScores.merge(completedScores,abandonedScores);
+	}
+	,scoreRootMovesAt: function(depth,weakening,hash,verificationKey,previous) {
+		var scores = new engine_hxconda_search_weakening_RootMoveScores(depth);
+		var moves = this.orderedMoves(depth,hash,verificationKey);
+		if(previous != null) {
+			var hashMove = moves[0];
+			var _g = [];
+			var _g1 = 0;
+			while(_g1 < moves.length) _g.push(previous.orderingKey(moves[_g1++]));
+			engine_hxconda_search_SearchTuning.sortByKeys(moves,_g,true);
+			engine_hxconda_search_SearchTuning.putFirst(moves,hashMove);
+		}
+		var pending = moves.slice();
+		var bestValue = null;
+		while(pending.length > 0) {
+			var move = pending.shift();
+			if(bestValue != null && scores.isPlacedAgainst(move,bestValue,weakening)) {
+				continue;
+			}
+			var isNewBest = this.scoreRootMove(scores,move,moves.indexOf(move),depth,weakening,bestValue,hash,verificationKey);
+			if(this.isAborted) {
+				break;
+			}
+			if(!isNewBest) {
+				continue;
+			}
+			var isReplacingBest = bestValue != null;
+			bestValue = scores.values[scores.moves.indexOf(move)];
+			if(isReplacingBest) {
+				var _g = [];
+				var _g1 = 0;
+				while(_g1 < moves.length) {
+					var other = moves[_g1];
+					++_g1;
+					if(other != move && (pending.indexOf(other) != -1 || !scores.isExact(other))) {
+						_g.push(other);
+					}
+				}
+				pending = _g;
+			}
+		}
+		return scores;
+	}
+	,scoreRootMove: function(scores,move,index,depth,weakening,bestValue,hash,verificationKey) {
+		var _gthis = this;
+		var sign = this.board.turn == 0 ? 1 : -1;
+		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
+		this.currentRootMoveIndex = this.rootMoves.indexOf(move);
+		var _this = this.board;
+		var isCapture;
+		if(_this.pieces[move >> 6 & 63] != 12) {
+			var this1 = _this.pieces[move & 63];
+			isCapture = !(this1 == 10 || this1 == 11);
+		} else {
+			isCapture = false;
+		}
+		var childHash = this.board.hashAfter(hash,move);
+		var childVerificationKey = depth >= 2 ? this.board.verificationKeyAfter(verificationKey,move) : 0;
+		var tracksRepetition = depth >= 2;
+		this.board.makeMove(move);
+		this.ply++;
+		if(tracksRepetition) {
+			if(childHash != 0) {
+				this.board.visitCounts.increment(childHash);
+			}
+		}
+		var isCheck;
+		if(attacksIntellector) {
+			var _this = this.board;
+			isCheck = _this.attacksIntellector(_this.turn ^ 1);
+		} else {
+			isCheck = this.board.isIntellectorAttackedAfter(move);
+		}
+		var extension = this.moveExtension(move,isCapture,isCheck,true,index,depth,depth);
+		var isReduced = extension < 0;
+		var unreducedExtension = isReduced ? 0 : extension;
+		var probe = function(lower,upper,childExtension) {
+			var score = sign > 0 ? _gthis.search(lower,upper,depth - 1,childExtension,depth,childHash,childVerificationKey,false,isCheck) : -_gthis.search(-upper,-lower,depth - 1,childExtension,depth,childHash,childVerificationKey,false,isCheck);
+			if(score > 90000) {
+				return score - 1;
+			} else if(score < -90000.) {
+				return score + 1;
+			} else {
+				return score;
+			}
+		};
+		var test = function(threshold,isFinal) {
+			var value = probe(threshold,threshold + 1,extension);
+			if(value > threshold && isReduced && isFinal && !_gthis.isAborted) {
+				value = probe(threshold,threshold + 1,unreducedExtension);
+			}
+			return value;
+		};
+		var probeNear = function(lowerBound,lower,upper) {
+			if(lowerBound >= upper) {
+				return probe(lower,upper,unreducedExtension);
+			}
+			var narrowLower = Math.max(lower,lowerBound - 1);
+			var narrowUpper = Math.min(upper,lowerBound + 20);
+			var value = probe(narrowLower,narrowUpper,unreducedExtension);
+			if(_gthis.isAborted || value > narrowLower && value < narrowUpper) {
+				return value;
+			}
+			if(value >= narrowUpper) {
+				if(value >= upper) {
+					return value;
+				} else {
+					return probe(Math.max(lower,value - 1),upper,unreducedExtension);
+				}
+			}
+			if(narrowLower == lower) {
+				return value;
+			} else {
+				return probe(lower,upper,unreducedExtension);
+			}
+		};
+		var exactLine = function() {
+			var line = engine_hxconda_search_SearchTuning.extendLine(_gthis.resultLine,move);
+			line.reverse();
+			return line;
+		};
+		var bound = 0;
+		var value;
+		var line = null;
+		var isNewBest = false;
+		if(bestValue == null) {
+			value = probe(-Infinity,Infinity,unreducedExtension);
+			line = exactLine();
+			isNewBest = true;
+		} else {
+			var top = bestValue - weakening.minLoss;
+			value = test(bestValue,false);
+			if(value > bestValue && !this.isAborted) {
+				value = probe(bestValue,Infinity,unreducedExtension);
+				if(value > bestValue) {
+					line = exactLine();
+					isNewBest = true;
+				}
+			}
+			if(!isNewBest && value > top && !this.isAborted) {
+				value = test(top,true);
+			}
+			if(isNewBest) {
+				bound = 0;
+			} else if(value > top) {
+				bound = 1;
+			} else {
+				var threshold = scores.candidateThreshold(bestValue,weakening);
+				var isTested = false;
+				bound = 2;
+				if(value > threshold && threshold > -Infinity && !this.isAborted) {
+					value = test(threshold,false);
+					isTested = true;
+				}
+				if(value > threshold && !this.isAborted) {
+					value = isTested ? probeNear(value,threshold,top + 1) : probe(threshold,top + 1,unreducedExtension);
+					if(value > threshold && value <= top) {
+						bound = 0;
+						line = exactLine();
+					} else if(value > top) {
+						bound = 1;
+					}
+				}
+			}
+		}
+		this.board.unmakeMove();
+		this.ply--;
+		if(tracksRepetition) {
+			if(childHash != 0) {
+				this.board.visitCounts.decrement(childHash);
+			}
+		}
+		if(!this.isAborted) {
+			scores.set(move,bound,value,line);
+		}
+		if(isNewBest) {
+			return !this.isAborted;
+		} else {
+			return false;
+		}
 	}
 	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
 		var followsNullMove = this.isNullMoveChild;
@@ -1640,9 +2213,9 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			this.resultMove = -1;
 			this.resultLine = null;
 			this.resultIsDraw = true;
-			return 0;
+			return this.drawScore;
 		}
-		if(depth >= 2) {
+		if(depth >= 2 && !isRoot) {
 			switch(this.table.probe(hash,verificationKey,alpha,beta,depth)) {
 			case 1:
 				this.resultMove = this.table.cutoffMove;
@@ -1707,6 +2280,19 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 				return nullMoveScore;
 			}
 		}
+		if(depth >= 4 && !isRoot && this.table.bestMove(hash,verificationKey) == -1) {
+			--depth;
+		}
+		if(depth >= 1 && depth <= 6 && !isRoot && !isInCheck && beta - alpha <= 1 && Math.abs(alpha) < 90000 && Math.abs(beta) < 90000) {
+			var staticScore = this.evaluate();
+			var margin = 60 * depth;
+			if(this.board.turn == 0 ? staticScore - margin >= beta : staticScore + margin <= alpha) {
+				this.resultMove = -1;
+				this.resultLine = null;
+				this.resultIsDraw = false;
+				return staticScore;
+			}
+		}
 		if(depth < 1) {
 			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
@@ -1729,7 +2315,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		if(isWhite ? beta > 90000 || staticScore < beta : alpha < -90000. || staticScore > alpha) {
 			return null;
 		}
-		var reduction = 2 + (depth >= 6 ? 1 : 0);
+		var reduction = 3 + (depth >> 2);
 		var _this = this.board;
 		_this.turn = _this.turn ^ 1;
 		this.ply++;
@@ -1770,10 +2356,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		var bestMoveIsQuiet = false;
 		var bestLine = [];
 		var moves = this.orderedMoves(depth,hash,verificationKey);
-		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
-		while(_g < moveCount) {
+		var _g1 = moves.length;
+		while(_g < _g1) {
 			var i = _g++;
 			var move = moves[i];
 			if(isRoot) {
@@ -1804,7 +2390,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture,isCheck,isRoot,i,depth,maxDepth);
 			var isReduced = adjustment < 0;
 			var childExtension = extension + adjustment;
 			var unreducedExtension = isReduced ? extension : childExtension;
@@ -1856,23 +2442,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 				bestMove = move;
 				bestMoveIsQuiet = isQuiet;
 			}
-			if(value >= beta) {
-				if(!isCapture) {
-					this.history.cutoffWeights[move] += depth * depth;
-					var killerSlot = 2 * this.ply;
-					if(this.ply < 128 && this.killers[killerSlot] != move) {
-						this.killers[killerSlot + 1] = this.killers[killerSlot];
-						this.killers[killerSlot] = move;
-					}
-				}
-				break;
-			}
 			var tmp;
-			if(bestMove != -1) {
+			if(value < beta && bestMove != -1) {
 				var _this2 = this.budget;
 				if(depth == maxDepth) {
 					var tmp1;
-					if(_this2.completedDepth < _this2.maxDepth) {
+					if(_this2.completedDepth < _this2.maxDepth && !_this2.isDecided) {
 						if(_this2.isCapped && !_this2.isOverdue && _this2.deadline - performance.now() < 0) {
 							_this2.isOverdue = true;
 						}
@@ -1889,6 +2464,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			}
 			if(tmp) {
 				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
+			}
+			if(value >= beta || value > 90000) {
+				if(!isCapture) {
+					this.history.cutoffWeights[move] += depth * depth;
+					var killerSlot = 2 * this.ply;
+					if(this.ply < 128 && this.killers[killerSlot] != move) {
+						this.killers[killerSlot + 1] = this.killers[killerSlot];
+						this.killers[killerSlot] = move;
+					}
+				}
+				break;
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
@@ -1908,10 +2494,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		var bestMoveIsQuiet = false;
 		var bestLine = [];
 		var moves = this.orderedMoves(depth,hash,verificationKey);
-		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
-		while(_g < moveCount) {
+		var _g1 = moves.length;
+		while(_g < _g1) {
 			var i = _g++;
 			var move = moves[i];
 			if(isRoot) {
@@ -1942,7 +2528,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture,isCheck,isRoot,i,depth,maxDepth);
 			var isReduced = adjustment < 0;
 			var childExtension = extension + adjustment;
 			var unreducedExtension = isReduced ? extension : childExtension;
@@ -1994,23 +2580,12 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 				bestMove = move;
 				bestMoveIsQuiet = isQuiet;
 			}
-			if(value <= alpha) {
-				if(!isCapture) {
-					this.history.cutoffWeights[move] += depth * depth;
-					var killerSlot = 2 * this.ply;
-					if(this.ply < 128 && this.killers[killerSlot] != move) {
-						this.killers[killerSlot + 1] = this.killers[killerSlot];
-						this.killers[killerSlot] = move;
-					}
-				}
-				break;
-			}
 			var tmp;
-			if(bestMove != -1) {
+			if(value > alpha && bestMove != -1) {
 				var _this2 = this.budget;
 				if(depth == maxDepth) {
 					var tmp1;
-					if(_this2.completedDepth < _this2.maxDepth) {
+					if(_this2.completedDepth < _this2.maxDepth && !_this2.isDecided) {
 						if(_this2.isCapped && !_this2.isOverdue && _this2.deadline - performance.now() < 0) {
 							_this2.isOverdue = true;
 						}
@@ -2028,6 +2603,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 			if(tmp) {
 				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
 			}
+			if(value <= alpha || value < -90000.) {
+				if(!isCapture) {
+					this.history.cutoffWeights[move] += depth * depth;
+					var killerSlot = 2 * this.ply;
+					if(this.ply < 128 && this.killers[killerSlot] != move) {
+						this.killers[killerSlot + 1] = this.killers[killerSlot];
+						this.killers[killerSlot] = move;
+					}
+				}
+				break;
+			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
 		var isDraw = valueIsDraw;
@@ -2039,17 +2625,20 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		this.resultIsDraw = isDraw;
 		return value;
 	}
-	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash,childVerificationKey) {
-		if(isTactical) {
+	,moveExtension: function(move,isCapture,isCheck,isRoot,index,depth,maxDepth) {
+		if(isCheck) {
 			return 0.5;
+		}
+		if(isCapture || isRoot || index < 2) {
+			return 0;
 		}
 		var extension = 0;
 		if(this.history.quietVisitCounts[move] >= maxDepth * maxDepth * 2) {
 			var _this = this.history;
 			extension = -1 / (100 * (_this.quietBestCounts[move] / _this.quietVisitCounts[move]) + 0.5);
 		}
-		if(depth >= 2 && this.table.deepestDepth(childHash,childVerificationKey) >= 3) {
-			extension -= index / moveCount;
+		if(depth >= 3) {
+			extension -= Math.min(4,0.75 * Math.log(depth) * Math.log(index + 1));
 		}
 		return extension;
 	}
@@ -2320,7 +2909,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$DepthBud
 		return captures;
 	}
 };
-var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget = function(board,budget,noiseAmplitude) {
+var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudget = function(board,budget,noiseAmplitude,drawScore,memory) {
+	if(drawScore == null) {
+		drawScore = 0;
+	}
 	this.isNullMoveChild = false;
 	this.isAborted = false;
 	this.resultIsDraw = false;
@@ -2328,13 +2920,6 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Node
 	this.resultMoveIsQuiet = false;
 	this.resultMove = -1;
 	this.ply = 0;
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < 256) {
-		++_g1;
-		_g.push(-1);
-	}
-	this.killers = _g;
 	this.currentRootMoveIndex = 0;
 	var _g = [];
 	var _g1 = 0;
@@ -2344,10 +2929,13 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Node
 	}
 	this.quiescenceCaptureCounts = _g;
 	this.report = new engine_hxconda_search_BestMoveReport();
-	this.history = new engine_hxconda_search_SearchHistory();
-	this.table = new engine_hxconda_search_TranspositionTable();
+	var searchMemory = memory != null ? memory : new engine_hxconda_search_SearchMemory();
+	this.table = searchMemory.table;
+	this.history = searchMemory.history;
+	this.killers = searchMemory.killers;
 	this.board = board;
 	this.budget = budget;
+	this.drawScore = drawScore;
 	this.rootMoves = engine_hxconda_board_MoveGenerator.generateMoves(board);
 	var _g = [];
 	var _g1 = 0;
@@ -2375,35 +2963,52 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			if(!(_this.nodeLimit - _this.nodeCount > 0)) {
 				break;
 			}
-			var alpha;
-			var beta;
-			if((this.board.turn + iteration + 1) % 2 == 0) {
-				alpha = expectedScore - 10;
-				beta = expectedScore + 20;
-			} else {
-				alpha = expectedScore - 20;
-				beta = expectedScore + 10;
-			}
-			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			if(score <= alpha) {
-				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			} else if(score >= beta) {
-				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			}
-			expectedScore = score;
-			if(this.resultMove == -1) {
-				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			}
-			var _this1 = this.budget;
-			if(_this1.nodeLimit - _this1.nodeCount > 0 || iteration == 1) {
-				this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
-			}
+			expectedScore = this.searchIteration(iteration,expectedScore,rootHash,rootVerificationKey,rootIsInCheck);
 			if(this.report.move == -1) {
 				throw haxe_Exception.thrown("Anaconda found no move to play");
 			}
 			++iteration;
 		}
 		return this.report;
+	}
+	,searchIteration: function(iteration,expectedScore,rootHash,rootVerificationKey,rootIsInCheck) {
+		var margin = 50;
+		var alpha = expectedScore - 50;
+		var beta = expectedScore + 50;
+		var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		var hasFailedLow = false;
+		var hasFailedHigh = false;
+		while(!this.isAborted && (score <= alpha && alpha > -Infinity || score >= beta && beta < Infinity)) {
+			margin *= 4;
+			var isLastWidening = margin > 400;
+			if(score <= alpha) {
+				hasFailedLow = true;
+			} else {
+				hasFailedHigh = true;
+			}
+			if(hasFailedLow && hasFailedHigh) {
+				alpha = -Infinity;
+				beta = Infinity;
+			} else if(score <= alpha) {
+				var failedBound = alpha;
+				alpha = isLastWidening ? -Infinity : expectedScore - margin;
+				beta = failedBound + 1;
+			} else {
+				var failedBound1 = beta;
+				beta = isLastWidening ? Infinity : expectedScore + margin;
+				alpha = failedBound1 - 1;
+			}
+			score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		}
+		var nextExpectedScore = score;
+		if(this.resultMove == -1) {
+			score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		}
+		var _this = this.budget;
+		if(_this.nodeLimit - _this.nodeCount > 0 || iteration == 1) {
+			this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
+		}
+		return nextExpectedScore;
 	}
 	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
 		var followsNullMove = this.isNullMoveChild;
@@ -2444,9 +3049,9 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			this.resultMove = -1;
 			this.resultLine = null;
 			this.resultIsDraw = true;
-			return 0;
+			return this.drawScore;
 		}
-		if(depth >= 2) {
+		if(depth >= 2 && !isRoot) {
 			switch(this.table.probe(hash,verificationKey,alpha,beta,depth)) {
 			case 1:
 				this.resultMove = this.table.cutoffMove;
@@ -2454,10 +3059,8 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				this.resultIsDraw = false;
 				return this.table.cutoffScore;
 			case 2:
-				if(!isRoot) {
-					alpha = this.table.narrowedAlpha;
-					beta = this.table.narrowedBeta;
-				}
+				alpha = this.table.narrowedAlpha;
+				beta = this.table.narrowedBeta;
 				break;
 			default:
 			}
@@ -2513,6 +3116,19 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				return nullMoveScore;
 			}
 		}
+		if(depth >= 4 && !isRoot && this.table.bestMove(hash,verificationKey) == -1) {
+			--depth;
+		}
+		if(depth >= 1 && depth <= 6 && !isRoot && !isInCheck && beta - alpha <= 1 && Math.abs(alpha) < 90000 && Math.abs(beta) < 90000) {
+			var staticScore = this.evaluate();
+			var margin = 60 * depth;
+			if(this.board.turn == 0 ? staticScore - margin >= beta : staticScore + margin <= alpha) {
+				this.resultMove = -1;
+				this.resultLine = null;
+				this.resultIsDraw = false;
+				return staticScore;
+			}
+		}
 		if(depth < 1) {
 			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
@@ -2535,7 +3151,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		if(isWhite ? beta > 90000 || staticScore < beta : alpha < -90000. || staticScore > alpha) {
 			return null;
 		}
-		var reduction = 2 + (depth >= 6 ? 1 : 0);
+		var reduction = 3 + (depth >> 2);
 		var _this = this.board;
 		_this.turn = _this.turn ^ 1;
 		this.ply++;
@@ -2576,10 +3192,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		var bestMoveIsQuiet = false;
 		var bestLine = null;
 		var moves = this.orderedMoves(depth,hash,verificationKey);
-		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
-		while(_g < moveCount) {
+		var _g1 = moves.length;
+		while(_g < _g1) {
 			var i = _g++;
 			var move = moves[i];
 			if(isRoot) {
@@ -2610,7 +3226,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture,isCheck,isRoot,i,depth,maxDepth);
 			var isReduced = adjustment < 0;
 			var childExtension = extension + adjustment;
 			var unreducedExtension = isReduced ? extension : childExtension;
@@ -2655,7 +3271,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				bestMove = move;
 				bestMoveIsQuiet = isQuiet;
 			}
-			if(value >= beta) {
+			var tmp;
+			if(value < beta && bestMove != -1) {
+				var _this2 = this.budget;
+				tmp = isRoot && (_this2.nodeLimit - _this2.nodeCount > 0 || maxDepth <= 1);
+			} else {
+				tmp = false;
+			}
+			if(tmp) {
+				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
+			}
+			if(value >= beta || value > 90000) {
 				if(!isCapture) {
 					this.history.cutoffWeights[move] += depth * depth;
 					var killerSlot = 2 * this.ply;
@@ -2665,16 +3291,6 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 					}
 				}
 				break;
-			}
-			var tmp;
-			if(bestMove != -1) {
-				var _this2 = this.budget;
-				tmp = isRoot && (_this2.nodeLimit - _this2.nodeCount > 0 || maxDepth <= 1);
-			} else {
-				tmp = false;
-			}
-			if(tmp) {
-				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
@@ -2694,10 +3310,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		var bestMoveIsQuiet = false;
 		var bestLine = null;
 		var moves = this.orderedMoves(depth,hash,verificationKey);
-		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
-		while(_g < moveCount) {
+		var _g1 = moves.length;
+		while(_g < _g1) {
 			var i = _g++;
 			var move = moves[i];
 			if(isRoot) {
@@ -2728,7 +3344,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture,isCheck,isRoot,i,depth,maxDepth);
 			var isReduced = adjustment < 0;
 			var childExtension = extension + adjustment;
 			var unreducedExtension = isReduced ? extension : childExtension;
@@ -2773,7 +3389,17 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 				bestMove = move;
 				bestMoveIsQuiet = isQuiet;
 			}
-			if(value <= alpha) {
+			var tmp;
+			if(value > alpha && bestMove != -1) {
+				var _this2 = this.budget;
+				tmp = isRoot && (_this2.nodeLimit - _this2.nodeCount > 0 || maxDepth <= 1);
+			} else {
+				tmp = false;
+			}
+			if(tmp) {
+				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
+			}
+			if(value <= alpha || value < -90000.) {
 				if(!isCapture) {
 					this.history.cutoffWeights[move] += depth * depth;
 					var killerSlot = 2 * this.ply;
@@ -2783,16 +3409,6 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 					}
 				}
 				break;
-			}
-			var tmp;
-			if(bestMove != -1) {
-				var _this2 = this.budget;
-				tmp = isRoot && (_this2.nodeLimit - _this2.nodeCount > 0 || maxDepth <= 1);
-			} else {
-				tmp = false;
-			}
-			if(tmp) {
-				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
@@ -2805,17 +3421,20 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		this.resultIsDraw = isDraw;
 		return value;
 	}
-	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash,childVerificationKey) {
-		if(isTactical) {
+	,moveExtension: function(move,isCapture,isCheck,isRoot,index,depth,maxDepth) {
+		if(isCheck) {
 			return 0.5;
+		}
+		if(isCapture || isRoot || index < 2) {
+			return 0;
 		}
 		var extension = 0;
 		if(this.history.quietVisitCounts[move] >= maxDepth * maxDepth * 2) {
 			var _this = this.history;
 			extension = -1 / (100 * (_this.quietBestCounts[move] / _this.quietVisitCounts[move]) + 0.5);
 		}
-		if(depth >= 2 && this.table.deepestDepth(childHash,childVerificationKey) >= 3) {
-			extension -= index / moveCount;
+		if(depth >= 3) {
+			extension -= Math.min(4,0.75 * Math.log(depth) * Math.log(index + 1));
 		}
 		return extension;
 	}
@@ -3086,7 +3705,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$NodeBudg
 		return captures;
 	}
 };
-var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget = function(board,budget,noiseAmplitude) {
+var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudget = function(board,budget,noiseAmplitude,drawScore,memory) {
+	if(drawScore == null) {
+		drawScore = 0;
+	}
 	this.isNullMoveChild = false;
 	this.isAborted = false;
 	this.resultIsDraw = false;
@@ -3094,13 +3716,6 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Time
 	this.resultMoveIsQuiet = false;
 	this.resultMove = -1;
 	this.ply = 0;
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < 256) {
-		++_g1;
-		_g.push(-1);
-	}
-	this.killers = _g;
 	this.currentRootMoveIndex = 0;
 	var _g = [];
 	var _g1 = 0;
@@ -3110,10 +3725,13 @@ var engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$Time
 	}
 	this.quiescenceCaptureCounts = _g;
 	this.report = new engine_hxconda_search_BestMoveReport();
-	this.history = new engine_hxconda_search_SearchHistory();
-	this.table = new engine_hxconda_search_TranspositionTable();
+	var searchMemory = memory != null ? memory : new engine_hxconda_search_SearchMemory();
+	this.table = searchMemory.table;
+	this.history = searchMemory.history;
+	this.killers = searchMemory.killers;
 	this.board = board;
 	this.budget = budget;
+	this.drawScore = drawScore;
 	this.rootMoves = engine_hxconda_board_MoveGenerator.generateMoves(board);
 	var _g = [];
 	var _g1 = 0;
@@ -3139,28 +3757,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		var _this = this.budget;
 		_this.deadline = performance.now() + _this.durationMs;
 		while(this.budget.deadline - performance.now() > 0) {
-			var alpha;
-			var beta;
-			if((this.board.turn + iteration + 1) % 2 == 0) {
-				alpha = expectedScore - 10;
-				beta = expectedScore + 20;
-			} else {
-				alpha = expectedScore - 20;
-				beta = expectedScore + 10;
-			}
-			var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			if(score <= alpha) {
-				score = this.search(-Infinity,alpha + 1,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			} else if(score >= beta) {
-				score = this.search(beta - 1,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			}
-			expectedScore = score;
-			if(this.resultMove == -1) {
-				score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
-			}
-			if(this.budget.deadline - performance.now() > 0 || iteration == 1) {
-				this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
-			}
+			expectedScore = this.searchIteration(iteration,expectedScore,rootHash,rootVerificationKey,rootIsInCheck);
 			this.budget.onIteration(this.report);
 			if(this.report.move == -1) {
 				throw haxe_Exception.thrown("Anaconda found no move to play");
@@ -3168,6 +3765,44 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			++iteration;
 		}
 		return this.report;
+	}
+	,searchIteration: function(iteration,expectedScore,rootHash,rootVerificationKey,rootIsInCheck) {
+		var margin = 50;
+		var alpha = expectedScore - 50;
+		var beta = expectedScore + 50;
+		var score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		var hasFailedLow = false;
+		var hasFailedHigh = false;
+		while(!this.isAborted && (score <= alpha && alpha > -Infinity || score >= beta && beta < Infinity)) {
+			margin *= 4;
+			var isLastWidening = margin > 400;
+			if(score <= alpha) {
+				hasFailedLow = true;
+			} else {
+				hasFailedHigh = true;
+			}
+			if(hasFailedLow && hasFailedHigh) {
+				alpha = -Infinity;
+				beta = Infinity;
+			} else if(score <= alpha) {
+				var failedBound = alpha;
+				alpha = isLastWidening ? -Infinity : expectedScore - margin;
+				beta = failedBound + 1;
+			} else {
+				var failedBound1 = beta;
+				beta = isLastWidening ? Infinity : expectedScore + margin;
+				alpha = failedBound1 - 1;
+			}
+			score = this.search(alpha,beta,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		}
+		var nextExpectedScore = score;
+		if(this.resultMove == -1) {
+			score = this.search(-Infinity,Infinity,iteration,0,iteration,rootHash,rootVerificationKey,true,rootIsInCheck);
+		}
+		if(this.budget.deadline - performance.now() > 0 || iteration == 1) {
+			this.report.record(this.resultMove,score,iteration,this.rootMoves.length);
+		}
+		return nextExpectedScore;
 	}
 	,search: function(alpha,beta,depth,extension,maxDepth,hash,verificationKey,isRoot,isInCheck) {
 		var followsNullMove = this.isNullMoveChild;
@@ -3196,9 +3831,9 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			this.resultMove = -1;
 			this.resultLine = null;
 			this.resultIsDraw = true;
-			return 0;
+			return this.drawScore;
 		}
-		if(depth >= 2) {
+		if(depth >= 2 && !isRoot) {
 			switch(this.table.probe(hash,verificationKey,alpha,beta,depth)) {
 			case 1:
 				this.resultMove = this.table.cutoffMove;
@@ -3263,6 +3898,19 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				return nullMoveScore;
 			}
 		}
+		if(depth >= 4 && !isRoot && this.table.bestMove(hash,verificationKey) == -1) {
+			--depth;
+		}
+		if(depth >= 1 && depth <= 6 && !isRoot && !isInCheck && beta - alpha <= 1 && Math.abs(alpha) < 90000 && Math.abs(beta) < 90000) {
+			var staticScore = this.evaluate();
+			var margin = 60 * depth;
+			if(this.board.turn == 0 ? staticScore - margin >= beta : staticScore + margin <= alpha) {
+				this.resultMove = -1;
+				this.resultLine = null;
+				this.resultIsDraw = false;
+				return staticScore;
+			}
+		}
 		if(depth < 1) {
 			var score = isInCheck ? this.quiesceInCheck(alpha,beta,this.evaluate()) : this.quiesce(0,alpha,beta,this.evaluate());
 			this.resultMove = -1;
@@ -3285,7 +3933,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		if(isWhite ? beta > 90000 || staticScore < beta : alpha < -90000. || staticScore > alpha) {
 			return null;
 		}
-		var reduction = 2 + (depth >= 6 ? 1 : 0);
+		var reduction = 3 + (depth >> 2);
 		var _this = this.board;
 		_this.turn = _this.turn ^ 1;
 		this.ply++;
@@ -3326,10 +3974,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		var bestMoveIsQuiet = false;
 		var bestLine = [];
 		var moves = this.orderedMoves(depth,hash,verificationKey);
-		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
-		while(_g < moveCount) {
+		var _g1 = moves.length;
+		while(_g < _g1) {
 			var i = _g++;
 			var move = moves[i];
 			if(isRoot) {
@@ -3360,7 +4008,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture,isCheck,isRoot,i,depth,maxDepth);
 			var isReduced = adjustment < 0;
 			var childExtension = extension + adjustment;
 			var unreducedExtension = isReduced ? extension : childExtension;
@@ -3412,7 +4060,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				bestMove = move;
 				bestMoveIsQuiet = isQuiet;
 			}
-			if(value >= beta) {
+			if(value < beta && bestMove != -1 && (depth == maxDepth && (this.budget.deadline - performance.now() > 0 || maxDepth <= 1))) {
+				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
+			}
+			if(value >= beta || value > 90000) {
 				if(!isCapture) {
 					this.history.cutoffWeights[move] += depth * depth;
 					var killerSlot = 2 * this.ply;
@@ -3422,9 +4073,6 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 					}
 				}
 				break;
-			}
-			if(bestMove != -1 && (depth == maxDepth && (this.budget.deadline - performance.now() > 0 || maxDepth <= 1))) {
-				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
@@ -3444,10 +4092,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		var bestMoveIsQuiet = false;
 		var bestLine = [];
 		var moves = this.orderedMoves(depth,hash,verificationKey);
-		var moveCount = moves.length;
 		var attacksIntellector = this.board.attacksIntellector(this.board.turn);
 		var _g = 0;
-		while(_g < moveCount) {
+		var _g1 = moves.length;
+		while(_g < _g1) {
 			var i = _g++;
 			var move = moves[i];
 			if(isRoot) {
@@ -3478,7 +4126,7 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 			} else {
 				isCheck = this.board.isIntellectorAttackedAfter(move);
 			}
-			var adjustment = this.moveExtension(move,isCapture || isCheck,i,moveCount,depth,maxDepth,childHash,childVerificationKey);
+			var adjustment = this.moveExtension(move,isCapture,isCheck,isRoot,i,depth,maxDepth);
 			var isReduced = adjustment < 0;
 			var childExtension = extension + adjustment;
 			var unreducedExtension = isReduced ? extension : childExtension;
@@ -3530,7 +4178,10 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 				bestMove = move;
 				bestMoveIsQuiet = isQuiet;
 			}
-			if(value <= alpha) {
+			if(value > alpha && bestMove != -1 && (depth == maxDepth && (this.budget.deadline - performance.now() > 0 || maxDepth <= 1))) {
+				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
+			}
+			if(value <= alpha || value < -90000.) {
 				if(!isCapture) {
 					this.history.cutoffWeights[move] += depth * depth;
 					var killerSlot = 2 * this.ply;
@@ -3540,9 +4191,6 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 					}
 				}
 				break;
-			}
-			if(bestMove != -1 && (depth == maxDepth && (this.budget.deadline - performance.now() > 0 || maxDepth <= 1))) {
-				this.report.recordRootProgress(moves,i + 1,bestMove,value,maxDepth,bestLine);
 			}
 		}
 		this.resultMoveIsQuiet = bestMoveIsQuiet;
@@ -3555,17 +4203,20 @@ engine_hxconda_search_AlphaBetaSearch_$engine_$hxconda_$search_$budget_$TimeBudg
 		this.resultIsDraw = isDraw;
 		return value;
 	}
-	,moveExtension: function(move,isTactical,index,moveCount,depth,maxDepth,childHash,childVerificationKey) {
-		if(isTactical) {
+	,moveExtension: function(move,isCapture,isCheck,isRoot,index,depth,maxDepth) {
+		if(isCheck) {
 			return 0.5;
+		}
+		if(isCapture || isRoot || index < 2) {
+			return 0;
 		}
 		var extension = 0;
 		if(this.history.quietVisitCounts[move] >= maxDepth * maxDepth * 2) {
 			var _this = this.history;
 			extension = -1 / (100 * (_this.quietBestCounts[move] / _this.quietVisitCounts[move]) + 0.5);
 		}
-		if(depth >= 2 && this.table.deepestDepth(childHash,childVerificationKey) >= 3) {
-			extension -= index / moveCount;
+		if(depth >= 3) {
+			extension -= Math.min(4,0.75 * Math.log(depth) * Math.log(index + 1));
 		}
 		return extension;
 	}
@@ -3855,18 +4506,63 @@ engine_hxconda_search_BestMoveReport.prototype = {
 			this.principalLine.reverse();
 		}
 	}
-	,record: function(move,score,depth,searchedRootMoveCount) {
+	,record: function(move,score,depth,searchedRootMoveCount,line) {
 		this.isSet = true;
 		this.move = move;
 		this.score = score;
 		this.depth = depth;
 		this.searchedRootMoveCount = searchedRootMoveCount;
+		if(line != null) {
+			this.principalLine = line;
+		}
+	}
+	,copy: function() {
+		var report = new engine_hxconda_search_BestMoveReport();
+		if(this.isSet) {
+			var tmp = this.principalLine;
+			report.record(this.move,this.score,this.depth,this.searchedRootMoveCount,tmp != null ? tmp.slice() : null);
+		}
+		return report;
 	}
 };
 var engine_hxconda_search_SearchHistory = function() {
 	this.quietBestCounts = new Float64Array(65536);
 	this.quietVisitCounts = new Float64Array(65536);
 	this.cutoffWeights = new Float64Array(65536);
+};
+engine_hxconda_search_SearchHistory.prototype = {
+	decay: function(divisor) {
+		var _g = 0;
+		while(_g < 65536) {
+			var i = _g++;
+			this.cutoffWeights[i] /= divisor;
+			this.quietVisitCounts[i] /= divisor;
+			this.quietBestCounts[i] /= divisor;
+		}
+	}
+};
+var engine_hxconda_search_SearchMemory = function() {
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 256) {
+		++_g1;
+		_g.push(-1);
+	}
+	this.killers = _g;
+	this.history = new engine_hxconda_search_SearchHistory();
+	this.table = new engine_hxconda_search_TranspositionTable();
+};
+engine_hxconda_search_SearchMemory.prototype = {
+	startNextSearch: function() {
+		this.table.startNextSearch();
+		this.history.decay(2);
+		var _g = 0;
+		var _g1 = this.killers.length;
+		while(_g < _g1) {
+			var i = _g++;
+			this.killers[i] = i + 4 < this.killers.length ? this.killers[i + 4] : -1;
+		}
+	}
 };
 var engine_hxconda_search_SearchTuning = function() { };
 engine_hxconda_search_SearchTuning.extendLine = function(line,move) {
@@ -3909,99 +4605,76 @@ engine_hxconda_search_SearchTuning.sortByKeys = function(moves,keys,isDescending
 		moves[j + 1] = move;
 	}
 };
-var engine_hxconda_search_TranspositionEntry = function(move,depth,score,alpha,beta) {
-	this.move = move;
-	this.depth = depth;
-	this.score = score;
-	this.alpha = alpha;
-	this.beta = beta;
-};
 var engine_hxconda_search_TranspositionTable = function() {
-	this.positionCount = 0;
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < 4096) {
-		++_g1;
-		_g.push(null);
-	}
-	this.buckets = _g;
-	this.verificationKeys = new Int32Array(4096);
-	this.hashes = new Int32Array(4096);
+	this.generation = 0;
+	this.usedSlotCount = 0;
+	this.bucketCount = 2048;
+	this.betas = new Float64Array(8192);
+	this.alphas = new Float64Array(8192);
+	this.scores = new Float64Array(8192);
+	this.generations = new Uint8Array(8192);
+	this.depths = new Uint16Array(8192);
+	this.moves = new Uint16Array(8192);
+	this.verificationKeys = new Int32Array(8192);
+	this.hashes = new Int32Array(8192);
 	this.narrowedBeta = 0;
 	this.narrowedAlpha = 0;
 	this.cutoffMove = -1;
 	this.cutoffScore = 0;
 };
 engine_hxconda_search_TranspositionTable.prototype = {
-	deepestDepth: function(hash,verificationKey) {
-		var depth = 0;
-		var positionEntries = this.buckets;
-		var mask = this.buckets.length - 1;
-		var slot = hash & mask;
-		while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != verificationKey)) slot = slot + 1 & mask;
-		var positionEntries1 = positionEntries[slot];
-		if(positionEntries1 != null) {
-			var _g = 0;
-			while(_g < positionEntries1.length) {
-				var entry = positionEntries1[_g];
-				++_g;
-				if(entry.depth > depth) {
-					depth = entry.depth;
-				}
-			}
-		}
-		return depth;
+	startNextSearch: function() {
+		this.generation = this.generation + 1 & 255;
 	}
 	,bestMove: function(hash,verificationKey) {
+		var firstSlot = 4 * (hash & this.bucketCount - 1);
 		var move = -1;
-		var depth = -1;
-		var positionEntries = this.buckets;
-		var mask = this.buckets.length - 1;
-		var slot = hash & mask;
-		while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != verificationKey)) slot = slot + 1 & mask;
-		var positionEntries1 = positionEntries[slot];
-		if(positionEntries1 != null) {
-			var _g = 0;
-			while(_g < positionEntries1.length) {
-				var entry = positionEntries1[_g];
-				++_g;
-				if(entry.move != -1 && entry.depth > depth) {
-					move = entry.move;
-					depth = entry.depth;
-				}
+		var depth = 0;
+		var _g = firstSlot;
+		var _g1 = firstSlot + 4;
+		while(_g < _g1) {
+			var slot = _g++;
+			if(this.depths[slot] != 0 && this.hashes[slot] == hash && this.verificationKeys[slot] == verificationKey && this.moves[slot] != 65535 && this.depths[slot] > depth) {
+				move = this.moves[slot] == 65535 ? -1 : this.moves[slot];
+				depth = this.depths[slot];
 			}
 		}
 		return move;
 	}
 	,probe: function(hash,verificationKey,alpha,beta,depth) {
-		var positionEntries = this.buckets;
-		var mask = this.buckets.length - 1;
-		var slot = hash & mask;
-		while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != verificationKey)) slot = slot + 1 & mask;
-		var positionEntries1 = positionEntries[slot];
-		if(positionEntries1 == null) {
-			return 0;
-		}
+		var firstSlot = 4 * (hash & this.bucketCount - 1);
 		var lowerBound = -Infinity;
 		var upperBound = Infinity;
-		var _g = 0;
-		while(_g < positionEntries1.length) {
-			var entry = positionEntries1[_g];
-			++_g;
-			if(entry.depth < depth) {
+		var hasEntries = false;
+		var _g = firstSlot;
+		var _g1 = firstSlot + 4;
+		while(_g < _g1) {
+			var slot = _g++;
+			if(!(this.depths[slot] != 0 && this.hashes[slot] == hash && this.verificationKeys[slot] == verificationKey)) {
 				continue;
 			}
-			if(entry.score > entry.alpha && entry.score < entry.beta) {
-				this.cutoffScore = entry.score;
-				this.cutoffMove = entry.move;
+			hasEntries = true;
+			if(this.depths[slot] < depth) {
+				continue;
+			}
+			var score = this.scores[slot];
+			var entryAlpha = this.alphas[slot];
+			var entryBeta = this.betas[slot];
+			if(score > entryAlpha && score < entryBeta) {
+				var move = this.moves[slot] == 65535 ? -1 : this.moves[slot];
+				this.cutoffScore = score;
+				this.cutoffMove = move;
 				return 1;
 			}
-			if(entry.score >= entry.beta && lowerBound < entry.beta) {
-				lowerBound = entry.beta;
+			if(score >= entryBeta && lowerBound < entryBeta) {
+				lowerBound = entryBeta;
 			}
-			if(entry.score <= entry.alpha && upperBound > entry.alpha) {
-				upperBound = entry.alpha;
+			if(score <= entryAlpha && upperBound > entryAlpha) {
+				upperBound = entryAlpha;
 			}
+		}
+		if(!hasEntries) {
+			return 0;
 		}
 		if(alpha >= upperBound) {
 			this.cutoffScore = alpha;
@@ -4037,68 +4710,101 @@ engine_hxconda_search_TranspositionTable.prototype = {
 		if((trustedAlpha > -100000 || trustedBeta < 100000) && Math.abs(score) > 90000) {
 			return;
 		}
-		var positionEntries = this.entriesOrNew(hash,verificationKey);
-		var i = positionEntries.length - 1;
-		while(i >= 0) {
-			var entry = positionEntries[i];
-			if(entry.depth <= depth && entry.alpha >= trustedAlpha && entry.beta <= trustedBeta) {
-				positionEntries.splice(i,1);
-			}
-			--i;
-		}
-		positionEntries.push(new engine_hxconda_search_TranspositionEntry(move,depth,score,trustedAlpha,trustedBeta));
-	}
-	,entriesOrNew: function(hash,verificationKey) {
-		var mask = this.buckets.length - 1;
-		var slot = hash & mask;
-		while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != verificationKey)) slot = slot + 1 & mask;
-		var slot1 = slot;
-		var positionEntries = this.buckets[slot1];
-		if(positionEntries != null) {
-			return positionEntries;
-		}
-		var newEntries = [];
-		this.hashes[slot1] = hash;
-		this.verificationKeys[slot1] = verificationKey;
-		this.buckets[slot1] = newEntries;
-		this.positionCount++;
-		if(this.positionCount * 2 > this.buckets.length) {
+		this.place(hash,verificationKey,move,depth,score,trustedAlpha,trustedBeta,this.generation);
+		if(this.usedSlotCount > 4 * this.bucketCount / 2 && this.bucketCount < 524288) {
 			this.grow();
 		}
-		return newEntries;
+	}
+	,place: function(hash,verificationKey,move,depth,score,alpha,beta,entryGeneration) {
+		var firstSlot = 4 * (hash & this.bucketCount - 1);
+		var slot = -1;
+		var _g = firstSlot;
+		var _g1 = firstSlot + 4;
+		while(_g < _g1) {
+			var candidate = _g++;
+			if(this.depths[candidate] != 0 && this.hashes[candidate] == hash && this.verificationKeys[candidate] == verificationKey && this.depths[candidate] <= depth && this.alphas[candidate] >= alpha && this.betas[candidate] <= beta) {
+				slot = candidate;
+				break;
+			}
+		}
+		if(slot == -1) {
+			var _g = firstSlot;
+			var _g1 = firstSlot + 4;
+			while(_g < _g1) {
+				var candidate = _g++;
+				if(this.depths[candidate] == 0) {
+					slot = candidate;
+					break;
+				}
+			}
+		}
+		if(slot == -1) {
+			var shallowestDeepest = firstSlot;
+			var _g = firstSlot + 1;
+			var _g1 = firstSlot + 2;
+			while(_g < _g1) {
+				var candidate = _g++;
+				if(this.depths[candidate] < this.depths[shallowestDeepest]) {
+					shallowestDeepest = candidate;
+				}
+			}
+			if(depth >= this.depths[shallowestDeepest] || this.generations[shallowestDeepest] != entryGeneration) {
+				slot = shallowestDeepest;
+			} else {
+				slot = firstSlot + 2;
+				var _g = slot + 1;
+				var _g1 = firstSlot + 4;
+				while(_g < _g1) {
+					var candidate = _g++;
+					if(this.depths[candidate] < this.depths[slot]) {
+						slot = candidate;
+					}
+				}
+			}
+		}
+		if(this.depths[slot] == 0) {
+			this.usedSlotCount++;
+		}
+		this.hashes[slot] = hash;
+		this.verificationKeys[slot] = verificationKey;
+		this.moves[slot] = move == -1 ? 65535 : move;
+		this.depths[slot] = depth;
+		this.generations[slot] = entryGeneration;
+		this.scores[slot] = score;
+		this.alphas[slot] = alpha;
+		this.betas[slot] = beta;
 	}
 	,grow: function() {
 		var oldHashes = this.hashes;
 		var oldVerificationKeys = this.verificationKeys;
-		var oldBuckets = this.buckets;
-		this.hashes = new Int32Array(oldBuckets.length * 2);
-		this.verificationKeys = new Int32Array(oldBuckets.length * 2);
-		var _g = [];
-		var _g1 = 0;
-		var _g2 = oldBuckets.length * 2;
-		while(_g1 < _g2) {
-			++_g1;
-			_g.push(null);
-		}
-		this.buckets = _g;
+		var oldMoves = this.moves;
+		var oldDepths = this.depths;
+		var oldGenerations = this.generations;
+		var oldScores = this.scores;
+		var oldAlphas = this.alphas;
+		var oldBetas = this.betas;
+		var oldSlotCount = 4 * this.bucketCount;
+		this.bucketCount *= 2;
+		this.hashes = new Int32Array(4 * this.bucketCount);
+		this.verificationKeys = new Int32Array(4 * this.bucketCount);
+		this.moves = new Uint16Array(4 * this.bucketCount);
+		this.depths = new Uint16Array(4 * this.bucketCount);
+		this.generations = new Uint8Array(4 * this.bucketCount);
+		this.scores = new Float64Array(4 * this.bucketCount);
+		this.alphas = new Float64Array(4 * this.bucketCount);
+		this.betas = new Float64Array(4 * this.bucketCount);
+		this.usedSlotCount = 0;
 		var _g = 0;
-		var _g1 = oldBuckets.length;
-		while(_g < _g1) {
-			var i = _g++;
-			if(oldBuckets[i] != null) {
-				var hash = oldHashes[i];
-				var mask = this.buckets.length - 1;
-				var slot = hash & mask;
-				while(this.buckets[slot] != null && (this.hashes[slot] != hash || this.verificationKeys[slot] != oldVerificationKeys[i])) slot = slot + 1 & mask;
-				var slot1 = slot;
-				this.hashes[slot1] = oldHashes[i];
-				this.verificationKeys[slot1] = oldVerificationKeys[i];
-				this.buckets[slot1] = oldBuckets[i];
+		while(_g < oldSlotCount) {
+			var slot = _g++;
+			if(oldDepths[slot] != 0) {
+				this.place(oldHashes[slot],oldVerificationKeys[slot],oldMoves[slot] == 65535 ? -1 : oldMoves[slot],oldDepths[slot],oldScores[slot],oldAlphas[slot],oldBetas[slot],oldGenerations[slot]);
 			}
 		}
 	}
 };
 var engine_hxconda_search_budget_DepthBudget = function(maxDepth,timeCapMs,onIteration) {
+	this.isDecided = false;
 	this.completedDepth = 0;
 	this.isOverdue = false;
 	this.deadline = 0;
@@ -4124,6 +4830,186 @@ var engine_hxconda_search_budget_TimeBudget = function(durationMs,onIteration) {
 	this.deadline = 0;
 	this.durationMs = durationMs;
 	this.onIteration = onIteration;
+};
+var engine_hxconda_search_weakening_RootMoveScores = function(depth) {
+	this.lines = [];
+	this.values = [];
+	this.bounds = [];
+	this.moves = [];
+	this.depth = depth;
+};
+engine_hxconda_search_weakening_RootMoveScores.merge = function(base,partial) {
+	var merged = new engine_hxconda_search_weakening_RootMoveScores(partial.depth);
+	var _g = 0;
+	var _g1 = base.moves.length;
+	while(_g < _g1) {
+		var i = _g++;
+		merged.set(base.moves[i],base.bounds[i],base.values[i],base.lines[i]);
+	}
+	var _g = 0;
+	var _g1 = partial.moves.length;
+	while(_g < _g1) {
+		var i = _g++;
+		merged.set(partial.moves[i],partial.bounds[i],partial.values[i],partial.lines[i]);
+	}
+	return merged;
+};
+engine_hxconda_search_weakening_RootMoveScores.prototype = {
+	set: function(move,bound,value,line) {
+		var i = this.moves.indexOf(move);
+		if(i == -1) {
+			this.moves.push(move);
+			this.bounds.push(bound);
+			this.values.push(value);
+			this.lines.push(line);
+		} else {
+			this.bounds[i] = bound;
+			this.values[i] = value;
+			this.lines[i] = line;
+		}
+	}
+	,isExact: function(move) {
+		var i = this.moves.indexOf(move);
+		if(i != -1) {
+			return this.bounds[i] == 0;
+		} else {
+			return false;
+		}
+	}
+	,bestIndex: function() {
+		var best = -1;
+		var _g = 0;
+		var _g1 = this.moves.length;
+		while(_g < _g1) {
+			var i = _g++;
+			if(this.bounds[i] == 0 && (best == -1 || this.values[i] > this.values[best])) {
+				best = i;
+			}
+		}
+		return best;
+	}
+	,orderingKey: function(move) {
+		var i = this.moves.indexOf(move);
+		if(i == -1) {
+			return -10000000.;
+		}
+		if(this.bounds[i] == 2) {
+			return this.values[i] - 1000000;
+		} else {
+			return this.values[i];
+		}
+	}
+	,exactCount: function() {
+		var _this = this.bounds;
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < _this.length) {
+			var v = _this[_g1];
+			++_g1;
+			if(v == 0) {
+				_g.push(v);
+			}
+		}
+		return _g.length;
+	}
+	,candidateThreshold: function(bestValue,weakening) {
+		var maxLoss = weakening.maxLoss;
+		var floor = maxLoss == null ? -Infinity : bestValue - maxLoss - 0.5;
+		var candidates = this.bestExactWithin(floor,bestValue - weakening.minLoss,weakening.candidateCount);
+		if(candidates.length < weakening.candidateCount) {
+			return floor;
+		} else {
+			return Math.max(floor,this.values[candidates[candidates.length - 1]]);
+		}
+	}
+	,isPlacedAgainst: function(move,bestValue,weakening) {
+		var i = this.moves.indexOf(move);
+		if(i == -1) {
+			return false;
+		}
+		switch(this.bounds[i]) {
+		case 0:
+			return true;
+		case 1:
+			return this.values[i] > bestValue - weakening.minLoss;
+		case 2:
+			return this.values[i] <= this.candidateThreshold(bestValue,weakening);
+		}
+	}
+	,bestExactWithin: function(lower,upper,count) {
+		var _gthis = this;
+		var _g = [];
+		var _g1 = 0;
+		var _g2 = this.moves.length;
+		while(_g1 < _g2) {
+			var i = _g1++;
+			if(this.bounds[i] == 0 && this.values[i] >= lower && this.values[i] <= upper) {
+				_g.push(i);
+			}
+		}
+		_g.sort(function(a,b) {
+			if(_gthis.values[a] > _gthis.values[b]) {
+				return -1;
+			} else if(_gthis.values[a] < _gthis.values[b]) {
+				return 1;
+			} else {
+				return a - b;
+			}
+		});
+		return _g.slice(0,count);
+	}
+};
+var engine_hxconda_search_weakening_WeakenedMoveChoice = function() { };
+engine_hxconda_search_weakening_WeakenedMoveChoice.choose = function(scores,weakening,bonus) {
+	var best = scores.bestIndex();
+	var bestValue = scores.values[best];
+	var top = bestValue - weakening.minLoss;
+	var maxLoss = weakening.maxLoss;
+	var floor = maxLoss == null ? -Infinity : bestValue - maxLoss;
+	var candidates = scores.bestExactWithin(floor,top,weakening.candidateCount);
+	if(candidates.length == 0) {
+		return engine_hxconda_search_weakening_WeakenedMoveChoice.mostLosingAboveWindow(scores,best,top);
+	}
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < candidates.length) {
+		var i = candidates[_g1];
+		++_g1;
+		_g.push(scores.values[i] + bonus(scores.moves[i]));
+	}
+	var bestAdjustedValue = -Infinity;
+	var _g1 = 0;
+	while(_g1 < _g.length) bestAdjustedValue = Math.max(bestAdjustedValue,_g[_g1++]);
+	var _g1 = [];
+	var _g2 = 0;
+	while(_g2 < _g.length) _g1.push(Math.pow(100 / (bestAdjustedValue - _g[_g2++] + 1),weakening.weightExponent));
+	var totalWeight = 0;
+	var _g = 0;
+	while(_g < _g1.length) totalWeight += _g1[_g++];
+	var threshold = Math.random() * totalWeight;
+	var _g = 0;
+	var _g2 = candidates.length;
+	while(_g < _g2) {
+		var k = _g++;
+		threshold -= _g1[k];
+		if(threshold < 0) {
+			return candidates[k];
+		}
+	}
+	return candidates[candidates.length - 1];
+};
+engine_hxconda_search_weakening_WeakenedMoveChoice.mostLosingAboveWindow = function(scores,best,top) {
+	var chosen = best;
+	var _g = 0;
+	var _g1 = scores.moves.length;
+	while(_g < _g1) {
+		var i = _g++;
+		var value = scores.values[i];
+		if(scores.bounds[i] != 2 && value > top && value < scores.values[chosen]) {
+			chosen = i;
+		}
+	}
+	return chosen;
 };
 var haxe_Exception = function(message,previous,native) {
 	Error.call(this,message);
@@ -4178,6 +5064,10 @@ haxe_iterators_ArrayIterator.prototype = {
 		return this.array[this.current++];
 	}
 };
+var $_;
+function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $global.$haxeUID++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = m.bind(o); o.hx__closures__[m.__id__] = f; } return f; }
+$global.$haxeUID |= 0;
+engine_hxconda_Hxconda.memoryStyle = "std";
 engine_hxconda_board_BoardGeometry.DOMINATOR_RAY_SOURCE = [[[1,2,3,4,5,6],[7,14,21,28,35,42,49,56],[],[],[],[]],[[2,3,4,5,6],[8,15,22,29,36,43,50,57],[7,13],[0],[],[]],[[3,4,5,6],[9,16,23,30,37,44,51,58],[8,14,20,26],[1,0],[],[]],[[4,5,6],[10,17,24,31,38,45],[9,15,21,27,33,39],[2,1,0],[],[]],[[5,6],[11,18,25,32],[10,16,22,28,34,40,46,52],[3,2,1,0],[],[]],[[6],[12,19],[11,17,23,29,35,41,47,53],[4,3,2,1,0],[],[]],[[],[],[12,18,24,30,36,42,48,54],[5,4,3,2,1,0],[],[]],[[8,9,10,11,12],[14,21,28,35,42,49,56],[13],[],[0],[1]],[[9,10,11,12],[15,22,29,36,43,50,57],[14,20,26],[7],[1],[2]],[[10,11,12],[16,23,30,37,44,51,58],[15,21,27,33,39],[8,7],[2],[3]],[[11,12],[17,24,31,38,45],[16,22,28,34,40,46,52],[9,8,7],[3],[4]],[[12],[18,25,32],[17,23,29,35,41,47,53],[10,9,8,7],[4],[5]],[[],[19],[18,24,30,36,42,48,54],[11,10,9,8,7],[5],[6]],[[14,15,16,17,18,19],[20,27,34,41,48,55],[],[],[],[7,1]],[[15,16,17,18,19],[21,28,35,42,49,56],[20,26],[13],[7,0],[8,2]],[[16,17,18,19],[22,29,36,43,50,57],[21,27,33,39],[14,13],[8,1],[9,3]],[[17,18,19],[23,30,37,44,51,58],[22,28,34,40,46,52],[15,14,13],[9,2],[10,4]],[[18,19],[24,31,38,45],[23,29,35,41,47,53],[16,15,14,13],[10,3],[11,5]],[[19],[25,32],[24,30,36,42,48,54],[17,16,15,14,13],[11,4],[12,6]],[[],[],[25,31,37,43,49,55],[18,17,16,15,14,13],[12,5],[]],[[21,22,23,24,25],[27,34,41,48,55],[26],[],[13],[14,8,2]],[[22,23,24,25],[28,35,42,49,56],[27,33,39],[20],[14,7,0],[15,9,3]],[[23,24,25],[29,36,43,50,57],[28,34,40,46,52],[21,20],[15,8,1],[16,10,4]],[[24,25],[30,37,44,51,58],[29,35,41,47,53],[22,21,20],[16,9,2],[17,11,5]],[[25],[31,38,45],[30,36,42,48,54],[23,22,21,20],[17,10,3],[18,12,6]],[[],[32],[31,37,43,49,55],[24,23,22,21,20],[18,11,4],[19]],[[27,28,29,30,31,32],[33,40,47,54],[],[],[],[20,14,8,2]],[[28,29,30,31,32],[34,41,48,55],[33,39],[26],[20,13],[21,15,9,3]],[[29,30,31,32],[35,42,49,56],[34,40,46,52],[27,26],[21,14,7,0],[22,16,10,4]],[[30,31,32],[36,43,50,57],[35,41,47,53],[28,27,26],[22,15,8,1],[23,17,11,5]],[[31,32],[37,44,51,58],[36,42,48,54],[29,28,27,26],[23,16,9,2],[24,18,12,6]],[[32],[38,45],[37,43,49,55],[30,29,28,27,26],[24,17,10,3],[25,19]],[[],[],[38,44,50,56],[31,30,29,28,27,26],[25,18,11,4],[]],[[34,35,36,37,38],[40,47,54],[39],[],[26],[27,21,15,9,3]],[[35,36,37,38],[41,48,55],[40,46,52],[33],[27,20,13],[28,22,16,10,4]],[[36,37,38],[42,49,56],[41,47,53],[34,33],[28,21,14,7,0],[29,23,17,11,5]],[[37,38],[43,50,57],[42,48,54],[35,34,33],[29,22,15,8,1],[30,24,18,12,6]],[[38],[44,51,58],[43,49,55],[36,35,34,33],[30,23,16,9,2],[31,25,19]],[[],[45],[44,50,56],[37,36,35,34,33],[31,24,17,10,3],[32]],[[40,41,42,43,44,45],[46,53],[],[],[],[33,27,21,15,9,3]],[[41,42,43,44,45],[47,54],[46,52],[39],[33,26],[34,28,22,16,10,4]],[[42,43,44,45],[48,55],[47,53],[40,39],[34,27,20,13],[35,29,23,17,11,5]],[[43,44,45],[49,56],[48,54],[41,40,39],[35,28,21,14,7,0],[36,30,24,18,12,6]],[[44,45],[50,57],[49,55],[42,41,40,39],[36,29,22,15,8,1],[37,31,25,19]],[[45],[51,58],[50,56],[43,42,41,40,39],[37,30,23,16,9,2],[38,32]],[[],[],[51,57],[44,43,42,41,40,39],[38,31,24,17,10,3],[]],[[47,48,49,50,51],[53],[52],[],[39],[40,34,28,22,16,10,4]],[[48,49,50,51],[54],[53],[46],[40,33,26],[41,35,29,23,17,11,5]],[[49,50,51],[55],[54],[47,46],[41,34,27,20,13],[42,36,30,24,18,12,6]],[[50,51],[56],[55],[48,47,46],[42,35,28,21,14,7,0],[43,37,31,25,19]],[[51],[57],[56],[49,48,47,46],[43,36,29,22,15,8,1],[44,38,32]],[[],[58],[57],[50,49,48,47,46],[44,37,30,23,16,9,2],[45]],[[53,54,55,56,57,58],[],[],[],[],[46,40,34,28,22,16,10,4]],[[54,55,56,57,58],[],[],[52],[46,39],[47,41,35,29,23,17,11,5]],[[55,56,57,58],[],[],[53,52],[47,40,33,26],[48,42,36,30,24,18,12,6]],[[56,57,58],[],[],[54,53,52],[48,41,34,27,20,13],[49,43,37,31,25,19]],[[57,58],[],[],[55,54,53,52],[49,42,35,28,21,14,7,0],[50,44,38,32]],[[58],[],[],[56,55,54,53,52],[50,43,36,29,22,15,8,1],[51,45]],[[],[],[],[57,56,55,54,53,52],[51,44,37,30,23,16,9,2],[]]];
 engine_hxconda_board_BoardGeometry.AGGRESSOR_RAY_SOURCE = [[[8,16,24,32],[13,26,39,52],[],[],[],[]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[11,19],[16,29,42,55],[8,13],[],[],[]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[19,32,45,58],[11,16,21,26],[],[],[]],[[],[],[],[],[],[]],[[16,24,32],[21,34,47],[13],[0],[],[3]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[19],[24,37,50],[16,21,26],[3],[],[6]],[[],[],[],[],[],[]],[[21,29,37,45],[26,39,52],[],[],[0],[8,3]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[24,32],[29,42,55],[21,26],[8,0],[3],[11,6]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[32,45,58],[24,29,34,39],[11,3],[6],[]],[[],[],[],[],[],[]],[[29,37,45],[34,47],[26],[13],[8],[16,11,6]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[32],[37,50],[29,34,39],[16,8,0],[11],[19]],[[],[],[],[],[],[]],[[34,42,50,58],[39,52],[],[],[13,0],[21,16,11,6]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[37,45],[42,55],[34,39],[21,13],[16,3],[24,19]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[45,58],[37,42,47,52],[24,16,8,0],[19,6],[]],[[],[],[],[],[],[]],[[42,50,58],[47],[39],[26],[21,8],[29,24,19]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[45],[50],[42,47,52],[29,21,13],[24,11],[32]],[[],[],[],[],[],[]],[[47,55],[52],[],[],[26,13,0],[34,29,24,19]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[50,58],[55],[47,52],[34,26],[29,16,3],[37,32]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[58],[50,55],[37,29,21,13],[32,19,6],[]],[[],[],[],[],[],[]],[[55],[],[52],[39],[34,21,8],[42,37,32]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[58],[],[55],[42,34,26],[37,24,11],[45]],[[],[],[],[],[],[]],[[],[],[],[],[39,26,13,0],[47,42,37,32]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[],[],[47,39],[42,29,16,3],[50,45]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[],[],[50,42,34,26],[45,32,19,6],[]]];
 engine_hxconda_board_BoardGeometry.LIBERATOR_JUMP_SOURCE = [[2,14],[3,15,13],[4,16,14,0],[5,17,15,1],[6,18,16,2],[19,17,3],[18,4],[9,21],[10,22,20],[11,23,21,7],[12,24,22,8],[25,23,9],[24,10],[15,27,1],[16,28,26,0,2],[17,29,27,13,1,3],[18,30,28,14,2,4],[31,29,15,3,5,19],[32,30,16,4,6],[31,17,5],[22,34,8],[23,35,33,7,9],[24,36,34,20,8,10],[25,37,35,21,9,11],[38,36,22,10,12],[37,23,11],[28,40,14],[29,41,39,13,15],[30,42,40,26,14,16],[31,43,41,27,15,17],[32,44,42,28,16,18],[45,43,29,17,19],[44,30,18],[35,47,21],[36,48,46,20,22],[37,49,47,33,21,23],[38,50,48,34,22,24],[51,49,35,23,25],[50,36,24],[41,53,27],[42,54,52,26,28],[43,55,53,39,27,29],[44,56,54,40,28,30],[45,57,55,41,29,31],[58,56,42,30,32],[57,43,31],[48,34],[49,33,35],[50,46,34,36],[51,47,35,37],[48,36,38],[49,37],[54,40],[55,39,41],[56,52,40,42],[57,53,41,43],[58,54,42,44],[55,43,45],[56,44]];
@@ -4198,46 +5088,16 @@ engine_hxconda_board_BoardGeometry.DOMINATOR_DIRECTIONS = engine_hxconda_board_B
 engine_hxconda_board_BoardGeometry.AGGRESSOR_DIRECTIONS = engine_hxconda_board_BoardGeometry.computeRayDirections(engine_hxconda_board_BoardGeometry.AGGRESSOR_RAYS);
 engine_hxconda_board_BoardGeometry.ADJACENCY = engine_hxconda_board_BoardGeometry.computeAdjacency();
 engine_hxconda_board_BoardGeometry.FINAL_SQUARE_FLAGS = engine_hxconda_board_BoardGeometry.computeFinalSquareFlags();
-engine_hxconda_evaluation_Evaluation.PIECE_VALUES = Float64Array.from([100,-100,600,-600,170,-170,200,-200,150,-150,100000,-100000,0]);
+engine_hxconda_board_BoardGeometry.HEIGHTS = engine_hxconda_board_BoardGeometry.computeHeights();
+engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES = [100,-100,600,-600,170,-170,200,-200,150,-150,100000,-100000,0];
+engine_hxconda_evaluation_Evaluation.PIECE_VALUES = Float64Array.from(engine_hxconda_evaluation_Evaluation.STANDARD_PIECE_VALUES);
 engine_hxconda_evaluation_Evaluation.DISTANCE_TO_CENTER = [5,4,4,4,4,4,5,4,3,3,3,3,4,4,3,2,2,2,3,4,3,2,1,1,2,3,3,2,1,0,1,2,3,3,2,1,1,2,3,4,3,2,2,2,3,4,4,3,3,3,3,4,5,4,4,4,4,4,5];
 engine_hxconda_evaluation_Evaluation.WHITE_PROGRESSOR_ADVANCEMENT = [0,0,20,50,100,150,0,0,0,20,50,100,150,0,0,20,50,100,150,0,0,0,20,50,100,150,0,0,20,50,100,150,0,0,0,20,50,100,150,0,0,20,50,100,150,0,0,0,20,50,100,150,0,0,20,50,100,150,0];
 engine_hxconda_evaluation_Evaluation.BLACK_PROGRESSOR_ADVANCEMENT = [0,-150,-100,-50,-20,0,0,-150,-100,-50,-20,0,0,0,-150,-100,-50,-20,0,0,-150,-100,-50,-20,0,0,0,-150,-100,-50,-20,0,0,-150,-100,-50,-20,0,0,0,-150,-100,-50,-20,0,0,-150,-100,-50,-20,0,0,0,-150,-100,-50,-20,0,0];
 engine_hxconda_evaluation_Evaluation.WHITE_INTELLECTOR_ADVANCEMENT = [0,5,10,20,50,100,100000,0,5,10,20,50,100,0,5,10,20,50,100,100000,0,5,10,20,50,100,0,5,10,20,50,100,100000,0,5,10,20,50,100,0,5,10,20,50,100,100000,0,5,10,20,50,100,0,5,10,20,50,100,100000];
 engine_hxconda_evaluation_Evaluation.BLACK_INTELLECTOR_ADVANCEMENT = [-100000,-100,-50,-20,-10,-5,0,-100,-50,-20,-10,-5,0,-100000,-100,-50,-20,-10,-5,0,-100,-50,-20,-10,-5,0,-100000,-100,-50,-20,-10,-5,0,-100,-50,-20,-10,-5,0,-100000,-100,-50,-20,-10,-5,0,-100,-50,-20,-10,-5,0,-100000,-100,-50,-20,-10,-5,0];
-engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES = (function($this) {
-	var $r;
-	var _g = [];
-	{
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(0,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(1,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(2,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(3,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(4,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(5,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(6,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(7,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(8,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(9,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(10,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(11,_g1++));
-		var _g1 = 0;
-		while(_g1 < 59) _g.push(engine_hxconda_evaluation_Evaluation.computePieceSquareScore(12,_g1++));
-	}
-	$r = Float64Array.from(_g);
-	return $r;
-}(this));
+engine_hxconda_evaluation_Evaluation.advancementFactor = 1;
+engine_hxconda_evaluation_Evaluation.PIECE_SQUARE_SCORES = engine_hxconda_evaluation_Evaluation.fillPieceSquareScores(new Float64Array(767));
 engine_hxconda_search_budget_NodeBudget.LEVEL_NODE_LIMITS = [3000,10000,30000,100000,300000,1000000,3000000,10000000,30000000,70000000,150000000];
 engine_hxconda_search_budget_NodeBudget.LEVEL_NOISE_AMPLITUDES = [500,250,100,50,25,20,15,15,10,10,8];
 engine_hxconda_HxcondaWorker.main();

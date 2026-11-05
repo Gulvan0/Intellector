@@ -141,7 +141,6 @@ enum abstract StyleClass(String) from String to String
     var CHALLENGE_BOT_CARD = "intellector-challenge-bot-card";
     var CHALLENGE_BOT_CARD_AVATAR = "intellector-challenge-bot-card-avatar";
     var CHALLENGE_BOT_CARD_NAME = "intellector-challenge-bot-card-name";
-    var CHALLENGE_BOT_CARD_SELECTED = "intellector-challenge-bot-card-selected";
     var CHALLENGE_BOT_CHANGE = "intellector-challenge-bot-change";
     var CHALLENGE_BOT_NAME = "intellector-challenge-bot-name";
     var CHALLENGE_BOT_NO_CAP = "intellector-challenge-bot-no-cap";
@@ -201,12 +200,19 @@ enum abstract StyleClass(String) from String to String
     var GAME_CHAT_SEND_ROW = "intellector-game-chat-send-row";
     var GAME_CHAT_TEXT = "intellector-game-chat-text";
     var GAME_CHAT_TEXT_SPECTATOR = "intellector-game-chat-text-spectator";
+    var GAME_BOT_PROGRESS = "intellector-game-bot-progress";
+    var GAME_BOT_PROGRESS_FILL = "intellector-game-bot-progress-fill";
+    var GAME_BOT_PROGRESS_LABEL = "intellector-game-bot-progress-label";
+    var GAME_BOT_PROGRESS_TRACK = "intellector-game-bot-progress-track";
+    var GAME_BOT_PROGRESS_VALUE = "intellector-game-bot-progress-value";
     var GAME_CLOCK = "intellector-game-clock";
     var GAME_CLOCK_LOW = "intellector-game-clock-low";
     var GAME_CLOCK_RUNNING = "intellector-game-clock-running";
     var GAME_COMPACT_COLUMN = "intellector-game-compact-column";
     var GAME_FORCED_RAIL = "intellector-game-forced-rail";
     var GAME_HEAD = "intellector-game-head";
+    var GAME_HEAD_BLOCK = "intellector-game-head-block";
+    var GAME_HEAD_LAST_MOVE = "intellector-game-head-last-move";
     var GAME_HEAD_DETAILS = "intellector-game-head-details";
     var GAME_HINT = "intellector-game-hint";
     var GAME_INFO_CARD = "intellector-game-info-card";

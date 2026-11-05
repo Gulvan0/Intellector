@@ -48,6 +48,7 @@ const single = (engine, level) => +execFileSync(process.execPath, [...TIMING_V8_
 
 const median = values => values.slice().sort((a, b) => a - b)[values.length >> 1];
 const rows = [];
+const benchStartedAt = Date.now();
 for (const level of LEVELS) {
     const times = { reference: [], baseline: [], candidate: [] };
     const baselineRatios = [], referenceRatios = [];
@@ -66,6 +67,9 @@ for (const level of LEVELS) {
         times.candidate.push(candidate);
         baselineRatios.push(baseline / candidate);
         referenceRatios.push(reference / candidate);
+        const completed = LEVELS.indexOf(level) * REPETITIONS + i + 1;
+        const elapsedMinutes = (Date.now() - benchStartedAt) / 60000;
+        console.error(`  level ${level} repetition ${i + 1}/${REPETITIONS} (${completed}/${LEVELS.length * REPETITIONS}), ETA ~${Math.round(elapsedMinutes / completed * (LEVELS.length * REPETITIONS - completed))} min`);
     }
     const [reference, baseline, candidate] = [median(times.reference), median(times.baseline), median(times.candidate)].map(Math.round);
     const row = {

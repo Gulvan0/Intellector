@@ -6,9 +6,9 @@ import net.models.common.UserRefWithNickname;
 
 class ChatMessageBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
-	public var event_index:Int;
-	public var text:String;
-	public var spectator:Bool;
-	public var author:UserRefWithNickname;
+    @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
+    public var event_index:Int;
+    public var text:String;
+    public var spectator:Bool;
+    public var author:UserRefWithNickname;
 }

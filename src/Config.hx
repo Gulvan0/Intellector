@@ -2,35 +2,31 @@ package;
 
 class Config
 {
-    public static var minServerBuild:Int = 1745671032;
+    /** Bumped on a breaking API change; must equal the server's **/
+    public static inline final API_VERSION:Int = 2;
 
     #if debug
 
-    public static var base_url:String = debugBaseUrl();
-    public static var actualPathPrefix:Null<String> = null;
-    public static var prevPathPrefix:Null<String> = null;
+    public static final BASE_URL:String = debugBaseUrl();
 
-    #else
-
-    public static var base_url:String = "https://play-intellector.ru:8443";
-    public static var actualPathPrefix:Null<String> = "/";
-    public static var prevPathPrefix:Null<String> = "/exgame";
-
-    #end
-
-    #if debug
-    /** Other devices on the local network cannot trust the dev server's self-signed certificate, so they use its plain-HTTP port **/
+    /** A page served over plain HTTP (another device, or a phone reaching `localhost` through `adb reverse`) cannot trust the dev server's self-signed certificate, so it uses the server's plain-HTTP port **/
     private static function debugBaseUrl():String
     {
         var hostname:String = js.Browser.location.hostname;
-        if (hostname == "localhost" || hostname == "127.0.0.1")
+        if (js.Browser.location.protocol == "https:")
             return 'https://$hostname:8443';
         return 'http://$hostname:8080';
     }
+
+    #else
+
+    /** Set by `index.html`, which needs the production address before any client is loaded **/
+    public static final BASE_URL:String = js.Syntax.code("window.API_BASE_URL");
+
     #end
 
     public static function getWebsocketUrl():String
     {
-        return "ws" + base_url.substr("http".length) + "/ws";
+        return "ws" + BASE_URL.substr("http".length) + "/ws?api=" + API_VERSION;
     }
 }

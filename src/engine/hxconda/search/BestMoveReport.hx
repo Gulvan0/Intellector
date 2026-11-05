@@ -17,7 +17,7 @@ class BestMoveReport
     public var searchedRootMoveCount(default, null):Int = 0;
     /**
         Line behind the best score of the root, starting with a root move.
-        Tracked by time-limited searches only, and only updated mid-iteration, so it can disagree with `move`.
+        Tracked by time- and depth-limited searches only. Mostly updated mid-iteration, so it can disagree with `move`.
     **/
     public var principalLine(default, null):Null<Array<Move>> = null;
 
@@ -39,13 +39,24 @@ class BestMoveReport
         }
     }
 
-    public function record(move:Move, score:Float, depth:Int, searchedRootMoveCount:Int):Void
+    /** `line` starts with `move`; the previous principal line stays if it is absent **/
+    public function record(move:Move, score:Float, depth:Int, searchedRootMoveCount:Int, ?line:Array<Move>):Void
     {
         isSet = true;
         this.move = move;
         this.score = score;
         this.depth = depth;
         this.searchedRootMoveCount = searchedRootMoveCount;
+        if (line != null)
+            principalLine = line;
+    }
+
+    public function copy():BestMoveReport
+    {
+        var report:BestMoveReport = new BestMoveReport();
+        if (isSet)
+            report.record(move, score, depth, searchedRootMoveCount, principalLine?.copy());
+        return report;
     }
 
     public function new() {}

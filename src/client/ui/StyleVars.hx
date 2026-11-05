@@ -132,10 +132,9 @@ class StyleVars
         collapsed: [DIRECT => 164, OPEN => 112, BOT => 282]
     };
     public static inline final CHALLENGE_OVERLAY_TYPE_SLOT_TRANSITION_MS:Int = 180;
-    public static final CHALLENGE_OVERLAY_BOT_CARD_SIZE:ByMenuLayout<Int> = {expanded: 182, collapsed: 148};
+    public static final CHALLENGE_OVERLAY_BOT_CARD_SIZE:ByMenuLayout<Int> = {expanded: 160, collapsed: 230};
     public static inline final CHALLENGE_OVERLAY_BOT_CARD_GAP:Int = 8;
-    public static final CHALLENGE_OVERLAY_BOT_CARDS_SIDEWAYS:ByMenuLayout<Bool> = {expanded: true, collapsed: false}; // otherwise a grid scrolling down
-    public static inline final CHALLENGE_OVERLAY_BOT_CARDS_PER_ROW_NARROW:Int = 2;
+    public static final CHALLENGE_OVERLAY_BOT_CARDS_SIDEWAYS:ByMenuLayout<Bool> = {expanded: true, collapsed: false}; // whether the bot's portrait stands beside its fields
     public static final CHALLENGE_OVERLAY_BOT_PORTRAIT_SIZE:ByMenuLayout<Int> = {expanded: 196, collapsed: 96};
     public static inline final CHALLENGE_OVERLAY_BOT_PORTRAIT_GAP:Int = 14;
     public static final CHALLENGE_OVERLAY_BOT_SETUP_ROW_GAP:ByMenuLayout<Int> = {expanded: 18, collapsed: 10}; // expanded: the name row and both fields fill the portrait's height

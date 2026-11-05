@@ -5,6 +5,6 @@ import jsonmodel.IJsonSerializableMacro;
 @:structInit
 class ExternalGameRollbackPayload implements IJsonSerializableMacro
 {
-	public var game_id:Int;
-	public var new_ply_cnt:Int;
+    public var game_id:Int;
+    public var new_ply_cnt:Int;
 }

@@ -14,6 +14,7 @@ hxconda.hxml
 -lib easypubsub
 -lib intellectorboard
 
+--macro client.build.BuildInfoMacro.register()
 -js bin/app.js
 
 -resource assets/images/common/board/controls/annotate_generic.svg@annotate_generic

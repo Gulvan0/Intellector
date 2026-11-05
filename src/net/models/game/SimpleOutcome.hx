@@ -5,6 +5,6 @@ import net.models.game.OutcomeKind;
 
 class SimpleOutcome
 {
-	public var kind:OutcomeKind;
-	@:default(null) public var winner:Null<PieceColor>;
+    public var kind:OutcomeKind;
+    @:default(null) public var winner:Null<PieceColor>;
 }

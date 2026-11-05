@@ -10,13 +10,11 @@ import morestd.Detachable;
 
 /**
     A square card picking a bot: its avatar over its name. A name too long for one line wraps, and
-    the avatar shrinks to keep the card square. `selected` outlines it.
+    the avatar shrinks to keep the card square.
 **/
 class BotCard extends VBox
 {
     private final sizeBinding:Detachable;
-
-    public var selected(default, set):Bool = false;
 
     public function new(kind:BotKind, onPick:BotKind->Void)
     {
@@ -52,12 +50,5 @@ class BotCard extends VBox
     public function dispose():Void
     {
         sizeBinding.detach();
-    }
-
-    private function set_selected(value:Bool):Bool
-    {
-        selected = value;
-        ComponentExtension.setClass(this, StyleClass.CHALLENGE_BOT_CARD_SELECTED, value);
-        return value;
     }
 }

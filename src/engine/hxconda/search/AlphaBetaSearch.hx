@@ -9,14 +9,17 @@ import engine.hxconda.board.PieceArray;
 import engine.hxconda.board.PlayerColor;
 import engine.hxconda.evaluation.Evaluation.BLACK_WIN_SCORE;
 import engine.hxconda.evaluation.Evaluation.DECISIVE_THRESHOLD;
-import engine.hxconda.evaluation.Evaluation.DRAW_SCORE;
 import engine.hxconda.evaluation.Evaluation.WHITE_WIN_SCORE;
 import engine.hxconda.evaluation.Evaluation;
 import engine.hxconda.search.budget.SearchBudget;
+import engine.hxconda.search.weakening.RootMoveScores;
+import engine.hxconda.search.weakening.ScoreBound;
+import engine.hxconda.search.weakening.Weakening;
 
 /**
-    Iterative deepening principal variation search with aspiration windows, a transposition table, null move pruning,
-    extensions for captures and checks, history-based reductions and a quiescence search of captures, and of evasions at leaves in check.
+    Iterative deepening principal variation search with aspiration windows, a transposition table, null move and reverse futility pruning,
+    extensions for checks, history-based and late-move reductions and a quiescence search of captures, and of evasions at leaves in check.
+    A node stops at its first forced win: a faster one isn't worth the search, and iterative deepening finds short wins first.
     Specialized per budget class `B`, which keeps the budget checks inlined.
 **/
 @:generic
@@ -24,8 +27,8 @@ class AlphaBetaSearch<B:SearchBudget>
 {
     private final board:Board;
     private final budget:B;
-    private final table:TranspositionTable = new TranspositionTable();
-    private final history:SearchHistory = new SearchHistory();
+    private final table:TranspositionTable;
+    private final history:SearchHistory;
     private final report:BestMoveReport = new BestMoveReport();
     /** Root moves in generation order **/
     private final rootMoves:Array<Move>;
@@ -34,10 +37,11 @@ class AlphaBetaSearch<B:SearchBudget>
     /** How many captures on each square the current quiescence line has made **/
     private final quiescenceCaptureCounts:Array<Int> = [for (_ in 0...BoardGeometry.SQUARE_COUNT) 0];
     private var currentRootMoveIndex:Int = 0;
-    /** Per ply from the root, the two latest distinct quiet moves that caused a cutoff there, the latest first **/
-    private final killers:Array<Move> = [for (_ in 0...2 * SearchTuning.KILLER_PLY_COUNT) Move.NONE];
+    private final killers:Array<Move>;
     /** Distance of the current node from the root, in moves made by the main search **/
     private var ply:Int = 0;
+    /** Score of a repetition draw **/
+    private final drawScore:Float;
 
     // Outcome of the latest completed `search()` call, besides its returned score
     private var resultMove:Move = Move.NONE;
@@ -69,33 +73,7 @@ class AlphaBetaSearch<B:SearchBudget>
 
         while (budget.hasRemaining())
         {
-            var lastMoveColor:PlayerColor = cast (board.turn + iteration + 1) % 2;
-            var alpha:Float;
-            var beta:Float;
-            if (lastMoveColor == White)
-            {
-                alpha = expectedScore - SearchTuning.ASPIRATION_NEAR_MARGIN;
-                beta = expectedScore + SearchTuning.ASPIRATION_FAR_MARGIN;
-            }
-            else
-            {
-                alpha = expectedScore - SearchTuning.ASPIRATION_FAR_MARGIN;
-                beta = expectedScore + SearchTuning.ASPIRATION_NEAR_MARGIN;
-            }
-
-            var score:Float = search(alpha, beta, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
-            if (score <= alpha)
-                score = search(Math.NEGATIVE_INFINITY, alpha + 1, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
-            else if (score >= beta)
-                score = search(beta - 1, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
-
-            expectedScore = score;
-            if (resultMove == Move.NONE)
-                score = search(Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
-
-            if (budget.hasRemaining() || iteration == 1)
-                report.record(resultMove, score, iteration, rootMoves.length);
-
+            expectedScore = searchIteration(iteration, expectedScore, rootHash, rootVerificationKey, rootIsInCheck);
             budget.onIterationCompleted(report);
 
             if (report.move == Move.NONE)
@@ -105,6 +83,278 @@ class AlphaBetaSearch<B:SearchBudget>
         }
 
         return report;
+    }
+
+    /**
+        Searches the root `iteration` plies deep with an aspiration window around `expectedScore`, recording the best move
+        unless the budget ran out. Returns the score to expect from the next iteration.
+    **/
+    private function searchIteration(iteration:Int, expectedScore:Float, rootHash:Int, rootVerificationKey:Int, rootIsInCheck:Bool):Float
+    {
+        var margin:Float = SearchTuning.ASPIRATION_MARGIN;
+        var alpha:Float = expectedScore - margin;
+        var beta:Float = expectedScore + margin;
+        var score:Float = search(alpha, beta, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
+        var hasFailedLow:Bool = false;
+        var hasFailedHigh:Bool = false;
+        while (!isAborted && (score <= alpha && alpha > Math.NEGATIVE_INFINITY || score >= beta && beta < Math.POSITIVE_INFINITY))
+        {
+            margin *= SearchTuning.ASPIRATION_WIDENING;
+            var isLastWidening:Bool = margin > SearchTuning.ASPIRATION_MAX_MARGIN;
+            if (score <= alpha)
+                hasFailedLow = true;
+            else
+                hasFailedHigh = true;
+
+            if (hasFailedLow && hasFailedHigh) // contradictory bounds of an unstable search: only an unbounded window is sure to end
+            {
+                alpha = Math.NEGATIVE_INFINITY;
+                beta = Math.POSITIVE_INFINITY;
+            }
+            else if (score <= alpha)
+            {
+                var failedBound:Float = alpha;
+                alpha = isLastWidening ? Math.NEGATIVE_INFINITY : expectedScore - margin;
+                beta = failedBound + 1;
+            }
+            else
+            {
+                var failedBound:Float = beta;
+                beta = isLastWidening ? Math.POSITIVE_INFINITY : expectedScore + margin;
+                alpha = failedBound - 1;
+            }
+            score = search(alpha, beta, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
+        }
+
+        var nextExpectedScore:Float = score;
+        if (resultMove == Move.NONE)
+            score = search(Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY, iteration, 0, iteration, rootHash, rootVerificationKey, true, rootIsInCheck);
+
+        if (budget.hasRemaining() || iteration == 1)
+            report.record(resultMove, score, iteration, rootMoves.length);
+
+        return nextExpectedScore;
+    }
+
+    /**
+        Iterative deepening that scores the root moves at depths 1 and 2 and at the even depths from `weakening.scoredFromDepth` on,
+        see `scoreRootMovesAt`; the other iterations search plainly, see `searchIteration`.
+        Returns the latest completed scored iteration's scores (an even one, unless only depth 1 completed), merged with
+        those of an abandoned scored iteration after it if that one found a different best move (see `RootMoveScores.merge`).
+        The report gets each completed iteration's best move. Null if the root has no moves or the game is over.
+    **/
+    public function scoreRootMoves(weakening:Weakening):Null<RootMoveScores>
+    {
+        if (rootMoves.length == 0 || board.decisiveScore() != null)
+            return null;
+
+        var sign:Float = board.turn == White ? 1 : -1;
+        var rootHash:Int = board.hash();
+        var rootVerificationKey:Int = board.verificationKey();
+        var rootIsInCheck:Bool = board.isIntellectorAttacked();
+        var expectedScore:Float = 0;
+        var completedScores:Null<RootMoveScores> = null;
+        var abandonedScores:Null<RootMoveScores> = null;
+        var iteration:Int = 1;
+
+        budget.start();
+
+        while (budget.hasRemaining())
+        {
+            var isScored:Bool = iteration <= 2 || iteration % 2 == 0 && iteration >= weakening.scoredFromDepth;
+            if (!isScored)
+            {
+                expectedScore = searchIteration(iteration, expectedScore, rootHash, rootVerificationKey, rootIsInCheck);
+                budget.onIterationCompleted(report);
+                iteration++;
+                continue;
+            }
+
+            var scores:RootMoveScores = scoreRootMovesAt(iteration, weakening, rootHash, rootVerificationKey, completedScores);
+            var isCompleted:Bool = budget.hasRemaining() || iteration == 1;
+
+            if (isCompleted)
+            {
+                var best:Int = scores.bestIndex();
+                expectedScore = sign * scores.values[best];
+                report.record(scores.moves[best], expectedScore, iteration, scores.exactCount(), scores.lines[best]);
+                if (iteration % 2 == 0 || completedScores == null)
+                    completedScores = scores;
+            }
+            else if (iteration % 2 == 0)
+                abandonedScores = scores;
+
+            budget.onIterationCompleted(report);
+            iteration++;
+        }
+
+        if (abandonedScores == null)
+            return completedScores;
+
+        var abandonedBest:Int = abandonedScores.bestIndex();
+        if (abandonedBest == -1 || abandonedScores.moves[abandonedBest] == completedScores.moves[completedScores.bestIndex()])
+            return completedScores;
+
+        return RootMoveScores.merge(completedScores, abandonedScores);
+    }
+
+    /**
+        One scored iteration: the first move gets an exact score, then every other move is placed against the best one by
+        null-window tests, reduced like in the main search; a reduced pass is settled by an unreduced search. A move beating
+        the best one gets an exact score and makes the moves not yet placed against it get placed again. A move losing less
+        than `minLoss` only gets a bound. A move within the window gets an exact score only if it beats the
+        `candidateCount`-th best exact score in the window so far. Once a move gets aborted, the moves left stay unrecorded.
+        The moves go in the order of their values in `previous`, the latest scored iteration, after the table's best move.
+    **/
+    private function scoreRootMovesAt(depth:Int, weakening:Weakening, hash:Int, verificationKey:Int, previous:Null<RootMoveScores>):RootMoveScores
+    {
+        var scores:RootMoveScores = new RootMoveScores(depth);
+        var moves:Array<Move> = orderedMoves(depth, hash, verificationKey);
+        if (previous != null)
+        {
+            var hashMove:Move = moves[0];
+            SearchTuning.sortByKeys(moves, [for (move in moves) previous.orderingKey(move)], true);
+            SearchTuning.putFirst(moves, hashMove);
+        }
+        var pending:Array<Move> = moves.copy();
+        var bestValue:Null<Float> = null;
+
+        while (pending.length > 0)
+        {
+            var move:Move = pending.shift();
+            if (bestValue != null && scores.isPlacedAgainst(move, bestValue, weakening))
+                continue;
+
+            var isNewBest:Bool = scoreRootMove(scores, move, moves.indexOf(move), depth, weakening, bestValue, hash, verificationKey);
+            if (isAborted)
+                break;
+            if (!isNewBest)
+                continue;
+
+            var isReplacingBest:Bool = bestValue != null;
+            bestValue = scores.values[scores.moves.indexOf(move)];
+            if (isReplacingBest)
+                pending = [for (other in moves) if (other != move && (pending.contains(other) || !scores.isExact(other))) other];
+        }
+
+        return scores;
+    }
+
+    /**
+        Places `move`, the `index`-th of the root's moves, against `bestValue` (none yet if null) as described in `scoreRootMovesAt`,
+        recording what it finds unless the search gets aborted. Returns whether the move is the new best one.
+    **/
+    private function scoreRootMove(scores:RootMoveScores, move:Move, index:Int, depth:Int, weakening:Weakening, bestValue:Null<Float>, hash:Int, verificationKey:Int):Bool
+    {
+        var sign:Float = board.turn == White ? 1 : -1;
+        var attacksIntellector:Bool = board.attacksIntellector(board.turn);
+        currentRootMoveIndex = rootMoves.indexOf(move);
+
+        var isCapture:Bool = board.isCapture(move);
+        var childHash:Int = board.hashAfter(hash, move);
+        var childVerificationKey:Int = depth >= SearchTuning.HASHING_DEPTH ? board.verificationKeyAfter(verificationKey, move) : 0;
+        var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
+        makeSearchedMove(move, childHash, tracksRepetition);
+        var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
+        var extension:Float = moveExtension(move, isCapture, isCheck, true, index, depth, depth);
+        var isReduced:Bool = extension < 0;
+        var unreducedExtension:Float = isReduced ? 0 : extension;
+
+        // Fail-soft search of the child within (lower, upper), in values for the side to move at the root
+        var probe:(Float, Float, Float)->Float = (lower, upper, childExtension) -> {
+            var score:Float = sign > 0
+                ? search(lower, upper, depth - 1, childExtension, depth, childHash, childVerificationKey, false, isCheck)
+                : -search(-upper, -lower, depth - 1, childExtension, depth, childHash, childVerificationKey, false, isCheck);
+            return SearchTuning.decayDecisiveScore(score);
+        };
+        // Whether the score exceeds `threshold`, by a null-window search; a reduced pass is re-tested unreduced if `isFinal`
+        var test:(Float, Bool)->Float = (threshold, isFinal) -> {
+            var value:Float = probe(threshold, threshold + 1, extension);
+            if (value > threshold && isReduced && isFinal && !isAborted)
+                value = probe(threshold, threshold + 1, unreducedExtension);
+            return value;
+        };
+        // `probe` within (lower, upper) of a score `lowerBound` likely bounds from below, first in a narrow window above it
+        var probeNear:(Float, Float, Float)->Float = (lowerBound, lower, upper) -> {
+            if (lowerBound >= upper)
+                return probe(lower, upper, unreducedExtension);
+
+            var narrowLower:Float = Math.max(lower, lowerBound - 1);
+            var narrowUpper:Float = Math.min(upper, lowerBound + SearchTuning.ROOT_EXACT_MARGIN);
+            var value:Float = probe(narrowLower, narrowUpper, unreducedExtension);
+            if (isAborted || value > narrowLower && value < narrowUpper)
+                return value;
+            if (value >= narrowUpper)
+                return value >= upper ? value : probe(Math.max(lower, value - 1), upper, unreducedExtension);
+            return narrowLower == lower ? value : probe(lower, upper, unreducedExtension);
+        };
+        var exactLine:Void->Array<Move> = () -> {
+            var line:Array<Move> = SearchTuning.extendLine(resultLine, move);
+            line.reverse();
+            return line;
+        };
+
+        var bound:ScoreBound = Exact;
+        var value:Float;
+        var line:Null<Array<Move>> = null;
+        var isNewBest:Bool = false;
+
+        if (bestValue == null)
+        {
+            value = probe(Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY, unreducedExtension);
+            line = exactLine();
+            isNewBest = true;
+        }
+        else
+        {
+            var top:Float = bestValue - weakening.minLoss;
+            value = test(bestValue, false);
+            if (value > bestValue && !isAborted)
+            {
+                value = probe(bestValue, Math.POSITIVE_INFINITY, unreducedExtension);
+                if (value > bestValue)
+                {
+                    line = exactLine();
+                    isNewBest = true;
+                }
+            }
+            if (!isNewBest && value > top && !isAborted)
+                value = test(top, true);
+
+            if (isNewBest)
+                bound = Exact;
+            else if (value > top)
+                bound = Lower;
+            else
+            {
+                var threshold:Float = scores.candidateThreshold(bestValue, weakening);
+                var isTested:Bool = false;
+
+                bound = Upper;
+                if (value > threshold && threshold > Math.NEGATIVE_INFINITY && !isAborted)
+                {
+                    value = test(threshold, false);
+                    isTested = true;
+                }
+                if (value > threshold && !isAborted)
+                {
+                    value = isTested ? probeNear(value, threshold, top + 1) : probe(threshold, top + 1, unreducedExtension);
+                    if (value > threshold && value <= top)
+                    {
+                        bound = Exact;
+                        line = exactLine();
+                    }
+                    else if (value > top)
+                        bound = Lower;
+                }
+            }
+        }
+
+        unmakeSearchedMove(childHash, tracksRepetition);
+
+        if (!isAborted)
+            scores.set(move, bound, value, line);
+        return isNewBest && !isAborted;
     }
 
     /**
@@ -136,14 +386,14 @@ class AlphaBetaSearch<B:SearchBudget>
         }
 
         if (depth >= SearchTuning.REPETITION_DEPTH && depth != maxDepth && board.visitCount(hash) >= SearchTuning.REPETITIONS_TO_DRAW)
-            return conclude(DRAW_SCORE, Move.NONE, null, true);
+            return conclude(drawScore, Move.NONE, null, true);
 
-        if (depth >= SearchTuning.HASHING_DEPTH)
+        if (depth >= SearchTuning.HASHING_DEPTH && !isRoot) // the root must come back with a move
             switch table.probe(hash, verificationKey, alpha, beta, depth)
             {
                 case Cutoff:
                     return conclude(table.cutoffScore, table.cutoffMove, null);
-                case WindowNarrowed if (budget.allowsWindowNarrowing(isRoot)):
+                case WindowNarrowed:
                     alpha = table.narrowedAlpha;
                     beta = table.narrowedBeta;
                 default:
@@ -192,6 +442,17 @@ class AlphaBetaSearch<B:SearchBudget>
                 return nullMoveScore;
         }
 
+        if (depth >= SearchTuning.NO_HASH_MOVE_REDUCTION_DEPTH && !isRoot && table.bestMove(hash, verificationKey) == Move.NONE) // nothing to go by: not worth the full depth
+            depth--;
+
+        if (depth >= 1 && depth <= SearchTuning.REVERSE_FUTILITY_DEPTH && !isRoot && !isInCheck && beta - alpha <= 1 && Math.abs(alpha) < DECISIVE_THRESHOLD && Math.abs(beta) < DECISIVE_THRESHOLD)
+        {
+            var staticScore:Float = evaluate();
+            var margin:Float = SearchTuning.REVERSE_FUTILITY_MARGIN * depth;
+            if (board.turn == White ? staticScore - margin >= beta : staticScore + margin <= alpha)
+                return conclude(staticScore, Move.NONE, null);
+        }
+
         if (depth < 1)
             return conclude(isInCheck ? quiesceInCheck(alpha, beta, evaluate()) : quiesce(0, alpha, beta, evaluate()), Move.NONE, null);
 
@@ -220,7 +481,7 @@ class AlphaBetaSearch<B:SearchBudget>
         if (isWhite ? beta > DECISIVE_THRESHOLD || staticScore < beta : alpha < -DECISIVE_THRESHOLD || staticScore > alpha)
             return null;
 
-        var reduction:Int = SearchTuning.NULL_MOVE_REDUCTION + (depth >= SearchTuning.NULL_MOVE_DEEP_DEPTH ? 1 : 0);
+        var reduction:Int = SearchTuning.NULL_MOVE_REDUCTION + (depth >> SearchTuning.NULL_MOVE_REDUCTION_DEPTH_SHIFT);
         board.passTurn();
         ply++;
         var passedIsInCheck:Bool = board.isIntellectorAttacked();
@@ -249,10 +510,9 @@ class AlphaBetaSearch<B:SearchBudget>
         var bestMoveIsQuiet:Bool = false;
         var bestLine:Null<Array<Move>> = budget.tracksLines() ? [] : null;
         var moves:Array<Move> = orderedMoves(depth, hash, verificationKey);
-        var moveCount:Int = moves.length;
         var attacksIntellector:Bool = board.attacksIntellector(board.turn);
 
-        for (i in 0...moveCount)
+        for (i in 0...moves.length)
         {
             var move:Move = moves[i];
             if (isRoot)
@@ -264,7 +524,7 @@ class AlphaBetaSearch<B:SearchBudget>
             var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
             makeSearchedMove(move, childHash, tracksRepetition);
             var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
-            var adjustment:Float = moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash, childVerificationKey);
+            var adjustment:Float = moveExtension(move, isCapture, isCheck, isRoot, i, depth, maxDepth);
             var isReduced:Bool = adjustment < 0;
             var childExtension:Float = extension + adjustment;
             var unreducedExtension:Float = isReduced ? extension : childExtension;
@@ -319,7 +579,10 @@ class AlphaBetaSearch<B:SearchBudget>
                 bestMoveIsQuiet = isQuiet;
             }
 
-            if (value >= beta)
+            if (value < beta && bestMove != Move.NONE && budget.allowsRootProgress(isRoot, depth, maxDepth))
+                report.recordRootProgress(moves, i + 1, bestMove, value, maxDepth, bestLine);
+
+            if (value >= beta || value > DECISIVE_THRESHOLD)
             {
                 if (!isCapture)
                 {
@@ -328,9 +591,6 @@ class AlphaBetaSearch<B:SearchBudget>
                 }
                 break;
             }
-
-            if (bestMove != Move.NONE && budget.allowsRootProgress(isRoot, depth, maxDepth))
-                report.recordRootProgress(moves, i + 1, bestMove, value, maxDepth, bestLine);
         }
 
         resultMoveIsQuiet = bestMoveIsQuiet;
@@ -345,10 +605,9 @@ class AlphaBetaSearch<B:SearchBudget>
         var bestMoveIsQuiet:Bool = false;
         var bestLine:Null<Array<Move>> = budget.tracksLines() ? [] : null;
         var moves:Array<Move> = orderedMoves(depth, hash, verificationKey);
-        var moveCount:Int = moves.length;
         var attacksIntellector:Bool = board.attacksIntellector(board.turn);
 
-        for (i in 0...moveCount)
+        for (i in 0...moves.length)
         {
             var move:Move = moves[i];
             if (isRoot)
@@ -360,7 +619,7 @@ class AlphaBetaSearch<B:SearchBudget>
             var tracksRepetition:Bool = depth >= SearchTuning.REPETITION_DEPTH;
             makeSearchedMove(move, childHash, tracksRepetition);
             var isCheck:Bool = attacksIntellector ? board.isIntellectorAttacked() : board.isIntellectorAttackedAfter(move);
-            var adjustment:Float = moveExtension(move, isCapture || isCheck, i, moveCount, depth, maxDepth, childHash, childVerificationKey);
+            var adjustment:Float = moveExtension(move, isCapture, isCheck, isRoot, i, depth, maxDepth);
             var isReduced:Bool = adjustment < 0;
             var childExtension:Float = extension + adjustment;
             var unreducedExtension:Float = isReduced ? extension : childExtension;
@@ -415,7 +674,10 @@ class AlphaBetaSearch<B:SearchBudget>
                 bestMoveIsQuiet = isQuiet;
             }
 
-            if (value <= alpha)
+            if (value > alpha && bestMove != Move.NONE && budget.allowsRootProgress(isRoot, depth, maxDepth))
+                report.recordRootProgress(moves, i + 1, bestMove, value, maxDepth, bestLine);
+
+            if (value <= alpha || value < -DECISIVE_THRESHOLD)
             {
                 if (!isCapture)
                 {
@@ -424,9 +686,6 @@ class AlphaBetaSearch<B:SearchBudget>
                 }
                 break;
             }
-
-            if (bestMove != Move.NONE && budget.allowsRootProgress(isRoot, depth, maxDepth))
-                report.recordRootProgress(moves, i + 1, bestMove, value, maxDepth, bestLine);
         }
 
         resultMoveIsQuiet = bestMoveIsQuiet;
@@ -450,19 +709,21 @@ class AlphaBetaSearch<B:SearchBudget>
     }
 
     /**
-        Depth adjustment of the child node `move` leads to, `move` being the `index`-th of `moveCount` and already made.
+        Depth adjustment of the child node `move` leads to, `move` being the `index`-th of the node's moves and already made.
         A negative one is a reduction, which a move improving on the best one so far gets re-searched without.
     **/
-    private function moveExtension(move:Move, isTactical:Bool, index:Int, moveCount:Int, depth:Int, maxDepth:Int, childHash:Int, childVerificationKey:Int):Float
+    private function moveExtension(move:Move, isCapture:Bool, isCheck:Bool, isRoot:Bool, index:Int, depth:Int, maxDepth:Int):Float
     {
-        if (isTactical)
-            return SearchTuning.TACTICAL_EXTENSION;
+        if (isCheck)
+            return SearchTuning.CHECK_EXTENSION;
+        if (isCapture || isRoot || index < SearchTuning.UNREDUCED_MOVE_COUNT)
+            return 0;
 
         var extension:Float = 0;
         if (history.quietVisitCount(move) >= maxDepth * maxDepth * 2)
             extension = -1 / (100 * history.quietBestRate(move) + 0.5);
-        if (depth >= SearchTuning.SORTING_DEPTH && table.deepestDepth(childHash, childVerificationKey) >= SearchTuning.LATE_MOVE_REDUCTION_HASH_DEPTH)
-            extension -= index / moveCount;
+        if (depth >= SearchTuning.LATE_MOVE_REDUCTION_DEPTH)
+            extension -= Math.min(SearchTuning.LATE_MOVE_REDUCTION_CAP, SearchTuning.LATE_MOVE_REDUCTION_SCALE * Math.log(depth) * Math.log(index + 1));
         return extension;
     }
 
@@ -710,11 +971,20 @@ class AlphaBetaSearch<B:SearchBudget>
         return -Evaluation.PIECE_VALUES[pieces[move.to]] - Evaluation.PIECE_VALUES[pieces[move.from]];
     }
 
-    /** `noiseAmplitude` bounds the random offset each root move's line gets added to its evaluation **/
-    public function new(board:Board, budget:B, noiseAmplitude:Float)
+    /**
+        `noiseAmplitude` bounds the random offset each root move's line gets added to its evaluation.
+        `drawScore` is what a repetition draw scores.
+        `memory` carries what earlier searches of the game learned, and receives what this one does; a fresh one is used if absent.
+    **/
+    public function new(board:Board, budget:B, noiseAmplitude:Float, drawScore:Float = 0, ?memory:SearchMemory)
     {
+        var searchMemory:SearchMemory = memory ?? new SearchMemory();
+        table = searchMemory.table;
+        history = searchMemory.history;
+        killers = searchMemory.killers;
         this.board = board;
         this.budget = budget;
+        this.drawScore = drawScore;
         rootMoves = MoveGenerator.generateMoves(board);
         rootMoveNoise = [for (_ in rootMoves) Math.round((Math.random() - 0.5) * 2 * noiseAmplitude)];
     }

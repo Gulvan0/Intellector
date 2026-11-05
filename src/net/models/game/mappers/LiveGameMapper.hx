@@ -77,7 +77,7 @@ class LiveGameMapper
             new intellectorboard.primitives.hex.HexCoords(dto.to_i, dto.to_j),
             dto.morph_into != null ? PieceKindMapper.dtoToDatatype(dto.morph_into) : null
         );
-        return LiveGameEvent.Ply(dto.event_index, dto.ply_index, ply, GameClockMapper.dtoToDatatype(dto.time_update));
+        return LiveGameEvent.Ply(dto.event_index, dto.ply_index, ply, GameClockMapper.dtoToDatatype(dto.time_update), dto.occurred_at != null ? dto.occurred_at.getUnixMs() : null, dto.sip_after);
     }
 
     public static function chatMessageToDatatype(dto:ChatMessageBroadcastedData):LiveGameEvent
@@ -97,7 +97,12 @@ class LiveGameMapper
 
     public static function rollbackToDatatype(dto:RollbackBroadcastedData):LiveGameEvent
     {
-        return LiveGameEvent.Rollback(dto.event_index, dto.ply_cnt_after, GameClockMapper.dtoToDatatype(dto.time_update));
+        return LiveGameEvent.Rollback(dto.event_index, dto.ply_cnt_after, GameClockMapper.dtoToDatatype(dto.time_update), dto.updated_sip);
+    }
+
+    public static function suspensionToDatatype(dto:GameSuspensionBroadcastedData):LiveGameEvent
+    {
+        return LiveGameEvent.Suspension(dto.event_index, dto.suspended, GameClockMapper.dtoToDatatype(dto.time_update));
     }
 
     public static function outcomeToDatatype(dto:Null<GameOutcomePublic>):Null<GameEnding>
@@ -161,7 +166,7 @@ class LiveGameMapper
     private static function eventToDatatype(dto:GameEvent):Null<LiveGameEvent>
     {
         return switch dto {
-            case Ply(_, eventIndex, plyIndex, from, to, morphInto, timeUpdate, isCancelled):
+            case Ply(occurredAt, eventIndex, plyIndex, from, to, morphInto, timeUpdate, isCancelled):
                 if (isCancelled)
                     null;
                 else
@@ -171,12 +176,13 @@ class LiveGameMapper
                         HexCoordsMapper.dtoToDatatype(to),
                         morphInto != null ? PieceKindMapper.dtoToDatatype(morphInto) : null
                     );
-                    LiveGameEvent.Ply(eventIndex, plyIndex, ply, GameClockMapper.dtoToDatatype(timeUpdate));
+                    LiveGameEvent.Ply(eventIndex, plyIndex, ply, GameClockMapper.dtoToDatatype(timeUpdate), occurredAt != null ? occurredAt.getUnixMs() : null, null);
                 }
             case ChatMessage(_, eventIndex, text, spectator, author): LiveGameEvent.ChatMessage(eventIndex, new GameChatMessage(author.user_ref, UserRefMapper.displayName(author), text, spectator));
             case Offer(_, eventIndex, action, kind, author): LiveGameEvent.Offer(eventIndex, offerActionToDatatype(action), offerKindToDatatype(kind), PieceColorMapper.dtoToDatatype(author));
             case TimeAdded(_, eventIndex, amountSeconds, receiver, timeUpdate): LiveGameEvent.TimeAdded(eventIndex, PieceColorMapper.dtoToDatatype(receiver), amountSeconds, GameClockMapper.dtoToDatatype(timeUpdate));
-            case Rollback(_, eventIndex, _, plyCountAfter, _, timeUpdate): LiveGameEvent.Rollback(eventIndex, plyCountAfter, GameClockMapper.dtoToDatatype(timeUpdate));
+            case Rollback(_, eventIndex, _, plyCountAfter, _, timeUpdate): LiveGameEvent.Rollback(eventIndex, plyCountAfter, GameClockMapper.dtoToDatatype(timeUpdate), null);
+            case Suspension(_, eventIndex, suspended, timeUpdate): LiveGameEvent.Suspension(eventIndex, suspended, GameClockMapper.dtoToDatatype(timeUpdate));
         }
     }
 

@@ -5,5 +5,5 @@ import net.models.game.OngoingGamePublic;
 
 class PlayerOngoingGamesStateRefresh implements IJsonUnserializableMacro
 {
-	public var current_games:Array<OngoingGamePublic>;
+    public var current_games:Array<OngoingGamePublic>;
 }

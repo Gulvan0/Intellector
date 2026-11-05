@@ -5,20 +5,25 @@ import engine.hxconda.protocol.HxcondaMoveMessage;
 import engine.hxconda.protocol.HxcondaProtocol;
 import engine.hxconda.protocol.HxcondaReportMessage;
 import engine.hxconda.protocol.HxcondaRequest;
+import engine.hxconda.search.weakening.Weakening;
+import js.html.ErrorEvent;
 import js.html.MessageEvent;
 import js.html.Worker;
 
 /**
     Runs Hxconda searches off the main thread, in the web worker built from `hxconda.hxml`.
-    One search runs at a time: starting another one or calling `stop` abandons the running search.
-    Every search gets a fresh worker, so nothing carries over between searches.
+    All engines share one worker, which keeps its memory between the searches of a game, see `Hxconda`, and runs one search at a time.
+    An engine starting a search abandons its own running or queued one; a search started while another engine's is running waits
+    for it. `stop` abandons the engine's search: a running one by terminating the worker, which loses its memory.
     `history` lists the positions of the game before the searched one, oldest first: the search scores returning to any of them as a draw.
 **/
 class HxcondaEngine
 {
     private static inline final WORKER_URL:String = "bin/hxconda.js";
 
-    private var worker:Null<Worker> = null;
+    private static var worker:Null<Worker> = null;
+    private static var runningEngine:Null<HxcondaEngine> = null;
+    private static final waiting:Array<WaitingSearch> = [];
 
     /** Searches within the node budget of a difficulty `level` (0 to 10), which plays the same on any hardware **/
     public function searchByLevel(notation:String, history:Array<String>, level:Int, onEvent:HxcondaEvent->Void):Void
@@ -40,22 +45,25 @@ class HxcondaEngine
 
     /**
         Searches `halfDepth` full moves deep or, with a `timeCapMs`, until the cap runs out.
-        `weakness` (in centiprogressors) and `style` are accepted, not applied yet.
+        Without a `weakening` it plays the best move found, see `Hxconda.bestMoveByDepth`.
+        Searches of the same `gameId` in a row, with the same style, share what they learn.
         `onDepthReached` gets every newly completed depth, in plies, the deepest one right before `onCompleted`.
         `onCompleted` gets the score (positive favours white) and the expected line, starting with the chosen move.
     **/
-    public function searchByDepth(notation:String, history:Array<String>, halfDepth:Int, timeCapMs:Null<Float>, weakness:Float = 0.0, ?style:HxcondaStyle, onCompleted:(score:Float, mainLine:Array<HxcondaMoveMessage>)->Void, ?onDepthReached:Int->Void, ?onFailed:String->Void):Void
+    public function searchByDepth(notation:String, history:Array<String>, gameId:String, halfDepth:Int, timeCapMs:Null<Float>, ?weakening:Weakening, ?style:HxcondaStyle, onCompleted:(score:Float, mainLine:Array<HxcondaMoveMessage>)->Void, ?onDepthReached:Int->Void, ?onFailed:String->Void):Void
     {
         var request:HxcondaRequest = {
             kind: SearchByDepth,
             position: notation,
             history: history,
+            gameId: gameId,
             maxDepth: halfDepth * 2,
-            weakness: weakness,
             style: style ?? Standard
         };
         if (timeCapMs != null)
             request.timeCapMs = timeCapMs;
+        if (weakening != null)
+            request.weakening = weakening;
 
         start(request, event -> {
             switch event
@@ -78,6 +86,73 @@ class HxcondaEngine
 
     public function stop():Void
     {
+        for (i in 0...waiting.length)
+            if (waiting[i].engine == this)
+            {
+                waiting.splice(i, 1);
+                return;
+            }
+
+        if (runningEngine == this)
+        {
+            terminateWorker();
+            runningEngine = null;
+            startNextWaiting();
+        }
+    }
+
+    private function start(request:HxcondaRequest, onEvent:HxcondaEvent->Void):Void
+    {
+        stop();
+
+        if (runningEngine == null)
+            launch(request, onEvent);
+        else
+            waiting.push({engine: this, request: request, onEvent: onEvent});
+    }
+
+    private function launch(request:HxcondaRequest, onEvent:HxcondaEvent->Void):Void
+    {
+        runningEngine = this;
+
+        var searchWorker:Worker = worker ?? new Worker(WORKER_URL);
+        searchWorker.onmessage = (message:MessageEvent) -> {
+            if (searchWorker != worker)
+                return; // a message queued before the worker's termination
+
+            var event:HxcondaEvent = HxcondaProtocol.decodeResponse(message.data);
+            switch event
+            {
+                case Completed(_):
+                    finish(onEvent, event);
+                case Failed(_):
+                    terminateWorker();
+                    finish(onEvent, event);
+                default:
+                    onEvent(event);
+            }
+        };
+        searchWorker.onerror = (event:ErrorEvent) -> {
+            if (searchWorker != worker)
+                return;
+
+            terminateWorker();
+            finish(onEvent, Failed('The engine worker failed to run: ${event.message ?? "it could not be loaded"}'));
+        };
+        worker = searchWorker;
+        searchWorker.postMessage(request);
+    }
+
+    private function finish(onEvent:HxcondaEvent->Void, event:HxcondaEvent):Void
+    {
+        runningEngine = null;
+        onEvent(event);
+        if (runningEngine == null)
+            startNextWaiting();
+    }
+
+    private static function terminateWorker():Void
+    {
         if (worker == null)
             return;
 
@@ -85,28 +160,11 @@ class HxcondaEngine
         worker = null;
     }
 
-    private function start(request:HxcondaRequest, onEvent:HxcondaEvent->Void):Void
+    private static function startNextWaiting():Void
     {
-        stop();
-
-        var searchWorker:Worker = new Worker(WORKER_URL);
-        searchWorker.onmessage = (message:MessageEvent) -> {
-            var event:HxcondaEvent = HxcondaProtocol.decodeResponse(message.data);
-            switch event
-            {
-                case Completed(_) | Failed(_):
-                    stop();
-                default:
-            }
-            onEvent(event);
-        };
-        searchWorker.onerror = () -> {
-            stop();
-            onEvent(Failed("The engine worker failed to run"));
-        };
-        searchWorker.postMessage(request);
-
-        worker = searchWorker;
+        var next:Null<WaitingSearch> = waiting.shift();
+        if (next != null)
+            next.engine.launch(next.request, next.onEvent);
     }
 
     /** The principal line if it starts with the chosen move, which an aspiration re-search can break; the move alone otherwise **/
@@ -125,4 +183,10 @@ class HxcondaEngine
     }
 
     public function new() {}
+}
+
+private typedef WaitingSearch = {
+    var engine:HxcondaEngine;
+    var request:HxcondaRequest;
+    var onEvent:HxcondaEvent->Void;
 }

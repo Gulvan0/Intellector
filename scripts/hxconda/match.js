@@ -13,6 +13,9 @@
         --noise <amplitude>   evaluation noise with --nodes (default 0)
         --baseline-nodes <n>  a different node budget for the baseline, e.g. to calibrate what doubling the nodes is worth
         --level <0..10>       difficulty level per move instead of --nodes
+        --depth <plies>       search depth per move instead of --nodes, Hxconda builds only: strength at equal depth, as bot games search;
+                              also prints the time each engine took
+        --baseline-depth <n>  a different search depth for the baseline
         --time <ms>           thinking time per move instead of --nodes; counts speed gains, but is sensitive to machine load
         --elo0 <e> --elo1 <e> SPRT hypotheses: the candidate is <elo0> vs <elo1> Elo stronger (default 0 and 10)
         --alpha <a> --beta <b> SPRT error rates (default 0.05 each)
@@ -75,15 +78,15 @@ function applyMove(position, move) {
 
 function engine(enginePath, settings) {
     const isReference = fs.readFileSync(enginePath, 'utf8').includes('class Position');
-    if (isReference && settings.mode === 'nodes')
+    if (isReference && (settings.mode === 'nodes' || settings.mode === 'depth'))
         throw new Error('The reference engine supports --level and --time only');
-    return { path: enginePath, isReference, settings };
+    return { path: enginePath, isReference, settings, thinkingMs: 0 };
 }
 
 // `history`: the game's positions before `position`, oldest first. Null if the engine failed, STALEMATE if it reports one
 const STALEMATE = 'stalemate';
-function bestMove(player, position, seed, history) {
-    const { mode, nodes, noise, level, time } = player.settings;
+function bestMove(player, position, seed, history, gameId) {
+    const { mode, nodes, noise, level, time, depth } = player.settings;
     if (player.isReference) {
         const request = mode === 'level' ? { command: 'bestMoveByLevel', position, level } : { command: 'bestMoveByTime', position, time };
         const posted = runInRealm(player.path, request, seed).posted;
@@ -93,17 +96,22 @@ function bestMove(player, position, seed, history) {
         return { from: result.move.from, to: result.move.to, resultingPiece: result.move.figure };
     }
 
-    const request = mode === 'nodes' ? { kind: 'searchByNodes', position, history, nodeLimit: nodes, noiseAmplitude: noise }
-        : mode === 'level' ? { kind: 'searchByLevel', position, history, level }
-        : { kind: 'searchByTime', position, history, durationMs: time };
-    const final = runInRealm(player.path, request, seed).posted.find(response => response.kind === 'completed' || response.kind === 'failed');
+    const request = mode === 'nodes' ? { kind: 'searchByNodes', position, history, gameId, nodeLimit: nodes, noiseAmplitude: noise }
+        : mode === 'level' ? { kind: 'searchByLevel', position, history, gameId, level }
+        : mode === 'depth' ? { kind: 'searchByDepth', position, history, gameId, maxDepth: depth }
+        : { kind: 'searchByTime', position, history, gameId, durationMs: time };
+    const run = runInRealm(player.path, request, seed);
+    player.thinkingMs += run.ms;
+    const final = run.posted.find(response => response.kind === 'completed' || response.kind === 'failed');
     if (final == null || final.kind !== 'completed' || final.report == null)
         return null;
     return final.report.move ?? STALEMATE;
 }
 
 // Plays one game; returns the points of `white`'s side
+let gameCounter = 0;
 function playGame(opening, white, black, seed) {
+    const gameId = `game${++gameCounter}`; // the engines keep what they learn between the moves of a game
     let position = opening;
     const visits = new Map([[position, 1]]);
     const history = [];
@@ -115,7 +123,7 @@ function playGame(opening, white, black, seed) {
         if (ply >= MAX_PLIES)
             return { whitePoints: 0.5, plies: ply, reason: 'length' };
 
-        const move = bestMove(position[59] === 'w' ? white : black, position, seed + ply, history);
+        const move = bestMove(position[59] === 'w' ? white : black, position, seed + ply, history, gameId);
         if (move == null)
             return { whitePoints: 0.5, plies: ply, reason: 'no move' };
         if (move === STALEMATE)
@@ -132,9 +140,15 @@ function playGame(opening, white, black, seed) {
 
 function playPair(pairIndex, opening, candidate, baseline) {
     const seed = 1 + pairIndex * 1000;
+    candidate.thinkingMs = baseline.thinkingMs = 0;
     const first = playGame(opening, candidate, baseline, seed);
     const second = playGame(opening, baseline, candidate, seed + 500);
-    return { pairIndex, games: [{ ...first, candidatePoints: first.whitePoints }, { ...second, candidatePoints: 1 - second.whitePoints }] };
+    return {
+        pairIndex,
+        games: [{ ...first, candidatePoints: first.whitePoints }, { ...second, candidatePoints: 1 - second.whitePoints }],
+        candidateMs: candidate.thinkingMs,
+        baselineMs: baseline.thinkingMs
+    };
 }
 
 // Statistics
@@ -167,7 +181,7 @@ function parseOptions(argv) {
     const options = {
         candidate: path.join(__dirname, '..', '..', 'bin', 'hxconda.js'),
         baseline: path.join(__dirname, 'baseline', 'hxconda.js'),
-        mode: 'nodes', nodes: 30000, noise: 0, baselineNodes: null, level: null, time: null,
+        mode: 'nodes', nodes: 30000, noise: 0, baselineNodes: null, level: null, time: null, depth: null, baselineDepth: null,
         elo0: 0, elo1: 10, alpha: 0.05, beta: 0.05,
         pairs: Infinity, threads: null, record: null
     };
@@ -179,16 +193,20 @@ function parseOptions(argv) {
             options[name] = +value;
         else
             throw new Error(`Unknown option ${argv[i]}`);
-        if (name === 'level' || name === 'time' || name === 'nodes')
+        if (name === 'level' || name === 'time' || name === 'nodes' || name === 'depth')
             options.mode = name;
     }
     return options;
 }
 
-const baselineSettings = options => options.baselineNodes != null ? { ...options, nodes: options.baselineNodes } : options;
+const baselineSettings = options => ({
+    ...options,
+    nodes: options.baselineNodes ?? options.nodes,
+    depth: options.baselineDepth ?? options.depth
+});
 
 function conditions(options) {
-    const budget = options.mode === 'nodes' ? `${options.nodes}${options.baselineNodes != null ? ` vs ${options.baselineNodes}` : ''} nodes, noise ${options.noise}` : options.mode === 'level' ? `level ${options.level}` : `${options.time} ms`;
+    const budget = options.mode === 'nodes' ? `${options.nodes}${options.baselineNodes != null ? ` vs ${options.baselineNodes}` : ''} nodes, noise ${options.noise}` : options.mode === 'level' ? `level ${options.level}` : options.mode === 'depth' ? `depth ${options.depth}${options.baselineDepth != null ? ` vs ${options.baselineDepth}` : ''}` : `${options.time} ms`;
     return `${budget}; SPRT [${options.elo0}, ${options.elo1}], α=${options.alpha}, β=${options.beta}`;
 }
 
@@ -253,7 +271,7 @@ function runMatch(options) {
     const pentanomial = [0, 0, 0, 0, 0];
     const outcomes = { wins: 0, draws: 0, losses: 0 };
     const endings = {};
-    let nextPair = 0, finished = 0, verdict = null, plies = 0;
+    let nextPair = 0, finished = 0, verdict = null, plies = 0, candidateMs = 0, baselineMs = 0;
     const started = Date.now();
     const workers = [];
 
@@ -266,7 +284,8 @@ function runMatch(options) {
             `Verdict: ${verdict} after ${stats.pairCount} pairs (${2 * stats.pairCount} games, ${minutes} min, ${Math.round(plies / (2 * stats.pairCount))} plies per game)`,
             `Candidate W/D/L ${outcomes.wins}/${outcomes.draws}/${outcomes.losses}, pair points 0/0.5/1/1.5/2: ${pentanomial.join('/')}`,
             `Elo ${stats.elo.toFixed(1)} [${stats.eloLow.toFixed(1)}, ${stats.eloHigh.toFixed(1)}], LLR ${stats.llr.toFixed(2)} [${stats.lowerBound.toFixed(2)}, ${stats.upperBound.toFixed(2)}]`,
-            `Game endings: ${Object.entries(endings).map(([reason, count]) => `${reason} ${count}`).join(', ')}`
+            `Game endings: ${Object.entries(endings).map(([reason, count]) => `${reason} ${count}`).join(', ')}`,
+            `Thinking time: candidate ${(candidateMs / 1000).toFixed(0)} s, baseline ${(baselineMs / 1000).toFixed(0)} s, x${(baselineMs / candidateMs).toFixed(2)}`
         ];
         console.log(summary.join('\n'));
 
@@ -289,10 +308,24 @@ function runMatch(options) {
         }
     };
 
+    // Progress estimate: the pace so far, the pairs a decision needs if the LLR keeps drifting as it has, and the pairs left at most
+    const startedAt = Date.now();
+    const eta = stats => {
+        const minutesPerPair = (Date.now() - startedAt) / 60000 / finished;
+        const driftPerPair = stats.llr / finished;
+        const target = driftPerPair > 0 ? stats.upperBound : stats.lowerBound;
+        const pairsToDecision = driftPerPair === 0 ? Infinity : Math.max(0, (target - stats.llr) / driftPerPair);
+        const formatMinutes = pairs => Number.isFinite(pairs) ? `${Math.round(pairs * minutesPerPair)} min` : 'unknown';
+        const toLimit = pairLimit - finished;
+        return `${(1 / minutesPerPair).toFixed(1)} pairs/min, ETA ~${formatMinutes(Math.min(pairsToDecision, toLimit))} at the current drift, at most ${formatMinutes(toLimit)}`;
+    };
+
     const onPair = (worker, result) => {
         if (verdict != null)
             return;
         finished++;
+        candidateMs += result.candidateMs;
+        baselineMs += result.baselineMs;
         let pairPoints = 0;
         for (const game of result.games) {
             pairPoints += game.candidatePoints;
@@ -314,7 +347,7 @@ function runMatch(options) {
             verdict = `rejected: not stronger by ${options.elo1} Elo`;
 
         if (finished % 20 === 0 || verdict != null)
-            console.log(`  ${finished} pairs: W/D/L ${outcomes.wins}/${outcomes.draws}/${outcomes.losses}, Elo ${stats.elo.toFixed(1)} [${stats.eloLow.toFixed(1)}, ${stats.eloHigh.toFixed(1)}], LLR ${stats.llr.toFixed(2)}`);
+            console.log(`  ${finished}/${pairLimit} pairs: W/D/L ${outcomes.wins}/${outcomes.draws}/${outcomes.losses}, Elo ${stats.elo.toFixed(1)} [${stats.eloLow.toFixed(1)}, ${stats.eloHigh.toFixed(1)}], LLR ${stats.llr.toFixed(2)}${verdict == null ? ', ' + eta(stats) : ''}`);
 
         if (verdict != null || finished === pairLimit)
             finish();

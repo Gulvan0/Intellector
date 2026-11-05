@@ -1,5 +1,6 @@
 package client.logic.challenge.creation;
 
+import client.datatypes.bot.BotSettings;
 import client.datatypes.challenge.creation.CallerColorChoice;
 import client.datatypes.challenge.creation.ChallengeDraft;
 import client.datatypes.challenge.creation.ChallengeParams;
@@ -116,7 +117,10 @@ class ChallengeDraftRulesTest extends Test
         Assert.same(ChallengeTarget.LinkOnly, ChallengeDraftRules.target(draft, null));
 
         draft.type = BOT;
-        Assert.same(ChallengeTarget.Bot, ChallengeDraftRules.target(draft, null));
+        Assert.isNull(ChallengeDraftRules.target(draft, null));
+
+        draft.bot = STANDARD;
+        Assert.same(ChallengeTarget.Bot(new BotSettings(STANDARD, 5, null)), ChallengeDraftRules.target(draft, null));
     }
 
     private function testDirectTargetNeedsValidCallee():Void
@@ -185,6 +189,11 @@ class ChallengeDraftRulesTest extends Test
         Assert.isTrue(ChallengeDraftRules.parseSip(' ${Sip.DEFAULT_STARTING_POSITION_SIP} ').isDefaultStarting());
         Assert.isNull(ChallengeDraftRules.parseSip("garbage"));
         Assert.isNull(ChallengeDraftRules.parseSip(""));
+        Assert.isNull(ChallengeDraftRules.parseSip("!"));
+        Assert.isNull(ChallengeDraftRules.parseSip("x!!"));
+        Assert.isNull(ChallengeDraftRules.parseSip("2!!"));
+        Assert.isNull(ChallengeDraftRules.parseSip("abc!w!"));
+        Assert.isNull(ChallengeDraftRules.parseSip("9!w!"));
     }
 
     private function customPositionDraft():ChallengeDraft

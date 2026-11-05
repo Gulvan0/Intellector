@@ -1,10 +1,12 @@
 package engine.hxconda.search.budget;
 
+import engine.hxconda.evaluation.Evaluation.DECISIVE_THRESHOLD;
 import engine.hxconda.search.BestMoveReport;
 
 /**
     Limits the search by depth and, optionally, by wall-clock time, reporting the best move after every completed iteration.
     Once the time cap runs out, the running iteration is abandoned and no further one starts.
+    No further iteration starts either once a completed one proves a side wins, since a deeper one can't change the outcome.
 **/
 final class DepthBudget implements SearchBudget
 {
@@ -16,6 +18,7 @@ final class DepthBudget implements SearchBudget
     /** Latched as soon as any check sees the deadline passed, so the iteration it interrupts is never counted as completed **/
     private var isOverdue:Bool = false;
     private var completedDepth:Int = 0;
+    private var isDecided:Bool = false;
 
     public inline function start():Void
     {
@@ -25,7 +28,7 @@ final class DepthBudget implements SearchBudget
 
     public inline function hasRemaining():Bool
     {
-        return completedDepth < maxDepth && !checkOverdue();
+        return completedDepth < maxDepth && !isDecided && !checkOverdue();
     }
 
     public inline function isExhausted():Bool
@@ -34,11 +37,6 @@ final class DepthBudget implements SearchBudget
     }
 
     public inline function onNodeEntered() {}
-
-    public inline function allowsWindowNarrowing(isRoot:Bool):Bool
-    {
-        return true;
-    }
 
     public inline function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int):Bool
     {
@@ -56,6 +54,7 @@ final class DepthBudget implements SearchBudget
         if (!isOverdue || completedDepth == 0)
         {
             completedDepth++;
+            isDecided = Math.abs(report.score) > DECISIVE_THRESHOLD;
             onIteration(report);
         }
     }

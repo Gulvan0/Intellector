@@ -24,8 +24,7 @@ Five members of the `hxconda` family, in this UI order. Names are not localized;
 - `client.datatypes.bot.BotSettings`: kind, strength (1..9), think time cap in seconds (null = no cap).
 - `client.logic.bot.BotStrengthRules`:
   - availability: strength 9 for `std` only; 1..8 for all;
-  - weakness = `(9 - strength) * 25` centiprogressors (9 → 0, 1 → 200);
-  - half-depth: 9 → 6, 5..8 → 5, 3..4 → 4, 1..2 → 3 (depth 12 / 10 / 8 / 6).
+  - weakening and depth: `[[bot_strength]]` (half-depth 9 → 13, 1..8 → strength + 2, chosen by the time a move takes).
 - `client.logic.bot.BotKinds`: display name, description locale key, avatar path, engine style.
 - `client.logic.bot.BotRefs`: builds and parses refs (`+hxconda_<code>_<strength>` → kind and
   strength; `+Anaconda` → legacy; anything else → unknown bot).
@@ -60,9 +59,9 @@ Behavior of every existing search stays bit-identical: `scripts/hxconda/compare.
 - `engine.hxconda.HxcondaStyle`: `enum abstract(String)` with the five styles (`std`, `trl`, `vrz`,
   `frt`, `unc`), engine-side so the engine stays self-contained.
 - `Hxconda.bestMoveByDepth(notation, history, maxDepth, timeCapMs, onIteration)`.
-- Protocol: request kind `SearchByDepth` with `halfDepth`, `?timeCapMs`, `weakness`, `style` (the
-  last two carried but unused); responses reuse `Iteration` and `Completed`.
-- `HxcondaEngine.searchByDepth(notation, history, halfDepth, timeCapMs:Null<Float>, weakness = 0.0,
+- Protocol: request kind `SearchByDepth` with `halfDepth`, `?timeCapMs`, `?weakening`, `style`
+  (both applied since, see `[[bot_strength]]`); responses reuse `Iteration` and `Completed`.
+- `HxcondaEngine.searchByDepth(notation, history, halfDepth, timeCapMs:Null<Float>, ?weakening,
   ?style, onCompleted:(score:Float, mainLine:Array<HxcondaMoveMessage>)->Void,
   ?onDepthReached:Int->Void, ?onFailed:String->Void)`:
   - depth = `halfDepth * 2`;
@@ -86,7 +85,7 @@ Behavior of every existing search stays bit-identical: `scripts/hxconda/compare.
   `BotTimeData.getSecsToMove` verbatim (the unused `botMovesFirst` dropped; `moveNum` = plies played
   + 1, as the old `LiveGame.makeBotMove` passed it).
 - Time cap passed to the engine = min(user cap, allocation); the allocation only for timed games;
-  neither → no cap. `secsLeft` is the bot's clock when the search starts (a resumed game uses what
+  neither (a correspondence game without a cap) → 30 minutes, which the overlay doesn't show. `secsLeft` is the bot's clock when the search starts (a resumed game uses what
   is left).
 
 ## 4. Server (IntellectorServerV2)
@@ -208,8 +207,8 @@ failures go to `RequestFailureNotice` (a new `FailedAction` if needed) with `Fai
     the app. A search is never started for a game whose page wasn't opened in this tab.
   - A result is dropped if the game moved on meanwhile (ply count changed, ended, rolled back).
   - Game ended → stop. Search failed → a notice with Retry on the page.
-- **One driver per game**: tabs of the same browser hold a per-game lease in localStorage
-  (`client.tabs`, heartbeat, taken over when stale), so only one computes. Across devices, a
+- **One driver per game**: tabs of the same browser hold a per-game Web Lock
+  (`client.tabs`, freed by the browser when the tab goes away), so only one computes. Across devices, a
   duplicate submit fails with "impossible ply" (422) and that side resyncs silently.
 - **Bot clocks**: the server ticks the bot's clock while it thinks; latency is covered by the
   server's 60 s external grace. A user leaving during the bot's turn is `[[bot_games_deferred]]`'s.

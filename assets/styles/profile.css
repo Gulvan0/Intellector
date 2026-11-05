@@ -382,8 +382,8 @@
     word-wrap: false;
 }
 
+/* no vertical margin here: RemovableTagToken centers it by alignment, and a margin would offset that */
 .intellector-study-token-remove {
-    margin-top: 3px;
     width: 26px;
     height: 26px;
     border-radius: 4px;

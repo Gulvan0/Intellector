@@ -1797,16 +1797,6 @@
     color: #2a211a;
 }
 
-.intellector-challenge-bot-card-selected {
-    background-color: #f6e6c6;
-    border-color: #c79a56;
-}
-
-.intellector-challenge-bot-card-selected .intellector-challenge-bot-card-name {
-    font-name: $ui-family-semibold;
-    color: #8a5a1f;
-}
-
 .intellector-challenge-bot-portrait {
     padding: 8px;
     background-color: #faf7f2;
@@ -2586,6 +2576,43 @@
     padding-right: 5px;
 }
 
+/* bot progress: search depth reached out of the target, in the bot's own bar */
+.intellector-game-bot-progress {
+    horizontal-spacing: 8px;
+}
+
+.intellector-game-bot-progress-track {
+    width: 56px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: #f0ebe2;
+    border: 1px solid #e6dfd3;
+    clip: true;
+}
+
+.intellector-game-bot-progress-fill {
+    background-color: #8a5a1f;
+}
+
+.intellector-game-bot-progress-value {
+    width: 42px;
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    text-align: right;
+    word-wrap: false;
+}
+
+.haxefolio-tier-board-compact .intellector-game-bot-progress-label,
+.haxefolio-tier-board-rail .intellector-game-bot-progress-label,
+.intellector-game-forced-rail .intellector-game-bot-progress-label {
+    display: none;
+}
+
+.haxefolio-tier-board-compact .intellector-game-bot-progress-track {
+    width: 28px;
+}
+
 .intellector-game-clock {
     height: 34px;
     width: 88px;
@@ -2660,7 +2687,21 @@
     horizontal-spacing: 8px;
 }
 
+/* the head and, under it, a correspondence game's last move */
+.intellector-game-head-block {
+    vertical-spacing: 2px;
+}
+
+.intellector-game-head-last-move {
+    padding-right: 4px;
+    text-align: right;
+}
+
 /* medium: as wide as the board, over it */
+.haxefolio-tier-board-medium .intellector-game-head-last-move {
+    padding-right: 0;
+}
+
 .haxefolio-tier-board-medium .intellector-game-head {
     padding-left: 0;
     padding-right: 0;

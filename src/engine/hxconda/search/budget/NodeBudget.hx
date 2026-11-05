@@ -47,12 +47,6 @@ final class NodeBudget implements SearchBudget
         nodeCount++;
     }
 
-    /** The root always keeps its window **/
-    public inline function allowsWindowNarrowing(isRoot:Bool):Bool
-    {
-        return !isRoot;
-    }
-
     /** The root reports while the budget lasts, and throughout the first iteration **/
     public inline function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int):Bool
     {

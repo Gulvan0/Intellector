@@ -8,5 +8,7 @@ enum GameChatEntry
     Message(message:GameChatMessage);
     Offer(action:OfferAction, kind:OfferKind, author:PieceColor);
     TimeAdded(receiver:PieceColor, amountSeconds:Int);
+    /** The uploader of a game against a bot went away, freezing the game, or came back **/
+    Suspension(suspended:Bool);
     Ended(outcome:Outcome);
 }

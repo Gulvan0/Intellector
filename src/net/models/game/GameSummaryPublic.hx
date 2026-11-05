@@ -9,20 +9,20 @@ import jsonmodel.IJsonUnserializableMacro;
 
 class GameSummaryPublic implements IJsonUnserializableMacro
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var started_at:Null<DateTime>;
-	public var time_control_kind:TimeControlKind;
-	public var rated:Bool;
-	@:default(null) public var custom_starting_sip:Null<String>;
-	@:default(null) public var external_uploader_ref:Null<String>;
-	public var id:Int;
-	public var white_player:UserRefWithNickname;
-	public var black_player:UserRefWithNickname;
-	public var opening_sip:String;
-	public var latest_sip:String;
-	@:default(null) public var fischer_time_control:Null<FischerTimeControl>;
-	@:default(null) public var outcome:Null<GameOutcomePublic>;
-	@:default(null) public var white_rating:Null<PlayerRatingPublic>;
-	@:default(null) public var black_rating:Null<PlayerRatingPublic>;
-	@:default(null) public var bot_think_cap_secs:Null<Int>;
-	@:default(null) @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var last_ply_at:Null<DateTime>;
+    @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var started_at:Null<DateTime>;
+    public var time_control_kind:TimeControlKind;
+    public var rated:Bool;
+    @:default(null) public var custom_starting_sip:Null<String>;
+    @:default(null) public var external_uploader_ref:Null<String>;
+    public var id:Int;
+    public var white_player:UserRefWithNickname;
+    public var black_player:UserRefWithNickname;
+    public var opening_sip:String;
+    public var latest_sip:String;
+    @:default(null) public var fischer_time_control:Null<FischerTimeControl>;
+    @:default(null) public var outcome:Null<GameOutcomePublic>;
+    @:default(null) public var white_rating:Null<PlayerRatingPublic>;
+    @:default(null) public var black_rating:Null<PlayerRatingPublic>;
+    @:default(null) public var bot_think_cap_secs:Null<Int>;
+    @:default(null) @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var last_ply_at:Null<DateTime>;
 }

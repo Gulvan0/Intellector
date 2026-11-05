@@ -42,10 +42,6 @@ The board slides the moved piece on a `Move`-cause position change, instead of r
 
 Page the friends/following/followers lists instead of loading them whole.
 
-## Rate limiting
-
-Everywhere where relevant. Server-side-only change
-
 ## Board thumbnail in the expanded Variations card
 
 A small `BoardSurface` in the expanded card's header, following the selection.
@@ -101,3 +97,22 @@ player claim the win (`OutcomeKind.ABANDON`), plus the page's prompt to do so.
 ## Game archive
 
 Note: tables will probably not update their locale strings inside
+
+## The password is stored in plaintext, even without "remember me"
+
+Every successful sign-in or registration writes the password to localStorage (`session.saved_credentials.password`).
+Unchecking "remember me" only writes `remember_me=false`; the password stays until the user logs out. It's readable
+by any script on the origin and by anyone with access to the browser profile, and passwords are often reused. The v1
+cookie migration stores it too.
+
+The silent re-login it enables exists only because server tokens die on restart.
+
+Fix:
+
+- Don't write the password when `remember` is false, and erase it in `dontRemember`.
+- Once the server persists sessions, keep a long-lived session token instead, and never store the password.
+
+
+## Spammable timeout check
+
+`GET /game/{id}/check_timeout` is unauthenticated, and each call writes a log row and replans the timer.

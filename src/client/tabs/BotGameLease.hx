@@ -1,59 +1,46 @@
 package client.tabs;
 
-import client.storage.LocalStorageKey;
-import haxefolio.HaxeFolioApp;
+import js.Syntax;
+import js.lib.Promise;
 
 /**
-    Which of the browser's tabs computes the bot's moves in a game: the one holding the game's lease. The holder renews
-    it every `RENEWAL_INTERVAL_MS`; a lease not renewed for `EXPIRY_MS` is free to take over.
+    Which of the browser's tabs computes the bot's moves in a game: the one holding the game's Web Lock, which the
+    browser frees when that tab goes away. Where Web Locks are unavailable (a page served over plain HTTP), tabs don't
+    coordinate: every tab gets the lease, and the server rejects all plies but the first.
 **/
 class BotGameLease
 {
-    public static inline final RENEWAL_INTERVAL_MS:Int = 2000;
-    public static inline final EXPIRY_MS:Int = 6000;
+    /** How long to wait before asking again for a lease another tab holds **/
+    public static inline final RETRY_INTERVAL_MS:Int = 6000;
 
-    private static final TAB_ID:String = Std.string(Std.random(0x7FFFFFFF)) + "-" + Std.string(Date.now().getTime());
+    private static inline final LOCK_NAME_PREFIX:String = "intellector.bot_game.";
 
-    /** Takes the lease of game `gameId` unless another tab holds it; returns whether this tab holds it now **/
-    public static function tryAcquire(gameId:Int):Bool
+    /** `onResult` gets the function releasing the lease of game `gameId`, or null if another tab holds it **/
+    public static function tryAcquire(gameId:Int, onResult:(release:Null<Void->Void>)->Void):Void
     {
-        var holder:Null<String> = holderOf(gameId);
-        if (holder != null && holder != TAB_ID)
-            return false;
+        var locks:Null<LockManager> = Syntax.code("navigator.locks");
+        if (locks == null)
+        {
+            onResult(() -> {});
+            return;
+        }
 
-        renew(gameId);
-        return holderOf(gameId) == TAB_ID;
+        locks.request(LOCK_NAME_PREFIX + Std.string(gameId), {ifAvailable: true}, lock -> {
+            if (lock == null)
+            {
+                onResult(null);
+                return null;
+            }
+
+            return new Promise<Any>((resolve, _) -> {
+                onResult(() -> resolve(null));
+            });
+        });
     }
+}
 
-    public static function renew(gameId:Int):Void
-    {
-        HaxeFolioApp.valueStorage.write(key(gameId), TAB_ID + ";" + Std.string(Date.now().getTime()));
-    }
-
-    /** Frees the lease of game `gameId` if this tab holds it **/
-    public static function release(gameId:Int):Void
-    {
-        if (holderOf(gameId) == TAB_ID)
-            HaxeFolioApp.valueStorage.remove(key(gameId));
-    }
-
-    /** The tab holding an unexpired lease of game `gameId`, or null **/
-    private static function holderOf(gameId:Int):Null<String>
-    {
-        var serialized:Null<String> = HaxeFolioApp.valueStorage.read(key(gameId));
-        if (serialized == null)
-            return null;
-
-        var parts:Array<String> = serialized.split(";");
-        var renewedAtMs:Float = parts.length == 2 ? Std.parseFloat(parts[1]) : Math.NaN;
-        if (Math.isNaN(renewedAtMs) || Date.now().getTime() - renewedAtMs > EXPIRY_MS)
-            return null;
-
-        return parts[0];
-    }
-
-    private static function key(gameId:Int):String
-    {
-        return LocalStorageKey.BOT_GAME_LEASE_PREFIX + "." + Std.string(gameId);
-    }
+private extern class LockManager
+{
+    /** Holds the lock until the promise `callback` returns settles; `callback` gets null if the lock is taken **/
+    public function request(name:String, options:{ifAvailable:Bool}, callback:Null<Any>->Null<Promise<Any>>):Promise<Any>;
 }

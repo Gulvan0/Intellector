@@ -14,7 +14,7 @@ Every change gets its own round: implement it, measure it, then accept or revert
 **A change meant to alter the behaviour** (list B):
 
 1. `node scripts/hxconda/match.js --record "<label>"`: 30000 nodes per move, SPRT [0, 10]. A change aimed at speed rather than search quality is tested with `--time <ms>` instead, since node-limited games don't reward speed.
-2. A change accepted at 30000 nodes is confirmed at a larger budget, since some techniques only pay off in deeper searches, or only hurt there. The confirmation is a non-regression test, `--nodes 200000 --elo0 -10 --elo1 0`, passing unless the change is worse by 10 Elo. Engines without noise play the same game whenever a change doesn't trigger, so a change that alters few games leaves most pairs identical; a second [0, 10] test then rejects on a handful of differing pairs, which only says "not +10 Elo".
+2. A change accepted at 30000 nodes is confirmed at a larger budget, since some techniques only pay off in deeper searches, or only hurt there. The confirmation is a non-regression test, `--nodes 200000 --elo0 -10 --elo1 0`, passing unless the change is worse by 10 Elo. Engines without noise play the same game whenever a change doesn't trigger, so a change that alters few games leaves most pairs identical; a second [0, 10] test then rejects on a handful of differing pairs, which only says "not +10 Elo". A change tested with `--time` is confirmed the same way, at `--time 200 --elo0 -10 --elo1 0`.
 3. `bench.js` is still run. Node-limited wall time stays meaningful as speed per node, even though the trees differ.
 
 Calibration (`match_results.md`): doubling the nodes is worth about +140 Elo, detected after 92 pairs. Typical single improvements are worth 5-30 Elo, which takes hundreds to thousands of pairs; 6000 openings allow 12000 games (2000 until B10a). If a match ends "inconclusive" at the opening limit, generate more openings with `match.js --generate-openings <count>`.
@@ -40,6 +40,8 @@ CPU profile of the accepted baseline (A10) on the 10 benchmark positions at leve
 
 Quiescence and move generation dominate; sorting, allocation and the depth ≥ 2 nodes are a few percent each. Re-profile after every accepted change, since the shares shift.
 
+The latest profile is of bundle A (item 28) by depth, 40 positions at depth 8, only 3.5 s long and from before reductions in check: `generateCaptures` 23.0%, the two move loops and `search` 22.3%, `isIntellectorAttackedAfter` and `attacksIntellector` 10.1%, `generateMoves` 6.5%, `orderedCaptures` 5.7%, `quiesce` 4.4%, `sortMoves` 3.6%, garbage collection 3.4%, `orderedMoves` 3.3%, `orderShallowMoves` 2.2%, the clock 2.0%. A profile of the final build at bot depths is still to do.
+
 Speed is worth strength: at about +140 Elo per doubling of the nodes, a 10% speedup is worth about +19 Elo in games played on time.
 
 ## A. Changes that keep the behaviour
@@ -48,7 +50,8 @@ The output must stay identical, so each change only alters how a result is compu
 
 ### Planned
 
-None left.
+- Principal lines only at PV nodes and a clock read every ~256 nodes: about x1.1 together.
+- Staged move generation: maybe 10%.
 
 ### Tried
 
@@ -94,9 +97,25 @@ None left.
 12. **Real null-move pruning** (11.4): reduction R = 2-3 at depth ≥ 3, skipped while the own Intellector is attacked.
     - **R = 2, 3 from depth 6, behind a static evaluation gate: accepted.** +12.2 Elo [2.5, 21.9] at 30000 nodes, +7.9 [-5.0, 20.8] at 200000 (non-regression [-10, 0]), and +11.5 [2.3, 20.6] at 50 ms against B11c, despite x0.94-0.95 per node. A node of depth ≥ 3 passes and searches the child at a null window, R plies shallower, returning the bound if it still holds. Skipped at the root, in check, right after a null move, and when the side to move has nothing but its Intellector and progressors, where zugzwang is likeliest. It is only tried if the static evaluation already reaches the bound. A decisive score after the pass becomes the bound, since passing is no legal way to win or lose. The depth-1 null move stays as it was, skipped right after a null move too.
 13. **Stronger extension for Intellector attacks** (11.1): a full ply instead of half, with a per-line extension budget.
+    - **Full ply for moves attacking the Intellector, within 2x the nominal depth from the root: rejected.** -33.5 Elo [-56.2, -11.1] at 30000 nodes after 416 pairs. Captures kept their half ply. The extra nodes cost more than the deeper tactics return.
 14. **Reduction exemptions** (11.2): no reductions at the root, for the first moves of a node, or while the own Intellector is attacked.
+    - **No reductions at the root, for a node's first 2 moves, or while the own Intellector is attacked: accepted.** +49.2 Elo [25.1, 73.8] at 30000 nodes, +15.8 [-0.5, 32.3] at 200000, passing the non-regression test; x0.91-0.98 per node. Captures and checks were already exempt. Only the history and late-move reductions of quiet moves are skipped. The 2 is untuned.
+    - **Logarithmic late-move reductions: accepted.** +9.6 Elo [1.9, 17.3] at 30000 nodes after 3348 pairs, +42.1 [17.4, 67.2] at 200000 after 311, passing the non-regression test. Quiet moves outside the B14 exemptions, at depth >= 3, are reduced by 0.3 ln(depth) ln(index + 1), at most 2 plies. It replaces the table-gated `index / moveCount` reduction. The history reduction and the re-search stay. The constants are untuned.
+    - **Reductions while the own Intellector is attacked: accepted, reversing that exemption of the first bullet.** +43.3 Elo [21.0, 66.0] at 50 ms on top of bundle A (item 28), +21.4 [2.9, 40.0] at 200 ms against the final source, passing the non-regression test. `bench.js`: x0.88 per node, the trees differing. Only the root and a node's first 2 moves stay exempt.
 15. **Aspiration windows** (13.4): start wider, around ±50, and widen gradually on failure instead of jumping to ±∞. Repeat the re-search if it fails again.
+    - **±50 start, widened x4 per failure up to ±400, then unbounded on the failed side: accepted.** +26.2 Elo [9.6, 42.9] at 30000 nodes after 698 pairs. The 200000-node non-regression test was stopped without a verdict (2 h, system out of memory), so the acceptance rests on the 30000-node test alone. The old windows were -10/+20 around the expected score, skewed by the side that moved last. The margins are untuned.
+    - **Contradictory bounds go unbounded: accepted.** +31.4 Elo [13.0, 49.9] at 30000 nodes, +37.3 [16.7, 58.0] at 50 ms. An iteration that has failed on both sides gets a fully unbounded window, the only one sure to end.
+    - **The root doesn't probe the table.** It used to narrow its window from the table in time and depth searches, through `allowsWindowNarrowing`, which is gone. The match on it went against it, -21.9 Elo [-40.6, -3.3] at 50 ms against the aspiration fix alone, yet it stayed in, and every later result builds on it. Why isn't recorded.
 16. **Integer scores** (12): round the piece-square values and drop the 0.5 steps, so a null window is a true null window.
+27. **A node stops at its first forced win. Accepted for speed:** +3.1 Elo [-8.5, 14.8] at 50 ms, inconclusive after 1500 pairs, but x3.6 at equal depth 8 (mean 1829 ms to 503 ms over 40 positions, 15 s cap). Both move loops break on a decisive score, since iterative deepening finds short wins first.
+28. **Bundle A: stronger pruning, all five pieces together. Accepted:** +52.9 Elo [27.8, 78.6] at 50 ms after 311 pairs; with the win cut, +69.1 [37.5, 101.8] at 200 ms, passing the non-regression test. Mean time at depth 8 falls from 1829 ms to 86 ms (x21.4, win cut included). The pieces, each with what removing it costs at 50 ms over 800 pairs, all inconclusive but none hurting:
+    - No capture extension (checks keep their half ply): +12.8 [-3.7, 29.4].
+    - Internal iterative reduction, a ply off nodes of depth ≥ 4 without a hash move: +13.3 [-2.2, 28.8].
+    - Late-move reductions scaled to 0.75, capped at 4 plies: +1.1 [-15.0, 17.1].
+    - Reverse futility, 60 per ply up to depth 6: +7.4 [-7.8, 22.6].
+    - Null move R = 3 + depth / 4: +16.1 [0.3, 31.9].
+
+    At equal depth it is much weaker, as expected: -311.9 Elo at depth 6, -404.7 at depth 8 against the start build, so a bot's depth means something else now (item 29). At depth 12 it scored +70.4 [15.5, 129.1] against the start build at depth 8, over 60 pairs stopped by hand. Left out on top of it: internal iterative reduction from depth 3 (-16.9 [-33.9, -0.0]) and the table at depth-1 nodes (+1.7 [-14.0, 17.5]). Weakened searches are untested with the capture extension gone at the root: the tested build kept it there. Untried on top of the bundle: an earlier win return, razoring, internal iterative reduction from depth 5, late-move reductions at scale 1, reverse futility at 40 per ply.
 
 ### Evaluation
 
@@ -110,5 +129,31 @@ None left.
 21. **Count quiescence nodes in the node budget** (15.4). Makes the levels' wait times more even, but changes what each level means: the level table needs recalibrating, using `match.js` against the old levels.
 22. **Time management** (13.2): a soft limit (don't start an iteration after about half the budget), a hard limit, and a clock check every 1024 nodes. Affects timing only, so it is tested with `--time`.
 23. **Bounded transposition table** (9): fixed size with a depth-preferred plus always-replace scheme. Bounded memory for long searches; the replacement changes results.
+    - **Typed arrays, buckets of 4 slots (2 deepest-wins, 2 always-replace), doubling up to 2^19 buckets (74 MB, within the 128 MB cap): accepted.** A bucket of 2 slots was rejected (-10.6 Elo); with 4 the strength matches the unbounded table (-0.2 Elo [-0.6, 0.2] over 1695 pairs at 30000 nodes, 1 pair differing; +2.7 [-2.6, 8.0] in the non-regression test). A slot is replaced in this order: the entry for the same position it supersedes, an unused slot, the shallowest deepest-wins slot if the new entry is at least as deep or the old one is from an earlier search, the shallowest always-replace slot. The main Zobrist keys come from a fixed seed (0x1B873593) and `pieceKeys` is an `Int32Array`.
 24. **One worker per game, keeping the table between moves** (1.1). Needs seeded Zobrist keys, item 4 and item 23.
+    - **Accepted:** +20.1 Elo [6.1, 34.2] at 30000 nodes after 1062 pairs; +7.3 [-6.8, 21.4] at 200000, inconclusive after 1000 pairs (LLR 2.39 of 2.94, no sign of regression), accepted on the 30000-node result. `SearchMemory` (table, history, killers) lives in the worker per `gameId` and style; each new search of the same game starts a table generation (older entries lose their deepest-wins protection but still serve probes), halves the history scores (`HISTORY_DECAY_DIVISOR`, 2 or 4 untried) and shifts the killers by 2 plies. Table cutoffs at the root are skipped, so the report always carries a searched move. `HxcondaEngine` keeps one worker for the page and runs one game's search at a time, the others wait; stopping a running search terminates the worker and with it the memory. No counter-move history or SEE cache exists to carry over. Speed per node (a single search per process, so the memory isn't exercised): x0.96 / x0.98 / x0.94 at levels 4-6, from the typed `pieceKeys` and the root-cutoff skip; the cause isn't isolated. The client side (shared worker, game ids) isn't browser-tested yet.
 25. **Personalities**: per-personality evaluation tables and candidate-move biases, on top of items 17-18.
+29. **Bot levels chosen by thinking time**, not by matching the old build's strength. **Set:** `BotStrengthRules.halfDepth` is strength + 2 for strengths 1-8, which is depths 6 to 20 in plies, and 13 at strength 9, depth 26. `scoredFromDepth` stays as it was. There is no default think time cap; a correspondence game without a cap stops a search after `BotThinkCapRules.MAX_SECONDS`, 30 minutes. Not checked: real games at these depths, and a phone.
+
+    Measured in Chrome 156 web workers on the final build (i7-12800HX on mains power, visible tab, idle machine): 40 positions from games, empty table, time cap 5 min. Most ran on 4 workers at once and are divided by the x1.345 this costs, measured on 6 identical deep trees (x1.29-1.41). Real games, where the table carries over, weren't measured and should be somewhat faster. Unweakened, mean seconds per move:
+
+    | Depth | 12 | 14 | 16 | 18 | 20 | 22 | 24 | 26 | 28 | 30 |
+    |---|---|---|---|---|---|---|---|---|---|---|
+    | All 40 | 0.17 | 0.44 | 1.04 | 2.34 | 4.5 | 9.9 | 21 | 46 | ≥79 | ≥114 |
+    | The 28 undecided | 0.21 | 0.57 | 1.18 | 2.63 | 5.3 | 13 | 28 | 65 | ≥111 | ≥162 |
+    | p90 of all 40 | 0.38 | 1.02 | 2.66 | 7.8 | 12 | 28 | 62 | 161 | ≥223 | ≥223 |
+    | Over 2 min | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 13 | 21 |
+
+    Each 2 plies cost about x2.2. A time cap of 2 min at depth 28 gives a mean of 57 s (79 s undecided), cutting 13 of the 28 undecided moves short, which then play depth 24 or 26.
+
+    Weakened from the first move, seconds per move, `scoredFromDepth` 6 below strength 3 and 8 from it on:
+
+    | Strength, depth | 1, 6 | 2, 8 | 3, 10 | 4, 12 | 5, 14 | 6, 16 | 7, 18 | 8, 20 | 8, 22 |
+    |---|---|---|---|---|---|---|---|---|---|
+    | Mean | 0.02 | 0.11 | 0.26 | 0.62 | 1.35 | 2.55 | 4.3 | 10.4 | 18.6 |
+    | p90 | 0.04 | 0.22 | 0.55 | 1.88 | 4.1 | 6.2 | 10 | 21 | 51 |
+    | Max | 0.11 | 0.70 | 1.13 | 3.08 | 6.3 | 11.5 | 30 | 180 | 190 |
+
+    Raising `scoredFromDepth` to the search's depth saves little (x0.81 at 14, x1.07 at 18, x0.79 at 22), and a search capped before reaching it picks its move from the depth 2 scores.
+
+    The same fixed work against a single worker in Chrome: Node x0.97, a worker on an efficiency core x1.43, a hidden tab x1.54 (measured by minimizing the window), 2 workers at once x1.09, 4 x1.28, 6 x1.49. A phone wasn't measured.

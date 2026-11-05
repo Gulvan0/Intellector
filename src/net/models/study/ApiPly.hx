@@ -5,14 +5,14 @@ import net.models.common.HexCoords;
 
 class ApiPly
 {
-	public var departure:HexCoords;
-	public var destination:HexCoords;
-	public var morph_into:Null<PieceKind> = null;
+    public var departure:HexCoords;
+    public var destination:HexCoords;
+    public var morph_into:Null<PieceKind> = null;
 
-	public function new(departure:HexCoords, destination:HexCoords, morph_into:Null<PieceKind> = null)
-	{
-		this.departure = departure;
-		this.destination = destination;
-		this.morph_into = morph_into;
-	}
+    public function new(departure:HexCoords, destination:HexCoords, morph_into:Null<PieceKind> = null)
+    {
+        this.departure = departure;
+        this.destination = destination;
+        this.morph_into = morph_into;
+    }
 }

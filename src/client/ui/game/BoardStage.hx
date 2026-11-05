@@ -8,6 +8,7 @@ import haxe.ui.containers.Box;
 import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
 import morestd.Detachable;
+import intellectorboard.primitives.piece.PieceColor;
 
 /**
     The board between its two player bars, under an optional header, as wide as the area allows -
@@ -83,6 +84,12 @@ class BoardStage extends Box
     }
 
     /** Whether the height given limits the board too; if not, the stage takes its content's height **/
+    /** The bar of the player of `color`, with `orientation` being the color at the bottom **/
+    public function barOf(color:PieceColor, orientation:PieceColor):PlayerBar
+    {
+        return color == orientation ? bottomBar : topBar;
+    }
+
     public function setFitsHeight(fitsHeight:Bool):Void
     {
         this.fitsHeight = fitsHeight;

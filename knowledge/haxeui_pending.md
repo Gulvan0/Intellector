@@ -28,6 +28,7 @@ https://github.com/haxeui/haxeui-core/pull/715 - `MenuBar.closeCurrentMenu()` (`
 https://github.com/haxeui/haxeui-core/pull/746 - `Menu.openPopup()`/`closePopup()` (`upstream-pr/menu-open-close-popup`; supersedes #701, which was opened from the fork's `master`); haxefolio's `NormalMenu` overrides `openPopup`
 https://github.com/haxeui/haxeui-core/pull/747 - a fixed-height `Label`'s text display ignores vertical padding and overflows the label by `padding-top` (`upstream-pr/label-fixed-height-padding`); without it, `.intellector-challenge-list-empty` scrolls the challenges dropdown
 https://github.com/haxeui/haxeui-core/pull/749 - tooltip stays on screen after its target is disposed (`upstream-pr/tooltip-unregister-hides-current`); tooltips on buttons that navigate away or on removed tag crosses linger without it
+https://github.com/haxeui/haxeui-core/pull/750 - style rules indexed by node name/id/class, so `buildStyleFor` stops testing every rule per component (`upstream-pr/style-rule-index`); without it, opening an overlay blocks the main thread ~0.5 s longer on a phone
 
 # Issues
 

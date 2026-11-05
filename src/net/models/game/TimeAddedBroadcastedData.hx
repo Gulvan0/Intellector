@@ -7,9 +7,9 @@ import net.models.common.PieceColor;
 
 class TimeAddedBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
-	public var event_index:Int;
-	public var amount_seconds:Int;
-	public var receiver:PieceColor;
-	public var time_update:GameTimeUpdatePublic;
+    @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
+    public var event_index:Int;
+    public var amount_seconds:Int;
+    public var receiver:PieceColor;
+    public var time_update:GameTimeUpdatePublic;
 }

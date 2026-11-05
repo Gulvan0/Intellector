@@ -1,9 +1,7 @@
 package client.ui.analysis.study;
 
 import client.datatypes.study.StudyDetails;
-import haxe.ui.components.Image;
-import haxe.ui.components.Label;
-import haxe.ui.containers.Box;
+import client.ui.common.RemovableTagToken;
 import haxe.ui.containers.ContinuousHBox;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
@@ -132,31 +130,7 @@ class StudyTagsField extends VBox
 
     private function token(tag:String):HBox
     {
-        var token:HBox = new HBox();
-        token.addClass(StyleClass.STUDY_TOKEN);
-        token.verticalAlign = "center";
-
-        var text:Label = new Label();
-        text.text = tag;
-        text.verticalAlign = "center";
-        text.addClass(StyleClass.STUDY_TOKEN_TEXT);
-        token.addComponent(text);
-
-        var removeButton:Box = new Box();
-        removeButton.addClass(StyleClass.STUDY_TOKEN_REMOVE);
-        removeButton.tooltip = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.overlay.study.remove_tag"), tag);
-        removeButton.verticalAlign = "center";
-        removeButton.trackHover();
-        removeButton.onClick = _ -> remove(tag);
-        token.addComponent(removeButton);
-
-        var cross:Image = new Image();
-        cross.resource = Assets.profileIcon("remove_tag");
-        cross.width = 10;
-        cross.height = 10;
-        cross.horizontalAlign = "center";
-        cross.verticalAlign = "center";
-        removeButton.addComponent(cross);
-        return token;
+        var tooltip:String = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.overlay.study.remove_tag"), tag);
+        return new RemovableTagToken(tag, tooltip, () -> remove(tag));
     }
 }

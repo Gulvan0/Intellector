@@ -4,6 +4,6 @@ import jsonmodel.IJsonUnserializableMacro;
 
 class PlayerSearchResult implements IJsonUnserializableMacro
 {
-	public var players:Array<PlayerSearchEntry>;
-	public var total_count:Int;
+    public var players:Array<PlayerSearchEntry>;
+    public var total_count:Int;
 }

@@ -129,14 +129,7 @@ class ChallengeDraftRules
     /** `sip` as a position, or null if it isn't well-formed **/
     public static function parseSip(sip:String):Null<Position>
     {
-        try
-        {
-            return new Sip(StringTools.trim(sip)).toPosition();
-        }
-        catch (_)
-        {
-            return null; // a malformed SIP may break the parser rather than make it return null
-        }
+        return new Sip(StringTools.trim(sip)).toPosition();
     }
 
     private static function validTarget(input:CalleeInput):Null<ChallengeTarget>

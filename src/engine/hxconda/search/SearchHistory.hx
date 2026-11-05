@@ -47,5 +47,16 @@ class SearchHistory
         quietBestCounts[move]++;
     }
 
+    /** Divides every statistic by `divisor`, so that older searches weigh less than newer ones **/
+    public function decay(divisor:Float):Void
+    {
+        for (i in 0...MOVE_INDEX_COUNT)
+        {
+            cutoffWeights[i] /= divisor;
+            quietVisitCounts[i] /= divisor;
+            quietBestCounts[i] /= divisor;
+        }
+    }
+
     public function new() {}
 }

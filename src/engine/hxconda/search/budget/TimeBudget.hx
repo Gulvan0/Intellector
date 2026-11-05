@@ -28,11 +28,6 @@ final class TimeBudget implements SearchBudget
 
     public inline function onNodeEntered() {}
 
-    public inline function allowsWindowNarrowing(isRoot:Bool):Bool
-    {
-        return true;
-    }
-
     public inline function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int):Bool
     {
         return depth == maxDepth && (hasRemaining() || maxDepth <= 1);

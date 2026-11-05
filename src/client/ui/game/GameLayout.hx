@@ -55,7 +55,9 @@ class GameLayout extends Box
     private final wideRow:HBox;
 
     private final compactColumn:VBox;
+    private final headBlock:VBox;
     private final headRow:HBox;
+    private final headLastMoveLabel:Label;
     private final tabRow:HBox;
     private final headTimeControlLabel:Label;
     private final headDetailsLabel:Label;
@@ -128,7 +130,19 @@ class GameLayout extends Box
         headResolutionLabel.addClass(StyleClass.GAME_RESOLUTION);
         headResolutionLabel.verticalAlign = "center";
         headRow.addComponent(headResolutionLabel);
-        compactColumn.addComponent(headRow);
+
+        headLastMoveLabel = new Label();
+        headLastMoveLabel.percentWidth = 100;
+        headLastMoveLabel.addClass(StyleClass.GAME_HINT);
+        headLastMoveLabel.addClass(StyleClass.GAME_HEAD_LAST_MOVE);
+        headLastMoveLabel.hidden = true;
+
+        headBlock = new VBox();
+        headBlock.percentWidth = 100;
+        headBlock.addClass(StyleClass.GAME_HEAD_BLOCK);
+        headBlock.addComponent(headRow);
+        headBlock.addComponent(headLastMoveLabel);
+        compactColumn.addComponent(headBlock);
 
         peekButton = new HBox();
         peekButton.percentWidth = 100;
@@ -277,7 +291,7 @@ class GameLayout extends Box
             movesCard.percentHeight = 100;
 
             infoScrollArea.addComponent(infoCard);
-            compactColumn.addComponent(headRow);
+            compactColumn.addComponent(headBlock);
             compactColumn.addComponent(moveStrip);
             compactColumn.addComponent(stage);
             compactColumn.addComponent(actionsCard);
@@ -300,7 +314,7 @@ class GameLayout extends Box
             wideRow.addComponent(stage);
             wideRow.addComponent(rightColumn);
             addComponent(wideRow);
-            stage.setHeader(headRow);
+            stage.setHeader(headBlock);
         }
         else
         {
@@ -350,6 +364,14 @@ class GameLayout extends Box
         LocaleManager.instance.registerComponent(headTimeControlLabel, "text", timeControlText);
         LocaleManager.instance.registerComponent(headDetailsLabel, "text", detailsText);
         LocaleManager.instance.registerComponent(headResolutionLabel, "text", resolutionText);
+    }
+
+    /** The header's last move line (medium and compact); null hides it **/
+    public function setHeadLastMove(lastMoveText:Null<Void->String>):Void
+    {
+        headLastMoveLabel.hidden = lastMoveText == null;
+        if (lastMoveText != null)
+            LocaleManager.instance.registerComponent(headLastMoveLabel, "text", lastMoveText);
     }
 
     /** Medium: shows the head's details only while they fit on one line between the time control and the resolution. Measured, so call it after a layout **/
@@ -440,7 +462,7 @@ class GameLayout extends Box
     // the bars go back to the stage, and the control row to the board, only once they've left the rail column
     private function detachParts():Void
     {
-        for (part in ([infoCard, infoFrame, chatCard, movesCard, actionsCard, stage, moveStrip, peekButton, sheet, railSheet, headRow, tabRow, railTabRow] : Array<Component>))
+        for (part in ([infoCard, infoFrame, chatCard, movesCard, actionsCard, stage, moveStrip, peekButton, sheet, railSheet, headBlock, tabRow, railTabRow] : Array<Component>))
             if (part.parentComponent != null)
                 part.parentComponent.removeComponent(part, false);
         for (bar in [stage.topBar, stage.bottomBar])

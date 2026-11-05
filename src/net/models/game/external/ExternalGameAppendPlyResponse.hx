@@ -5,5 +5,5 @@ import jsonmodel.IJsonUnserializableMacro;
 
 class ExternalGameAppendPlyResponse implements IJsonUnserializableMacro
 {
-	@:default(null) public var outcome:Null<SimpleOutcome>;
+    @:default(null) public var outcome:Null<SimpleOutcome>;
 }

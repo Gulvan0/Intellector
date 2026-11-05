@@ -1,18 +1,19 @@
 package engine.hxconda;
 
 /**
-    Playing style of a search. Accepted, not applied yet: every style plays as `Standard`.
+    Playing style of a search: the piece values, advancement bonuses and draw score of its evaluation (see `Evaluation.useStyle`),
+    and the bonuses a weakened search's move choice adds to the scores (see `StyleBonuses`).
 **/
 enum abstract HxcondaStyle(String)
 {
     /** No bias **/
     var Standard = "std";
-    /** Pushes progressors, marches the Intellector **/
+    /** Values progressors and their and the intellector's advancement more; likes progressor and forward intellector moves **/
     var Trailblazer = "trl";
-    /** Checks and sacrifices **/
+    /** Values aggressors more and dislikes draws; likes checks and sacrifices **/
     var Vrezh = "vrz";
-    /** Keeps every piece defended **/
+    /** Values defensors more and likes draws; likes its pieces defended and dislikes counter-attacking while attacked **/
     var Fortress = "frt";
-    /** Trades, open board, long moves **/
+    /** Values liberators more; likes attacking more squares, liberator jumps and long slides **/
     var Unchained = "unc";
 }

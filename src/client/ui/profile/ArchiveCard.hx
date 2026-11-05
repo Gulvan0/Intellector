@@ -7,11 +7,11 @@ import client.datatypes.timecontrol.TimeControlKind;
 import client.ui.common.FilterDropdown;
 import client.ui.common.LoadStatus;
 import client.ui.common.Pager;
+import client.ui.common.RemovableTagToken;
 import client.ui.common.UnderlineTabs;
 import client.ui.common.WidthObserver;
 import client.ui.profile.ProfileState.ArchiveState;
 import haxe.ui.components.Button;
-import haxe.ui.components.Image;
 import haxe.ui.components.Label;
 import haxe.ui.components.TextField;
 import haxe.ui.containers.Box;
@@ -19,7 +19,6 @@ import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
 import haxe.ui.events.KeyboardEvent;
-import haxe.ui.events.MouseEvent;
 import haxefolio.LocaleUtils;
 import haxefolio.structure.ScrollArea;
 import morestd.Detachable;
@@ -487,31 +486,8 @@ class ArchiveCard extends VBox
 
         for (tag in tags)
         {
-            var token:HBox = new HBox();
-            token.addClass(StyleClass.STUDY_TOKEN);
-            token.verticalAlign = "center";
-
-            var tokenLabel:Label = new Label();
-            tokenLabel.text = tag;
-            tokenLabel.addClass(StyleClass.STUDY_TOKEN_TEXT);
-            tokenLabel.verticalAlign = "center";
-            token.addComponent(tokenLabel);
-
-            var removeButton:Box = new Box();
-            removeButton.addClass(StyleClass.STUDY_TOKEN_REMOVE);
-            removeButton.tooltip = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.profile.studies.remove_tag"), tag);
-            removeButton.trackHover();
-            removeButton.registerEvent(MouseEvent.CLICK, _ -> removeTag(tag));
-            var cross:Image = new Image();
-            cross.resource = Assets.profileIcon("remove_tag");
-            cross.width = 10;
-            cross.height = 10;
-            cross.horizontalAlign = "center";
-            cross.verticalAlign = "center";
-            removeButton.addComponent(cross);
-            token.addComponent(removeButton);
-
-            addTagFilterPart(token);
+            var tooltip:String = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.profile.studies.remove_tag"), tag);
+            addTagFilterPart(new RemovableTagToken(tag, tooltip, () -> removeTag(tag)));
         }
 
         var clearButton:Button = new Button();

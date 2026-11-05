@@ -14,6 +14,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
 import haxefolio.PageLink;
+import js.html.CSSStyleDeclaration;
 
 using client.ui.ComponentExtension;
 
@@ -113,6 +114,9 @@ class PlayCard extends VBox
         titleOfChange.addClass(StyleClass.HOME_CHANGELOG_TITLE);
         if (latestChange != null)
             LocaleManager.instance.registerComponent(titleOfChange, "text", () -> latestChange.title(LocaleManager.instance.language));
+        var titleStyle:CSSStyleDeclaration = titleOfChange.getTextDisplay().element.style;
+        titleStyle.overflow = "hidden";
+        titleStyle.textOverflow = "ellipsis";
         changelogText.addComponent(titleOfChange);
 
         changelogCaption = new Label();

@@ -409,6 +409,7 @@ class BoardGeometry
 
     private static final ADJACENCY:Array<Bool> = computeAdjacency();
     private static final FINAL_SQUARE_FLAGS:Array<Bool> = computeFinalSquareFlags();
+    private static final HEIGHTS:Array<Int> = computeHeights();
 
     public static inline function areAdjacent(square:Int, otherSquare:Int):Bool
     {
@@ -425,6 +426,26 @@ class BoardGeometry
     public static inline function rayDirection(directions:Int8Array, square:Int, otherSquare:Int):Int
     {
         return directions[square * SQUARE_COUNT + otherSquare];
+    }
+
+    /** How many steps along `rays` lead from `square` to `otherSquare`, 0 if no ray of `directions` connects them **/
+    public static function rayDistance(rays:SquareLists, directions:Int8Array, square:Int, otherSquare:Int):Int
+    {
+        var direction:Int = rayDirection(directions, square, otherSquare);
+        if (direction == NO_DIRECTION)
+            return 0;
+
+        var ray:Int = square * DIRECTION_COUNT + direction;
+        for (k in rays.start(ray)...rays.end(ray))
+            if (rays.squares[k] == otherSquare)
+                return k - rays.start(ray) + 1;
+        return 0;
+    }
+
+    /** Vertical position of `square` in half-hex units, from 0 on a1 to 12 on the white final row: higher is further forward for white **/
+    public static inline function height(square:Int):Int
+    {
+        return HEIGHTS[square];
     }
 
     /** Total length of the rays going from `square` **/
@@ -464,6 +485,19 @@ class BoardGeometry
             for (neighbour in NEIGHBOUR_SOURCE[square])
                 adjacency[square * SQUARE_COUNT + neighbour] = true;
         return adjacency;
+    }
+
+    /** Columns alternate between 7 squares (a, c, …, i) and 6 squares shifted half a hex up (b, d, …, h) **/
+    private static function computeHeights():Array<Int>
+    {
+        var heights:Array<Int> = [];
+        for (column in 0...9)
+        {
+            var isShifted:Bool = column % 2 == 1;
+            for (row in 0...(isShifted ? 6 : 7))
+                heights.push(2 * row + (isShifted ? 1 : 0));
+        }
+        return heights;
     }
 
     private static function computeFinalSquareFlags():Array<Bool>

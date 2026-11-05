@@ -5,5 +5,5 @@ import net.models.challenge.ChallengePublic;
 
 class ChallengeListStateRefresh implements IJsonUnserializableMacro
 {
-	public var challenges:Array<ChallengePublic>;
+    public var challenges:Array<ChallengePublic>;
 }

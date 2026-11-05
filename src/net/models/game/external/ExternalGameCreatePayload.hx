@@ -6,9 +6,9 @@ import net.models.common.FischerTimeControl;
 @:structInit
 class ExternalGameCreatePayload implements IJsonSerializableMacro
 {
-	public var white_player_ref:String;
-	public var black_player_ref:String;
-	public var custom_starting_sip:Null<String> = null;
-	public var time_control:Null<FischerTimeControl> = null;
-	public var bot_think_cap_secs:Null<Int> = null;
+    public var white_player_ref:String;
+    public var black_player_ref:String;
+    public var custom_starting_sip:Null<String> = null;
+    public var time_control:Null<FischerTimeControl> = null;
+    public var bot_think_cap_secs:Null<Int> = null;
 }

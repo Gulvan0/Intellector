@@ -19,9 +19,6 @@ interface SearchBudget
 
     public function onNodeEntered():Void;
 
-    /** Whether transposition table bounds may narrow the window of a node **/
-    public function allowsWindowNarrowing(isRoot:Bool):Bool;
-
     /** Whether a node may report its best move found so far as the best root move **/
     public function allowsRootProgress(isRoot:Bool, depth:Int, maxDepth:Int):Bool;
 

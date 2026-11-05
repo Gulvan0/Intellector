@@ -29,11 +29,14 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
 ## Source code folder (`src`)
 
 - `client` - code specific to the client
+    - `client.build` - the build ID macro, which also writes `bin/version.json`
     - `client.botengine` - wrappers around engines for playing against the computer
     - `client.datatypes` - types commonly used in a client-only code, divided into subpackages by domain (`challenge`, `game`, `timecontrol`, `board`, ...). Holds classes centered around instances: data, plus instance-bearing state like `ChallengeInbox`
     - `client.logic` - classes centered around static members (rules, parsing, ordering) operating on `client.datatypes`, mirroring its domain subpackages
     - `client.storage` - local storage keys, typed readers/writers of persisted client state
     - `client.migration` - one-time carry-overs from the previous iteration: its cookies into localStorage, its URL forms into the current ones
+    - `client.update` - the API version mismatch reload and the watcher that reloads into a newer build
+    - `client.errors` - reporting the errors that would otherwise only reach the console
     - `client.tabs` - browser tab coordination: blinking, cross-tab hand-offs via focus and storage events
     - `client.openings` - opening database
     - `client.ui` - everything UI-related
@@ -47,8 +50,8 @@ The source files of `haxefolio`, `morestd`, `intellectorboard`, `jsonmodel`, `ea
 - `engine` - game engines. Each one is self-contained (no `client`/`net` dependencies, no HaxeUI) and runs in a web worker compiled as its own JS target
     - `engine.hxconda` - Hxconda, the Haxe port of the previous iteration's Anaconda bot engine. The client starts searches through `HxcondaEngine`, which spawns the `bin/hxconda.js` worker (main class `HxcondaWorker`) and exchanges `engine.hxconda.protocol` messages with it. Inside the search everything is plain integers and flat arrays: `intellectorboard` types are too slow there, so conversion to them belongs to the client side
         - `board` - position state, piece and move encodings, movement tables, move generation
-        - `evaluation` - static evaluation terms
-        - `search` - the alpha-beta search and its tables; `search.budget` - what stops a search (node count or time) and how it reports progress
+        - `evaluation` - static evaluation terms, per bot style; `StyleBonuses` - the styles' move preferences at the root
+        - `search` - the alpha-beta search and its tables; `search.budget` - what stops a search (node count, time or depth) and how it reports progress; `search.weakening` - how a bot below full strength picks a worse move among the scored root moves
         - `protocol` - worker messages and their encoding/decoding
 
 ## Assets folder (`assets`)

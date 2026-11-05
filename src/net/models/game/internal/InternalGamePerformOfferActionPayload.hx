@@ -7,7 +7,7 @@ import jsonmodel.IJsonSerializableMacro;
 @:structInit
 class InternalGamePerformOfferActionPayload implements IJsonSerializableMacro
 {
-	public var game_id:Int;
-	public var action_kind:OfferAction;
-	public var offer_kind:OfferKind;
+    public var game_id:Int;
+    public var action_kind:OfferAction;
+    public var offer_kind:OfferKind;
 }

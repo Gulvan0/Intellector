@@ -1,6 +1,7 @@
 import client.ServerTime;
+import client.update.ApiMismatch;
+import client.update.UpdateWatcher;
 import client.auth.AuthBootstrap;
-import client.botengine.BotGameRunner;
 import client.ui.Assets;
 import client.ui.BoardLayoutTier;
 import client.auth.Identity;
@@ -10,12 +11,8 @@ import client.migration.ChallengeDraftMigration;
 import client.migration.CredentialsMigration;
 import client.migration.LegacyUrlMigration;
 import client.migration.PreferenceMigration;
-import client.datatypes.bot.BotSettings;
-import client.datatypes.challenge.creation.ChallengeDraft;
-import client.logic.bot.BotRefs;
 import client.logic.challenge.creation.ChallengePrefills;
 import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
-import client.ui.common.overlays.challenge.ChallengeCreationOverlay;
 import client.ui.common.overlays.login.LoginOverlay;
 import client.ui.common.overlays.playersearch.PlayerSearchOverlay;
 import haxefolio.browser.ActivityTracker;
@@ -23,8 +20,6 @@ import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.HaxeFolioConfig;
 import haxefolio.HaxeFolioConfigBuilder;
-import intellectorboard.primitives.piece.PieceColor;
-import intellectorboard.primitives.ply.RawPly;
 import client.ui.home.HomeLayoutTier;
 import client.ui.home.HomePage;
 import client.ui.analysis.AnalysisPage;
@@ -33,105 +28,60 @@ import client.ui.game.LiveGamePage;
 import client.ui.profile.ProfileLayoutTier;
 import client.ui.profile.ProfilePage;
 import client.ui.challenge.ChallengeJoiningPage;
-import client.storage.ChallengeMarksStorage;
 import client.tabs.GameRedirect;
-import client.tabs.WatchedGameClaim;
-import client.datatypes.challenge.creation.ChallengeCreationOutcome;
-import client.datatypes.challenge.ChallengeMarks;
-import client.datatypes.challenge.creation.ChallengeParams;
-import client.datatypes.request.FailedAction;
-import client.datatypes.challenge.IncomingChallenge;
-import client.datatypes.challenge.OutgoingChallenge;
-import client.datatypes.game.OngoingGame;
 import client.datatypes.game.StartedGame;
-import client.datatypes.player.FoundPlayer;
-import client.datatypes.watch.WatchedGameReactionKind;
-import client.datatypes.watch.WatchedPlayer;
-import client.logic.watch.WatchedGameReaction;
-import client.utils.PagePaths;
-import client.utils.PlayerStatusFeed;
+import client.utils.AssetPreloader;
 import client.watch.WatchKeeper;
 import client.ui.StyleVars;
 import client.ui.common.account.AccountWidget;
-import client.ui.common.challenges.ChallengesController;
 import client.ui.common.challenges.widget.ChallengesWidget;
-import client.ui.common.games.OngoingGamesController;
 import client.ui.common.games.widget.OngoingGamesWidget;
-import client.ui.common.notifications.CalleeOfflineNotice;
 import client.ui.common.notifications.ConnectionNotice;
 import client.ui.common.notifications.GameStartedNotice;
 import client.ui.common.notifications.InfoNotice;
-import client.ui.common.notifications.RequestFailureNotice;
-import client.ui.common.notifications.WatchedGameNotice;
-import client.ui.common.watch.WatchController;
 import client.ui.common.watch.widget.WatchWidget;
-import easypubsub.Subscription;
 import haxe.ui.core.Component;
-import http.HttpError;
-import net.models.challenge.ChallengeCreateResponse;
-import net.models.challenge.mappers.ChallengeParamsMapper;
-import net.models.challenge.mappers.IncomingChallengeMapper;
-import net.models.challenge.mappers.OutgoingChallengeMapper;
-import net.models.challenge.mappers.StartedGameMapper;
-import net.models.common.RestErrorCode;
-import net.models.common.UserRefWithNickname;
-import net.models.common.mappers.UserRefMapper;
-import net.models.game.OngoingGamePublic;
-import net.models.game.mappers.LiveGameMapper;
-import net.models.game.mappers.OngoingGameMapper;
 import net.rest.Rest;
-import net.rest.RestErrors;
 import net.rest.RestOperationRegistry;
 import net.ws.PubSub;
 import net.ws.channels.Everyone;
-import net.ws.channels.IncomingChallenges;
-import net.ws.channels.OutgoingChallenges;
-import net.ws.channels.PlayerOngoingGames;
-import net.ws.events.IncomingChallengeAccepted;
-import net.ws.events.IncomingChallengeCancelled;
-import net.ws.events.IncomingChallengeDeclined;
-import net.ws.events.IncomingChallengeReceived;
-import net.ws.events.IncomingChallengesCancelledByServer;
-import net.ws.events.IncomingChallengesRefresh;
-import net.ws.events.OutgoingChallengeAccepted;
-import net.ws.events.OutgoingChallengeCancelled;
-import net.ws.events.OutgoingChallengeCreated;
-import net.ws.events.OutgoingChallengeRejected;
-import net.ws.events.OutgoingChallengesCancelledByServer;
-import net.ws.events.OutgoingChallengesRefresh;
-import net.ws.events.OngoingGameEnded;
-import net.ws.events.OngoingGameStarted;
-import net.ws.events.OngoingGameUpdated;
-import net.ws.events.PlayerOngoingGamesRefresh;
 import net.ws.events.ServerShutdown;
+import client.build.BuildInfo;
+import client.errors.ErrorReporter;
+import client.ui.common.challenges.ChallengeFlows;
+import client.ui.common.games.OngoingGamesFeed;
+import client.ui.common.overlays.challenge.ChallengeCreationFlow;
+import client.ui.common.watch.WatchFlows;
+import client.ui.game.controllers.BotGameRequests;
+import js.html.Location;
+import net.models.other.ClientErrorReport;
 
 class Main
 {
     /** Shorter than the server's away threshold, so that a resumed user never stays "away" until the next scheduled heartbeat **/
     private static inline final IDLE_THRESHOLD_SECS:Int = 60;
 
+    private static inline final MAX_REPORTED_PATH_LENGTH:Int = 512;
+
     private static var challengesWidget:ChallengesWidget;
-    private static var challenges:ChallengesController;
-    private static var incomingChallengesSubscription:Null<Subscription<IncomingChallenges>> = null;
-    private static var outgoingChallengesSubscription:Null<Subscription<OutgoingChallenges>> = null;
-    private static var challengesUserRef:Null<String> = null;
     private static var ongoingGamesWidget:OngoingGamesWidget;
     private static var accountWidget:AccountWidget;
-    private static var ongoingGames:OngoingGamesController;
-    private static var ongoingGamesSubscription:Null<Subscription<PlayerOngoingGames>> = null;
     private static var watchWidget:WatchWidget;
-    private static var watch:WatchController;
-    private static var watchedGamesSubscription:Null<Subscription<PlayerOngoingGames>> = null;
-    private static var watchedStatusFeed:Null<PlayerStatusFeed> = null;
 
     public static function main():Void
     {
+        var tokenRetriever:Void->Null<String> = () -> HaxeFolioApp.valueStorage?.read(LocalStorageKey.TOKEN);
+        Rest.init(tokenRetriever);
+        Rest.client().onDeserializationFailed = ErrorReporter.report;
+        ErrorReporter.start(sendErrorReport);
+
         LegacyUrlMigration.run();
 
         var config:HaxeFolioConfig = HaxeFolioConfigBuilder.init("intellector", Preferences)
             .setAppIcon("assets/favicons/normal.png")
             .setSiteName("Intellector")
             .setLeaveConfirmText("{{intellector.common.leave_confirm}}")
+            .setPageFailureHandler(ErrorReporter.report)
             .setDebounceMs(100)
             .setMenuRailHeight(BoardLayoutTier.RAIL_MAX_HEIGHT)
             .addWidthTier(BoardLayoutTier.SCALE, BoardLayoutTier.Compact, 0)
@@ -161,7 +111,7 @@ class Main
             .addNormalMenuItem("play", "versus_bot", Execute(onVersusBotPressed), Assets.menuItemIcon("versus_bot"))
             .addLeftMenubarItem(NormalMenu("watch", []))
             .addNormalMenuItem("watch", "current_games", NavigateTo(() -> "home"), Assets.menuItemIcon("current_games"))
-            .addNormalMenuItem("watch", "watch_player", Execute(onWatchPlayerPressed), Assets.menuItemIcon("watch_player"))
+            .addNormalMenuItem("watch", "watch_player", Execute(WatchFlows.presentPlayerSearch), Assets.menuItemIcon("watch_player"))
             .addLeftMenubarItem(NormalMenu("learn", []))
             .addNormalMenuItem("learn", "analysis_board", NavigateTo(() -> "analysis"), Assets.menuItemIcon("analysis_board"))
             .addLeftMenubarItem(NormalMenu("social", []))
@@ -177,61 +127,56 @@ class Main
             .buildConfig();
 
         // before the first page opens: it may load data right away
-        var tokenRetriever:Void->Null<String> = () -> HaxeFolioApp.valueStorage.read(LocalStorageKey.TOKEN);
-        Rest.init(tokenRetriever);
         ServerTime.init(Rest.serverClock().now);
         PubSub.start(tokenRetriever, () -> ActivityTracker.getLastActivityTs(), null, AuthBootstrap.run); // the token was rejected: revalidate it, falling back to the guest
 
         HaxeFolioApp.init(config);
         ConnectionNotice.init();
-        PubSub.watchConnection(ConnectionNotice.onConnected, ConnectionNotice.onDisconnected);
+        PubSub.watchConnection(onConnectionOpened, ConnectionNotice.onDisconnected);
+        PubSub.watchClose(ApiMismatch.onConnectionClosed);
+        PubSub.watchMessageFailures(ErrorReporter.report);
+        UpdateWatcher.init(() -> LiveGamePage.isShowingOwnOngoingGame() || !HaxeFolioApp.currentPageMayBeLeft() || HaxeFolioApp.overlayHoldsInput());
         js.Browser.window.addEventListener("online", PubSub.reconnectNow);
+        js.Browser.document.addEventListener("visibilitychange", PubSub.sendHeartbeat); // a hidden tab's timers are throttled: tell the server the tab is alive before they are, and check the connection on return
         PubSub.listen(new Everyone()).onEventLight(ServerShutdown, _ -> InfoNotice.show("intellector.server_shutdown_notice.title", "intellector.server_shutdown_notice.text"));
         PreferenceMigration.run();
         ChallengeDraftMigration.run();
         CredentialsMigration.run();
         ActivityTracker.activate(IDLE_THRESHOLD_SECS, PubSub.sendHeartbeat);
-        challenges = new ChallengesController(challengesWidget, acceptChallenge, declineChallenge, cancelChallenge, saveChallengeMarks);
-        ChallengeMarksStorage.addExternalChangeHandler(() -> challengesUserRef, challenges.applyMarks);
-        ongoingGames = new OngoingGamesController(ongoingGamesWidget);
+        var challengeFlows:ChallengeFlows = new ChallengeFlows(challengesWidget);
+        var ongoingGamesFeed:OngoingGamesFeed = new OngoingGamesFeed(ongoingGamesWidget);
         ongoingGamesWidget.currentGameId = () -> LiveGamePage.openGameId;
         GameRedirect.init(openStartedGame);
-        watch = new WatchController(watchWidget);
+        var watchFlows:WatchFlows = new WatchFlows(watchWidget, {
+            openGameId: () -> LiveGamePage.openGameId,
+            isShowingOwnOngoingTimedGame: LiveGamePage.isShowingOwnOngoingTimedGame,
+            isShowingOthersOngoingTimedGame: LiveGamePage.isShowingOthersOngoingTimedGame
+        });
         watchWidget.currentGameId = () -> LiveGamePage.openGameId;
-        WatchedGameClaim.init(openWatchedGame, announceWatchedGame);
-        BotGameRunner.init(submitBotPly, onBotSearchFailed);
-        ChallengeCreationLauncher.launch = presentChallengeCreation;
-        IdentityKeeper.init([_ -> PubSub.reauth(), refreshAccountMenu, subscribeToChallenges, subscribeToOngoingGames]);
-        WatchKeeper.init([subscribeToWatchedPlayer]);
+        BotGameRequests.connect();
+        ChallengeCreationLauncher.launch = ChallengeCreationFlow.present;
+        IdentityKeeper.init([_ -> PubSub.reauth(), refreshAccountMenu, challengeFlows.onIdentityChanged, ongoingGamesFeed.onIdentityChanged]);
+        WatchKeeper.init([watchFlows.onWatchedChanged]);
         js.Browser.window.addEventListener("installpromptchange", refreshInstallItem);
         refreshInstallItem();
         AuthBootstrap.run();
+        haxe.Timer.delay(AssetPreloader.start, 0);
+    }
+
+    private static function onConnectionOpened():Void
+    {
+        ConnectionNotice.onConnected();
+        UpdateWatcher.check();
     }
 
     private static function onCreateGamePressed():Void
     {
-        presentChallengeCreation(null);
+        ChallengeCreationFlow.present();
     }
 
     private static function onVersusBotPressed():Void
     {
-        presentChallengeCreation(ChallengePrefills.versusBot);
-    }
-
-    private static function presentChallengeCreation(?prefill:ChallengeDraft->Void):Void
-    {
-        var identity:Identity = IdentityKeeper.currentIdentity;
-        ChallengeCreationOverlay.present(identity.isGuest(), identity.getUserRef(), createChallenge, prefill);
-    }
-
-    private static function onWatchPlayerPressed():Void
-    {
-        PlayerSearchOverlay.present(LocaleUtils.localeBinding("intellector.overlay.player_search.title.watch_player"), true, watchFoundPlayer);
-    }
-
-    private static function watchFoundPlayer(player:FoundPlayer):Void
-    {
-        WatchKeeper.watch(new WatchedPlayer(player.login, player.nickname));
+        ChallengeCreationFlow.present(ChallengePrefills.versusBot);
     }
 
     private static function onPlayerProfilePressed():Void
@@ -291,194 +236,6 @@ class Main
         return challengesWidget.dropdown;
     }
 
-    private static function subscribeToChallenges(identity:Identity):Void
-    {
-        if (incomingChallengesSubscription != null)
-        {
-            incomingChallengesSubscription.detach();
-            incomingChallengesSubscription = null;
-        }
-
-        if (outgoingChallengesSubscription != null)
-        {
-            outgoingChallengesSubscription.detach();
-            outgoingChallengesSubscription = null;
-        }
-
-        challengesUserRef = null;
-        challenges.reset();
-
-        var userRef:Null<String> = identity.getUserRef();
-        if (userRef == null)
-            return;
-
-        challengesUserRef = userRef;
-        challenges.applyMarks(ChallengeMarksStorage.read(userRef));
-
-        incomingChallengesSubscription = PubSub.sub(new IncomingChallenges(userRef))
-            .onEventLight(IncomingChallengesRefresh, refresh -> challenges.syncIncoming(refresh.challenges.map(IncomingChallengeMapper.dtoToDatatype)))
-            .onEventLight(IncomingChallengeReceived, challenge -> challenges.receiveIncoming(IncomingChallengeMapper.dtoToDatatype(challenge)))
-            .onEventLight(IncomingChallengeCancelled, cancelled -> challenges.removeIncoming(cancelled.id))
-            .onEventLight(IncomingChallengeAccepted, accepted -> challenges.removeIncoming(accepted.id))
-            .onEventLight(IncomingChallengeDeclined, declined -> challenges.removeIncoming(declined.id))
-            .onEventLight(IncomingChallengesCancelledByServer, cancelled -> {
-                for (id in cancelled.ids)
-                    challenges.removeIncoming(id);
-            });
-
-        outgoingChallengesSubscription = PubSub.sub(new OutgoingChallenges(userRef))
-            .onEventLight(OutgoingChallengesRefresh, refresh -> onOutgoingChallengesRefresh(refresh.challenges.map(OutgoingChallengeMapper.dtoToDatatype)))
-            .onEventLight(OutgoingChallengeCreated, challenge -> challenges.addOutgoing(OutgoingChallengeMapper.dtoToDatatype(challenge)))
-            .onEventLight(OutgoingChallengeCancelled, cancelled -> challenges.removeOutgoing(cancelled.id))
-            .onEventLight(OutgoingChallengeAccepted, accepted -> onOutgoingChallengeAccepted(accepted.id))
-            .onEventLight(OutgoingChallengeRejected, rejected -> challenges.removeOutgoing(rejected.id))
-            .onEventLight(OutgoingChallengesCancelledByServer, cancelled -> {
-                for (id in cancelled.ids)
-                    challenges.removeOutgoing(id);
-            });
-    }
-
-    private static function subscribeToOngoingGames(identity:Identity):Void
-    {
-        if (ongoingGamesSubscription != null)
-        {
-            ongoingGamesSubscription.detach();
-            ongoingGamesSubscription = null;
-        }
-
-        ongoingGames.reset();
-
-        var userRef:Null<String> = identity.getUserRef();
-        if (userRef == null)
-            return;
-
-        ongoingGamesSubscription = PubSub.sub(new PlayerOngoingGames(userRef))
-            .onEventLight(PlayerOngoingGamesRefresh, refresh -> ongoingGames.sync([for (game in refresh.current_games) OngoingGameMapper.dtoToDatatype(game, userRef)]))
-            .onEventLight(OngoingGameStarted, game -> ongoingGames.add(OngoingGameMapper.startedToDatatype(game, userRef)))
-            .onEventLight(OngoingGameUpdated, update -> ongoingGames.update(update.game_id, game -> OngoingGameMapper.applyUpdate(game, update)))
-            .onEventLight(OngoingGameEnded, ended -> ongoingGames.remove(ended.id));
-    }
-
-    private static function subscribeToWatchedPlayer(player:Null<WatchedPlayer>):Void
-    {
-        if (watchedGamesSubscription != null)
-        {
-            watchedGamesSubscription.detach();
-            watchedGamesSubscription = null;
-        }
-
-        if (watchedStatusFeed != null)
-        {
-            watchedStatusFeed.detach();
-            watchedStatusFeed = null;
-        }
-
-        watch.setPlayer(player);
-
-        if (player == null)
-            return;
-
-        var login:String = player.login;
-        watchedGamesSubscription = PubSub.sub(new PlayerOngoingGames(login))
-            .onEventLight(PlayerOngoingGamesRefresh, refresh -> onWatchedGamesRefresh(refresh.current_games, login))
-            .onEventLight(OngoingGameStarted, started -> {
-                var game:OngoingGame = OngoingGameMapper.startedToDatatype(started, login);
-                watch.add(game);
-                if (!involvesUser(started.white_player.user_ref, started.black_player.user_ref))
-                    onWatchedGameStarted(game);
-            })
-            .onEventLight(OngoingGameUpdated, update -> watch.update(update.game_id, game -> OngoingGameMapper.applyUpdate(game, update)))
-            .onEventLight(OngoingGameEnded, ended -> {
-                watch.remove(ended.id);
-                WatchedGameClaim.cancel(ended.id);
-                WatchedGameNotice.dismissFor(ended.id);
-            });
-        watchedStatusFeed = new PlayerStatusFeed([login], (_, status, _) -> watch.setStatus(status));
-    }
-
-    // a game listed anew after a reconnect may have started meanwhile
-    private static function onWatchedGamesRefresh(dtos:Array<OngoingGamePublic>, login:String):Void
-    {
-        var games:Array<OngoingGame> = [for (dto in dtos) OngoingGameMapper.dtoToDatatype(dto, login)];
-        var newIds:Array<Int> = watch.sync(games);
-
-        for (i in 0...dtos.length)
-            if (newIds.contains(dtos[i].id) && !involvesUser(dtos[i].white_player.user_ref, dtos[i].black_player.user_ref))
-                onWatchedGameStarted(games[i]);
-    }
-
-    // the user's own games open through GameRedirect
-    private static function involvesUser(whiteRef:String, blackRef:String):Bool
-    {
-        var userRef:Null<String> = IdentityKeeper.currentIdentity.getUserRef();
-        return userRef != null && (whiteRef == userRef || blackRef == userRef);
-    }
-
-    private static function onWatchedGameStarted(game:OngoingGame):Void
-    {
-        if (game.id != LiveGamePage.openGameId)
-            WatchedGameClaim.request(game);
-    }
-
-    private static function openWatchedGame(game:OngoingGame):Void
-    {
-        var reaction:WatchedGameReactionKind = WatchedGameReaction.decide(
-            Preferences.watchedGameOpening.get(),
-            HaxeFolioApp.currentPageMayBeLeft(),
-            LiveGamePage.isShowingOwnOngoingTimedGame(),
-            LiveGamePage.isShowingOthersOngoingTimedGame()
-        );
-
-        switch reaction
-        {
-            case Navigate:
-                WatchedGameNotice.dismissFor(game.id);
-                HaxeFolioApp.navigateTo(PagePaths.liveGame(game.id));
-            case Announce:
-                announceWatchedGame(game);
-        }
-    }
-
-    private static function announceWatchedGame(game:OngoingGame):Void
-    {
-        var player:Null<WatchedPlayer> = WatchKeeper.watched;
-        if (player != null)
-            WatchedGameNotice.show(player.nickname, game);
-    }
-
-    private static function saveChallengeMarks(marks:ChallengeMarks):Void
-    {
-        if (challengesUserRef != null)
-            ChallengeMarksStorage.save(challengesUserRef, marks);
-    }
-
-    // a challenge missing from a refresh may have been accepted while disconnected
-    private static function onOutgoingChallengesRefresh(pending:Array<OutgoingChallenge>):Void
-    {
-        for (dropped in challenges.syncOutgoing(pending))
-            redirectToResultingGame(dropped.id);
-    }
-
-    private static function onOutgoingChallengeAccepted(challengeId:Int):Void
-    {
-        challenges.removeOutgoing(challengeId);
-        redirectToResultingGame(challengeId);
-    }
-
-    private static function redirectToResultingGame(challengeId:Int):Void
-    {
-        Rest.client().execute(
-            RestOperationRegistry.GET_CHALLENGE,
-            challenge -> {
-                var game:Null<StartedGame> = StartedGameMapper.resultingGameToDatatype(challenge);
-                if (game != null)
-                    GameRedirect.request(game);
-            },
-            RequestFailureNotice.showHttpError.bind(OPEN_STARTED_GAME),
-            ["challenge_id" => Std.string(challengeId)]
-        );
-    }
-
     private static function openStartedGame(game:StartedGame):Void
     {
         if (LiveGamePage.isShowingOwnOngoingGame())
@@ -487,170 +244,15 @@ class Main
             HaxeFolioApp.navigateTo('live/${game.id}');
     }
 
-
-    private static function submitBotPly(gameId:Int, ply:RawPly, searchedSip:String, onSettled:Void->Void):Void
+    private static function sendErrorReport(message:String, stack:Null<String>):Void
     {
-        Rest.client().execute(
-            RestOperationRegistry.APPEND_PLY_TO_EXTERNAL_GAME,
-            _ -> onSettled(),
-            error -> {
-                onSettled();
-                var status:Null<Int> = error.httpStatus;
-                if (status == null || status >= 500) // otherwise the game has moved on without this ply
-                    RequestFailureNotice.showHttpError(BOT_MOVE, error, submitBotPly.bind(gameId, ply, searchedSip, () -> {}));
-            },
-            null,
-            null,
-            LiveGameMapper.externalPlyToDto(gameId, ply, searchedSip)
-        );
-    }
-
-    private static function onBotSearchFailed(gameId:Int, retry:Void->Void):Void
-    {
-        RequestFailureNotice.show(BOT_MOVE, Unexpected, retry);
-    }
-
-    private static function createChallenge(params:ChallengeParams, onOutcome:ChallengeCreationOutcome->Void):Void
-    {
-        var calleeRef:Null<String> = params.target.calleeRef();
-        var onCreated:ChallengeCreateResponse->Void = onChallengeCreated.bind(_, onOutcome);
-        var onFailed:HttpError->Void = onCreateChallengeFailed.bind(_, calleeRef != null, onOutcome);
-
-        switch params.target
-        {
-            case Player(_) | Guest(_):
-                Rest.client().execute(RestOperationRegistry.CREATE_DIRECT_CHALLENGE, onCreated, onFailed, null, null, ChallengeParamsMapper.datatypeToDirectDto(params, calleeRef));
-            case Public | LinkOnly:
-                Rest.client().execute(RestOperationRegistry.CREATE_OPEN_CHALLENGE, onCreated, onFailed, null, null, ChallengeParamsMapper.datatypeToOpenDto(params, params.target == LinkOnly));
-            case Bot(settings):
-                startBotGame(params, settings, onOutcome);
-        }
-    }
-
-    private static function startBotGame(params:ChallengeParams, settings:BotSettings, onOutcome:ChallengeCreationOutcome->Void):Void
-    {
-        var ownUserRef:Null<String> = IdentityKeeper.currentIdentity.getUserRef();
-        if (ownUserRef == null)
-        {
-            onOutcome(Failed);
-            return;
-        }
-
-        var userColor:PieceColor = params.callerColor ?? (Std.random(2) == 0 ? White : Black);
-        Rest.client().execute(
-            RestOperationRegistry.CREATE_EXTERNAL_GAME,
-            game -> {
-                GameRedirect.request(StartedGameMapper.summaryToDatatype(game, ownUserRef));
-                onOutcome(GameStarted);
-            },
-            error -> {
-                RequestFailureNotice.showHttpError(START_BOT_GAME, error);
-                onOutcome(Failed);
-            },
-            null,
-            null,
-            ChallengeParamsMapper.datatypeToExternalGameDto(params, ownUserRef, userColor, BotRefs.build(settings.kind, settings.strength), settings.thinkCapSeconds)
-        );
-    }
-
-    private static function onChallengeCreated(response:ChallengeCreateResponse, onOutcome:ChallengeCreationOutcome->Void):Void
-    {
-        switch response.result
-        {
-            case MERGED:
-                var ownUserRef:Null<String> = IdentityKeeper.currentIdentity.getUserRef();
-                if (response.game != null && ownUserRef != null)
-                    GameRedirect.request(StartedGameMapper.summaryToDatatype(response.game, ownUserRef));
-                onOutcome(GameStarted);
-            case CREATED:
-                var callee:Null<UserRefWithNickname> = response.challenge?.callee;
-                if (response.callee_online == false && callee != null)
-                    CalleeOfflineNotice.show(UserRefMapper.displayName(callee), response.callee_session_lost == true);
-                onOutcome(Created);
-        }
-    }
-
-    private static function onCreateChallengeFailed(error:HttpError, direct:Bool, onOutcome:ChallengeCreationOutcome->Void):Void
-    {
-        if (direct && RestErrors.codeOf(error) == RestErrorCode.CALLEE_NOT_FOUND)
-        {
-            onOutcome(CalleeNotFound);
-            return;
-        }
-
-        RequestFailureNotice.showHttpError(CREATE_CHALLENGE, error);
-        onOutcome(Failed);
-    }
-
-    private static function acceptChallenge(challenge:IncomingChallenge):Void
-    {
-        Rest.client().execute(
-            RestOperationRegistry.ACCEPT_CHALLENGE,
-            game -> {
-                challenges.acceptSucceeded();
-                HaxeFolioApp.navigateTo('live/${game.id}');
-            },
-            onAcceptFailed.bind(challenge),
-            ["challenge_id" => Std.string(challenge.id)]
-        );
-    }
-
-    private static function onAcceptFailed(challenge:IncomingChallenge, error:HttpError):Void
-    {
-        challenges.acceptFailed(challenge.id);
-
-        if (isChallengeResolved(error))
-        {
-            challenges.removeIncoming(challenge.id);
-            RequestFailureNotice.show(ACCEPT_CHALLENGE, ChallengeUnavailable);
-        }
-        else
-            RequestFailureNotice.showHttpError(ACCEPT_CHALLENGE, error);
-    }
-
-    private static function declineChallenge(challenge:IncomingChallenge):Void
-    {
-        Rest.client().execute(
-            RestOperationRegistry.DECLINE_CHALLENGE,
-            _ -> {},
-            onDeclineFailed.bind(challenge),
-            ["challenge_id" => Std.string(challenge.id)]
-        );
-    }
-
-    // already off display: put back unless the challenge is gone anyway
-    private static function onDeclineFailed(challenge:IncomingChallenge, error:HttpError):Void
-    {
-        if (isChallengeResolved(error))
-            return;
-
-        challenges.declineFailed(challenge);
-        RequestFailureNotice.showHttpError(DECLINE_CHALLENGE, error);
-    }
-
-    private static function cancelChallenge(challenge:OutgoingChallenge):Void
-    {
-        Rest.client().execute(
-            RestOperationRegistry.CANCEL_CHALLENGE,
-            _ -> {},
-            onCancelFailed.bind(challenge),
-            ["challenge_id" => Std.string(challenge.id)]
-        );
-    }
-
-    // already off display: put back unless the challenge is gone anyway
-    private static function onCancelFailed(challenge:OutgoingChallenge, error:HttpError):Void
-    {
-        if (isChallengeResolved(error))
-            return;
-
-        challenges.cancelFailed(challenge);
-        RequestFailureNotice.showHttpError(CANCEL_CHALLENGE, error);
-    }
-
-    // not found, or no longer active: cancelled, accepted or declined already
-    private static function isChallengeResolved(error:HttpError):Bool
-    {
-        return error.httpStatus == 404 || error.httpStatus == 422;
+        var location:Location = js.Browser.location;
+        var report:ClientErrorReport = {
+            message: message,
+            stack: stack,
+            build_id: BuildInfo.BUILD_ID,
+            page_path: (location.pathname + location.search).substr(0, MAX_REPORTED_PATH_LENGTH)
+        };
+        Rest.client().execute(RestOperationRegistry.REPORT_CLIENT_ERROR, _ -> {}, _ -> {}, null, null, report);
     }
 }

@@ -80,6 +80,18 @@ class PlyHistory
         return plies[index];
     }
 
+    /** Whether the latest ply ended the game by the rules: a fatum, a breakthrough or leaving the opponent without plies **/
+    public function latestPlyEndsGame():Bool
+    {
+        if (plies.length == 0)
+            return false;
+
+        return switch PlyPerformer.performRawPly(positions[plies.length - 1].copy(), plies[plies.length - 1]) {
+            case FatumReached, BreakthroughReached, StalemateReached: true;
+            default: false;
+        }
+    }
+
     /**
         Adds `ply` to the end of the history. The view follows it if it was showing the latest
         position (as a `Move`), or if `followLatestMove` (snapping back from an older position, as

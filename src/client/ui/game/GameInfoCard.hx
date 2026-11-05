@@ -30,6 +30,7 @@ class GameInfoCard extends VBox
     private final ratedLabel:Label;
     private final startedAtLabel:Label;
     private final resolutionLabel:Label;
+    private final lastMoveLabel:Label;
     private final whiteRow:HBox;
     private final blackRow:HBox;
     private final whiteDot:Box;
@@ -88,6 +89,12 @@ class GameInfoCard extends VBox
         resolutionLabel.addClass(StyleClass.GAME_RESOLUTION);
         addComponent(resolutionLabel);
 
+        lastMoveLabel = new Label();
+        lastMoveLabel.percentWidth = 100;
+        lastMoveLabel.addClass(StyleClass.GAME_HINT);
+        lastMoveLabel.hidden = true;
+        addComponent(lastMoveLabel);
+
         var playersBox:VBox = new VBox();
         playersBox.percentWidth = 100;
         playersBox.addClass(StyleClass.GAME_PLAYERS_BOX);
@@ -135,6 +142,14 @@ class GameInfoCard extends VBox
     {
         this.ending = ending;
         refreshResolution();
+    }
+
+    /** `lastMoveText`: null hides the line **/
+    public function setLastMove(lastMoveText:Null<Void->String>):Void
+    {
+        lastMoveLabel.hidden = lastMoveText == null;
+        if (lastMoveText != null)
+            LocaleManager.instance.registerComponent(lastMoveLabel, "text", lastMoveText);
     }
 
     public function setPresent(color:PieceColor, present:Bool):Void

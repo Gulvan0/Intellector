@@ -129,6 +129,7 @@ class ChatCard extends VBox
             case Message(message): createMessage(message);
             case Offer(action, kind, author): createLogLine(GameFormatters.offerLogLine(action, kind, author));
             case TimeAdded(receiver, amountSeconds): createLogLine(GameFormatters.timeAddedLogLine(receiver, amountSeconds));
+            case Suspension(suspended): createLogLine(GameFormatters.suspensionLogLine(suspended));
             case Ended(outcome): createLogLine(GameFormatters.outcomeLogLine(outcome));
         }
     }

@@ -7,7 +7,7 @@ import jsonmodel.IJsonSerializableMacro;
 @:structInit
 class ExternalGameEndPayload implements IJsonSerializableMacro
 {
-	public var game_id:Int;
-	public var outcome_kind:OutcomeKind;
-	public var winner:Null<PieceColor> = null;
+    public var game_id:Int;
+    public var outcome_kind:OutcomeKind;
+    public var winner:Null<PieceColor> = null;
 }

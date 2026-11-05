@@ -177,12 +177,15 @@ class AnalysisPage extends PageBase
         for (handle in handles)
             handle.detach();
         handles = [];
-        studyMode.dispose();
+        if (studyMode != null)
+            studyMode.dispose();
         gameImport.cancel();
         if (missingGameTimer != null)
             missingGameTimer.stop();
-        board.dispose();
-        stage.dispose();
+        if (board != null)
+            board.dispose();
+        if (stage != null)
+            stage.dispose();
     }
 
     private override function canLeave():Bool

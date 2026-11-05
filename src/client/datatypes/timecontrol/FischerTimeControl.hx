@@ -2,8 +2,8 @@ package client.datatypes.timecontrol;
 
 class FischerTimeControl
 {
-	public var startSeconds:Int;
-	public var incrementSeconds:Int;
+    public var startSeconds:Int;
+    public var incrementSeconds:Int;
 
     public function getKind():TimeControlKind
     {

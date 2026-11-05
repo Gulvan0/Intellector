@@ -8,9 +8,9 @@ import net.models.game.OfferKind;
 
 class OfferActionBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
-	public var event_index:Int;
-	public var action:OfferAction;
-	public var offer_kind:OfferKind;
-	public var offer_author:PieceColor;
+    @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
+    public var event_index:Int;
+    public var action:OfferAction;
+    public var offer_kind:OfferKind;
+    public var offer_author:PieceColor;
 }

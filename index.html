@@ -17,12 +17,89 @@
     </style>
 </head>
 <body>
-    <script src="bin/app.js"></script>
-    <!-- gifenc 1.0.3 (MIT), used only once the page is up, for GIF exports -->
-    <script type="module">import * as gifenc from "./assets/vendor/gifenc/gifenc.esm.js"; window.gifenc = gifenc;</script>
     <script>
-        if ("serviceWorker" in navigator)
-            window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch((e) => console.warn("Service worker registration failed", e)));
+        (function () {
+            var API_BASE_URL = "https://play-intellector.ru";
+            window.API_BASE_URL = API_BASE_URL; // read by the release build's Config
+            var API_VERSION_KEY = "intellector.api_version";
+            var RETRY_DELAY_MS = 5000;
+            var host = window.location.hostname;
+            var isDev = host === "localhost" || host === "127.0.0.1" || /^(192\.168|10)\./.test(host);
+            var serviceWorkerUrl = new URL("sw.js", document.baseURI).href;
+
+            function readStoredApiVersion() {
+                try {
+                    var stored = window.localStorage.getItem(API_VERSION_KEY);
+                    return /^\d+$/.test(stored) ? stored : null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function storeApiVersion(apiVersion) {
+                try {
+                    window.localStorage.setItem(API_VERSION_KEY, String(apiVersion));
+                } catch (e) {
+                }
+            }
+
+            function clearStoredApiVersion() {
+                try {
+                    window.localStorage.removeItem(API_VERSION_KEY);
+                } catch (e) {
+                }
+            }
+
+            // The client of an API version lives in its own folder; the base makes every relative URL of the app resolve inside it
+            function loadClient(folder) {
+                if (folder) {
+                    var base = document.createElement("base");
+                    base.href = folder;
+                    document.head.appendChild(base);
+                }
+
+                var script = document.createElement("script");
+                script.src = "bin/app.js";
+                if (folder)
+                    script.onerror = function () {
+                        // The folder of the stored version has been pruned from the server
+                        clearStoredApiVersion();
+                        base.remove();
+                        loadClientOfServer();
+                    };
+                document.body.appendChild(script);
+
+                // Through a blob, as importing the file directly fails if the web server gives .js a non-JavaScript MIME type
+                fetch(new URL("assets/vendor/gifenc/gifenc.esm.js", document.baseURI).href)
+                    .then(function (response) { return response.text(); })
+                    .then(function (source) { return import(URL.createObjectURL(new Blob([source], {type: "text/javascript"}))); })
+                    .then(function (gifenc) { window.gifenc = gifenc; })
+                    .catch(function (e) { console.warn("Failed to load gifenc: GIF export is unavailable", e); });
+            }
+
+            function loadClientOfServer() {
+                fetch(API_BASE_URL + "/version", {cache: "no-store"})
+                    .then(function (response) { return response.json(); })
+                    .then(function (version) {
+                        storeApiVersion(version.api);
+                        loadClient("v/" + version.api + "/");
+                    })
+                    .catch(function () { window.setTimeout(loadClientOfServer, RETRY_DELAY_MS); });
+            }
+
+            var storedApiVersion = readStoredApiVersion();
+            if (isDev)
+                loadClient(null);
+            else if (storedApiVersion !== null)
+                loadClient("v/" + storedApiVersion + "/");
+            else
+                loadClientOfServer();
+
+            if ("serviceWorker" in navigator)
+                window.addEventListener("load", function () {
+                    navigator.serviceWorker.register(serviceWorkerUrl).catch(function (e) { console.warn("Service worker registration failed", e); });
+                });
+        })();
     </script>
 </body>
 </html>

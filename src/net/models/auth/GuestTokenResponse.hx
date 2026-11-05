@@ -4,6 +4,6 @@ import jsonmodel.IJsonUnserializableMacro;
 
 class GuestTokenResponse implements IJsonUnserializableMacro
 {
-	public var guest_id:Int;
-	public var token:String;
+    public var guest_id:Int;
+    public var token:String;
 }

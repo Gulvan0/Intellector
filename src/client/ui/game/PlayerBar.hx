@@ -1,5 +1,6 @@
 package client.ui.game;
 
+import client.botengine.BotSearchProgress;
 import client.datatypes.game.GameParticipant;
 import client.formatters.ClockFormatters;
 import client.formatters.GameFormatters;
@@ -24,6 +25,9 @@ class PlayerBar extends HBox
     private final nicknameLink:PageLink;
     private final watchEye:WatchEye;
     private final ratingLabel:Label;
+    private final progressBox:HBox;
+    private final progressFill:Box;
+    private final progressValueLabel:Label;
     private final clockLabel:Label;
     private var ratingShown:Bool = true;
     private var hasRating:Bool = false;
@@ -52,6 +56,34 @@ class PlayerBar extends HBox
         var spacer:Box = new Box();
         spacer.percentWidth = 100;
         addComponent(spacer);
+
+        progressBox = new HBox();
+        progressBox.addClass(StyleClass.GAME_BOT_PROGRESS);
+        progressBox.verticalAlign = "center";
+        progressBox.hidden = true;
+        addComponent(progressBox);
+
+        var progressLabel:Label = new Label();
+        progressLabel.addClass(StyleClass.GAME_HINT);
+        progressLabel.addClass(StyleClass.GAME_BOT_PROGRESS_LABEL);
+        progressLabel.verticalAlign = "center";
+        progressLabel.text = LocaleUtils.localeBinding("intellector.live_game.bot_thinking");
+        progressBox.addComponent(progressLabel);
+
+        var progressTrack:Box = new Box();
+        progressTrack.addClass(StyleClass.GAME_BOT_PROGRESS_TRACK);
+        progressTrack.verticalAlign = "center";
+        progressBox.addComponent(progressTrack);
+
+        progressFill = new Box();
+        progressFill.addClass(StyleClass.GAME_BOT_PROGRESS_FILL);
+        progressFill.percentHeight = 100;
+        progressTrack.addComponent(progressFill);
+
+        progressValueLabel = new Label();
+        progressValueLabel.addClass(StyleClass.GAME_BOT_PROGRESS_VALUE);
+        progressValueLabel.verticalAlign = "center";
+        progressBox.addComponent(progressValueLabel);
 
         clockLabel = new Label();
         clockLabel.addClass(StyleClass.GAME_CLOCK);
@@ -113,6 +145,18 @@ class PlayerBar extends HBox
     public function setPresent(present:Bool):Void
     {
         setPresence(presenceDot, present);
+    }
+
+    /** The bot's search depth against its target, shown while this bar's player is a bot working on its move; null hides it **/
+    public function setBotProgress(progress:Null<BotSearchProgress>):Void
+    {
+        progressBox.hidden = progress == null;
+        if (progress == null)
+            return;
+
+        progressFill.percentWidth = Math.min(100, 100 * progress.depth / progress.targetDepth);
+        progressValueLabel.text = '${progress.depth}/${progress.targetDepth}';
+        progressBox.tooltip = LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.live_game.bot_depth"), progress.depth, progress.targetDepth);
     }
 
     /** `remainingMs`: null hides the clock (a correspondence game) **/

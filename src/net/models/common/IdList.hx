@@ -4,5 +4,5 @@ import jsonmodel.IJsonUnserializableMacro;
 
 class IdList implements IJsonUnserializableMacro
 {
-	public var ids:Array<Int>;
+    public var ids:Array<Int>;
 }

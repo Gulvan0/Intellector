@@ -9,9 +9,9 @@ import net.models.game.GameEndedEloUpdates;
 
 class GameEndedBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var game_ended_at:Null<DateTime>;
-	public var kind:OutcomeKind;
-	@:default(null) public var winner:Null<PieceColor>;
-	@:default(null) public var time_update:Null<GameTimeUpdatePublic>;
-	@:default(null) public var elo:Null<GameEndedEloUpdates>;
+    @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var game_ended_at:Null<DateTime>;
+    public var kind:OutcomeKind;
+    @:default(null) public var winner:Null<PieceColor>;
+    @:default(null) public var time_update:Null<GameTimeUpdatePublic>;
+    @:default(null) public var elo:Null<GameEndedEloUpdates>;
 }

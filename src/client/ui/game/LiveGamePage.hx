@@ -3,25 +3,16 @@ package client.ui.game;
 import client.logic.challenge.creation.ChallengePrefills;
 import client.ui.common.overlays.challenge.ChallengeCreationLauncher;
 import client.ServerTime;
-import client.botengine.BotGameRunner;
-import client.botengine.BotMoveRequest;
-import client.botengine.BotTimeAllocation;
 import client.auth.Identity;
 import client.auth.IdentityKeeper;
-import client.datatypes.game.GameChatEntry;
-import client.datatypes.game.GameChatMessage;
 import client.datatypes.game.GameClock;
 import client.datatypes.game.GameEnding;
 import client.datatypes.game.LiveGameChange;
 import client.datatypes.game.LiveGameEvent;
 import client.datatypes.game.LiveGameInfo;
 import client.datatypes.game.LiveGameState;
-import client.datatypes.game.OfferAction;
-import client.datatypes.game.OfferKind;
-import client.datatypes.game.PlyHistory;
 import client.datatypes.game.PlyHistory.ShownPly;
 import client.datatypes.game.PlyNavigationType;
-import client.datatypes.request.FailedAction;
 import client.datatypes.watch.WatchedPlayer;
 import client.formatters.GameFormatters;
 import client.logic.game.OpeningLookup;
@@ -35,14 +26,15 @@ import client.ui.common.board.tools.LiveGameMovePolicy;
 import client.ui.common.notifications.GameEndedNotice;
 import client.ui.common.notifications.RequestFailureNotice;
 import client.ui.common.overlays.share.ShareOverlay;
-import client.ui.game.GameLayout.SheetTab;
-import client.ui.game.commands.ExternalGameCommands;
-import client.ui.game.commands.InternalGameCommands;
-import client.ui.game.commands.LiveGameCommands;
+import client.ui.game.controllers.BotTurnController;
+import client.ui.game.controllers.GameChatController;
+import client.ui.game.controllers.GameClockTicker;
+import client.ui.game.controllers.GameFeed;
+import client.ui.game.controllers.GameOffersController;
+import client.ui.game.controllers.GamePresenceController;
+import client.ui.game.controllers.LiveGameSession;
 import client.utils.PagePaths;
 import client.watch.WatchKeeper;
-import easypubsub.Subscription;
-import haxe.Timer;
 import haxe.ui.Toolkit;
 import haxe.ui.components.Button;
 import haxe.ui.components.Label;
@@ -51,7 +43,6 @@ import haxefolio.HaxeFolioApp;
 import haxefolio.LocaleUtils;
 import haxefolio.PageBase;
 import haxefolio.PageLink;
-import http.HttpError;
 import intellectorboard.mappers.notation.PlyFormatter;
 import intellectorboard.position.Position;
 import intellectorboard.primitives.piece.PieceColor;
@@ -59,27 +50,10 @@ import intellectorboard.primitives.ply.RawPly;
 import morestd.Detachable;
 import net.models.game.GameAddTimePayload;
 import net.models.game.GamePublic;
-import net.models.game.GameSendChatMessagePayload;
-import net.models.game.GameStateRefresh;
 import net.models.game.mappers.GameClockMapper;
 import net.models.game.mappers.LiveGameMapper;
-import net.models.common.UserRefWithNickname;
-import net.models.other.SubscriberListChannelStateRefresh;
 import net.rest.Rest;
 import net.rest.RestOperationRegistry;
-import net.ws.PubSub;
-import net.ws.channels.Game as GameChannel;
-import net.ws.channels.SubscriberList;
-import net.ws.events.GameEnded as GameEndedEvent;
-import net.ws.events.GameRefresh as GameRefreshEvent;
-import net.ws.events.NewChatMessage as NewChatMessageEvent;
-import net.ws.events.NewPly as NewPlyEvent;
-import net.ws.events.NewSubscriber as NewSubscriberEvent;
-import net.ws.events.OfferActionPerformed as OfferActionPerformedEvent;
-import net.ws.events.Rollback as RollbackEvent;
-import net.ws.events.SubscriberLeft as SubscriberLeftEvent;
-import net.ws.events.SubscriberListRefresh as SubscriberListRefreshEvent;
-import net.ws.events.TimeAdded as TimeAddedEvent;
 
 using client.ui.ComponentExtension;
 
@@ -89,11 +63,6 @@ using client.ui.ComponentExtension;
 **/
 class LiveGamePage extends PageBase
 {
-    private static inline final LOAD_TIMEOUT_MS:Int = 10000;
-    private static inline final CLOCK_REFRESH_MS:Int = 200;
-    private static inline final LOW_TIME_MS:Float = 60 * 1000;
-    // a game starting with less has no low time warning: it would sound almost at once
-    private static inline final LOW_TIME_WARNING_MIN_START_SECONDS:Int = 90;
     // below it, the wide layout stops shrinking and the page scrolls instead
     private static inline final MIN_WIDE_HEIGHT:Float = 240;
     // below this viewport height, a landscape viewport lays the page out as a rail instead of the medium layout, whose cards and board come out too small
@@ -107,22 +76,16 @@ class LiveGamePage extends PageBase
     private final gameId:Int;
 
     private var statusBox:Null<VBox> = null;
-    private var loadAttempt:Int = 0;
-    private var loadTimer:Null<Timer> = null;
+    private var feed:Null<GameFeed> = null;
+    private var presence:Null<GamePresenceController> = null;
 
-    private var gameSubscription:Null<Subscription<GameChannel>> = null;
-    private var presenceSubscription:Null<Subscription<SubscriberList<Dynamic>>> = null;
-    // live events arriving before the game has loaded, applied once it has
-    private var pendingEvents:Array<Void->Void> = [];
-    private var presentSubscribers:Array<UserRefWithNickname> = [];
-    private var presentGuestCount:Int = 0;
-
+    private var session:Null<LiveGameSession> = null;
     private var state:Null<LiveGameState> = null;
-    private var userColor:Null<PieceColor> = null;
-    private var orientation:PieceColor = White;
-    private var resignAsked:Bool = false;
-    private var timeoutCheckedFor:Null<GameClock> = null;
-    private var lowTimeSounded:Bool = false;
+
+    private var clockTicker:Null<GameClockTicker> = null;
+    private var offers:Null<GameOffersController> = null;
+    private var botTurn:Null<BotTurnController> = null;
+    private var chat:Null<GameChatController> = null;
 
     private var board:Null<InteractiveBoard> = null;
     private var premoves:Null<Premoves> = null;
@@ -136,7 +99,6 @@ class LiveGamePage extends PageBase
     private var moveStrip:Null<MoveStrip> = null;
     private var notations:Array<String> = [];
 
-    private var clockTimer:Null<Timer> = null;
     private var handles:Array<Detachable> = [];
 
     public function new(gameId:Int)
@@ -148,7 +110,7 @@ class LiveGamePage extends PageBase
     /** Whether a game the user plays, and which hasn't ended, is open **/
     public static function isShowingOwnOngoingGame():Bool
     {
-        return openPage != null && openPage.userColor != null && openPage.state != null && !openPage.state.isOver();
+        return openPage != null && openPage.session != null && openPage.session.userColor != null && !openPage.state.isOver();
     }
 
     /** Whether a timed game the user plays, and which hasn't ended, is open **/
@@ -160,7 +122,7 @@ class LiveGamePage extends PageBase
     /** Whether a timed game the user doesn't play, and which hasn't ended, is open **/
     public static function isShowingOthersOngoingTimedGame():Bool
     {
-        return openPage != null && openPage.userColor == null && openPage.state != null && !openPage.state.isOver() && openPage.state.info.isTimed();
+        return openPage != null && openPage.session != null && openPage.session.userColor == null && !openPage.state.isOver() && openPage.state.info.isTimed();
     }
 
     private override function init():Void
@@ -170,10 +132,20 @@ class LiveGamePage extends PageBase
         addClass(StyleClass.GAME_PAGE);
         setTitle(LocaleUtils.localeBinding("intellector.live_game.title"), gameId);
 
-        subscribe();
+        feed = new GameFeed(gameId, {
+            onFirstLoadStarted: () -> showStatus(LocaleUtils.localeBinding("intellector.live_game.status.loading")),
+            onFirstLoaded: onFirstLoaded,
+            onCaughtUp: onCaughtUp,
+            onFirstLoadFailed: textKey -> showStatus(LocaleUtils.localeBinding(textKey), null, "intellector.live_game.status.retry", feed.load),
+            onNotFound: onGameNotFound,
+            onSnapshot: onSnapshot,
+            onEvent: applyEvent,
+            onEnded: onEnded
+        });
+        presence = new GamePresenceController(feed.channel);
         IdentityKeeper.addChangeListener(onIdentityChanged);
         WatchKeeper.addChangeListener(onWatchedChanged);
-        load();
+        feed.load();
     }
 
     private override function onClose():Void
@@ -185,14 +157,14 @@ class LiveGamePage extends PageBase
 
         IdentityKeeper.removeChangeListener(onIdentityChanged);
         WatchKeeper.removeChangeListener(onWatchedChanged);
-        stopLoadTimer();
-        RequestFailureNotice.dismissAll(SYNC_GAME);
-        if (clockTimer != null)
-            clockTimer.stop();
-        if (gameSubscription != null)
-            gameSubscription.detach();
-        if (presenceSubscription != null)
-            presenceSubscription.detach();
+        if (feed != null)
+            feed.dispose();
+        if (presence != null)
+            presence.dispose();
+        if (clockTicker != null)
+            clockTicker.stop();
+        if (botTurn != null)
+            botTurn.dispose();
         for (handle in handles)
             handle.detach();
         handles = [];
@@ -202,70 +174,9 @@ class LiveGamePage extends PageBase
             stage.dispose();
     }
 
-    private function load():Void
-    {
-        loadAttempt++;
-        var attempt:Int = loadAttempt;
-        if (state == null)
-            showStatus(LocaleUtils.localeBinding("intellector.live_game.status.loading"));
-
-        stopLoadTimer();
-        loadTimer = Timer.delay(() -> {
-            if (attempt == loadAttempt)
-                onLoadFailed("intellector.live_game.status.timeout");
-        }, LOAD_TIMEOUT_MS);
-
-        Rest.client().execute(
-            RestOperationRegistry.GET_GAME,
-            game -> {
-                if (attempt == loadAttempt)
-                    onLoaded(game);
-            },
-            error -> {
-                if (attempt == loadAttempt)
-                {
-                    if (state != null)
-                        onResyncFailed(error);
-                    else if (error.httpStatus == 404)
-                        onGameNotFound();
-                    else
-                        onLoadFailed("intellector.live_game.status.failed");
-                }
-            },
-            ["game_id" => Std.string(gameId)]
-        );
-    }
-
-    private function stopLoadTimer():Void
-    {
-        if (loadTimer != null)
-            loadTimer.stop();
-        loadTimer = null;
-    }
-
-    private function onLoadFailed(textKey:String):Void
-    {
-        stopLoadTimer();
-        loadAttempt++;
-        if (state == null)
-            showStatus(LocaleUtils.localeBinding(textKey), null, "intellector.live_game.status.retry", load);
-        else
-            RequestFailureNotice.show(SYNC_GAME, NoConnection, load);
-    }
-
-    // the board stays shown, so the failure is a notice rather than the status screen
-    private function onResyncFailed(error:HttpError):Void
-    {
-        stopLoadTimer();
-        loadAttempt++;
-        RequestFailureNotice.showHttpError(SYNC_GAME, error, load);
-    }
-
     // nothing to retry: the user goes looking for another game
     private function onGameNotFound():Void
     {
-        stopLoadTimer();
-        loadAttempt++;
         showStatus(LocaleUtils.localeBinding("intellector.live_game.status.not_found", Std.string(gameId)), "intellector.live_game.status.not_found_hint", "intellector.live_game.status.to_main_page", null, HaxeFolioApp.defaultPagePath);
     }
 
@@ -312,24 +223,8 @@ class LiveGamePage extends PageBase
         addComponent(statusBox);
     }
 
-    private function onLoaded(game:GamePublic):Void
+    private function onFirstLoaded(game:GamePublic):Void
     {
-        stopLoadTimer();
-        loadAttempt++;
-
-        RequestFailureNotice.dismissAll(SYNC_GAME);
-
-        var events:Array<LiveGameEvent> = LiveGameMapper.eventsToDatatype(game.events);
-        var latestClock:Null<GameClock> = GameClockMapper.dtoToDatatype(game.latest_time_update);
-        var ending:Null<GameEnding> = LiveGameMapper.outcomeToDatatype(game.outcome);
-
-        if (state != null)
-        {
-            state.resync(events, latestClock, ending, followsLatestMove());
-            refreshPlies();
-            return;
-        }
-
         if (statusBox != null)
         {
             removeComponent(statusBox);
@@ -337,25 +232,30 @@ class LiveGamePage extends PageBase
         }
 
         var info:LiveGameInfo = LiveGameMapper.infoToDatatype(game);
-        state = new LiveGameState(info, events, latestClock, ending);
+        state = new LiveGameState(info, LiveGameMapper.eventsToDatatype(game.events), GameClockMapper.dtoToDatatype(game.latest_time_update), LiveGameMapper.outcomeToDatatype(game.outcome));
         restoreShownPly();
-        userColor = info.colorOf(IdentityKeeper.currentIdentity.getUserRef());
-        orientation = userColor ?? White;
+        session = new LiveGameSession(gameId, state, info.colorOf(IdentityKeeper.currentIdentity.getUserRef()));
         build(info);
+    }
 
-        for (applyPending in pendingEvents)
-            applyPending();
-        pendingEvents = [];
-        refreshBotTurn();
+    private function onCaughtUp():Void
+    {
+        botTurn.refreshTurn();
 
         if (!state.isOver())
             Sounds.play(NOTIFY);
     }
 
+    private function onSnapshot(events:Array<LiveGameEvent>, latestClock:Null<GameClock>, ending:Null<GameEnding>):Void
+    {
+        state.resync(events, latestClock, ending, session.followsLatestMove());
+        refreshPlies();
+    }
+
     private function build(info:LiveGameInfo):Void
     {
         var shownPlyCount:Int = state.history.shownPlyIndex();
-        board = new InteractiveBoard(state.history.shownPosition(), orientation, new InertMovePolicy());
+        board = new InteractiveBoard(state.history.shownPosition(), session.orientation, new InertMovePolicy());
         board.setLastMove(shownPlyCount > 0 ? state.history.plyAt(shownPlyCount - 1) : null);
         handles.push(board.playMove.subscribe(onOwnMove));
 
@@ -363,14 +263,14 @@ class LiveGamePage extends PageBase
         stage.onFitted = fitLayoutHeight; // compact: the parts around the board can change height after it's fitted
         infoCard = new GameInfoCard();
         infoCard.setWatchedLogin(watchedLogin());
-        chatCard = new ChatCard(sendChatMessage);
+        chatCard = new ChatCard(text -> chat.send(text));
         chatCard.setWatchedLogin(watchedLogin());
         movesCard = new MovesCard(navigate);
         actionsCard = new ActionsCard({
             onFlip: flip,
-            onDraw: () -> toggleOffer(Draw),
+            onDraw: () -> offers.toggle(Draw),
             onTakeback: takeback,
-            onResign: askResign,
+            onResign: () -> offers.askResign(),
             onAddTime: addTime,
             onShare: share,
             onPlayFromHere: playFromHere,
@@ -379,6 +279,11 @@ class LiveGamePage extends PageBase
         moveStrip = new MoveStrip(navigate, () -> gameLayout.toggleTab(Moves));
 
         gameLayout = new GameLayout(infoCard, chatCard, movesCard, actionsCard, stage, moveStrip);
+        clockTicker = new GameClockTicker(session, stage);
+        offers = new GameOffersController(session, stage, actionsCard);
+        botTurn = new BotTurnController(session, stage);
+        chat = new GameChatController(session, chatCard, gameLayout);
+        presence.attach(session, stage, infoCard, chatCard);
         refreshHeadTexts();
         addComponent(gameLayout);
         handles.push(BoardLayoutTier.bind(tier -> {
@@ -393,12 +298,12 @@ class LiveGamePage extends PageBase
         refreshPlayerBars();
         refreshMoves();
         refreshShown();
-        refreshChat();
+        chat.refresh();
         refreshEnding();
         refreshRole();
+        refreshLastMove();
 
-        clockTimer = new Timer(CLOCK_REFRESH_MS);
-        clockTimer.run = refreshClocks;
+        clockTicker.start();
     }
 
     private override function onResize(width:Float, height:Float):Void
@@ -447,52 +352,15 @@ class LiveGamePage extends PageBase
         });
     }
 
-    private function subscribe():Void
-    {
-        var channel:GameChannel = new GameChannel(gameId);
-        gameSubscription = PubSub.sub(channel)
-            .onEventLight(GameRefreshEvent, refresh -> whenLoaded(() -> onRefresh(refresh)))
-            .onEventLight(NewPlyEvent, ply -> whenLoaded(() -> applyEvent(LiveGameMapper.plyToDatatype(ply))))
-            .onEventLight(NewChatMessageEvent, message -> whenLoaded(() -> applyEvent(LiveGameMapper.chatMessageToDatatype(message))))
-            .onEventLight(OfferActionPerformedEvent, offer -> whenLoaded(() -> applyEvent(LiveGameMapper.offerToDatatype(offer))))
-            .onEventLight(TimeAddedEvent, timeAdded -> whenLoaded(() -> applyEvent(LiveGameMapper.timeAddedToDatatype(timeAdded))))
-            .onEventLight(RollbackEvent, rollback -> whenLoaded(() -> applyEvent(LiveGameMapper.rollbackToDatatype(rollback))))
-            .onEventLight(GameEndedEvent, ended -> whenLoaded(() -> onEnded(LiveGameMapper.endedToDatatype(ended))));
-
-        presenceSubscription = PubSub.sub(new SubscriberList<Dynamic>(channel))
-            .onEventLight(SubscriberListRefreshEvent, onPresenceRefresh)
-            .onEventLight(NewSubscriberEvent, subscriber -> {
-                setPresent(subscriber, true);
-            })
-            .onEventLight(SubscriberLeftEvent, subscriber -> {
-                setPresent(subscriber, false);
-            });
-    }
-
-    private function whenLoaded(apply:Void->Void):Void
-    {
-        if (state != null)
-            apply();
-        else
-            pendingEvents.push(apply);
-    }
-
-    private function onRefresh(refresh:GameStateRefresh):Void
-    {
-        var events:Array<LiveGameEvent> = LiveGameMapper.eventsToDatatype(refresh.events);
-        state.resync(events, GameClockMapper.dtoToDatatype(refresh.latest_time_update), LiveGameMapper.outcomeToDatatype(refresh.outcome), followsLatestMove());
-        refreshPlies();
-    }
-
     private function applyEvent(event:LiveGameEvent):Void
     {
         var plyCountBefore:Int = state.history.plyCount();
-        var applied:Bool = state.apply(event, followsLatestMove());
+        var applied:Bool = state.apply(event, session.followsLatestMove());
         if (event.match(Ply(_, _, _, _)) && state.history.plyCount() == plyCountBefore + 1)
             playLatestPlySound();
 
         if (!applied)
-            load(); // missed events: catch up from the full game
+            feed.load(); // diverged from the server: catch up from the full game
         refreshPlies();
     }
 
@@ -501,36 +369,15 @@ class LiveGamePage extends PageBase
         if (state.isOver())
             return;
 
-        var wasPlaying:Bool = isPlaying();
+        var wasPlaying:Bool = session.isPlaying();
         state.end(ending);
-        refreshBotTurn();
-        refreshPresence();
+        botTurn.refreshTurn();
+        presence.refresh();
         Sounds.play(NOTIFY);
-        GameEndedNotice.show(state.info, ending, userColor);
+        GameEndedNotice.show(state.info, ending, session.userColor);
 
         if (wasPlaying)
-            load(); // brings in the spectators' messages, kept from players until now
-    }
-
-    private function onPresenceRefresh(refresh:SubscriberListChannelStateRefresh):Void
-    {
-        presentSubscribers = refresh.subscribers.copy();
-        presentGuestCount = refresh.unauthenticated_subs_count;
-        refreshPresence();
-    }
-
-    /** A null `subscriber` is an unauthenticated one **/
-    private function setPresent(subscriber:Null<UserRefWithNickname>, present:Bool):Void
-    {
-        if (subscriber == null)
-            presentGuestCount = Std.int(Math.max(0, presentGuestCount + (present ? 1 : -1)));
-        else
-        {
-            presentSubscribers = presentSubscribers.filter(known -> known.user_ref != subscriber.user_ref);
-            if (present)
-                presentSubscribers.push(subscriber);
-        }
-        refreshPresence();
+            feed.load(); // brings in the spectators' messages, kept from players until now
     }
 
     private function onShownChanged(shown:ShownPly):Void
@@ -550,23 +397,12 @@ class LiveGamePage extends PageBase
         switch change
         {
             case Chat(appended):
-                if (appended == null)
-                    refreshChat();
-                else if (isChatEntryVisible(appended))
-                {
-                    chatCard.appendEntry(appended);
-                    switch appended
-                    {
-                        case Message(message):
-                            gameLayout.setLatestMessage(message, message.authorRef != IdentityKeeper.currentIdentity.getUserRef());
-                        default:
-                    }
-                }
+                chat.onChanged(appended);
             case Offers:
-                refreshOffers();
+                offers.refresh();
             case Clock:
-                timeoutCheckedFor = null;
-                refreshClocks();
+                clockTicker.onClockChanged();
+                refreshLastMove();
             case Ended:
                 refreshEnding();
                 refreshRole();
@@ -591,25 +427,25 @@ class LiveGamePage extends PageBase
 
     private function onIdentityChanged(_:Identity):Void
     {
-        if (state == null)
+        if (session == null)
             return;
 
         var newColor:Null<PieceColor> = state.info.colorOf(IdentityKeeper.currentIdentity.getUserRef());
-        if (newColor == userColor)
+        if (newColor == session.userColor)
             return;
 
-        userColor = newColor;
+        session.userColor = newColor;
         refreshRole();
-        refreshChat();
-        refreshBotTurn();
+        chat.refresh();
+        botTurn.refreshTurn();
     }
 
     private function refreshRole():Void
     {
-        var playing:Bool = isPlaying();
+        var playing:Bool = session.isPlaying();
 
         if (playing && premoves == null)
-            premoves = board.enablePremoves(userColor, MoveRulesAdapter.DEFAULT);
+            premoves = board.enablePremoves(session.userColor, MoveRulesAdapter.DEFAULT);
         else if (!playing && premoves != null)
         {
             board.disablePremoves();
@@ -620,10 +456,10 @@ class LiveGamePage extends PageBase
         if (playing)
             actionsCard.showPlayerActions(state.info.isTimed(), state.info.bot != null);
         else
-            actionsCard.showViewerActions(userColor != null);
+            actionsCard.showViewerActions(session.userColor != null);
 
         refreshPolicy();
-        refreshOffers();
+        offers.refresh();
     }
 
     private function playFromHere():Void
@@ -635,116 +471,31 @@ class LiveGamePage extends PageBase
     private function rematch():Void
     {
         var info:LiveGameInfo = state.info;
-        var color:Null<PieceColor> = userColor;
+        var color:Null<PieceColor> = session.userColor;
         if (color != null)
             ChallengeCreationLauncher.launch(draft -> ChallengePrefills.rematch(draft, info, color));
     }
 
     private function refreshPolicy():Void
     {
-        var canMove:Bool = isPlaying() && state.history.isShowingLatest();
-        board.setPolicy(canMove ? new LiveGameMovePolicy(MoveRulesAdapter.DEFAULT, userColor, premoves) : new InertMovePolicy());
+        var canMove:Bool = session.isPlaying() && state.history.isShowingLatest();
+        board.setPolicy(canMove ? new LiveGameMovePolicy(MoveRulesAdapter.DEFAULT, session.userColor, premoves) : new InertMovePolicy());
     }
 
     private function refreshPlayerBars():Void
     {
-        var top:PieceColor = orientation.opposite();
+        var top:PieceColor = session.orientation.opposite();
         stage.topBar.setParticipant(state.info.participant(top), watchedLogin());
-        stage.bottomBar.setParticipant(state.info.participant(orientation), watchedLogin());
-        refreshPresence();
-        refreshClocks();
-    }
-
-    private function refreshPresence():Void
-    {
-        if (state == null)
-            return;
-
-        var participantRefs:Array<String> = [];
-        for (color in [White, Black])
-        {
-            var participantRef:String = state.info.participant(color).ref;
-            participantRefs.push(participantRef);
-            var present:Bool = Lambda.exists(presentSubscribers, subscriber -> subscriber.user_ref == participantRef);
-            infoCard.setPresent(color, present);
-            (color == orientation ? stage.bottomBar : stage.topBar).setPresent(present);
-        }
-
-        if (state.isOver())
-        {
-            chatCard.setSpectators(null, 0);
-            return;
-        }
-
-        var spectators:Array<UserRefWithNickname> = presentSubscribers.filter(subscriber -> !participantRefs.contains(subscriber.user_ref));
-        var signedInSpectators:Array<UserRefWithNickname> = spectators.filter(subscriber -> !StringTools.startsWith(subscriber.user_ref, "_"));
-        var guestCount:Int = presentGuestCount + spectators.length - signedInSpectators.length;
-        chatCard.setSpectators(signedInSpectators, guestCount);
-    }
-
-    private function refreshClocks():Void
-    {
-        var shownPlyCount:Int = state.history.shownPlyIndex();
-        var clock:Null<GameClock> = state.clockAt(shownPlyCount);
-        var nowMs:Float = ServerTime.now();
-
-        for (color in [White, Black])
-        {
-            var bar:PlayerBar = color == orientation ? stage.bottomBar : stage.topBar;
-            var remainingMs:Null<Float> = clock != null ? clock.remainingMs(color, nowMs) : null;
-            if (color == userColor)
-                remainingMs = firstMoveRemainingMs(nowMs) ?? remainingMs;
-            bar.setClock(remainingMs, clock != null && clock.tickingSide == color);
-        }
-
-        var latestClock:Null<GameClock> = state.clockAt(state.history.plyCount());
-        checkTimeout(latestClock, nowMs);
-        checkLowTime(latestClock, nowMs);
-    }
-
-    // what's left of the user's first-move deadline, if it's their turn within the first two plies; shown in place of their clock
-    private function firstMoveRemainingMs(nowMs:Float):Null<Float>
-    {
-        var deadlineStartMs:Null<Float> = state.firstMoveDeadlineStartMs();
-        if (deadlineStartMs == null || !isPlaying() || !state.history.isShowingLatest() || state.history.latestPosition().turnColor != userColor)
-            return null;
-
-        return Math.max(0, deadlineStartMs + state.firstMoveDeadlineSeconds() * 1000 - nowMs);
-    }
-
-    // once a game, when the user's own running clock drops below a minute
-    private function checkLowTime(clock:Null<GameClock>, nowMs:Float):Void
-    {
-        if (lowTimeSounded || !isPlaying() || clock == null || clock.tickingSide != userColor)
-            return;
-
-        var startSeconds:Int = switch state.info.timeControl {
-            case Fischer(instance): instance.startSeconds;
-            case None: 0;
-        }
-        if (startSeconds < LOW_TIME_WARNING_MIN_START_SECONDS || clock.remainingMs(userColor, nowMs) >= LOW_TIME_MS)
-            return;
-
-        lowTimeSounded = true;
-        Sounds.play(LOW_TIME);
+        stage.bottomBar.setParticipant(state.info.participant(session.orientation), watchedLogin());
+        presence.refresh();
+        clockTicker.refresh();
+        botTurn.refreshProgress();
     }
 
     private function playLatestPlySound():Void
     {
         var plyCount:Int = state.history.plyCount();
         Sounds.playPly(state.history.plyAt(plyCount - 1), state.history.positionAt(plyCount - 1));
-    }
-
-    // a running clock at 0: the server learns of it from a check, unless a move comes first
-    private function checkTimeout(clock:Null<GameClock>, nowMs:Float):Void
-    {
-        if (clock == null || clock.tickingSide == null || state.isOver() || clock == timeoutCheckedFor)
-            return;
-        if (clock.remainingMs(clock.tickingSide, nowMs) > 0)
-            return;
-
-        timeoutCheckedFor = clock;
-        Rest.client().execute(RestOperationRegistry.CHECK_TIMEOUT, _ -> {}, _ -> {}, ["game_id" => Std.string(gameId)]);
     }
 
     private function refreshMoves():Void
@@ -763,42 +514,9 @@ class LiveGamePage extends PageBase
     {
         refreshMoves();
         refreshShown();
-        refreshOffers();
-        refreshBotTurn();
-    }
-
-    // in a game the user plays against a bot, has this tab search for the bot's move while it's the bot's turn
-    private function refreshBotTurn():Void
-    {
-        var botColor:Null<PieceColor> = state.info.botColor();
-        if (botColor == null || userColor == null)
-            return;
-
-        if (state.isOver() || state.history.latestPosition().turnColor != botColor)
-        {
-            BotGameRunner.stop(gameId);
-            return;
-        }
-
-        var plyCount:Int = state.history.plyCount();
-        var positions:Array<Position> = [for (i in 0...plyCount + 1) state.history.positionAt(i)];
-        BotGameRunner.requestMove(gameId, new BotMoveRequest(positions, state.info.bot, botAllocationSeconds(botColor)));
-    }
-
-    // what the bot's clock allows for its move; null in a correspondence game
-    private function botAllocationSeconds(botColor:PieceColor):Null<Float>
-    {
-        var clock:Null<GameClock> = state.clockAt(state.history.plyCount());
-        return switch state.info.timeControl {
-            case Fischer(instance) if (clock != null):
-                BotTimeAllocation.secondsToMove(
-                    clock.remainingMs(botColor, ServerTime.now()) / 1000,
-                    instance.incrementSeconds,
-                    state.history.plyCount() + 1,
-                    state.history.latestPosition().countPieces()
-                );
-            default: null;
-        }
+        offers.refresh();
+        botTurn.refreshTurn();
+        refreshLastMove();
     }
 
     private function refreshShown():Void
@@ -809,7 +527,7 @@ class LiveGamePage extends PageBase
         moveStrip.setShown(shownPlyCount, plyCount, shownPlyCount > 0 ? notations[shownPlyCount - 1] : null);
         actionsCard.setAnalysisPath(PagePaths.gameAnalysis(state.info.id, shownPlyCount));
         refreshOpening(shownPlyCount);
-        refreshClocks();
+        clockTicker.refresh();
         HaxeFolioApp.setState(state.history.isShowingLatest() ? null : {shownPlyCount: shownPlyCount});
     }
 
@@ -834,6 +552,16 @@ class LiveGamePage extends PageBase
         movesCard.setOpening(opening, custom);
     }
 
+    // a correspondence game tells when its latest move was made
+    private function refreshLastMove():Void
+    {
+        var lastPlyAtMs:Null<Float> = state.lastPlyAtMs();
+        var lastMoveText:Null<Void->String> = !state.info.isTimed() && lastPlyAtMs != null ? () -> GameFormatters.lastMove(lastPlyAtMs) : null;
+        infoCard.setLastMove(lastMoveText);
+        gameLayout.setHeadLastMove(lastMoveText);
+        fitLayoutHeight(); // the head's second line changes its height
+    }
+
     private function refreshHeadTexts():Void
     {
         var info:LiveGameInfo = state.info;
@@ -845,89 +573,14 @@ class LiveGamePage extends PageBase
         fitLayoutHeight(); // the texts' widths decide whether the head's details fit
     }
 
-    private function refreshChat():Void
-    {
-        var entries:Array<GameChatEntry> = state.getChat().filter(isChatEntryVisible);
-        chatCard.setEntries(entries);
-
-        var latestMessage:Null<GameChatMessage> = null;
-        for (entry in entries)
-        {
-            switch entry
-            {
-                case Message(message):
-                    latestMessage = message;
-                default:
-            }
-        }
-        gameLayout.setLatestMessage(latestMessage, false);
-    }
-
-    // a player can't see spectators' messages until the game is over
-    private function isChatEntryVisible(entry:GameChatEntry):Bool
-    {
-        return switch entry {
-            case Message(message): !message.spectator || !isPlaying();
-            default: true;
-        }
-    }
-
     private function refreshEnding():Void
     {
         infoCard.setEnding(state.getEnding());
         refreshHeadTexts();
         if (state.isOver())
-            resignAsked = false;
-        refreshChat();
-        refreshClocks();
-    }
-
-    private function refreshOffers():Void
-    {
-        stage.requests.removeAllComponents();
-
-        if (!isPlaying())
-            return;
-
-        var opponentColor:PieceColor = userColor.opposite();
-        var opponentNickname:String = state.info.participant(opponentColor).nickname;
-        var plyCount:Int = state.history.plyCount();
-
-        if (state.hasOffer(Draw, opponentColor))
-            stage.requests.addComponent(createOfferBar("intellector.live_game.request.draw", opponentNickname, Draw));
-        if (state.hasOffer(Takeback, opponentColor))
-            stage.requests.addComponent(createOfferBar("intellector.live_game.request.takeback", opponentNickname, Takeback));
-        if (resignAsked)
-            stage.requests.addComponent(createResignBar(plyCount < 2));
-
-        var takebackThreshold:Int = state.info.startingPosition.turnColor == userColor ? 1 : 2; // the user's first move made
-        actionsCard.setDrawState(state.hasOffer(Draw, userColor), !state.hasOffer(Draw, opponentColor) && plyCount >= 2);
-        if (state.info.bot != null)
-            actionsCard.setTakebackState(false, plyCount >= takebackThreshold);
-        else
-            actionsCard.setTakebackState(state.hasOffer(Takeback, userColor), !state.hasOffer(Takeback, opponentColor) && plyCount >= takebackThreshold);
-        actionsCard.setResignIsAbort(plyCount < 2);
-    }
-
-    private function createOfferBar(textKey:String, opponentNickname:String, kind:OfferKind):OfferBar
-    {
-        var bar:OfferBar = new OfferBar();
-        bar.setText(LocaleUtils.resolveText(LocaleUtils.localeBinding(textKey), LocaleUtils.resolveText(opponentNickname)));
-        bar.addAnswer(LocaleUtils.localeBinding("intellector.live_game.request.decline"), false, () -> performOfferAction(Decline, kind));
-        bar.addAnswer(LocaleUtils.localeBinding("intellector.live_game.request.accept"), true, () -> performOfferAction(Accept, kind));
-        return bar;
-    }
-
-    private function createResignBar(abort:Bool):OfferBar
-    {
-        var bar:OfferBar = new OfferBar();
-        bar.setText(LocaleUtils.localeBinding(abort ? "intellector.live_game.request.abort_confirm" : "intellector.live_game.request.resign_confirm"));
-        bar.addAnswer(LocaleUtils.localeBinding("intellector.live_game.request.cancel"), false, () -> {
-            resignAsked = false;
-            refreshOffers();
-        });
-        bar.addAnswer(LocaleUtils.localeBinding(abort ? "intellector.live_game.action.abort" : "intellector.live_game.action.resign"), true, resign);
-        return bar;
+            offers.onEnded();
+        chat.refresh();
+        clockTicker.refresh();
     }
 
     private function navigate(type:PlyNavigationType):Void
@@ -937,8 +590,8 @@ class LiveGamePage extends PageBase
 
     private function flip():Void
     {
-        orientation = orientation.opposite();
-        board.setOrientation(orientation);
+        session.orientation = session.orientation.opposite();
+        board.setOrientation(session.orientation);
         refreshPlayerBars();
     }
 
@@ -949,7 +602,7 @@ class LiveGamePage extends PageBase
 
         ShareOverlay.present({
             position: state.history.shownPosition(),
-            orientation: orientation,
+            orientation: session.orientation,
             lastMove: shownPlyCount > 0 ? state.history.plyAt(shownPlyCount - 1) : null,
             game: {
                 info: state.info,
@@ -966,71 +619,19 @@ class LiveGamePage extends PageBase
         state.playOwn(ply, ServerTime.now());
         playLatestPlySound();
         refreshPlies();
-        commands().move(ply, position, error -> {
+        session.commands().move(ply, position, error -> {
             if (!state.info.isExternal() || error.httpStatus != 422) // an external game moved on elsewhere: nothing to tell
                 RequestFailureNotice.showHttpError(MAKE_MOVE, error);
-            load(); // the move didn't happen: back to the server's version
+            feed.load(); // the move didn't happen: back to the server's version
         });
-    }
-
-    private function commands():LiveGameCommands
-    {
-        return state.info.isExternal() ? new ExternalGameCommands(gameId, userColor) : new InternalGameCommands(gameId);
     }
 
     private function takeback():Void
     {
         if (state.info.bot == null)
-        {
-            toggleOffer(Takeback);
-            return;
-        }
-
-        // back to before the user's last move, at once
-        var userToMove:Bool = state.history.latestPosition().turnColor == userColor;
-        BotGameRunner.stop(gameId);
-        new ExternalGameCommands(gameId, userColor).rollback(state.history.plyCount() - (userToMove ? 2 : 1), error -> {
-            RequestFailureNotice.showHttpError(TAKE_BACK, error);
-            refreshBotTurn();
-        });
-    }
-
-    private function toggleOffer(kind:OfferKind):Void
-    {
-        performOfferAction(state.hasOffer(kind, userColor) ? Cancel : Create, kind);
-    }
-
-    private function performOfferAction(action:OfferAction, kind:OfferKind):Void
-    {
-        var failedAction:FailedAction = switch [action, kind] {
-            case [Create, Draw]: OFFER_DRAW;
-            case [Cancel, Draw]: CANCEL_DRAW;
-            case [_, Draw]: ANSWER_DRAW;
-            case [Create, Takeback]: OFFER_TAKEBACK;
-            case [Cancel, Takeback]: CANCEL_TAKEBACK;
-            case [_, Takeback]: ANSWER_TAKEBACK;
-        }
-        Rest.client().execute(
-            RestOperationRegistry.PERFORM_OFFER_ACTION_IN_INTERNAL_GAME,
-            _ -> {},
-            RequestFailureNotice.showHttpError.bind(failedAction),
-            null,
-            null,
-            LiveGameMapper.offerActionToDto(gameId, action, kind)
-        );
-    }
-
-    private function askResign():Void
-    {
-        resignAsked = true;
-        refreshOffers();
-    }
-
-    private function resign():Void
-    {
-        resignAsked = false;
-        refreshOffers();
-        commands().resign(state.history.plyCount() < 2, RequestFailureNotice.showHttpError.bind(RESIGN));
+            offers.toggle(Takeback);
+        else
+            botTurn.takeBack();
     }
 
     private function addTime():Void
@@ -1043,27 +644,5 @@ class LiveGamePage extends PageBase
             null,
             ({game_id: gameId} : GameAddTimePayload)
         );
-    }
-
-    private function sendChatMessage(text:String):Void
-    {
-        Rest.client().execute(
-            RestOperationRegistry.GAME_SEND_CHAT_MESSAGE,
-            _ -> chatCard.clearDraft(),
-            RequestFailureNotice.showHttpError.bind(SEND_CHAT_MESSAGE),
-            null,
-            null,
-            ({game_id: gameId, text: text} : GameSendChatMessagePayload)
-        );
-    }
-
-    private function isPlaying():Bool
-    {
-        return userColor != null && state != null && !state.isOver() && (!state.info.isExternal() || state.info.bot != null);
-    }
-
-    private function followsLatestMove():Bool
-    {
-        return PlyHistory.followsLatestMove(Preferences.followLatestMove.get(), isPlaying());
     }
 }

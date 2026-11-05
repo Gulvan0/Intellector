@@ -10,4 +10,5 @@ enum abstract RestErrorCode(String) from String to String
     var TOO_MANY_ACTIVE_CHALLENGES = "too_many_active_challenges";
     var TOO_MANY_DIRECT_CHALLENGES = "too_many_direct_challenges";
     var SERVER_RESTARTING = "server_restarting";
+    var CHAT_RESTRICTED = "chat_restricted";
 }

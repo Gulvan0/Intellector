@@ -7,11 +7,11 @@ import net.models.common.PieceColor;
 
 class RollbackBroadcastedData implements IJsonUnserializableMacro
 {
-	@:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
-	public var event_index:Int;
-	public var ply_cnt_before:Int;
-	public var ply_cnt_after:Int;
-	public var requested_by:PieceColor;
-	@:default(null) public var time_update:Null<GameTimeUpdatePublic>;
-	public var updated_sip:String;
+    @:jcustomparse(jsonmodel.StdParsers.parseOptionalDate) public var occurred_at:Null<DateTime>;
+    public var event_index:Int;
+    public var ply_cnt_before:Int;
+    public var ply_cnt_after:Int;
+    public var requested_by:PieceColor;
+    @:default(null) public var time_update:Null<GameTimeUpdatePublic>;
+    public var updated_sip:String;
 }

@@ -1,12 +1,15 @@
 package engine.hxconda.evaluation;
 
+import engine.hxconda.HxcondaStyle;
 import engine.hxconda.board.BoardGeometry.SQUARE_COUNT;
 import engine.hxconda.board.BoardGeometry;
 import engine.hxconda.board.Piece;
+import engine.hxconda.board.PlayerColor;
 import js.lib.Float64Array;
 
 /**
     Static evaluation terms. Scores are from white's perspective: positive favours white.
+    The tables follow the style set by `useStyle`, `Standard` until then.
 **/
 class Evaluation
 {
@@ -18,9 +21,15 @@ class Evaluation
 
     private static inline final MOBILITY_WEIGHT:Float = 5;
     private static inline final CENTRALITY_WEIGHT:Float = 5;
+    /** Multiplier of Trailblazer's progressor and intellector advancement bonuses **/
+    private static inline final TRAILBLAZER_ADVANCEMENT_FACTOR:Float = 1.5;
+    /** How much Fortress likes and Vrezh dislikes a draw, from the side the bot plays **/
+    private static inline final CONTEMPT:Float = 200;
+
+    private static final STANDARD_PIECE_VALUES:Array<Float> = [100, -100, 600, -600, 170, -170, 200, -200, 150, -150, WHITE_WIN_SCORE, BLACK_WIN_SCORE, 0];
 
     /** Material value of each piece code **/
-    public static final PIECE_VALUES:Float64Array = Float64Array.from([100, -100, 600, -600, 170, -170, 200, -200, 150, -150, WHITE_WIN_SCORE, BLACK_WIN_SCORE, 0]);
+    public static final PIECE_VALUES:Float64Array = Float64Array.from(STANDARD_PIECE_VALUES);
 
     private static final DISTANCE_TO_CENTER:Array<Int> = [
         5, 4, 4, 4, 4, 4, 5, // a
@@ -82,7 +91,47 @@ class Evaluation
         -100000, -100, -50, -20, -10, -5, 0 // i
     ];
 
-    private static final PIECE_SQUARE_SCORES:Float64Array = Float64Array.from([for (piece in 0...Piece.COUNT) for (square in 0...SQUARE_COUNT) computePieceSquareScore(cast piece, square)]);
+    private static var advancementFactor:Float = 1;
+
+    private static final PIECE_SQUARE_SCORES:Float64Array = fillPieceSquareScores(new Float64Array(Piece.COUNT * SQUARE_COUNT));
+
+    /**
+        Makes the tables evaluate as `style` does. Changes the evaluation of every search in this thread,
+        so it has to be called before the search's board is created, and not while another search runs.
+    **/
+    public static function useStyle(style:HxcondaStyle):Void
+    {
+        for (piece in 0...Piece.COUNT)
+            PIECE_VALUES[piece] = STANDARD_PIECE_VALUES[piece];
+
+        // Each style values its favourite piece kind about 15% higher
+        switch style
+        {
+            case Standard:
+            case Trailblazer:
+                setPieceValue(WhiteProgressor, 115);
+            case Vrezh:
+                setPieceValue(WhiteAggressor, 230);
+            case Fortress:
+                setPieceValue(WhiteDefensor, 170);
+            case Unchained:
+                setPieceValue(WhiteLiberator, 195);
+        }
+
+        advancementFactor = style == Trailblazer ? TRAILBLAZER_ADVANCEMENT_FACTOR : 1;
+        fillPieceSquareScores(PIECE_SQUARE_SCORES);
+    }
+
+    /** Score of a draw for a search whose root side to move plays `style` with `rootColor` **/
+    public static function drawScore(style:HxcondaStyle, rootColor:PlayerColor):Float
+    {
+        var contempt:Float = switch style {
+            case Vrezh: -CONTEMPT;
+            case Fortress: CONTEMPT;
+            default: DRAW_SCORE;
+        }
+        return rootColor == White ? contempt : -contempt;
+    }
 
     /** Value of `piece` standing on `square`: its material value plus the positional bonuses **/
     public static inline function pieceSquareScore(piece:Piece, square:Int):Float
@@ -104,8 +153,8 @@ class Evaluation
         var liberatorMobility:Float = neighbourCount / 2 + BoardGeometry.LIBERATOR_JUMPS.size(square);
 
         return switch piece {
-            case WhiteProgressor: value + BoardGeometry.WHITE_PROGRESSOR_STEPS.size(square) * MOBILITY_WEIGHT + WHITE_PROGRESSOR_ADVANCEMENT[square];
-            case BlackProgressor: value - BoardGeometry.BLACK_PROGRESSOR_STEPS.size(square) * MOBILITY_WEIGHT + BLACK_PROGRESSOR_ADVANCEMENT[square];
+            case WhiteProgressor: value + BoardGeometry.WHITE_PROGRESSOR_STEPS.size(square) * MOBILITY_WEIGHT + advancement(WHITE_PROGRESSOR_ADVANCEMENT[square]);
+            case BlackProgressor: value - BoardGeometry.BLACK_PROGRESSOR_STEPS.size(square) * MOBILITY_WEIGHT + advancement(BLACK_PROGRESSOR_ADVANCEMENT[square]);
             case WhiteDominator: value + BoardGeometry.rayLength(BoardGeometry.DOMINATOR_RAYS, square) * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
             case BlackDominator: value - BoardGeometry.rayLength(BoardGeometry.DOMINATOR_RAYS, square) * MOBILITY_WEIGHT + distanceToCenter * CENTRALITY_WEIGHT;
             case WhiteLiberator: value + liberatorMobility * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
@@ -114,9 +163,36 @@ class Evaluation
             case BlackAggressor: value - BoardGeometry.rayLength(BoardGeometry.AGGRESSOR_RAYS, square) * MOBILITY_WEIGHT;
             case WhiteDefensor: value + neighbourCount * MOBILITY_WEIGHT - distanceToCenter * CENTRALITY_WEIGHT;
             case BlackDefensor: value - neighbourCount * MOBILITY_WEIGHT + distanceToCenter * CENTRALITY_WEIGHT;
-            case WhiteIntellector: value + neighbourCount * MOBILITY_WEIGHT + WHITE_INTELLECTOR_ADVANCEMENT[square];
-            case BlackIntellector: value - neighbourCount * MOBILITY_WEIGHT + BLACK_INTELLECTOR_ADVANCEMENT[square];
+            case WhiteIntellector: value + neighbourCount * MOBILITY_WEIGHT + advancement(WHITE_INTELLECTOR_ADVANCEMENT[square]);
+            case BlackIntellector: value - neighbourCount * MOBILITY_WEIGHT + advancement(BLACK_INTELLECTOR_ADVANCEMENT[square]);
             case Empty: 0;
         }
+    }
+
+    /** Sets the value of the white `piece` and the negated value of its black counterpart **/
+    private static function setPieceValue(piece:Piece, value:Float):Void
+    {
+        PIECE_VALUES[piece] = value;
+        PIECE_VALUES[piece.counterpart()] = -value;
+    }
+
+    private static function fillPieceSquareScores(scores:Float64Array):Float64Array
+    {
+        for (piece in 0...Piece.COUNT)
+            for (square in 0...SQUARE_COUNT)
+                scores[piece * SQUARE_COUNT + square] = computePieceSquareScore(cast piece, square);
+        return scores;
+    }
+
+    /** An advancement bonus scaled by the style's factor; the decisive bonuses of the final row stay as they are **/
+    private static function advancement(bonus:Int):Float
+    {
+        return Math.abs(bonus) > DECISIVE_THRESHOLD ? bonus : roundAwayFromZero(bonus * advancementFactor);
+    }
+
+    /** Keeps black's values the exact negations of white's ones **/
+    private static function roundAwayFromZero(value:Float):Float
+    {
+        return value < 0 ? -Math.round(-value) : Math.round(value);
     }
 }

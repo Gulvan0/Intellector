@@ -25,16 +25,32 @@ locally, dumped, and loaded on the VPS through the ordinary restore path. Reason
 
 ## Migrator facts
 
-- Tables must exist before it runs: `alembic upgrade head` on the empty DB first (it used to rely on the
-  server's startup `create_all`, which is removed).
+- Tables must exist before it runs: `alembic upgrade head` on the empty DB first (the server's startup `create_all` is
+  gone). The log tables are in `intellector_logs`, which must exist too.
 - Not idempotent: a failed run means drop the database, recreate it, upgrade, rerun.
 - Order inside is fixed by foreign keys: games → players, passwords, follows → studies → antifraud.
 - Game 5524 is skipped on purpose.
 - The guest id counter needs no migration step: the server derives it on startup (`last_guest_id.sql`).
-- Bug to fix before use: `IS_TEST = os.getenv("STAGE", "TEST")` is a non-empty string for any stage,
-  so the prod branch (`root = Path.cwd()`) is unreachable and every run prompts for a backup folder.
-  For PC-side migration the prompt branch is the one used anyway; the fix is still needed for clarity.
+- Duplicate sibling plies in v1 studies get merged, and illegal plies repaired or removed, each change printed as
+  `Study <id>: ...`; review them after the
+  final run, as v1 can still produce more.
+- Run it with `STAGE=test`, which is required and selects the prompt for a backup folder. `STAGE=prod` reads the
+  backup from the current directory instead.
 - The prompt branch imports `prompt_toolkit`, which isn't in `requirements.txt`.
+
+## Findings from the infra work (2026-11-04)
+
+- **A Windows copy of the v1 data loses players.** `player/` has case-colliding files (`Divan`/`divan`, `Groot`,
+  `Leo169`/`leo169`, `KatziRina`/`katzirina`, `PaulNotIntellector`/`paulnotintellector`), so `backup_light.py` into Yandex Disk
+  and the migrator on Windows see 1289 of 1293. The exact copy is `v1/v1-data-2026-11-04.tar.zst` in the B2 bucket (made on
+  the VPS); on release day take the final one the same way (`tar | zstd | rclone rcat`), and decide how the migrator treats
+  the colliding pairs before the rehearsal.
+- `backup_light.py` has a bug: if today's folder already holds a partial `game/`, it picks it as the "previous" backup and
+  crashes copying it onto itself. Run it once per day, or exclude today's folder.
+- Port 8000 on the VPS is v1's `webserver.py`, port 5000 is v1's server; 80 and 443 are free (certbot uses standalone mode).
+- Caddy is installed but disabled; `systemctl enable --now caddy` is a release-day step, after certbot's timer is disabled.
+- On release day also: `bootstrap.sh --firewall --harden-ssh`, `admin.env`, an `ADMIN` account in the restored DB, the
+  alert channel, and `systemctl start intellector.target` (or `deploy.py`).
 
 ## Before release day
 
@@ -63,7 +79,7 @@ locally, dumped, and loaded on the VPS through the ordinary restore path. Reason
    obtained the certificate (`journalctl -u caddy`).
 6. Start the v3 server (`ExecStartPre` migrations are a no-op).
 7. Take the first backup immediately (`ictl backup`) and confirm the restore-test timer is armed.
-8. Upload the v3 frontend to the static hosting (first `deploy.py` run). Its release `base_url` is
+8. Upload the v3 frontend to the static hosting (first `deploy.py` run). Its production address, set in `index.html`, is
    `https://play-intellector.ru` (port 443), no longer `:8443`.
 9. Smoke test (below). Then announce.
 

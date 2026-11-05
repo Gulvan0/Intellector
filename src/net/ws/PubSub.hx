@@ -4,12 +4,12 @@ import easypubsub.Subscription;
 import easypubsub.SubscriptionGroup;
 import easypubsub.IChannel;
 import easypubsub.PubSubEngine;
-import net.ws.channels.Everyone;
-
-using StringTools;
 
 class PubSub
 {
+    /** The server closes a connection with this code, and its API version as the reason, when the version the client announced differs from its own **/
+    public static inline final API_MISMATCH_CLOSE_CODE:Int = 4409;
+
     private static var _engine:PubSubEngine;
 
     public static function start(
@@ -19,11 +19,8 @@ class PubSub
         ?onAuthError:Null<()->Void> = null
     )
     {
-        _engine = new PubSubEngine(Config.getWebsocketUrl(), onInitialConnectionFailed, tokenRetriever, lastActivityUnixSecsRetriever);
+        _engine = new PubSubEngine(Config.getWebsocketUrl(), onInitialConnectionFailed, tokenRetriever, lastActivityUnixSecsRetriever, 6000);
         _engine.onAuthError = onAuthError;
-        // the server subscribes before it computes the refresh, so the events preceding it are already reflected in it
-        _engine.snapshotEventKind = kind -> kind.endsWith("_refresh");
-        _engine.expectsSnapshot = channel -> !Std.isOfType(channel, Everyone);
         _engine.connect();
     }
 
@@ -43,6 +40,18 @@ class PubSub
     {
         _engine.onConnected = onConnected;
         _engine.onDisconnected = onDisconnected;
+    }
+
+    /** `handler` gets the code and reason the server (or the network) closed an open connection with **/
+    public static function watchClose(handler:Int->String->Void):Void
+    {
+        _engine.onClosed = handler;
+    }
+
+    /** `handler` gets a description and the caught error when a message can't be processed or an event handler throws **/
+    public static function watchMessageFailures(handler:String->Dynamic->Void):Void
+    {
+        _engine.onMessageFailed = handler;
     }
 
     /** Attempts to connect right away instead of waiting out the reconnection delay **/

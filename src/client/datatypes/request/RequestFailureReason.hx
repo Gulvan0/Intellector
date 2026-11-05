@@ -11,4 +11,5 @@ enum RequestFailureReason
     TooManyActiveChallenges(maxActiveChallenges:Int);
     TooManyDirectChallenges(maxActiveChallenges:Int);
     ServerRestarting;
+    ChatRestricted;
 }
