@@ -36,7 +36,7 @@ Paths are relative to the app's folder on the static hosting (not necessarily th
 /v/42/bin/app.js ...   client for API 42, uploaded ahead of its server
 ```
 
-A client folder mirrors the repo layout (`bin/app.js`, `bin/hxconda.js`, `bin/version.json`, `assets/`); the loader makes it the document's `<base>`, so every relative URL of the app resolves inside it. The shell also holds `assets/favicons/pwa-*.png`, which `manifest.json` and `sw.js` reference.
+A client folder mirrors the repo layout (`bin/app.js`, `bin/hxconda.js`, `bin/version.json`, `manifest.json`, `assets/`); the loader makes it the document's `<base>`, so every relative URL of the app resolves inside it. The shell also holds `assets/favicons/pwa-*.png`, which `manifest.json` and `sw.js` reference.
 
 - A client lives in `/v/<api>/`. A same-API rebuild replaces its folder; a new API gets a new folder.
 - A folder must never be served half-written, and only the newest few `/v/*` folders need to exist (both handled by the deploy script).

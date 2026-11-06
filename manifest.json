@@ -1,8 +1,8 @@
 {
   "name": "Intellector",
   "short_name": "Intellector",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/game/",
+  "scope": "/game/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#e9e3d9",
