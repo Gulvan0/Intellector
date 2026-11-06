@@ -1,9 +1,0 @@
-<component width="100%" height="100%">
-    <vbox horizontalAlign="center">
-        <label id="headerLabel" text="Language/Язык:" horizontalAlign="center" />
-        <hbox id="btnBox" horizontalAlign="center">
-            <image id="enBtn" style="pointer-events: true" resource="assets/symbols/flags/en.svg" />
-            <image id="ruBtn" style="pointer-events: true" resource="assets/symbols/flags/ru.svg" />
-        </hbox>
-    </vbox>
-</component>

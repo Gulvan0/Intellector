@@ -1,3 +1,0 @@
-<vbox width="100%" height="100%" style="spacing:5px">
-    <scrollview id="history" width="100%" height="100%" contentWidth="100%" contentLayoutName="vertical" />
-</vbox>

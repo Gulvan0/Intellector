@@ -1,47 +1,26 @@
-This project is a client for a turn-based board game called Intellector. It is similar to chess on a hexagonal board.
+This project is named `Intellector Frontend v3.0` and it is a sandbox for the future iteration of the Intellector board game website (frontend). It will be used to rebuild this project from scratch, improving on the previous iteration located in `C:/Users/mitmi/Documents/GitHub/Intellector` (in the inconsistent and unbuildable state).
 
-`haxe html5.hxml` builds the project. While the refactoring is still ongoing, it will fail most of the time.
+ANY AMBIGUITY OR DESIGN DOC GAP SURFACING DURING THE IMPLEMENTATION SHOULD NOT BE RESOLVED SILENTLY. Instead, explicitly ask the question.
 
-ANY AMBIGUITY OR GAPS SURFACING DURING THE IMPLEMENTATION SHOULD NOT BE RESOLVED SILENTLY. Instead, explicitly ask the question.
-
-If told to take a dubious or possibly suboptimal approach (whether from the UI/UX or technical standpoint), also ask a question, providing details on why you're uncertain about this and what are the better practices or better ways to solve the problem.
+`haxe build.hxml` builds the project.
 
 # Tech stack
 
-The client is written in **Haxe** targeting **HTML5**.
+This project will be written in `Haxe` targeting `HTML5` using the HaxeFolio framework. Its sources are located in the framework's own repo (`C:/Users/mitmi/Documents/GitHub/Libraries/haxefolio`). Utility functions are defined in a separate lib (located in `C:/Users/mitmi/Documents/GitHub/Libraries/morestd`). The source files of both libraries may be freely edited, but the libraries should remain independent and universal, not tailored to `Intellector Frontend v3.0` specifically.
 
-Major libraries:
-- `HaxeUI` for UI
-- `http` for REST networking
-- `hxWebSockets` for websocket networking
-- `json2object` as a foundation for the two-way conversions between strictly typed DTOs and their JSON representations
+HaxeFolio is built over the `HaxeUI` library (`haxeui-core` plus its `haxeui-html5` backend). `HaxeUI` may have bugs, but they should be identified with care and special approval is needed for implementing the fixes. Each bug found needs to be demonstrated with a minimal reproducible example in the shape of a single XML file.
 
-# Project structure
+# Project structure and lib modules
 
-As of now, major refactoring is underway, so the actual structure is still inconsistent.
+...
 
-Target package structure overview:
-- `client` for code specific to the client
-    - `client.datatypes` for types commonly used in a client-only code
-- `dict` for localization/internationalization (to be moved into `client` later)
-- `engine` for AI bot-related code (to be moved into `client` later)
-- `gfx` for UI (to be moved into `client` later)
-- `lib` for "lib modules": reusable isolated chunks of code (each is represented by a subpackage in `lib`) with no dependencies or with minimal dependencies on other lib modules
-- `net` for everything related to networking
-    - `net.models` for DTOs, divided into subpackages by domain. Domain packages may have `mappers` subpackage containing converters between types in `client.datatypes`/`lib.intellectorboard` and DTOs in that domain
-    - `net.rest` for REST endpoint definitions and REST client
-    - `net.ws` for Websocket channel and event type definitions and PubSub client
-    - Other members of the `net` package as well as other subpackages are deprecated and will be removed
-- `openings` for opening database
-- `utils` for utilities that, unlike lib modules, bear no use outside of this app (to be moved into `client` later)
+# Transition
 
-## Lib modules
+Overall, the transition will be performed page-after-page. The page will usually be thoroughly tested before the next one will be taken into work.
 
-- `lib.std` - reusable utilities. Most other lib modules depend on this one.
-- `lib.intellectorboard` - game rules and abstractions (board fields, pieces, positions, plys etc.)
-- `lib.json` - macro-powered automation around `json2object` library. Generated serializers and deserializers for DTOs
-- `lib.rest` - wrapper around `http` lib allowing to define endpoints in a strictly typed manner and getting rid of associated boilerplate. Depends on `lib.json` for endpoint payload parsing and dumping.
-- `lib.pubsub` - wrapper around `hxWebSockets` lib allowing to define PubSub channels and messages published to them in a strictly typed manner and getting rid of associated boilerplate. Depends on `lib.json` for parsing and dumping message payloads and channels.
+The original version above can be used as a declarative reference (answering how the result is expected to look like, minus the ill-designed aspects), but the concrete approaches and decisions chosen may and should be subject to being questioned.
+
+...
 
 # Code style conventions
 

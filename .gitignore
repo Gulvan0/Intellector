@@ -1,4 +1,2 @@
-/deprecated/**
-/build/html5/config.yaml
-upload.log
-/.haxelsp/**
+bin/
+todo.md

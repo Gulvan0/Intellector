@@ -1,0 +1,8 @@
+-cp src
+-main Main
+
+-lib haxeui-core
+-lib haxeui-html5
+-lib haxefolio
+
+-js bin/app.js

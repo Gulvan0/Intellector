@@ -1,6 +1,0 @@
-<item-renderer width="300px" height="300px">
-    <vbox width="100%" height="100%" style="background-color:#eeeeee;border: 1px solid #BBBBBB;padding:3px">
-        <box id="boardContainer" width="100%" height="100%" />
-        <label id="turnColorLabel" horizontalAlign="center" />
-    </vbox>
-</item-renderer>
