@@ -98,91 +98,91 @@
         "name_ru": "Центральное продвижение"
     },
     "2!wmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr": {
-        "code": "P1",
+        "code": "P2",
         "sip": "2!wmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr",
         "other_sip": "2!wmrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr",
         "name_en": "Symmetric Central Advancement",
         "name_ru": "Двойное центральное продвижение"
     },
     "2!bmrtrurvnwrxryize0e1i2o3g5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr": {
-        "code": "P1",
+        "code": "P3",
         "sip": "2!bmrtrurvnwrxryize0e1i2o3g5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr",
         "other_sip": "2!bmrtrurvnwrxryize0e1i2o3g5g6o!AoBgCnDgEoFiGeHeIiJrKrMrNrUr",
         "name_en": "Central Opening",
         "name_ru": "Центральный дебют"
     },
     "2!wmrtrurvnwrxryize0e1i2o3g5g6o!AoBgDgEoFiGeHeIiJrKrLnMrNrUr": {
-        "code": "P1",
+        "code": "P4",
         "sip": "2!wmrtrurvnwrxryize0e1i2o3g5g6o!AoBgDgEoFiGeHeIiJrKrLnMrNrUr",
         "other_sip": "2!wmrtrurvnwrxryize0e1i2o3g5g6o!AoBgDgEoFiGeHeIiJrKrLnMrNrUr",
         "name_en": "Symmetric Central Opening",
         "name_ru": "Двойной центральный дебют"
     },
     "2!bqrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P2",
+        "code": "P5",
         "sip": "2!bqrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!brrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Open Intellector Opening",
         "name_ru": "Дебют вскрытого интеллектора"
     },
     "2!brrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P2",
+        "code": "P5",
         "sip": "2!bqrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!brrtrurwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Open Intellector Opening",
         "name_ru": "Дебют вскрытого интеллектора"
     },
     "2!bqrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P3",
+        "code": "P6",
         "sip": "2!bqrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!brrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Inward Progressor Opening",
         "name_ru": "Центростремительный дебют прогрессора"
     },
     "2!brrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P3",
+        "code": "P6",
         "sip": "2!bqrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!brrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Inward Progressor Opening",
         "name_ru": "Центростремительный дебют прогрессора"
     },
     "2!bprtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P4",
+        "code": "P7",
         "sip": "2!bprtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bsrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Outward Progressor Opening",
         "name_ru": "Центробежный дебют прогрессора"
     },
     "2!bsrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P4",
+        "code": "P7",
         "sip": "2!bprtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bsrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Outward Progressor Opening",
         "name_ru": "Центробежный дебют прогрессора"
     },
     "2!blrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P5",
+        "code": "P8",
         "sip": "2!blrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bnrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Forward Progressor Opening",
         "name_ru": "Прямой дебют прогрессора"
     },
     "2!bnrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P5",
+        "code": "P8",
         "sip": "2!blrtrvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bnrtrurvrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Forward Progressor Opening",
         "name_ru": "Прямой дебют прогрессора"
     },
     "2!bprurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P6",
+        "code": "P9",
         "sip": "2!bprurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bsrtrurvrwryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Channel Opening",
         "name_ru": "Дебют канала"
     },
     "2!bsrtrurvrwryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
-        "code": "P6",
+        "code": "P9",
         "sip": "2!bprurvrwrxryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bsrtrurvrwryize0e1i2o3g4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "name_en": "Channel Opening",
