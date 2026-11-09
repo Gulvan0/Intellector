@@ -234,29 +234,29 @@
         "code": "U2",
         "sip": "2!bdgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bdgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
-        "name_en": "Central Aggressor Opening",
-        "name_ru": "Дебют центрального агрессора"
+        "name_en": "Central Sac",
+        "name_ru": "Центральная жертва"
     },
     "2!bdgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
         "code": "U2",
         "sip": "2!bdgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bdgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
-        "name_en": "Central Aggressor Opening",
-        "name_ru": "Дебют центрального агрессора"
+        "name_en": "Central Sac",
+        "name_ru": "Центральная жертва"
     },
     "2!bQgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
         "code": "U3",
         "sip": "2!bQgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bPgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
-        "name_en": "e4 Sac",
-        "name_ru": "Жертва на e4"
+        "name_en": "Fifth Rank Sac",
+        "name_ru": "Жертва на пятой горизонтали"
     },
     "2!bPgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr": {
         "code": "U3",
         "sip": "2!bQgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
         "other_sip": "2!bPgtrurvrwrxryize0e1i2o3g4n6o!AoBgCnDgEoFiGeHeIiJrKrLrMrNr",
-        "name_en": "e4 Sac",
-        "name_ru": "Жертва на e4"
+        "name_en": "Fifth Rank Sac",
+        "name_ru": "Жертва на пятой горизонтали"
     },
     "2!bDgtrurvrwrxryize0e1i2o4n5g6o!AoBgCnEoFiGeHeIiJrKrLrMrNr": {
         "code": "A3",
