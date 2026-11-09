@@ -71,9 +71,11 @@ Depends on the mode
 
 Two right-aligned buttons: "Save filter" and "Open filter". Both with light monochrome icons.
 
-"Save filter" prompts for a name (matching `[\w ]{1,32}` in unicode mode), then finalizes and saves the formula (sending a save request to the game server). It also transitions to the saved user-owned filter mode. If the filter with the name provided by the user already exists among this user's filters, an overwrite confirmation is shown first. For guests, "Save filter" invokes login overlay instead.
+"Save filter" prompts for a name (trimmed, then matching `^[\p{L}\p{N}_ ]{1,32}$` with the `u` flag on the client and the equivalent pattern on the server; plain `\w` is ASCII-only in JS, but Unicode-aware in Python), then finalizes and saves the formula (sending a save request to the game server). It also transitions to the saved user-owned filter mode. If the filter with the name provided by the user already exists among this user's filters, an overwrite confirmation is shown first.
 
 "Open filter" opens a dropdown of all filters saved by user, identified by their names. Clicking an entry requests the filter from the game server, then fills the formula and transitions to the saved user-owned filter mode.
+
+For guests, both buttons invoke login overlay instead.
 
 #### Saved user-owned filter
 
@@ -83,11 +85,13 @@ Left-aligned filter name; right-aligned buttons "Share filter", "Delete filter" 
 
 There are also authorless saved filters managed by the server; they are accessible via the `?p=games/<filter name>` link. They behave the same, provided they could never lead the user into the saved user-owned filter mode, because they are not owned by anyone. In the very first iteration, two authorless filters will be defined: `Ongoing games` for `Result = Still Ongoing` condition and `Game archive` for `NOT Result = Still Ongoing` condition.
 
-A dead link redirects to `?p=games`.
+A dead link redirects to `?p=games` and shows a notification that the filter was not found.
 
 On the server-side, the filters will be stored in a table with a composite primary key: author (possibly noone, represented by an empty string) + name.
 
-"Delete filter" shows a confirmation and, if confirmed, sends a delete request to the game server and enters the unsaved filter mode whilist not changing the formula in the formula box.
+Names are compared case- and accent-insensitively, as the DB collation does: `Foo`, `foo` and `Fóo` are the same name. The overwrite confirmation check uses the same comparison, so a save never fails on the key constraint instead of asking to overwrite.
+
+"Delete filter" shows a confirmation and, if confirmed, sends a delete request to the game server and enters the unsaved filter mode whilst not changing the formula in the formula box.
 
 Once the formula is changed in any way, the mode switches to unsaved filter one. This, in particular, means that the only way to update the filter is by overwriting it via "Save filter" on an unsaved filter.
 
@@ -183,7 +187,7 @@ Just an integer input field prepended with static "Guest" text (label).
 
 Two-step selector with each step mimicking `SingleSelection` of a set of fixed options (see below).
 
-First step's options are "any", plus bot families: "Anaconda", "Haxaconda Standard", "Haxaconda Trailblazer", "Haxaconda Vrezh", "Haxaconda Fortress", "Haxaconda Unchained". If "any" is selected, the selector short-circuits with a "Bot" value. If "Anaconda" is selected, the selected short-circuits with an "Anaconda" value.
+First step's options are "any", plus bot families: "Anaconda", "Haxaconda Standard", "Haxaconda Trailblazer", "Haxaconda Vrezh", "Haxaconda Fortress", "Haxaconda Unchained". If "any" is selected, the selector short-circuits with a "Bot" value. If "Anaconda" is selected, the selector short-circuits with an "Anaconda" value.
 
 Second step's options are "any", plus difficulties: for Haxaconda Standard, nine in total, from "1" to "9"; for other families, eight (up until "8"). If "any" is selected, the selector short-circuits with a value equal to the selected family. If a difficulty is selected, the value returned is a fully qualified bot, for example, "Haxaconda Vrezh 6".
 
@@ -223,6 +227,8 @@ Options may have icons, in that case, for fixed options, they are placed in the 
 
 `PlayerOrColor` is a `SingleSelection` with the following choices: "white", "black", +`User`, +`Guest`, +`Bot`.
 
+`UserOrColor` is a `SingleSelection` with the following choices: "white", "black", +`User`.
+
 ### MultiSelection, MultiTimeControlKind, MultiOutcomeKind
 
 `MultiSelection`'s selector is a dropdown of all the possible choices (once again, they may be fixed or appended). It differs from `SingleSelection` in appearance and behaviour.
@@ -253,18 +259,18 @@ Operator condition properties:
 - `initial_time` - `Duration` (operands: h, m, s assignable; usual time control restrictions apply to the ranges)
 - `bonus_time` - `Duration` (operands: m, s assignable; usual time control restrictions apply to the ranges)
 - `duration` - `Duration` (operands: anything assignable except for s and ms; allows UNKNOWN, which corresponds to legacy games for either the start timestamp or the end timestamp are not filled; for ongoing games substitutes end timestamp with 'now' timestamp, calculated on server during the processing of the search request)
-- `time_left` (`PlayerOrColor`) - `Duration` (allows UNKNOWN; operands: h, m, s assignable)
+- `time_left` (`PlayerOrColor`) - `Duration` (operands: h, m, s assignable; allows UNKNOWN, which corresponds to legacy games for which this field is not filled; for ongoing games substitutes end timestamp with 'now' timestamp, calculated on server during the processing of the search request)
 - `move_cnt` - `Int`
-- `elo` (`PlayerOrColor`) - `Int`
+- `elo` (`UserOrColor`) - `Int`
 
 Sole equality condition properties:
 - `player` (`OptionalColor`) - `MultiSelection` (+`User`, +`Guest`, +`Bot`)
 - `time_control_kind` - `MultiTimeControlKind`
 - `rated` - `Bool`
 - `outcome` - `MultiOutcomeKind`
-- `starting_position` - `MultiSelection` ("default", +`SIP`) - will later be subsided by much more generic `arrangement`
+- `starting_position` - `MultiSelection` ("default", +`SIP`) - will later be superseded by much more generic `arrangement`
 - `opening` - `MultiSelection` (of a list of several dozens of fixed values; in actuality, is implemented as 'one of the SIPs associated with this opening has occurred in that game, with the cancelled plies excluded')
-- `elo_provisional` (`PlayerOrColor`) - `Bool`
+- `elo_provisional` (`UserOrColor`) - `Bool`
 - `winner` - `MultiSelection` ("None yet (Ongoing game)", "Noone (Draw)", +`User`, +`Guest`, +`Bot`)
 - `result` - `MultiSelection` ("Still ongoing", "White won", "Black won", "Draw")
 
@@ -277,9 +283,9 @@ Will be better off explicitly highlighted to a user to keep them informed.
 
 These apply only to the games subject to this condition. So, for example, a complex condition `initial_time > 20s OR time_control_kind IN ('CORRESPONDENCE',)` WILL include correspondence games, because implicit exclusion applies only to the first OR operand.
 
-- Specifying any condition on `initial_time` or `bonus_time` automatically excludes all correspondence games
+- Specifying any condition on `initial_time`, `bonus_time` or `time_left` automatically excludes all correspondence games
 - Specifying any condition on `elo` or `elo_provisional`  automatically excludes all unrated games
-- Specifying any condition on `elo`, `elo_provisional` or `time_left` bound to a specific player (user/guest/bot) automatically restricts the game set to the games where this player participated exclusively
+- Specifying any condition on `elo`, `elo_provisional` or `time_left` bound to a specific player (user/guest/bot) automatically restricts the game set to exclusively the games where this player participated
 - Specifying any condition on `ended_at` (even UNKNOWN) automatically excludes all ongoing games
 
 These apply even if the condition is put inside the NOT block.
@@ -291,8 +297,8 @@ They may (and usually do) require operands (values) to be provided, their expect
 ### DateTime
 
 - `<` (`DateTime`) - if compared against a date without a time, assumes `00:00:00` time
-- `>` (`DateTime`) - if compared against a date without a time, assumes `23:59:59` time
-- BETWEEN (`DateTime`;`DateTime`) - behaves as a conjunction of `<` and `>`, but both bounds are inclusive (so more like `<=` and `=>` if they were available)
+- `>` (`DateTime`) - if compared against a date without a time, means "on the next day `00:00:00` or later"
+- BETWEEN (`DateTime`;`DateTime`) - both bounds are inclusive (`>=` lower bound, `<=` upper bound). A date without a time means `00:00:00` of that day as the lower bound, and "before the next day `00:00:00`" as the upper bound, so both boundary days are included in full
 - UNKNOWN - but only if this specific property allows it
 
 ### Duration, Int (exact type expressed as T)
@@ -301,7 +307,7 @@ They may (and usually do) require operands (values) to be provided, their expect
 - `>` (`T`)
 - `<=` (`T`)
 - `>=` (`T`)
-- `=` (`T`) - has a special behaviour for duration: compares with the precision matching the lowest assignable unit
+- `=` (`T`) - has a special behaviour for duration: compares by rounding down to the lowest assignable unit
 - BETWEEN (`T`;`T`)
 - UNKNOWN - but only if this specific property allows it
 
@@ -327,40 +333,40 @@ Submitting the overlay sends a request to the game server making it query the wh
 
 Important: all text occurrences in cell values should be selectable.
 
-Column list should be customizable: a user must be able to toggle the inclusion of each invidividual column. The column roster also propagates to exported XLSX spreadsheet.
+Column list should be customizable: a user must be able to toggle the inclusion of each individual column. The column roster also propagates to exported XLSX spreadsheet.
 
 Results should be sortable by a column value. This applies to the result set as a whole, not to a single page. Hence, it emits a new search request and re-fills the result table on response. If multi-level sorting may be achieved without hurting or overcomplicating the UX, it should be implemented. Default sorting is by `ID` column in descending order. In exported XLSX, the columns are presented in the same order as in result table.
 
-All available columns, in order:
+All available columns, in order (sorting, even arbitrary one, implies grouping results together by the sorted column, it's just that the order of such groups is arbitrary):
 
 - `ID` - game ID
-- `Link` - game URL built from ID; should appear and behave as a normal HTML link - hidden by default
-- `White` - white player nickname
-- `Black` - black player nickname
-- `White ELO` - white player ELO formatted as usual (e.g. with ? for provisional) if rated; if unrated, dash - hidden by default
-- `Black ELO` - black player ELO formatted as usual (e.g. with ? for provisional) if rated; if unrated, dash - hidden by default
+- `Link` - game URL built from ID; should appear and behave as a normal HTML link; hidden by default
+- `White` - white player nickname; sorting sorts by login for users, guest id for guests, bot slug for bots, all users are followed by all guests followed by all bots
+- `Black` - black player nickname; sorting sorts by login for users, guest id for guests, bot slug for bots, all users are followed by all guests followed by all bots
+- `White ELO` - white player ELO formatted as usual (e.g. with ? for provisional) if rated; if unrated, dash; hidden by default
+- `Black ELO` - black player ELO formatted as usual (e.g. with ? for provisional) if rated; if unrated, dash; hidden by default
 - `Started at` - datetime in a usual frontend format used elsewhere (e. g. datetime in a game info card)
-- `Ended at` - datetime in a usual frontend format used elsewhere (e. g. datetime in a game info card) - hidden by default
+- `Ended at` - datetime in a usual frontend format used elsewhere (e. g. datetime in a game info card); hidden by default
 - `Duration` - duration in a "DD:HH:MM:SS" format, with leading zero components stripped
 - `Time control` - time control kind prepended with its icon
 - `Start time` - time control's start time in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games
 - `Bonus time` - time control's bonus time in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games
-- `Rated` - "Yes"/"No"
-- `Starting position` - "Default" if default, otherwise, SIP with "Preview" button sitting to the right and acting like similar buttons in ongoing game and challenge menubar widgets - hidden by default
-- `Result` - "White won"/"Black won"/"Draw"/"Still ongoing"
-- `Outcome` - outcome kind presented the same as on the game cards in player profile and main pages; dash if the game is still ongoing
-- `Opening` - opening name - hidden by default
-- `Move count` - move count as an integer - hidden by default
-- `Time left (White)` - remaining time for white player in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games; does not update live for ongoing games; equals time reserve at the moment the game ended for past games - hidden by default
-- `Time left (Black)` - remaining time for black player in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games; does not update live for ongoing games; equals time reserve at the moment the game ended for past games - hidden by default
+- `Rated` - "Yes"/"No"; sorting is arbitrary, but deterministic
+- `Starting position` - "Default" if default, otherwise, SIP with "Preview" button sitting to the right and acting like similar buttons in ongoing game and challenge menubar widgets; hidden by default
+- `Result` - "White won"/"Black won"/"Draw"/"Still ongoing"; sorting is arbitrary, but deterministic
+- `Outcome` - outcome kind presented the same as on the game cards in player profile and main pages; dash if the game is still ongoing; sort is arbitrary as long as all drawish outcomes follow all decisive ones, but must be deterministic (declaration order in the server-side enum will do just fine)
+- `Opening` - opening name; sorting sorts by code; it may not match the opening filter (for example, if the actual opening is the subvariation of an opening used in the filter), but that's intended; hidden by default
+- `Move count` - move count as an integer; hidden by default
+- `Time left (White)` - remaining time for white player in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games; does not update live for ongoing games; equals time reserve at the moment the game ended for past games; hidden by default
+- `Time left (Black)` - remaining time for black player in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games; does not update live for ongoing games; equals time reserve at the moment the game ended for past games; hidden by default
 
-There is no pre-search state. When a page is first opened, the game list is loaded into the result table. It then remains there until the user presses the "Search" button.
+There is no pre-search state. When a page is first opened, the game list is loaded into the result table (all games for empty filter; games matching the filter if a filter is opened by its link). It then remains there until the user presses the "Search" button.
 
 The result table, though, has special states. One is for empty result and another is for loading state. Both look identically: instead of a table, a centered label with italics font in dimmed colour is shown. The text says "No games match these filters" or "Loading the games..." respectively. Of course, these are localized strings.
 
-The table indicates that the results are stale (which happens when the formula was edited, but the search button has not been pressed) by a small notice label above it. When the results are sorted or when the page is switched, the last submitted formula is used.
+The table indicates that the results are stale (which happens when the formula was edited, but the search button has not been pressed) by a small notice label above it. When the results are sorted, when the page is switched or when a XLSX export is requested, the last submitted formula is used.
 
-# Deisgn references across the existing components
+# Design references across the existing components
 
 1. The time control kind filters in game lists in home and player profile pages are prime examples of how `MultiTimeControlKind` should look like.
 
@@ -378,7 +384,7 @@ Conditions should be editable by clicking them in a formula box. The exact speci
 
 2. Calendar widget
 
-It's design is described declaratively, as a set of requirements. The exact implementation is undecided.
+Its design is described declaratively, as a set of requirements. The exact implementation is undecided.
 
 3. Duration widget
 
@@ -402,7 +408,7 @@ Design missing.
 
 8. Export as XLSX implementation on the server-side
 
-Can it be simplistic? Or will some queries take a lot of time and need to implement the HTTP 202 async report generaiton pattern? If the latter, then how it should be wired on the frontend to keep UX intuitive and convenient? And how the server will make sure it won't get overloaded by such requests (either in number or in weight)?
+Can it be simplistic? Or will some queries take a lot of time and need to implement the HTTP 202 async report generation pattern? If the latter, then how it should be wired on the frontend to keep UX intuitive and convenient? And how the server will make sure it won't get overloaded by such requests (either in number or in weight)?
 
 Also: will including move columns have detrimental implications?
 
@@ -429,3 +435,60 @@ Probably there should be a way to return to the previous step of the flow, but I
 Opening book should be synchronized between the client and the server. Maybe by the equivalence test.
 
 If they are not equivalent and the server's version will be updated, the prod database should be updated with the corrected `opening_sip` values.
+
+# Review proposals
+
+Not accepted yet. Each one either changes a section above or feeds an open question.
+
+## 1. Dates without a time
+
+A date without a time covers a different 24 hours in every timezone, so it is stored as a calendar date and resolved into UTC bounds only when a search runs.
+
+- A `DateTime` operand is either `{instant: "2024-06-13T09:30:00Z"}` (a time is set) or `{date: "2024-06-13"}` (the time was opted out of). A date is shown as that same date to every viewer, never with a time.
+- Search and export requests carry the viewer's IANA timezone name (`Intl.DateTimeFormat().resolvedOptions().timeZone`). The server resolves dates into UTC bounds with it, following the rules of the `DateTime` operators. A UTC offset would not do: an offset taken now is wrong for dates on the other side of a DST change. The XLSX export needs the same timezone to format its datetimes.
+- A date means the viewer's midnight: a shared "13.06" means 13.06 for whoever opens it, so viewers in different timezones may get slightly different results. The alternative, pinning the author's timezone in the filter, gives identical results at the cost of shifted dates or a "(UTC+3)" suffix.
+- Event days in the JSON resource are dates as well.
+
+Changes "always UTC" in the `DateTime` selector section to apply to instants only. Feeds open question 6.
+
+## 2. Touch-ups
+
+- `time_left` for ongoing games: the ticking side's remainder is computed as of the search request (the current wording speaks of an end timestamp, copied from `duration`).
+- `Duration` column for ongoing games: elapsed time as of the search request. `Ended at` column for ongoing games: dash.
+- `Duration` comparisons: every operator compares the stored value truncated to the lowest assignable unit, not just `=`. Otherwise a 5:30 game matches `= 5m` but not `<= 5m`.
+- `White`/`Black` sorting: guest ids sort numerically, so that "Guest 9" precedes "Guest 10".
+
+## 3. Page state in the URL
+
+Resetting the URL to `?p=games` means a reload, Back or a bookmark loses the formula, sorting and page. Only saved filters can be shared, and guests cannot save, so guests cannot share a search at all.
+
+Proposal: encode the formula (compressed), sorting and page in the URL. This also gives guests sharing. At the very least, keep `games/<login>/<name>` in the address bar instead of resetting it.
+
+## 4. Filter identity
+
+Links address an owner and a name, not a fixed filter: an overwrite silently changes what every shared link shows, and a rename (should it ever appear) breaks them.
+
+Proposal: a surrogate id primary key plus a unique (author, name) key. The human-readable URL stays possible, and it also replaces the empty-string author.
+
+## 5. Formula schema versioning
+
+The vocabulary already moves: `elo_kind` became `elo_provisional`, `starting_position` will be superseded by `arrangement`, the bot roster and the opening book will change. Stored formulas need a schema version from the start, plus a migration path.
+
+Opening values need stable ids: neither names nor codes are unique (A2 and U2 are both "Central Aggressor Opening"; `P1` is shared by four openings).
+
+Feeds open question 6.
+
+## 6. Search load protection
+
+Guests may send arbitrarily heavy formulas and exports. Each search that times out still holds a DB connection for the whole time limit, so a few parallel ones may exhaust the pool the game server relies on.
+
+Proposal: a separate connection pool (or a semaphore) for searches, a cap on formula size and depth, and per-client rate limits. The backlog's "Spammable timeout check" is the same class of problem.
+
+## 7. XLSX export
+
+- Size is fine: few tens of thousands of games with ~60 plies typical is roughly 2M cells, written in a streaming mode.
+- Datetimes and durations should be native Excel values, not `DD:HH:MM:SS` strings, so that they sort and sum in Excel.
+- The request carries the locale and the timezone, since the server builds the file.
+- Server-side notation already exists (`board/serializers/notation.py`); it needs the same client/server equivalence test as the opening book.
+
+Feeds open question 8.
