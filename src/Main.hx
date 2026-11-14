@@ -119,6 +119,7 @@ class Main
             .addNormalMenuItem("watch", "watch_player", Execute(WatchFlows.presentPlayerSearch), Assets.menuItemIcon("watch_player"))
             .addLeftMenubarItem(NormalMenu("learn", []))
             .addNormalMenuItem("learn", "analysis_board", NavigateTo(() -> "analysis"), Assets.menuItemIcon("analysis_board"))
+            .addNormalMenuItem("learn", "game_archive", Execute(onGameArchivePressed), Assets.menuItemIcon("game_archive", "png"))
             .addLeftMenubarItem(NormalMenu("social", []))
             .addNormalMenuItem("social", "player_profile", Execute(onPlayerProfilePressed), Assets.menuItemIcon("player_profile"))
             .addNormalMenuItem("social", "vk", Link("https://vk.com/intellectorgroup", true), Assets.menuItemIcon("vk"))
@@ -182,6 +183,11 @@ class Main
     private static function onVersusBotPressed():Void
     {
         ChallengeCreationFlow.present(ChallengePrefills.versusBot);
+    }
+
+    private static function onGameArchivePressed():Void
+    {
+        HaxeFolioApp.navigateTo("games", null, "/archive");
     }
 
     private static function onPlayerProfilePressed():Void

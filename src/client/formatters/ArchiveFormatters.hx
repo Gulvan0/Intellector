@@ -14,6 +14,7 @@ import client.logic.games.ImplicitRestrictions.ImplicitRestriction;
 import client.logic.games.ResultColumns;
 import client.openings.OpeningEntry;
 import client.openings.OpeningTree;
+import haxe.ui.locale.LocaleManager;
 import haxefolio.LocaleUtils;
 
 using StringTools;
@@ -22,6 +23,7 @@ using StringTools;
 class ArchiveFormatters
 {
     private static inline final ANACONDA_NAME:String = "Anaconda";
+    private static inline final MIN_DAYS_IN_WHOLE_DAYS:Int = 5;
 
     /** `D:HH:MM:SS` in whole seconds, the leading zero components stripped: `3`, `5:00`, `1:02:03` **/
     public static function clock(ms:Float):String
@@ -36,6 +38,15 @@ class ArchiveFormatters
         while (components.length > 1 && components[0] == 0)
             components.shift();
         return [for (i in 0...components.length) i == 0 ? Std.string(components[i]) : Std.string(components[i]).lpad("0", 2)].join(":");
+    }
+
+    /** A game's duration: whole days from `MIN_DAYS_IN_WHOLE_DAYS` days on (`7 days`), `clock` below **/
+    public static function gameDuration(ms:Float):String
+    {
+        var days:Int = Std.int(ms / 86400000);
+        if (days < MIN_DAYS_IN_WHOLE_DAYS)
+            return clock(ms);
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding(Plurals.key("intellector.games.duration_days", days, LocaleManager.instance.language)), days);
     }
 
     /** `DD.MM.YYYY` or `DD.MM.YYYY HH:MM:SS` **/

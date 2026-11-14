@@ -438,7 +438,7 @@ Submitting the overlay sends a request to the game server making it query the wh
 
 The response is synchronous: the server streams the file as it writes it. The size is not a concern even with move columns: few tens of thousands of games with ~60 plies typical is roughly 2M cells. Submitting closes the overlay; the "Export as XLSX" button then shows a spinner and stays disabled until the download starts or the request fails, the latter resulting in an error notification.
 
-Datetimes and durations are native Excel values, not `DD:HH:MM:SS` strings, so that they sort and sum in Excel. Excel datetimes have no timezone, so the request carries the locale and the viewer's IANA timezone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), and the server writes the viewer's local time. Moves are written in the notation by the server-side serializer (`board/serializers/notation.py`), kept equivalent to the client's (see "Other fixes required").
+Datetimes and durations are native Excel values, not `DD:HH:MM:SS` strings, so that they sort and sum in Excel. Excel datetimes have no timezone, so the request carries the locale and the viewer's IANA timezone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), and the server writes the viewer's local time. The request also carries the game URL template for the `Link` column (the client's own `?p=live/{game_id}` URL, built from its origin), so the server holds no frontend address. Moves are written in the notation by the server-side serializer (`board/serializers/notation.py`), kept equivalent to the client's (see "Other fixes required").
 
 Important: all text occurrences in cell values should be selectable.
 
@@ -456,7 +456,7 @@ All available columns, in order (sorting, even arbitrary one, implies grouping r
 - `Black ELO` - black player ELO formatted as usual (e.g. with ? for provisional) if rated; if unrated, dash; hidden by default
 - `Started at` - datetime in a usual frontend format used elsewhere (e. g. datetime in a game info card)
 - `Ended at` - datetime in a usual frontend format used elsewhere (e. g. datetime in a game info card); dash for ongoing games; hidden by default
-- `Duration` - duration in a "DD:HH:MM:SS" format, with leading zero components stripped; for ongoing games, elapsed time as of the search request
+- `Duration` - duration in a "DD:HH:MM:SS" format, with leading zero components stripped; from 5 days on, whole days instead ("7 days"); for ongoing games, elapsed time as of the search request
 - `Time control` - time control kind prepended with its icon
 - `Start time` - time control's start time in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games
 - `Bonus time` - time control's bonus time in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games

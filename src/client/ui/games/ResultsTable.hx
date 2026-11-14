@@ -141,7 +141,7 @@ class ResultsTable extends Box
             case BLACK_ELO: textCell(rating(game.rated, game.black), true);
             case STARTED_AT: textCell(GameFormatters.optionalDateTime(game.startedAtMs), true);
             case ENDED_AT: textCell(game.outcome == null ? DASH : GameFormatters.optionalDateTime(game.endedAtMs), true);
-            case DURATION: textCell(clockOrDash(game.durationMs), true);
+            case DURATION: textCell(game.durationMs != null ? ArchiveFormatters.gameDuration(game.durationMs) : DASH, true);
             case TIME_CONTROL: timeControl(game);
             case START_TIME: textCell(game.startSeconds != null ? ArchiveFormatters.clock(game.startSeconds * 1000.0) : DASH, true);
             case BONUS_TIME: textCell(game.incrementSeconds != null ? ArchiveFormatters.clock(game.incrementSeconds * 1000.0) : DASH, true);

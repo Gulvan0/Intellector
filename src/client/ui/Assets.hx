@@ -7,9 +7,9 @@ import intellectorboard.primitives.piece.PieceColor;
 
 class Assets
 {
-    public static function menuItemIcon(name:String):String
+    public static function menuItemIcon(name:String, extension:String = "svg"):String
     {
-        return 'assets/images/menubar/menu_items/$name.svg';
+        return 'assets/images/menubar/menu_items/$name.$extension';
     }
 
     public static function timeControlKindIcon(kind:TimeControlKind):String
