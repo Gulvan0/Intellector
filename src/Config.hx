@@ -3,7 +3,7 @@ package;
 class Config
 {
     /** Bumped on a breaking API change; must equal the server's **/
-    public static inline final API_VERSION:Int = 2;
+    public static inline final API_VERSION:Int = 3;
 
     #if debug
 
