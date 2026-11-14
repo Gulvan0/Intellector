@@ -116,3 +116,7 @@ Fix:
 ## Spammable timeout check
 
 `GET /game/{id}/check_timeout` is unauthenticated, and each call writes a log row and replans the timer.
+
+## Search load protection
+
+A separate DB connection pool (or a semaphore) for game archive searches and exports, plus per-client rate limits, so timing-out searches can't exhaust the game server's pool.

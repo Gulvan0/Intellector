@@ -31,7 +31,7 @@ AND
 ├── (Started At < 13.06.2024 ×)
 ├── OR ×
 │   ├── (Time Control = Blitz, Rapid ×)
-│   ├── (Winner = PaulNotIntellector, Guest 23, Bot, ... ×)
+│   ├── (Winner = PaulNotIntellector, Guest 23, Bot +2 more ×)
 │   ├── NOT (+ Specify condition) ×
 │   └── (+ Add condition)
 └── (+ Add condition)
@@ -43,7 +43,9 @@ The hierarchy contours should be drawn as lines, not placed as text like in the 
 
 Braces denote the start and end of the pill-shaped card. Crosses denote the "delete condition" buttons - see "Deleting a condition".
 
-Condition pill cards are clickable, and this click should trigger an edit, but the exact behaviour is still an open question.
+Condition pill cards are clickable, and this click triggers an edit (see "Editing a condition").
+
+A `MultiSelection` pill lists its ticked values in the selector's order and shows at most 3 of them, followed by "+N more" if there are more, as in the example above. A pill with hidden values lists all of them in its tooltip. Each value has a maximum width, beyond which it is cut with an ellipsis (long SIPs, opening names); if the pill still exceeds the formula box width, its value list is cut with an ellipsis as well.
 
 ## Formula finalization
 
@@ -84,7 +86,7 @@ Right-aligned buttons, all with light monochrome icons: "Share filter", "Save fi
 
 "Delete filter" shows a confirmation and, if confirmed, sends a delete request to the game server and enters the unsaved filter mode, leaving the formula box and the results as they are.
 
-"Open filter" opens a dropdown of all filters saved by user, identified by their names. Clicking an entry requests the filter from the game server, fills the formula and runs the search.
+"Open filter" opens a dropdown of all filters saved by user, identified by their names. Clicking an entry requests the filter from the game server, fills the formula and runs the search. If the filter no longer exists or its formula is unreadable (see "Formula in the URL"), a notification says that the filter was not found or could not be read, and the page stays as it was: the formula box, the results, the URL and the mode are unchanged.
 
 If the formula box diverged from the last search (see "Result presentation"), "Share filter" and "Save filter" run the search first, so they always act on what the formula box shows. "Delete filter" acts on the saved filter named in the header.
 
@@ -107,11 +109,56 @@ The URL fragment identifies the last search:
 - `?p=games` - the empty formula, yielding all games.
 - `?p=games#/<id>` - a saved filter by its id.
 - `?p=games#/<key>` - an authorless filter by its key. A key is never a number, unlike an id.
-- `?p=games#<base64>` - an unsaved formula, in the stored filter format (see open question 6), base64url-encoded without padding, so it never starts with `/`.
+- `?p=games#<base64>` - an unsaved formula, in the stored filter format (see "Formula format"), base64url-encoded without padding, so it never starts with `/`.
 
-Opening the page, including via Back/Forward, reads the fragment, fills the formula, enters the respective mode and runs the search; the URL is kept. A saved filter is requested from the game server first. A missing filter or an undecodable formula redirects to `?p=games` with a notification that the filter was not found or could not be read.
+Opening the page, including via Back/Forward, reads the fragment, fills the formula, enters the respective mode and runs the search; the URL is kept. A saved filter is requested from the game server first. A missing filter, or a formula that is undecodable or exceeds a cap (see "Formula limits"), redirects to `?p=games` with a notification that the filter was not found or could not be read.
 
 Every later search that changes the fragment writes it via `HaxeFolioApp.setFragment` with `keepInHistory: true`, so Back and Forward step through the searches; a search that does not change it leaves the history alone. Saving a filter and deleting the saved one replace the fragment (`#/<id>` and `#<base64>` respectively) instead. Sorting and the result page do not touch the URL.
+
+## Formula format
+
+Saved filters and URL fragments share one formula schema. The database stores it as JSON, the URL fragment as base64 of that JSON. Example:
+
+```json
+{
+    "version": 1,
+    "root": {"and": [
+        {"property": "started_at", "operator": "lt", "operands": ["2024-06-13"]},
+        {"or": [
+            {"property": "time_control_kind", "values": ["BLITZ", "RAPID"]},
+            {"property": "winner", "values": [{"user": "paulnotintellector"}, {"guest": 23}, {"bot": {}}]},
+            {"not": {"property": "elo", "parameter": "white", "operator": "between", "operands": [1500, 1800]}}
+        ]}
+    ]}
+}
+```
+
+Nodes:
+
+- Recursive conditions: `{"and": [<node>, ...]}`, `{"or": [<node>, ...]}`, `{"not": <node>}`. The root is always an AND.
+- Operator condition: `property`, `parameter` (parametrized properties only), `operator` (`lt`, `gt`, `le`, `ge`, `eq`, `between`, `unknown`) and `operands`, with as many as the operator requires (none for `unknown`).
+- Sole equality condition: `property`, `parameter` (parametrized properties only) and `values`, a non-empty array in the selector's order.
+
+Values:
+
+- `DateTime`: `"YYYY-MM-DD"` or `"YYYY-MM-DDTHH:MM:SS"`, without a timezone.
+- `Duration`: integer milliseconds. `Int`: integer. `Bool`: `true`/`false`.
+- Colors (`OptionalColor`, `PlayerOrColor`, `UserOrColor`): `"white"`, `"black"`, plus `"any"` for `OptionalColor`.
+- Players: `{"user": "<login>"}`, `{"guest": <id>}`, `{"bot": {}}` for any bot, `{"bot": {"family": "anaconda"}}`, `{"bot": {"family": "haxaconda_vrezh", "level": 6}}`. Families: `anaconda`, `haxaconda_standard`, `haxaconda_trailblazer`, `haxaconda_vrezh`, `haxaconda_fortress`, `haxaconda_unchained`.
+- `time_control_kind`, `outcome`: `TimeControlKind`/`OutcomeKind` member names.
+- `result`: `"ongoing"`, `"white_won"`, `"black_won"`, `"draw"`. `winner`: `"ongoing"`, `"draw"` or a player.
+- `starting_position`: `"default"` or `{"sip": "<SIP>"}`.
+- `opening`: the opening's stable id, since neither names nor codes are unique (A2 and U2 are both "Central Aggressor Opening"; `P1` is shared by four openings).
+
+The schema is versioned from the start, since the vocabulary moves (`elo_kind` became `elo_provisional`, `starting_position` will be superseded by `arrangement`, the bot roster and the opening book will change). Stored filters are migrated on the server along with its DB migrations, so the server always returns the current version. URL fragments cannot be migrated, so the client upgrades an older formula step by step on decoding; a version it does not know is undecodable.
+
+Search and export requests carry the same tree in the current version, except that every `DateTime` operand becomes `{"at": "<UTC ISO 8601 instant>", "inclusive": <bool>}`, resolved as described in the `DateTime` selector section; `inclusive` turns a bound non-strict:
+
+- `lt`: a date becomes its local midnight, exclusive; a datetime is exclusive.
+- `gt`: a date becomes the next day's local midnight, inclusive; a datetime is exclusive.
+- `between`: the lower bound is inclusive, a date becoming its local midnight; the upper bound is a datetime, inclusive, or a date, becoming the next day's local midnight, exclusive.
+
+The server rejects a request whose formula doesn't follow the schema with an error.
 
 ## Adding a condition: the flow
 
@@ -120,6 +167,8 @@ Describes what happens when a user clicks "Add condition"/"Specify condition" bu
 Important: upon completing each step, the formula should update to show the partially filled condition at its place.
 
 Mid-flow, an outside click or Esc press should trigger cancellation, leading to this condition being removed.
+
+Every step but the first one has a "←" button in its dropdown header. It returns to the previous step with the previous choice still selected, and the partially filled condition in the formula shrinks back accordingly. The second step of the `Bot` selector has it too, leading to the first one. Pressing Backspace in a step whose text inputs (if any) are all empty does the same.
 
 ### 1. First dropdown
 
@@ -169,6 +218,12 @@ As part of it, it may (or may not) feature some value selectors. If it does, tho
 
 Just a value selector dropdown appears.
 
+## Editing a condition
+
+Clicking a property condition pill reruns the flow for it, starting with the step that follows the property choice (2a for parametrized properties, 3aa-3ac otherwise): the property itself cannot be changed, so the user deletes the condition and adds a new one instead. Each step comes pre-filled with the condition's current choice. The pill updates along the way, as during adding; committing the last step replaces the condition, while cancellation restores it as it was before the edit.
+
+Clicking an AND or OR keyword opens a dropdown offering the other one, which keeps the group's subconditions. A switch is allowed if the result still alternates: the new kind must differ from the parent's and from every child's. NOT is never switched, nothing is switched to NOT, and the root AND cannot be switched. A keyword that cannot be switched shows no chevron and is not clickable; in practice, only a group directly under NOT can be switched.
+
 ## Deleting a condition
 
 Each condition has a cross mark in the rightmost part of it. When clicked, it removes the respective condition and makes the formula readjust by removing its row.
@@ -207,7 +262,14 @@ Second step's options are "any", plus difficulties: for Haxaconda Standard, nine
 
 ### DateTime
 
-Calendar widget. Should also allow to set time or opt-out of it. Also should provide an alternative: picking an option from `SingleSelection` filled with predetermined event days: appear as event names, yield event date.
+A calendar dropdown (a full-screen sheet on Narrow). Design: https://claude.ai/artifact/GgKkJwkF9RVXBQCa7PJvdW
+
+- "Calendar" and "Event days" tabs share one fixed-height slot.
+- Calendar: month and year steppers, weeks start on Monday, always 6 rows; days of the neighbouring months are blank. The selected day is outlined, today is marked with a dot.
+- Event days: event names with their dates. Picking one selects its date and switches to the calendar, so a time can still be added.
+- A "Time" checkbox with hours, minutes and seconds fields, greyed in place while unchecked. Each field clamps on losing focus (0-23, 0-59).
+- A hint line saying what the operand resolves to under the chosen operator: "Before 13.06.2024, 00:00", "From 14.06.2024, 00:00", "Through the end of 13.06.2024".
+- The footer shows the value as `DD.MM.YYYY` or `DD.MM.YYYY HH:MM:SS` and the Confirm button, disabled until a day is picked.
 
 A `DateTime` operand is either a date or a date with a time, both without a timezone. They read the same to every viewer and mean that viewer's wall-clock time: a shared "13.06" filter means 13.06 for whoever opens it, so viewers in different timezones may get slightly different results. Stored filters keep operands in this form.
 
@@ -220,6 +282,8 @@ Event days are dates, hardcoded on the client-side in a JSON resource file.
 ### Duration
 
 May have been just a number input field (for seconds or ms), but, for the sake of better UX, uses a separate selector widget, allowing users to set hours, minutes, seconds independently. In addition, certain properties may restrict the assignable units and their admissible range.
+
+The widget is a row of number fields, one per assignable unit, largest unit first, each followed by its unit label ("1 h 30 m 0 s"). Units the property doesn't allow are not shown. A field clamps its value on losing focus: the fields below the largest one to their unit's natural range (0-999 ms, 0-59 s, 0-59 m, 0-23 h, 0-29 days), and the total to the property's admissible range.
 
 At its widest choice (which practically should never happen), allows to set these units:
 - milliseconds
@@ -295,9 +359,17 @@ Sole equality condition properties:
 Provisional:
 - `arrangement` (will have a very special selector and unique conditions)
 
+### Server-side evaluation
+
+The properties not stored on the `game` row are computed in the search query from existing tables and indexes, with no extra columns. The server builds each expression once and reuses it for filtering, sorting, the result columns and the XLSX export, so that they never disagree. `:now` is read once per request.
+
+- `ended_at`: `LEFT JOIN gameoutcome` by its primary key `game_id`; ended games only have a row. The same join serves `result`, `winner`, `outcome` and `duration` (`COALESCE(game_ended_at, :now) - started_at`).
+- `move_cnt`: `COALESCE((SELECT MAX(live_ply_index) + 1 FROM gameplyevent WHERE game_id = game.id), 0)`, answered by one dive into the `uq_live_ply (game_id, live_ply_index)` index per game. `live_ply_index` is a virtual generated column, so the query must name it rather than `ply_index` with `is_cancelled = 0` for MySQL to use the index; to be confirmed with `EXPLAIN`. Should it fall short, a `ply_cnt` column on `game`, set alongside `latest_sip` on ply and rollback, replaces the subquery.
+- `time_left`: the game's latest `gametimeupdate` (`SELECT MAX(id) ... WHERE game_id = game.id`, one dive into the foreign key index), joined by its primary key. A game's end writes a final `GAME_ENDED` update with no ticking side, so the same rule covers ended and ongoing games: `white_ms - IF(ticking_side = 'white' AND updated_at IS NOT NULL, TIMESTAMPDIFF(MICROSECOND, updated_at, :now) DIV 1000, 0)`, the same for black, as `GameTimeUpdate.get_actual_time_remainders` does. A player parameter picks the side by `white_player_ref`/`black_player_ref`. Legacy games without time updates yield null, which is UNKNOWN.
+
 ## Implicit restrictions
 
-Will be better off explicitly highlighted to a user to keep them informed.
+A pill whose condition implies any of them shows a small info icon to the left of its cross. The icon's tooltip names the restrictions, for example "Also excludes correspondence games".
 
 These apply only to the games subject to this condition. So, for example, a complex condition `initial_time > 20s OR time_control_kind IN ('CORRESPONDENCE',)` WILL include correspondence games, because implicit exclusion applies only to the first OR operand.
 
@@ -325,7 +397,7 @@ They may (and usually do) require operands (values) to be provided, their expect
 - `>` (`T`)
 - `<=` (`T`)
 - `>=` (`T`)
-- `=` (`T`) - has a special behaviour for duration: compares by rounding down to the lowest assignable unit
+- `=` (`T`) - only available for Int, not duration
 - BETWEEN (`T`;`T`)
 - UNKNOWN - but only if this specific property allows it
 
@@ -341,6 +413,21 @@ NONE YET
 
 Important: in X block, recursive condition X appears disabled and, hence, cannot be selected. For example, in NOT block, among recursive conditions, one may only choose AND/OR. In AND block - only OR/NOT. Et cetera.
 
+## Formula limits
+
+The formula is capped, with the caps being constants shared by the client and the server:
+
+- Nesting depth: 8 recursive layers (AND/OR/NOT), the root AND included.
+- Leaf conditions: 50.
+- Total nodes (leaves and recursive conditions): 100.
+- Values per `MultiSelection` leaf: 100 (all `opening` values must fit).
+- `opening` and `starting_position` leaves (later `arrangement`), being the costly ones: 10 in total.
+- Serialized formula: 8 KB, checked before parsing.
+
+Both sides enforce them. The formula box disables the "Add condition"/"Specify condition" buttons, the recursive conditions and the `MultiSelection` options that would exceed a cap, explaining why in a tooltip. The server rejects an exceeding search or export with an error, shown as an error notification.
+
+A formula exceeding a cap (handcrafted, or saved before a cap was lowered) counts as unreadable (see "Formula in the URL").
+
 # Result presentation
 
 A paginated table, whose contents (not pagination controls, those sit outside) are a horizontal scrollview (vertically occupies all the needed space).
@@ -348,6 +435,10 @@ A paginated table, whose contents (not pagination controls, those sit outside) a
 Above the table, right-aligned, sits an "Export as XLSX" button with an Excel icon. It opens an export options overlay. Right now, only one option is available: a checkbox for including move columns.
 
 Submitting the overlay sends a request to the game server making it query the whole result set from the database, convert it to xlsx and respond with a file so that a file download on the client-side will start. If move columns are set to be included, several columns are appended to the right of the usual ones: starting from "Move 1" up to "Move X", where X is the maximum move count in the queried game set; every column holds a notation string of the respective ply in the game (obviously, ply i becomes move i+1, because plies use 0-based indexing). For a game with move count equal to M < X, all columns starting from the "Move M+1" one and further to the right up until the last one should remain blank.
+
+The response is synchronous: the server streams the file as it writes it. The size is not a concern even with move columns: few tens of thousands of games with ~60 plies typical is roughly 2M cells. Submitting closes the overlay; the "Export as XLSX" button then shows a spinner and stays disabled until the download starts or the request fails, the latter resulting in an error notification.
+
+Datetimes and durations are native Excel values, not `DD:HH:MM:SS` strings, so that they sort and sum in Excel. Excel datetimes have no timezone, so the request carries the locale and the viewer's IANA timezone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), and the server writes the viewer's local time. Moves are written in the notation by the server-side serializer (`board/serializers/notation.py`), kept equivalent to the client's (see "Other fixes required").
 
 Important: all text occurrences in cell values should be selectable.
 
@@ -396,70 +487,13 @@ The table indicates that the results are stale by a small notice label above it.
 
 # Open questions
 
-1. Editing conditions
-
-Conditions should be editable by clicking them in a formula box. The exact specifics of the behaviour are yet to be designed, though.
-
-2. Calendar widget
-
-Its design is described declaratively, as a set of requirements. The exact implementation is undecided.
-
-3. Duration widget
-
-Same for this, though it's a bit simpler to design.
-
-4. Notifying the user when the implicit restriction is active
-
-Not designed, and difficult to fit organically without breaking and/or overcomplicating the layout.
-
-5. Ellipsis for long conditions
-
-What are the rules for applying it?
-
-6. Filter DTO and storage format
-
-How is the filter passed to the game search endpoint? How is it stored in a database column?
-
-Partially settled: saved filters and URL fragments share one formula schema, with `DateTime` operands that carry no timezone. The database stores it as JSON, the URL fragment as base64 of that JSON. Search and export requests carry the same tree with `DateTime` operands resolved into UTC instants and strict/non-strict comparisons (see the `DateTime` selector). The exact schema is still open.
-
-The schema is versioned from the start: every serialized formula carries its schema version, since the vocabulary moves (`elo_kind` became `elo_provisional`, `starting_position` will be superseded by `arrangement`, the bot roster and the opening book will change). Stored filters are migrated on the server along with its DB migrations, so the server always returns the current version. URL fragments cannot be migrated, so the client upgrades an older formula step by step on decoding; a version it does not know is undecodable.
-
-Opening values reference stable opening ids, since neither names nor codes are unique (A2 and U2 are both "Central Aggressor Opening"; `P1` is shared by four openings).
-
-7. Result presentation: including/excluding columns, sorting
+1. Result presentation: including/excluding columns, sorting
 
 Design missing.
 
-8. Export as XLSX implementation on the server-side
-
-Can it be simplistic? Or will some queries take a lot of time and need to implement the HTTP 202 async report generation pattern? If the latter, then how it should be wired on the frontend to keep UX intuitive and convenient? And how the server will make sure it won't get overloaded by such requests (either in number or in weight)?
-
-Also: will including move columns have detrimental implications?
-
-For information: we assert that the total amount of games will never exceed few tens of thousands and that the maximum move (ply) count will always lay below 500, with 95% of games ending in a two-digit number of plies.
-
-Partially settled:
-
-- Size, move columns included, is fine: few tens of thousands of games with ~60 plies typical is roughly 2M cells, written in a streaming mode.
-- Datetimes and durations are native Excel values, not `DD:HH:MM:SS` strings, so that they sort and sum in Excel.
-- The request carries the locale and the viewer's IANA timezone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), since the server builds the file: Excel datetimes have no timezone, so the server writes the viewer's local time.
-- Moves are written in the notation by the server-side serializer (`board/serializers/notation.py`), kept equivalent to the client's (see "Other fixes required").
-
-Still open: synchronous response or the async pattern, and protection from overload (see the "Search load protection" proposal).
-
-9. Mobile-readiness
+2. Mobile-readiness
 
 All the components discussed should be convenient to use on mobile. Special care is needed to satisfy this condition. Anchors are, for instance, one of the hardest elements to get done correctly.
-
-10. Missing properties
-
-Example: `move_cnt`, `ended_at`, `time_left`.
-
-They may be costly as they need a join with another table or even subquery. This needs addressing.
-
-11. 'Back' button in the condition addition flow
-
-Probably there should be a way to return to the previous step of the flow, but I cannot design it.
 
 # Other fixes required
 
@@ -472,17 +506,3 @@ If they are not equivalent and the server's version will be updated, the prod da
 2. Notation
 
 The server-side notation serializer (`board/serializers/notation.py`) should be kept equivalent to the client's one by the same kind of equivalence test, since the XLSX export writes moves with it.
-
-# Review proposals
-
-Not accepted yet. Each one either changes a section above or feeds an open question.
-
-## 1. Duration comparisons
-
-Every operator compares the stored value truncated to the lowest assignable unit, not just `=`. Otherwise a 5:30 game matches `= 5m` but not `<= 5m`.
-
-## 2. Search load protection
-
-Guests may send arbitrarily heavy formulas and exports. Each search that times out still holds a DB connection for the whole time limit, so a few parallel ones may exhaust the pool the game server relies on.
-
-Proposal: a separate connection pool (or a semaphore) for searches, a cap on formula size and depth, and per-client rate limits. The backlog's "Spammable timeout check" is the same class of problem.
