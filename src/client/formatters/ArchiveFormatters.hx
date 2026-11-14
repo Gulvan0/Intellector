@@ -3,6 +3,7 @@ package client.formatters;
 import client.datatypes.game.Outcome;
 import client.datatypes.games.ConditionOperator;
 import client.datatypes.games.ConditionParameter;
+import client.datatypes.games.DateTimeBound;
 import client.datatypes.games.EqualityValue;
 import client.datatypes.games.GameProperty;
 import client.datatypes.games.LocalDateTime;
@@ -24,8 +25,9 @@ class ArchiveFormatters
 {
     private static inline final ANACONDA_NAME:String = "Anaconda";
     private static inline final MIN_DAYS_IN_WHOLE_DAYS:Int = 5;
+    private static inline final MIDNIGHT:String = "00:00";
 
-    /** `D:HH:MM:SS` in whole seconds, the leading zero components stripped: `3`, `5:00`, `1:02:03` **/
+    /** `D:HH:MM:SS` in whole seconds, the leading zero components stripped down to `M:SS`: `0:03`, `5:00`, `1:02:03` **/
     public static function clock(ms:Float):String
     {
         var totalSeconds:Float = Math.ffloor(ms / 1000);
@@ -35,13 +37,13 @@ class ArchiveFormatters
             Std.int(totalSeconds / 60) % 60,
             Std.int(totalSeconds % 60)
         ];
-        while (components.length > 1 && components[0] == 0)
+        while (components.length > 2 && components[0] == 0)
             components.shift();
         return [for (i in 0...components.length) i == 0 ? Std.string(components[i]) : Std.string(components[i]).lpad("0", 2)].join(":");
     }
 
-    /** A game's duration: whole days from `MIN_DAYS_IN_WHOLE_DAYS` days on (`7 days`), `clock` below **/
-    public static function gameDuration(ms:Float):String
+    /** Whole days from `MIN_DAYS_IN_WHOLE_DAYS` days on (`7 days`), `clock` below **/
+    public static function duration(ms:Float):String
     {
         var days:Int = Std.int(ms / 86400000);
         if (days < MIN_DAYS_IN_WHOLE_DAYS)
@@ -56,6 +58,26 @@ class ArchiveFormatters
         if (value.time == null)
             return date;
         return '$date ${pad(value.time.hours)}:${pad(value.time.minutes)}:${pad(value.time.seconds)}';
+    }
+
+    /** What a `DateTime` operand resolves to as `bound`: `Before 13.06.2024, 00:00`; asks for a day while there is none **/
+    public static function resolvedBound(value:Null<LocalDateTime>, bound:DateTimeBound):String
+    {
+        if (value == null)
+            return resolve("intellector.games.step.date.pick_day");
+
+        var date:String = localDateTime(new LocalDateTime(value.year, value.month, value.day));
+        var time:Null<String> = value.time != null ? '${pad(value.time.hours)}:${pad(value.time.minutes)}:${pad(value.time.seconds)}' : null;
+        var key:String = switch [bound, time != null] {
+            case [Before, _]: "before";
+            case [After, true]: "after";
+            case [After, false]: "from_next";
+            case [FromInclusive, _]: "from_inclusive";
+            case [UpToInclusive, true]: "up_to_inclusive";
+            case [UpToInclusive, false]: "through_end";
+        }
+        var shownDate:String = bound == After && time == null ? nextDay(value) : date;
+        return LocaleUtils.resolveText(LocaleUtils.localeBinding('intellector.games.step.date.resolved.$key'), shownDate, time ?? MIDNIGHT);
     }
 
     public static function propertyName(property:GameProperty):String
@@ -86,9 +108,11 @@ class ArchiveFormatters
         }
     }
 
-    /** `<`, `≥`, or a word for BETWEEN and UNKNOWN **/
-    public static function operatorSymbol(conditionOperator:ConditionOperator):String
+    /** `<`, `≥`, or a word for BETWEEN and UNKNOWN; `compact` gives `?` for UNKNOWN, as the operator list shows it **/
+    public static function operatorSymbol(conditionOperator:ConditionOperator, compact:Bool = false):String
     {
+        if (compact && conditionOperator == UNKNOWN)
+            return "?";
         return switch conditionOperator {
             case LT: "<";
             case GT: ">";
@@ -110,7 +134,7 @@ class ArchiveFormatters
     {
         return switch operand {
             case DateTimeValue(value): localDateTime(value);
-            case DurationValue(ms): clock(ms);
+            case DurationValue(ms): duration(ms);
             case IntValue(value): Std.string(value);
         }
     }
@@ -180,6 +204,12 @@ class ArchiveFormatters
     private static function resolve(key:String):String
     {
         return LocaleUtils.resolveText(LocaleUtils.localeBinding(key));
+    }
+
+    private static function nextDay(value:LocalDateTime):String
+    {
+        var next:Date = new Date(value.year, value.month - 1, value.day + 1, 0, 0, 0);
+        return localDateTime(new LocalDateTime(next.getFullYear(), next.getMonth() + 1, next.getDate()));
     }
 
     private static function pad(value:Int):String

@@ -98,7 +98,7 @@ Right-aligned sits accent-tinted "Search" button, which finalizes the filters, r
 
 ### Saved filter storage
 
-On the server-side, the filters are stored in a table with a surrogate id primary key. Filters saved by users are unique by (author, name). Authorless filters are managed by the server and have no author, but have a unique fixed ASCII key used in their links. In the very first iteration, two authorless filters will be defined: `Ongoing games` (key `ongoing`) for `Result = Still Ongoing` condition and `Game archive` (key `archive`) for `NOT Result = Still Ongoing` condition.
+On the server-side, the filters are stored in a table with a surrogate id primary key. Filters saved by users are unique by (author, name). Authorless filters are managed by the server and have no author, but have a unique fixed ASCII key used in their links. In the very first iteration, two authorless filters will be defined: `Ongoing games` (key `ongoing`) for `Result = Still Ongoing` condition and `Game archive` (key `archive`) for `NOT Result = Still Ongoing AND NOT Outcome = Aborted` condition.
 
 Names are compared case- and accent-insensitively, as the DB collation does: `Foo`, `foo` and `Fóo` are the same name. The overwrite confirmation check uses the same comparison, so a save never fails on the key constraint instead of asking to overwrite.
 
@@ -440,7 +440,7 @@ The response is synchronous: the server streams the file as it writes it. The si
 
 Datetimes and durations are native Excel values, not `DD:HH:MM:SS` strings, so that they sort and sum in Excel. Excel datetimes have no timezone, so the request carries the locale and the viewer's IANA timezone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), and the server writes the viewer's local time. The request also carries the game URL template for the `Link` column (the client's own `?p=live/{game_id}` URL, built from its origin), so the server holds no frontend address. Moves are written in the notation by the server-side serializer (`board/serializers/notation.py`), kept equivalent to the client's (see "Other fixes required").
 
-Important: all text occurrences in cell values should be selectable.
+Important: all text occurrences in cell values should be selectable with a mouse. On touch devices, a drag over the table scrolls it (both ways) instead of selecting.
 
 Column list should be customizable: a user must be able to toggle the inclusion of each individual column. The column roster also propagates to exported XLSX spreadsheet.
 
@@ -456,18 +456,18 @@ All available columns, in order (sorting, even arbitrary one, implies grouping r
 - `Black ELO` - black player ELO formatted as usual (e.g. with ? for provisional) if rated; if unrated, dash; hidden by default
 - `Started at` - datetime in a usual frontend format used elsewhere (e. g. datetime in a game info card)
 - `Ended at` - datetime in a usual frontend format used elsewhere (e. g. datetime in a game info card); dash for ongoing games; hidden by default
-- `Duration` - duration in a "DD:HH:MM:SS" format, with leading zero components stripped; from 5 days on, whole days instead ("7 days"); for ongoing games, elapsed time as of the search request
+- `Duration` - duration in a "DD:HH:MM:SS" format, with leading zero components stripped down to "M:SS" ("0:30"); from 5 days on, whole days instead ("7 days"); for ongoing games, elapsed time as of the search request
 - `Time control` - time control kind prepended with its icon
-- `Start time` - time control's start time in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games
-- `Bonus time` - time control's bonus time in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games
+- `Start time` - time control's start time in the same format as `Duration`; dash for correspondence games
+- `Bonus time` - time control's bonus time in the same format as `Duration`; dash for correspondence games
 - `Rated` - "Yes"/"No"; sorting is arbitrary, but deterministic
 - `Starting position` - "Default" if default, otherwise, SIP with "Preview" button sitting to the right and acting like similar buttons in ongoing game and challenge menubar widgets; hidden by default
 - `Result` - "White won"/"Black won"/"Draw"/"Still ongoing"; sorting is arbitrary, but deterministic
 - `Outcome` - outcome kind presented the same as on the game cards in player profile and main pages; dash if the game is still ongoing; sort is arbitrary as long as all drawish outcomes follow all decisive ones, but must be deterministic (declaration order in the server-side enum will do just fine)
 - `Opening` - opening name; sorting sorts by code; it may not match the opening filter (for example, if the actual opening is the subvariation of an opening used in the filter), but that's intended; hidden by default
 - `Move count` - move count as an integer; hidden by default
-- `Time left (White)` - remaining time for white player in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games; does not update live for ongoing games; equals time reserve at the moment the game ended for past games; hidden by default
-- `Time left (Black)` - remaining time for black player in a "DD:HH:MM:SS" format, with leading zero components stripped; dash for correspondence games; does not update live for ongoing games; equals time reserve at the moment the game ended for past games; hidden by default
+- `Time left (White)` - remaining time for white player in the same format as `Duration`; dash for correspondence games; does not update live for ongoing games; equals time reserve at the moment the game ended for past games; hidden by default
+- `Time left (Black)` - remaining time for black player in the same format as `Duration`; dash for correspondence games; does not update live for ongoing games; equals time reserve at the moment the game ended for past games; hidden by default
 
 There is no pre-search state. When a page is first opened, the game list is loaded into the result table (all games for empty filter; games matching the filter if a filter is opened by its link). It then remains there until the user presses the "Search" button.
 
@@ -485,15 +485,13 @@ The table indicates that the results are stale by a small notice label above it.
 
 4. HaxeFolio anchors (used, for example, in ongoing games menubar widget to show the position preview) are how appended option prompts should open (at the very least; probably more components and systems described in this plan doc may benefit from this feature).
 
-# Open questions
+# Columns, sorting and mobile layout
 
-1. Result presentation: including/excluding columns, sorting
+Designed in the canvas (https://claude.ai/artifact/GgKkJwkF9RVXBQCa7PJvdW, `ColumnsSort`, `PageNarrow`, `FlowNarrow`):
 
-Design missing.
-
-2. Mobile-readiness
-
-All the components discussed should be convenient to use on mobile. Special care is needed to satisfy this condition. Anchors are, for instance, one of the hardest elements to get done correctly.
+- A "Columns" dropdown of checkboxes (the last visible column can't be unchecked, "Reset" restores the defaults) beside "Export as XLSX". Column visibility and the sorting are the viewer's own, kept in local storage, not in the URL.
+- Sorting: chips "ID ↓ ×", "then White ↑ ×", up to 3 levels, plus "+ Then by". A header click makes its column the only level, ascending, or flips it if it already is. Removing the last chip restores the default. Default `ID ↓`.
+- Narrow: the filter buttons and Columns/Export sit two to a row, full width, 44 px tall; Search is full width; the condition flow's steps open as full-screen sheets instead of popovers.
 
 # Other fixes required
 

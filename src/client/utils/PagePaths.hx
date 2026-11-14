@@ -14,7 +14,13 @@ class PagePaths
 
     public static function liveGame(gameId:Int):String
     {
-        return 'live/$gameId';
+        return liveGameTemplate(Std.string(gameId));
+    }
+
+    /** `liveGame`'s path with `placeholder` in place of the game's id **/
+    public static function liveGameTemplate(placeholder:String):String
+    {
+        return 'live/$placeholder';
     }
 
     /** The analysis board opened on game `gameId` after `plyCount` plies **/

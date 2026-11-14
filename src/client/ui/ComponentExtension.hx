@@ -19,6 +19,14 @@ class ComponentExtension
     }
 
     /** Maintains `:hover` on a component HaxeUI doesn't maintain it on: anything but its interactive components (Button, CheckBox...) **/
+    /** Fills its parent's width, or sizes to its content again: dropping the percentage alone keeps the last width **/
+    public static function setFillsWidth(component:Component, fill:Bool):Void
+    {
+        component.percentWidth = fill ? 100 : null;
+        if (!fill)
+            component.invalidateComponentLayout();
+    }
+
     public static function trackHover(component:Component):Void
     {
         component.registerEvent(MouseEvent.MOUSE_OVER, _ -> setPseudoClass(component, ":hover", true));

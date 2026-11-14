@@ -28,4 +28,7 @@ enum abstract FailedAction(String) from String to String
     var WATCH_PLAYER = "watch_player";
     var SEARCH_GAMES = "search_games";
     var OPEN_FILTER = "open_filter";
+    var SAVE_FILTER = "save_filter";
+    var DELETE_FILTER = "delete_filter";
+    var EXPORT_GAMES = "export_games";
 }

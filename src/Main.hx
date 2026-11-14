@@ -115,7 +115,7 @@ class Main
             .addNormalMenuItem("play", "open_challenges", NavigateTo(() -> "home"), Assets.menuItemIcon("open_challenges"))
             .addNormalMenuItem("play", "versus_bot", Execute(onVersusBotPressed), Assets.menuItemIcon("versus_bot"))
             .addLeftMenubarItem(NormalMenu("watch", []))
-            .addNormalMenuItem("watch", "current_games", NavigateTo(() -> "home"), Assets.menuItemIcon("current_games"))
+            .addNormalMenuItem("watch", "current_games", Execute(onCurrentGamesPressed), Assets.menuItemIcon("current_games"))
             .addNormalMenuItem("watch", "watch_player", Execute(WatchFlows.presentPlayerSearch), Assets.menuItemIcon("watch_player"))
             .addLeftMenubarItem(NormalMenu("learn", []))
             .addNormalMenuItem("learn", "analysis_board", NavigateTo(() -> "analysis"), Assets.menuItemIcon("analysis_board"))
@@ -183,6 +183,11 @@ class Main
     private static function onVersusBotPressed():Void
     {
         ChallengeCreationFlow.present(ChallengePrefills.versusBot);
+    }
+
+    private static function onCurrentGamesPressed():Void
+    {
+        HaxeFolioApp.navigateTo("games", null, "/ongoing");
     }
 
     private static function onGameArchivePressed():Void

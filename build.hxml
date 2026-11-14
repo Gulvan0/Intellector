@@ -19,3 +19,4 @@ hxconda.hxml
 
 -resource assets/images/common/board/controls/annotate_generic.svg@annotate_generic
 -resource assets/resources/changelog.json@changelog
+-resource assets/resources/event_days.json@event_days

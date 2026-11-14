@@ -1,5 +1,40 @@
 [
     {
+        "date": "2026-11-14",
+        "title": {
+            "en": "Game Database",
+            "ru": "База партий"
+        },
+        "description": {
+            "en": [
+                "What's new:",
+                "- Added the \"Game Database\" page, giving a detailed overview of past and ongoing games",
+                "- Games are filtered by flexible conditions that can be combined in almost any way",
+                "- The results can be sorted by the values of one or several columns",
+                "- The set of columns in the results table can be customized too",
+                "- The list of games matching the filters can be downloaded as XLSX. The sorting and the columns of the downloaded file match the ones chosen on the page",
+                "- The chosen filter conditions can be saved for easy reuse later",
+                "- The chosen filter can also be shared by a link",
+                "- Links to the game archive were added next to the lists of ongoing and recent games on the home page",
+                "Bug fixes:",
+                "- Fixed the opening encoding and name errors introduced by the opening system rework in the \"Snake Pit\" update"
+            ],
+            "ru": [
+                "Что нового:",
+                "- Добавлена страница \"База партий\". Здесь можно получить детальную сводку с информацией по прошедшим и текущим играм",
+                "- Партии фильтруются при помощи гибких условий, которые можно практически произвольно комбинировать",
+                "- Результат можно сортировать по значениям в одной или нескольких колонках",
+                "- Состав колонок в таблице с результатами поиска тоже можно настраивать",
+                "- Список подходящих под фильтры партий можно скачать в формате XLSX. Сортировка и список колонок в скачанном файле будут совпадать с выбранными на странице",
+                "- Выбранные условия фильтрации можно сохранить для легкого дальнейшего использования",
+                "- Также выбранным фильтром можно поделиться по ссылке",
+                "- Рядом со списками текущих и недавних партий на главной странице добавлены ссылки на архив игр",
+                "Исправления ошибок:",
+                "- Исправлены ошибки в кодировке и названиях примумов, появившиеся в результате переработки системы дебютов в обновлении \"Змеиное логово\""
+            ]
+        }
+    },
+    {
         "date": "2026-11-05",
         "title": {
             "en": "Intellector 3.0: Snake Pit Update",

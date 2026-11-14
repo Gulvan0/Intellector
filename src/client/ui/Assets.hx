@@ -49,6 +49,12 @@ class Assets
         return 'assets/images/games/$name.svg';
     }
 
+    /** `user`, `guest` or `bot` **/
+    public static function playerKindIcon(kind:String):String
+    {
+        return 'assets/images/common/player_kinds/$kind.svg';
+    }
+
     public static function analysisIcon(name:String):String
     {
         return 'assets/images/analysis/$name.svg';

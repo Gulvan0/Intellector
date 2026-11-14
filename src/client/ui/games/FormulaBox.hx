@@ -6,16 +6,18 @@ import client.datatypes.games.FormulaNode;
 import client.datatypes.games.GroupKind;
 import client.logic.games.FormulaCaps;
 import client.logic.games.FormulaCaps.FormulaCounts;
+import client.ui.games.flow.KeywordSwitch;
 import haxe.ui.components.Image;
 import haxe.ui.components.Label;
 import haxe.ui.containers.Absolute;
 import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
-import haxe.ui.containers.ScrollView;
 import haxe.ui.containers.VBox;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
 import haxefolio.LocaleUtils;
+import haxefolio.structure.ScrollArea;
+import js.Browser;
 
 using client.ui.ComponentExtension;
 
@@ -30,9 +32,10 @@ class FormulaBox extends VBox
     private static inline final CONNECTOR_WIDTH:Float = 22;
     private static inline final ROW_CENTER:Float = 22; // the 6 px gap above a row plus half its 32 px height
     private static inline final BRANCH_LENGTH:Float = 16;
+    private static inline final TREE_PADDING:Float = 14;
 
     private final tree:VBox;
-    private final scroller:ScrollView;
+    private final scroller:ScrollArea;
     private final countLabel:Label;
     private final toggleLabel:Label;
     private final toggleChevron:Image;
@@ -40,8 +43,17 @@ class FormulaBox extends VBox
     private var root:ConditionGroup = ConditionGroup.emptyRoot();
     private var counts:FormulaCounts;
     private var expanded:Bool = false;
+    private var pills:Map<Condition, ConditionPill> = [];
+    private var addButtons:Map<ConditionGroup, Component> = [];
+    private var keywordSwitch:Null<KeywordSwitch> = null;
+    private var fitPending:Bool = false;
+    /** Refits the pills as the tree and they change size **/
+    private final sizeObserver:Dynamic;
 
-    /** After a deletion changed the formula **/
+    /** The condition being added or edited, its pill highlighted; re-rendering is the caller's **/
+    public var editing:Null<Condition> = null;
+
+    /** After a deletion or a keyword switch changed the formula **/
     public var onChanged:Void->Void = () -> {};
     /** "Add condition" or "Specify condition" pressed: the group to add to, the pressed button **/
     public var onAddRequested:(ConditionGroup, Component)->Void = (_, _) -> {};
@@ -58,13 +70,12 @@ class FormulaBox extends VBox
         tree.percentWidth = 100;
         tree.addClass(StyleClass.GAMES_FORMULA_TREE);
 
-        scroller = new ScrollView();
-        scroller.percentWidth = 100;
+        sizeObserver = js.Syntax.code("new ResizeObserver({0})", (_:Array<Dynamic>) -> scheduleFit());
+        sizeObserver.observe(tree.element);
+
+        scroller = new ScrollArea(tree);
         scroller.height = COLLAPSED_HEIGHT;
-        scroller.scrollMode = NATIVE;
-        scroller.percentContentWidth = 100;
         scroller.addClass(StyleClass.GAMES_FORMULA_SCROLLER);
-        scroller.addComponent(tree);
         addComponent(scroller);
 
         var footer:HBox = new HBox();
@@ -108,12 +119,52 @@ class FormulaBox extends VBox
     public function render():Void
     {
         counts = FormulaCaps.count(root);
+        pills = [];
+        addButtons = [];
+        closeKeywordSwitch();
+        sizeObserver.disconnect();
+        sizeObserver.observe(tree.element);
         tree.removeAllComponents();
 
-        tree.addComponent(keywordRow(root, true));
+        tree.addComponent(keywordRow(root, null));
         tree.addComponent(childrenColumn(root, 1));
 
         countLabel.text = LocaleUtils.localeBinding("intellector.games.formula.count", Std.string(counts.leaves), Std.string(FormulaCaps.MAX_LEAVES));
+        scheduleFit();
+    }
+
+    /** Fits the pills into the tree's width once it is laid out **/
+    private function scheduleFit():Void
+    {
+        if (fitPending)
+            return;
+        fitPending = true;
+        Browser.window.requestAnimationFrame(_ -> {
+            fitPending = false;
+            var right:Float = tree.element.getBoundingClientRect().right - TREE_PADDING;
+            for (pill in pills)
+                pill.fit(right - pill.element.getBoundingClientRect().left);
+        });
+    }
+
+    /** The pill of `condition`, as last rendered **/
+    public function pillOf(condition:Condition):Component
+    {
+        return pills.get(condition);
+    }
+
+    /** The "Add condition" button of `group`, or the "Specify condition" one of a NOT, as last rendered **/
+    public function addButtonOf(group:ConditionGroup):Component
+    {
+        return addButtons.get(group);
+    }
+
+    /** Closes the keyword switch dropdown, if open **/
+    public function closeKeywordSwitch():Void
+    {
+        if (keywordSwitch != null)
+            keywordSwitch.close();
+        keywordSwitch = null;
     }
 
     private function setExpanded(expanded:Bool):Void
@@ -203,7 +254,7 @@ class FormulaBox extends VBox
             case Group(group):
                 var content:VBox = new VBox();
                 content.addClass(StyleClass.GAMES_FORMULA_GROUP);
-                var row:HBox = keywordRow(group, false);
+                var row:HBox = keywordRow(group, parent);
                 content.addComponent(row);
 
                 var inlineChild:Null<FormulaNode> = group.kind == NOT ? group.children[0] : null;
@@ -220,20 +271,79 @@ class FormulaBox extends VBox
         }
     }
 
-    /** A group's keyword with the cross deleting the group, or the root's bare keyword **/
-    private function keywordRow(group:ConditionGroup, isRoot:Bool):HBox
+    /** A group's keyword with the cross deleting the group, or the root's (`parent` null) bare keyword **/
+    private function keywordRow(group:ConditionGroup, parent:Null<ConditionGroup>):HBox
     {
         var row:HBox = createRow();
 
-        var keyword:Label = new Label();
-        keyword.text = keywordText(group.kind);
-        keyword.addClass(isRoot ? StyleClass.GAMES_KEYWORD_ROOT : StyleClass.GAMES_KEYWORD);
+        if (parent == null)
+        {
+            var rootKeyword:Label = new Label();
+            rootKeyword.text = keywordText(group.kind);
+            rootKeyword.addClass(StyleClass.GAMES_KEYWORD_ROOT);
+            rootKeyword.verticalAlign = "center";
+            row.addComponent(rootKeyword);
+            return row;
+        }
+
+        var keyword:HBox = new HBox();
+        keyword.addClass(StyleClass.GAMES_KEYWORD);
         keyword.verticalAlign = "center";
+        var label:Label = new Label();
+        label.text = keywordText(group.kind);
+        label.addClass(StyleClass.GAMES_KEYWORD_TEXT);
+        label.verticalAlign = "center";
+        keyword.addComponent(label);
         row.addComponent(keyword);
 
-        if (!isRoot)
-            row.addComponent(ConditionPill.createDeleteButton(StyleClass.GAMES_GROUP_CROSS, () -> delete(Group(group))));
+        var target:Null<GroupKind> = switchTarget(group, parent);
+        if (target != null)
+        {
+            var chevron:Image = new Image();
+            chevron.resource = Assets.gamesIcon("keyword_chevron");
+            chevron.verticalAlign = "center";
+            keyword.addComponent(chevron);
+            keyword.addClass(StyleClass.GAMES_KEYWORD_SWITCHABLE);
+            keyword.trackHover();
+            keyword.registerEvent(MouseEvent.CLICK, _ -> openKeywordSwitch(group, target, keyword));
+        }
+
+        row.addComponent(ConditionPill.createDeleteButton(StyleClass.GAMES_GROUP_CROSS, () -> delete(Group(group))));
         return row;
+    }
+
+    /**
+        The kind an AND or OR may be switched to, keeping the formula alternating: unlike its parent and
+        every child group. Null for NOT and for a group that can't be switched.
+    **/
+    private static function switchTarget(group:ConditionGroup, parent:ConditionGroup):Null<GroupKind>
+    {
+        var target:Null<GroupKind> = switch group.kind {
+            case AND: OR;
+            case OR: AND;
+            default: null;
+        }
+        if (target == null || parent.kind == target)
+            return null;
+        for (child in group.children)
+            switch child
+            {
+                case Group(subgroup) if (subgroup.kind == target):
+                    return null;
+                default:
+            }
+        return target;
+    }
+
+    private function openKeywordSwitch(group:ConditionGroup, target:GroupKind, keyword:Component):Void
+    {
+        closeKeywordSwitch();
+        keywordSwitch = new KeywordSwitch(this, keyword, target, () -> {
+            keywordSwitch = null;
+            group.kind = target;
+            render();
+            onChanged();
+        }, () -> keywordSwitch = null);
     }
 
     private function createRow():HBox
@@ -247,6 +357,9 @@ class FormulaBox extends VBox
     {
         var pill:Null<ConditionPill> = null;
         pill = new ConditionPill(condition, edited -> onEditRequested(edited, pill), _ -> delete(Leaf(condition)));
+        pill.setClass(StyleClass.GAMES_PILL_EDITING, condition == editing);
+        pills.set(condition, pill);
+        sizeObserver.observe(pill.element);
         return pill;
     }
 
@@ -269,6 +382,7 @@ class FormulaBox extends VBox
         label.verticalAlign = "center";
         button.addComponent(label);
 
+        addButtons.set(group, button);
         if (blockingCap != null)
         {
             button.addClass(StyleClass.GAMES_ADD_BUTTON_DISABLED);

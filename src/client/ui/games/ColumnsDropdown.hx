@@ -23,6 +23,7 @@ class ColumnsDropdown extends Box
     private static inline final POPUP_WIDTH:Float = 280;
 
     private final popup:AnchoredPopup;
+    private final button:Box;
     private final chevron:Image;
     private final boxes:Map<ResultColumn, Box> = [];
 
@@ -35,26 +36,32 @@ class ColumnsDropdown extends Box
     {
         super();
 
-        var button:HBox = new HBox();
+        button = new Box();
         button.addClass(StyleClass.GAMES_BUTTON);
         button.trackHover();
         addComponent(button);
 
+        var content:HBox = new HBox();
+        content.addClass(StyleClass.GAMES_BUTTON_CONTENT);
+        content.horizontalAlign = "center";
+        content.verticalAlign = "center";
+        button.addComponent(content);
+
         var icon:Image = new Image();
         icon.resource = Assets.gamesIcon("columns");
         icon.verticalAlign = "center";
-        button.addComponent(icon);
+        content.addComponent(icon);
 
         var label:Label = new Label();
         label.text = LocaleUtils.localeBinding("intellector.games.columns.button");
         label.addClass(StyleClass.GAMES_BUTTON_TEXT);
         label.verticalAlign = "center";
-        button.addComponent(label);
+        content.addComponent(label);
 
         chevron = new Image();
         chevron.resource = Assets.gamesIcon("chevron_down");
         chevron.verticalAlign = "center";
-        button.addComponent(chevron);
+        content.addComponent(chevron);
 
         popup = new AnchoredPopup(this, POPUP_WIDTH, End);
         popup.onClosed = () -> chevron.resource = Assets.gamesIcon("chevron_down");
@@ -88,6 +95,13 @@ class ColumnsDropdown extends Box
             popup.toggle();
             chevron.resource = Assets.gamesIcon(popup.isOpen ? "chevron_up" : "chevron_down");
         });
+    }
+
+    /** Whether the button fills the dropdown's width, set by its owner **/
+    public function setFill(fill:Bool):Void
+    {
+        this.setFillsWidth(fill);
+        button.setFillsWidth(fill);
     }
 
     public function setVisible(columns:Array<ResultColumn>):Void

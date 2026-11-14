@@ -20,15 +20,22 @@ using client.ui.ComponentExtension;
 /**
     A property condition in the formula box: what it tests, a click target for editing it, an info
     icon naming its implicit restrictions and a cross deleting it. A partially filled condition
-    trails off with an ellipsis.
+    trails off with an ellipsis, and so does a value list too long for the room given by `fit`.
 **/
 class ConditionPill extends HBox
 {
     /** Values shown before the rest are summed up as "+N more" **/
     private static inline final SHOWN_VALUES:Int = 3;
+    private static inline final MIN_VALUES_WIDTH:Float = 48;
 
     private final condition:Condition;
     private final main:HBox;
+    /** The values and "+N more", each in a label of its own **/
+    private final valueParts:Array<Label> = [];
+    /** The same in one label, cut to fit; shown instead of `valueParts` while they don't fit **/
+    private var compactValues:Null<Label> = null;
+    /** The pill's width with every value part shown, measured before compacting **/
+    private var naturalWidth:Null<Float> = null;
 
     /** `onEdit` and `onDelete` get the pill's condition **/
     public function new(condition:Condition, onEdit:Condition->Void, onDelete:Condition->Void)
@@ -74,6 +81,36 @@ class ConditionPill extends HBox
         cross.verticalAlign = "center";
         button.addComponent(cross);
         return button;
+    }
+
+    /** Cuts the value list with an ellipsis while the pill is wider than `maxWidth`, restores it once there is room **/
+    public function fit(maxWidth:Float):Void
+    {
+        if (compactValues == null)
+            return;
+
+        var compact:Bool = !compactValues.hidden;
+        if (!compact)
+            naturalWidth = element.getBoundingClientRect().width;
+        if (naturalWidth == null || naturalWidth <= maxWidth)
+        {
+            if (compact)
+                setCompact(false);
+            return;
+        }
+
+        var valuesWidth:Float = compact ? compactValues.element.getBoundingClientRect().width : spanWidth(valueParts);
+        var otherWidth:Float = element.getBoundingClientRect().width - valuesWidth;
+        compactValues.width = Math.max(MIN_VALUES_WIDTH, maxWidth - otherWidth);
+        if (!compact)
+            setCompact(true);
+    }
+
+    private function setCompact(compact:Bool):Void
+    {
+        compactValues.hidden = !compact;
+        for (part in valueParts)
+            part.hidden = compact;
     }
 
     private function fillMain():Void
@@ -132,17 +169,37 @@ class ConditionPill extends HBox
             var value:EqualityValue = shown[i];
             var last:Bool = i == shown.length - 1;
             var label:Label = addText(() -> ArchiveFormatters.valueText(value) + (last ? "" : ","), StyleClass.GAMES_PILL_VALUE);
-            var style:CSSStyleDeclaration = label.getTextDisplay().element.style;
-            style.overflow = "hidden";
-            style.textOverflow = "ellipsis";
+            cutWithEllipsis(label);
+            valueParts.push(label);
         }
 
         var hiddenCount:Int = condition.values.length - shown.length;
+        var more:Void->String = () -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.games.pill.more", Std.string(hiddenCount)));
         if (hiddenCount > 0)
         {
-            addText(() -> LocaleUtils.resolveText(LocaleUtils.localeBinding("intellector.games.pill.more", Std.string(hiddenCount))), StyleClass.GAMES_PILL_MORE);
+            valueParts.push(addText(more, StyleClass.GAMES_PILL_MORE));
             LocaleManager.instance.registerComponent(this, "tooltip", () -> condition.values.map(ArchiveFormatters.valueText).join("\n"));
         }
+
+        compactValues = addText(() -> {
+            var text:String = shown.map(ArchiveFormatters.valueText).join(", ");
+            return hiddenCount > 0 ? '$text ${more()}' : text;
+        }, StyleClass.GAMES_PILL_VALUES_COMPACT);
+        cutWithEllipsis(compactValues);
+        compactValues.hidden = true;
+    }
+
+    /** From the left edge of the first of `parts` to the right edge of the last **/
+    private static function spanWidth(parts:Array<Label>):Float
+    {
+        return parts[parts.length - 1].element.getBoundingClientRect().right - parts[0].element.getBoundingClientRect().left;
+    }
+
+    private static function cutWithEllipsis(label:Label):Void
+    {
+        var style:CSSStyleDeclaration = label.getTextDisplay().element.style;
+        style.overflow = "hidden";
+        style.textOverflow = "ellipsis";
     }
 
     private function addText(text:Void->String, styleClass:StyleClass):Label

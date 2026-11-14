@@ -25,8 +25,111 @@
     vertical-spacing: 10px;
 }
 
+.intellector-games-filter-bar {
+    vertical-spacing: 10px;
+}
+
+.intellector-games-filter-top-row {
+    horizontal-spacing: 14px;
+}
+
 .intellector-games-filter-title {
     horizontal-spacing: 6px;
+}
+
+.intellector-games-filter-buttons,
+.intellector-games-results-narrow-buttons {
+    horizontal-spacing: 10px;
+    vertical-spacing: 10px;
+}
+
+.intellector-games-results-narrow-buttons {
+    padding-top: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.intellector-games-open-list {
+    padding: 8px;
+    vertical-spacing: 0;
+}
+
+.intellector-games-open-state {
+    height: 80px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+/* Dialogs */
+
+.intellector-games-dialog-body {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+}
+
+.intellector-games-dialog-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+.intellector-games-export-content {
+    vertical-spacing: 10px;
+}
+
+.intellector-games-export-summary {
+    padding: 12px;
+    vertical-spacing: 6px;
+    background-color: #f0ebe2;
+    border-radius: 5px;
+}
+
+.intellector-games-export-name {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+.intellector-games-export-value {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-games-export-hint {
+    padding-left: 30px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+}
+
+/* Export button */
+
+.intellector-games-export-button {
+    background-color: #e4eae1;
+    border-color: #a2c1ac;
+}
+
+.intellector-games-export-button:hover {
+    background-color: #d7e2d6;
+    border-color: #77a78a;
+}
+
+.intellector-games-export-button-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #185c37;
+    word-wrap: false;
+}
+
+.intellector-games-export-button-busy,
+.intellector-games-export-button-busy:hover {
+    background-color: #e4eae1;
+    border-color: #a2c1ac;
+    cursor: default;
+    opacity: 0.7;
 }
 
 .intellector-games-filter-name {
@@ -57,6 +160,15 @@
 
 .intellector-games-button {
     height: 37px;
+}
+
+.intellector-games-button-content {
+    horizontal-spacing: 6px;
+}
+
+.intellector-games-narrow .intellector-games-button,
+.intellector-games-narrow .intellector-games-search-button {
+    height: 44px;
 }
 
 .intellector-games-small-button {
@@ -170,17 +282,30 @@
 
 .intellector-games-keyword {
     height: 28px;
-    padding-top: 6px;
     padding-left: 10px;
     padding-right: 10px;
+    horizontal-spacing: 4px;
     background-color: #f0ebe2;
     border: 1px solid #d8cfc0;
     border-radius: 5px;
+}
+
+.intellector-games-keyword-text {
     font-name: $ui-family-semibold;
     font-size: 13px;
     font-weight: 600;
     color: #2a211a;
     word-wrap: false;
+}
+
+.intellector-games-keyword-switchable {
+    padding-right: 6px;
+    border-color: #bdb2a0;
+    cursor: pointer;
+}
+
+.intellector-games-keyword-switchable:hover {
+    border-color: #6d6152;
 }
 
 .intellector-games-pill {
@@ -195,6 +320,12 @@
     border-color: #bdb2a0;
 }
 
+.intellector-games-pill-editing,
+.intellector-games-pill-editing:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
 .intellector-games-pill-main {
     height: 30px;
     padding-left: 12px;
@@ -204,7 +335,8 @@
 }
 
 .intellector-games-pill-text,
-.intellector-games-pill-value {
+.intellector-games-pill-value,
+.intellector-games-pill-values-compact {
     font-name: $ui-family-medium;
     font-size: 13px;
     color: #2a211a;
@@ -404,6 +536,10 @@
     border-top: 1px solid #e6dfd3;
 }
 
+.intellector-games-table-content {
+    vertical-spacing: 0;
+}
+
 .intellector-games-table {
     horizontal-spacing: 0;
 }
@@ -493,4 +629,458 @@
 
 .intellector-games-table-time-control {
     horizontal-spacing: 6px;
+}
+
+.intellector-games-table-position {
+    horizontal-spacing: 8px;
+}
+
+/* Adding and editing a condition: steps, popovers and the Narrow sheet */
+
+.intellector-games-step-card {
+    margin-top: 6px;
+    margin-left: 6px;
+    vertical-spacing: 0;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-games-step-header {
+    height: 44px;
+    padding-left: 8px;
+    padding-right: 8px;
+    horizontal-spacing: 6px;
+    border-bottom: 1px solid #e6dfd3;
+}
+
+.intellector-games-step-title {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-games-icon-button {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.intellector-games-icon-button:hover {
+    background-color: #f0ebe2;
+}
+
+.intellector-games-step-body {
+    padding: 14px;
+    vertical-spacing: 5px;
+}
+
+.intellector-games-step-hint,
+.intellector-games-step-note {
+    height: 16px;
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+}
+
+.intellector-games-step-hint-error {
+    color: #9e2f1c;
+}
+
+.intellector-games-step-note {
+    height: 26px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.intellector-games-step-footer {
+    height: 57px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 10px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-games-step-footer-info {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+}
+
+.intellector-games-step-footer-value {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+}
+
+.intellector-games-confirm-button {
+    height: 37px;
+    padding-left: 18px;
+    padding-right: 18px;
+    background-color: #8a5a1f;
+    border: 1px solid #8a5a1f;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-games-confirm-button:hover {
+    background-color: #70491a;
+    border-color: #70491a;
+}
+
+.intellector-games-confirm-button-text {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fffefb;
+    word-wrap: false;
+}
+
+.intellector-games-confirm-button-disabled,
+.intellector-games-confirm-button-disabled:hover {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    cursor: default;
+}
+
+.intellector-games-confirm-button-disabled .intellector-games-confirm-button-text {
+    color: #a79b8a;
+}
+
+/* Option lists */
+
+.intellector-games-choice-list {
+    padding-top: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+    vertical-spacing: 0;
+}
+
+.intellector-games-choice-heading {
+    height: 28px;
+    padding-top: 10px;
+    padding-left: 6px;
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-choice-separator {
+    height: 1px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    background-color: #e6dfd3;
+}
+
+.intellector-games-choice-current {
+    background-color: #f0ebe2;
+}
+
+.intellector-games-choice-symbol {
+    width: 56px;
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-choice-reason {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-choice-plus {
+    width: 10px;
+    height: 10px;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+/* Numbers and durations */
+
+.intellector-games-digit-field {
+    width: 52px;
+    height: 37px;
+    background-color: #fffefb;
+    border: 1px solid #d8cfc0;
+    border-radius: 4px;
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    text-align: center;
+}
+
+.intellector-games-digit-field:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-games-digit-field-invalid,
+.intellector-games-digit-field-invalid:hover {
+    border-color: #b8462c;
+}
+
+.intellector-games-digit-field:disabled {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    color: #a79b8a;
+}
+
+.intellector-games-duration-row {
+    horizontal-spacing: 5px;
+}
+
+.intellector-games-duration-unit {
+    padding-right: 8px;
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+/* The DateTime selector */
+
+.intellector-games-calendar-body {
+    vertical-spacing: 0;
+}
+
+.intellector-games-calendar-tabs {
+    padding-top: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-games-calendar-tab {
+    height: 37px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-games-calendar-tab:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-games-calendar-tab-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-calendar-tab-on,
+.intellector-games-calendar-tab-on:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-games-calendar-tab-on .intellector-games-calendar-tab-text {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #8a5a1f;
+}
+
+.intellector-games-calendar-slot {
+    padding-top: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 12px;
+}
+
+.intellector-games-calendar {
+    vertical-spacing: 6px;
+}
+
+.intellector-games-calendar-navigation {
+    height: 32px;
+    horizontal-spacing: 2px;
+}
+
+.intellector-games-calendar-month {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    text-align: center;
+    word-wrap: false;
+}
+
+.intellector-games-calendar-weekdays {
+    height: 18px;
+    horizontal-spacing: 0;
+}
+
+.intellector-games-calendar-weekday {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    text-align: center;
+}
+
+.intellector-games-calendar-grid {
+    vertical-spacing: 0;
+}
+
+.intellector-games-calendar-row {
+    height: 36px;
+    horizontal-spacing: 0;
+}
+
+.intellector-games-calendar-cell {
+    height: 36px;
+}
+
+.intellector-games-calendar-day {
+    border: 1px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-games-calendar-day:hover {
+    background-color: #f0ebe2;
+}
+
+.intellector-games-calendar-day-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-games-calendar-day-selected,
+.intellector-games-calendar-day-selected:hover {
+    background-color: #f6e6c6;
+    border-color: #c79a56;
+}
+
+.intellector-games-calendar-day-selected .intellector-games-calendar-day-text {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #8a5a1f;
+}
+
+.intellector-games-calendar-today {
+    width: 4px;
+    height: 4px;
+    margin-bottom: 4px;
+    border-radius: 2px;
+    background-color: #8a5a1f;
+}
+
+.intellector-games-calendar-events {
+    vertical-spacing: 2px;
+}
+
+.intellector-games-calendar-event {
+    height: 40px;
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-games-calendar-event:hover {
+    background-color: #f0ebe2;
+}
+
+.intellector-games-calendar-event-name {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+}
+
+.intellector-games-calendar-event-date {
+    font-name: $mono-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-calendar-time-section {
+    padding-top: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 12px;
+    vertical-spacing: 4px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-games-calendar-time-row {
+    height: 37px;
+    horizontal-spacing: 4px;
+}
+
+.intellector-games-calendar-time-row .intellector-games-digit-field {
+    width: 40px;
+}
+
+.intellector-games-calendar-time-toggle {
+    horizontal-spacing: 8px;
+    cursor: pointer;
+}
+
+.intellector-games-calendar-colon {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+}
+
+.intellector-games-calendar-colon-off {
+    color: #a79b8a;
+}
+
+/* The Narrow sheet */
+
+.intellector-games-sheet-header {
+    height: 56px;
+}
+
+.intellector-games-sheet-header .intellector-games-step-header {
+    height: 56px;
+    padding-left: 10px;
+    padding-right: 10px;
+    horizontal-spacing: 4px;
+}
+
+.intellector-games-sheet-header .intellector-games-step-title {
+    padding-left: 12px;
+    font-size: 17px;
+}
+
+.intellector-games-sheet-header .intellector-games-icon-button,
+.intellector-games-sheet-body .intellector-games-icon-button {
+    width: 44px;
+    height: 44px;
+}
+
+.intellector-games-sheet-body {
+    padding-top: 6px;
+    padding-bottom: 34px;
+    vertical-spacing: 0;
+}
+
+.intellector-games-sheet-body .intellector-filter-option {
+    height: 44px;
+}
+
+.intellector-games-sheet-body .intellector-games-choice-list {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.intellector-games-sheet-body .intellector-games-calendar-row,
+.intellector-games-sheet-body .intellector-games-calendar-cell,
+.intellector-games-sheet-body .intellector-games-calendar-tab,
+.intellector-games-sheet-body .intellector-games-calendar-navigation,
+.intellector-games-sheet-body .intellector-games-digit-field,
+.intellector-games-sheet-body .intellector-games-confirm-button {
+    height: 44px;
 }

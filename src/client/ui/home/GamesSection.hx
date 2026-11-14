@@ -19,7 +19,9 @@ import haxe.ui.containers.Box;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import haxefolio.LocaleUtils;
+import haxefolio.PageLink;
 import intellectorboard.primitives.piece.PieceColor;
+import js.Browser;
 
 using client.ui.ComponentExtension;
 
@@ -60,6 +62,9 @@ class GamesSection extends VBox
     private static inline final PANEL_PADDING:Float = 14;
     private static inline final SECTION_BORDERS_WIDTH:Float = 2;
     private static inline final NARROW_FILTER_ROW_HEIGHT:Float = 93;
+    /** Ongoing's panel while no game matches the filters **/
+    private static inline final EMPTY_PANEL_HEIGHT:Float = 120;
+    private static inline final PANEL_ANIMATION_MS:Float = 250;
 
     /** How many games the recent games feed delivers **/
     public static inline final RECENT_SIZE:Int = 12;
@@ -78,6 +83,8 @@ class GamesSection extends VBox
     private final typeFilter:FilterDropdown;
     private final resetButton:Button;
     private final headingSpacer:Box;
+    /** Leads to the game database, filtered to the section's games **/
+    private final databaseLink:HBox;
     private final panel:Box;
     private final grid:VBox;
     private final loadStatus:LoadStatus;
@@ -93,6 +100,9 @@ class GamesSection extends VBox
     private var allGames:Array<GameRecord> = [];
     private var games:Array<GameRecord> = [];
     private var cards:Array<GameCard> = [];
+    /** Ongoing: the games matching the filters, as last rendered; null until then **/
+    private var matchingCount:Null<Int> = null;
+    private var panelAnimation:Null<Int> = null;
 
     public function new(kind:GamesSectionKind, callbacks:GamesSectionCallbacks)
     {
@@ -129,6 +139,16 @@ class GamesSection extends VBox
         pillButton.verticalAlign = "center";
         pillButton.hidden = true;
         pillButton.onClick = _ -> render();
+
+        databaseLink = new HBox();
+        databaseLink.addClass(StyleClass.HOME_DATABASE_LINK);
+        databaseLink.verticalAlign = "center";
+        var databaseLabel:Label = new Label();
+        databaseLabel.text = LocaleUtils.localeBinding(kind == Ongoing ? "intellector.home.games.all_ongoing" : "intellector.home.games.archive");
+        databaseLabel.addClass(StyleClass.HOME_DATABASE_LINK_TEXT);
+        databaseLabel.verticalAlign = "center";
+        databaseLink.addComponent(databaseLabel);
+        PageLink.attach(databaseLink, "games", kind == Ongoing ? "/ongoing" : "/archive");
 
         filterRow = new HBox();
         filterRow.percentWidth = 100;
@@ -254,7 +274,7 @@ class GamesSection extends VBox
             return;
         this.narrow = narrow;
 
-        for (part in [titleLabel, tabs, headingSpacer, pillButton])
+        for (part in [titleLabel, tabs, headingSpacer, pillButton, databaseLink])
             if (part.parentComponent != null)
                 part.parentComponent.removeComponent(part, false);
 
@@ -262,6 +282,7 @@ class GamesSection extends VBox
         if (narrow)
         {
             heading.addComponent(tabs);
+            filterRow.addComponent(databaseLink);
             filterRow.addComponent(pillButton);
             filterRow.height = NARROW_FILTER_ROW_HEIGHT;
         }
@@ -270,6 +291,7 @@ class GamesSection extends VBox
             heading.addComponent(titleLabel);
             heading.addComponent(headingSpacer);
             heading.addComponent(pillButton);
+            heading.addComponent(databaseLink);
             filterRow.height = null;
             filterRow.invalidateComponentLayout();
         }
@@ -292,12 +314,10 @@ class GamesSection extends VBox
 
         var firstIndex:Int = (page - 1) * pageSize;
         columns = newColumns;
-        var rows:Int = rowCount();
-        pageSize = kind == Ongoing ? columns * rows : RECENT_SIZE;
-        panel.height = 2 * PANEL_PADDING + GameCard.HEIGHT * rows + CARD_GAP * (rows - 1);
-
+        pageSize = kind == Ongoing ? columns * rowCount() : RECENT_SIZE;
         page = Std.int(firstIndex / pageSize) + 1;
         render();
+        fitPanel(false);
     }
 
     public function showFailure(timedOut:Bool):Void
@@ -322,6 +342,7 @@ class GamesSection extends VBox
     {
         kindFilter.close();
         typeFilter.close();
+        stopPanelAnimation();
     }
 
     private function rowCount():Int
@@ -330,6 +351,48 @@ class GamesSection extends VBox
             case Ongoing: columns == 1 ? 3 : 2;
             case Recent: Std.int(RECENT_SIZE / columns);
         }
+    }
+
+    /** Ongoing shrinks to the rows its matching games fill, or to a short panel saying there are none **/
+    private function panelHeight():Float
+    {
+        var rows:Int = rowCount();
+        if (kind == Ongoing && matchingCount != null)
+        {
+            if (matchingCount == 0)
+                return EMPTY_PANEL_HEIGHT;
+            rows = Std.int(Math.min(rows, Math.ceil(matchingCount / columns)));
+        }
+        return 2 * PANEL_PADDING + GameCard.HEIGHT * rows + CARD_GAP * (rows - 1);
+    }
+
+    private function fitPanel(animated:Bool):Void
+    {
+        var target:Float = panelHeight();
+        var start:Null<Float> = panel.height;
+        stopPanelAnimation();
+        if (!animated || start == null || start == target)
+        {
+            panel.height = target;
+            return;
+        }
+
+        var startedAt:Float = Browser.window.performance.now();
+        var step:Null<Float->Void> = null;
+        step = now -> {
+            var progress:Float = Math.min(1, (now - startedAt) / PANEL_ANIMATION_MS);
+            var eased:Float = 1 - Math.pow(1 - progress, 3);
+            panel.height = start + (target - start) * eased;
+            panelAnimation = progress < 1 ? Browser.window.requestAnimationFrame(step) : null;
+        };
+        panelAnimation = Browser.window.requestAnimationFrame(step);
+    }
+
+    private function stopPanelAnimation():Void
+    {
+        if (panelAnimation != null)
+            Browser.window.cancelAnimationFrame(panelAnimation);
+        panelAnimation = null;
     }
 
     private function pageCountOf(total:Int):Int
@@ -379,6 +442,10 @@ class GamesSection extends VBox
             kindFilter.setCounts([for (kind in KINDS) counts.ofKind(kind)]);
             typeFilter.setCounts([counts.rated + counts.casual, counts.rated, counts.casual]);
             renderPager(matching.length);
+
+            var firstRender:Bool = matchingCount == null;
+            matchingCount = matching.length;
+            fitPanel(!firstRender);
         }
 
         setPill(null);
