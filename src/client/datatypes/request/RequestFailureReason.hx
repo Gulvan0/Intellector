@@ -12,4 +12,8 @@ enum RequestFailureReason
     TooManyDirectChallenges(maxActiveChallenges:Int);
     ServerRestarting;
     ChatRestricted;
+    SearchTimeout;
+    InvalidFormula;
+    /** A saved filter is gone, or a filter link doesn't hold a readable formula **/
+    FilterUnavailable;
 }

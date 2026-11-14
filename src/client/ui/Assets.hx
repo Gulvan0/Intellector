@@ -44,6 +44,11 @@ class Assets
         return 'assets/images/profile/$name.svg';
     }
 
+    public static function gamesIcon(name:String):String
+    {
+        return 'assets/images/games/$name.svg';
+    }
+
     public static function analysisIcon(name:String):String
     {
         return 'assets/images/analysis/$name.svg';

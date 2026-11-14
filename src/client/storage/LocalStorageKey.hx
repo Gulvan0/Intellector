@@ -29,4 +29,6 @@ enum abstract LocalStorageKey(String) from String to String
     var CHALLENGE_DRAFT_BOT_CAP_SECONDS:String = "challenge_draft.bot_cap_seconds";
     var WATCHED_PLAYER:String = "watch.player";
     var CLAIMED_WATCHED_GAME_ID:String = "watch.claimed_game_id";
+    var GAMES_COLUMNS:String = "games.columns";
+    var GAMES_SORT:String = "games.sort";
 }

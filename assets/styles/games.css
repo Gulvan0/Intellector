@@ -1,0 +1,496 @@
+/* The game database page (?p=games) */
+
+.intellector-games-frame {
+    padding-top: 18px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 26px;
+    vertical-spacing: 18px;
+}
+
+.intellector-games-narrow {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.intellector-games-heading {
+    font-name: $ui-family-semibold;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-games-filter-section {
+    vertical-spacing: 10px;
+}
+
+.intellector-games-filter-title {
+    horizontal-spacing: 6px;
+}
+
+.intellector-games-filter-name {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+}
+
+.intellector-games-filter-author {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+/* Buttons */
+
+.intellector-games-button,
+.intellector-games-small-button {
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 6px;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-games-button {
+    height: 37px;
+}
+
+.intellector-games-small-button {
+    height: 32px;
+}
+
+.intellector-games-button:hover,
+.intellector-games-small-button:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-games-button-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-button:hover .intellector-games-button-text,
+.intellector-games-small-button:hover .intellector-games-button-text {
+    color: #2a211a;
+}
+
+.intellector-games-search-button {
+    height: 37px;
+    padding-left: 22px;
+    padding-right: 22px;
+    horizontal-spacing: 6px;
+    background-color: #8a5a1f;
+    border: 1px solid #8a5a1f;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-games-search-button:hover,
+.intellector-games-search-button:down {
+    background-color: #70491a;
+    border-color: #70491a;
+}
+
+.intellector-games-search-button-text {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fffefb;
+    word-wrap: false;
+}
+
+/* The formula box */
+
+.intellector-games-formula-card {
+    vertical-spacing: 0;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-games-formula-tree {
+    padding: 14px;
+    vertical-spacing: 0;
+}
+
+.intellector-games-formula-children {
+    padding-left: 12px;
+    vertical-spacing: 0;
+}
+
+.intellector-games-formula-branch {
+    horizontal-spacing: 0;
+}
+
+.intellector-games-formula-branch-content {
+    padding-top: 6px;
+}
+
+.intellector-games-formula-group {
+    vertical-spacing: 0;
+}
+
+.intellector-games-formula-line {
+    background-color: #bdb2a0;
+}
+
+.intellector-games-formula-row {
+    height: 32px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-games-formula-footer {
+    height: 45px;
+    padding-left: 14px;
+    padding-right: 8px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-games-formula-count {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-keyword-root {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    padding-left: 2px;
+    word-wrap: false;
+}
+
+.intellector-games-keyword {
+    height: 28px;
+    padding-top: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 5px;
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-games-pill {
+    height: 32px;
+    horizontal-spacing: 0;
+    background-color: #f0ebe2;
+    border: 1px solid #d8cfc0;
+    border-radius: 16px;
+}
+
+.intellector-games-pill:hover {
+    border-color: #bdb2a0;
+}
+
+.intellector-games-pill-main {
+    height: 30px;
+    padding-left: 12px;
+    padding-right: 4px;
+    horizontal-spacing: 6px;
+    cursor: pointer;
+}
+
+.intellector-games-pill-text,
+.intellector-games-pill-value {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-games-pill-value {
+    max-width: 220px;
+}
+
+.intellector-games-pill-operator {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-pill-mono {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-games-pill-more,
+.intellector-games-pill-pending {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-pill-info {
+    width: 24px;
+    height: 24px;
+    padding: 5px;
+}
+
+.intellector-games-pill-cross,
+.intellector-games-group-cross {
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.intellector-games-pill-cross:hover,
+.intellector-games-group-cross:hover {
+    background-color: #e6dfd3;
+}
+
+.intellector-games-add-button {
+    height: 32px;
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 6px;
+    border: 1px dashed #bdb2a0;
+    border-radius: 16px;
+    cursor: pointer;
+}
+
+.intellector-games-add-button:hover {
+    border-color: #6d6152;
+}
+
+.intellector-games-add-button-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-add-button:hover .intellector-games-add-button-text {
+    color: #2a211a;
+}
+
+.intellector-games-add-button-disabled,
+.intellector-games-add-button-disabled:hover {
+    background-color: #f0ebe2;
+    border-color: #e6dfd3;
+    cursor: default;
+}
+
+.intellector-games-add-button-disabled .intellector-games-add-button-text {
+    color: #a79b8a;
+}
+
+/* Results */
+
+.intellector-games-results-card {
+    vertical-spacing: 0;
+    background-color: #faf7f2;
+    border: 1px solid #d8cfc0;
+    border-radius: 9px;
+}
+
+.intellector-games-results-bar {
+    padding: 14px;
+    horizontal-spacing: 14px;
+}
+
+.intellector-games-caption {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-sort-chips {
+    horizontal-spacing: 6px;
+}
+
+.intellector-games-sort-chip {
+    height: 28px;
+    padding-left: 10px;
+    padding-right: 4px;
+    horizontal-spacing: 6px;
+    background-color: #f6e6c6;
+    border: 1px solid #c79a56;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-games-sort-chip-text {
+    font-name: $ui-family-semibold;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a5a1f;
+    word-wrap: false;
+}
+
+.intellector-games-sort-chip-cross {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.intellector-games-sort-chip-cross:hover {
+    background-color: #efd9ad;
+}
+
+.intellector-games-sort-add {
+    height: 28px;
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 6px;
+    border: 1px dashed #bdb2a0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.intellector-games-sort-add:hover {
+    border-color: #6d6152;
+}
+
+.intellector-games-sort-add-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-columns-footer {
+    padding-top: 8px;
+    margin-top: 4px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-games-stale-notice {
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 10px;
+    horizontal-spacing: 6px;
+}
+
+.intellector-games-stale-notice-text {
+    font-name: $ui-family-regular;
+    font-size: 11px;
+    color: #6d6152;
+}
+
+.intellector-games-results-state {
+    height: 200px;
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-games-results-state-text {
+    font-name: $ui-family-regular;
+    font-italic: true;
+    font-size: 13px;
+    color: #6d6152;
+}
+
+.intellector-games-table-scroller {
+    border-top: 1px solid #e6dfd3;
+}
+
+.intellector-games-table {
+    horizontal-spacing: 0;
+}
+
+.intellector-games-table-column {
+    vertical-spacing: 0;
+}
+
+.intellector-games-table-header {
+    height: 37px;
+    padding-left: 12px;
+    padding-right: 12px;
+    horizontal-spacing: 4px;
+    cursor: pointer;
+}
+
+.intellector-games-table-header-text {
+    font-name: $ui-family-medium;
+    font-size: 12px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-table-header:hover .intellector-games-table-header-text {
+    color: #2a211a;
+}
+
+.intellector-games-table-header-sorted .intellector-games-table-header-text,
+.intellector-games-table-header-sorted:hover .intellector-games-table-header-text {
+    font-name: $ui-family-semibold;
+    font-weight: 600;
+    color: #8a5a1f;
+}
+
+.intellector-games-table-level {
+    font-name: $mono-family-medium;
+    font-size: 11px;
+    color: #8a5a1f;
+    word-wrap: false;
+}
+
+.intellector-games-table-level-ghost {
+    font-name: $mono-family-medium;
+    font-size: 11px;
+    color: #a79b8a;
+    opacity: 0;
+    word-wrap: false;
+}
+
+.intellector-games-table-header:hover .intellector-games-table-level-ghost {
+    opacity: 1;
+}
+
+.intellector-games-table-cell {
+    height: 40px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.intellector-games-table-text {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-games-table-mono {
+    font-name: $mono-family-medium;
+    font-size: 14px;
+    color: #2a211a;
+    word-wrap: false;
+}
+
+.intellector-games-table-dim {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #6d6152;
+    word-wrap: false;
+}
+
+.intellector-games-table-link {
+    font-name: $ui-family-medium;
+    font-size: 13px;
+    color: #8a5a1f;
+    word-wrap: false;
+}
+
+.intellector-games-table-time-control {
+    horizontal-spacing: 6px;
+}

@@ -24,6 +24,8 @@ import client.ui.home.HomeLayoutTier;
 import client.ui.home.HomePage;
 import client.ui.analysis.AnalysisPage;
 import client.ui.changelog.ChangelogPage;
+import client.ui.games.GamesLayoutTier;
+import client.ui.games.GamesPage;
 import client.ui.game.LiveGamePage;
 import client.ui.profile.ProfileLayoutTier;
 import client.ui.profile.ProfilePage;
@@ -93,6 +95,8 @@ class Main
             .addWidthTier(ProfileLayoutTier.SCALE, ProfileLayoutTier.Wide, ProfileLayoutTier.WIDE_MIN_WIDTH)
             .addWidthTier(HomeLayoutTier.SCALE, HomeLayoutTier.Narrow, 0)
             .addWidthTier(HomeLayoutTier.SCALE, HomeLayoutTier.Wide, HomeLayoutTier.WIDE_MIN_WIDTH)
+            .addWidthTier(GamesLayoutTier.SCALE, GamesLayoutTier.Narrow, 0)
+            .addWidthTier(GamesLayoutTier.SCALE, GamesLayoutTier.Wide, GamesLayoutTier.WIDE_MIN_WIDTH)
             .setAppearance({selectionEmphasis: Outlined, geometry: {fieldHeight: {expanded: 37, collapsed: 44}}, shadows: StyleVars.HAXEFOLIO_SHADOWS}) // outlined: brass shares the board's hue family
             .addLocale("en", "English")
             .addLocale("ru", "Русский")
@@ -104,6 +108,7 @@ class Main
             .addPage("player/{login}", params -> new ProfilePage(params.get("login")))
             .addPage("join/{id}", params -> new ChallengeJoiningPage(Std.parseInt(params.get("id"))))
             .addPage("changelog", params -> new ChangelogPage())
+            .addPage("games", params -> new GamesPage())
             .setMenubarChevronsShown(false)
             .addLeftMenubarItem(NormalMenu("play", []))
             .addNormalMenuItem("play", "create_game", Execute(onCreateGamePressed), Assets.menuItemIcon("new_game"))

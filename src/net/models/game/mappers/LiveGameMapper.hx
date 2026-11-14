@@ -210,7 +210,7 @@ class LiveGameMapper
         }
     }
 
-    private static function outcomeKindToDatatype(kind:OutcomeKind, winner:Null<net.models.common.PieceColor>):Outcome
+    public static function outcomeKindToDatatype(kind:OutcomeKind, winner:Null<net.models.common.PieceColor>):Outcome
     {
         if (winner != null)
         {

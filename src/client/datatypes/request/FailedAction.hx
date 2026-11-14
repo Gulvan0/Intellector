@@ -26,4 +26,6 @@ enum abstract FailedAction(String) from String to String
     var FOLLOW_PLAYER = "follow_player";
     var UNFOLLOW_PLAYER = "unfollow_player";
     var WATCH_PLAYER = "watch_player";
+    var SEARCH_GAMES = "search_games";
+    var OPEN_FILTER = "open_filter";
 }

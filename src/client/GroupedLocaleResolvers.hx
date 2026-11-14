@@ -119,6 +119,9 @@ class GroupedLocaleResolvers
             case TooManyDirectChallenges(maxActiveChallenges): LocaleUtils.localeBinding("intellector.request_failure.reason.too_many_direct_challenges", Std.string(maxActiveChallenges));
             case ServerRestarting: LocaleUtils.localeBinding("intellector.request_failure.reason.server_restarting");
             case ChatRestricted: LocaleUtils.localeBinding("intellector.request_failure.reason.chat_restricted");
+            case SearchTimeout: LocaleUtils.localeBinding("intellector.request_failure.reason.search_timeout");
+            case InvalidFormula: LocaleUtils.localeBinding("intellector.request_failure.reason.invalid_formula");
+            case FilterUnavailable: LocaleUtils.localeBinding("intellector.request_failure.reason.filter_unavailable");
         }
     }
 }

@@ -21,6 +21,11 @@ import net.models.game.external.ExternalGameEndPayload;
 import net.models.game.external.ExternalGameHeartbeatPayload;
 import net.models.game.external.ExternalGameRollbackPayload;
 import net.models.game.GameAddTimePayload;
+import net.models.game.archive.ArchiveSearchPayload;
+import net.models.game.archive.ArchiveSearchResult;
+import net.models.game.archive.SaveFilterPayload;
+import net.models.game.archive.SavedFilterPublic;
+import net.models.game.archive.SavedFilterSummaryPublic;
 import net.models.game.GameSendChatMessagePayload;
 import net.models.game.GameSearchPayload;
 import net.models.game.GameSearchResult;
@@ -64,6 +69,13 @@ class RestOperationRegistry
     public static final DECLINE_CHALLENGE:GenericRestOperation<NoPayload, NoResponse> = new GenericRestOperation<NoPayload, NoResponse>("/challenge/{challenge_id}/decline", Post);
 
     public static final SEARCH_GAMES:GenericRestOperation<GameSearchPayload, GameSearchResult> = new GenericRestOperation<GameSearchPayload, GameSearchResult>("/game/search", Post);
+    public static final SEARCH_GAME_ARCHIVE:GenericRestOperation<ArchiveSearchPayload, ArchiveSearchResult> = new GenericRestOperation<ArchiveSearchPayload, ArchiveSearchResult>("/game/archive/search", Post);
+    /** Responds with the XLSX file, so it is requested through `FileRequests` **/
+    public static inline final EXPORT_GAME_ARCHIVE_PATH:String = "/game/archive/export";
+    public static final GET_MY_SAVED_FILTERS:GetOperation<UnserializableArray<SavedFilterSummaryPublic>> = new GetOperation<UnserializableArray<SavedFilterSummaryPublic>>("/game/archive/filters");
+    public static final GET_SAVED_FILTER:GetOperation<SavedFilterPublic> = new GetOperation<SavedFilterPublic>("/game/archive/filters/{id_or_key}");
+    public static final SAVE_FILTER:GenericRestOperation<SaveFilterPayload, SavedFilterPublic> = new GenericRestOperation<SaveFilterPayload, SavedFilterPublic>("/game/archive/filters", Put);
+    public static final DELETE_SAVED_FILTER:GenericRestOperation<NoPayload, NoResponse> = new GenericRestOperation<NoPayload, NoResponse>("/game/archive/filters/{filter_id}", Delete);
     public static final GET_GAME:GetOperation<GamePublic> = new GetOperation<GamePublic>("/game/{game_id}");
     public static final CHECK_TIMEOUT:GetOperation<NoResponse> = new GetOperation<NoResponse>("/game/{game_id}/check_timeout");
     public static final GAME_SEND_CHAT_MESSAGE:GenericRestOperation<GameSendChatMessagePayload, NoResponse> = new GenericRestOperation<GameSendChatMessagePayload, NoResponse>("/game/chat/send_message", Post);

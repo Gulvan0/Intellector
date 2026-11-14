@@ -11,4 +11,8 @@ enum abstract RestErrorCode(String) from String to String
     var TOO_MANY_DIRECT_CHALLENGES = "too_many_direct_challenges";
     var SERVER_RESTARTING = "server_restarting";
     var CHAT_RESTRICTED = "chat_restricted";
+    var SEARCH_TIMEOUT = "search_timeout";
+    var INVALID_FORMULA = "invalid_formula";
+    var FILTER_NOT_FOUND = "filter_not_found";
+    var FILTER_NAME_TAKEN = "filter_name_taken";
 }

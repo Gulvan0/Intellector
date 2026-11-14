@@ -84,6 +84,9 @@ class RequestFailureNotice
             case TOO_MANY_DIRECT_CHALLENGES if (response.max_active_challenges != null): TooManyDirectChallenges(response.max_active_challenges);
             case SERVER_RESTARTING: ServerRestarting;
             case CHAT_RESTRICTED: ChatRestricted;
+            case SEARCH_TIMEOUT: SearchTimeout;
+            case INVALID_FORMULA: InvalidFormula;
+            case FILTER_NOT_FOUND: FilterUnavailable;
             default: null;
         }
     }

@@ -12,6 +12,10 @@ import client.datatypes.variations.PositionDraftTest;
 import client.logic.variations.PlainTextBlocksTest;
 import client.logic.variations.TreeGridTest;
 import client.logic.game.OngoingGameOrderingTest;
+import client.logic.games.FormulaCapsTest;
+import client.logic.games.FormulaCodecTest;
+import client.logic.games.FormulaFinalizerTest;
+import client.logic.games.OperandResolverTest;
 import client.formatters.ClockFormattersTest;
 import client.formatters.PluralsTest;
 import client.formatters.VariationFormattersTest;
@@ -74,7 +78,11 @@ class TestMain
             new PlainTextBlocksTest(),
             new PluralsTest(),
             new VariationFormattersTest(),
-            new StudyPlyTreeMapperTest()
+            new StudyPlyTreeMapperTest(),
+            new FormulaCodecTest(),
+            new FormulaFinalizerTest(),
+            new FormulaCapsTest(),
+            new OperandResolverTest()
         ]);
     }
 }
